@@ -1,0 +1,373 @@
+---
+title: "Central Tendency"
+interactive-scripts:
+  - graph-generator
+  - median-tutorial
+  - mean-balance-beam
+  - income-distribution
+  - distribution-generator
+---
+
+{{< interactive-figure meanBalanceBeamCover makeMeanBalanceBeam options='{"variant":"cover","initialPositions":[1,2,6,6,10],"labels":false,"deviationSums":false,"meanMarker":false,"controls":false,"draggable":false,"addOnClick":false,"wobble":"once-visible"}' fallback="Animated balance beam showing the mean as a balance point." >}}
+
+Our topic for this chapter is central tendency, or figuring out what a typical score in a distribution looks like. There are three measures of central tendency we'll cover: the mode, the median, and the mean. Some or all of this will most likely be familiar to you already. But it's important that we understand conceptually what each of these measures represents and what situations make each one more or less appropriate for our purposes.
+
+## What is central tendency?
+
+Generally speaking, what we want from a measure of central tendency is a single value to help us describe and summarize a set of data. In the questions below, don't worry about remembering statistical specifics. I just want you to try to start from scratch and explain what seems a sensible approach in each case. What kind of score is most central, or typical, or representative in some way?
+
+::: {#quiz-central-tendency}
+{{< include quizzes/03-central-tendency-center-1.qmd >}}
+:::
+
+In working through those examples, you probably found yourself using a few different ideas about what a useful summary should do. Each example changed what kind of information was available. Favorite colors could be counted. Letter grades might also be put in order. Numerical scores had meaningful distances between them, which made it possible to think about balance as well. And the two-peaked distribution showed a difficulty we can run into: reducing a distribution to one value inevitably leaves something out. Sometimes we might need more than one.
+
+Putting the terminology from Chapter 1 onto those examples, favorite color is a nominal categorical variable, letter grade is an ordinal categorical variable, and test score is quantitative. Those distinctions lead to the three approaches we'll focus on:
+
+| Measure | Question | Information required | Works with |
+|---|---|---|---|
+| Mode | What occurs most often? | Category membership and frequency | Nominal, ordinal, or quantitative data |
+| Median | What lies halfway through the ordered observations? | Order | Ordinal or quantitative data |
+| Mean | Where do the numerical values balance? | Numerical magnitudes and meaningful distances | Quantitative data only |
+
+So the mode, median, and mean offer distinct definitions of central tendency. They have different requirements of the data and answer different questions. For some kinds of data we can use more than one measure; we might find they give similar answers, or that their answers diverge. That doesn't make one inherently better than another. We need to look at each measure in a bit more detail to drill into what each one is capable of and when they are more or less useful.
+
+## The mode
+
+The mode answers a simple question: what happened the most? More technically, the value of the mode is the category or score with the highest frequency. If we're looking at histograms or bar charts or whatever, the mode is generally the tallest bar. In a frequency table, it's the row with the highest frequency.
+
+The mode is generally most useful with categorical data, either nominal or ordinal. In the kids' favorite colors example from @quiz-central-tendency, blue was the mode for both classes. But in the second class it was only just ahead of the other colors. It's true to call blue the mode for both classes, but it is a relatively less useful description of the data from class B. Depending on our purposes, we might want to think of that class's data as not having a clear mode --- which is still a useful description. With the letter grades example (an ordinal variable) the mode was an A grade. No problem there (though as we'll see the median gives a different answer).
+
+The mode can also be determined for quantitative data. But just because we *can* doesn't mean we *should*. Whether it is useful depends on the range of the scores and what values are possible. Say we have a discrete quantitative variable like the data represented in the third quiz question. The values represented scores on a ten-question test. Here's that data again in the form of a frequency table:
+
+::: {#tbl-simple-mode .bc-mode-table}
+| Score | $f$ |
+|--:|--:|
+| 0 | 0 |
+| 1 | 0 |
+| 2 | 1 |
+| 3 | 2 |
+| 4 | 3 |
+| [5]{.bc-mode-marker} | 4 |
+| 6 | 3 |
+| 7 | 2 |
+| 8 | 1 |
+| 9 | 0 |
+| 10 | 0 |
+
+A simple frequency table for the test scores from the opening quiz. The mode is 5.
+:::
+
+Both from the histogram in @quiz-central-tendency and the frequency table above, we can see that the mode is 5. Very straightforward.
+
+But what if the test had a hundred questions rather than ten, and the data were evenly spread across the 0--100 range of possible scores? We saw an example of this situation in [Chapter 2](02-frequency-distributions.qmd#sec-grouped-frequency). We would have a table with many rows, most of which would have a frequency of zero or one, and we wouldn't be able to extract a useful mode.
+
+One way around this problem is to find the mode for a grouped version of the data rather than the raw scores. Following the rules of thumb we laid out in Chapter 2, we could group the scores into bins, like 0 through 9, 10 through 19, and so on. Then we could make a grouped frequency table:
+
+::: {.bc-mode-table}
+| Score bin | $f$ |
+|--:|--:|
+| 0–9 | 4 |
+| 10–19 | 4 |
+| 20–29 | 5 |
+| 30–39 | 7 |
+| 40–49 | 10 |
+| [50–59]{.bc-mode-marker} | 18 |
+| 60–69 | 11 |
+| 70–79 | 7 |
+| 80–89 | 5 |
+| 90–99 | 2 |
+
+: Grouped frequency table {#tbl-grouped}
+:::
+
+Now we can easily identify the modal bin. Like we mentioned in our discussion of grouped frequency in Chapter 2, grouping the scores discards information. We can't tell what exact score was the most common, only which bin contained the most scores. Here the modal bin is 50 through 59. We don't know what score or scores were the most common within that range. And the grouping in @tbl-grouped is not the only way to group those scores; a different choice of bin width or cut points would give us a different modal bin.
+
+### Multiple modes
+
+The other thing worth mentioning is that a set of data can have more than one mode. If two exact values tie for the highest frequency, both are modes. More broadly, we can describe the *shape* of a distribution as bimodal or multimodal when its frequencies form two or more distinct peaks, even if the peaks are not exactly the same height.
+
+Remember the last distribution from @quiz-central-tendency? It actually comes from a perceptual psychology study. Researchers wanted to know how well people could discriminate between major and minor musical modes. They created "tone-scrambles": 32 musical notes played rapid fire over the course of two seconds in random order, creating an effect, according to the researchers' evocative description, "akin to alien birdsong." One of these weird birds tweeted major thirds while the other presumably more melancholy bird tweeted minor thirds. Listeners classified each scramble as one type or the other, and the researchers measured the proportion they classified correctly [@chubb2013bimodal].
+
+The graph in @fig-tone-scramble-performance pools data across three experiments. The distribution it shows goes up and down and up again in two waves. There's one peak close to 0.5, which is what you would see if people were just guessing. And another peak near 1, or nearly perfect performance. The researchers took this as evidence that the task sorted listeners fairly cleanly into a group with little sensitivity to the difference (performing close to chance) and another with high sensitivity.
+
+::: {#fig-tone-scramble-performance}
+
+{{< interactive-figure toneIdentificationDemo makeToneIdentificationGraph fallback="Histogram of proportion correct for 275 listeners. One peak is near chance performance at 0.5 and another is near perfect performance at 1.0, with fewer listeners between them." >}}
+
+Distribution of proportion correct in the test phase across 275 listeners, pooled across three tone-scramble experiments. Recreated from @chubb2013bimodal, Figure 6.
+
+:::
+
+This is a difference between the mode and the median or the mean. We wouldn't usually talk about a distribution as having two means or two medians. But we can talk about a distribution as being bimodal or even multimodal if that seems a useful description.
+
+## The median
+
+While the mode focuses on frequency --- what happened most often? --- the median focuses on *order*; if we put our data in order from smallest to largest, what value splits the observations in the middle? So the mode is just the most common, but the median starts to put the "center" in central tendency.
+
+The median is also called the 50th percentile. Since it is the middle position of the ordered data, at least half (i.e., 50%) of the observations are at or below the median, and at least half are at or above it. (The "at least" qualifier is important, because as we'll see, multiple observations can have the same value as the median, meaning the at-or-below and at-or-above groups overlap.)
+
+Since it requires a meaningful order, the median doesn't work with a purely nominal categorical variable. We couldn't find the median favorite color, for example. But it can be used with ordinal variables. Let's work through finding the median for the ordinal letter-grade data in the quiz at the start of the chapter.
+
+::::: {#act-median .callout-tip .interactive}
+## Find the median grade
+
+{{< interactive-figure medianTutorial makeMedianTutorial options='{"examples":{"odd":{"values":[5,2,5,1,4,5,3,4,5],"kind":"ordinal","labels":{"1":"F","2":"D","3":"C","4":"B","5":"A"},"noun":"letter grades"},"even":{"values":[5,2,5,1,4,5,3,4],"kind":"ordinal","labels":{"1":"F","2":"D","3":"C","4":"B","5":"A"},"noun":"letter grades"},"evenBoundary":{"values":[5,2,5,1,4,5,3,3],"kind":"ordinal","labels":{"1":"F","2":"D","3":"C","4":"B","5":"A"},"noun":"letter grades"}}}' fallback="Letter grades are ordered to find the median in odd- and even-sized sets, including a case where the middle falls between C and B." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Raw data" data-action='{"example":"odd","order":"raw","emphasize":"none","annotation":"none","animate":false}'}
+Here are the nine grades from the opening quiz: four As, two Bs, and one each of C, D, and F. They're unsorted right now. To find the median we need to impose order.
+:::
+
+::: {.tutorial-step data-title="Order" data-action='{"example":"odd","order":"ascending","emphasize":"none","annotation":"none","animate":true}'}
+Letter grades are ordinal categories, so we can put them in ascending order from F through A. Now that they're arranged, we can look for the one that falls right in the middle.
+:::
+
+::: {.tutorial-step data-title="Middle" data-action='{"example":"odd","order":"ascending","emphasize":"middle","annotation":"median","animate":true}'}
+With nine observations, the fifth position is the middle. The student in that position earned a B, so the median grade is B.
+:::
+
+::: {.tutorial-step data-title="Halves" data-action='{"example":"odd","order":"ascending","emphasize":"halves","annotation":"median","animate":true}'}
+Three students earned grades below B, four earned grades above it, and two earned B itself. The striped B cards belong to both the at-or-below and at-or-above groups. This is why that "at least" qualification was necessary: it would not quite be accurate to say 50% of scores are below and 50% are above the median here. Note also the discrepancy between the median and the mode, which was an A.
+:::
+
+::: {.tutorial-step data-title="Even number" data-action='{"example":"even","order":"ascending","emphasize":"none","annotation":"none","animate":true}' data-major="even" data-major-title="Even number"}
+In that data, there were an odd number of observations so the middle observation was a single actual value in the data. What if there had been an even number of scores?
+:::
+
+::: {.tutorial-step data-title="Same category" data-action='{"example":"even","order":"ascending","emphasize":"positional-halves","annotation":"median","animate":true}' data-major="even" data-major-title="Even number"}
+Maybe the two middle observations belong to the same category. In that case, no problem: the median is that category.
+:::
+
+::: {.tutorial-step data-title="Between" data-action='{"example":"evenBoundary","order":"ascending","emphasize":"positional-halves","annotation":"middle","animate":true}'}
+However, if the median falls between two ordinal categories, there isn't a meaningful halfway point between them. Like, if the 50th percentile was between a C and a B, we couldn't say the median was "C and a half" or something. In that case we have to use our discretion. We might report that the median is between the categories, or that both categories can be considered median, or we might pick one or the other as the better representation of the middle. The important thing is to be clear and intentional.
+:::
+::::
+
+:::::
+
+The median works the same way with quantitative data, since numerical scores have an inherent order. Take the symmetrical distribution of test scores from the third quiz question:
+
+::: {#fig-median-test-scores}
+
+{{< interactive-figure medianQuizScores makeMedianCards options='{"values":[2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8],"kind":"quantitative","noun":"test scores","revealOnVisible":true}' fallback="Sixteen ordered test scores: 2; two 3s; three 4s; four 5s; three 6s; two 7s; and 8. The two middle scores are both 5, so the median is 5." >}}
+
+The sixteen test scores from the opening quiz, arranged in order.
+
+:::
+
+5 was the most common score, making it the mode. There are an even number of observations, so there are two middle positions: the eighth and ninth. Both contain 5, making the median 5 as well. So in this case, the mode and median point to the same place. (As we saw in @act-median, this agreement is not inevitable.)
+
+What about when we have an even number of scores? That posed a slight problem for ordinal data, but if the variable is quantitative, no problem at all: we take the point halfway between the two middle values. That's a meaningful value for the median since on a quantitative scale the distances between numbers are all consistent (unlike the distances between ordinal categories).
+
+::: {#fig-even-median-quant}
+
+{{< interactive-figure medianEvenQuantitative makeMedianCards options='{"values":[65,70,80,90],"kind":"quantitative","noun":"scores","revealOnVisible":true}' fallback="Four ordered quantitative scores: 65, 70, 80, and 90. The median is 75, halfway between the two middle scores." >}}
+
+Four quantitative scores with a median of 75, halfway between the two middle scores.
+
+:::
+
+{{< include quizzes/03-central-tendency-median.qmd >}}
+
+## The mean
+
+The mean, or average, is more nuanced because it uses every numerical value, not only their ordered positions. To calculate it, we add all the scores and then divide by the number of scores.
+
+It might seem like a simple idea, and we'll soon see what's so elegant and useful about it. But it took a long time to catch on. It's worth taking a brief historical tour of the idea to get a sense of its uses (and abuses).
+
+Averaging, as a mathematical idea, has been around for a long time. The Pythagoreans discussed it in the third century BCE, but in the context of musical theory rather than data analysis. You would think scientists whose job involves taking multiple observations and figuring out what to make of them would have been quick to adopt the mean for their purposes, but it took a while. Astronomy provides an extensive historical record [see @raper2017shock]. As long ago as the second century BCE, the Greek astronomer Hipparchus was observing the positions of celestial bodies, recording things like times, angles, and distances.
+
+![A sixteenth-century illustration of Hipparchus, anachronistically using the sort of quadrant familiar to a sixteenth-century illustrator. There was some clever equipment in Hipparchus's day; he wasn't exactly just eyeballing things, but there was plenty of room for measurement error.^[Detail from the title-page border of William Cuningham’s *The Cosmographical Glasse* (1559), cropped from [British Museum image 225898001](https://www.britishmuseum.org/collection/image/225898001). © The Trustees of the British Museum. Shared under a [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) licence](https://creativecommons.org/licenses/by-nc-sa/4.0/).]](resources/figures/hipparchus.jpg){#fig-hipparchus}
+
+Hipparchus and other astronomers realized that of course any one observation could be a bit off, so there's value in combining multiple observations. But how? He reportedly used the midrange (halfway between the lowest and highest values). Even by the 17th century, great thinkers including Johannes Kepler, Tycho Brahe, and Galileo still hadn't come to a consensus, variously using the midrange, median, sometimes the mean, and sometimes methods that they just made up themselves and didn't particularly bother to explain [@stahl2006normal].
+
+It was over the course of the 18th century that the mean began to become the standard. By 1777, mathematician and physicist Daniel Bernoulli^[Daniel Bernoulli was the nephew of Jacob Bernoulli, who we'll run into in Chapter 6.] wrote that among astronomers (who "as a class are men of the most scrupulous sagacity"), the mean had become a "universally accepted rule for handling several slightly discrepant observations of the same event" [@bernoulli1961choice, p. 3].^[The flattery may have been strategic, since Bernoulli was in fact aiming to persuade astronomers of the limitations of the mean.]
+
+Why is the mean so valuable for handling discrepant observations? Well, when your measurements of the same thing come out a bit different each time, how can you know which one to trust? The mean, in a sense, allows us to trust no one observation in particular, but rather to put them all together and allow the "errors" to cancel out.
+
+To see what I mean, consider the foot --- as in the imperial unit of distance. Things have been measured in feet for a long time, since a foot is a convenient human-scale unit, and usually easy to come by. Just look down. But obviously it's not very standardized. My foot isn't necessarily the same length as yours. This can lead to trouble. A "rod" was a common unit of land measurement, generally defined as something like 16 feet. But because of the issue of unstandardized feet, different towns often had different standards for what exactly a rod was, opening the door to property and taxation disputes when administering surveys across regions.
+
+In his surveying manual *Geometrei*, the sixteenth-century mathematician and general Renaissance man Jakob Köbel offered a solution.
+
+> Stand at the door of a church on a Sunday and bid 16 men to stop, tall ones and small ones, as they happen to pass out when the service is finished; then make them put their feet one behind the other, and the length thus obtained shall be a right and lawful rod to measure and survey the land with, and the 16th part of it shall be the right and lawful foot.[@addy1925littlejohn, p. 215]
+
+![Sixteen men line up their feet toe to heel to establish a surveying rod. Woodcut from Jakob Köbel's *Geometrei*, first published in 1535 or 1536. Image from @addy1925littlejohn.](resources/figures/kobel-rod.png){#fig-kobel-rod}
+
+This practical procedure illustrates the logic of the mean. Any one foot (as in, the foot at the end of someone's leg) is a bit different from any other. But if we take a bunch of them and figure out the average, we end up with an idealized foot that can be used as a more standardized and reliable unit of length than any one actual foot.
+
+There is an important condition: the "errors" must be random, rather than systematically biased in one direction. Köbel advised lurking outside Sunday mass because the congregation would fairly represent the town's male population. If we repeated the procedure at the New York Knicks' locker room door, or outside a classroom of second-graders, we'd get very different results.
+
+Note how the mean provides a model of the thing being measured. The sixteenth part of the measured rod --- the idealized average "foot" --- will not necessarily be the same as any of the individual feet from which it was calculated. The mean represents an ideal, not the actual. This is a powerful and useful thing. We can use the ideal foot without having to deal with all the individual idiosyncratic feet. But as we know, with great power comes great responsibility. If we rely on ideals and neglect reality, we can get into another kind of trouble.
+
+This becomes most obvious when the mean is used to describe and understand *people*. (Not just their feet.) Belgian astronomer and statistician Adolphe Quetelet was a pioneer of using statistical techniques like the average to understand human and social data. In 1846, Quetelet examined the chest circumference measurements of more than 5,000 Scottish soldiers. He treated each soldier's distance from the mean like an astronomer treated an observation's distance from the true position of a star: as error [@gallagher2020quetelet]. The mean represented the “true” soldier; actual soldiers were imperfect variations. Quetelet called this abstraction *l'homme moyen*, the average man. He saw in l'homme moyen the possibility of the same kind of harmonious proportion in health, beauty, and moral balance that the Pythagoreans found in music. An individual combining all of the average man's qualities would represent “everything grand, beautiful, and good” and resemble a “type of perfection” [@quetelet1835surhomme, pp. 274--276].
+
+Quetelet acknowledged, however, that this perfect identity could "scarcely be realized." No one person can be average in every respect. Statistical findings from the masses should not be mechanically applied to individuals. A doctor should not merely treat every patient as if they were average but rather consider each individually [@quetelet1835surhomme, pp. 267--269].
+
+The French modernist architect Le Corbusier did not allow any such reservations to constrain his own work. In designing buildings and urban spaces, Corbusier calculated people's requirements for air, heat, light, and space, turning statistical abstractions and quantitative assumptions into blueprints for reality. Real people, as opposed to statistical aggregates, want their living spaces to do more than satisfy minimum physical requirements. They cook, work, socialize, gossip, relax, and make a place their own. But Le Corbusier brushed this aside: "Each man will live in an ordered relation to the whole." No need to worry about individual wants, hopes, desires, because "human happiness already exists expressed in terms of numbers, of mathematics, of properly calculated designs" [@scott1998seeing, pp. 112--113].
+
+The reason I bring all this up here is to show that the mean is a simple and powerful tool, but we should not let the mathematical elegance lull us into forgetting that we are dealing with a deliberately simplified statistical summary rather than a direct representation of reality. (For one thing, the mean never tells us by itself how much variation surrounds it. That is the problem we'll take up in the next chapter.)
+
+### Calculating the mean
+
+Ok, history lesson over. Let's talk more about the math. Again, when we want to calculate the mean, all we do is sum the scores and then divide by the number of scores. (Since we're doing real math here, the mean only works with quantitative data; a mean cannot be computed for categorical data.)
+
+$$  \mu = \frac{\Sigma X}{N} $$ {#eq-mean-pop}
+
+$$  M = \frac{\Sigma X}{n} $$ {#eq-mean-sample}
+
+The $\Sigma$ symbol tells us to add, and $X$ represents each score. The other symbols differ depending on whether we're talking about a sample or a population. For a population (@eq-mean-pop), we call the mean $\mu$ and divide by uppercase $N$, the number of individuals in the population. For a sample (@eq-mean-sample), we call the mean $M$ and divide by lowercase $n$, the number of observations in the sample. (Sometimes statisticians refer to the mean as $\bar{X}$ ("x bar"). But social scientists generally use this $\mu$ or $M$ notation, so, with apologies to real statisticians, that's what we're going to use for our purposes.)
+
+Why is this such an elegant and effective statistic? In our historical tour we encountered the idea of measurement errors, as when an astronomer might measure an angle slightly too low today and slightly too high tomorrow. And we also mentioned another kind of variability, as when some soldiers' chest circumferences are bigger than average and some are smaller than average. Let me now use the more neutral term __deviations__.
+
+A deviation is the difference between a score and some reference point, keeping track of direction. Here we can think about deviations from the mean. A score $X$ above the mean has a positive deviation, while a score below it has a negative deviation. We can express the difference as $X - M$. If we calculate the deviation for every score and then add them up, we always get the same answer: $\Sigma(X - M) = 0$. This is what is special about the mean. It is the one reference point around which the signed deviations sum to zero.
+
+How does this work? $\Sigma X$ lumps all the observed scores into one total. Dividing that total by $n$ shares it equally among the $n$ observations. Imagine a bunch of people with buckets of water, all filled to a different level. Some people's buckets are almost filled to the brim, some people's are almost empty. We have them all dump their water into one big tank ($\Sigma X$), and then share it back out equally (divide by $n$). Now everyone has exactly the same amount in their bucket (the average amount, $M$).
+
+Put another way, $M=\frac{\Sigma X}{n}$ rearranges to $nM=\Sigma X$: if we replaced every observed score (the initial inconsistent buckets) with $M$ (the identically-filled average buckets), the total does not change. The extra contribution of scores above the mean is exactly matched by the shortfall of scores below it; the deviations balance.
+
+Think back to Köbel’s sixteen feet. The length of them all lined up provided "the right and lawful rod." That's $\Sigma X$. Dividing by $n=16$ gave "the right and lawful foot." That's the mean --- the average foot becomes the town standard. Some of the men's feet were bigger than average, some were smaller. The extra length contributed by the bigger feet was matched by the shortfall from the smaller ones. The procedure lets all those deviations come out in the wash.
+
+You can begin to see more clearly what kind of "center" the mean offers, as compared to the other measures we have encountered. The mode gives us a representative score in the sense of the one with the highest frequency. The median gives us the middle score by ordering them and splitting the set in two. The mean gives us the center of the distribution in terms of balance: the point around which all the deviations above and below that point are in balance.
+
+::::: {#act-mean-balance .callout-tip .interactive}
+## The mean as a balance point
+
+{{< interactive-figure meanBalanceBeam makeMeanBalanceBeam options='{"initialPositions":[1,2,6,6,10],"labels":true,"boxLabels":false,"deviationSums":false,"dropOnVisible":true,"draggable":false,"addOnClick":false,"removeOnClick":false,"controlsOpen":false}' fallback="Stepped balance-beam demonstration. Five observations balance at their mean of 5. Their signed deviations sum to zero; moving the pivot or adding a new observation tips the beam until the pivot moves to the new mean." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Balance" data-action='{"positions":[1,2,6,6,10],"pivot":"mean","labels":true,"box-labels":false,"deviation-sums":false,"animate":false}'}
+Here's another sort of visual, physical way of thinking about the average. Picture the kind of block histogram we mentioned in the previous chapter, with scores as boxes piled up on the x axis categories. And picture the x axis itself as a balance beam. The mean is the point along the x axis where scores are "balanced," with the same "weight," so to speak, on either side. Notice that there are two boxes to the left and three to the right. Balance doesn't require the same number on each side: a box farther from the pivot has more leverage than one close to it. For this little dataset, $\Sigma X = 1+2+6+6+10=25$, so $M=25/5=5$.
+:::
+
+::: {.tutorial-step data-title="Deviations" data-action='{"positions":[1,2,6,6,10],"pivot":"mean","labels":true,"box-labels":true,"deviation-sums":false,"animate":true}'}
+Now each box is labeled by its deviation from $M = 5$: its distance above or below the mean. The scores to the left are 4 and 3 points below the mean. To the right, two scores are 1 point above it and one is 5 points above it.
+:::
+
+::: {.tutorial-step data-title="Sums" data-action='{"positions":[1,2,6,6,10],"pivot":"mean","labels":true,"box-labels":true,"deviation-sums":true,"animate":true}'}
+The lines at the bottom add those deviations end to end. The negative deviations sum to −7 and the positive deviations sum to +7. They balance. This is what it means for the deviations to sum to zero, $\Sigma (X - M) = 0$.
+:::
+
+::: {.tutorial-step data-title="Wrong pivot" data-action='{"positions":[1,2,6,6,10],"pivot":4,"labels":true,"box-labels":true,"deviation-sums":true,"animate":true}'}
+Suppose we tried to balance the scores at 4 instead. The deviations are now measured from that point, and they no longer cancel out: the negative side sums to −5 while the positive side sums to +10. So the beam is no longer balanced, and it tips over.
+:::
+
+::: {.tutorial-step data-title="Restored" data-action='{"positions":[1,2,6,6,10],"pivot":"mean","labels":true,"box-labels":true,"deviation-sums":true,"animate":true}'}
+Returning the pivot to the mean restores the balance, for this particular set of scores. But what if the scores changed? The mean would have to change too.
+:::
+
+::: {.tutorial-step data-title="New score" data-action='{"positions":[1,2,2,6,6,10],"pivot":5,"labels":true,"box-labels":true,"deviation-sums":true,"animate":true}'}
+Now let's add one more observation at 2 while leaving the pivot at the old mean of 5. The new score adds another negative deviation, so the two sides no longer cancel out and the beam tips. The mean of the expanded set must have changed.
+:::
+
+::: {.tutorial-step data-title="New mean" data-action='{"positions":[1,2,2,6,6,10],"pivot":"mean","labels":true,"box-labels":true,"deviation-sums":true,"animate":true}'}
+The six scores sum to 27, so the new mean is $27/6$, or 4.5. Moving the pivot to that point restores the balance: the negative deviations and positive deviations once again cancel out.
+:::
+
+::: {.tutorial-step data-title="Try it" data-action='{"positions":[1,2,2,6,6,10],"pivot":"mean","labels":true,"box-labels":true,"deviation-sums":true,"interactive":true,"controls-open":true,"animate":true}'}
+Now try changing the distribution yourself. Drag the red pivot to test another balance point. Click an empty spot to add a box, or click an existing box to remove it. Watch how the dashed ghost marks the mean whenever the pivot is in the wrong place.
+:::
+::::
+
+:::::
+
+## Comparing the three measures
+
+Now we've explored the ins and outs of three measures of central tendency: the mode describes the most frequent score (or scores); the median orders the observations and divides them in half; the mean balances their values. When we can compute all three measures for a quantitative distribution, we might find that they pretty much agree, or that they diverge.
+
+To see why, let's start with an extreme example. Suppose we stand on a street corner and ask the people passing by their incomes. For some reason they agree to tell us, and we list the first seven answers below.
+
+::: {style="text-align: center; font-size: 1.2em;"}
+🙂 $30,000  
+🙂 $40,000  
+🙂 $45,000  
+🙂 $50,000  
+🙂 $55,000  
+🙂 $60,000  
+🙂 $70,000
+:::
+
+We can locate the median right in the middle of the ordered incomes at $50,000. We can also calculate the mean, by adding up all the values and dividing by 7. At this point, we'd find that it's the same as the median, $50,000.
+
+But the next person who walks by happens to be real estate tycoon Mr. Monopoly, with an annual income of a billion dollars.^[For what it's worth, Forbes actually estimated that Mr. Monopoly, a.k.a. Rich Uncle Pennybags, had a net worth of $7.1 billion [back in a 2006 article](https://web.archive.org/web/20260221073032/https://www.forbes.com/2006/11/20/uncle-pennybags-money-tech-media_cx_de_06fict15_monopoly.html), and [later claimed](https://web.archive.org/web/20081229023831/http://www.forbes.com/2007/12/11/fictional-characters-wealth-oped-books-fict1507-cx_de_mn_1211fictionalintro.html) that he lost it all in the 2007 subprime mortgage crash.] Now our data look like this:
+
+::: {style="text-align: center; font-size: 1.2em;"}
+🙂 $30,000  
+🙂 $40,000  
+🙂 $45,000  
+🙂 $50,000  
+🙂 $55,000  
+🙂 $60,000  
+🙂 $70,000  
+🤑 $1,000,000,000
+:::
+
+If we recalculate the median, we find that it hasn't budged much. It's $52,500, halfway between the fourth and fifth values. As we've seen, the median depends primarily on *position*. Four incomes fall on either side of it. It doesn't matter too much what the values at either end of the distribution are. Once Mr. Monopoly is at the upper end, his income could be one hundred thousand dollars or ten billion dollars, the median would be the same either way.
+
+If we recalculate the mean, however, we find that it shoots up to around $125 million. The reason is that the mean balances all the deviations, and an extreme deviation requires the mean to move to accommodate it. So now exactly what Mr. Monopoly's income is matters, and the farther it is from all the other observations, the more it pulls the mean in that direction.
+
+Obviously, this is an intentionally contrived example, but this is a genuine issue for researchers who are interested in income distributions. U.S. household income forms a positively __skewed__ distribution. A relatively small number of households have extremely high incomes, while most have much lower incomes. For census data from 2024, the median and mean diverge by almost $40,000 (see @fig-income-distribution). Our choice of which to report or focus on can give quite a different impression of the "typical" household's income.
+
+::: {#fig-income-distribution}
+
+{{< interactive-figure incomeDistribution makeIncomeDistributionChart fallback="Histogram of U.S. household income with mean and median markers." >}}
+
+Distribution of U.S. household income in 2024, with mean and median markers. Histogram bars represent $5,000 bins, except for the final striped bar which combines all households with incomes of $200,000 or more (16% of households). Data source: [U.S. Census Bureau](https://www.census.gov/data/tables/time-series/demo/income-poverty/cps-hinc/hinc-01.html).
+
+:::
+
+To take another example, we pointed out the bimodality of the tone-identification data from earlier in the chapter. But that distribution is also a bit skewed. The two peaks are not exactly the same height; the whole distribution is a bit more clustered at the lower-performing end, and skewed a bit by the smaller number of high performers.
+
+::: {#fig-tone-scramble-centers}
+
+{{< interactive-figure toneIdentificationCenters makeToneIdentificationGraph options='{"showCenters":true}' fallback="Histogram of proportion correct for 275 listeners, with an estimated median of 0.62 and mean of 0.67. The distribution has peaks near chance performance at 0.5 and near perfect performance at 1.0." >}}
+
+Distribution of tone-identification performance with the median and mean estimated from the grouped data. Recreated from @chubb2013bimodal, Figure 6.
+
+:::
+
+The median remains near the upper edge of the larger, lower-performing cluster, while the mean is pulled farther toward the space between the two peaks. Arguably for this data any one measure of central tendency on its own doesn't tell the complete story of the distribution's shape.
+
+Stepping back from real data and looking instead at generic distribution curves, we can watch how those three kinds of center respond to changes in normality, skew, and bimodality.
+
+::::: {#act-distributions .callout-tip .interactive}
+## Watch the center change
+
+{{< interactive-figure centralTendencyMorph makeCentralTendencyMorph options='{"skew":0,"bimodal":0,"controlsOpen":false,"transitionDuration":1100,"ariaLabel":"A distribution smoothly changes from one symmetrical peak, through positive and negative skew, into two symmetrical peaks."}' fallback="A distribution changes from one symmetrical peak, where the mode, median, and mean coincide, through positive skew, where the mean lies farthest into the tail, back through symmetry into negative skew, and finally into two symmetrical peaks, where the mean and median lie in the valley between the modes." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Normal" data-action='{"skew":0,"bimodal":0,"controls-open":false,"animate":true,"duration":900}'}
+We begin with a normal distribution, symmetrical and with one peak. The mode is in the middle, where the highest frequency is observed. The median divides the distribution into two halves, right in the middle. And the mean is the balance point, also right in the middle. In this case, all three measures point to the same place because the distribution is symmetrical and unimodal.
+:::
+
+::: {.tutorial-step data-title="Asymmetrical" data-action='{"skew":0.35,"bimodal":0,"controls-open":false,"animate":true,"duration":1100}'}
+Now we can start to make the distribution asymmetrical. Here we see positive skew: a tail begins to grow toward the higher end of the scale. The three markers begin to differ because their definitions respond to different features of the distribution.
+:::
+
+::: {.tutorial-step data-title="Positive skew" data-action='{"skew":1,"bimodal":0,"controls-open":false,"animate":true,"duration":2000}'}
+The more the distribution is skewed, the more the measures diverge. The mode stays at the peak, where scores are most concentrated. The median moves to the right to keep half the distribution on either side. The mean moves farthest toward the tail: values far from the old balance point have more leverage, as they did in the income example.
+:::
+
+::: {.tutorial-step data-title="Negative skew" data-action='{"skew":-1,"bimodal":0,"controls-open":false,"animate":true,"duration":1600}'}
+With negative skew, the pattern is the opposite. The mode is the highest of the three values, because that's where the peak is. The median is lower, keeping half of the distribution above and below. And the mean is lowest.
+:::
+
+::: {.tutorial-step data-title="Bimodal" data-action='{"skew":0,"bimodal":1,"controls-open":false,"animate":true,"duration":1350}'}
+If the distribution is bimodal, we label both modal peaks. Since the distribution is symmetrical again, the median and mean align in the middle. But that middle is a valley containing relatively few observations. The modal peaks on either side show where scores are actually concentrated.
+:::
+
+::::
+
+:::::
+
+## Summary
+
+The mode works with any variable type and can reveal more than one concentration, but it may be unclear or uninformative when exact values are sparse or tied. The median gives ordered data a relatively stable middle and is not easily shifted by outliers, but it ignores how far observations fall from that middle. The mean preserves those numerical distances and balances all the deviations, making it especially useful for the analyses we'll meet later, but it requires meaningfully quantitative values and can be shifted substantially by extremes.
+
+No measure is automatically the best description. For reasonably symmetrical, single-peaked quantitative data, all three often point to roughly the same place. When they don't, the difference tells us something about the shape of the distribution.
+
+Moving forward, the mean will be our measure of choice, because we'll most often be dealing with quantitative data where the mean can acknowledge every data point. As we'll see, part of its value to us is in those deviations which it balances. We won't overlook them; in fact, they'll be central to much of what we end up doing.
+
+The mean offers us a model of a world in which everyone is identical; we could replace Köbel's sixteen churchgoers with sixteen stand-ins, identical mannequins whose feet were all exactly equal to the mean, and end up with the same answer for the length of the rod. But in the real world, the things we're interested in usually aren't all exactly average. Observations do deviate from the mean. This kind of variability is worth quantifying, which is what we'll turn to in the next chapter.
+
+{{< include quizzes/03-central-tendency-learning-checks.qmd >}}

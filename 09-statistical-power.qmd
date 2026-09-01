@@ -1,0 +1,366 @@
+---
+title: "Statistical Power"
+interactive-scripts:
+  - statistical-power
+  - distribution-generator
+  - graph-generator
+  - bee-swarm
+---
+
+In this lecture we'll develop our understanding of hypothesis testing by exploring some related concepts: effect size, inferential errors, and statistical power. These are nuanced ideas, and statistical power in particular can be difficult to get your head around both conceptual and computationally. But they are key to fully understanding the strengths and limitations of hypothesis testing, so we'll take our time with them here before moving on to other ideas and tests.
+
+## Effect Size
+
+Suppose you run a hypothesis test on some data and find a significant result, like we in [Chapter @sec-spider-test]. That means that the sample mean we found was sufficiently unlikely to have come from the null hypothesis distribution that we rejected the null hypothesis. In other words, the significance of the test tells us how (im)probable the result was. But it does not tell us how *big* of a difference it was, at least not directly.
+
+First we need to talk about effect size. The procedure we worked through for the $z$ test at the end of the previous lecture led us to declare a "statistically significant" result. That means that the sample mean we found was sufficiently unlikely to have come from the null hypothesis distribution, according to our arbitrary criterion of $\alpha = .05$ or whatever it was, and so we rejected that null hypothesis. In other words, the significance of the test told us how (im)probable the result was. But it did not tell us how *big* of a difference it was, at least not directly.
+
+That difference is part of the $z$ equation, of course. It's right there in the numerator, $X - \mu$. But we divide that numerator by the standard error of the mean, which is a function of the sample size: $\sigma_M = \frac{\sigma}{\sqrt{n}}$. So as sample size increases, the standard error decreases, and even a small difference can become statistically significant, in the sense of being highly unlikely under the null hypothesis. On the other hand, a very large absolute difference in the numerator might turn out to be nonsignificant if we have a very small sample size, because the small $n$ will result in a relatively large denominator for the test statistic.
+
+This can be a little confusing because in everyday language, calling something "significant" usually means it is big or important. But that's not what *statistical* significance means. Small, even trivial differences can be statistically significant. In particular, with a large enough sample size, even a tiny difference can be statistically significant. And that's because increasing sample size decreases the standard error of the mean, because sample size is in the denominator of the standard error equation, and a small standard error makes even very small differences quite improbable.
+
+In sum, the significance of the test is only part of the story. Knowing how (im)probable the result was is important, but we also need to know the size of the difference we found. For that, we need a measure of *effect size*: a way of quantifying the absolute magnitude of a treatment effect, independent of sample size and statistical significance.
+
+
+The trouble is, very small differences might be real, but not very important to us. So we need to consider effect size as well. Effect size tells us how big the treatment effect is in absolute terms, independent of sample size or statistical significance. In simple terms, you can think of effect size as the distance between the population means.
+
+### Cohen's $d$
+
+A common measure of effect size is Cohen's $d$ or difference score. Again, its purpose is to quantify the absolute magnitude of a treatment effect independent of sample size. And it does this by dividing the difference between means by the population standard deviation. 
+
+$$ \text{Cohen's } d = \frac{\text{mean difference}}{\text{standard deviation}} = \frac{M - \mu}{\sigma} $$ {#eq-cohens-d}
+
+So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability. The equation comes in slightly different forms for different tests, but for the $z$ test, it is the mean difference over the standard deviation, or our treated sample mean minus the original population mean divided by the population standard deviation $\sigma$. Notice that while the standard error, $\sigma_M$, varies with sample size, the population standard deviation, $\sigma$, does not. It is what it is. So Cohen's $d$ is independent of sample size.
+
+So effect size is fairly easy to calculate. As for how to interpret it, Cohen outlined some rough rules of thumb, whereby a Cohen's $d$ of .2 would generally be considered a small effect, .5 would be considered medium, and .8 large. However, Cohen himself and many others have noted that these rules of thumb may not apply in all situations.
+
+For a beautiful interactive visualization of what different values of Cohen's $d$ actually look like, spend some time with [Kristoffer Magnusson's effect-size visualization](https://rpsychologist.com/cohend/).
+
+
+### Cohen's $d$
+
+One of the more straightforward and commonly used measures of effect size is Cohen's $d$. The $d$ stands for "difference". The purpose of Cohen's $d$ is to quantify the absolute magnitude of difference between the two means. And it does this by dividing the difference between means by the population standard deviation. So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability.
+
+Allow me to demonstrate the difference between significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost children's SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$ test would be an appropriate hypothesis test.
+
+So we administer the banana treatment to a sample of test takers and we find the sample mean to be 501. We want to know if this is statistically significant with an $\alpha$ of .05 two-tailed, giving us critical values of $\pm 1.96$.
+
+$$ z = \frac{X - \mu}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{n}} = \frac{1}{100 / \sqrt{n}} = \frac{\sqrt{n}}{100} $$
+
+But we also want to know if it is a meaningful effect, if it's big enough for us to care about. So we need to calculate the effect size as well.
+
+$$ d = \frac{X - \mu}{\sigma} = \frac{501 - 500}{100} = \frac{1}{100} = 0.01 $$
+
+
+First, let's suppose the results came from a sample of 50 students.
+
+{{< include quizzes/09-power-significance-effect-size.qmd >}}
+
+See if you can calculate the $z$ score to determine significance and Cohen's $d$ to quantify the effect size. 
+
+
+Now let's suppose that it came from a sample of fifty thousand students, and calculate the $z$ score and Cohen's $d$ again.
+
+In the first case, with just 50 participants, we were not able to reject the null hypothesis of no difference. Our hypothesis test was non-significant and Cohen's $d$ came out at .01, an absolutely trivial difference. With 50,000 participants, however, the hypothesis test did lead us to reject the null hypothesis. The sample mean of 501 now seemed sufficiently unlikely that we could reject the null hypothesis. Again, this is because sample size determines the standard error, the denominator of the test statistic. So as sample size increases, we become more likely to find a significant difference, all else being equal. But you should have gotten exactly the same answer for Cohen's $d$. It is still a trivial effect, even if it's real. The measure of effect size tells us that because it is independent of sample size.
+
+So based on the results of the significance test, we might be tempted to invest in supplying every schoolchild with a banana before every test they take. But the measure of effect size tells us that probably would not be a sensible use of resources. The tiny effect just wouldn't justify the effort of the treatment.
+
+
+### Interpreting Effect Size
+
+Here's a very small effect size. The two curves represent the original and the treated populations. We're saying for the sake of argument that the dashed treated curve really does have a higher population mean than the original population, but it's only a very small difference. And for practical purposes, it might not be very meaningful to us.
+
+{{< interactive-figure effectSizeSmall makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0},{"mean":0.2,"color":"var(--graph-series-2)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.2"}}' fallback="Two nearly overlapping normal curves representing a small effect size of 0.2." >}}
+
+This graph shows a bigger effect size.
+
+{{< interactive-figure effectSizeMedium makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0},{"mean":0.5,"color":"var(--graph-series-2)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.5"}}' fallback="Two normal curves separated by half a standard deviation, a medium effect size." >}}
+
+And this one shows a bigger effect size still.
+
+{{< interactive-figure effectSizeLarge makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0},{"mean":0.8,"color":"var(--graph-series-2)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.8"}}' fallback="Two normal curves separated by 0.8 standard deviations, a large effect size." >}}
+
+You can see how as effect size increases the magnitude of the differences is bigger and probably much more interesting to us.
+
+As for how to interpret Pearson's $r$ as a measure of effect size, you might remember that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, Cohen was also familiar with Pearson's $r$ and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb and they have been called into question. Cohen himself said that these rules of thumb should be used only reluctantly and when no better basis was available. He even told friends that he regretted having suggested them at all.
+
+There's a great recent paper by @funder2019evaluating that looked at what effect sizes are actually typically seen across a wide range of psychological studies, and they suggested these evidence-based alternative interpretive criteria based on actual data. They suggest that an $r$ of .05 indicates an effect that is very small for the explanation of single events, but potentially consequential over time. An effect size $r$ of .1 indicates an effect that is still small at the level of single events, but potentially more ultimately consequential. An effect size $r$ of .2 indicates a medium effect that is of some explanatory and practical use, even in the short run, and therefore even more important. An effect size $r$ of .3 indicates a large effect that is potentially powerful in both the short and the long run. A very large effect size $r$ of .4 or greater, in the context of psychological research, is likely a gross overestimate, the authors argued, that will rarely be found in a large sample or in a replication.
+
+So from this you can see how context-dependent our interpretation of effect size should be. If you're a psych major, I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when your professor tells you about some experimental effect, ask them what was the effect size. If they can't tell you, you should be a little bit skeptical.
+
+For building an intuitive feel for what correlations of different sizes actually look like, spend some time with [Kristoffer Magnusson's interactive correlation visualization](https://rpsychologist.com/correlation/).
+
+
+### $r^2$: Proportion of Variance Explained
+
+Cohen's $d$ is not the only measure of effect size. Another is $r^2$. This is a way of quantifying the proportion of variability in the data attributable to the treatment effect. In other words, this is a way of thinking about different sources of variability in the data. We'll be doing a lot of this in future lectures, so it's worth getting acquainted with the idea now.
+
+One source of variability is the treatment effect. We think that it increased or decreased scores from the original population mean — in other words, the treatment made the scores vary from the expected mean. Another source of variability is just the general messiness in the data: some people scoring a bit higher or lower because of their abilities or mood or whatever — anything that might make scores vary other than the pure treatment effect.
+
+So $r^2$ tries to separate those different sources of variability. It assumes that the treatment adds or subtracts a constant to every score. Like, if we find a treatment effect of one point on a scale of 1 to 5, we know that in reality it might have boosted one person's score by two points and another person's score by one point; another person might not have been affected at all. But for mathematical purposes, we just assume that the treatment added one point to everyone's score, because on average, that's what happened. $r^2$ separates that variability — the one-point treatment effect from the overall natural variability between scores.
+
+### Calculating $r^2$: A Simple Example
+
+Going through a simple example: suppose we're using our five-point happiness scale. We think the population mean should be three because the scale is designed with that as the average. But suppose we record four people's scores — 2, 4, 5, and 5 — and we find this distribution. The sample mean is $M = 4$, one point above the population mean of $\mu = 3$ that the null hypothesis predicts.
+
+{{< interactive-figure rSquaredBlocks makeGraph options='{"type":"block","data":[2,4,5,5],"xDomain":[0.5,5.5],"xTickValues":[1,2,3,4,5],"labels":{"x":"Happiness score","y":"Frequency"}}' fallback="Block histogram of the four scores 2, 4, 5, and 5." >}}
+
+If we want to calculate $r^2$, the first step is to calculate the sum of squared deviations from the sample mean. This is exactly how we calculated sums of squares in the past. Doing this quantifies the variability in the data, excluding any treatment effect. That's because the treatment effect refers specifically to any overall departure from the null hypothesis predicted population mean; by calculating deviations from the sample mean, we're ignoring that expected population mean, and so we're ignoring any treatment effect. So we could call this the sum of squared deviations, or $SS_\text{within treatment}$. For this example, we have deviations of $-2$, $0$, $1$, and $1$. Squaring them and adding them up, we get an answer of six.
+
+Step two is to calculate the total variability in the data, including any treatment effect. We do this by calculating the sum of squared deviations again, but this time as deviations from the null hypothesis mean rather than the sample mean. This way, we are capturing any departure from that predicted mean due to any treatment effect, plus we're still capturing the same standard variability between scores. We can call this the sum of squared deviations, or $SS_\text{total}$. For this example, you can see the deviations are a bit larger on the whole; squaring them and summing them up, we get a total of ten.
+
+<!-- [Possible typo: "time" in original audio was likely "ten"] -->
+
+Step three: we can calculate the sum of squared deviations associated with the treatment effect alone. We don't do this directly from the scores. We find it by subtracting the sum of squares within treatment from the sum of squares total. Whatever is left over must be attributable to the treatment effect. So here we take six from ten, giving an answer of four.
+
+And finally, we can calculate $r^2$ by dividing the sum of squares treatment by the sum of squares total, to get the variability due to the treatment effect as a proportion of the total variability in the data. For this little data set, we get a ratio of four over ten for an answer of 0.4. In other words, 40% of the variability in these scores is attributable to the treatment effect — the overall deviation of scores from our expected population mean of three.
+
+### Computing $r^2$ from $t$
+
+Luckily, we don't necessarily have to go through that whole rigmarole just to calculate $r^2$. If we already calculated the $t$ statistic for the sample, we can compute $r^2$ using this equation:
+
+$$r^2 = \frac{t^2}{t^2 + df}$$
+
+This works for any kind of $t$ statistic, whether it's the single sample $t$ test we're using here or the independent or related sample $t$ tests that we'll move on to in the next lectures.
+
+Like with Cohen's $d$, there are some rules of thumb for interpreting $r^2$. Generally, an $r^2$ of 0.01 (1% of variance) is considered a small effect; 0.09 (9% of variance explained) is considered medium; and 0.25 (25% of the variance being attributable to the treatment) is considered a large effect — though, as with Cohen's $d$, these are rules of thumb and should not be considered appropriate in all circumstances.
+
+
+{{< include quizzes/10-confidence-intervals-cohens-d.qmd >}}
+{{< include quizzes/10-confidence-intervals-r-squared.qmd >}}
+
+## Errors in Hypothesis Testing
+
+Null hypothesis significance testing is an inferential process, by which I mean we're using limited information from a sample to make a general conclusion about a population. Hopefully we make the correct decision. But because we don't have direct insight into what's really true in the world, we only have our limited and imperfect inferences to work with, it's possible to make the wrong decision.
+
+There are two decisions we can make: either we accept or reject the null hypothesis. And there are two actual states of affairs in reality, though, again, we can never have perfect direct knowledge of which one is true. Either the null hypothesis really is true or it really is false.
+
+So there are four possible outcomes in total. Hopefully, we accept the null hypothesis when it really is true — concluding that there is no effect, when really there isn't. And hopefully we reject the null hypothesis when it really is false, concluding that there is an effect when there really is.
+
+### Type I Error (False Positive)
+
+But there is a chance that we will reject the null hypothesis when we shouldn't have, when it actually is true. In other words, we might think that there is an effect when there actually isn't. This is called, entirely unhelpfully, a type one error. A more useful description would be a false positive: thinking that there is an effect when actually there isn't.
+
+### Type II Error (False Negative)
+
+And there's a chance that we will fail to reject the null hypothesis when we should have rejected it, when it is actually false, and there really is an effect. We just failed to find convincing evidence of it. This is called a type two error or a false negative: thinking that there is no effect when really there is.
+
+### $\alpha$ and the Type I Error Rate
+
+The type one error, the false positive, is actually just another name for $\alpha$, the probability that we set as our cutoff criterion for unlikely results. If you think about it, an $\alpha$ of .05, say, is an admission that if the null hypothesis is correct, we would see sample means like this five percent of the time. If we ran our experiment 100 times, even if there is no treatment effect, we would mistakenly reject our null hypothesis five out of those 100 times. So this is basically saying that five percent of samples that come from the null hypothesis sampling distribution will cause us to mistakenly reject the null hypothesis. We're going to be wrong five percent of the time.
+
+The argument in favor of this is that five percent is sufficiently low that we can live with that risk of a type one false positive error. But there are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a type one error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
+
+::::: {.callout-tip .interactive}
+## Watch chance at work: the bee swarm
+
+{{< interactive-figure beeSwarmAlpha makeBeeSwarm options='{"seed":"bee-swarm-alpha-v24","variability":"medium","n":50,"hiveOffset":0,"playing":false}' fallback="Animated bee swarm illustrating sampling variability and the five percent Type I error rate: bees flock around a fixed hive, each instant's mean position forms one sample mean, and over time about five percent of those means land in the critical regions even though the hive never moves." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="The swarm" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":false}'}
+Meet the swarm. The hive at the center is the population mean, $\mu$ — real and fixed. The bees buzzing around it are variability. (We'll only care about horizontal position; the up-and-down motion is just for show.)
+:::
+
+::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="Variability" data-action='{"variability":"high","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Turn the variability up and the bees range farther from home. The hive hasn't moved — only the spread has changed. Think of this as the population's standard deviation, in bee form.
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="One sample" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Freeze time. At this instant, the $n = 50$ bee positions are a sample, and the dashed line marks their mean, $M$. It's close to the hive — but not exactly on it. That's sampling error.
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Every instant" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Press play: sixty samples a second. The mean jitters around the hive, occasionally straying surprisingly far but always pulled back. No random number generator is placing that line — it is purely the product of the swarm's flocking.
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Collect" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+Fast-forward through a minute of swarm time and keep every sample mean. The means pile into a familiar shape: most of them near the hive, extreme ones rare.
+:::
+
+::: {.tutorial-step data-major="null" data-major-title="Null dist." data-title="The curve" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":false,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+Overlay a normal curve centered on the hive with standard deviation $\sigma_M$, the standard error. This is the sampling distribution of the mean predicted by the central limit theorem — and it fits the pile.
+:::
+
+::: {.tutorial-step data-major="null" data-major-title="Null dist." data-title="Critical regions" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+Shade the most extreme 5% of that distribution — 2.5% in each tail, beyond $z = \pm 1.96$. A sample mean landing out there would look too unlikely to blame on chance, so we would reject $H_0$.
+:::
+
+::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="By chance" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+But here the null is true — the hive really is sitting at $\mu_0$. Watch the tracker: over time, about 5% of sample means land in the critical regions anyway. So far: {{< interactive-value beeSwarmAlpha.proportionSignificant format=".3f" >}}.
+:::
+
+::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="Type I errors" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Every one of those rejections was a false alarm — a type one error. That is what $\alpha = .05$ really means: when nothing is going on, chance alone will still cry wolf about five percent of the time.
+:::
+::::
+
+:::::
+
+### $\beta$ and the Type II Error Rate
+
+The type two error — the false negative, or failing to reject the null hypothesis that is false, or put another way, failing to detect a real effect — is referred to as $\beta$. And you might think that $\beta$ is just the flip side of $\alpha$, but it's a bit more complicated than that. $\beta$ is related to the statistical power of a hypothesis test. We'll cover that in more detail later in this lecture.
+
+### Remembering the Difference
+
+Now, it's too bad that "type one" and "type two" are such uninformative names because this is a very important concept. One way to try and remember them is to remember that the villagers in the story of the boy who cried wolf made a type one error and a type two error in that order. At first, there was no wolf, just a mischievous young shepherd who cried wolf. The villagers made a false positive mistake. They thought there was a wolf and there wasn't. And the next time there was a wolf, the boy cried wolf again. But this time, the villagers made a false negative, failing to detect the wolf that really was there.
+
+
+## Statistical Power
+
+Moving on to statistical power, the power of a test is defined as the probability that the test will reject the null hypothesis if the treatment really does have an effect. If a treatment really does have an effect, we're focusing on the right-hand column of the table here, under which $H_0$ is false. 
+
+<div class="table-responsive">
+<table id="inf-tab">
+  <thead>
+     <tr><th colspan=2 style="border-bottom: none;"></th><th colspan=2 style="text-align: center;">Actual situation</th></tr>
+     <tr><th colspan=2></th><th style="text-align: center;">$H_0$ true</th><th style="text-align: center; background-color: #B3D1E3;">$H_0$ false</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan=2 style="writing-mode: vertical-rl; transform: rotate(180deg); text-align: center; font-weight: bold;">Researcher's<br>Decision</td>
+      <td style="text-align: right; font-weight: bold;" >Reject $H_0$</td>
+      <td style="text-align: center; color: red; border-color: var(--text-color);">Type 1 error<br>$\alpha$</td>
+      <td style="text-align: center; color: #50C878; border-color: var(--text-color); background-color: #B3D1E3;">Correct<br>$1-\beta$</td>
+    </tr>
+    <tr>
+      <td style="text-align: right; font-weight: bold;" >Fail to reject $H_0$</td>
+      <td style="text-align: center; color: #50C878; border-color: var(--text-color);">Correct</td>
+      <td style="text-align: center; color: red; border-color: var(--text-color); background-color: #B3D1E3; background-opacity: 0.5;">Type 2 error<br>$\beta$</td>  
+    </tr>
+  </tbody>
+</table>
+</div>
+
+There are two possible outcomes: either we fail to reject the null hypothesis, making a type two false negative error; or we correctly reject the null hypothesis. Because these two complementary outcomes cover the whole probability space, their probabilities must add up to 1. The probability of a type two error is referred to as $\beta$. Therefore, the other outcome, the correct rejection of the null, must have a probability of $1 - \beta$. This quantity, $1 - \beta$, is the statistical power of the test.
+
+
+
+### Calculating Power
+
+::::: {.callout-tip .interactive}
+## Explore statistical power
+
+{{< interactive-figure statisticalPower makeStatisticalPowerDiagram fallback="Interactive statistical-power diagram with null and alternative distributions." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-action='{"show-H1":true,"H1-z-scores":false,"raw-scores":false,"effect-size":0.5,"animate":false}'}
+Placeholder text. Do not remove.
+:::
+
+::: {.tutorial-step data-action='{"show-H1":true,"raw-scores":false,"H1-z-scores":true,"effect-size":0.5,"animate":true}'}
+Text for step 2. Some params change.
+
+After step, {{< interactive-math "\\beta =" statisticalPower.beta format=".2f" >}} and power is {{< interactive-math "1 - \\beta =" statisticalPower.power format=".2f" >}}.
+
+:::
+
+::::
+
+:::::
+
+We'll work through calculating power both visually and mathematically. Visually, here's our null hypothesis distribution with critical regions highlighted red. As you know by now, these critical regions are the regions of the sampling distribution that will cause us to reject the null hypothesis. So to think about statistical power, we need to imagine what the alternative hypothesis distribution with its different mean would look like, and how it overlaps with the null distribution. Specifically, what proportion of sample means for the alternative hypothesis distribution fall within the critical regions of the null distribution and will cause us to reject the null hypothesis? That is the power of the test, the region shaded blue here.
+
+This is slightly complicated to think about. So we'll work through it step by step. First, we focus on the null distribution. We need to determine the critical $z$ scores that define those red critical regions. Since we're dealing with a normal distribution, we know that we can use the `qnorm()` function in R to find those scores. So let's say our $\alpha$ is .05. We'd find critical $z$ scores of $\pm 1.96$.
+
+The next step is to determine what original sample means those critical $z$ scores correspond to. That requires knowing the null distribution's mean and variability. So let's say the population mean is 50 with a standard deviation of 10. We know from the central limit theorem that this sampling distribution will also have a mean of 50, and its variability, the standard error of the mean, is found by dividing the standard deviation by the square root of the sample size. So let's say our sample size is 25.
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+See if you can calculate the critical means.
+
+{{< include quizzes/09-power-critical-means.qmd >}}
+
+Next, we turn our attention to the alternative hypothesis distribution. We need to know what effect size to expect. So in other words, how much higher or lower is the mean of the alternative distribution than the original distribution? Let's say we expect a difference of five points.
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+Now we need to work out what $z$ scores correspond to the sample means we just worked out, but for this distribution.
+
+{{< include quizzes/09-power-alternative-means.qmd >}}
+
+So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using R, we use the `pnorm()` function and subtract the higher $z$ score from the lower one. This gives us the area of the region shaded dark blue here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+
+And so finally we can work out the statistical power of the test — the chances of correctly rejecting the null hypothesis — by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
+
+Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis 70.5% of the time.
+
+### Factors Affecting Power
+
+It's worth spending some time thinking this through, particularly thinking about how changing different quantities will affect statistical power. Increasing effect size, the distance between the means, increases power because the distributions will be farther apart and overlap less. Increasing sample size also increases power because it reduces the standard error, again meaning that the distributions will overlap less. Reducing our $\alpha$ value lowers power because it makes for a more stringent test. The critical regions of the null distribution will be smaller and so less of the alternative distribution will cause us to reject the null. And the directionality of our hypothesis affects power as well. Using a one-tailed test increases power since it gives a larger critical region in one tail that we're interested in.
+
+If you really understand how and why each of these factors affects power, you'll have a good grasp of the concept.
+
+::::: {.callout-tip .interactive}
+## Watch power in action: the swarm returns
+
+{{< interactive-figure beeSwarmPower makeBeeSwarm options='{"seed":"bee-swarm-power-v3","variability":"medium","n":50,"hiveOffset":0,"playing":false}' fallback="Animated bee swarm illustrating statistical power: when the hive moves away from the null position, the proportion of sample means that land in the critical regions is the power of the test, and it rises with sample size and effect size and falls with variability." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="null" data-major-title="Null true" data-title="Null true" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":false}'}
+The swarm again, with everything in view. The hive sits exactly where the null hypothesis says it should, so the sample means pile onto the null distribution — and the roughly 5% that land in the critical regions are all false alarms.
+:::
+
+::: {.tutorial-step data-major="effect" data-major-title="Effect" data-title="Move the hive" data-action='{"variability":"medium","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Now the hive has moved; the dashed marker shows where the null hypothesis still thinks it is. The null is false — there is a real effect of $d =$ {{< interactive-value beeSwarmPower.d format=".2f" >}} — but our critical regions stay right where they were.
+:::
+
+::: {.tutorial-step data-major="effect" data-major-title="Effect" data-title="Power" data-action='{"variability":"medium","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Rebuild the pile of sample means. It centers on the true hive, not on the null — and now a sample mean in the critical region is a good thing: a correct detection of the real effect. The proportion of the time that happens is the power of the test: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"medium","sample-size":100,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Give the swarm 100 bees instead of 50. More bees per sample means a smaller standard error, a tighter pile of means, less overlap with the null — and more power: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More noise" data-action='{"variability":"high","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Crank the variability instead. A noisier swarm inflates the standard error, so the same 10-pixel effect is now small relative to the noise, and sample means rarely clear the critical bounds. Power sinks back toward $\alpha$: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Bigger effect" data-action='{"variability":"medium","sample-size":50,"hive-offset":20,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Finally, move the hive farther out. A bigger effect is simply easier to see — hardly any sample means stay inside the null's bounds now: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Explore" data-action='{"variability":"medium","sample-size":50,"hive-offset":20,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"controls-open":true,"animate":true}'}
+Now it's yours. Mix the three ingredients — sample size, variability, and effect size (the hive offset) — and watch what each one does to the power tracker. (The fourth factor, $\alpha$, stays fixed at .05 here.)
+:::
+::::
+
+:::::
+
+For another way to build intuition about how these factors interact, explore [Kristoffer Magnusson's interactive NHST/power visualization](https://rpsychologist.com/d3/NHST/).
+
+### Practical Applications of Power
+
+Since this is all quite abstract, you may be wondering the usefulness of knowing about statistical power. And honestly, it has long been overlooked within psychology. Until recently, it was quite rare for a published research paper to even mention statistical power. But it's now generally accepted that power should be a central feature of research design.
+
+Researchers could calculate the power of a study before beginning their research or after a study has been conducted, using their knowledge or their assumptions about effect size, sample size, and $\alpha$. But a more practically useful use of power is to specify the power you want in advance and adjust your required sample size in order to achieve that level of power. This requires knowing or estimating your expected effect size. And then you can say, for example, that you want a power of .8 or an 80 percent chance of detecting a real effect of that size. And then you can calculate how many participants you need in order to achieve that level of power.
+
+### Power in Context: Real-World Examples
+
+Since this probably still sounds quite abstract, it's worth putting it in the context of some real effects. The paper referenced at the bottom of the slide here estimated, based on well-established effect sizes, the number of participants that would be required to reliably detect some real differences if we didn't already know that they were real. @simmons2013life looked at...
+
+| Grouping variable | Dependent Variable | Cohen's $d$ | Required $n$ |
+|-------------------|--------------------|---------:|----------:|
+| Gender | Height | 1.85 | 6 |
+| Liberal / Conservative | How important is social equality? | 0.69 | 34 |
+| Do you like eggs? [yes / no] | How often do you eat egg salad? | 0.58 | 48 |
+| Are you a smoker? [yes / no] | What is the likelihood of a smoker dying from a smoking-related illness? | 0.33 | 144 |
+| Do you prefer science or art? | How many planets can you name correctly? | 0.07 | 3,669 |
+
+: Some required sample sizes to detect real effects with 80% power, based on Cohen's $d$ effect sizes, from @simmons2013life.
+
+So, for example, given the real average difference between men and women's heights, you'd need around twelve people, six men and six women, to have sufficient statistical power to detect it. The difference between men and women's heights is very large, with a Cohen's $d$ of around 1.85. So you don't need many participants to reliably detect it.
+
+Usually, though, psychologists are interested in more subtle differences. You might think the difference between liberals and conservatives in terms of how important they say social equality is would be pretty robust. But given its effect size of around .7, you already need many more participants, around 34 each of liberals and conservatives, or almost 70 participants total, in order to have a power of .8 to detect the difference.
+
+This paper also included some questions that sound kind of funny, like comparing people who say they do or do not like eggs in terms of how often they eat egg salad. You'd think this would be a pretty easy effect to detect, but you'd need close to 100 participants to reliably detect it.
+
+A lot of psychology has to do with attitudes and behaviors that we aren't entirely aware of, like motivated cognition. It seems pretty plausible that smokers would underestimate the likelihood of a smoker dying from a smoking-related illness as compared to nonsmokers. And they do. But it's a small enough effect that you'd need almost 300 people in your study to detect it with 80 percent power.
+
+And lastly, people who say they prefer science over art can name more of the planets than people who say they prefer art. Again, it's plausible that this would be the case, but it's a very small difference. If you didn't know the size of the difference in advance, you'd need a study with more than 7,000 people to have 80 percent power to detect the difference.
+
+So this is all worth bearing in mind when you read papers for other classes. Think about the sample sizes they had, the subtlety of the effects that they're looking for, and whether they really had sufficient power to detect those effects.
+
+I'll end with a quote here by <!-- [Possible typo: "by its statistical power" in original; likely meant "about statistical power"] --> Stuart Ritchie from *Science Fictions*, which is a great recent book about the scientific method and the uses and misuses of statistics. The author noted that running a study with low statistical power is like setting out to look for distant galaxies with a pair of binoculars. Even if what you're looking for is definitely out there, you have essentially no chance of seeing it. And I would add, anything you do see may not be quite what you think it is.
+
+{{< include quizzes/09-power-learning-checks.qmd >}}

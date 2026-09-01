@@ -1,0 +1,302 @@
+---
+title: "Variability"
+interactive-scripts:
+  - distribution-generator
+  - graph-generator
+  - variability-table-generator
+  - height-variability-interactive
+---
+
+{{< interactive-figure variabilityCover makeDistributionFamilyCover options='{"renderer":"webgl","distribution":"normal","sd":[2.4,2.2,2,1.8,1.6,1.4,1.2,1,0.8,0.6],"xDomain":[-6,6],"yDomain":[0,0.7],"points":160,"strokeWidth":2.6,"opacity":0.88,"colorCycle":10,"animation":"rise","duration":1700,"ease":"cubic","stagger":"spread","delaySpread":1500,"fallback":{"animate":false},"performance":true,"ariaLabel":"Animated family of normal curves with increasing standard deviations rising from a baseline"}' fallback="Animated family of normal curves showing different standard deviations." >}}
+
+In the previous chapter we talked about measures of central tendency. But there is another crucial characteristic of distributions that we need to know in addition to the center: how widely scattered or closely clustered scores are around it. That's what we mean by *variability*. We'll start with the range, then build up the standard deviation from deviations, sums of squares, and variance. Along the way we'll meet another important concept: degrees of freedom.
+
+## What is variability?
+
+To start with, let's consider a few small sets of scores. Imagine you check the reviews of three movies you're thinking about watching, scored from 0 to 10.
+
+> *Fine, Actually*: 5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5
+>
+> *The Good, the Bad and the Okay*: 0,&nbsp;4,&nbsp;5,&nbsp;5,&nbsp;6,&nbsp;10
+>
+> *The Polarizing Express*: 0,&nbsp;0,&nbsp;1,&nbsp;9,&nbsp;10,&nbsp;10
+
+How might you describe the differences among these sets of ratings? Don't worry about calculating any new statistics yet. Start with the ideas from the previous chapter and think about what they capture or leave out.
+
+::: {#quiz-variability-differences}
+{{< include quizzes/04-variability-differences.qmd >}}
+:::
+
+Using the tools we explored in the previous chapter, we find that the median and mean are 5 for all three movies. The mode is also 5 for the first two. *The Polarizing Express* has two modes, 0 and 10, which already gives us a clue that something different is going on. But none of these measures quantifies just how closely the ratings cluster around the center. Without knowing anything else about the movies, if you were to try to guess how much you will like each one --- what score will you most likely give it? --- 5 would be a sensible prediction in each case. But it seems a more reliable guess in some cases than others. If we plot the ratings as block histograms, we can see why.
+
+::: {.bc-figure-row .bc-figure-row-wide}
+{{< interactive-figure variabilityBlocksStandins makeGraph options='{"type":"block","data":[5,5,5,5,5,5],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"Fine, Actually","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for Fine, Actually, all at 5." >}}
+
+{{< interactive-figure variabilityBlocksYou makeGraph options='{"type":"block","data":[0,4,5,5,6,10],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"The Good, the Bad and the Okay","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for The Good, the Bad and the Okay, mostly clustered around 5 with ratings at 0 and 10." >}}
+
+{{< interactive-figure variabilityBlocksFriend makeGraph options='{"type":"block","data":[0,0,1,9,10,10],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"The Polarizing Express","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for The Polarizing Express, clustered near 0 and 10." >}}
+:::
+
+The ratings for *Fine, Actually* do not vary at all: every reviewer so far gave it a 5. Most of the ratings for *The Good, the Bad and the Okay* cluster in the middle, aside from the two extremes. The ratings for *The Polarizing Express* sit much farther towards the extremes, with none in the middle of the scale at all. So *Fine, Actually* has no variability, *The Polarizing Express* has relatively high variability, and *The Good, the Bad and the Okay* sits somewhere in between. The mean gives us the same prediction for all three, but their variability tells us how far individual ratings tend to depart from it. 
+
+How do we quantify that difference? Like measures of central tendency, measures of variability use a single number to summarize a more complex dataset. But this time we're describing spread rather than center. Greater variability means scores are more widely dispersed, so the center by itself tells us less about what any individual score is likely to look like. And, as with central tendency, there is more than one way to quantify it.
+
+## The range
+
+Remember Hipparchus? I mentioned him in Chapter 3 as an early astronomical pioneer, gazing at the heavens, taking measurements, and realizing that his data were not always perfectly consistent. His solution (according to later sources; his own original work is mostly lost) was to take the midrange: the halfway point between the lowest and highest observations [@stahl2006normal].
+
+The utility of this to the early astronomers was to smooth over the discrepant measurements; once the midrange was calculated it could be taken as providing a reliable answer, and the extremes could be largely ignored. But those two values also offer a simple and intuitive way of quantifying variability: the __range__, calculated by subtracting the minimum score from the maximum.
+
+Here are those ratings from before:
+
+> *Fine, Actually*: 5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5\
+> Range: $5 - 5 = 0$
+>
+> *The Good, the Bad and the Okay*: 0,&nbsp;4,&nbsp;5,&nbsp;5,&nbsp;6,&nbsp;10\
+> Range: $10 - 0 = 10$
+>
+> *The Polarizing Express*: 0,&nbsp;0,&nbsp;1,&nbsp;9,&nbsp;10,&nbsp;10\
+> Range: $10 - 0 = 10$
+
+The range captures one important difference: it is zero for *Fine, Actually* because its ratings don't vary. But it gives us the same answer for *The Good, the Bad and the Okay* and *The Polarizing Express*. There's nothing *wrong* about that. The range is telling us precisely what it is designed to, but it misses the obvious difference between how the ratings are distributed between the extremes.
+
+This is the main limitation of the range as a measure of variability: it does not consider all the observations. Only the two extremes contribute to its value. As a result, it is not affected by how observations are distributed between them. This characteristic also makes it highly susceptible to outliers. One unusual observation can drastically change the range. It also tends to grow with sample size, simply because larger samples have more opportunities to include extreme values.
+
+That's not to say looking at the range isn't useful for some purposes. Researchers often begin by checking the minimum, maximum, and range to get a quick sense of the values in their data. Sometimes you just don't know what to expect, so its helpful to see the extremes and how far apart they are. It can also reveal a problem. Suppose we write a new extraversion item that allows responses numbered one to five. A range of three suggests that the item didn't work well. Maybe asking people "Are you the world's most extraverted person?" was a bit too much and restricted the range of responses. A range of ten, on the other hand, tells us to check for misrecorded values.
+
+Useful as the range is, we also want a measure of variability that considers every observation, not just the two extremes. For that, we need a more mathematically sophisticated measure.
+
+## Deviations
+
+In chapter 3 we introduced *deviations*: the differences between each score and the mean. The mean is the point at which those deviations balance, but the deviations themselves also give us a way to quantify how far the scores spread around it.
+
+For astronomers, deviations offered a way to quantify measurement error: imprecision in their instruments or observations. For statisticians applying the same ideas to human measurements, they captured a different kind of variation. In Quetelet's measurements of soldiers' chests, a deviation did not necessarily indicate a mistake of the measuring tape; it described how one person's body differed from another's. In either case, if we think of the mean as a prediction, a deviation is the prediction error: how far, and in which direction, the actual score fell from it.
+
+The next step was to find a way to summarize those deviations in a single number. Should be easy, no? If we want a "standard deviation," meaning a typical deviation from the mean, why not just calculate the average of all the deviations?
+
+::: {#quiz-average-deviations}
+{{< include quizzes/04-variability-average-deviations.qmd >}}
+:::
+
+The problem is that, precisely because the mean is the balance point, the deviations above and below balance each other out. To find a mean, we first have to add the values up, but the signed deviations always add up to zero. That means it's not possible to calculate an average deviation this way. The answer would always be zero.
+
+So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we minimize and partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
+
+Having squared the deviations, we can follow up with one connected chain of calculations. Add the squared deviations to get $SS$, the __sum of squared deviations__ (or "sum of squares" for short). Divide $SS$ by the number of observations to get the population __variance__, the mean squared deviation. Then take its square root to get the __standard deviation__. The square root returns us to the original units, so we can interpret the standard deviation as a *typical deviation* from the mean.^[More precisely, the population standard deviation is the **root-mean-square deviation**: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn't the literal arithmetic mean of the raw deviations or their absolute values. I don't hear social scientists use the term "root-mean-square deviation" very often, so I'm just going to follow the convention of calling it the standard deviation.]
+
+## Variability equations for populations
+
+To complicate life slightly, populations and samples use slightly different calculations. We'll start with a population and return to samples shortly.
+
+The table puts the steps into mathematical notation. Population variance is represented by lowercase sigma squared ($\sigma^2$), and population standard deviation by lowercase sigma ($\sigma$).
+
+| Step | Population calculation |
+|:------|:-|
+| 1. Find the deviation for each score | $X - \mu$ |
+| 2. Square the deviations | $(X - \mu)^2$ |
+| 3. Sum the squared deviations | $SS = \Sigma(X - \mu)^2$ |
+| 4. Calculate variance (mean squared deviation) | $\sigma^2 = \frac{SS}{N}$ |
+| 5. Calculate standard deviation (root-mean-square deviation) | $\sigma = \sqrt{\sigma^2}$ |
+
+Equations in hand, let's return to the two movies whose ratings had the same range. For now, we'll treat each complete set of ratings as its own population. We'll work through *The Good, the Bad and the Okay* together; then you can try the same procedure for *The Polarizing Express*.
+
+::::: {#act-calculate-variability .callout-tip .interactive}
+## Calculate variability
+
+{{< interactive-figure variabilityTable makeVariabilityTable options='{"title":"The Good, the Bad and the Okay","data":[0,4,5,5,6,10],"controls":false}' fallback="Interactive table calculating deviations, sum of squares, variance, and standard deviation for the ratings of The Good, the Bad and the Okay." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Scores" data-action='{"stage":"data","animate":false}'}
+Start with the original ratings for *The Good, the Bad and the Okay*. When I'm doing this calculation by hand, I find it easiest to put the scores in the first column of a table, then add columns for the deviations and squared deviations. We'll fill them from left to right before using the values at the bottom to finish the calculation.
+:::
+
+::: {.tutorial-step data-title="Mean" data-action='{"stage":"mean","animate":true}'}
+First find the population mean. The ratings add to 30, and there are six of them, so $\mu = 30/6 = 5$. This is the reference point for every deviation in the next column.
+:::
+
+::: {.tutorial-step data-title="Deviations" data-action='{"stage":"deviations","animate":true}'}
+Subtract the mean from each score: $X-\mu$. The deviations are $-5, -1, 0, 0, 1,$ and $5$. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are.
+:::
+
+::: {.tutorial-step data-title="Squared" data-action='{"stage":"squared-deviations","animate":true}'}
+Now square each deviation. This gives us $25, 1, 0, 0, 1,$ and $25$. Squaring makes every value nonnegative, so the deviations below and above the mean will no longer cancel each other out.
+:::
+
+::: {.tutorial-step data-title="SS" data-action='{"stage":"ss","animate":true}'}
+Add the squared deviations to get the sum of squares: $SS = 25+1+0+0+1+25 = 52$. Once the two extra columns are filled, this is simply the total at the bottom of the final column.
+:::
+
+::: {.tutorial-step data-title="Variance" data-action='{"stage":"variance","animate":true}'}
+Divide by the population size, $N$, to get the variance: $\sigma^2 = 52/6 = 8.67$. Because we've squared the deviations, variance is measured in squared rating points. That makes it useful mathematically, but not especially intuitive on the scale of the original scores.
+:::
+
+::: {.tutorial-step data-title="SD" data-action='{"stage":"sd","animate":true}'}
+Finally, take the square root of the variance: $\sigma = \sqrt{8.67} = 2.94$. This returns us to the original units, so we can say that a typical deviation from the mean rating for *The Good, the Bad and the Okay* is around three points.
+:::
+::::
+
+:::::
+
+::: {#quiz-variability-calculation}
+{{< include quizzes/04-variability-calculation.qmd >}}
+:::
+
+### The importance of sums of squares
+
+<!-- HISTORY NOTES — possible short naming/legacy coda here
+- The underlying root-mean-square quantity predates the modern name; nineteenth-century writers used terms such as "mean error," "mean square error," and "error of mean square."
+  - "Probable error" was a different, competing way to put the spread of the error curve into one number, based on its central half rather than its squared deviations.
+- Karl Pearson introduced the name *standard deviation* and the symbol $\sigma$ in print in 1894.
+  - His paper explicitly equated it with Gauss's "mean error" and Airy's "error of mean square."
+  - Nice conceptual turn: a tool developed for scatter in astronomical errors was now being used in biometry to describe variation among organisms.
+- R. A. Fisher coined *variance* in 1918 for the square of standard deviation.
+  - His reason was substantive as well as terminological: independent sources of variability add on the squared scale, so total variation can be partitioned among causes.
+  - Direct plant for later ANOVA: variance becomes useful not merely as a description of spread but as something that can be decomposed.
+- Sources: @pearson1894evolution; @fisher1918relatives.
+-->
+
+Allow me for a moment to impress upon you the importance of squares. $SS$ is not just an intermediate answer that we can forget about as soon as we've found the standard deviation. Later in this book we'll find ourselves splitting variability into different sources, each with its own sum of squares. By the time we finish ANOVA and regression near the end of the semester, I like to joke with my students that the whole course has been nothing but squares all the way down.
+
+The tables above followed the **definitional formula** for $SS$: find each deviation, square it, and add the squared deviations.
+
+$$
+SS = \Sigma(X - \mu)^2
+$$
+
+There is an algebraically equivalent shortcut called the **computational formula**:
+
+$$
+SS = \Sigma X^2 - \frac{(\Sigma X)^2}{N}
+$$
+
+For the first term, square every score and add the results. Then subtract the correction term: the sum of the scores squared, divided by the number of scores. For *The Good, the Bad and the Okay*, $\Sigma X=30$ and $\Sigma X^2=202$, so:
+
+$$
+SS = 202 - \frac{30^2}{6} = 202 - 150 = 52
+$$
+
+That is the same answer we found by calculating every deviation. The shortcut likewise gives $SS=132$ for *The Polarizing Express*, so the rest of both calculations remains unchanged.
+
+We'll stick with the definitional approach for now, but tuck this computational arrangement in the back of your mind; it will become our preferred method when we get to the ANOVA section of the book.
+
+## Sample variability and bias {#sec-variability-sample}
+
+So far we've treated the movie ratings as populations. I mentioned that we have to do things a little differently for samples. Don't worry, the difference in the math is tiny, but the reason for it is important.
+
+In research, we generally use the limited information in a sample to estimate something about a population. Here, we want sample variance to estimate population variance. But if we used precisely the calculation above, dividing by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a single sample variance can fall above or below the population variance. It is a long-run property. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the estimates would average below the actual population variance; it would underestimate the true value.
+
+The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimizes their sum of squared deviations. As a result, the sum of squared deviations around $M$ can only be smaller than the sum of squared deviations of those same scores around $\mu$, never larger.
+
+::::: {#act-moving-center .callout-tip .interactive}
+## The moving center
+
+{{< interactive-figure heightVariability makeHeightVariabilityDemo options='{"seed":"height-variability-v1","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"repeatedSamples":1000}' fallback="Interactive height-sampling diagram showing each uncorrected sample SD first centered on its fitted sample mean, then shifted to the fixed population mean for comparison." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Population" data-action='{"draw":2,"show-sample":false,"show-population-sd":true,"show-sample-sd":false,"sample-span-center":"sample","show-summary":false,"animate":false,"fall":false}'}
+Start with the population. The half-inch bins are filled from a hypothetical normal model with mean 65 inches and standard deviation 3 inches, so most people are near the mean and fewer people are in the tails.
+:::
+
+::: {.tutorial-step data-title="Around M" data-action='{"draw":1,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":true}'}
+Now draw a sample of {{< interactive-value heightVariability.n format=".0f" >}} observations from those actual dots. The red span shows the uncorrected sample SD. It is built from squared deviations around $M$, with the variance calculated by dividing $SS$ by $n$. Its center marker sits on $M$, which was fitted from these same observations.
+:::
+
+::: {.tutorial-step data-title="Shift to μ" data-action='{"draw":1,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
+For comparison, slide that same red span over until its center marker reaches $\mu$. Its width does not change—we are not recalculating the SD. The movement isolates the choice of center: $M$ moved toward this particular set of scores and minimized their squared deviations, whereas $\mu$ stayed fixed.
+:::
+
+::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+A different sample gives us a different $M$. Here the uncorrected SD is larger than the population SD, showing that an individual sample can still overestimate variability.
+:::
+
+::: {.tutorial-step data-title="Can be low" data-action='{"draw":5,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+Here the uncorrected SD is smaller than the population SD. Individual estimates can miss in either direction; what happens every time is that $M$ is fitted afresh.
+:::
+
+::: {.tutorial-step data-title="Keep sampling" data-action='{"draw":6,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}' data-repeat-action='{"new-sample":true,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}' data-repeat-label="New sample"}
+Keep clicking **New sample** and watch how the fitted $M$ and the width of the uncorrected SD change from one sample to the next.
+:::
+::::
+
+:::::
+
+## Variability equations for samples
+
+So now we know what the problem is, here's the solution: divide $SS$ by $n - 1$ rather than $n$. If only all of life's problems were so easily solved.
+
+Here is that correction in context. A population uses the known $\mu$ and divides $SS$ by $N$; a sample uses its fitted $M$ and divides by $n - 1$. Apart from the fitted center, denominator, and notation, the steps are the same.
+
+| Step | Population | Sample |
+|:------|:-|:-|
+| 1. Find the deviation for each score | $X - \mu$ | $X - M$ |
+| 2. Square the deviations | $(X - \mu)^2$ | $(X - M)^2$ |
+| 3. Sum the squared deviations | $SS = \Sigma(X - \mu)^2$ | $SS = \Sigma(X - M)^2$ |
+| 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{df} = \frac{SS}{n - 1}$ |
+| 5. Calculate standard deviation | $\sigma = \sqrt{\sigma^2}$ | $s = \sqrt{s^2}$ |
+
+This correction makes $s^2$ an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
+
+{{< include quizzes/04-variability-sample-calculation.qmd >}}
+
+## Degrees of freedom
+
+But wait, why does the correction use exactly $n - 1$? Suppose I have put three playing cards face down in front of you and tell you that their mean is $M=5$. There is no way to know the value of the first card, so I show you that it is a three. There is still no way to know the second; it turns out to be a five. But you can now tell me the value of the third card. Given the mean and the other two values, it has to be seven.
+
+::: {.center style="font-size: 12em; margin-top: -0.4em; margin-bottom: -0.2em;"}
+🃓 🂵 🂠
+:::
+
+We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ __degrees of freedom__.
+
+If $\mu$ were already known and we measured the sample's deviations around that fixed population center, they would not be constrained to sum to zero and we would not lose a degree of freedom by fitting $M$. (Later we'll meet calculations that fit more means and therefore have different degrees of freedom.)
+
+## Visualizing statistical bias
+
+The moving-center visualization showed the mechanism within each sample. But bias is a long-run property, so now we need to follow estimates across many samples. There is no contradiction in saying that $M$ is an unbiased estimate of $\mu$ while fitting $M$ creates bias in $SS/n$. Across samples, the errors in $M$ balance around zero. Within each sample, $M$ is the center that minimizes $SS$.
+
+@act-tracking-bias tracks both the individual errors and their cumulative average. We will begin with the sample mean, then compare variance calculated using $SS/n$ and $SS/(n - 1)$.
+
+::::: {#act-tracking-bias .callout-tip .interactive}
+## Tracking bias across repeated samples
+
+{{< interactive-figure varianceBiasTracker makeHeightVariabilityDemo options='{"tracking":true,"seed":"height-variability-bias-v61","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"initialSamples":1,"maxSamples":1000,"populationSampleScale":0.76,"varianceReferenceWidth":7}' fallback="Interactive charts tracking mean and variance estimates across repeated samples." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="source" data-major-title="Source" data-title="One sample" data-action='{"estimator":"mean","samples":1,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
+Begin with the sample mean, $M$, as an estimate of the population mean, $\mu$. The colored dots are one sample drawn from this fixed population. This particular sample mean might be too low or too high, but one sample cannot tell us whether the estimator itself is biased.
+:::
+
+::: {.tutorial-step data-major="source" data-major-title="Source" data-title="Follow the samples" data-action='{"estimator":"mean","samples":1,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
+The population will stay the same while we draw sample after sample. Let's shift it out of the way and collect the individual sample means on the timeline below, using the population mean as our fixed reference.
+:::
+
+::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="Five means" data-action='{"estimator":"mean","samples":5,"sample-interval":500,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
+Now draw four more samples, one at a time. The five squares are the five sample means we've seen so far. Each square's vertical position is that sample's estimation error, $M-\mu$: below zero is an underestimate and above zero is an overestimate.
+:::
+
+::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="Average error" data-action='{"estimator":"mean","samples":5,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+The second tracker summarizes the first. After each new sample, it averages all the errors collected so far. The line may wander at first because a few samples can land mostly high or mostly low. Bias is the long-run position of this average, not the fact that individual estimates scatter around.
+:::
+
+::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="First 100" data-action='{"estimator":"mean","samples":100,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Now collect 100 sample means. The individual errors land on both sides of zero while their cumulative average begins to settle down.
+:::
+
+::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="1,000 means" data-action='{"estimator":"mean","samples":1000,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+At 1,000 sample means, the average error is {{< interactive-value varianceBiasTracker.averageMeanError format=".2f" >}} inches. The overestimates and underestimates balance out, so the sample mean is unbiased.
+:::
+
+::: {.tutorial-step data-major="variance" data-major-title="Variance" data-title="One variance" data-action='{"estimator":"variance","samples":1,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Now reset to one sample and use it to estimate population variance. The red triangles show the calculation that divides $SS$ by $n$; the blue triangles show the calculation that divides by $n-1$. Either estimate can miss high or low in one sample, so once again a single result cannot establish bias.
+:::
+
+::: {.tutorial-step data-major="variance" data-major-title="Variance" data-title="Bias and correction" data-action='{"estimator":"variance","samples":1000,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Across many samples, the calculation that divides by $n$ settles below zero. Its errors do not balance out: it systematically underestimates population variance. The corrected estimates that divide by $n-1$ do balance around zero. The correction changes the long-run center of the estimator; it does not eliminate the sample-to-sample scatter.
+:::
+::::
+
+:::::
+
+The two charts distinguish *sampling error* from *bias*. The wide vertical scatter in the upper chart is sampling error: estimates differ from sample to sample. The long-run position of the lower line is bias. Neither using the mean nor dividing variance by $n - 1$ makes every estimate accurate; it makes the overestimates and underestimates balance out on average.
+
+{{< include quizzes/04-variability-learning-checks.qmd >}}

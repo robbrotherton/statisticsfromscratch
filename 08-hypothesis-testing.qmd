@@ -1,0 +1,190 @@
+---
+title: "Hypothesis Testing"
+interactive-scripts:
+  - distribution-generator
+  - make-inferential-diagram
+---
+
+{{< interactive-figure hypothesisTestingCriticalRegions makeDistributionGraph options='{"distribution":"normal","style":"minimal","shade":{"tail":"two","alpha":0.05},"animate":true}' fallback="Normal curve with two-tailed critical regions shaded." >}}
+
+We'll start this chapter by taking stock of what we've learned so far: $z$-scores, the principles of probability, and the Central Limit Theorem. This puts us in a position to make the big leap that we've been working towards, to inferential statistics and hypothesis testing. We'll ask what is a hypothesis test, and we'll work through an example: the $z$-test.
+
+## Putting It All Together
+
+First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. And for normally distributed scores, we can find the probability associated with any given range of scores using the unit normal table or using the `pnorm()` function in R.
+
+Next, we learned that we can begin thinking about samples rather than individual scores by looking at a sampling distribution of the mean. That is, we construct a special kind of population which consists of every possible sample mean that a population can produce for a given sample size, like our samples of size $n = 2$ for this population of four people of different heights. Knowing all possible sample means allows us to determine probabilities. For example, the probability of means of 61 or less.
+
+And finally, the Central Limit Theorem shows us that we don't need to know every possible sample mean. We can determine the characteristics of a sampling distribution just by knowing or estimating the population parameters $\mu$, the population mean, and $\sigma$, the population standard deviation. The Central Limit Theorem tells us what the center and variability of the distribution will be, as well as assuring us that it will be normally distributed if either the population itself is normal or our sample size is sufficiently large (by which we mean, for practical purposes, $n \geq 30$).
+
+So all this comes together with the insight that now we're prepared to think about the probability of observing particular *sample statistics* for any population for which we know the mean and standard deviation. We can find the $z$-score for a sample mean using a modified $z$ equation: 
+
+$$z = \frac{M - \mu_M}{\sigma_M}$$
+
+This $z$-score tells us the position of that particular sample mean relative to all sample means in the sampling distribution, in terms of the standard error of the mean. And since the Central Limit Theorem also tells us that, under the conditions I just mentioned, the distribution of sample means is approximately normal, we can then determine the probability of finding sample means within a specific range, using the same unit normal table or `pnorm()` functions that we used for individual $z$-scores.
+
+$$z = \frac{M - \mu_M}{\sigma_M}$$
+
+Now, since $\mu_M$, the mean of the sampling distribution, is equal to $\mu$, the population mean, you'll often see this equation written using $\mu$ instead of $\mu_M$. The idea is the same.
+
+$$z = \frac{M - \mu}{\sigma_M}$$
+
+## The Problem of Sampling Error
+
+Before we embark on our first true hypothesis test, one last thing to remember. Recall that sampling error refers to the fact that sample statistics do not perfectly represent their corresponding population parameters. If we draw repeated samples from a stable population, the samples will all differ slightly from one another.
+
+So this brings us to the ultimate problem we need to confront. What we're doing when we run experiments, theoretically, is we're taking a sample from one population--the original population--and we're subjecting that sample to some kind of treatment. So then we produce descriptive statistics to describe the treated sample, and we make inferences about the population that that treated sample likely came from. This is a purely hypothetical population. We're imagining that we could take every member of the original population and subject them all to our treatment. Then we'd have this new treated population. What would its characteristics be?
+
+{{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
+
+What we're asking is, does it look as though this sample came from a population that is different or the same as that original population? Has the treatment caused any difference? We put it in these terms — we're comparing these populations — because, as usual, we don't actually care about the sample. We know it's just one possible sample out of a vast array of possible samples drawn from the actual population. It's the population that we're interested in. And since it's a hypothetical population, because we can't give the entire population our treatment, we have to use our one sample to make an inference about the population it came from.
+
+But here's the rub. If it appears as though the populations have different means, how do we know if the apparent difference is really due to a real treatment effect or if it's just that discrepancy between sample means we would expect due to sampling error alone? This is the crucial question addressed by inferential statistics and the hypothesis testing procedure.
+
+## Spider-Man revisited
+
+So let's put this in terms of our silly but hopefully memorable example. Remember, we spent some time thinking about Spiderman. Some kid is bitten by a spider. Do his reaction times look substantially faster than regular unbitten kids? We were able to work out Peter Parker's $z$-score to describe where he fell in the population distribution — the population of unbitten kids. And his score looked pretty different, which we could take as evidence that he no longer belonged to that population. The treatment, the spider bite, seemed to have caused a difference.
+
+But again, real research doesn't usually rely on examining just one kid. We would want a sample — a sample of a bunch of kids who we treated to radioactive spider bites to see if it would mess with their reaction times. Obviously, this experiment probably would not make it past the ethics board, but hey, it's a good thought experiment.
+
+![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen }
+
+### From Individual Scores to Sample Means
+
+Thankfully, armed with the Central Limit Theorem, it's not much of a leap to move from single scores to whole samples.
+
+First, let's just recalculate the $z$-score and probability of Peter Parker's single score, for old time's sake. Remember our imaginary test spiderman had a reaction time of 159 milliseconds on a test for which the general population had a mean of 284 milliseconds and a standard deviation of 50 milliseconds. We plug the numbers into the $z$-score equation and we get $-2.5$. 
+
+$$ z = \frac{X - \mu}{\sigma} = \frac{159 - 284}{50} = -2.5 $$
+
+We can look up $z = 2.5$ in the unit normal table to find a probability of less than .01. Pretty unlikely. $p(z \le -2.5) = .0062$. So if Peter Parker's reaction time really came from the population of unbitten kids, we would only see a score this extreme about six times out of a thousand.
+
+But now let's calculate the $z$-score based on the idea that the score of $159ms$ came not from one individual, but instead it was the sample mean for a sample of five people all bitten by radioactive spiders.
+
+
+{{< include quizzes/08-hypothesis-testing-sample-z-score.qmd >}}
+$$ z = \frac{M - \mu_M}{\sigma_M} = \frac{159 - 284}{\frac{50}{\sqrt{5}}} = -5.59 $$
+
+Now our score calculation starts with that sample mean. We subtract the mean of the sampling distribution, which we know from the Central Limit Theorem is equal to the population mean, which we know from the website where you did that reaction time test is 284 milliseconds. So actually our numerator here is completely unchanged. It's only the denominator that changes. We divide by the standard error of the mean — the variability of the sampling distribution — rather than the variability of the population. The standard error is $\sigma$ over the square root of sample size. So 50, the population standard deviation, over the square root of 5, our sample size for this example. And now we get a $z$-score of $-5.59$, which is quite a bit lower than it was for Peter Parker alone. That's because you're inherently less likely to get extreme sample means than extreme single scores. The larger the sample, the more uncommon extreme means will be. Remember, the chances of one individual happening to have such an extreme score was less than one percent. The chances of five people all having an average score this extreme is correspondingly less likely.
+
+And if we put that $z$-score into `pnorm()`, we get a much smaller $p$-value, which here R is giving to us in scientific notation. This just means that there are a lot of zeros after the decimal before we get to the fraction of a percent that this represents.
+
+```r
+pnorm(-5.59)
+#> [1] 1.135695e-08
+```
+
+To show this another way, here's what the sampling distribution looks like and where our sample mean lies in that distribution. Here it's shown in the original units; we could relabel the axis with $z$-scores instead. Remember, the $z$-scores are just a change of label. They don't transform the positions or the variability of the scores. So with the original units, our sample mean is still exactly as far down in that extreme tail of the distribution.
+
+{{< interactive-figure spidermenSamplingDistribution makeDistributionGraph options='{"distribution":"normal","mean":284,"sd":22.36,"xDomain":[150,352],"xTicks":8,"style":"minimal","xAxis":true,"shade":{"to":159},"markers":{"at":159,"label":"M = 159","height":0.45,"color":"var(--bc-accent, #2c7fb8)"},"animate":true,"labels":{"x":"Sample mean reaction time (ms), n = 5"}}' fallback="Sampling distribution of mean reaction times for samples of five, centered on 284 ms with standard error 22.36 ms; a vertical line marks the sample mean of 159 ms far down in the lower tail." >}}
+
+In other words, for a population with the reaction time characteristics of regular unbitten people, getting a sample of 5 people with an average of 159 milliseconds is vanishingly unlikely. If the hypothetical population of bitten individuals really looks like this — if it's the same as the population of unbitten individuals — the probability of happening to end up with this sample by chance alone is so slim that we might have to entertain the possibility that the sample did not come from a population with these characteristics, that the spider bites really do change people's reaction times.
+
+Or to put it in terms of this inferential process diagram, again, we're asking if these two populations seem to be identical. We knew the characteristics of the original population. So if we assume that the treated population is the same, we've just calculated that it would only produce a sample like this a tiny, tiny fraction of a percent of the time. The chances are one in a hundred million. So in other words, if we draw samples from this population over and over again, we'd probably have to take 100 million samples before seeing one this extreme.
+
+## What Is a Hypothesis Test?
+
+We've effectively just completed our first hypothesis test. A hypothesis is just something you suspect might be true about the world. We suspected that bitten people may have different reaction times than unbitten people; that was our hypothesis. But we remain always open minded. We hold onto the possibility that we're wrong and that the treatment has no effect. In fact, this skeptical assumption is always our default assumption. It's our guiding star. We're going to call the *null hypothesis*.
+
+And so we used our knowledge of the Central Limit Theorem and probability to determine what kind of sample means would be common or uncommon, assuming that there was no effect on reaction times. We collected some data — our hypothetical sample of five spider people — and we compared the $z$-score for their sample mean to the sampling distribution we would expect a completely unchanged population to produce. And we decided that the evidence was sufficiently unlikely if spider bites had no effect. So maybe they did.
+
+## The Four-Step Hypothesis Testing Procedure
+
+To put this procedure more formally, we can think of this as a four-step procedure. We'll talk about each step in more detail since there's some new terminology to introduce along the way, but essentially it's the procedure we just walked through, dressed up in slightly more formal language. We state our hypotheses first. We set our decision criteria. Next, we collect and analyze the data. And then we make a decision.
+
+### Step 1: State the Hypotheses
+
+Step one of the hypothesis testing procedure is to formally state our hypotheses. Now, to give it its full title, this hypothesis testing procedure is called Null Hypothesis Significance Testing, or NHST for short. That name refers to our default skeptical stance. Our starting position is always that the null hypothesis is going to be the right answer, and the null hypothesis is that there is no treatment effect — that the treated population is identical to the original untreated population. Or, in the other statistical tests we'll cover in later lectures, the null hypothesis might state that there is no difference between different treatment conditions or no relationship between different variables. In any case, the null always basically says there is nothing going on here.
+
+The other side of the coin is the alternative hypothesis. That's the one that we're actually interested in — that the treatment, meaning the spider bites in this case or whatever the case may be, actually does cause some change. We're trying to show that the null hypothesis is unlikely to be the best explanation of our data and that the alternative hypothesis looks like a potentially better explanation for the data.
+
+Note that these two propositions, the null and the alternative hypothesis, are necessarily logical complements, by which we mean that they can't both be true. If one is true, the other is false. Stating our two hypotheses this way is meant to ensure that we're designing research around specific and falsifiable hypotheses, by which we mean we're setting things up in a way that we can show our hypothesis to be right or wrong. We're not posing vague, open-ended questions that the data won't actually be able to definitively answer.
+
+So here are some examples based on some psychological effects we might be interested in. 
+
+Say some pharma company thinks it has invented a pill that makes people smarter. The null hypothesis there would be that the pill has no effect on intelligence. The alternative would be that it does affect intelligence. 
+
+- General research question: Does this intervention affect intelligence? 💊🧠
+    - $H_0$: The intervention has no effect on intelligence.
+    - $H_1$: The intervention has an effect on intelligence.
+
+Or say some researchers suspect that adopting an expansive body posture--like the Superman pose--makes people feel more confident. The null would be the posture does not affect confidence. The alternative would be that it does.
+
+- General research question: Does this posture affect confidence? 🦸‍♀ 😎️
+    - $H_0$: The posture has no effect on confidence.
+    - $H_1$: The posture has an effect on confidence.
+
+Or to take one more example, say we're interested in correlations and we think that there will be an association between the number of years of education someone has completed and their lifetime earnings. The null hypothesis would say that there is no association between education and income. The alternative would say that there is.
+
+- General research question: Is there an association between education and income? 🎓🤑
+    - $H_0$: There is no association between education and income.
+    - $H_1$: There is an association between education and income.
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+We won't say much more about *formulating* hypotheses for this class. That's an issue for research methods. We'll focus more on what happens next: the statistical analyses used to test hypotheses. But if you really think about it, this should be by far the most important and effortful step of the entire research process. Formulating new, interesting, sensible, plausible, meaningful hypotheses is a demanding process. Even to begin to come up with reasonable and potentially insightful hypotheses requires familiarity with the existing research and theoretical perspectives on the phenomena you're interested in. But that's something you should go into in more detail in other classes as you address research methods and specialized topics within psychology.
+
+{{< include quizzes/08-hypothesis-testing-stating-hypotheses.qmd >}}
+
+### Step 2: Set the Decision Criteria
+
+For step two, we're essentially asking, "if the null hypothesis is true, what sample statistics are we most likely or most unlikely to see?" The Central Limit Theorem tells us what the sampling distribution will look like. Exactly how we determine the sampling distribution's characteristics depends on the nature of our data and the appropriate test statistic. We'll talk more about that as we go on, and we'll see one example later in this lecture. But in a general sense, we are using our advance knowledge of probability and sampling to determine what samples will be highly unlikely. And if we see one that is sufficiently unlikely, we will reject the null hypothesis.
+
+Here, we need to introduce the terminology of $\alpha$ and $p$-values. The Greek symbol, lowercase $\alpha$, is our decision criterion. It is the probability value we pick to define a very unlikely outcome. When we talk about a $p$-value, we're usually referring to the precise probability of our observed sample statistic: the probability of seeing a sample statistic as extreme or more extreme than the observed sample statistic, assuming again that the null hypothesis is correct.
+
+So $\alpha$ is our stated cutoff. It can be any value we like, but by convention, the field of psychology usually uses an alpha level of .05, meaning the most extreme five percent of possible sample statistics. So if our sample's $p$-value is less than $\alpha$, we call it a statistically significant result, and we reject the null hypothesis. So when you see $p < .05$ in a published journal article, this is what they're referring to. What we're doing is dividing the distribution of sample means into two parts: sample means that are likely and sample means that are unlikely, in both cases assuming that the null hypothesis is true.
+
+To show this idea visually, here's a normal curve with the top five percent shaded, illustrating the example of choosing $\alpha = .05$. We talk about this proportion we're defining as unlikely as the "critical region." If we observe a sample mean in the critical region, it's unlikely enough that we'll reject the null hypothesis.
+
+{{< interactive-figure alphaCriticalRegion makeDistributionGraph options='{"distribution":"normal","style":"minimal","xAxis":true,"xDomain":[-4,4],"shade":{"tail":"right","alpha":0.05},"animate":true,"labels":{"x":"z"}}' fallback="Normal curve with the top five percent shaded as the critical region." >}}
+
+This is where the percentile language we introduced for the median becomes useful again. In this one-tailed example, the point that cuts off the top five percent is the 95th percentile: 95 percent of the null hypothesis distribution lies below it, and five percent lies above it. Alpha describes the area we've decided to call unlikely. The corresponding percentile identifies the boundary of that area, which we'll call the **critical value**.
+
+### One-Tailed and Two-Tailed Tests
+
+We don't have to have just one critical region. If we do, it's called a one-tailed test, because our critical region is in one tail of the distribution. But we can have a two-tailed test where we specify critical regions at both extremes. If we do this, we're dividing our chosen $\alpha$ into two. If $\alpha$ is .05, or five percent, then by having a two-tailed hypothesis test, we're dividing that five percent between the two tails of the distribution, giving two and a half percent at each end that will cause us to reject the null hypothesis.
+
+{{< interactive-figure twoTailedCriticalRegions makeDistributionGraph options='{"distribution":"normal","style":"minimal","xAxis":true,"xDomain":[-4,4],"shade":{"tail":"two","alpha":0.05},"animate":true,"labels":{"x":"z"}}' fallback="Normal curve with 2.5 percent shaded in each tail for a two-tailed test." >}}
+
+In percentile terms, the two critical values are at the 2.5th and 97.5th percentiles. The middle 95 percent of the null hypothesis distribution lies between them, leaving the most extreme five percent outside them.
+
+Whether we want a one- or two-tailed test depends on how we stated our hypotheses in step one. We talk about directional or non-directional hypotheses. With one-tailed or directional hypotheses, the researcher has a specific prediction about the direction of the treatment effect and specifies in advance that they are looking for either an increase or decrease. With non-directional tests, we're just looking for a difference in either direction. Again, the main point of step two is that we're determining up front what kind of sample statistics would look sufficiently unlikely under the null hypothesis that we will reject that null hypothesis.
+
+### Step 3: Collect and Analyze the Data
+
+Step three is to conduct the research, gather data, and calculate the appropriate sample statistics. Again, there are so many issues around data collection and research methods in general that we're just going to gloss over here and leave for other classes. But for our purposes, let's recall that an assumption of the Central Limit Theorem is true independent random sampling, though in practice we often aren't collecting data in a way that conforms strictly to independent random sampling. That's another issue for research methods classes.
+
+But in any case, the exact statistics we will calculate depend on the nature of the data. We'll start here with the $z$-test. We'll encounter a few different examples over the rest of the semester, including the $t$-test, analysis of variance (ANOVA), and correlation and regression. All these tests rely on the same fundamental hypothesis testing ideas that we're outlining here.
+
+### Step 4: Make a Decision
+
+And now everything is in place for us to make our decision. Do we accept or reject the null hypothesis? Notice again that this is all framed around that null hypothesis. We're not saying that the alternative hypothesis is true or false. We're just accepting or rejecting the null. And at this point, our decision depends simply on whether the statistic that we calculated falls within the critical regions that we identified in step two.
+
+## The $z$ test
+
+So we can now apply this formal hypothesis testing procedure using our first real test statistic. It's called the $z$-test because it relies on the $z$-score for a sample mean that we introduced at the start of this lecture. This is an appropriate statistic to use if and only if we know the characteristics of the original population — its population mean and standard deviation — and we know that the sampling distribution will be normally distributed.
+
+This $z$-test isn't actually used very often because often in real research, we don't know the population mean and standard deviation, which is why we need the other test statistics that we'll cover in future lectures. But the $z$-test is a good place for us to start.
+
+To put it in terms of this diagram again, there is an original untreated population that has a known mean and standard deviation. We wonder what the new treated population would look like if we could subject every member of the population to some treatment. Would it still have the same population mean or would it be changed? The null hypothesis is that the populations are identical. The alternative is that they are not — that they are different, that there was a treatment effect. Now, logistically we can't treat every member of the population, so we take a sample and we subject it to the treatment. Then we locate that sample within the hypothetical treated population sampling distribution for the null hypothesis by calculating its sample $z$-score. And that leads us to our decision for the $z$-test.
+
+### The Spider Example: Formal Procedure {#sec-spider-test}
+
+So now let's quickly run through the spider example one more time in this formalized step-by-step procedure. We start with our hypotheses. The null ($H_0$) is that radioactive spider bites do not alter reaction times. The alternative ($H_1$) is that they do. Notice here we're just stating this as a non-directional hypothesis, allowing for the possibility that being bitten by a radioactive spider is actually quite bad for your reaction times and probably for your health in general. But if we were more confident in the Spidey sense hypothesis, we could state a directional hypothesis if we wanted to.
+
+But whatever our hypotheses, we next determine our decision criteria. We know that the $z$-test is appropriate here because I'm telling you we know the original population mean and standard deviation. And we know we'll be dealing with a normally distributed sampling distribution, because back when we first did this reaction time test, we said for the sake of argument that everyone's scores form a normally distributed population, which, like I said at the time, isn't strictly true for reaction times. But let's not worry about that. So we can set $\alpha$ at .05 if we like, giving us critical regions of .025, or two and a half percent, at either end of the distribution. Then we can find the corresponding $z$-score cutoffs for the normal distribution using the `qnorm()` function in R, and we find that that corresponds to $z$-scores of $\pm 1.96$.
+
+Next, we collect and analyze our data. We already did this earlier. Plugging in all the values to the $z$-score equation, remembering that our denominator now is the standard error of the mean, we got a $z$-score of $-5.59$.
+
+$$\sigma_M = \frac{50}{\sqrt{5}} = 22.36 \qquad z = \frac{159 - 284}{22.36} = -5.59$$
+
+And since that is within our critical region, step four is to reject the null hypothesis. We know that the $p$-value for this sample, whatever it is, is less than $\alpha$. And so we declare a statistically significant finding. Again, we're saying that if spider bites did nothing to people's reaction times, a population with those characteristics would produce a random sample with a mean this or more extreme less than five percent of the time. So our alternative hypothesis — that the sample comes from a population with a different population mean — looks more plausible than the null hypothesis.
+
+## Practice: CBT for OCD
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+We'll end by having you perform your own hypothesis test. We're going back to another example I introduced a few lectures ago: the study of the efficacy of cognitive behavioral therapy for obsessive compulsive disorder. First, you'll need to articulate your hypotheses and then set your decision criteria. The numbers refer to scores on a measure of symptom severity. The original pretreatment population mean was 30.25 with a standard deviation of 14.89. The treated sample mean is 15.49, and it comes from a sample of 40 people.<!-- Note: an earlier draft said 15.59; 15.49 matches the value used in the z-scores chapter and the lecture slides. --> You'll need to calculate the test statistic and then make your decision based on the cutoff or cutoffs that you identified in step two.
+
+
+{{< include quizzes/08-hypothesis-testing-learning-check.qmd >}}

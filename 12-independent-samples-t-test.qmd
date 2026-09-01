@@ -1,0 +1,249 @@
+---
+title: "Independent Samples t Test"
+interactive-scripts:
+  - likert-helper
+  - make-inferential-diagram
+  - variability-table-generator
+  - distribution-generator
+---
+
+## Introduction
+
+We spent the last couple of lectures working with the single sample $t$ statistic. Here, we'll move on to another variant of the $t$ test: the independent samples $t$ test. We'll start by comparing the two, seeing what kind of research designs call for which versions of the $t$ test, and then we'll work through calculating the independent samples $t$ statistic and using it in a hypothesis test.
+
+## From Single Sample to Independent Samples
+
+To refresh your memory of the single sample $t$ statistic, suppose you run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we measure happiness using a five point scale. 
+
+::: center
+Here's $10! 💵
+:::
+
+{{< interactive-figure moneyLikert makeLikert fallback="A five-point Likert response scale." >}}
+
+Arguably, we have a good reason to think we can predict what the population mean should be if the money has no effect at all. By definition, on average, people should report average happiness levels. In technical terms, the null hypothesis $H_0$ states that the population mean $\mu = 3$. But we don't know how variable scores might be, so we can't claim knowledge of the population standard deviation, $\sigma$. As a result, we can't use the $z$-test. Instead, the single sample $t$ test would be the appropriate statistical test.
+
+But suppose we have a slightly more complicated design. Suppose we don't want to give everyone $10 and just see what happens. We want to create two different situations and see if there's a difference between them. So for this study, imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves — an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Maybe they'll buy their pal a coffee or whatever. And then later that day we ask everyone in both groups about their current level of happiness.
+
+:::: {.columns}
+
+::: {.column width="50%"}
+
+::: {.center}
+Group A:  
+Spend this on yourself 💵
+:::
+
+{{< interactive-figure likertSpendSelf makeLikert options='{"name":"likert-spend-self"}' fallback="Likert response scale for the spend-on-yourself group." >}}
+:::
+
+::: {.column width="50%"}
+
+::: {.center}
+Group B:  
+Spend this on someone else 💵
+:::
+
+{{< interactive-figure likertSpendOther makeLikert options='{"name":"likert-spend-other"}' fallback="Likert response scale for the spend-on-someone-else group." >}}
+:::
+::::
+
+This isn't a purely hypothetical example, by the way: researchers really have run studies like this, and prosocial spending does seem to make people happier [@dunn2014prosocial].
+
+We can't use the single sample $t$ test here because we have *two* hypothetical populations and we don't know either of their means. So we can't formulate a null hypothesis based on expected means the way we could with the single sample design.
+
+### The inferential logic
+
+{{< interactive-figure independentInferentialDiagram makeInferentialDiagram options='{"preset":"independent"}' fallback="Inferential process diagram for an independent-samples t test." >}}
+
+Put in terms of the inferential diagram, for the single sample situation we had an original untreated population that we thought we knew something about: its mean. That was the basis of our null hypothesis: that the treated population would have that same mean. We inferred the variability from our sample, and we assumed that both populations would have that same variability, because an assumption of the $t$ test is that the treatment does not alter variability. And the central limit theorem allowed us to predict the shape of the sampling distribution and to determine the probability of observing a sample with a mean as or more extreme than our sample's mean.
+
+Now for the more complicated research design with two different samples, things are slightly more complicated. We no longer claim to know anything about the populations that we want to compare. So we have to infer both populations' characteristics based on their sample means and standard deviations and sample sizes. And then our null hypothesis is, as usual, that there is no difference between these two populations. Since we don't know either of their means in advance, the null hypothesis doesn't specify a value that one or the other mean is equal to the way that the single sample $t$ test did. Rather, it specifies that the difference between the two population means is equal to zero, which amounts to the same thing — of course, we're just not claiming in advance to know either population value like we did before.
+
+## The Structure of the $t$ Statistic
+
+Before we get into how to actually calculate the independent samples test, it's worth just outlining the conceptual structure of the $t$ statistic in general, because this is true of all the variations of the $t$ test. The numerator always takes the form of a sample statistic minus a population parameter, and the denominator is always the estimated standard error for that statistic. So in plainer language, we could say the numerator quantifies how different was what we observed from what we predicted based on the null hypothesis, and the denominator quantifies how big of a difference we would typically see just by chance alone. So the more of a difference we saw over and above what would be expected by chance, the bigger our numerator will be compared to the denominator and the larger the $t$ statistic we will get. Or a succinct, technical way of putting it would be the numerator is constructed from the difference between our data and our hypothesis, and the denominator is the expected sampling error.
+
+For the single sample $t$ test, the equation looked like this. The sample statistic was the single sample's mean; we subtracted $\mu$, the expected population mean; and we divided by the estimated standard error of the mean, which we calculated using the single sample's standard deviation and our sample size.
+
+## The Independent Samples $t$ Formula
+
+This is what the equation looks like for the independent samples test. 
+
+$$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$ {#eq-independent-t}
+
+The numerator looks a bit more complicated, but remember that basic form: we have a statistic minus a parameter divided by a standard error.
+
+In this case, our statistic is no longer a single sample mean. Instead, it's the difference between two sample means, denoted by $M_1$, the mean of the first sample, minus $M_2$, the mean of the second sample. And we subtract from that statistic the expected population parameter. And again, it's not just a single population's mean, but the difference between two population means.
+
+Now, if you think about the null hypothesis, you know that it predicts no difference. So the value of $\mu_1 - \mu_2$, according to our null hypothesis, is always zero. So this numerator is actually a little bit simpler than it looks, because we're subtracting a population parameter of zero for the difference between those two population means. So when we come to actually calculate this, we could ignore that zero and our numerator will just be the difference between the two sample means.
+
+### The estimated standard error of the mean difference
+
+The denominator also looks more complicated here. This notation, $s_{M_1 - M_2}$, refers to the estimated standard error of the mean difference — how much of a difference we'd expect to see between sample means drawn from these populations by chance alone. And calculating that actually is a bit more complicated, because we'll have to combine our estimates from both samples' variabilities. So the equation for calculating that denominator, the estimated standard error of the mean difference, looks like this: 
+
+$$ s_{M_1 - M_2} = \sqrt{\frac{s_p^2}{n_1} + \frac{s_p^2}{n_2}} $$ {#eq-independent-se}
+
+It is the square root of $s_p^2$ divided by the sample size of sample one plus $s_p^2$ over $n$ for sample two. If you think back to the calculation for standard error we've used in the past, it's been the square root of variance over $n$. And so this looks kind of similar, but there's two things going on here — and presumably that's because we have two samples — and there's this unfamiliar symbol $s_p^2$.
+
+$$ s_p^2 = \frac{SS_1 + SS_2}{df_1 + df_2} $$ {#eq-pooled-variance}
+
+### Pooled variance
+
+So what is that? Well, you know that $s^2$ usually refers to a variance, and this is no different. We're talking about some kind of variance. And the subscript $p$ stands for pooled. This is the pooled variance: the variances of our two samples pooled together to produce an estimate of the population variance based on the separate estimates that each sample is giving us. Remember, the $t$ test generally assumes homogeneity of variance; that the different hypothetical populations we're thinking about always have the same variance. So we want to come up with a single guess at the single population variability. Each sample gives us an estimate and we pool those estimates together to come up with the best possible guess at that single true population variability.
+
+So essentially the pooled variance is just a weighted average of the two samples' variances. And we calculate it by dividing the sum of each sample's sum of squared deviations by the sum of the samples' degrees of freedom. Remember, sum of squares divided by degrees of freedom gives us the average squared deviation for a sample — its variance. So here we're pooling all the sums of squares together and effectively weighting them by sample size, each sample's degrees of freedom, because bigger samples, with higher degrees of freedom, provide more accurate estimates of population parameters.
+
+Another form we could put this equation in is degrees of freedom multiplied by the sample variance for each sample, added together in the numerator, and degrees of freedom in the denominator. That is algebraically equivalent to the simpler looking sums of squares version, because $SS$ is equal to variance multiplied by degrees of freedom. So this version of the equation can just be a bit more useful if we've already calculated the samples' variances and we can't be bothered working out their sums of squares separately. For example, if we're working in R, there's a function to calculate variance, but there isn't one for sums of squares, so it might just be easier to work with this version of the equation.
+
+### Putting it all together
+
+So these are the steps to calculate the independent samples $t$ statistic. Most of the extra work is in the denominator. First, we have to calculate pooled variance, and we use that to calculate the estimated standard error of the mean difference. Then we use that as the denominator with the difference between sample means as the numerator for our $t$ statistic, remembering that the population parameter — the difference between $\mu$s — is zero and can effectively be ignored when we're calculating this.
+
+And this gives us the usual ratio of how much difference we observed to how much we would expect by chance. We'd expect to get an answer of around one if there was no treatment effect at all, because on average we would see just as much difference as we would expect due to chance. The more our $t$ statistic exceeds one, the more difference we saw over and above that expected by chance alone, and the more convincing the evidence of a treatment effect becomes.
+
+## Hypothesis Testing Example
+
+So let's run with the example of giving two different groups of people $10, telling one group to spend it on themselves and the other group to spend it on someone else.
+
+### Step 1: State the hypotheses
+
+As usual, the first step is to state our hypotheses. As always, the null hypothesis is our default assumption that there is no difference between groups, that the treatment has no effect. Specifically, in the case of the independent samples test, the null hypothesis is that $\mu_1 - \mu_2 = 0$. We state it this way because again we don't claim to know in advance what the value of $\mu_1$ or $\mu_2$ is. We just expect that the difference between them is zero — or to put it another, more intuitive way, that they are the same.
+
+The alternative hypothesis is that there is a difference between the groups, that the treatment does have an effect. As before, we could state either a directional or a non-directional hypothesis. A directional hypothesis would state that the difference will be less than zero if we expect a change in that direction, or greater than zero if we expect a change in the other direction. A non-directional hypothesis would state simply that the difference will not be equal to zero, and we'll be looking for a difference in either direction using a two-tailed test. Researchers most often use two-tailed tests because it's generally a slightly more stringent test in terms of having a smaller critical region in each tail of the distribution. So let's run with a two-tailed test for this example.
+
+### Step 2: Define the critical regions
+
+Step two is to define our critical regions. Again, since the $t$ distribution is actually a family of distributions with a slightly different mathematical curve for every possible value of degrees of freedom, we need to know the degrees of freedom for our test at this point.
+
+To be long-winded about it, the total degrees of freedom for an independent samples $t$ test is the degrees of freedom for sample one plus the degrees of freedom for sample two, and that is equal to $n_1$, the number of people in group one, minus one, plus $n_2$, the number of people in group two, minus one. This is because we lose one degree of freedom for each sample mean that we calculate, because we then have to reuse the scores to calculate deviations from that mean to get the variance and standard deviation. And reusing the scores means that one is no longer free to vary. We have to do this twice here, once for each sample, and so we lose a degree of freedom for each sample. So to be more concise about it, the degrees of freedom is $N$ — meaning here the total number of people in both conditions of the study — minus two.
+
+So let's say for our little example here, we're going to have just five people in each group. That means that the degrees of freedom for each sample is four. So four plus four is eight. Or to use the more concise way of thinking about it, we have ten people in our study in total, so the total degrees of freedom is ten minus two, or eight.
+
+So we decide on $\alpha$. For our purposes, we'll use the traditional .05. And we look up the $t$ distribution with eight degrees of freedom in a table or using R, and we find that the critical $t$ score that cuts off the highest and lowest 5% of the distribution is 2.306.
+
+### Step 3: Calculate the test statistic
+
+Step three is where we get our data and calculate our test statistic. Here are the happiness scores for our two groups of five:
+
+::: {style="text-align: center; font-size: 1.05em;"}
+Spend on self: 1&emsp;5&emsp;2&emsp;4&emsp;3
+
+Spend on other: 5&emsp;5&emsp;2&emsp;5&emsp;3
+:::
+
+Remember, for the independent samples $t$ test, this involves calculating the estimated standard error of the mean difference for the denominator, which involves calculating the pooled variance of our two samples. So we're going to need to know either the sums of squares for each sample or each sample variance.
+
+::::: {.callout-tip .interactive}
+## Calculate each sample's variability
+
+{{< interactive-figure independentTVariabilityTables makeVariabilityTables options='{"tables":[{"title":"Spend on self","data":[1,5,2,4,3],"sample":true},{"title":"Spend on other","data":[5,5,2,5,3],"sample":true}]}' fallback="Interactive tables calculating deviations, sums of squares, and variance for the two spending groups." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Scores" data-action='{"stage":"data","animate":false}'}
+Start with each group's scores.
+:::
+
+::: {.tutorial-step data-title="Means" data-action='{"stage":"mean","animate":true}'}
+Find each sample mean: 3 for the spend-on-self group, 4 for the spend-on-other group.
+:::
+
+::: {.tutorial-step data-title="Deviations" data-action='{"stage":"deviations","animate":true}'}
+Subtract each group's mean from its scores.
+:::
+
+::: {.tutorial-step data-title="Squared" data-action='{"stage":"squared-deviations","animate":true}'}
+Square each deviation.
+:::
+
+::: {.tutorial-step data-title="SS" data-action='{"stage":"ss","animate":true}'}
+Sum the squared deviations: $SS_1 = 10$ and $SS_2 = 8$. These are the ingredients for the pooled variance.
+:::
+::::
+
+:::::
+
+### Step 4: Make a decision
+
+{{< include quizzes/12-independent-t-variability.qmd >}}
+{{< include quizzes/12-independent-t-statistic.qmd >}}
+
+As usual, step four is to ask: is the mean difference sufficiently large that it seems unlikely to have come from the null hypothesis distribution, which states that there is no difference? In short, is your calculated $t$ statistic within the critical regions you identified earlier? If it is, you reject the null hypothesis. If it isn't, you fail to reject the null hypothesis.
+
+So in this case, our statistic of $-1.05$ is not within the critical region. There was a difference between our two sample means of one point on our five point scale. Given the estimated standard error of the mean difference, that is not sufficiently unlikely to make us reject the null hypothesis in this case. It is not one of the 5% of most extreme means for the null hypothesis sampling distribution.
+
+## Reporting Results
+
+So we've made our decision for the hypothesis test, but as we saw last time, we aren't quite done yet. If we had found a significant difference, the next step would have been to calculate the effect size. For the independent samples $t$ test, Cohen's $d$ divides the difference between the sample means by the pooled standard deviation — the square root of the pooled variance:
+
+$$d = \frac{M_1 - M_2}{\sqrt{s_p^2}} = \frac{3 - 4}{\sqrt{2.25}} = -0.67$$
+
+But when we find a non-significant difference, effect size is not required because we've effectively found that no effect exists to calculate the size of.
+
+Lastly, even though we got a non-significant result, we still have to report the results. When you find a non-significant difference, you have to be just as meticulous about reporting all the relevant information as if you had found a significant result. Here's how we might report this one:
+
+> A two-tailed independent-samples $t$ test suggested that the difference in average happiness between people in the "spend on self" group ($M = 3$; $SD = 1.58$) and the "spend on other" group ($M = 4$; $SD = 1.41$) was nonsignificant; $t(8) = -1.05$, $p > .05$.
+
+## Assumptions
+
+As we've seen, the $t$ test relies on some general assumptions. First, the observations within each sample must be independent of one another. Second, the two populations from which the samples are selected must be normally distributed, unless our sample size is greater than around 30, in which case the sampling distribution will be normal regardless of the shape of the population. Again, these assumptions come straight from the central limit theorem.
+
+And third, for independent samples $t$ tests, we assume that the two populations from which the samples are selected must have equal variances. Again, this is called homogeneity of variance, and this assumption is required for a couple of reasons. First, as we've seen, this inferential process generally assumes that treatments can affect the population's average score on a measure without affecting its variability. But this is particularly important here because we calculated pooled variance as a weighted average of our two sample variances, and averages are only meaningful if you're averaging together things that are fundamentally similar. So we average our sample variabilities as estimates of the same single true population variability. If they were actually estimating different variabilities, the average wouldn't be meaningful — like if you averaged together your guesses of someone's height and their weight, you'd get a number, but it wouldn't make any sense as an estimate of anything.
+
+### Hartley's $F$-max test
+
+Since this assumption is particularly important in the context of the independent samples $t$ test, we can quantify the extent to which the assumption is violated. Hartley's $F$-max test provides a hypothesis test of its own, testing the homogeneity of variance assumption. 
+
+$$ F_{max} = \frac{s^2_{largest}}{s^2_{smallest}} $$ {#eq-f-max}
+
+The calculation is simple: we just divide the larger sample variance by the smaller sample variance. This gives a ratio of how much bigger one is than the other. If they're pretty much the same, the answer will be close to one. The larger the answer, the more different the sample variances are, and the more it looks like the assumption of homogeneity of variance has been violated.
+
+And like our regular hypothesis tests, the $F$-max test has its own critical values. If the value you calculate exceeds the critical value, then we have to admit that the homogeneity of variance assumption has not been met and we have to rethink our analysis.
+
+### Adjusting degrees of freedom
+
+Specifically, if the assumption is not met, then we adjust the degrees of freedom for the $t$ test according to a particular equation. 
+
+$$df = \frac{(\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2})}
+{\frac{(\frac{s_1^2}{n_1})^2}{n_1-1} + \frac{(\frac{s_2^2}{n_2})^2}{n_2-1}
+}$${#eq-df-adjustment}
+
+Now, this is not an equation that you have to know or really to understand, but I like to show it because it has this nice cascading quality — it just looks nice to me. But basically it adjusts the degrees of freedom for the test so that it's no longer $N - 2$ but whatever this equation works out to. This compensates for the inequality of the sample variances, and we won't get any farther into the weeds on this than that.
+
+But you should know that when you run a $t$ test in R using the `t.test` function, it will automatically apply this correction by default. If you want to override that behavior, you'll have to specify `var.equal = TRUE` as an argument within the function to let R know that you are indeed assuming that the homogeneity of variances assumption has been met and that you'd just like to use $N - 2$ as your degrees of freedom. If you forget to specify this argument, or if you specify it as `FALSE`, then the test will still work. You'll just see a different value of degrees of freedom — it'll probably be a strange looking decimal.
+
+## Confidence Intervals
+
+Lastly, we can calculate a confidence interval for an independent samples $t$ test, much as we did for the single sample $t$ test. Again, it quantifies the precision of a statistic. The difference here is that our interval isn't for a particular population mean, but rather for the difference between samples drawn from a population. It's based on the sampling distribution for all possible differences between means for a given population. We can calculate it similarly to how we did before, by rearranging the equation @#eq-independent-t to solve for the population parameters.
+
+$$ t = \dfrac{(M_1-M_2)-(\mu_1-\mu_2)}{s_{M_1-M_2}}$$
+
+To solve for parameter $(\mu_1 - \mu_2)$:
+
+$$ (\mu_1-\mu_2) = (M_1-M_2) \pm t * s_{M_1-M_2} $$
+
+So for our little money-buying-happiness example, let's say we want a 95% confidence interval for our mean difference of $-1$ with ten participants and an estimated standard error of the mean difference of 0.95. The critical $t$ values are exactly the same as we had for the hypothesis test because we're using the same definition of common and uncommon, splitting a distribution into the 5% in the tails and 95% in the middle.
+
+{{< interactive-figure
+  independentCiFigure
+  makeDistributionGraph
+  options='{
+    "distribution": "normal", "mean": -1, "sd": 0.95,
+    "style": "minimal", "xAxis": true, "xDomain": [-5, 3], "xTicks": 5,
+    "shade": {"from": -3.19, "to": 1.19, "color": "var(--bc-comparison-color, #2f6f9f)", "opacity": 0.3, "labelPosition": "above", "label": "[-3.19, 1.19]"},
+    "markers": {"at": 0, "label": "H0: 0", "height": 0.5, "color": "var(--bc-accent, #2c7fb8)"},
+    "labels": {"x": "Mean difference (M1 - M2)"},
+    "maxWidth": "34rem"
+  }'
+  fallback="Normal curve centered on the observed mean difference of -1, with the 95% confidence interval from -3.19 to 1.19 shaded; a marker at 0, the null-hypothesis value, falls inside the shaded interval."
+>}}
+
+You should have gotten answers of $-3.19$ and $+1.19$.
+
+{{< include quizzes/12-independent-t-confidence-interval.qmd >}}
+
+Notice here that the confidence interval includes a mean difference of zero within that range. Our hypothesis test failed to reject the null hypothesis because our observed difference of $-1$ was not among the least common 5% of differences for the null distribution.
+
+Again, the confidence interval and hypothesis test outcome are related and will always be in agreement if the $\alpha$ for the test corresponds to the width of the confidence interval. Like I said before, this is a tricky idea to get your head around, but it's worth putting in the time to really understand why this is the case.
+
+{{< include quizzes/12-independent-t-learning-checks.qmd >}}

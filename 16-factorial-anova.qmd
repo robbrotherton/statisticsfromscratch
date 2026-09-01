@@ -1,0 +1,360 @@
+---
+title: "Factorial ANOVA"
+interactive-scripts:
+  - interaction-plot
+  - variance-partition-diagram
+  - critical-table-generator
+  - distribution-generator
+---
+
+## Introduction
+
+Here, we'll introduce the last variant of ANOVA that we'll deal with: the factorial ANOVA, meaning ANOVA used with research designs that have more than one independent variable. This enables us to see not just the effect of a single variable, but how two variables interact. It's slightly more complicated, both conceptually and mathematically, but it's based on the same idea of partitioning variance that we've used in the previous two lectures.
+
+## Terminology and Factorial Designs
+
+To refresh your memory of the terminology that goes with the ANOVA procedure, a factor means the variable that defines the different groups being compared, usually an independent variable that the researcher manipulates either between or within participants — like our examples where we gave people different snacks before a test. Snack type was the factor there. The levels are the individual conditions that make up a factor. So we have different groups for the banana, the candy bar, and the control condition. Those were the levels of the snack factor.
+
+A factorial design, then, is one with more than one factor, each factor with two or more levels. For our purposes, we're only going to look at one kind of factorial design: the two-by-two between-participants ANOVA, which has two between-participants factors, each with two levels. But you should be aware that one or both factors can be manipulated within participants. And we can have more factors, and factors that have different numbers of levels — like we could have a three-by-two within-participants design. We can even have a mix of between- and within-participants factors. We call that a mixed-factorial design. But again, here we'll just stick with the two-by-two between-participants version.
+
+### Structure of a Two-by-Two Design
+
+It's important to understand the basic conceptual structure here. With a two-by-two design, we end up with four actual samples, one for each combination of the levels of each factor. So generically, we have Factor A and Factor B. If we arrange them in a table, you can see the four conditions that that creates.
+
+|  |  | **Factor A** | |
+|---|---|:--:|:--:|
+| | | $A_1$ | $A_2$ |
+| **Factor B** | $B_1$ | $A_1 B_1$ | $A_2 B_1$ |
+| | $B_2$ | $A_1 B_2$ | $A_2 B_2$ |
+
+: The four conditions of a generic 2×2 factorial design. {#tbl-factorial-generic} If you're a participant in this study, you might be in the group of people treated with level one of Factor A and level one of Factor B. Or you might get level one of Factor A and level two of Factor B. Or you could be in level two of Factor A, level one of Factor B. Or $A_2 B_2$.
+
+We can always find the number of individual groups by multiplying the factorial statement. So two-by-two literally means two multiplied by two, so four conditions in total. A two-by-three design would have two times three, so six groups. A three-by-five design would have three times five, so fifteen conditions. It can get pretty complicated. And you'd need a lot of participants because usually you'd want at least 30 participants per condition for the central limit theorem normality rule to kick in. But again, we'll just stick with a two-by-two design.
+
+## Hypothesis Tests in a Factorial Design
+
+When it comes to the hypothesis test for a factorial design, we'll actually run several hypothesis tests. For this two-by-two design we'll have three tests. First, the main effects. We test the main effect of Factor A — this asks whether there is an overall difference between the levels of Factor A ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. Second, there's the main effect of Factor B. This is the same idea. We ignore the different groups on Factor A and just pool together everyone on each level of Factor B, and compare those two levels to see if there was an overall difference.
+
+And third, we're interested in the interaction between A and B. This is the whole reason for coming up with a complicated design like this in the first place, instead of just two separate studies to look at Factors A and B in isolation. We want to know if Factor A and Factor B interact — that is, if the effect of one depends on the level of the other. So for this interaction test we'll look at each of the four conditions compared to each of the others, checking to see if that pattern of variability deviates from what we'd expect based on the main effects alone.
+
+<!-- [Possible correction: original said "factor A factor B, interact" — likely meant "Factor A and Factor B interact"] -->
+
+So for each of those three hypotheses, we calculate an $F$ ratio. Though the math will differ slightly, because we'll be partitioning variance differently, the $F$ ratios all follow the same conceptual structure. We're comparing the variance between treatments to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$-test and the other ANOVAs we've learned. But there's really nothing new here, just a more nuanced application of the basic concepts.
+
+## A Concrete Example: Snacks and Test Type
+
+Now let's look at that kind of table, but for an actual research design we might be interested in, and with a small sample of data for each condition. We'll stick with the idea of snacks and test performance.
+
+|  |  | **Snack** | |
+|---|---|:--:|:--:|
+| | | Banana | Candy |
+| **Test** | Math | 7, 9, 8, 9 | 5, 3, 4, 4 |
+| | Reaction time | 5, 4, 6, 5 | 6, 6, 5, 5 |
+
+: Test scores for the 2×2 snack type by test type design. {#tbl-factorial-data} Well, let's complicate things. Maybe we think that a snack could affect test performance, but the effect depends on what kind of test you're doing. Maybe you're doing a math test, something that requires some intellectual effort and flexibility. Or maybe you're doing a physical kind of reaction time test that requires sheer focus and cognitive and physical speed.
+
+<!-- [Possible typo: original said "requirs" — corrected to "requires"] -->
+
+It seems plausible that these different kinds of tests could be differently affected by different kinds of snacks. Maybe the banana, with its nutrients and minerals and whatever, promotes the kind of intellectual processing that will help with the math test, but not necessarily the reaction time test. Maybe the candy bar will give you a sugar rush that helps with your reaction times, but not with the focus and processing required for the math test. In short, maybe the snack type and test type will interact. The effect of one will depend on which level of the other you are in. The effect of the snack on your performance will depend on what kind of test you're doing.
+
+### Grouping Scores for Analysis
+
+Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of snack type, we'll be comparing everyone who had a banana against everyone who had a candy bar. And then for the main effect of Factor B, we compare everyone who did a math test with everyone who did the reaction time test. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+
+## Partitioning Variance
+
+Calculating the various components required for those three $F$ ratios works just like any other ANOVA. Conceptually, we're partitioning the total variance in the data into different sources, just as before. It starts out the same as every other ANOVA. We separate out the total variance into variance between groups, the mean square between, and variance within groups, mean square within.
+
+Now here, assuming we're just using between-participants factors, we don't need to divide up the variance within groups. Instead, we want to think about the different sources of between-group variance. We want to separate between-group variability associated with Factor A exclusively and between-group variability associated with Factor B exclusively. And knowing both of those, anything left over — any between-group variability not accounted for by those main effects of Factor A and Factor B — must be due to the interaction between Factors A and B.
+
+::::: {.callout-tip .interactive}
+## Partitioning variance in a factorial design
+
+{{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","stage":"split"}' fallback="Diagram partitioning total variability into between-treatments and within-groups variance, with the between-treatments variance further partitioned into Factor A, Factor B, and the A-by-B interaction. Each of those three components is compared against the within-groups variance in its own F ratio." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Between and within" data-action='{"stage":"split","animate":false}'}
+It starts out the same as every other ANOVA: the total variance separates into variance between groups and variance within groups.
+:::
+
+::: {.tutorial-step data-title="Subdividing between" data-action='{"stage":"subdivide"}'}
+With between-participants factors, it's the *between-groups* variance we subdivide: the part associated with Factor A, the part associated with Factor B, and whatever is left over — the interaction.
+:::
+
+::: {.tutorial-step data-title="Three F ratios" data-action='{"stage":"formula"}'}
+Each component gets its own $F$ ratio, always compared against the same denominator: the variance within groups, our estimate of chance variability.
+:::
+::::
+
+:::::
+
+<!-- [Possible typo: original said "in fact, B" — likely meant "and Factor B"] -->
+
+## Calculating Sums of Squares and Degrees of Freedom
+
+So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variance that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
+
+So the equations for between and within groups $SS$ and $df$ are exactly the same as before. The new equations here are for the main effects and interaction. And as long as we're thinking about the data in a two-by-two table like I've shown you, then we can think in terms of columns and rows.
+
+### Sums of Squares for Factor A
+
+In my generic table, I had Factor A at the top of the table, so its two conditions were represented as columns in the table. So the $SS$ for Factor A are the sum of $T^2_{\text{column}}$ divided by $n_{\text{column}}$, meaning the sum of scores for each column divided by the number of scores in each column, minus $G^2$ divided by $N$. Notice that this is basically the same equation as for the between-groups variance. The difference is that the $T$ represents different sets of scores — scores for each column combined, rather than all four treatment conditions separately. And its degrees of freedom are $k_A$, the number of levels for that factor, minus one.
+
+### Sums of Squares for Factor B
+
+And it's the same logic for the $SS$ for Factor B. In my generic table, Factor B was on the side of the table, so its two conditions were represented as rows. So $SS$ for Factor B are the sum of $T^2_{\text{row}}$ divided by $n_{\text{row}}$ minus $G^2$ over $N$. Here we sum the scores for each row and we divide by the number of scores in each row. Again, the only new thing about this equation is that the $T$ scores represent another grouping of scores, the scores for each row combined, and the number of scores in each row.
+
+### The Interaction
+
+And then, like I said, the $SS$ and $df$ for the interaction are simply whatever is left over — variability not already partitioned either into Factor A or Factor B. So we find those through simple subtraction.
+
+Again, there are a lot of values to keep track of while you calculate this, so filling in a summary table as you go is a good idea. Notice the new rows here for Factor A and Factor B and the interaction.
+
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|:--:|:--:|:--:|:--:|
+| Between treatments | | | | |
+| &emsp;Factor A | | | | |
+| &emsp;Factor B | | | | |
+| &emsp;A × B interaction | | | | |
+| Within treatments | | | | |
+| Total | | | | |
+
+: A blank factorial ANOVA summary table. {#tbl-factorial-summary-blank} As a piece of advice, if you haven't already done this, I'd suggest that for your notes you could also make a version of this table where each cell contains the equation to calculate that piece of the puzzle. So the $SS$ column has each of the sums of squares equations, the $df$ column has how to find each degrees of freedom value, and so on.
+
+## Working Through the Hypothesis Test
+
+So now let's work through a hypothesis test for this design. Here's the little table again for the snack type and task type example. Each cell had just four recorded scores.
+
+### Step 1: State the Hypotheses
+
+As always, we start with our hypotheses, and we have both a null hypothesis and alternative hypothesis for each of the three tests we're going to do: the main effect of snack type, the main effect of test type, and the interaction. For the main effects, the null hypothesis is just that each level of the factor is equal to the other. The alternative hypothesis is that the levels are not equal to one another. For the interaction, our null hypothesis is that there is no interaction. The alternative is that there is.
+
+### Step 2: Determine the Critical Value
+
+Step two is to determine the critical value for the test. And we do so using the same $F$ table as before. Strictly speaking, we need three different critical values, one for each of our three hypothesis tests. But here with a two-by-two between-participants design, all three $F$ ratios actually have the same degrees of freedom, both for the numerator and the denominator. That won't always necessarily be the case. The denominator is always the same for all three tests, but the degrees of freedom for the numerator may vary if we have a more complicated design. But for a two-by-two between-participants design, all three $F$ ratios actually have the same degrees of freedom for both the numerator and the denominator for all three tests.
+
+{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":6},"df2":[1,2,3,4,5,6,8,10,12,15,20,30],"selected":{"df1":1,"df2":12,"alpha":0.05},"maxWidth":"46rem","tableMinWidth":"34rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+
+{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+
+### Step 3: Calculate the Test Statistics
+
+Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm gonna give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with its $T$ treatment total, which you'll remember is just the sum of the scores in the group, and its sum of squared deviations. I've also added the $T$-row totals, the sum of scores in each row, and the column totals, the sum of scores in each column. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each condition, $k$ the total number of treatment conditions, $k_A$ and $k_B$, the number of conditions for each factor, $G$, the sum of all recorded scores, and $\Sigma X^2$, the sum of every squared score.
+
+|  | Banana | Candy | $T_{row}$ |
+|:--|:--:|:--:|:--:|
+| Math | $T = 33$; $SS = 2.75$ | $T = 16$; $SS = 2$ | 49 |
+| Reaction time | $T = 20$; $SS = 2$ | $T = 22$; $SS = 1$ | 42 |
+| $T_{col}$ | 53 | 38 | |
+
+: Treatment totals and sums of squares for each cell, with row and column totals. {#tbl-factorial-totals}
+
+$$N = 16 \qquad n = 4 \qquad k = 4 \qquad k_A = 2 \qquad k_B = 2 \qquad G = 91 \qquad \Sigma X^2 = 565$$
+
+So see if you can calculate all the pieces of the puzzle and end up with three $F$ ratios for the main effects and the interaction.
+
+{{< include quizzes/16-factorial-anova-calculate-2x2.qmd >}}
+
+That's an impressive feat. It's the most mathematically complicated thing that we'll do as part of this course. It's worth working through the math by hand at least once to reinforce how this kind of ANOVA works behind the scenes. But as you'll see in the problem sets, we can run this kind of ANOVA in just a couple of lines of simple code in R.
+
+### Step 4: Make a Decision
+
+Here's the completed summary table so you can check your work:
+
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|--:|--:|--:|--:|
+| Between treatments | 39.69 | 3 | | |
+| &emsp;Snack type (A) | 14.06 | 1 | 14.06 | 21.77 |
+| &emsp;Test type (B) | 3.06 | 1 | 3.06 | 4.74 |
+| &emsp;A × B interaction | 22.56 | 1 | 22.56 | 34.94 |
+| Within treatments | 7.75 | 12 | 0.65 | |
+| Total | 47.44 | 15 | | |
+
+: Completed factorial ANOVA summary table for the snack × test example. {#tbl-factorial-summary}
+
+Anyway, here you should have found that the $F$ ratio was within the critical region for the main effect of snack type (the critical value for $F(1, 12)$ at $\alpha = .05$ is 4.75). It was (just barely) outside the critical region for test type. And within the critical region for the interaction.
+
+And what that means is that there was a significant difference between the two snack conditions overall. People did better with a banana, in general, than with a candy bar. But there was no difference between the two test conditions in general. On average, people didn't do any better or worse on the math test than on the reaction time test. But we have a significant interaction, and a significant interaction means that the main effects don't mean too much by themselves, because the interaction tells us that the effect of one factor depends on the level of the other.
+
+### Visualizing the Results
+
+This is what I meant by the interaction quantifying patterns of cell means that deviate from what you'd expect based on the main effects. The main effect of snack type suggests that you should generally do better if you eat a banana before any test. But the interaction tells us it isn't quite so simple. Visualizing the results in a line graph shows the trends more clearly.
+
+::::: {.callout-tip .interactive}
+## Graphing the snack × test results
+
+{{< interactive-figure
+  snackInteraction
+  makeInteractionPlot
+  options='{
+    "means": {"a1b1": 8.25, "a2b1": 4.0, "a1b2": 5.0, "a2b2": 5.5},
+    "factorA": "Snack type",
+    "factorB": "Test type",
+    "yLabel": "Mean test score",
+    "xTickLabels": ["Banana", "Candy"],
+    "seriesLabels": ["Math", "Reaction time"],
+    "yDomain": [0, 10],
+    "yTicks": "numeric",
+    "showLines": false,
+    "valueLabels": true
+  }'
+  fallback="Line graph of the four snack-by-test cell means: math scores fall steeply from banana (8.25) to candy (4.0) while reaction-time scores stay nearly flat (5.0 and 5.5)."
+>}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Cell means" data-action='{"show-lines":false,"highlight":"none","animate":false}'}
+Each dot is the mean score of one of the four groups, placed above its snack condition.
+:::
+
+::: {.tutorial-step data-title="Join the dots" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
+Joining the dots by test type gives one line per level of the other factor: solid for the math test, dashed for the reaction time test.
+:::
+
+::: {.tutorial-step data-title="Math test" data-action='{"show-lines":true,"highlight":"math","animate":true}'}
+On the math test, people did much better with a banana than with a candy bar — the line drops steeply.
+:::
+
+::: {.tutorial-step data-title="Reaction time" data-action='{"show-lines":true,"highlight":"reaction","animate":true}'}
+On the reaction time test, the snack barely mattered — the line is nearly flat.
+:::
+
+::: {.tutorial-step data-title="Interaction" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
+The lines are not parallel: the effect of snack type depends on test type. That is the interaction.
+:::
+::::
+
+:::::
+
+Each dot represents one of the four group means. The x-axis has the two levels of one factor and the levels of the other factor are represented by different lines, joining up the dots by the levels of that factor. For the math test, represented by the solid line, people did much better if they had a banana as compared to a candy bar. But that wasn't the case for the reaction time test. For that test, represented by the dashed line, there was barely any difference between the banana and the candy bar at all. Put another way, it looks like the snack type only affected performance on the math test, not the reaction time test.
+
+## Effect Size: Partial Eta Squared
+
+It can be difficult to understand the patterns of results from a two-by-two ANOVA like this, so we'll come back to this in a moment. But for now, we need to complete our hypothesis test. When we get significant results, we need to quantify the effect size. Here, as for other ANOVAs, we use eta squared. Like the related samples ANOVA, we're actually using partial eta squared, one for each of our tests. There's the effect size for the main effect of Factor A, another effect size for Factor B, and another for the interaction, just like we have three $F$ ratios.
+
+In each case, the numerator is the $SS$ for that component of the variability and the denominator is the partial variability, excluding the other sources that we quantify separately. So the partial $\eta^2$ for the main effect of Factor A is the $SS$ for Factor A divided by the total $SS$ minus the $SS$ for Factor B and for the interaction. We're partialling out those other sources of variability that we quantify separately. For Factor B, it's $SS_B$ over $SS_{\text{total}}$ minus $SS_A$ and $SS_{\text{interaction}}$. And for the interaction, it's the $SS$ for the interaction over $SS_{\text{total}}$ minus $SS_A$ and $SS_B$.
+
+$$
+\begin{align}
+\eta^2_A &= \frac{SS_A}{SS_{total} - SS_B - SS_{A \times B}} = \frac{14.06}{47.44 - 3.06 - 22.56} = 0.64 \\
+\eta^2_B &= \frac{SS_B}{SS_{total} - SS_A - SS_{A \times B}} = \frac{3.06}{47.44 - 14.06 - 22.56} = 0.28 \\
+\eta^2_{A \times B} &= \frac{SS_{A \times B}}{SS_{total} - SS_A - SS_B} = \frac{22.56}{47.44 - 14.06 - 3.06} = 0.74
+\end{align}
+$$
+
+## Reporting the Results
+
+And lastly, we report the results. As always, this is a fairly dry, technical statement. For the descriptives, meaning the means for each condition, there are so many to report here that it can get messy doing it in a sentence, so a table or a graph is usually preferred. And you need to mention the type of test you performed, including here specifying what each of the factors was and what the dependent variable — the thing you measured and are comparing — was. And you need to report the test results with $F$ ratios, degrees of freedom, and $p$ value for each of the three tests, including effect size for any significant tests.
+
+> To examine the influence of snack and test type on performance, a 2-factor ANOVA was conducted with test scores as the dependent variable and Snack Type and Test Type as between-participants independent variables. There was no significant main effect of Test Type ($F(1, 12) = 4.74$, $p > .05$). There was, however, a significant main effect of Snack Type ($F(1, 12) = 21.77$, $p < .05$, $\eta^2_p = .64$); overall, performance was superior in the Banana condition. Moreover, there was a significant interaction between Snack Type and Test Type ($F(1, 12) = 34.94$, $p < .05$, $\eta^2_p = .74$); performance on the math test was affected by snack type to a greater extent than performance on the reaction time test.
+
+## Interpreting Interaction Graphs
+
+Now, you may be finding all these equations and numbers somewhat overwhelming, but for our purposes, I'm much less interested in having you memorize all those different variations of variance equations than in making sure you understand the logic of factorial ANOVA on a more conceptual level and that you're able to interpret the pattern of findings that you might see.
+
+### No Main Effect of A, Main Effect of B, No Interaction
+
+So here's a basic generic version of a two-by-two line graph. Again, Factor A is represented as groups on the x-axis and Factor B is represented as the different lines joining up the dots, which represent each of the four group means. But for this example, we just have two lines and they're both parallel to the x-axis.
+
+{{< interactive-figure
+  interactionPatternFlat
+  makeInteractionPlot
+  options='{"pattern": "flat-parallel", "controls": false, "maxWidth": "34rem"}'
+  fallback="Interaction plot with two flat parallel lines: no main effect of Factor A, a main effect of Factor B, and no interaction."
+>}}
+
+Let's think through how to interpret this basic pattern of findings. Think about the main effects first. Is there a main effect of Factor A? If there was, we would see that in the slope of the lines. If scores generally increased or decreased between the two levels of Factor A, the lines would slant up or down. Here they're completely flat, which is what we'd see with no main effect of Factor A — no difference in how people scored in level one of Factor A as compared to level two of Factor A overall. Is there a main effect of Factor B? We would see that in the distance between the lines. Here there's a big gap. Scores were generally higher in level two of Factor B as compared to level one of Factor B. So that indicates a main effect of Factor B. The interaction is evident in whether or not the lines are parallel. Here they are. This means that the main effect of Factor A is the same at all levels of Factor B and vice versa.
+
+So again, here there is no main effect of Factor A. There is a main effect of Factor B — level two scores are higher than level one scores overall. And that is equally true at both levels of Factor A. That's what we mean by not having an interaction.
+
+
+{{< include quizzes/16-factorial-anova-interpreting-results-1.qmd >}}
+<!-- [Possible typo: original said "no main effect to factor A" — likely meant "of Factor A"] -->
+
+### Main Effects of Both A and B, No Interaction
+
+Here's another example. Now the lines slope up to the right.
+
+{{< interactive-figure
+  interactionPatternSloped
+  makeInteractionPlot
+  options='{"pattern": "sloped-parallel", "controls": false, "maxWidth": "34rem"}'
+  fallback="Interaction plot with two parallel lines sloping up from A1 to A2: main effects of both factors, but no interaction."
+>}}
+
+So see if you think there are significant main effects of Factor A, Factor B, and an interaction. Again, here, the slope of the line suggests that there is a main effect of Factor A — scores are higher across the board in level two of Factor A than in level one. And like the previous graph, there is still a wide gap between the lines, suggesting a main effect of Factor B — scores are generally higher in level two of Factor B than level one. But there's still no interaction. The lines are parallel, meaning that the main effect of A is the same at both levels of Factor B and vice versa.
+
+
+{{< include quizzes/16-factorial-anova-interpreting-results-2.qmd >}}
+### Crossover Interaction
+
+None of those previous examples showed an interaction. This is what an interaction might look like. Again, the interaction is revealed by lines which are not parallel to one another. This is called a crossover interaction because, as you can see, the lines cross over. And this is where interpreting the findings gets a little trickier.
+
+{{< interactive-figure
+  interactionPatternCrossover
+  makeInteractionPlot
+  options='{"pattern": "crossover", "controls": false, "maxWidth": "34rem"}'
+  fallback="Interaction plot with two lines crossing in an X shape: no main effect of either factor, but a crossover interaction."
+>}}
+
+Here there would be no main effect of Factor A because the average score for level one and level two would be about the same. Likewise, there would be no main effect of Factor B because, again, the average scores would be about the same between the two levels of Factor B. But the lack of main effects clearly doesn't tell the whole story, because there is this interesting crossover interaction going on.
+
+{{< include quizzes/16-factorial-anova-interpreting-results-3.qmd >}}
+
+For level one of Factor A, scores are higher if you were in level two of Factor B than level one. But in level two of Factor A, the pattern was reversed. Scores were higher in level one of Factor B than in level two.
+
+### Another Interaction Example
+
+Here's another example of an interaction.
+
+{{< interactive-figure
+  interactionPatternOneFlat
+  makeInteractionPlot
+  options='{"pattern": "one-flat-one-sloped", "controls": false, "maxWidth": "34rem"}'
+  fallback="Interaction plot with one flat line and one line sloping up: Factor A only affects scores at level two of Factor B — an interaction."
+>}}
+
+Here Factor A had no effect on people in level one of Factor B, but it did have an effect on people in level two of Factor B. It's important that you understand how to read these kinds of graphs and interpret the overall pattern of results from a factorial ANOVA.
+
+## Practice: Design Your Own Example
+
+Again, it's a complicated thing. And maybe it doesn't help that much talking about it in such abstract terms, since Factor A and Factor B don't intuitively mean anything. So I'd like you to come up with an example of your own, or to describe a study you've learned about somewhere else that fits this two-by-two design. It should be a design with two independent variables, each with two levels, and one dependent variable — the measure for which scores are recorded and compared across groups. Anytime I'm thinking about this kind of design, I literally just sketch a little graph like the ones from the last few slides with four dots, one for each group's average score — just whether I think it's going to be relatively high or low or in the middle — and then join up the dots to represent the levels of the factors.
+
+::::: {.callout-tip .interactive}
+## Sketch your own two-by-two result
+
+{{< interactive-figure
+  designInteraction
+  makeInteractionPlot
+  options='{
+    "pattern": "flat-parallel",
+    "draggable": true,
+    "valueLabels": true,
+    "yTicks": "numeric",
+    "controlsOpen": true
+  }'
+  fallback="Draggable interaction plot for sketching your own pattern of four cell means."
+>}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Drag the dots" data-action='{"means":{"a1b1":3,"a2b1":3,"a1b2":7,"a2b2":7},"animate":false}'}
+Each dot is a cell mean — drag it up or down (or type exact values in the controls). Watch the effect readouts as the lines move.
+:::
+
+::: {.tutorial-step data-title="Main effects" data-action='{"means":{"a1b1":3,"a2b1":6,"a1b2":5,"a2b2":8},"animate":true}'}
+Sloped parallel lines: main effects of both factors, but no interaction — the Interaction readout stays at zero.
+:::
+
+::: {.tutorial-step data-title="Interaction" data-action='{"means":{"a1b1":2,"a2b1":8,"a1b2":8,"a2b2":2},"animate":true}'}
+Now the lines cross. Both main effects vanish, yet the interaction is as big as it gets.
+:::
+
+::: {.tutorial-step data-title="Your turn" data-action='{"means":{"a1b1":2,"a2b1":8,"a1b2":8,"a2b2":2},"animate":true}'}
+Sketch the pattern you'd predict for your own study: place each group's mean roughly where you expect it, then join up the dots mentally and ask — are the lines parallel?
+:::
+::::
+
+:::::
+
+{{< include quizzes/16-factorial-anova-design.qmd >}}
+
+{{< include quizzes/16-factorial-anova-learning-checks.qmd >}}

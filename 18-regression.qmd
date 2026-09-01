@@ -1,0 +1,216 @@
+---
+title: "Regression"
+interactive-scripts:
+  - variance-partition-diagram
+  - scatterplot
+  - critical-table-generator
+  - distribution-generator
+---
+
+## Introduction
+
+In this, our final lecture, we'll introduce the last inferential procedure that we will cover: the regression technique. This is an extension of the idea of correlations among variables, much like ANOVA extends our ability to analyze differences among groups beyond what the $t$-test is capable of. And as we'll see, regression is actually a variation of the ANOVA technique itself.
+
+## Recap: Correlation
+
+First, let's quickly recap the gist of the correlation statistic. Pearson's $r$ correlation coefficient quantifies the strength of linear relationship between two variables. I find the easiest way to think about this is to imagine or sketch an ellipse around all the points on your scatterplot. For a correlation of zero or a very weak correlation, the ellipse will basically be a circle. As the value of Pearson's $r$ increases, the circle becomes a tighter and tighter ellipse, until for a correlation of one, you can put a straight line through all the points.
+
+Here's the little example dataset we used last time, showing scores on two variables for five people: how much sleep they got the night before and how they did on a test.
+
+| Participant | Sleep (hours) | Test score |
+|:--:|:--:|:--:|
+| A | 4 | 5 |
+| B | 5 | 8 |
+| C | 7 | 8 |
+| D | 8 | 10 |
+| E | 11 | 9 |
+
+: The sleep and test score data from the correlation chapter. $r = 0.73$. {#tbl-sleep-scores-again}
+
+With just five points on the scatterplot, it's difficult to see, but the ellipse around the points would be something like this. It was a strong correlation, but with so few scores in the data, it was not statistically significant in our hypothesis test. We couldn't reject the null hypothesis that scores came from a population in which the two variables have a correlation of zero. They just look correlated here by chance.
+
+{{< interactive-figure sleepEllipseScatter makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"showEllipse":true,"ellipseScale":1.7,"showR":true,"controls":false,"maxWidth":"30rem"}' fallback="The sleep and test score scatterplot with an upward-sloping ellipse traced around the five points, illustrating the strong correlation of r = .73." >}}
+
+## The Line of Best Fit
+
+So now let's talk about regression. Basically, rather than conceptually representing the ellipse around the points, regression tries to find the single straight line that traces the best path through the points. This is called the line of best fit. The purpose of this, in a very general sense, is that it makes the relationship easier to see. It shows the central tendency of the relationship, so to speak. By that, I mean it shows the most typical value on the $Y$ variable for any given value of $X$. You can just pick any value on the $X$ axis, trace a straight line up to the line of best fit, and then trace a straight line across to the $Y$ axis to find the typical value for that value of $X$. This is in contrast to the correlational idea of tracing an ellipse around the points, which is more akin to showing the dispersion of the points, the variability of the relationship, where regression here shows the central tendency of the relationship.
+
+{{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"line":"fit","controls":false,"maxWidth":"30rem"}' fallback="The sleep and test score scatterplot with the line of best fit drawn through the points, rising from an intercept of 4.5 with a slope of 0.5." >}}
+
+But how do we know the correct line to draw through the points? You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. It's obviously hard to tell just from looking, but each of those lines looks like it might be just as good as the blue one that I'm telling you is the best fit line here. So what makes it the best? The line of best fit is the line that mathematically minimizes the prediction error. When a point isn't exactly on the line, it's either at some distance above or below the line of best fit. We call that a prediction error, as in, if you were predicting what the point would have been based only on the best fit line, you would've been a bit off. There would've been some error. So the best fit line mathematically minimizes the collective prediction error. Any other line would've produced more error, on aggregate.
+
+## The Equation of a Straight Line
+
+So how does regression achieve this? Well, you're probably familiar with a lot of this already from high school math. You probably know this equation for a straight line: $\hat{Y} = bX + a$, although you might know a version of it with different letters. When I learned it in school, we learned $Y = mX + c$. I'm not sure why there are different versions, to be honest. Maybe it's a cultural thing. But they are all quantifying the same thing. $X$ and $Y$ are variables: the scores that we plot on the $X$ and $Y$ axis of the scatterplot respectively. $a$ is the intercept: the value of $Y$ when $X$ is zero. Or put more simply, the value of $Y$ when the line meets the $Y$ axis. $b$ is the slope of the line: how much it changes on $Y$ per unit change in $X$.
+
+### The Celsius–Fahrenheit Example
+
+You might also be familiar with this particular example of a straight line equation: the relationship between temperatures on the Celsius scale and on the Fahrenheit scale. Obviously the relationship between these two variables is a perfect correlation. There is no variability that isn't completely shared. You can perfectly predict the value of one from the other with no prediction error at all. And the equation for this relationship is $Y = 1.8X + 32$.
+
+| Celsius | Fahrenheit |
+|--:|--:|
+| 0 | 32 |
+| 10 | 50 |
+| 20 | 68 |
+| 30 | 86 |
+| 40 | 104 |
+| 50 | 122 |
+
+: Some Celsius temperatures and their Fahrenheit equivalents. {#tbl-celsius-fahrenheit} Remember, 32 is the intercept. Zero degrees Celsius, so zero on the $X$ axis, corresponds to 32 Fahrenheit, 32 on the $Y$ axis. And 1.8 is the slope. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees.
+
+So this equation allows you to easily convert values from Celsius to Fahrenheit or vice versa. So if you didn't know what 20 Celsius corresponded to, you multiply 20 by 1.8, getting 36, and add 32, getting 68. So 20 Celsius is 68 Fahrenheit. Knowing the values of $b$ and $a$, the slope and the intercept, we can convert between any values of Fahrenheit and Celsius we like.
+
+
+{{< include quizzes/18-regression-fahrenheit.qmd >}}
+## Predicted Values and Residuals
+
+The regression line follows the same logic. The only difference is that because we're dealing with statistical relationships, rather than pure mathematical relationships like the one between Fahrenheit and Celsius, we refer to $\hat{Y}$ rather than $Y$. $\hat{Y}$ means that this is a predicted value based on the regression equation rather than an observed value that we saw in our data. It distinguishes those predicted $\hat{Y}$ values from the actual $Y$ values that we recorded for that variable.
+
+So this allows us to think about another quantity, $Y - \hat{Y}$. This is called a residual, but it's the same idea as something you're already very familiar with. Remember, a deviation score is $X - \bar{X}$. Residuals are basically deviations in the context of regression. $Y - \hat{Y}$ quantifies how much each point deviates from the regression line, or the amount of error between the observed value and the predicted value.
+
+And remember how we squared deviations in the past to find sums of squared deviations? Well, we do basically the same thing here. Again, the regression defines the line of best fit. And specifically, that is the line that minimizes the sum of squared residuals. The notation for the sum of squared residuals is $\Sigma(Y - \hat{Y})^2$. So you can see how this is fundamentally the same equation we learned all those lectures ago for the sum of squared deviations. Here in the context of regression, this is called the least squared error solution: the line that results in the lowest possible sum of squared errors.
+
+You can see the least squared error solution in action below. Step through to watch the residuals become literal squares, and then see what happens to them when we swap the best-fit line for a lazier guess.
+
+::::: {.callout-tip .interactive}
+## Why is the best-fit line the best?
+
+{{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"showLine":false,"maxWidth":"30rem"}' fallback="Scatterplot of the sleep and test score data used to demonstrate the least squared error solution: the best-fit line's squared residuals sum to 6.5, while a flat line at the mean of Y produces squared residuals summing to 14." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="The data" data-action='{"line":"none","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none","animate":false}'}
+The five sleep and test score pairs from the correlation chapter.
+:::
+
+::: {.tutorial-step data-title="Best-fit line" data-action='{"line":"fit","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none"}'}
+The line of best fit traces the best path through the points: $\hat{Y} = 0.5X + 4.5$.
+:::
+
+::: {.tutorial-step data-title="Residuals" data-action='{"line":"fit","show-residuals":true,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":["residuals","points"]}'}
+Each point misses the line by some amount. That miss is the residual, $Y - \hat{Y}$.
+:::
+
+::: {.tutorial-step data-title="Squares" data-action='{"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none"}'}
+Square each residual — literally — and add them up: $SS_{residual} = 6.5$.
+:::
+
+::: {.tutorial-step data-title="A flat line?" data-action='{"line":"mean","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":true,"emphasize":"none"}'}
+What if we ignored $X$ and just guessed the mean of $Y$ every time? That's a line with slope 0 and intercept $M_Y = 8$. The squares balloon: $SS_{residual}$ is now 14, which is exactly $SS_Y$, the total variability in $Y$.
+:::
+
+::: {.tutorial-step data-title="Least error" data-action='{"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none","controls-open":true}'}
+Back to the best-fit line and back to 6.5. No other line does better — that's what makes it the least squared error solution. Don't take my word for it: the controls are now open, so try any slope and intercept you like.
+:::
+::::
+
+:::::
+
+## Calculating the Slope and Intercept
+
+### The Slope ($b$)
+
+So let's calculate $b$ and $a$ for this little set of data. We find the slope, $b$, by dividing $SP$, the sum of products, which as you remember quantifies the covariability between $X$ and $Y$, by the sum of squares for $X$: $b = \frac{SP}{SS_X}$. This tells us for a unit variation in $X$, how much variation to expect in $Y$. For this data, we calculated $SP$ and $SS_X$ in the previous lecture. We got fifteen over 30 for an answer of 0.5. In other words, as you move one unit along the $X$ axis, you move half a unit on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line up, the $Y$ axis only moves from 5 to 5.5. So the change of one on $X$ corresponds to a change of 0.5 on $Y$.
+
+### The Intercept ($a$)
+
+With $a$, we're determining the intercept of the line—where it crosses the $Y$ axis when $X$ equals zero. To figure this out, we leverage the fact that the best fit line, by definition, will always pass through the point where the mean of $X$ and the mean of $Y$ intersect. Given that the line itself is representing the central tendency of the relationship between $X$ and $Y$, it's only natural that it should pass through the point that reflects their two averages. So $a = \bar{Y} - b \cdot \bar{X}$. $b$ times the mean of $X$ tells us how many units on the $Y$ variable the line will have moved by the time it reaches zero, since it's that many units from zero on the $X$ axis. Subtracting that from the mean of variable $Y$ reduces $Y$ by that amount, revealing the intercept of the line. So here, that's $8 - 0.5 \times 7$, giving 4.5. So, again, that's the point at which the line intercepts the $Y$ axis: where $X$ equals zero, $Y$ equals 4.5.
+
+## Prediction Error and the Standard Error of the Estimate
+
+So now we have the equation to calculate our $\hat{Y}$ values. We can calculate the prediction error, the deviation of each point from the best fit line. And with that, we can square those residual deviations and sum the squares to find the sum of squared residuals, $SS_{residual}$. Again, notice that this is the exact same process that we've used all along to calculate sum of squared deviations. We're just using slightly different terminology here to talk about the residuals.
+
+| Sleep ($X$) | Test score ($Y$) | $\hat{Y}$ | $Y - \hat{Y}$ | $(Y - \hat{Y})^2$ |
+|--:|--:|--:|--:|--:|
+| 4 | 5 | 6.5 | $-1.5$ | 2.25 |
+| 5 | 8 | 7.0 | $1.0$ | 1.00 |
+| 7 | 8 | 8.0 | $0.0$ | 0.00 |
+| 8 | 10 | 8.5 | $1.5$ | 2.25 |
+| 11 | 9 | 10.0 | $-1.0$ | 1.00 |
+
+: Predicted values and residuals for the sleep data. {#tbl-residuals}
+
+$$SS_{residual} = \Sigma(Y - \hat{Y})^2 = 2.25 + 1 + 0 + 2.25 + 1 = 6.5$$
+
+Here's what those calculations look like on the scatterplot — each labeled point's residual segment and square matches its row in the table:
+
+{{< interactive-figure residualsScatter makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"labels":["A","B","C","D","E"],"pointLabels":true,"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"line":"fit","showResiduals":true,"showSquares":true,"showSS":true,"controls":false,"maxWidth":"30rem"}' fallback="The sleep and test score scatterplot with the regression line, each point's residual drawn as a vertical segment to the line, and each squared residual drawn as a literal square; the squares sum to 6.5." >}}
+
+Do you remember what the square root of sum of squares divided by degrees of freedom is?
+
+{{< include quizzes/18-regression-ss-df.qmd >}}
+
+If you remember that the square root of sum of squares over degrees of freedom gives the standard deviation of a sample of scores, well done! So now I'm going to tell you about another seemingly new concept. But you'll realize it's not really new. It's just another variation on something else you already know about.
+
+In the context of regression, we talk about the standard error of the estimate. The $\hat{Y}$ values that make up the line of best fit give our best guess at $Y$ for any value of $X$. The standard error of the estimate quantifies the precision of the estimate. Or put another way, how much the actual scores tended to vary around those predictions. And if you think about it, this is exactly what standard deviation does. We calculate the mean of a set of scores, and standard deviation quantifies how much points tended to vary around that mean. So the name "standard error of the estimate" for regression here is just another way of saying the standard deviation of points around the line of best fit.
+
+And the concepts are mathematically identical as well. Remember that standard deviation $s$ (or $SD$) was found by taking the square root of the sum of squared deviations over degrees of freedom. The standard error of the estimate is the same: the square root of the sum of squared residuals over the degrees of freedom. Here that's equal to the square root of 6.5 over $5 - 2$, giving 1.47.
+
+## Partitioning Variability
+
+So that's the basic structure of how regression defines the line of best fit and quantifies its prediction error. To complete a regression hypothesis test, though, we're going to go a little further and partition the variability and calculate another sums of squares and degrees of freedom: $SS_{regression}$ and $df_{regression}$.
+
+Notice how we've mostly been framing everything around the $Y$ variable: $\hat{Y}$, the predicted values of $Y$, and $Y - \hat{Y}$, the residuals, the prediction error when we're trying to predict $Y$. So here, to partition the variability, we start with the total variability in $Y$, the sum of squares for $Y$, and we partition that into two components: the sum of squares regression, the variability that the regression model allows us to predict, and the sum of squares residual, the other, unpredictable variability.
+
+{{< interactive-figure regressionPartitionDiagram makeVariancePartitionDiagram options='{"preset":"regression","maxWidth":"38rem"}' fallback="Diagram partitioning the total variability in Y into predictable variability (sum of squares regression) and unpredictable variability (sum of squares residual), whose mean squares form the F ratio for the analysis of regression." >}}
+
+We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous lecture, using the usual technique for sums of squares. So we already know those values. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Remember, that's because we're partitioning the variability in $Y$ into these two components. So $SS_{regression} + SS_{residual} = SS_Y$. And correspondingly, $SS_Y - SS_{residual} = SS_{regression}$.
+
+<!-- [Possible typo: "in the previous actor" in original transcript should be "in the previous lecture"] -->
+
+For the degrees of freedom, $df_Y$ is the number of $Y$ scores minus one. $df_{regression}$ is the number of variables minus one. So with two variables, that equals one. And $df_{residual}$ is $df_Y - df_{regression}$, so $n - 2$. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom: we divide them to find a kind of variance, or mean square. Here we find $MS_{regression}$ and $MS_{residual}$. And those become the numerator and denominator of a new $F$-ratio for the regression. This is what we'll use for the hypothesis test. So this technique is known as analysis of regression. And this relies on the same logic of partitioning variance that we learned about with ANOVA.
+
+## Hypothesis Testing for Regression
+
+### Step 1: State the Hypotheses
+
+As with any hypothesis test, we need to articulate our hypotheses, and as always, we have a null and an alternative hypothesis. The null here is that the slope of the regression line is zero, which would mean that there is no association between the two variables. Or put another way, it would mean that knowing someone's score on the $X$ variable would not help us predict their score on the $Y$ variable with any more accuracy than just guessing that everyone would score the mean of $Y$. That's what a flat line with a slope of zero indicates: that our best guess at anyone's $Y$ score is just the mean of $Y$, regardless of their score on $X$. (That's exactly the flat line we pitted against the best-fit line in the interactive earlier — the one whose squared error came out to $SS_Y$.) The alternative hypothesis is that the slope is not equal to zero. And notice that the slope that we calculated based on our sample is labeled $b$. But the population parameter we're interested in with our hypotheses here is labeled with the Greek symbol $\beta$. This is the usual logic that we don't really care about our sample itself, only about what inferences it helps us make about the population, which is what we're really interested in.
+
+### Step 2: Find the Critical Value
+
+Step two is to find the critical value for the test statistic. And since we're using an $F$-ratio, we use the $F$ table or `qf()` function in R. The degrees of freedom for the numerator, $df_{regression}$, is one here. And for the denominator, $df_{residual}$ is $5 - 2$, which is three.
+
+{{< interactive-figure regressionFCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":6},"df2":[1,2,3,4,5,6,8,10,12,15,20,30],"selected":{"df1":1,"df2":3,"alpha":0.05},"maxWidth":"46rem","tableMinWidth":"34rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+
+{{< interactive-figure regressionFCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"regressionFCriticalValueTable.df1"},"df2":{"$value":"regressionFCriticalValueTable.df2"},"title":{"$template":"F(${regressionFCriticalValueTable.df1}, ${regressionFCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"regressionFCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+
+{{< include quizzes/18-regression-critical-values.qmd >}}
+### Step 3: Calculate the Test Statistic
+
+Step three is to calculate the $F$-ratio for the data. Some of the required values we already calculated earlier in this lecture or in the previous lecture. So whether you already have them noted down, or you need to recalculate them, see if you can get all the required sums of squares and degrees of freedom to calculate the numerator and denominator of the test statistic and find the $F$-ratio.
+
+### Step 4: Make a Decision
+
+{{< include quizzes/18-regression-calculate-f.qmd >}}
+
+Here's the full working, so you can check your answers:
+
+$$
+\begin{align}
+SS_Y &= 14 \qquad SS_{residual} = 6.5 \qquad SS_{regression} = 14 - 6.5 = 7.5 \\
+df_Y &= 4 \qquad\ \ df_{residual} = 3 \qquad\quad df_{regression} = 1
+\end{align}
+$$
+
+$$
+MS_{regression} = \frac{7.5}{1} = 7.5 \qquad
+MS_{residual} = \frac{6.5}{3} = 2.17 \qquad
+F = \frac{7.5}{2.17} = 3.46
+$$
+
+With our $F$-ratio in hand, we next make our decision. If $F$ is greater than the critical value, we can reject the null hypothesis. Our $F$ of 3.46 falls short of the critical value of 10.13 for $F(1, 3)$ at $\alpha = .05$. Here, as with the correlation for this data in the previous lecture, we fail to reject the null. The sample size is just too small for this kind of test to come out as significant. So it's not possible to say that the data is sufficiently unlikely that we can reject our null hypothesis of no association.
+
+## Effect Size: $r^2$
+
+Usually this means we wouldn't need to know the effect size because we can't be sure that there is a real effect. But for completeness, I need to mention that our measure of effect size here would be $r^2$. Given the close conceptual links between regression and correlation, it should make some kind of sense that we can square the correlation coefficient as a measure of effect size here. Specifically in this context, we call it the coefficient of determination.
+
+$$r^2 = \frac{SS_{regression}}{SS_Y} = \frac{7.5}{14} = 0.54$$ But despite the new name, it quantifies essentially the same thing I said when we first introduced the idea of $r^2$: the proportion of variability in the data that we can attribute to the relationship between our variables.
+
+The only difference is that previously, in the context of the $t$-test, we talked about the independent variable causing a difference on the dependent variable. Here we talk about changes in one variable being associated with changes in another. But philosophically speaking, saying one variable caused the difference in another is just another way of saying that the variable was related to changes in the other variable.
+
+## Reporting Results
+
+So finally, we can report the results. Here, we can mention the general trend in the data as quantified in $b$, the slope of the regression line. And then we mention the $F$-ratio for the analysis of regression with its degrees of freedom, whether $p$ was less than or greater than $\alpha$, and, if it was significant, the effect size.
+
+> Longer sleep duration was associated with an increase in test performance, $b = 0.5$. However, the association was nonsignificant; $F(1, 3) = 3.46$, $p > .05$.
+
+{{< include quizzes/18-regression-learning-checks.qmd >}}

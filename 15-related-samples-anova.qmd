@@ -1,0 +1,190 @@
+---
+title: "Related Samples ANOVA"
+interactive-scripts:
+  - variance-partition-diagram
+---
+
+## Introduction
+
+Last time we introduced the independent-samples ANOVA for use with between-participants designs. This time we'll introduce another variant, the related-samples ANOVA. Conceptually, there's really nothing new here. Just like the related-samples $t$-test, this is for use with within-participants or matched-subjects designs. We'll just need to examine some of the new sources of variance that we can partition differently here by virtue of the related-samples design.
+
+## Recap: Between- vs. Within-Participants Designs
+
+To recap the idea of these different designs, the independent-samples ANOVA we used in the previous lecture is for use with between-participants designs in which each sample consists of different people and therefore independent observations. Like I mentioned, because we have different participants in each treatment group, any between-groups variability could either be due to a treatment effect or any individual differences between participants. Again, we might happen to end up with groups with slightly different compositions just by chance alone. With this abstract diagram I first introduced with the related-samples $t$-test, I genuinely used a random sampling procedure in R to generate these groups of dots. And each group has a slightly different composition of colors. There's no real systematic difference between the groups. There's no treatment effect — only the slightly different aggregations of different individuals.
+
+With a repeated-measures design or a matched-samples design, each group is made up of the same people or people we deliberately paired up to be similar on any variable or variables we think are important. And the primary advantage of these designs is that we rule out those kinds of individual differences as a potential source of variability between groups.
+
+By eliminating that source of variability, we produce a more powerful test statistic. Like we said when we first introduced this idea, another advantage of repeated-samples designs, though not matched-samples designs, is that we require fewer participants. Everyone contributes data to all treatment conditions. With three conditions we only need a third of the participants compared to an independent-samples design, so this can be a big practical benefit. But remember, there are disadvantages as well. We're assuming that people haven't changed in any important way between treatments, but maybe they have. There could be order effects, improvement through practice, some change due to world events, or natural improvement in people's symptoms.
+
+## Partitioning Variance in Related-Samples Designs
+
+So let's think about this in terms of partitioning the variance in the data. Let's start by recapping this procedure for independent-samples designs again. There is the total variability in the data. We can partition that into the variance, or mean square, between groups and variance within groups.
+
+So what contributes to those different types of variability? Any treatment effect only contributes to variability between groups, not within. In the previous lecture I simplified a little by saying that chance also contributes to differences between groups. But here we can be more specific. That kind of chance difference consists both of sampling error, the general discrepancy between statistics and parameters, and individual differences, the fact that some people score higher or lower than others because of their abilities or traits or preferences or whatever. And both sampling error and individual differences contribute to variance within groups as well.
+
+So conceptually, to be more specific about things, the independent-samples $F$ ratio equation consists of the treatment effect, sampling error, and individual differences in the numerator, and sampling error and individual differences in the denominator. So the error and individual differences are sort of canceled out by the ratio, quantifying whatever treatment effect is above and beyond those chance differences.
+
+::::: {.callout-tip .interactive}
+## Partitioning variance in a related-samples design
+
+{{< interactive-figure relatedPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed"}' fallback="Diagram partitioning total variability into between-treatments and within-groups variance. For related samples, individual differences drop out of the between-treatments component, so the within-groups variance is further partitioned into error variance (sampling error) and between-subjects variance (individual differences), and the F ratio uses mean square error as its denominator." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Independent samples" data-action='{"preset":"independent-detailed","emphasize":"none","animate":false}'}
+For independent samples, treatment effect, sampling error, and individual differences all contribute to the variance between groups; sampling error and individual differences contribute within groups. The chance sources appear in both parts of the $F$ ratio, so they cancel out.
+:::
+
+::: {.tutorial-step data-title="The problem" data-action='{"preset":"related-problem","emphasize":"ind-diff"}'}
+A related-samples design eliminates individual differences *between* treatments — it's the same (or matched) people in every condition. But they still lurk within groups, so the usual ratio is unbalanced: individual differences sit in the denominator with nothing to cancel them in the numerator.
+:::
+
+::: {.tutorial-step data-title="The solution" data-action='{"preset":"related","emphasize":"ind-diff"}'}
+So we partition the within-groups variance itself, splitting the individual differences (between-subjects variance) apart from the sampling error (error variance).
+:::
+
+::: {.tutorial-step data-title="A balanced ratio" data-action='{"preset":"related","emphasize":"none"}'}
+Using $MS_{error}$ as the denominator restores the balance: treatment effect plus sampling error over sampling error alone. The individual differences are out of the equation entirely, giving us a more powerful test.
+:::
+::::
+
+:::::
+
+### Removing Individual Differences
+
+With the related-samples ANOVA, we start out the same, partitioning the total variance into variance between treatments and variance within treatments. Any treatment effect still contributes to variance between groups and not within groups. Sampling error still contributes to both differences between and within groups. But like I said, individual differences are eliminated as a potential source of variability between groups by virtue of the design — it's the same people or matched subjects in each group. So the individuals do not differ between groups. But of course, they do still differ within groups. So individual differences are a potential source of within-group variance.
+
+So if we use the same numerator and denominator here as for the independent-samples ANOVA, the ratio wouldn't be balanced anymore. We'd have treatment plus error in the numerator and error plus individual differences in the denominator. So those different sources of variability would contribute differently to the numerator and denominator and wouldn't cancel out nicely in the ratio like they did before.
+
+This would be a problem. And so with related samples, we have a little extra work to do, because, happily, we can partition out the variance in the denominator, separating the sampling error and the individual differences. We will partition that within-group variance into two components: error variance, labeled $MS_{error}$, and between-subjects variance, $MS_{between\ subjects}$. As the name suggests, the error variance consists only of sampling error and the between-subjects variance consists only of the individual differences. We'll see how exactly we're able to quantify these different sources in a moment.
+
+## The Modified $F$ Ratio
+
+But note that we have a slightly different label for the variance between groups now. We call it "mean square between treatments" to distinguish it from this new component, mean square between subjects. So we will still use the same numerator, $MS_{between\ treatments}$, but we're going to use a different denominator for the $F$ ratio: $MS_{error}$. So conceptually, the balance is restored to our equation. The individual differences are removed from the numerator simply by virtue of the design. And now we've removed them from the denominator by partitioning out the individual differences. Our ratio consists of any treatment effect plus sampling error in the numerator, and sampling error alone in the denominator. Now, as before, the ratio effectively cancels out the error, quantifying any treatment effect.
+
+## Sums of Squares and Degrees of Freedom
+
+So here's how we calculate this modified $F$ ratio for related-samples data. We start with the sums of squares and degrees of freedom. And the total, between-treatments, and within components are exactly the same as they were for the independent-samples designs.
+
+Then we get to the two new components for between-subjects and error variability. The equation for between subjects is $\sum P^2 / k - G^2 / N$. The $P$ here stands for participant totals. Remember, for the between-treatments variability, the equation uses $T$, treatment totals. Those are the sum of scores within each individual treatment group. For between-subjects variability, the idea is the same, but instead of summing scores for each treatment we sum them for each participant. Then we square the participant totals and divide by $k$, the number of treatment conditions, getting an average squared score for each participant across the conditions, much like we got an average squared score for each treatment by dividing the squared treatment totals by the number of scores in each treatment.
+
+The final component, and the one that will become our denominator, is found by subtraction. Anything left over after taking the individual-difference variability out of within-treatments variability is the error variability. So $SS_{error} = SS_{within} - SS_{between\ subjects}$.
+
+It's worth taking the time to really understand these equations on a conceptual level. It should hopefully make more sense when we work through an example a little bit later.
+
+### Computing Mean Squares and $F$
+
+Once we calculate the required sums of squares and degrees of freedom, the rest is easy. We calculate the variances for the numerator and denominator, $MS_{between\ treatments}$ and $MS_{error}$, by dividing the relevant sums of squares by degrees of freedom. And then we calculate the $F$ ratio by dividing the numerator by the denominator. Again, the numerator is exactly the same we would have used for an independent-samples design, $MS_{between\ treatments}$. We just have to remember to use the different denominator here, $MS_{error}$. And the interpretation of the $F$ ratio is exactly the same. The greater than 1 our $F$ ratio is, the more of a treatment effect there appears to be over and above sampling error. And because the denominator excludes an additional source of variability here, it will be smaller, making this a more powerful statistic than the regular independent-samples version.
+
+It's a good idea to use a summary table as you work through this by hand. It's the same as we used last time; it just has additional rows for new sources of variance: between subjects and error.
+
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|:--:|:--:|:--:|:--:|
+| Between treatments | | | | |
+| Within treatments | | | | |
+| &emsp;Between subjects | | | | |
+| &emsp;Error | | | | |
+| Total | | | | |
+
+: A blank related-samples ANOVA summary table. {#tbl-related-anova-summary-blank}
+
+## Worked Example: Hypothesis Test
+
+So we'll run through a hypothesis test using a related-samples design. In fact, we'll use exactly the same dataset we used in the previous lecture. The idea is we're running a study to test whether giving people different snacks before a test alters their performance. We have three conditions: we either give people a banana, a candy bar, or nothing.
+
+Previously, we treated this as a between-participants design, assuming we had different people in each sample, and so we used the independent-samples ANOVA. But let's say we've used a within-participants design. Each row represents a single participant who took all three tests at different times, preceded by a different snack each time. So instead of comparing independent samples we're comparing related samples, looking at the variability among each participant's own performance in the three different treatment conditions. So obviously here we'll use the related-samples ANOVA procedure.
+
+### Step 1: State the Hypotheses
+
+As always, we start that hypothesis test by stating our hypotheses. Again, the null here is that all three populations from which we've created these samples have identical means — that $\mu_1 = \mu_2 = \mu_3$. The alternative hypothesis is that at least one condition differs from at least one other.
+
+### Step 2: Determine the Critical Value
+
+Step two is to determine the critical value for the test. And we do so using the same table as before. The only difference is that we need to be aware of the different degrees of freedom for the different denominator. The numerator is the same as before; $df_{between\ treatments}$ is $k$, the number of conditions, minus one. We have three conditions, so the degrees of freedom for the numerator here is 2.
+
+The degrees of freedom for the new denominator, $df_{error}$, is $df_{within}$ minus $df_{between\ subjects}$, so $N - k$ for degrees of freedom within, minus $n - 1$, the number of scores in each group minus one. So here that works out to $9 - 3 = 6$, minus $3 - 1 = 2$. Six minus two gives us four. So our critical value is 6.94.
+
+
+{{< include quizzes/15-related-anova-degrees-of-freedom.qmd >}}
+And like I mentioned when we introduced the related-samples $t$-test, notice that we require a much more extreme critical value to reject the null hypothesis, because of the lower degrees of freedom. But we should have a more powerful test statistic because of the elimination of individual-differences variability.
+
+### Step 3: Calculate the $F$ Ratio
+
+Step three is to calculate the $F$ ratio for the data. Like the calculations for the independent-samples ANOVA, this is a little labor intensive. But it's worth practicing to make sure you understand how to use each equation and what each component represents.
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+Again, to save you some trouble,
+
+{{< include quizzes/15-related-anova-calculate-f.qmd >}}
+
+I've already worked on some of what you'll need. This table has the $T$ treatment totals for each condition, and their sums of squares. And I've added a new column for the $P$ participant totals. And for convenience, here are $n$, $k$, uppercase $N$, $G$, and $\Sigma X^2$. Notice that these values are all exactly the same as in the previous lecture because we're using the same data. Even though I'm giving you these again, it's important to make sure you understand how I arrived at each one. It would be a good idea for you to calculate them yourself, to double check my work and check your understanding.
+
+| Person | 🍌 Banana | 🍬 Candy | 😐 Control | $P$ |
+|:--:|:--:|:--:|:--:|:--:|
+| A | 9 | 3 | 5 | 17 |
+| B | 11 | 5 | 6 | 22 |
+| C | 13 | 4 | 7 | 24 |
+| $M$ | 11 | 4 | 6 | |
+| $T$ | 33 | 12 | 18 | |
+| $SS$ | 8 | 2 | 2 | |
+
+: The snack data as a within-participants design, with treatment totals ($T$) and participant totals ($P$). {#tbl-related-anova-data}
+
+$$n = 3 \qquad k = 3 \qquad N = 9 \qquad G = 63 \qquad \Sigma X^2 = 531$$
+
+So remember, you'll need to calculate the sums of squares, degrees of freedom, mean squares, and $F$ ratio.
+
+<!-- [Note: Original lecture included an interactive element here.] -->
+
+### Step 4: Make a Decision
+
+Here's the full working, so you can check your answers:
+
+$$
+\begin{align}
+SS_{between\ subjects} &= \Sigma \frac{P^2}{k} - \frac{G^2}{N} = \frac{17^2}{3} + \frac{22^2}{3} + \frac{24^2}{3} - \frac{63^2}{9} = 8.67 \\
+SS_{error} &= SS_{within} - SS_{between\ subjects} = 12 - 8.67 = 3.33
+\end{align}
+$$
+
+$$
+MS_{between\ treatments} = \frac{78}{2} = 39 \qquad
+MS_{error} = \frac{3.33}{4} = 0.83 \qquad
+F = \frac{39}{0.83} = 46.8
+$$
+
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|--:|--:|--:|--:|
+| Between treatments | 78 | 2 | 39 | 46.8 |
+| Within treatments | 12 | 6 | | |
+| &emsp;Between subjects | 8.67 | 2 | | |
+| &emsp;Error | 3.33 | 4 | 0.83 | |
+| Total | 90 | 8 | | |
+
+: Completed related-samples ANOVA summary table for the snack example. {#tbl-related-anova-summary}
+
+So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we figured out from the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. So here with our $F$ of 46.8, we can comfortably reject the null. There is a significant difference among our three treatment conditions. $p$ is less than $\alpha$.
+
+### Effect Size: Partial $\eta^2$
+
+Since we have a significant difference, we next need to determine the effect size. Last time we used $\eta^2$. Here we use a slightly different version called partial eta squared, $\eta^2_p$. Rather than just the $SS_{total}$ for the denominator, it uses $SS_{total} - SS_{between\ subjects}$. That's because we don't have individual differences in the numerator, the $SS_{between\ treatments}$, and so we want to get rid of them in the denominator as well. So we call it $\eta^2$ partial to acknowledge that we're quantifying the variability between treatments as a proportion of the partial rather than the total variability in the data. An equivalent form we could put the denominator in is $SS_{between\ treatments} + SS_{error}$. And if you understand why that's the same as $SS_{total} - SS_{between\ subjects}$, that's a good indication that you're grasping this idea of partitioning variance. So here we get an answer of 0.96.
+
+
+{{< include quizzes/15-related-anova-partitioning-variance.qmd >}}
+### Post-Hoc Tests: Tukey's HSD
+
+And step 4c, since the ANOVA revealed a significant difference, is to conduct post-hoc tests to determine where exactly the difference is — which conditions are different from which others. Again, we use the Tukey's HSD equation. First, we have to find the appropriate studentized range statistic, $q$, from a table or from R. It depends on the number of means we're comparing and the degrees of freedom for the denominator of the $F$ ratio. So with three conditions and degrees of freedom of four, $q$ is 5.04.
+
+We then use that value in this equation, multiplying it by the square root of the denominator of the $F$ ratio divided by $n$, the number of scores per condition. Here we get an answer of 2.66, meaning that any difference between condition means of 2.66 or greater will be a significant difference at the $.05$ level.
+
+$$HSD = q \sqrt{\frac{MS_{error}}{n}} = 5.04 \sqrt{\frac{0.83}{3}} = 2.66$$
+
+And remember, the whole point of doing these post-hoc tests is that we are maintaining our experimentwise alpha at $.05$, even though we're making multiple comparisons, whereas if we just did a bunch of $t$-tests, each with its own alpha of $.05$, we'd end up with a much larger experimentwise alpha rate, meaning a larger chance of having made a Type I false positive error somewhere.
+
+## Reporting Results
+
+So finally, we're ready to report the results and call it a day. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.
+
+> A single-factor, related-samples ANOVA revealed a significant difference in people's test scores when the test was preceded by consumption of a banana ($M = 11.00$; $SD = 2.00$), a candy bar ($M = 4.00$; $SD = 1.00$), and no snack ($M = 6.00$; $SD = 1.00$); $F(2, 4) = 46.8$, $p < .05$, $\eta^2_p = 0.96$. Post-hoc tests using Tukey's HSD revealed that test scores were significantly better following banana consumption than following no snack or candy consumption; the candy condition did not differ significantly from the control condition.
+
+{{< include quizzes/15-related-anova-learning-checks.qmd >}}

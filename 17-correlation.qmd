@@ -1,0 +1,270 @@
+---
+title: "Correlation"
+interactive-scripts:
+  - scatterplot
+  - critical-table-generator
+  - distribution-generator
+---
+
+## Introduction
+
+In the final two lectures of the course, we'll cover the techniques of correlation and regression. Whereas the techniques we've covered so far deal with examining differences between groups, correlation and regression focus on associations between variables. As we'll see, though, this isn't as big of a difference as you might expect. Correlation and regression are just another extension of the basic ideas of variability, sampling, and probability that have powered all of our inferential statistics so far.
+
+The key difference between the correlational approach and the designs and statistical tests we've covered so far---the $t$ test and ANOVA approach---is that those other approaches are primarily used with data from experimental research studies. This means studies with an independent variable, a grouping variable that divides samples up into different treatment conditions. The statistics then compare those groups looking for differences over and above what we'd expect by chance. Correlational studies measure two or more variables per participant and examine the relationship between those variables---their association, rather than their difference.
+
+
+## Correlational Research Questions
+
+To give a few quick examples of these kind of psychological research questions, we may be interested in the correlation between a person's income and their happiness. Do wealthier people tend to say they're happier? With correlational data, we generally visualize it as a scatterplot like this: one variable on the $x$ axis and the other on the $y$ axis. Each dot represents one person's pair of scores.
+
+{{< interactive-figure incomeHappinessScatter makeScatterplot options='{"generate":{"r":0.55,"n":45,"seed":11},"style":"minimal","axisLabels":true,"xLabel":"Income","yLabel":"Happiness","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical income and happiness scores: a loose cloud of dots drifting upward, suggesting that higher income tends to go with higher happiness." >}}
+
+Another question might be, does practice make perfect? We could record the amount of time someone spent practicing a task and record their performance of the task and put those pairs of observations on a scatterplot like this. Or we might suspect that the more absences someone has from a class, the worse their final grade will be for that class. Here, unlike those previous two examples, we'd be expecting that higher scores on one variable would be associated with lower scores on the other. This would be a negative correlation.
+
+{{< interactive-figure absencesGradeScatter makeScatterplot options='{"generate":{"r":-0.65,"n":45,"seed":12},"style":"minimal","axisLabels":true,"xLabel":"Absences","yLabel":"Final grade","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical absences and final grades: the cloud of dots slopes downward, with more absences going with lower grades — a negative correlation." >}}
+
+
+## Correlation Does Not Equal Causation
+
+Now, if you know anything about correlation, it's probably that correlation does not equal causation. So let's make this clear first. What this means is that if we just observe a correlation between two variables, we should be extremely careful about concluding that one variable is causing changes in the other.
+
+Take an example from real research. Drinking coffee is correlated with scoring higher on measures of IQ [@corley2010caffeine]. And as soon as you hear that, it's easy to start speculating about how the caffeine might improve cognitive function, so habitual consumption should increase general IQ. So maybe we should prescribe a daily dose of coffee to everyone to make us all smarter.
+
+But you can probably see where I'm going with this. It would be premature to conclude that coffee causes higher IQ if all we've done is show that they're correlated. It could just as easily be the reverse: being smarter causes you to drink more coffee. Again, we could speculate some causal effect whereby people with higher IQ have more sophisticated or refined tastes or are drawn to mild stimulants for whatever reason. But again, we should probably slow our roll. It could be that some third factor, like being richer, might be associated both with coffee consumption and IQ.
+
+And even then, we haven't explained the causality. Maybe coffee is more fashionable in more affluent social circles. Maybe higher socioeconomic status makes people healthier and good health promotes higher IQ, or, conversely, poor health inhibits performance on IQ tests. Or maybe higher income is associated with having the resources that allow you to perform better on measures of IQ and to afford to buy more coffee.
+
+In any case, the point is that causality is difficult to establish and usually requires experiments in which participants are randomly assigned to conditions. You'll hear much more about why that is in other classes that deal more with research methods. But for now, just know that correlation is not the same thing as causation. That doesn't mean that knowing about correlations that exist in the world is useless. Far from it. It just means we have to know the limitations of the data and the statistical techniques we apply to it.
+
+
+## Characteristics of Correlations
+
+We'll be calculating a correlation statistic. But before we learn how it's calculated, it's important to outline its general conceptual structure. The correlation statistic is a single number that quantifies the association between two variables. It has three characteristics: its absolute magnitude, its direction, and its form.
+
+### Magnitude
+
+The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker, less consistent their relationship, the closer the correlation will be to 0. In the four diagrams here, I've traced an ellipse around the scattered dots. Basically, the tighter of an ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
+
+::: {.bc-figure-row}
+{{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: the ellipse traced around the dots is essentially a circle." >}}
+
+{{< interactive-figure magnitudeScatterR40 makeScatterplot options='{"generate":{"r":0.4,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .40: the ellipse tilts upward but stays wide." >}}
+
+{{< interactive-figure magnitudeScatterR80 makeScatterplot options='{"generate":{"r":0.8,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .80: a much tighter upward-sloping ellipse." >}}
+
+{{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
+:::
+
+### Direction
+
+The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases on one variable are associated with increases on the other---or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other---that they move in opposite directions. Here I have flipped the diagrams around so that they're now illustrating negative correlations.
+
+::: {.bc-figure-row}
+{{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a circular cloud with no direction either way." >}}
+
+{{< interactive-figure directionScatterR40 makeScatterplot options='{"generate":{"r":-0.4,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.40: a wide ellipse sloping downward." >}}
+
+{{< interactive-figure directionScatterR80 makeScatterplot options='{"generate":{"r":-0.8,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.80: a tight downward-sloping ellipse." >}}
+
+{{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
+:::
+
+### Form
+
+And finally, there is the form of the association. We will only cover linear correlations. This means basically that we're imagining that the association forms a straight line. For positive correlations, increases in $X$ are always associated with increases in $Y$. Or for negative correlations, increases in $X$ are always associated with decreases in $Y$.
+
+But there are other forms that correlations can take---nonlinear forms, where the relationship between $X$ and $Y$ is different for different values of $X$. For one set of points, you can imagine a line that curves, so that as $X$ increases, $Y$ decreases, until a certain point where the curve changes direction, and increases in $X$ become associated with increases in $Y$. Or you can imagine even more complex lines which change directions more than once, attempting to find the best fit for the data. There can be value in these approaches, but for our purposes, we're going to focus on the basic linear form of correlation.
+
+
+## Estimating Correlations
+
+A somewhat useful skill to practice is being able to look at a scatterplot and estimate the strength of the correlation. It's actually easier than you'd think. It takes just a very small amount of practice to get quite good.
+
+Here's a very small dataset with just five data points. It's representing some hypothetical data from a study looking at the amount of sleep students got the night before an exam and their test score. It sounds plausible that these two things would be correlated.
+
+| Participant | Sleep (hours) | Test score |
+|:--:|:--:|:--:|
+| A | 4 | 5 |
+| B | 5 | 8 |
+| C | 7 | 8 |
+| D | 8 | 10 |
+| E | 11 | 9 |
+
+: Hours of sleep the night before an exam and test scores for five students. {#tbl-sleep-scores}
+
+Here's what those five pairs of scores look like as a scatterplot. From looking at these few points, see if you can come up with a reasonable guess at the strength and direction of the correlation. Remember, the correlation will vary from zero to one or negative one, depending on its strength and its direction. We'll calculate its actual value a little bit later.
+
+{{< interactive-figure sleepScoresScatter makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"labels":["A","B","C","D","E"],"pointLabels":true,"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"controls":false,"maxWidth":"30rem"}' fallback="Scatterplot of the five students' sleep hours and test scores: the points drift upward from student A at 4 hours and a score of 5 to student D at 8 hours and a score of 10, with E highest on sleep but not on score." >}}
+
+{{< include quizzes/17-correlation-guess.qmd >}}
+
+If you want more practice, try the point clouds below: for each one, guess the correlation by eye before revealing its actual value.
+
+::::: {.callout-tip .interactive}
+## Guess the correlation
+
+{{< interactive-figure guessCorrelationGame makeScatterplot options='{"generate":{"r":0.85,"n":40,"seed":21},"ticks":"none","axisLabels":false,"maxWidth":"26rem"}' fallback="A series of point clouds for practicing estimating correlations by eye." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Cloud 1" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":false,"show-ellipse":false,"animate":false}'}
+Size up the direction first, then the strength. What's your guess?
+:::
+
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":true,"show-ellipse":true}'}
+A strong positive correlation: $r = .85$. The ellipse around the points is long and thin.
+:::
+
+::: {.tutorial-step data-title="Cloud 2" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":false,"show-ellipse":false}'}
+A new cloud. Direction, then strength — what's your guess this time?
+:::
+
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":true,"show-ellipse":true}'}
+Much weaker, though still positive: $r = .25$. The ellipse is nearly a circle.
+:::
+
+::: {.tutorial-step data-title="Cloud 3" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":false,"show-ellipse":false}'}
+One more. What's your guess?
+:::
+
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":true,"show-ellipse":true}'}
+This one runs the other way: $r = -.60$, a moderately strong negative correlation.
+:::
+::::
+
+:::::
+
+## Pearson's $r$ Correlation Coefficient
+
+So now let's examine the actual correlation statistic that we'll be using. It's called Pearson's $r$ correlation coefficient. It was developed by Karl Pearson. There are other variations of correlation statistics, but Pearson's $r$ is by far the most widely used. It's based on the ideas of variability and covariability.
+
+You're very familiar with variability by now. It's the quantification of how much each variable varies, how widely spread or closely clustered scores are. Covariability is the new idea here. It quantifies how much $X$ and $Y$ vary in tandem. To what extent are changes in $X$ associated with corresponding changes in $Y$? So as $X$ increases, $Y$ increases as well, or as $X$ decreases, $Y$ also tends to decrease. Put another way, if there was no covariability, variation in $Y$ would be completely unrelated to the variation in $X$.
+
+### The Equation
+
+Here's the equation: $r$ equals $SP$ over the square root of $SS_X$ multiplied by $SS_Y$. $SS_X$ and $SS_Y$ should look familiar. $SS$, as usual, refers to the sum of squared deviations. So here we have the separate sums of squares for variable $X$ and variable $Y$ to quantify their separate variability in the denominator. And we have this new quantity, $SP$, which quantifies the covariability of $X$ and $Y$.
+
+I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a corresponding change in $Y$, then their variabilities separately would be exactly equal to their covariability. The correlation would equal one or negative one, meaning every change in $X$ is accompanied by an equal change in $Y$. In other words, all the variability is covariability. There is no variability that isn't shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero.
+
+
+## Hypothesis Testing with Pearson's $r$
+
+So let's dive into a hypothesis test using Pearson's $r$ correlation coefficient.
+
+### Step 1: State the Hypotheses
+
+As always, we begin by formally stating our hypotheses. And as with every other hypothesis test we've done, we're going to use samples of scores, but we don't actually care about those samples. We're interested in the population or populations that produce them. So what the correlation hypothesis tests are hypotheses concerning the relationship that exists or doesn't exist in the population. The lowercase letter $r$ is the correlation coefficient we calculate for our sample. We use the Greek letter $\rho$ to represent the population parameter, the correlation within the population.
+
+### Step 2: Determine Critical Values
+
+Now, this is going to sound weird, but the test statistic for a correlation is actually a $t$ statistic, not the $r$ correlation coefficient that we'll calculate at first. We'll see how to calculate that $t$ statistic in step four. But for now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for bivariate correlations, degrees of freedom is $n$, the number of pairs of scores, minus two. That's because we're dealing with two samples, so we lose one degree of freedom for each sample. But we're not treating the two samples as independent. We're looking at the associations between pairs of scores.
+
+As before, we can check a table or use the `qt()` function in R to find the critical values. Since our little example dataset has five pairs of scores, our degrees of freedom is five minus two, which is three.
+
+{{< interactive-figure tCriticalValueTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":30},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":true,"selectedTail":"two","selected":{"df":3,"tail":"two","alpha":0.05},"tableMaxHeight":"18rem"}' fallback="Interactive t critical-value table." >}}
+
+{{< interactive-figure tCriticalCurve makeDistributionGraph options='{"distribution":"t","df":{"$value":"tCriticalValueTable.df"},"title":{"$template":"df = ${tCriticalValueTable.df}"},"style":"minimal","height":160,"xDomain":[-4,4],"yDomain":[0,0.45],"xTicks":5,"shade":{"$value":"tCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="t distribution curve with the selected critical region shaded." >}}
+
+{{< include quizzes/17-correlation-critical-value.qmd >}}
+### Step 3: Calculate the Test Statistic
+
+So next, we calculate the correlation coefficient, Pearson's $r$. Remember the equation: $r$ equals $SP$ over the square root of the sum of squares for $X$ multiplied by the sum of squares for $Y$.
+
+#### Sum of Squares Recap
+
+Before getting to $SP$, let's recap sum of squares. To calculate the sum of squared deviations, we square the deviation scores. And another way of saying that we square something is to say we multiply it by itself. So the definitional formula we learned for sums of squares was $\Sigma(X - M)^2$. And another equivalent way of writing that would be $\Sigma(X - M)(X - M)$. $X$ minus the mean is the deviations. We multiply those deviations by themselves. The squaring is just a convenient notation for this, but it means the same thing.
+
+And remember the computational formula we learned: $\Sigma X^2$ minus $(\Sigma X)^2 / n$. Another equivalent way of writing that, bearing in mind that squaring is just multiplying something by itself, would be $\Sigma(X)(X)$ minus $(\Sigma X)(\Sigma X) / n$.
+
+#### Sum of Products ($SP$)
+
+The reason I point this out is that the numerator does something quite similar, but instead of multiplying deviations by themselves, we multiply them by one another. Our numerator, $SP$, is the sum of products. Products refer to the product of the deviations. We multiply the deviations for variable $X$ by the deviations for variable $Y$ to get their products. Then we sum those products to get the sum of products.
+
+The definitional formula for this is $\Sigma(X - M_X)(Y - M_Y)$. And I hope that by juxtaposing it with the sum of squares formula, you can see the conceptual link. Sums of squares quantifies the variability of an individual variable by multiplying its deviations by themselves. The sum of products quantifies the covariability of two variables by multiplying their deviations by one another.
+
+The computational formula for sum of products is similarly related to the computational formula for sums of squares: $SP = \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n}$. Again, this is equivalent to the definitional formula and it achieves basically the same thing as the sum of squares that we're familiar with, but instead of quantifying variability within a variable, it quantifies covariability across two variables.
+
+#### Worked Example
+
+So here's the example data I showed earlier. The variable labeled $X$ is the number of hours of sleep these five people said they got the previous night. The variable labeled $Y$ is their score on a test. We want to know if sleep duration is related to test performance. So we'll calculate the correlation coefficient. We just need these three quantities: the sum of squares for $X$, the sum of squares for $Y$, and the sum of products.
+
+{{< include quizzes/17-correlation-calculate-r.qmd >}}
+
+Let's use the definitional approach first. The first thing you would have needed to do is calculate the mean of each variable, then the deviations for $X$ and $Y$, then square those deviations, and then sum the squared deviations to get the sum of squares. This gets us the values for the denominator of the $r$ equation. The last step is to multiply the deviations for $X$ and $Y$ to get the products. So $-3$ multiplied by $-3$ gives positive nine, $-2$ multiplied by $0$ gives zero, and so on. We then sum those products to get the sum of products, which here is fifteen.
+
+| $X$ | $X - M_X$ | $(X - M_X)^2$ | $Y$ | $Y - M_Y$ | $(Y - M_Y)^2$ | $P$ |
+|--:|--:|--:|--:|--:|--:|--:|
+| 4 | $-3$ | 9 | 5 | $-3$ | 9 | 9 |
+| 5 | $-2$ | 4 | 8 | 0 | 0 | 0 |
+| 7 | 0 | 0 | 8 | 0 | 0 | 0 |
+| 8 | 1 | 1 | 10 | 2 | 4 | 2 |
+| 11 | 4 | 16 | 9 | 1 | 1 | 4 |
+
+: The definitional approach. $M_X = 7$; $SS_X = 30$; $M_Y = 8$; $SS_Y = 14$; $SP = 15$. {#tbl-r-definitional}
+
+$$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{15}{\sqrt{30 \times 14}} = 0.73$$
+
+Or if you'd prefer to use the computational formulas, it'd go like this. You don't need to calculate the means first because that's kind of built into the formula now. But you calculate some different quantities instead of the deviations and squared deviations. Instead, you'd calculate the sum of each variable, $X$ and $Y$, and you'd square the scores themselves and calculate the sum of squared scores. You'd also multiply the $X$ and $Y$ scores and sum those products. Then you'd use those values in the equations as shown. And if everything went right, you would arrive at exactly the same answer.
+
+| $X$ | $X^2$ | $Y$ | $Y^2$ | $XY$ |
+|--:|--:|--:|--:|--:|
+| 4 | 16 | 5 | 25 | 20 |
+| 5 | 25 | 8 | 64 | 40 |
+| 7 | 49 | 8 | 64 | 56 |
+| 8 | 64 | 10 | 100 | 80 |
+| 11 | 121 | 9 | 81 | 99 |
+| $\Sigma X = 35$ | $\Sigma X^2 = 275$ | $\Sigma Y = 40$ | $\Sigma Y^2 = 334$ | $\Sigma XY = 295$ |
+
+: The computational approach. {#tbl-r-computational}
+
+$$
+\begin{align}
+SS_X &= \Sigma X^2 - \frac{(\Sigma X)^2}{n} = 275 - \frac{35^2}{5} = 30 \\
+SS_Y &= \Sigma Y^2 - \frac{(\Sigma Y)^2}{n} = 334 - \frac{40^2}{5} = 14 \\
+SP &= \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n} = 295 - \frac{35 \times 40}{5} = 15
+\end{align}
+$$
+
+$$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{15}{\sqrt{30 \times 14}} = 0.73$$
+
+### Step 4: Make a Decision
+
+So lastly, we need to make our decision to reject or fail to reject the null hypothesis. And like I said, we can't do that with the $r$ statistic itself. Rather, we need to convert the $r$ value into a kind of $t$ statistic to see how improbable it is, given the variability in the data, that we would have observed an association this strong or stronger if no association actually exists in the population, as our null hypothesis assumes.
+
+So first, recall the general conceptual form of any $t$ statistic. It's composed of a sample statistic minus a population parameter in the numerator and a standard error in the denominator, to reveal how much your observed sample statistic deviates from the null expected value in relation to the standard error---the amount you'd expect the sample to deviate from the population value due to sampling error.
+
+So the specific form that takes here is $t = \frac{r - \rho}{s_r}$, where $r$ is the correlation coefficient, $\rho$ is the assumed population correlation, and $s_r$ is the standard error of the correlation. That standard error is found by taking $\sqrt{\frac{1 - r^2}{n - 2}}$.
+
+{{< include quizzes/17-correlation-significance.qmd >}}
+
+For our sleep data, that works out like this — a $t$ that falls short of the critical value of $\pm 3.18$ for three degrees of freedom, so we fail to reject the null hypothesis despite the seemingly strong correlation:
+
+$$t = \frac{r - \rho}{s_r} = \frac{0.73 - 0}{\sqrt{\dfrac{1 - 0.73^2}{5 - 2}}} = 1.86$$
+
+### Reporting Results
+
+Lastly, as always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom, and the $p$ value for the correlation, or that $p$ is less than or greater than $\alpha$.
+
+> More sleep was associated with higher test scores; however, the correlation did not reach statistical significance; $r(3) = .73$, $p > .05$.
+
+
+## Pearson's $r$ as a Measure of Effect Size
+
+You may have noticed we didn't mention effect size here, as we have done in the past. And that's because Pearson's $r$ correlation coefficient actually is itself a measure of effect size. That's why we couldn't complete the hypothesis test using $r$ itself. We had to convert it to a $t$ statistic. Remember that effect size is independent of statistical significance.
+
+Pearson's $r$ is a measure of effect size because it quantifies the degree of association between two variables on a standardized scale ranging from zero to one. And the correlation itself is independent of sample size. That's why we can have such a strong correlation in our example dataset and yet fail to reject the null hypothesis.
+
+And Pearson's $r$ is actually related to another measure of effect size that we learned about: $r^2$. You might have noticed that $r^2$ showed up in the calculation for the standard error of the correlation. You might also remember that when we learned about $r^2$ initially, I mentioned how it was related to the $t$ statistic. We could calculate $r^2$ from the $t$ statistic that we had already calculated. So it should be no surprise that $r$, $r^2$, and $t$ are all mathematically related. In fact, even Cohen's $d$ is mathematically related to $r$. I'll leave the actual mathematical relationships for anyone algebraically inclined to ponder over. But for us, the point is that these different statistics are all performing related jobs and share similar conceptual foundations.
+
+### Interpreting Effect Size
+
+<!-- note: this is now duplicated earlier in effect size/statistical power chapter. refer back to that chapter here instead of repeating it. -->
+
+As for how to interpret Pearson's $r$ as a measure of effect size, you might remember that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, Cohen was also familiar with Pearson's $r$ and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb and they have been called into question. Cohen himself said that these rules of thumb should be used only reluctantly and when no better basis was available. He even told friends that he regretted having suggested them at all.
+
+There's a great recent paper by @funder2019evaluating that looked at what effect sizes are actually typically seen across a wide range of psychological studies, and they suggested these evidence-based alternative interpretive criteria based on actual data. They suggest that an $r$ of .05 indicates an effect that is very small for the explanation of single events, but potentially consequential over time. An effect size $r$ of .1 indicates an effect that is still small at the level of single events, but potentially more ultimately consequential. An effect size $r$ of .2 indicates a medium effect that is of some explanatory and practical use, even in the short run, and therefore even more important. An effect size $r$ of .3 indicates a large effect that is potentially powerful in both the short and the long run. A very large effect size $r$ of .4 or greater, in the context of psychological research, is likely a gross overestimate, the authors argued, that will rarely be found in a large sample or in a replication.
+
+So from this you can see how context-dependent our interpretation of effect size should be. If you're a psych major, I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when your professor tells you about some experimental effect, ask them what was the effect size. If they can't tell you, you should be a little bit skeptical.
+
+For building an intuitive feel for what correlations of different sizes actually look like, spend some time with [Kristoffer Magnusson's interactive correlation visualization](https://rpsychologist.com/correlation/).
+
+{{< include quizzes/17-correlation-learning-checks.qmd >}}
