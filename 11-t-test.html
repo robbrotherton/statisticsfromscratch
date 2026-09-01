@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>11&nbsp; The t-test – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./12-independent-samples-t-test.html" rel="next">
+<link href="./10-confidence-intervals.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="11&nbsp; The \(t\)-test – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="11&nbsp; The \(t\)-test – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#recap-the-z-test" id="toc-recap-the-z-test" class="nav-link" data-scroll-target="#recap-the-z-test">Recap: The <span class="math inline">\(z\)</span> test</a></li>
+  <li><a href="#from-z-to-t-the-estimated-standard-error" id="toc-from-z-to-t-the-estimated-standard-error" class="nav-link" data-scroll-target="#from-z-to-t-the-estimated-standard-error">From <span class="math inline">\(z\)</span> to <span class="math inline">\(t\)</span>: The Estimated Standard Error</a>
+  <ul class="collapse">
+  <li><a href="#formulas-for-standard-error-and-estimated-standard-error" id="toc-formulas-for-standard-error-and-estimated-standard-error" class="nav-link" data-scroll-target="#formulas-for-standard-error-and-estimated-standard-error">Formulas for Standard Error and Estimated Standard Error</a></li>
+  </ul></li>
+  <li><a href="#degrees-of-freedom-revisited" id="toc-degrees-of-freedom-revisited" class="nav-link" data-scroll-target="#degrees-of-freedom-revisited">Degrees of Freedom Revisited</a></li>
+  <li><a href="#the-t-distribution" id="toc-the-t-distribution" class="nav-link" data-scroll-target="#the-t-distribution">The <span class="math inline">\(t\)</span> Distribution</a>
+  <ul class="collapse">
+  <li><a href="#how-the-t-distribution-changes-with-degrees-of-freedom" id="toc-how-the-t-distribution-changes-with-degrees-of-freedom" class="nav-link" data-scroll-target="#how-the-t-distribution-changes-with-degrees-of-freedom">How the <span class="math inline">\(t\)</span> Distribution Changes with Degrees of Freedom</a></li>
+  </ul></li>
+  <li><a href="#finding-probabilities-with-the-t-distribution" id="toc-finding-probabilities-with-the-t-distribution" class="nav-link" data-scroll-target="#finding-probabilities-with-the-t-distribution">Finding Probabilities with the <span class="math inline">\(t\)</span> Distribution</a>
+  <ul class="collapse">
+  <li><a href="#the-t-table" id="toc-the-t-table" class="nav-link" data-scroll-target="#the-t-table">The <span class="math inline">\(t\)</span> Table</a></li>
+  <li><a href="#using-r" id="toc-using-r" class="nav-link" data-scroll-target="#using-r">Using R</a></li>
+  </ul></li>
+  <li><a href="#when-to-use-the-single-sample-t-test" id="toc-when-to-use-the-single-sample-t-test" class="nav-link" data-scroll-target="#when-to-use-the-single-sample-t-test">When to Use the Single-Sample T Test</a></li>
+  <li><a href="#example-reaction-time-data" id="toc-example-reaction-time-data" class="nav-link" data-scroll-target="#example-reaction-time-data">Example: Reaction Time Data</a>
+  <ul class="collapse">
+  <li><a href="#step-1-state-the-hypotheses" id="toc-step-1-state-the-hypotheses" class="nav-link" data-scroll-target="#step-1-state-the-hypotheses">Step 1: State the Hypotheses</a></li>
+  <li><a href="#step-2-locate-the-critical-region" id="toc-step-2-locate-the-critical-region" class="nav-link" data-scroll-target="#step-2-locate-the-critical-region">Step 2: Locate the Critical Region</a></li>
+  <li><a href="#step-3-calculate-the-t-statistic" id="toc-step-3-calculate-the-t-statistic" class="nav-link" data-scroll-target="#step-3-calculate-the-t-statistic">Step 3: Calculate the T Statistic</a></li>
+  <li><a href="#step-4-make-a-decision" id="toc-step-4-make-a-decision" class="nav-link" data-scroll-target="#step-4-make-a-decision">Step 4: Make a Decision</a></li>
+  <li><a href="#step-4a-effect-size" id="toc-step-4a-effect-size" class="nav-link" data-scroll-target="#step-4a-effect-size">Step 4a: Effect size</a></li>
+  </ul></li>
+  <li><a href="#interpreting-the-results" id="toc-interpreting-the-results" class="nav-link" data-scroll-target="#interpreting-the-results">Interpreting the Results</a></li>
+  <li><a href="#research-designs-for-the-single-sample-t-test" id="toc-research-designs-for-the-single-sample-t-test" class="nav-link" data-scroll-target="#research-designs-for-the-single-sample-t-test">Research Designs for the Single Sample <span class="math inline">\(t\)</span> Test</a></li>
+  <li><a href="#assumptions-of-the-t-test" id="toc-assumptions-of-the-t-test" class="nav-link" data-scroll-target="#assumptions-of-the-t-test">Assumptions of the <span class="math inline">\(t\)</span> Test</a></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting Results</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/critical-table-generator.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/graph-generator.js"></script>
+<script src="resources/js/make-inferential-diagram.js"></script>
+<div class="interactive-figure-mount" data-interactive-factory="makeDistributionFamilyCover" data-interactive-options="{     &quot;renderer&quot;: &quot;webgl&quot;,     &quot;distribution&quot;: &quot;t&quot;,     &quot;df&quot;: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],     &quot;xDomain&quot;: [-3, 3],     &quot;yDomain&quot;: [0, 0.42],     &quot;points&quot;: 240,     &quot;strokeWidth&quot;: 1.35,     &quot;animation&quot;: &quot;draw&quot;   }" data-interactive-figure="tTestCover">
+<div class="interactive-figure-fallback">
+Animated family of t distribution curves.
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>We’ve introduced the general idea of null hypothesis significance testing in the past few chapters, and we used the <span class="math inline">\(z\)</span> statistic to complete some hypothesis tests. Here we’ll introduce a new test statistic, the <span class="math inline">\(t\)</span> test. We’ll see how it differs from a <span class="math inline">\(z\)</span> statistic–which is not very much at all, thankfully. It’s just used in slightly different circumstances. We’ll reintroduce the ideas of sample variance and degrees of freedom because they will be newly relevant thanks to this <span class="math inline">\(t\)</span> statistic. And we’ll practice hypothesis testing with the <span class="math inline">\(t\)</span> test.</p>
+</section>
+<section id="recap-the-z-test" class="level2">
+<h2 data-anchor-id="recap-the-z-test">Recap: The <span class="math inline">\(z\)</span> test</h2>
+<p>To begin with, let’s quickly recap the idea of hypothesis testing using the <span class="math inline">\(z\)</span> test. As we learned, the <span class="math inline">\(z\)</span> test is an appropriate statistic to use if and only if we know the population mean and standard deviation of the original population.[^And we know that the sampling distribution will be normally distributed, but that’s more of an assumption than a requiement] The null hypothesis significance test assumes a treated population that is no different to the original population. We determine the location of our actual sample mean in the sampling distribution of the mean for that assumed null hypothesis distribution, and we reject that null hypothesis if the sample looks sufficiently extreme and therefore unlikely to have come from that distribution.</p>
+<p><span class="math display">\[ z = \frac{M - \mu}{\sigma_M} \]</span></p>
+<p>It’s the denominator here, the standard error of the mean, that describes the variability of the sampling distribution, and therefore determines the probability of a given outcome. The standard error quantifies how much difference is reasonable to expect between the sample mean and its population mean. To determine that standard error, we need to know the population standard deviation, <span class="math inline">\(\sigma\)</span>, and the sample size, <span class="math inline">\(n\)</span>.</p>
+<p><span class="math display">\[ \sigma_M = \frac{\sigma}{\sqrt{n}} \]</span></p>
+<p>So to use this <span class="math inline">\(z\)</span> test, we have to know the population standard deviation, <span class="math inline">\(\sigma\)</span>, which allows us to calculate this standard error. But like I mentioned when we introduced the <span class="math inline">\(z\)</span> test, it isn’t actually used very often. Most often in real research we don’t know the standard deviation, and if we don’t know the population standard deviation, we can’t use it to calculate the standard error, and so our <span class="math inline">\(z\)</span> test statistic is missing its denominator.</p>
+<p>Thankfully, this isn’t just a dead end. There is a very simple solution.</p>
+</section>
+<section id="from-z-to-t-the-estimated-standard-error" class="level2">
+<h2 data-anchor-id="from-z-to-t-the-estimated-standard-error">From <span class="math inline">\(z\)</span> to <span class="math inline">\(t\)</span>: The Estimated Standard Error</h2>
+<p>Which brings us to the <span class="math inline">\(t\)</span> test. The solution to not knowing the population standard deviation is simply to use our sample’s standard deviation to estimate the population variability. Instead of our denominator being the standard error of the mean, <span class="math inline">\(\sigma_M\)</span>, we call it the estimated standard error of the mean, <span class="math inline">\(s_M\)</span>. You’ll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics. So we’re still referring to a standard deviation here, but we’ve swapped out the <span class="math inline">\(\sigma\)</span> for the lowercase <span class="math inline">\(s\)</span>.</p>
+<p>So this is the fundamental difference between the <span class="math inline">\(z\)</span> statistic and the <span class="math inline">\(t\)</span> statistic. To use the <span class="math inline">\(z\)</span> statistic we must know the population standard deviation. If we don’t, we use estimated standard error, <span class="math inline">\(s_M\)</span>, in place of the unknown population standard error.</p>
+<section id="formulas-for-standard-error-and-estimated-standard-error" class="level3">
+<h3 data-anchor-id="formulas-for-standard-error-and-estimated-standard-error">Formulas for Standard Error and Estimated Standard Error</h3>
+<p>Remember that standard error, <span class="math inline">\(\sigma_M\)</span>, is <span class="math inline">\(\sigma\)</span> over the square root of <span class="math inline">\(n\)</span>, the sample size, or the square root of variance over the square root of <span class="math inline">\(n\)</span>, or the square root of variance over <span class="math inline">\(n\)</span>. These are all algebraically equivalent. The estimated standard error, <span class="math inline">\(s_M\)</span>, is <span class="math inline">\(s\)</span>, the sample standard deviation, over the square root of <span class="math inline">\(n\)</span>, or the square root of <span class="math inline">\(s^2\)</span> (sample variance) over the square root of <span class="math inline">\(n\)</span>, or the square root of sample variance over <span class="math inline">\(n\)</span>. Again, these are all equivalent.</p>
+<p>Now, you could be forgiven for thinking at first that this just seems like a cheap trick, or not a real difference, maybe a distinction without a difference. The only difference here is the symbol and the name for the denominator of the test statistic. In every other way this is just the <span class="math inline">\(z\)</span> test. You might say the <span class="math inline">\(t\)</span> test is just the <span class="math inline">\(z\)</span> test in a different pair of pants. And that’s true in a way. But hopefully your next thought should take you back to why we took such care when we learned about variance and standard deviation to point out that samples give a biased underestimate of population variability and that we needed to correct for that by dividing by the degrees of freedom rather than by <span class="math inline">\(n\)</span>.</p>
+</section>
+</section>
+<section id="degrees-of-freedom-revisited" class="level2">
+<h2 data-anchor-id="degrees-of-freedom-revisited">Degrees of Freedom Revisited</h2>
+<p>So this brings us back to this idea of degrees of freedom. It’s going to be relevant to us now once again, now that we’re dealing with the sample variance and the <span class="math inline">\(t\)</span> statistic. We didn’t need to think about it with the <span class="math inline">\(z\)</span> test because the <span class="math inline">\(z\)</span> test relied on us just possessing knowledge somehow of the population variance. And remember, when we learned to calculate population variance, we just divided by <span class="math inline">\(N\)</span>, the number of scores in the population. No degrees of freedom required. But to calculate sample variance and standard deviation, we had to divide by degrees of freedom.</p>
+<p>Again, this was because we lose a degree of freedom in the process of calculating sample standard deviation, because we first have to calculate the sample mean in order to calculate the deviation scores — how far each individual score deviates from that mean. And calculating that statistic, the mean, lost us a degree of freedom because one score was then constrained. It was no longer free to vary. And because we’re using the sample variability as part of the <span class="math inline">\(t\)</span> statistic here, we have to be aware of the degrees of freedom for the test.</p>
+<p>Specifically, the kind of <span class="math inline">\(t\)</span> test we’ll introduce in this lecture is called the single-sample <span class="math inline">\(t\)</span> test. And it’s the closest analog of the <span class="math inline">\(z\)</span> test that we used, where we know the original population mean. Here we just no longer claim to know the original population variability. And for this single-sample <span class="math inline">\(t\)</span> test, <span class="math inline">\(df = n - 1\)</span>, just as it was when we calculated a sample’s variance or standard deviation.</p>
+<p>But it’s worth flagging at this point that whether degrees of freedom is <span class="math inline">\(n - 1\)</span> or something else depends on what kind of <span class="math inline">\(t\)</span> test we’re doing, and we’ll introduce other kinds of <span class="math inline">\(t\)</span> tests in the coming lectures, which will have different degrees of freedom.</p>
+</section>
+<section id="the-t-distribution" class="level2">
+<h2 data-anchor-id="the-t-distribution">The <span class="math inline">\(t\)</span> Distribution</h2>
+<p>So here’s the familiar normal curve. This is what we were dealing with to determine probabilities for the <span class="math inline">\(z\)</span> test. Again, we didn’t have to think about degrees of freedom because there is just one mathematically defined normal curve. The probabilities were always the same, no matter what our sample size was.</p>
+<p>Now that we have to consider degrees of freedom, the picture is slightly more complicated. And that’s because there’s actually no single <span class="math inline">\(t\)</span> curve. The <span class="math inline">\(t\)</span> distribution is actually a family of distributions. There’s a slightly different <span class="math inline">\(t\)</span> curve, with slightly different probabilities, for each possible value of degrees of freedom. It just depends on our sample size.</p>
+<p>But you can begin to see the trend here. With very low values of degrees of freedom — in other words, with small sample sizes — the <span class="math inline">\(t\)</span> curve is noticeably lower at the peak and higher in the tails. This means it has greater variability than the true normal distribution. The scores are more spread out here. As we increase the degrees of freedom for the curve, its peak gets higher and the tails get lower. The shape of the curve gets closer and closer to the shape of the normal curve. But it never quite matches it.</p>
+<p>And this is once again to do with the fact that samples inherently underestimate population variability. The <span class="math inline">\(t\)</span> distributions acknowledge and compensate for this by having more variability than the normal curve. And by scaling that difference with degrees of freedom, the lower the sample size, the lower the degrees of freedom, and the more variability in the sampling distribution as compared to the true normal curve that we use when we just know the population parameters and we don’t have to estimate anything based on our sample.</p>
+<section id="how-the-t-distribution-changes-with-degrees-of-freedom" class="level3">
+<h3 data-anchor-id="how-the-t-distribution-changes-with-degrees-of-freedom">How the <span class="math inline">\(t\)</span> Distribution Changes with Degrees of Freedom</h3>
+<p>The graph below shows how the <span class="math inline">\(t\)</span> distribution changes along with degrees of freedom, with the true normal distribution shown for reference. I only go up to degrees of freedom of 30 here. But in reality, we could have larger sample sizes, and degrees of freedom can theoretically go up to infinity. But again, you can see the trend. The shape of the curve changes very quickly as we increase degrees of freedom from very small values to slightly larger values. But the change slows down, the higher we get.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Explore the <span class="math inline">\(t\)</span> distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-factory="makeTDistributionDfExplorer" data-interactive-options="{&quot;df&quot;:1,&quot;controlsOpen&quot;:false}" data-interactive-figure="tDistributionDfExplorer">
+<div class="interactive-figure-fallback">
+Interactive t-distribution explorer controlled by degrees of freedom.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="df = 1" data-action="{&quot;df&quot;:1,&quot;animate&quot;:false}">
+<p>With one degree of freedom, the <span class="math inline">\(t\)</span> curve is much flatter than the normal curve and more of the probability is out in the tails.</p>
+</div>
+<div class="tutorial-step" data-title="df = 2" data-action="{&quot;df&quot;:2,&quot;animate&quot;:true}">
+<p>Increasing to two degrees of freedom already pulls the center upward and the tails downward.</p>
+</div>
+<div class="tutorial-step" data-title="df = 5" data-action="{&quot;df&quot;:5,&quot;animate&quot;:true}">
+<p>By five degrees of freedom, the curve is still visibly wider than the normal curve, but the difference is smaller.</p>
+</div>
+<div class="tutorial-step" data-title="df = 10" data-action="{&quot;df&quot;:10,&quot;animate&quot;:true}">
+<p>At ten degrees of freedom, the <span class="math inline">\(t\)</span> distribution is approaching the normal distribution.</p>
+</div>
+<div class="tutorial-step" data-title="df = 30" data-action="{&quot;df&quot;:30,&quot;animate&quot;:true,&quot;controls-open&quot;:true}">
+<p>By thirty degrees of freedom, the difference is subtle. Use the control to try values in between.</p>
+</div>
+</div>
+</div>
+</div>
+<p>In other words, there is a big difference between the distributions for degrees of freedom of one and two, or four and five, but a comparatively small difference between the distributions for twenty-eight and twenty-nine or twenty-nine and thirty degrees of freedom.</p>
+</section>
+</section>
+<section id="finding-probabilities-with-the-t-distribution" class="level2">
+<h2 data-anchor-id="finding-probabilities-with-the-t-distribution">Finding Probabilities with the <span class="math inline">\(t\)</span> Distribution</h2>
+<p>So now that we know about the properties of the distribution, particularly how it depends on degrees of freedom, we’re ready to start thinking about probabilities. With the normal distribution and the <span class="math inline">\(z\)</span> test, we could determine the area under the curve for, say, the most extreme five percent of the distribution. And we want to do exactly the same thing for the <span class="math inline">\(t\)</span> distribution. The only difference is that, again, there is more than one <span class="math inline">\(t\)</span> distribution. And so the specific probabilities depend on the degrees of freedom.</p>
+<section id="the-t-table" class="level3">
+<h3 data-anchor-id="the-t-table">The <span class="math inline">\(t\)</span> Table</h3>
+<p>So instead of referring to the unit normal table like we’ve done in the past, we refer to a <span class="math inline">\(t\)</span> table. Like the unit normal table, this will give us the <span class="math inline">\(t\)</span> values associated with different regions of the distribution. But unlike the unit normal table, the <span class="math inline">\(t\)</span> table must include values for different degrees of freedom.</p>
+<div class="interactive-figure-mount" data-interactive-factory="makeTTable" data-interactive-options="{&quot;title&quot;:&quot;t critical values&quot;,&quot;df&quot;:{&quot;from&quot;:1,&quot;to&quot;:30},&quot;alphas&quot;:[0.1,0.05,0.025,0.01,0.005],&quot;confidence&quot;:false,&quot;interactive&quot;:false}" data-interactive-figure="staticTTable">
+<div class="interactive-figure-fallback">
+Static table of t critical values.
+</div>
+</div>
+<p>So typically the table looks something like this. There’s a column for degrees of freedom, followed by columns for different alpha values of .1, .05, and so on. And often it’ll give these values for both one-tailed and two-tailed hypotheses. In other words, if you had a one-tailed hypothesis, an alpha .05, you’d look in the second column here. If your hypothesis was two-tailed with <span class="math inline">\(\alpha = .05\)</span>, you’d look in the third column. Then you find the right row based on your degrees of freedom, which for a single-sample <span class="math inline">\(t\)</span> test is one less than your sample size.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Connect the table to the critical regions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-factory="makeTTable" data-interactive-options="{&quot;title&quot;:&quot;t critical values&quot;,&quot;df&quot;:{&quot;from&quot;:1,&quot;to&quot;:30},&quot;alphas&quot;:[0.1,0.05,0.025,0.01,0.005],&quot;confidence&quot;:true,&quot;selectedTail&quot;:&quot;two&quot;,&quot;selected&quot;:{&quot;df&quot;:22,&quot;tail&quot;:&quot;two&quot;,&quot;alpha&quot;:0.05},&quot;tableMaxHeight&quot;:&quot;18rem&quot;}" data-interactive-figure="tCriticalValueTable">
+<div class="interactive-figure-fallback">
+Interactive t critical-value table.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-factory="makeDistributionGraph" data-interactive-options="{&quot;distribution&quot;:&quot;t&quot;,&quot;df&quot;:{&quot;$value&quot;:&quot;tCriticalValueTable.df&quot;},&quot;title&quot;:{&quot;$template&quot;:&quot;df = ${tCriticalValueTable.df}&quot;},&quot;style&quot;:&quot;minimal&quot;,&quot;height&quot;:160,&quot;xDomain&quot;:[-4,4],&quot;yDomain&quot;:[0,0.45],&quot;xTicks&quot;:5,&quot;shade&quot;:{&quot;$value&quot;:&quot;tCriticalValueTable.shade&quot;},&quot;maxWidth&quot;:&quot;24rem&quot;}" data-interactive-figure="tCriticalCurve">
+<div class="interactive-figure-fallback">
+t distribution curve with the selected critical region shaded.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Two-tailed" data-action="{&quot;df&quot;:22,&quot;tail&quot;:&quot;two&quot;,&quot;alpha&quot;:0.05,&quot;animate&quot;:false}">
+<p>For the class example, <span class="math inline">\(n = 23\)</span>, so <span class="math inline">\(df = 22\)</span>. With a two-tailed <span class="math inline">\(\alpha = .05\)</span>, the critical values are about <span class="math inline">\(\pm 2.07\)</span>.</p>
+</div>
+<div class="tutorial-step" data-title="Smaller df" data-action="{&quot;df&quot;:10,&quot;tail&quot;:&quot;two&quot;,&quot;alpha&quot;:0.05,&quot;animate&quot;:true}">
+<p>With fewer degrees of freedom, the same two-tailed alpha level needs a larger critical value because the <span class="math inline">\(t\)</span> distribution has heavier tails.</p>
+</div>
+<div class="tutorial-step" data-title="One-tailed" data-action="{&quot;df&quot;:22,&quot;tail&quot;:&quot;right&quot;,&quot;alpha&quot;:0.05,&quot;animate&quot;:true}">
+<p>For a one-tailed <span class="math inline">\(\alpha = .05\)</span> test with the same degrees of freedom, all of the critical area is on one side.</p>
+</div>
+</div>
+</div>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="11_t_test_t_table" aria-label="Determine Probabilities"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Determine Probabilities</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="df22_critical_t"><div class="quiz-prompt"><p>For df = 22 and a two-tailed alpha of .05, what critical t values
+should you use?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_t_table-df22_critical_t" id="11_t_test_t_table-df22_critical_t-option-1" value="0" aria-labelledby="11_t_test_t_table-df22_critical_t-option-1-text"><div class="quiz-choice-text" id="11_t_test_t_table-df22_critical_t-option-1-text"><p>+/-2.07</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_table-df22_critical_t" id="11_t_test_t_table-df22_critical_t-option-2" value="1" aria-labelledby="11_t_test_t_table-df22_critical_t-option-2-text"><div class="quiz-choice-text" id="11_t_test_t_table-df22_critical_t-option-2-text"><p>+/-1.00</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_table-df22_critical_t" id="11_t_test_t_table-df22_critical_t-option-3" value="2" aria-labelledby="11_t_test_t_table-df22_critical_t-option-3-text"><div class="quiz-choice-text" id="11_t_test_t_table-df22_critical_t-option-3-text"><p>+/-1.64</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_table-df22_critical_t" id="11_t_test_t_table-df22_critical_t-option-4" value="3" aria-labelledby="11_t_test_t_table-df22_critical_t-option-4-text"><div class="quiz-choice-text" id="11_t_test_t_table-df22_critical_t-option-4-text"><p>+/-3.50</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>+/-2.07</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>With 22 degrees of freedom and two tails at alpha .05, the critical
+values are about +/-2.07.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="11_t_test_t_table">{"questions":[{"options":[{"correct":true,"textHtml":"\u003cp\u003e+/-2.07\u003c/p\u003e","text":"+/-2.07"},{"textHtml":"\u003cp\u003e+/-1.00\u003c/p\u003e","text":"+/-1.00"},{"textHtml":"\u003cp\u003e+/-1.64\u003c/p\u003e","text":"+/-1.64"},{"textHtml":"\u003cp\u003e+/-3.50\u003c/p\u003e","text":"+/-3.50"}],"explanationHtml":"\u003cp\u003eWith 22 degrees of freedom and two tails at alpha .05, the critical\nvalues are about +/-2.07.\u003c/p\u003e","answerHtml":"","type":"multiple-choice","promptHtml":"\u003cp\u003eFor df = 22 and a two-tailed alpha of .05, what critical t values\nshould you use?\u003c/p\u003e","explanation":"With 22 degrees of freedom and two tails at alpha .05, the critical values are about +/-2.07.","prompt":"For df = 22 and a two-tailed alpha of .05, what critical t values should you use?","id":"df22_critical_t"}],"titleHtml":"\u003cp\u003eDetermine Probabilities\u003c/p\u003e","title":"Determine Probabilities","id":"11_t_test_t_table"}</script></section>
+</section>
+<section id="using-r" class="level3">
+<h3 data-anchor-id="using-r">Using R</h3>
+<p>Or, of course, we can use R instead. We used the <code>pnorm()</code> and <code>qnorm()</code> functions when we were dealing with the normal distribution. For the <span class="math inline">\(t\)</span> distribution there are analogous functions, <code>pt()</code> and <code>qt()</code>. The main difference is that, like we said, to find a particular <span class="math inline">\(t\)</span> distribution, we need to state our degrees of freedom. If we tried to run the function without it, R will just give us an error message. So we specify <code>df</code> as an argument within the function.</p>
+</section>
+</section>
+<section id="when-to-use-the-single-sample-t-test" class="level2">
+<h2 data-anchor-id="when-to-use-the-single-sample-t-test">When to Use the Single-Sample T Test</h2>
+<p>Here’s the familiar inferential process diagram again.</p>
+<div class="interactive-figure-mount" data-interactive-factory="makeInferentialDiagram" data-interactive-options="{&quot;preset&quot;:&quot;single-t&quot;}" data-interactive-figure="singleTInferentialDiagram">
+<div class="interactive-figure-fallback">
+Inferential process diagram for a single-sample t test.
+</div>
+</div>
+<p>And so again, the situation that leads us to use a single-sample <span class="math inline">\(t\)</span> test is one in which we only partially know the characteristics of the original untreated population. Specifically, we know the population mean, but we do not know the population standard deviation. That means we have to use the sample standard deviation along with sample size to determine the estimated standard error of the mean for the sampling distribution.</p>
+<p>And as with the <span class="math inline">\(z\)</span> test, we assume, according to our null hypothesis, that the treated population mean is the same as the untreated population mean. So we locate our sample mean in the sampling distribution for the null population. And we decide whether it’s sufficiently unlikely to have come from that unchanged population. If so, we reject the null hypothesis and admit that the treatment might have caused the population mean to change.</p>
+</section>
+<section id="example-reaction-time-data" class="level2">
+<h2 data-anchor-id="example-reaction-time-data">Example: Reaction Time Data</h2>
+<p>So now we’ll work through an example hypothesis test using our new tool, the <span class="math inline">\(t\)</span> test. For the purposes of the example, we’ll use some data from that reaction time test you all took a few lectures ago. Here are the scores, in milliseconds (two people didn’t record a score, hence the NAs):</p>
+<div style="text-align: center; font-size: 1.05em;">
+<p>327 335 359 430 275.4<br>
+272 350 343.2 278 354<br>
+303 328 371 312 346<br>
+359 NA 259 313.6 258<br>
+244 374.4 NA 338 290</p>
+</div>
+<p>And if you count them up, you’ll find that there are 23 valid scores. This is our sample size, and it’ll be important in a moment for determining the degrees of freedom for the <span class="math inline">\(t\)</span> distribution.</p>
+<p>And I constructed a group frequency table and a grouped histogram for the scores. It’s worth reflecting for a moment on why I made these the way I did; why I selected this interval width of 20 for the table and histogram, and why I used the histogram rather than a bar chart or something else.</p>
+<div class="interactive-figure-mount" data-interactive-factory="makeFrequencyTable" data-interactive-options="{&quot;data&quot;:[327,335,359,430,275.4,272,350,343.2,278,354,303,328,371,312,346,359,259,313.6,258,244,374.4,338,290],&quot;binWidth&quot;:20,&quot;binStart&quot;:240,&quot;binStop&quot;:440,&quot;variable&quot;:&quot;Reaction Time (ms)&quot;}" data-interactive-figure="classRtFrequencyTable">
+<div class="interactive-figure-fallback">
+Grouped frequency table of class reaction times with interval width 20.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;histogram&quot;,&quot;data&quot;:[327,335,359,430,275.4,272,350,343.2,278,354,303,328,371,312,346,359,259,313.6,258,244,374.4,338,290],&quot;binWidth&quot;:20,&quot;binStart&quot;:240,&quot;binStop&quot;:440,&quot;xDomain&quot;:[240,440],&quot;xTicks&quot;:10,&quot;labels&quot;:{&quot;x&quot;:&quot;Reaction Time (ms)&quot;,&quot;y&quot;:&quot;Frequency&quot;}}" data-interactive-figure="classRtHistogram">
+<div class="interactive-figure-fallback">
+Grouped histogram of class reaction times. The population mean of 284 ms sits toward the lower end of the sample distribution.
+</div>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="11_t_test_grouped_frequencies" aria-label="Why?"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Why?</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="grouped_histogram_reason"><div class="quiz-prompt"><p>Why might we use a grouped frequency table and histogram for the
+class reaction-time scores?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Reaction-time scores can have many distinct values. Grouping them
+into intervals makes the overall shape easier to see, although it
+sacrifices exact score information.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Grouped displays are useful when raw or ungrouped frequencies are too
+detailed to reveal the pattern clearly.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="11_t_test_grouped_frequencies">{"questions":[{"type":"free-response","explanationHtml":"\u003cp\u003eGrouped displays are useful when raw or ungrouped frequencies are too\ndetailed to reveal the pattern clearly.\u003c/p\u003e","answerHtml":"\u003cp\u003eReaction-time scores can have many distinct values. Grouping them\ninto intervals makes the overall shape easier to see, although it\nsacrifices exact score information.\u003c/p\u003e","answer":"Reaction-time scores can have many distinct values. Grouping them into intervals makes the overall shape easier to see, although it sacrifices exact score information.","promptHtml":"\u003cp\u003eWhy might we use a grouped frequency table and histogram for the\nclass reaction-time scores?\u003c/p\u003e","explanation":"Grouped displays are useful when raw or ungrouped frequencies are too detailed to reveal the pattern clearly.","prompt":"Why might we use a grouped frequency table and histogram for the class reaction-time scores?","id":"grouped_histogram_reason"}],"titleHtml":"\u003cp\u003eWhy?\u003c/p\u003e","title":"Why?","id":"11_t_test_grouped_frequencies"}</script></section>
+<!-- TODO: The lecture version of the histogram marks the population mean with a red dashed line and a "μ = 284" label (slides 11, media/class-reaction-times-histogram.svg). graph-generator doesn't currently support reference lines on histograms; add support or adjust the prose. -->
+<p>I’ve also put a red dashed line on the graph representing the population mean, according to that website, which you might remember was 284 milliseconds. In the past when we did our silly Spiderman <span class="math inline">\(z\)</span> test example, I just guessed at the population standard deviation. But now let’s not pretend to know that population standard deviation. If we want to know whether the class’s sample average is significantly different from that population average, you can see that this is a situation for the <span class="math inline">\(t\)</span> test. We know the population mean, but not the variability. We’ll have to estimate the standard error using our sample’s variability.</p>
+<p>Now, the distribution is a slightly weird shape. It’s certainly not normal. And since our sample size is a bit less than 30, this actually throws off some of the statistical assumptions. But let’s just run with it anyway. From just eyeballing the distribution, you might guess that the class’s sample average is higher than the population average.</p>
+<p>So how much higher? And is the difference sufficiently unlikely, given the variability in the data, that we could call the difference statistically significant? Well, let’s conduct a formal hypothesis test. Remember, the four steps we’ll follow: we need to state hypotheses, locate the critical region, calculate the test statistic, and then make a decision about the null hypothesis.</p>
+<section id="step-1-state-the-hypotheses" class="level3">
+<h3 data-anchor-id="step-1-state-the-hypotheses">Step 1: State the Hypotheses</h3>
+<p>So first, our hypotheses. What do you think they’ll be? There’s room for disagreement, but a nondirectional hypothesis seems most appropriate here. It’s not like you were all bitten by radioactive spiders or anything, so there’s no real reason to suspect that your average reaction times as a class should be higher or lower than the average for the reaction time website.</p>
+<p>So if we go with a nondirectional hypothesis, our null hypothesis states that statistics students have the same average reaction times as the general population: <span class="math inline">\(\mu = 284\)</span>. And the alternative hypothesis would be that statistics students have different reaction times to the general population. <!-- [Possible issue: "different reaction times to" could more formally be "different reaction times from/than"] --></p>
+</section>
+<section id="step-2-locate-the-critical-region" class="level3">
+<h3 data-anchor-id="step-2-locate-the-critical-region">Step 2: Locate the Critical Region</h3>
+<p>Step two is to specify our alpha level and identify the associated critical regions of the distribution. And again, for the <span class="math inline">\(t\)</span> test, unlike the <span class="math inline">\(z\)</span> test, this now depends on the sample size, which determines the degrees of freedom for the distribution. For this kind of single-sample <span class="math inline">\(t\)</span> test, <span class="math inline">\(df = n - 1\)</span>. So since we had a sample of 23 scores, our degrees of freedom is 22. We’ll use our traditional <span class="math inline">\(\alpha = 0.05\)</span> here. So the critical <span class="math inline">\(t\)</span> values are <span class="math inline">\(\pm 2.07\)</span>. So if we find a <span class="math inline">\(t\)</span> statistic for our sample that exceeds <span class="math inline">\(\pm 2.07\)</span>, we will reject the null hypothesis.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+</section>
+<section id="step-3-calculate-the-t-statistic" class="level3">
+<h3 data-anchor-id="step-3-calculate-the-t-statistic">Step 3: Calculate the T Statistic</h3>
+<p>Next we calculate the <span class="math inline">\(t\)</span> statistic for our sample. Remember, <span class="math inline">\(t = \frac{M - \mu}{s_M}\)</span>, the sample mean minus the population mean, divided by <span class="math inline">\(s_M\)</span>, the estimated standard error of the mean. Again, the numerator is the same as it was for our <span class="math inline">\(z\)</span> test. The only difference is that the denominator is the estimated standard error. Since we don’t know the population standard deviation, we therefore have to estimate it using the sample standard deviation before we can find the standard error of the sampling distribution.</p>
+<p>So this <span class="math inline">\(t\)</span> statistic quantifies the difference between the observed sample mean and the hypothesized population mean, divided by the estimated standard error. In other words, it’s a ratio of how much difference we saw between the means to the standard error, which tells us how much of a difference we would expect due to chance alone.</p>
+<p>So our population mean is still 284 milliseconds. And having calculated the class’s sample average, it comes out at 322.59 milliseconds, and the standard deviation comes to 45.31 milliseconds.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+</section>
+<section id="step-4-make-a-decision" class="level3">
+<h3 data-anchor-id="step-4-make-a-decision">Step 4: Make a Decision</h3>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="11_t_test_t_statistic" aria-label="t Statistic Quiz"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>t Statistic Quiz</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="reaction_t"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>For the reaction-time example, M = 322.59, mu = 284, and the
+estimated standard error is about 9.46. What is t?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>4.08</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>t = (322.59 - 284) / 9.46, which is about 4.08.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="reaction_decision"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>If the critical values are +/-2.07 and t = 4.08, what should you
+do?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_t_statistic-reaction_decision" id="11_t_test_t_statistic-reaction_decision-option-1" value="0" aria-labelledby="11_t_test_t_statistic-reaction_decision-option-1-text"><div class="quiz-choice-text" id="11_t_test_t_statistic-reaction_decision-option-1-text"><p>Reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_statistic-reaction_decision" id="11_t_test_t_statistic-reaction_decision-option-2" value="1" aria-labelledby="11_t_test_t_statistic-reaction_decision-option-2-text"><div class="quiz-choice-text" id="11_t_test_t_statistic-reaction_decision-option-2-text"><p>Fail to reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_statistic-reaction_decision" id="11_t_test_t_statistic-reaction_decision-option-3" value="2" aria-labelledby="11_t_test_t_statistic-reaction_decision-option-3-text"><div class="quiz-choice-text" id="11_t_test_t_statistic-reaction_decision-option-3-text"><p>Change to a one-tailed test</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_t_statistic-reaction_decision" id="11_t_test_t_statistic-reaction_decision-option-4" value="3" aria-labelledby="11_t_test_t_statistic-reaction_decision-option-4-text"><div class="quiz-choice-text" id="11_t_test_t_statistic-reaction_decision-option-4-text"><p>Conclude the sample mean equals the population mean</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Reject the null hypothesis</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The obtained t statistic is inside the critical region.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="11_t_test_t_statistic">{"questions":[{"tolerance":"2.0e-2","answerHtml":"\u003cp\u003e4.08\u003c/p\u003e","type":"numeric","explanationHtml":"\u003cp\u003et = (322.59 - 284) / 9.46, which is about 4.08.\u003c/p\u003e","answer":"4.08","promptHtml":"\u003cp\u003eFor the reaction-time example, M = 322.59, mu = 284, and the\nestimated standard error is about 9.46. What is t?\u003c/p\u003e","explanation":"t = (322.59 - 284) / 9.46, which is about 4.08.","prompt":"For the reaction-time example, M = 322.59, mu = 284, and the estimated standard error is about 9.46. What is t?","id":"reaction_t"},{"options":[{"correct":true,"textHtml":"\u003cp\u003eReject the null hypothesis\u003c/p\u003e","text":"Reject the null hypothesis"},{"textHtml":"\u003cp\u003eFail to reject the null hypothesis\u003c/p\u003e","text":"Fail to reject the null hypothesis"},{"textHtml":"\u003cp\u003eChange to a one-tailed test\u003c/p\u003e","text":"Change to a one-tailed test"},{"textHtml":"\u003cp\u003eConclude the sample mean equals the population mean\u003c/p\u003e","text":"Conclude the sample mean equals the population mean"}],"explanationHtml":"\u003cp\u003eThe obtained t statistic is inside the critical region.\u003c/p\u003e","answerHtml":"","type":"multiple-choice","promptHtml":"\u003cp\u003eIf the critical values are +/-2.07 and t = 4.08, what should you\ndo?\u003c/p\u003e","explanation":"The obtained t statistic is inside the critical region.","prompt":"If the critical values are +/-2.07 and t = 4.08, what should you do?","id":"reaction_decision"}],"titleHtml":"\u003cp\u003et Statistic Quiz\u003c/p\u003e","title":"t Statistic Quiz","id":"11_t_test_t_statistic"}</script></section>
+<p>Having calculated our statistic, step four is to make our decision. We reject the null hypothesis if the test statistic is sufficiently unlikely, assuming the null hypothesis to be true. In other words, if our calculated test statistic is in the critical regions we determined in step two, we know our sample is unlikely enough to make us reject the null hypothesis.</p>
+<p>And you should have calculated that the <span class="math inline">\(t\)</span> statistic of 4.08 is indeed within the critical region. So our class’s average reaction time appears to be significantly different from that website’s reported population average of 284 milliseconds.</p>
+</section>
+<section id="step-4a-effect-size" class="level3">
+<h3 data-anchor-id="step-4a-effect-size">Step 4a: Effect size</h3>
+<p>We need to remind ourselves about the idea of effect size that we introduced with the <span class="math inline">\(z\)</span> test. Remember, effect size quantifies the absolute magnitude of the difference between groups, independent of sample size or statistical significance. We can use a version of Cohen’s <span class="math inline">\(d\)</span> for the single sample <span class="math inline">\(t\)</span> test, just as we did with the <span class="math inline">\(z\)</span> test. Like the <span class="math inline">\(t\)</span> statistic itself as compared with the <span class="math inline">\(z\)</span> statistic, the only difference here is that we use sample standard deviation (<span class="math inline">\(s\)</span>) in place of the unknown population standard deviation (<span class="math inline">\(\sigma\)</span>).</p>
+</section>
+</section>
+<section id="interpreting-the-results" class="level2">
+<h2 data-anchor-id="interpreting-the-results">Interpreting the Results</h2>
+<p>To go back to this diagram, we’re concluding that the two populations are different. We could begin speculating about why that might be, and it depends what exactly we think the treatment is and how it caused the difference. If we wanted to get headlines, maybe we could say something like “statistics makes your brain work slower.” Or if we were being a little more restrained, we might say that maybe all of the great statistics knowledge you were learning during that lecture was making your brain work pretty hard already, which made your reaction times a bit slower.</p>
+<p>Or maybe a lot of people on that website take the test a bunch of times, rather than just five, like most of you did. And maybe their reaction times got a little faster with practice, so maybe our class was just unpracticed at this task rather than slower in general. Or maybe we just have a pretty small sample here and happened by chance to get an extreme sample mean from the null distribution. Maybe we’re making a Type I error. This is a good lesson on why just making up hypotheses and testing them with small samples can produce statistically significant but effectively meaningless results. But it was good practice at calculating a <span class="math inline">\(t\)</span> test using data you generated yourselves. And that’s all we were looking for.</p>
+</section>
+<section id="research-designs-for-the-single-sample-t-test" class="level2">
+<h2 data-anchor-id="research-designs-for-the-single-sample-t-test">Research Designs for the Single Sample <span class="math inline">\(t\)</span> Test</h2>
+<p>First, let’s take a moment to think about what kind of research designs necessitate the single sample <span class="math inline">\(t\)</span> test that we’ve been talking about. Remember, the situation is one in which we know the population mean but not the population standard deviation.</p>
+<p>One example that came to my mind, and one that features in the problem sets, is to do with the population distribution of sleep. A common sense idea that you’ve probably heard of is that people should get 8 hours of sleep per night. Now, this is scientifically questionable — the research is not at all clear on that — but based on that common sense theory, we might expect that the population distribution will have an average of 8 hours of sleep. That doesn’t tell us what the population standard deviation is; we’d have to estimate that based on a sample. Say we want to know if a sample of Barnard students get significantly more or less sleep than this expected population. This would be a good situation for a single sample <span class="math inline">\(t\)</span> test.</p>
+<p>Another situation that comes to mind is one in which we have a good, practical or theoretical reason to think we know the population mean. If we measure something in a way that should produce a predictable average score, we might justifiably assume that that will be the population average. Say we’re measuring people’s current level of happiness. We measure it using a five-point Likert scale. We have people circle the number from 1 to 5 that best reflects their current happiness level, and we label the points “a lot below average,” “a little below average,” “average,” “a little above average,” and “a lot above average.” It seems reasonable to assume that on average people would score average for this scale. By chance, some people would be a bit happier right now and some people a little bit less happy. There’ll be individual differences among the scores, sure, but that should balance out to the center of the scale. But again, we don’t know how variable the scores would be, so again, we’d have to estimate the variability from a sample.</p>
+<p>So we could administer some kind of treatment — maybe giving people some cash or a gift, or having them do some pro-social act — and then see if the treatment affected their happiness. We’d use the single sample <span class="math inline">\(t\)</span> test to see how likely it seemed that the treated population had a mean of three, as we’d expect the untreated population to have.</p>
+<p>Now it’s your turn: can you think of a research design of your own that would call for a single-sample <span class="math inline">\(t\)</span> test?</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="10_confidence_intervals_design" aria-label="Think of a Design"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Think of a Design</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="single_sample_design"><div class="quiz-prompt"><p>Think of a research design that would call for a single-sample
+t-test.</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A good answer describes one sample being compared with a known or
+theoretically expected population mean, while the population standard
+deviation is unknown.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>For example, compare Barnard students’ average sleep to an expected
+value of 8 hours, estimating variability from the sample.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="10_confidence_intervals_design">{"questions":[{"type":"free-response","explanationHtml":"\u003cp\u003eFor example, compare Barnard students’ average sleep to an expected\nvalue of 8 hours, estimating variability from the sample.\u003c/p\u003e","answerHtml":"\u003cp\u003eA good answer describes one sample being compared with a known or\ntheoretically expected population mean, while the population standard\ndeviation is unknown.\u003c/p\u003e","answer":"A good answer describes one sample being compared with a known or theoretically expected population mean, while the population standard deviation is unknown.","promptHtml":"\u003cp\u003eThink of a research design that would call for a single-sample\nt-test.\u003c/p\u003e","explanation":"For example, compare Barnard students’ average sleep to an expected value of 8 hours, estimating variability from the sample.","prompt":"Think of a research design that would call for a single-sample t-test.","id":"single_sample_design"}],"titleHtml":"\u003cp\u003eThink of a Design\u003c/p\u003e","title":"Think of a Design","id":"10_confidence_intervals_design"}</script></section>
+</section>
+<section id="assumptions-of-the-t-test" class="level2">
+<h2 data-anchor-id="assumptions-of-the-t-test">Assumptions of the <span class="math inline">\(t\)</span> Test</h2>
+<p>Something we didn’t mention as we worked through our example last time is the assumptions that the <span class="math inline">\(t\)</span> test rests upon. There are three assumptions to bear in mind.</p>
+<p>First, it assumes independent random sampling has been used — in other words, that values in the sample are independent of one another.</p>
+<p>Second, it assumes that the population is normally distributed, though with a large enough sample size, this assumption can be violated. If you think back to the central limit theorem, you can probably see the connection. The logic of hypothesis testing follows directly from the insights of the central limit theorem — specifically, its ability to predict the characteristics of distributions of sample means. So if we violate the assumptions of the central limit theorem to do with independent random sampling and normality, then the hypothesis test will be invalidated too.</p>
+<!-- [Possible typo: "central limit there" in original audio was likely "central limit theorem" — corrected throughout] -->
+<p>Lastly, the <span class="math inline">\(t\)</span> test assumes homogeneity of variance. This just means we’re assuming that the variability in the original and the treated populations is the same. This assumption is not unique to the <span class="math inline">\(t\)</span> test; it’s a general feature of this inferential procedure. If you think about the <span class="math inline">\(z\)</span> test, we knew the original population standard deviation and we just assumed that it would be unchanged in the null distribution. Now, with the <span class="math inline">\(t\)</span> test, we don’t know the original population standard deviation. We’re inferring the treated population’s standard deviation based on our sample, and we’re assuming that is just the same as the original population.</p>
+<p>Another way to think about this is: we’re investigating the possibility that some treatment changed the population mean, but we assume that the treatment does not affect the variability of the distribution. We think the treatment might nudge scores higher or lower on average, but without making them any more or less spread out. As is often the case, this is a convenient simplifying assumption. Whether or not it’s a reasonable assumption depends on the specifics of our research question and design. In some situations we can actually test the extent to which this assumption is met or violated. We’ll see an example of that in the next lecture.</p>
+</section>
+<section id="reporting-results" class="level2">
+<h2 data-anchor-id="reporting-results">Reporting Results</h2>
+<p>The final step of conducting a hypothesis test, which we’ve skipped over until now, is to formally report the results. There’s a fairly standard way of doing this. You can think of it as a list of things that you just have to report, and you will usually do it in the same order every time. There’s just not too much room here for creative license.</p>
+<p>Here’s an example based on our class reaction time data:</p>
+<blockquote class="blockquote">
+<p>Given the average reaction time for the population of <span class="math inline">\(\mu = 284\)</span> ms, according to humanbenchmark.com, a two-tailed single-sample <span class="math inline">\(t\)</span>-test suggests that statistics students have significantly different reaction times (<span class="math inline">\(M = 322.59\)</span>; <span class="math inline">\(SD = 45.31\)</span>) than the general population; <span class="math inline">\(t(22) = 4.08\)</span>, <span class="math inline">\(p &lt; .05\)</span>, <span class="math inline">\(d = 0.85\)</span>.</p>
+</blockquote>
+<p>There’s a lot of information packed into this fairly short, dry, technical sentence. You should report the kind of hypothesis test you’re doing, and if relevant, the expected population mean based on the null hypothesis. You should state verbally whether the test was significant or non-significant, and you should indicate the descriptive statistics — the sample mean and standard deviation — either in the text or as a summary table or graph. And then you report the numbers: the test statistic and its degrees of freedom in parentheses, the <span class="math inline">\(p\)</span> value, and the effect size.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="11_t_test_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 7 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 7</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="sample_size_power_t"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>An effect that exists is more likely to be detected if sample size n
+is large.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-sample_size_power_t" id="11_t_test_learning_checks-sample_size_power_t-option-1" value="true" aria-labelledby="11_t_test_learning_checks-sample_size_power_t-option-1-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-sample_size_power_t-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-sample_size_power_t" id="11_t_test_learning_checks-sample_size_power_t-option-2" value="false" aria-labelledby="11_t_test_learning_checks-sample_size_power_t-option-2-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-sample_size_power_t-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Larger samples tend to reduce the estimated standard error.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="t_vs_z"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>What are the differences between the t distribution and the z
+distribution?</p></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The z distribution is a single standard normal distribution. The t
+distribution is a family of distributions that depends on degrees of
+freedom, with heavier tails for small samples and an increasingly normal
+shape as df grows.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The t test uses estimated standard error because the population
+standard deviation is unknown.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="reported_t_result"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The results of a hypothesis test are reported as <span class="math inline"><em>t</em>(21) = 2.38, <em>p</em> &lt; .05</span>.
+What does the 21 represent?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-reported_t_result" id="11_t_test_learning_checks-reported_t_result-option-1" value="0" aria-labelledby="11_t_test_learning_checks-reported_t_result-option-1-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-reported_t_result-option-1-text"><p>Degrees of freedom</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-reported_t_result" id="11_t_test_learning_checks-reported_t_result-option-2" value="1" aria-labelledby="11_t_test_learning_checks-reported_t_result-option-2-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-reported_t_result-option-2-text"><p>Sample mean</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-reported_t_result" id="11_t_test_learning_checks-reported_t_result-option-3" value="2" aria-labelledby="11_t_test_learning_checks-reported_t_result-option-3-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-reported_t_result-option-3-text"><p>Sample size exactly</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-reported_t_result" id="11_t_test_learning_checks-reported_t_result-option-4" value="3" aria-labelledby="11_t_test_learning_checks-reported_t_result-option-4-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-reported_t_result-option-4-text"><p>The p-value</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Degrees of freedom</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The value in parentheses after t is the degrees of freedom.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="reported_t_sample_size"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>For that same reported result, <span class="math inline"><em>t</em>(21) = 2.38, <em>p</em> &lt; .05</span>:
+how many people were in the sample?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>For a single-sample <span class="math inline"><em>t</em></span> test,
+<span class="math inline"><em>d</em><em>f</em> = <em>n</em> − 1</span>.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>22</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Degrees of freedom for a single-sample <span class="math inline"><em>t</em></span> test is <span class="math inline"><em>n</em> − 1</span>, so <span class="math inline"><em>n</em> = 21 + 1 = 22</span>. And since <span class="math inline"><em>p</em> &lt; .05</span>, the statistical decision
+was to reject the null hypothesis.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="expected_t_null"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>What value of <span class="math inline"><em>t</em></span> would you
+expect to see if the null hypothesis is true?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>If there is no treatment effect, what should the numerator, <span class="math inline"><em>M</em> − <em>μ</em></span>, be on average?</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>If the null hypothesis is true, the sample mean should on average
+equal the population mean, making the numerator — and therefore <span class="math inline"><em>t</em></span> — zero on average.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="significant_t_factors"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">6</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which combination of factors is most likely to produce a significant
+value for the <span class="math inline"><em>t</em></span> statistic?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-significant_t_factors" id="11_t_test_learning_checks-significant_t_factors-option-1" value="0" aria-labelledby="11_t_test_learning_checks-significant_t_factors-option-1-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-significant_t_factors-option-1-text"><p>Large mean difference and small sample variability</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-significant_t_factors" id="11_t_test_learning_checks-significant_t_factors-option-2" value="1" aria-labelledby="11_t_test_learning_checks-significant_t_factors-option-2-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-significant_t_factors-option-2-text"><p>Small mean difference and large sample variability</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-significant_t_factors" id="11_t_test_learning_checks-significant_t_factors-option-3" value="2" aria-labelledby="11_t_test_learning_checks-significant_t_factors-option-3-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-significant_t_factors-option-3-text"><p>Small mean difference and small sample variability</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-significant_t_factors" id="11_t_test_learning_checks-significant_t_factors-option-4" value="3" aria-labelledby="11_t_test_learning_checks-significant_t_factors-option-4-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-significant_t_factors-option-4-text"><p>Large mean difference and large sample variability</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Large mean difference and small sample variability</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The <span class="math inline"><em>t</em></span> statistic is a ratio:
+the mean difference is the numerator, and the variability-based
+estimated standard error is the denominator. A big numerator and a small
+denominator give the largest <span class="math inline"><em>t</em></span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sd_power_t"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">7</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>An effect that exists is less likely to be detected if the sample
+standard deviation <span class="math inline"><em>s</em></span> is
+large.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-sd_power_t" id="11_t_test_learning_checks-sd_power_t-option-1" value="true" aria-labelledby="11_t_test_learning_checks-sd_power_t-option-1-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-sd_power_t-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="11_t_test_learning_checks-sd_power_t" id="11_t_test_learning_checks-sd_power_t-option-2" value="false" aria-labelledby="11_t_test_learning_checks-sd_power_t-option-2-text"><div class="quiz-choice-text" id="11_t_test_learning_checks-sd_power_t-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A larger sample standard deviation means a larger estimated standard
+error, which shrinks the <span class="math inline"><em>t</em></span>
+statistic for a given mean difference.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="11_t_test_learning_checks">{"questions":[{"type":"true-false","explanationHtml":"\u003cp\u003eLarger samples tend to reduce the estimated standard error.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","answer":true,"promptHtml":"\u003cp\u003eAn effect that exists is more likely to be detected if sample size n\nis large.\u003c/p\u003e","explanation":"Larger samples tend to reduce the estimated standard error.","prompt":"An effect that exists is more likely to be detected if sample size n is large.","id":"sample_size_power_t"},{"type":"free-response","explanationHtml":"\u003cp\u003eThe t test uses estimated standard error because the population\nstandard deviation is unknown.\u003c/p\u003e","answerHtml":"\u003cp\u003eThe z distribution is a single standard normal distribution. The t\ndistribution is a family of distributions that depends on degrees of\nfreedom, with heavier tails for small samples and an increasingly normal\nshape as df grows.\u003c/p\u003e","answer":"The z distribution is a single standard normal distribution. The t distribution is a family of distributions that depends on degrees of freedom, with heavier tails for small samples and an increasingly normal shape as df grows.","promptHtml":"\u003cp\u003eWhat are the differences between the t distribution and the z\ndistribution?\u003c/p\u003e","explanation":"The t test uses estimated standard error because the population standard deviation is unknown.","prompt":"What are the differences between the t distribution and the z distribution?","id":"t_vs_z"},{"options":[{"correct":true,"textHtml":"\u003cp\u003eDegrees of freedom\u003c/p\u003e","text":"Degrees of freedom"},{"textHtml":"\u003cp\u003eSample mean\u003c/p\u003e","text":"Sample mean"},{"textHtml":"\u003cp\u003eSample size exactly\u003c/p\u003e","text":"Sample size exactly"},{"textHtml":"\u003cp\u003eThe p-value\u003c/p\u003e","text":"The p-value"}],"explanationHtml":"\u003cp\u003eThe value in parentheses after t is the degrees of freedom.\u003c/p\u003e","answerHtml":"","type":"multiple-choice","promptHtml":"\u003cp\u003eThe results of a hypothesis test are reported as \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e(21) = 2.38, \u003cem\u003ep\u003c/em\u003e \u0026lt; .05\u003c/span\u003e.\nWhat does the 21 represent?\u003c/p\u003e","explanation":"The value in parentheses after t is the degrees of freedom.","prompt":"The results of a hypothesis test are reported as t(21) = 2.38, p \u003c .05. What does the 21 represent?","id":"reported_t_result"},{"tolerance":"0","prompt":"For that same reported result, t(21) = 2.38, p \u003c .05: how many people were in the sample?","hints":[{"textHtml":"\u003cp\u003eFor a single-sample \u003cspan class=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e test,\n\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003ed\u003c/em\u003e\u003cem\u003ef\u003c/em\u003e = \u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e.\u003c/p\u003e","text":"For a single-sample t test, df = n - 1."}],"type":"numeric","explanationHtml":"\u003cp\u003eDegrees of freedom for a single-sample \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e test is \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e, so \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e = 21 + 1 = 22\u003c/span\u003e. And since \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003ep\u003c/em\u003e \u0026lt; .05\u003c/span\u003e, the statistical decision\nwas to reject the null hypothesis.\u003c/p\u003e","answerHtml":"\u003cp\u003e22\u003c/p\u003e","answer":"22","promptHtml":"\u003cp\u003eFor that same reported result, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e(21) = 2.38, \u003cem\u003ep\u003c/em\u003e \u0026lt; .05\u003c/span\u003e:\nhow many people were in the sample?\u003c/p\u003e","explanation":"Degrees of freedom for a single-sample t test is n - 1, so n = 21 + 1 = 22. And since p \u003c .05, the statistical decision was to reject the null hypothesis.","id":"reported_t_sample_size"},{"tolerance":"0","prompt":"What value of t would you expect to see if the null hypothesis is true?","hints":[{"textHtml":"\u003cp\u003eIf there is no treatment effect, what should the numerator, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e − \u003cem\u003eμ\u003c/em\u003e\u003c/span\u003e, be on average?\u003c/p\u003e","text":"If there is no treatment effect, what should the numerator, M - \\mu, be on average?"}],"type":"numeric","explanationHtml":"\u003cp\u003eIf the null hypothesis is true, the sample mean should on average\nequal the population mean, making the numerator — and therefore \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e — zero on average.\u003c/p\u003e","answerHtml":"\u003cp\u003e0\u003c/p\u003e","answer":"0","promptHtml":"\u003cp\u003eWhat value of \u003cspan class=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e would you\nexpect to see if the null hypothesis is true?\u003c/p\u003e","explanation":"If the null hypothesis is true, the sample mean should on average equal the population mean, making the numerator — and therefore t — zero on average.","id":"expected_t_null"},{"options":[{"correct":true,"textHtml":"\u003cp\u003eLarge mean difference and small sample variability\u003c/p\u003e","text":"Large mean difference and small sample variability"},{"textHtml":"\u003cp\u003eSmall mean difference and large sample variability\u003c/p\u003e","text":"Small mean difference and large sample variability"},{"textHtml":"\u003cp\u003eSmall mean difference and small sample variability\u003c/p\u003e","text":"Small mean difference and small sample variability"},{"textHtml":"\u003cp\u003eLarge mean difference and large sample variability\u003c/p\u003e","text":"Large mean difference and large sample variability"}],"explanationHtml":"\u003cp\u003eThe \u003cspan class=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e statistic is a ratio:\nthe mean difference is the numerator, and the variability-based\nestimated standard error is the denominator. A big numerator and a small\ndenominator give the largest \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e.\u003c/p\u003e","answerHtml":"","type":"multiple-choice","promptHtml":"\u003cp\u003eWhich combination of factors is most likely to produce a significant\nvalue for the \u003cspan class=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e statistic?\u003c/p\u003e","explanation":"The t statistic is a ratio: the mean difference is the numerator, and the variability-based estimated standard error is the denominator. A big numerator and a small denominator give the largest t.","prompt":"Which combination of factors is most likely to produce a significant value for the t statistic?","id":"significant_t_factors"},{"type":"true-false","explanationHtml":"\u003cp\u003eA larger sample standard deviation means a larger estimated standard\nerror, which shrinks the \u003cspan class=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e\u003c/span\u003e\nstatistic for a given mean difference.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","answer":true,"promptHtml":"\u003cp\u003eAn effect that exists is less likely to be detected if the sample\nstandard deviation \u003cspan class=\"math inline\"\u003e\u003cem\u003es\u003c/em\u003e\u003c/span\u003e is\nlarge.\u003c/p\u003e","explanation":"A larger sample standard deviation means a larger estimated standard error, which shrinks the t statistic for a given mean difference.","prompt":"An effect that exists is less likely to be detected if the sample standard deviation s is large.","id":"sd_power_t"}],"titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","title":"Learning Checks","id":"11_t_test_learning_checks"}</script></section>
+
+
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./10-confidence-intervals.html" class="pagination-link" aria-label="Confidence Intervals">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./12-independent-samples-t-test.html" class="pagination-link" aria-label="Independent Samples t Test">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

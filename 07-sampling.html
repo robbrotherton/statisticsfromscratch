@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>7&nbsp; Sampling – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./08-hypothesis-testing.html" rel="next">
+<link href="./06-probability.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="7&nbsp; Sampling – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="7&nbsp; Sampling – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#the-galton-board" id="toc-the-galton-board" class="nav-link" data-scroll-target="#the-galton-board">The Galton Board</a></li>
+  <li><a href="#sampling-error" id="toc-sampling-error" class="nav-link" data-scroll-target="#sampling-error">Sampling Error</a>
+  <ul class="collapse">
+  <li><a href="#sampling-error-in-polling" id="toc-sampling-error-in-polling" class="nav-link" data-scroll-target="#sampling-error-in-polling">Sampling Error in Polling</a></li>
+  <li><a href="#sampling-error-with-iq-scores" id="toc-sampling-error-with-iq-scores" class="nav-link" data-scroll-target="#sampling-error-with-iq-scores">Sampling Error with IQ Scores</a></li>
+  </ul></li>
+  <li><a href="#the-distribution-of-sample-means" id="toc-the-distribution-of-sample-means" class="nav-link" data-scroll-target="#the-distribution-of-sample-means">The Distribution of Sample Means</a>
+  <ul class="collapse">
+  <li><a href="#characteristics-of-the-sampling-distribution" id="toc-characteristics-of-the-sampling-distribution" class="nav-link" data-scroll-target="#characteristics-of-the-sampling-distribution">Characteristics of the Sampling Distribution</a></li>
+  <li><a href="#a-small-population-example" id="toc-a-small-population-example" class="nav-link" data-scroll-target="#a-small-population-example">A Small Population Example</a></li>
+  </ul></li>
+  <li><a href="#the-central-limit-theorem" id="toc-the-central-limit-theorem" class="nav-link" data-scroll-target="#the-central-limit-theorem">The Central Limit Theorem</a>
+  <ul class="collapse">
+  <li><a href="#shape-of-the-sampling-distribution" id="toc-shape-of-the-sampling-distribution" class="nav-link" data-scroll-target="#shape-of-the-sampling-distribution">Shape of the Sampling Distribution</a></li>
+  <li><a href="#center-the-expected-value-of-the-mean" id="toc-center-the-expected-value-of-the-mean" class="nav-link" data-scroll-target="#center-the-expected-value-of-the-mean">Center: The Expected Value of the Mean</a></li>
+  <li><a href="#variability-the-standard-error-of-the-mean" id="toc-variability-the-standard-error-of-the-mean" class="nav-link" data-scroll-target="#variability-the-standard-error-of-the-mean">Variability: The Standard Error of the Mean</a></li>
+  <li><a href="#visualizing-standard-error" id="toc-visualizing-standard-error" class="nav-link" data-scroll-target="#visualizing-standard-error">Visualizing Standard Error</a></li>
+  <li><a href="#returning-to-the-heights-example" id="toc-returning-to-the-heights-example" class="nav-link" data-scroll-target="#returning-to-the-heights-example">Returning to the Heights Example</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/galton-board.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/sampling-distribution-builder.js"></script>
+<script src="resources/js/sampling-core.js"></script>
+<script src="resources/js/sampling-visuals.js"></script>
+<script src="resources/js/sampling-pathway.js"></script>
+<script src="resources/js/sampling-shape-explorer.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/standard-error-curve-demo.js"></script>
+<script src="resources/js/variability-table-generator.js"></script>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;variant&quot;:&quot;cover&quot;,&quot;mean&quot;:100,&quot;sd&quot;:20,&quot;xlim&quot;:[75,125],&quot;sampleCount&quot;:300,&quot;binWidth&quot;:1,&quot;axisSquare&quot;:true}" data-interactive-figure="samplingCover" data-interactive-factory="makeSamplingDistributionBuilder">
+<div class="interactive-figure-fallback">
+Animated sampling distribution cover figure.
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>In the previous chapter, we used the normal distribution to determine the probability of seeing individual scores within certain ranges. But researchers don’t usually collect a single score. They collect a sample. So here we’ll discover how we can think about the probability of obtaining certain sample statistics in much the same way. The big ideas are sampling error and the central limit theorem. Before we get to either of them, though, let’s begin with a physical picture of order emerging from randomness.</p>
+</section>
+<section id="the-galton-board" class="level2">
+<h2 data-anchor-id="the-galton-board">The Galton Board</h2>
+<p>A Galton board, developed by Francis Galton in the 1870s and also called a quincunx or bean machine, is a board studded with rows of pegs. Balls drop in at the top, and every time a ball hits a peg, it bounces left or right — each direction equally likely, like a coin flip. After running that gauntlet, the ball lands in one of the slots at the bottom.</p>
+<p>This is really just our dice logic from the previous chapter taken further. A ball’s final slot is determined by how many of its twelve bounces send it right rather than left. To end up in the far-left slot, a ball has to bounce left every single time, and there’s only one way for that to happen — just like there’s only one way to roll a total of two with two dice. To land in the middle, a ball needs an even mix of lefts and rights, and there are <em>many</em> different sequences of bounces that produce that mix — just like there are many ways to roll a total of seven. Any individual ball’s path is unpredictable. But the pile that hundreds of balls build up together is anything but.</p>
+<!-- TODO: possible callback in a later chapter (effect size / hypothesis testing):
+     the module supports a `bias` option (P(bounce right) != .5, rendered as
+     tilted pegs) so a subtle "treatment effect" can be contrasted against the
+     fair expected curve. -->
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Watch order emerge from randomness
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;seed&quot;:&quot;galton-board-v1&quot;,&quot;rows&quot;:12,&quot;balls&quot;:400}" data-interactive-figure="galtonBoard" data-interactive-factory="makeGaltonBoard">
+<div class="interactive-figure-fallback">
+A Galton board: balls fall through twelve rows of pegs, bouncing left or right at random at each peg, and pile up in bins at the bottom, forming a bell-shaped distribution.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="One ball" data-action="{&quot;drop&quot;:1,&quot;show-expected&quot;:false}">
+<p>Watch a single ball make its way down the board. At every peg it’s a 50/50 chance: left or right. There’s no way to predict where this particular ball will end up — its final slot depends on how many of those twelve bounces send it right.</p>
+</div>
+<div class="tutorial-step" data-title="A handful" data-action="{&quot;drop&quot;:40,&quot;show-expected&quot;:false}">
+<p>With a few dozen balls, the middle slots are starting to collect more than the edges, but the pile is still lumpy and irregular. Chance is messy in small numbers.</p>
+</div>
+<div class="tutorial-step" data-title="Hundreds" data-action="{&quot;drop&quot;:400,&quot;show-expected&quot;:false}">
+<p>Keep the balls coming and a roughly symmetrical, bell-shaped pile emerges. No single ball knows where it’s going, yet together they produce an increasingly stable pattern.</p>
+</div>
+<div class="tutorial-step" data-title="The pattern" data-action="{&quot;drop&quot;:400,&quot;show-expected&quot;:true,&quot;controls-open&quot;:true}">
+<p>The curve shows the mathematically expected distribution — the binomial distribution from counting how many paths lead to each slot, which is well approximated by the normal distribution. The middle slot has hundreds of possible paths; the far edges have exactly one each (<span class="math inline">\(1/2^{12}\)</span>, or about 1 in 4,000 balls). Try dropping more balls yourself, or click the board.</p>
+</div>
+</div>
+</div>
+</div>
+<p>Strictly speaking, the Galton board produces a discrete <strong>binomial distribution</strong>, not a continuous normal distribution. But with enough rows, its bell shape is well approximated by a normal curve. If we code each left bounce as zero and each right bounce as one, a ball’s final slot records the sum of twelve little random contributions. Dividing that sum by twelve would give their mean, or equivalently the proportion of right bounces. The pile at the bottom is therefore a distribution of one aggregate outcome repeated over and over.</p>
+<p>This little machine helps explain why the normal distribution is so useful. The normal curve isn’t merely a convenient shape that a few variables happen to resemble. All kinds of quantities are influenced by many small, more or less independent contributions pushing them one way or another. There are many ways for those contributions to mostly balance, and fewer ways for them all to push in the same direction. Under suitable conditions, the result is something like the pile on the board: lots of values near the middle, progressively fewer toward the extremes, and a shape that can be modelled remarkably well by the normal distribution.</p>
+<p>We encountered one version of this idea when we discussed astronomers making repeated measurements. One observation might be a little too high and another a little too low because of all the small sources of random error involved: the instrument, the observer, the weather, or any number of other things. If those errors aren’t systematically pushing in one direction, they tend to form a distribution around the value being estimated, and averaging several observations allows the positive and negative errors to partly cancel out. The normal distribution turned out to be a useful model for just this kind of scatter. And as we saw with Quetelet, the same model was later applied to natural differences among people. A soldier having a larger-than-average chest wasn’t a measurement mistake, but the deviations around the average could still take the same broad shape as an astronomer’s errors. One mathematical model could describe very different kinds of variation.</p>
+<p>This doesn’t mean that every quantity made from random contributions must be normally distributed. The board has a very particular mechanism, and real processes can be skewed, bounded, dependent, or systematically biased. The point is that a normal distribution can emerge from randomness rather than having to be built into every individual event. That is why the same bell-shaped model turns out to be useful in so many different settings.</p>
+<p>Now we’re going to meet another kind of random error. Instead of repeatedly measuring one thing, imagine repeatedly taking samples from the same population. Each sample gives us an aggregate, such as its mean, and that mean can land a little high or a little low. One sample is unpredictable, just as one ball’s landing place is. But if we repeat the process, those errors form a distribution with a predictable center, spread, and — under the right conditions — an approximately normal shape. The central limit theorem will eventually tell us exactly what that claim does and doesn’t mean. First, though, we need to define the error we’re talking about.</p>
+</section>
+<section id="sampling-error" class="level2">
+<h2 data-anchor-id="sampling-error">Sampling Error</h2>
+<p>First, we need to introduce the term sampling error. The definition of sampling error is the discrepancy between a sample statistic and the population parameter. What that means is that we’re interested in a sample statistic only inasmuch as it allows us to guess at the true value of the population parameter. But as we’ve mentioned already, any given sample provides an inherently imperfect representation of the population from which it’s drawn. So the sample mean, say, might be slightly different from the true population mean not because we did anything wrong, but purely due to statistical randomness.</p>
+<p>Sampling error is therefore different from the measurement error we just discussed. Even if every score in our sample were measured perfectly, the sample would still contain one random assortment of people rather than another, and its mean would usually miss the population mean by some amount. Here again, “error” means a random discrepancy around what we’re trying to estimate, not a mistake.</p>
+<p>Remember this stylized abstract representation of a population and different samples drawn from it? Well, I programmed this in R and the changing samples you see at the bottom really are ten randomly selected members of the population that’s hidden at the top. And you can see that the samples are quite different from one another in how spread out they are in the representation of the different possible colors. So each sample gives us a slightly different impression of the characteristics of the population. Whatever the true composition of the population, each sample estimates it slightly differently. Again, this isn’t through any fault of our sampling technique, but simply because that is the nature of samples. So that’s what we mean by sampling error: the discrepancy between a sample statistic and the true population parameter.</p>
+<section id="sampling-error-in-polling" class="level3">
+<h3 data-anchor-id="sampling-error-in-polling">Sampling Error in Polling</h3>
+<p>To get less abstract, a kind of sampling error you’re probably familiar with, though you might not have ever given it much thought, is the margin of error that you sometimes see accompanying public opinion poll results. Like when you see some statistic about the percentage of people who endorse a particular political candidate. It might be reported as, say, 43% with a margin of error of three percentage points. What that means is that a sample of people were asked for their opinion and the proportion of that sample that endorsed the candidate was 43%. But the margin of error is an acknowledgment that the true proportion of support in the population is probably not exactly 43%. But we can say that most samples drawn from that population would have values between 40 and 46%.</p>
+<!-- TODO: The lecture slides show Pew's margin-of-error graphic here (slides 08, media/margin-of-error.png, from https://www.pewresearch.org/fact-tank/2016/09/08/understanding-the-margin-of-error-in-election-polls/). Rob wants to create an original visualization of this instead: two candidates' poll shares with error bars, showing overlapping intervals despite a nominal lead. -->
+<p>Or if a poll is looking at one candidate’s lead over another rather than at support for individual candidates separately, then we essentially have to double the margin of error because we’re basically adding the separate uncertainties. And so in Pew’s hypothetical example here, even though the fictitious Republican candidate has a five-percentage-point lead in poll A, the total margin of error for the difference between the two candidates’ level of support is six percentage points, meaning that within the population it wouldn’t be statistically inconceivable that the Republican candidate is actually less favored than the Democrat. We’ll come back to this idea of uncertainty and confidence and how exactly we determine our degree of confidence later in the course.</p>
+</section>
+<section id="sampling-error-with-iq-scores" class="level3">
+<h3 data-anchor-id="sampling-error-with-iq-scores">Sampling Error with IQ Scores</h3>
+<p>For now, let’s just take one more quick example of what we mean by sampling error. Take a population for which we know the population average and standard deviation. Like we mentioned, the distribution of IQ scores is standardized, so that the mean is 100 and the standard deviation is 15.</p>
+<p>Now suppose we take a sample of ten people from this population—and again, this isn’t real data from any study, but I simulated that in R so this is how a real random sample might look. Now let’s take a second sample. And a third sample. What if we keep taking sample after sample of ten people from this population? Here’s what it would look like. Each black square here is a sample mean. You can see that they’re scattered around quite a bit. Again, every sample has a slightly different mean, but you can also see a pattern emerging. Most of the boxes are close to 100. And as you look farther and farther from 100, the boxes are fewer and fewer. But with these boxes piled up like this, you can see that there is some predictability to the sampling error. This is the delightful paradox of sampling error: it is predictable in its unpredictability.</p>
+<div class="interactive no-controls callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Build the sampling distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;seed&quot;:&quot;iq-sampling-distribution-v1&quot;,&quot;mean&quot;:100,&quot;sd&quot;:15,&quot;sampleSize&quot;:10,&quot;sampleCount&quot;:200,&quot;binWidth&quot;:1,&quot;xlim&quot;:[70,130],&quot;populationMarkers&quot;:340,&quot;populationAxisLabel&quot;:&quot;IQ score&quot;,&quot;sampleAxis&quot;:true,&quot;sampleMeanStyle&quot;:&quot;block&quot;,&quot;showPopulationAxisLabel&quot;:true,&quot;showSampleAxisLabel&quot;:false,&quot;showDistributionAxisLabel&quot;:false,&quot;fallObservationsOnRepeat&quot;:false,&quot;repeatInterval&quot;:240,&quot;showControls&quot;:false,&quot;controls&quot;:false,&quot;showDistribution&quot;:false,&quot;showSampleAxis&quot;:false,&quot;highlightCurrent&quot;:false,&quot;focus&quot;:&quot;population&quot;}" data-interactive-figure="iqSamplingDistribution" data-interactive-factory="makeSamplingPathway">
+<div class="interactive-figure-fallback">
+Interactive pathway from an IQ population through samples to a distribution of sample means.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-major="population" data-major-title="Population" data-title="Population" data-action="{&quot;draw&quot;:0,&quot;show-population&quot;:true,&quot;observations&quot;:false,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:false,&quot;show-distribution&quot;:false,&quot;axis&quot;:true,&quot;focus&quot;:&quot;population&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:false,&quot;animate&quot;:false}">
+<p>Begin with the normal IQ population, where <span class="math inline">\(\mu=100\)</span> and <span class="math inline">\(\sigma=15\)</span>. We will keep this population fixed while drawing samples, so every change below can be traced back to the same distribution.</p>
+</div>
+<div class="tutorial-step" data-major="one-sample" data-major-title="One sample" data-title="Select" data-action="{&quot;draw&quot;:1,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:false,&quot;axis&quot;:true,&quot;focus&quot;:&quot;sample&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:true,&quot;fall-mean&quot;:false,&quot;animate&quot;:true}">
+<p>Select ten IQ scores. Their colored dots fall from the population into the sample area. The unselected population dots fade, keeping attention on the selected scores and preserving a visible connection to where each one came from.</p>
+</div>
+<div class="tutorial-step" data-major="one-sample" data-major-title="One sample" data-title="Compute" data-action="{&quot;draw&quot;:1,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:true,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:false,&quot;axis&quot;:true,&quot;focus&quot;:&quot;mean&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:false,&quot;converge-mean&quot;:true,&quot;animate&quot;:true}">
+<p>Ghost copies of the ten selected scores converge at their average. When they meet, the <span class="bc-data-emphasis">blue block marks the sample mean (<span class="math inline">\(M =\)</span> <span class="interactive-value" data-interactive-value="iqSamplingDistribution.currentMean" data-interactive-format=".1f" data-interactive-empty="...">...</span>)</span> on the sample’s IQ-score axis. The original scores stay in place; only their summary has been added.</p>
+</div>
+<div class="tutorial-step" data-major="one-sample" data-major-title="One sample" data-title="Place mean" data-action="{&quot;draw&quot;:1,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;distribution&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:true,&quot;delay&quot;:0,&quot;animate&quot;:true}">
+<p>Now the <span class="bc-data-emphasis">same mean block</span> falls to the lower sample-mean axis. The distribution title and scale appear with it. One sample has become one statistic in the distribution of sample means.</p>
+</div>
+<div class="tutorial-step" data-major="two-samples" data-major-title="Two samples" data-title="Two samples" data-action="{&quot;draw&quot;:2,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;sample-mean&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true}">
+<p>For a second sample, the selected dots stay bright while their ghosts converge into a <span class="bc-data-emphasis">different mean block</span>, which then falls. That difference is sampling error: the sample statistic varies even though the population and sample size have not changed.</p>
+</div>
+<div class="tutorial-step" data-major="thirty" data-major-title="Thirty samples" data-title="Thirty samples" data-action="{&quot;draw&quot;:30,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;sample-mean&quot;,&quot;highlight-current&quot;:false,&quot;show-controls&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true,&quot;delay&quot;:440}">
+<p>Repeat the same transformation: each highlighted sample converges into a <span class="bc-data-emphasis">blue mean block</span>, which joins the growing pile. After thirty samples, the blocks begin to cluster around the population mean of 100.</p>
+</div>
+<div class="tutorial-step" data-major="pattern" data-major-title="The pattern" data-title="The pattern" data-action="{&quot;draw&quot;:200,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;sample-mean&quot;,&quot;highlight-current&quot;:false,&quot;controls-open&quot;:false,&quot;fall-observations&quot;:false,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:false,&quot;animate&quot;:true,&quot;delay&quot;:75}">
+<p>Now the sampling accelerates, so the convergence animation is skipped. The highlighted sample still connects individual scores to one <span class="bc-data-emphasis">sample mean</span>, while the full distribution reveals the long-run pattern: most sample means are near 100, and extreme ones are rare.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="the-distribution-of-sample-means" class="level2">
+<h2 data-anchor-id="the-distribution-of-sample-means">The Distribution of Sample Means</h2>
+<p>If we were to repeatedly sample a population like this, the distribution of sample means would form a predictable pattern. And this is the key insight that powers the inferential statistics that researchers use. The name for this kind of distribution is a distribution of sample means, also known as a sampling distribution of the mean. And technically the sampling distribution of the mean is the distribution of sample means obtained by selecting all possible samples of a given sample size <span class="math inline">\(n\)</span> from a population.</p>
+<p>For the IQ example here, I had 200 possible samples, not all of the possible samples for the population, as you might imagine. For a large population, there’s often a huge number of possible samples, and for practical purposes, the number of possible samples might be effectively infinite. But again, the key insight is that the sampling distribution forms a simple, predictable pattern.</p>
+<section id="characteristics-of-the-sampling-distribution" class="level3">
+<h3 data-anchor-id="characteristics-of-the-sampling-distribution">Characteristics of the Sampling Distribution</h3>
+<p>And so we can describe the characteristics of the sampling distribution of the mean. Its shape requires some care. If the population itself is normal, the distribution of sample means is exactly normal for any sample size. If the population is not normal, the distribution of sample means generally becomes more nearly normal as sample size increases, although how quickly this happens depends on the population’s shape. In either case, sample means tend to pile up around the true population mean, while sample means far from it are rarer.</p>
+<p>Relatedly, we can say that the center of the distribution of sample means—or in other words, the average of all those sample averages—will be close to <span class="math inline">\(\mu\)</span>, the population mean. In fact, once we have all the possible sample means, their average will be exactly equal to the population mean. That’s because the sample mean is an unbiased statistic. On average, its value is equal to the population parameter. That’s unlike the uncorrected sample standard deviation, which, as we learned, was biased because it systematically underestimated the population parameter.</p>
+<p>And lastly, we can predict the variability of the distribution. It will be related to the sample size <span class="math inline">\(n\)</span>. Specifically, the larger the sample, the lower the variability of the sampling distribution will be. Put another way, sample means far from <span class="math inline">\(\mu\)</span> will be even rarer, and more of the sample means will be even closer to the population mean, <span class="math inline">\(\mu\)</span>. This is because the larger samples are more representative of the population from which they’re drawn than smaller samples.</p>
+</section>
+<section id="a-small-population-example" class="level3">
+<h3 data-anchor-id="a-small-population-example">A Small Population Example</h3>
+<p>Because this probably all sounds quite abstract, let’s think about a small example. Suppose we have a population consisting of just four people and what we’re interested in is their height. We have one person 60 inches tall, one 62, one 64, and one 66.</p>
+<p>If we plot their heights on a histogram, it’s pretty simple. Just four scores for the four different heights. The frequency of each is one because there’s only one person of each height. So far, so simple.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Build every sample mean
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;population&quot;:[60,62,64,66],&quot;sampleSize&quot;:2,&quot;exhaustive&quot;:true,&quot;replacement&quot;:true,&quot;ordered&quot;:true,&quot;sampleOrder&quot;:&quot;first-varies-fastest&quot;,&quot;binWidth&quot;:1,&quot;xlim&quot;:[59,67],&quot;populationAxisLabel&quot;:&quot;Height (inches)&quot;,&quot;axisLabel&quot;:&quot;Sample mean height (inches)&quot;,&quot;sampleAxis&quot;:true,&quot;showSampleAxis&quot;:true,&quot;sampleMeanStyle&quot;:&quot;block&quot;,&quot;describeSampleValues&quot;:true,&quot;showEmptySampleNote&quot;:false,&quot;showPopulationAxisLabel&quot;:true,&quot;showSampleAxisLabel&quot;:false,&quot;showDistributionAxisLabel&quot;:false,&quot;individualPalette&quot;:&quot;graph-series-2-5&quot;,&quot;highlightSelected&quot;:false,&quot;highlightCurrent&quot;:false,&quot;focus&quot;:&quot;none&quot;,&quot;convergeMeanOnDraw&quot;:true,&quot;fallObservationsOnRepeat&quot;:true,&quot;repeatInterval&quot;:1200,&quot;controlsOpen&quot;:false}" data-interactive-figure="heightSamplingDistribution" data-interactive-factory="makeSamplingPathway">
+<div class="interactive-figure-fallback">
+Interactive pathway through all possible samples and sample means from four heights.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Population" data-action="{&quot;draw&quot;:0,&quot;show-population&quot;:true,&quot;observations&quot;:false,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;none&quot;,&quot;show-controls&quot;:true,&quot;controls-open&quot;:false,&quot;highlight-current&quot;:false,&quot;converge-mean&quot;:false,&quot;animate&quot;:false}">
+<p>Here the population is not an abstract curve: it is exactly four values, 60, 62, 64, and 66. The shared horizontal scale measures height throughout; each block in the empty lower panel will represent one possible sample mean for <span class="math inline">\(n=2\)</span>.</p>
+</div>
+<div class="tutorial-step" data-title="Sample 1" data-action="{&quot;draw&quot;:1,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;none&quot;,&quot;show-controls&quot;:true,&quot;controls-open&quot;:false,&quot;highlight-current&quot;:false,&quot;fall-observations&quot;:true,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true}">
+<p>The first ordered sample is 60 and 60. Once the two sample dots land, ghost copies converge at 60. The <span class="bc-data-emphasis">mean block</span> appears on the same horizontal scale and then falls into the distribution below.</p>
+</div>
+<div class="tutorial-step" data-title="Sample 2" data-action="{&quot;draw&quot;:2,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;none&quot;,&quot;show-controls&quot;:true,&quot;controls-open&quot;:false,&quot;highlight-current&quot;:false,&quot;fall-observations&quot;:true,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true}">
+<p>The next sample is 62 and 60. Its ghost dots meet halfway, so the <span class="bc-data-emphasis">sample mean is 61</span>. The resulting block falls to 61 on the shared scale, beside the first sample mean.</p>
+</div>
+<div class="tutorial-step" data-title="Sample 3" data-action="{&quot;draw&quot;:3,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;none&quot;,&quot;show-controls&quot;:true,&quot;controls-open&quot;:false,&quot;highlight-current&quot;:false,&quot;fall-observations&quot;:true,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true}">
+<p>The third sample is 64 and 60. Again the ghosts meet halfway, producing a <span class="bc-data-emphasis">sample mean of 62</span>. Its block falls onto 62, where repeated means will eventually form a stack.</p>
+</div>
+<div class="tutorial-step" data-title="All 16" data-action="{&quot;draw&quot;:16,&quot;show-population&quot;:true,&quot;observations&quot;:true,&quot;show-mean&quot;:false,&quot;show-sample-axis&quot;:true,&quot;show-distribution&quot;:true,&quot;axis&quot;:true,&quot;focus&quot;:&quot;none&quot;,&quot;show-controls&quot;:true,&quot;controls-open&quot;:true,&quot;highlight-current&quot;:false,&quot;fall-observations&quot;:true,&quot;fall-mean&quot;:true,&quot;converge-mean&quot;:true,&quot;animate&quot;:true,&quot;delay&quot;:1200}">
+<p>Continue the same transformation for every ordered sample. Each pair lands, <span class="bc-data-emphasis">converges into its mean</span>, and adds one block without extra highlighting. After all 16 samples with replacement, the complete sampling distribution is visible—the literal finite process that the IQ simulation only approximated.</p>
+</div>
+</div>
+</div>
+</div>
+<p>But remember, we’re not interested in individuals anymore. We’re interested in samples. So now we’re going to take every possible sample where <span class="math inline">\(n\)</span>, the sample size, is equal to two. All possible samples are shown in this table. <span class="math inline">\(X_1\)</span> is the first score in the sample. <span class="math inline">\(X_2\)</span> is the second score. And <span class="math inline">\(M\)</span> is that sample’s mean.</p>
+<div id="tbl-height-samples" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-height-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.1: All 16 possible samples of <span class="math inline">\(n = 2\)</span> (with replacement) from the four heights.
+</figcaption>
+<div aria-describedby="tbl-height-samples-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Sample</th>
+<th style="text-align: right;"><span class="math inline">\(X_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(X_2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(M\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">62</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">61</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">62</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">62</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">65</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">65</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">66</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Now remember, for this to work, a crucial assumption is that we’re using true random independent sampling, and that means we must be sampling with replacement. And so every possible sample will include samples where the same individual shows up twice. The first line here is the 60-inch person twice. Obviously the sample mean there is 60.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+<p>So let’s put a block on the histogram for that sample mean.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="07_sampling_sampling_distribution" aria-label="Sampling Distribution Probabilities"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Sampling Distribution Probabilities</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="height_mean_63"><div class="quiz-prompt"><p>For the population 60, 62, 64, 66, all ordered samples of size 2 are
+drawn with replacement. What proportion of sample means equal 63?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.25</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>There are 16 ordered samples. Four have a mean of 63: 60/66, 62/64,
+64/62, and 66/60.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="07_sampling_sampling_distribution">{"id":"07_sampling_sampling_distribution","title":"Sampling Distribution Probabilities","titleHtml":"\u003cp\u003eSampling Distribution Probabilities\u003c/p\u003e","questions":[{"answerHtml":"\u003cp\u003e0.25\u003c/p\u003e","answer":"0.25","tolerance":"1.0e-3","explanation":"There are 16 ordered samples. Four have a mean of 63: 60/66, 62/64, 64/62, and 66/60.","id":"height_mean_63","type":"numeric","explanationHtml":"\u003cp\u003eThere are 16 ordered samples. Four have a mean of 63: 60/66, 62/64,\n64/62, and 66/60.\u003c/p\u003e","prompt":"For the population 60, 62, 64, 66, all ordered samples of size 2 are drawn with replacement. What proportion of sample means equal 63?","promptHtml":"\u003cp\u003eFor the population 60, 62, 64, 66, all ordered samples of size 2 are\ndrawn with replacement. What proportion of sample means equal 63?\u003c/p\u003e"}]}</script></section>
+<p>Our next sample is 62 and 60, for a mean of 61. Let’s put that on the histogram. Then we have a sample of 64 and 60 for a mean of 62. Put it on the histogram; let’s keep going and add all the possible samples to the histogram.</p>
+<p>Now you can see what the sampling distribution of the mean looks like for this population of four people’s heights with samples of size <span class="math inline">\(n = 2\)</span>. It is a discrete triangular distribution, not a normal distribution: it is symmetrical, but its sides are straight stacks rather than a smooth bell curve. It nevertheless illustrates an important pattern. Sample means close to the true population mean are relatively common; sample means far from the true population mean are relatively uncommon.</p>
+<p>Now you might be wondering what the whole purpose of this quite tedious process was. The value of creating this sampling distribution is that we can now think about the probability of observing certain sample means from this distribution, just like we thought about the probabilities of obtaining certain scores from a regular population. This is at the heart of inferential statistics, and so we’ll come back to this in future.</p>
+<p>And incidentally, since we know this entire population of values, we could, if we wanted, figure out its mean and standard deviation. The mean should be obvious. It’s a symmetrical distribution and the peak is right on 63. So that’s the mean. You can also calculate it by adding all the sample means and dividing by 16, the number of scores. And if you care to check, you’ll notice that that was the mean of the population as well.</p>
+<p>And we can calculate the variability, the standard deviation, in the same way we did in a previous lecture, by putting all those values in a table, working out columns for deviations, the squared deviations, then using those to get the sum of squared deviations, the variance, and the standard deviation. Note that because we obtained <em>every</em> possible sample mean, this set of 16 means is itself a complete population, so we use the population formula, dividing by <span class="math inline">\(N\)</span>.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Calculate the variability of the sample means
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;tables&quot;:[{&quot;title&quot;:&quot;All 16 sample means&quot;,&quot;data&quot;:[60,61,62,63,61,62,63,64,62,63,64,65,63,64,65,66]}]}" data-interactive-figure="samplingDistVariabilityTable" data-interactive-factory="makeVariabilityTables">
+<div class="interactive-figure-fallback">
+Interactive table calculating deviations, sum of squares, variance, and standard deviation for the 16 sample means.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Means" data-action="{&quot;stage&quot;:&quot;data&quot;,&quot;animate&quot;:false}">
+<p>Start with the 16 sample means.</p>
+</div>
+<div class="tutorial-step" data-title="Mean" data-action="{&quot;stage&quot;:&quot;mean&quot;,&quot;animate&quot;:true}">
+<p>Find their mean — the mean of the sample means.</p>
+</div>
+<div class="tutorial-step" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Subtract the mean from each sample mean.</p>
+</div>
+<div class="tutorial-step" data-title="Squared" data-action="{&quot;stage&quot;:&quot;squared-deviations&quot;,&quot;animate&quot;:true}">
+<p>Square each deviation.</p>
+</div>
+<div class="tutorial-step" data-title="SS" data-action="{&quot;stage&quot;:&quot;ss&quot;,&quot;animate&quot;:true}">
+<p>Add the squared deviations to get the sum of squares.</p>
+</div>
+<div class="tutorial-step" data-title="Variance" data-action="{&quot;stage&quot;:&quot;variance&quot;,&quot;animate&quot;:true}">
+<p>Divide by the number of sample means to get the variance.</p>
+</div>
+<div class="tutorial-step" data-title="SD" data-action="{&quot;stage&quot;:&quot;sd&quot;,&quot;animate&quot;:true}">
+<p>Take the square root: the standard deviation of the sample means is about 1.58.</p>
+</div>
+</div>
+</div>
+</div>
+<p>So this was a fairly long-winded way of working out the mean and standard deviation of this sampling distribution.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="07_sampling_variability" aria-label="Variability"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Variability</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="standard_error_n4"><div class="quiz-prompt"><p>A population has standard deviation 15. What is the standard error of
+the mean for samples of size 4?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>7.5</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The standard error is sigma / sqrt(n) = 15 / sqrt(4) = 7.5.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="07_sampling_variability">{"id":"07_sampling_variability","title":"Variability","titleHtml":"\u003cp\u003eVariability\u003c/p\u003e","questions":[{"answerHtml":"\u003cp\u003e7.5\u003c/p\u003e","answer":"7.5","tolerance":"1.0e-2","explanation":"The standard error is sigma / sqrt(n) = 15 / sqrt(4) = 7.5.","id":"standard_error_n4","type":"numeric","explanationHtml":"\u003cp\u003eThe standard error is sigma / sqrt(n) = 15 / sqrt(4) = 7.5.\u003c/p\u003e","prompt":"A population has standard deviation 15. What is the standard error of the mean for samples of size 4?","promptHtml":"\u003cp\u003eA population has standard deviation 15. What is the standard error of\nthe mean for samples of size 4?\u003c/p\u003e"}]}</script></section>
+<p>We’ll circle back to this idea a little later in the lecture when we’ve learned about a simpler process for doing this.</p>
+</section>
+</section>
+<section id="the-central-limit-theorem" class="level2">
+<h2 data-anchor-id="the-central-limit-theorem">The Central Limit Theorem</h2>
+<p>So this brings us to the central limit theorem. The trouble with distributions of sample means is that it’s just not feasible in most realistic situations to obtain every possible sample of a given size for a population. We were able to do it with a population of just four people and samples of two. But imagine computing every possible sample of a given size from a population we’d actually be interested in—like, say, American voters. Even if we had the scores of everyone in the population, which we usually don’t, the number of possible samples would be astronomical for any useful sample size. There would just be too many people, too many possible samples. For practical purposes the numbers are basically infinite.</p>
+<p>So what’s the use of knowing about sampling distributions if we can’t ever obtain one in practice? That’s where the central limit theorem comes in. The central limit theorem is the mathematical engine that powers inferential statistics. It allows us to sidestep this problem of not knowing everyone’s scores in a population, and so not being able to compute every possible sample. We can predict the sampling distribution’s center and variability from the population mean, population variability, and sample size. Under the conditions described below, the theorem also tells us how its standardized shape behaves as sample size grows.</p>
+<p>Under the usual conditions—independent observations drawn in the same way from a population with a finite mean and variance—the distribution of sample means has an expected mean, symbolized as <span class="math inline">\(\mu_M\)</span>, of <span class="math inline">\(\mu\)</span>. That is another way of saying that the average of all the sample means equals the population mean. Its standard deviation is <span class="math inline">\(\sigma\)</span> divided by the square root of <span class="math inline">\(n\)</span>, the sample size. In other words, the variability of the sample means is predictable from the population variability and sample size. Lastly, if the population is not already normal, the standardized distribution of sample means more and more closely resembles a normal distribution as <span class="math inline">\(n\)</span> approaches infinity.</p>
+<section id="shape-of-the-sampling-distribution" class="level3">
+<h3 data-anchor-id="shape-of-the-sampling-distribution">Shape of the Sampling Distribution</h3>
+<p>So again, we’re talking about three characteristics of the sampling distribution. First, its shape. If the population is normally distributed, its distribution of sample means is exactly normal at every sample size. If the population is not normal, averaging increasingly many independent observations usually makes the distribution of means progressively more normal. But this is convergence, not a switch: there is no sample size at which the remaining nonnormality suddenly disappears.</p>
+<p>That is why the familiar rule of thumb <span class="math inline">\(n = 30\)</span> needs to be handled carefully. For many moderately nonnormal populations, the remaining difference from normality is small enough by then that it has little practical consequence. For a more severely skewed or heavy-tailed population, 30 may not be enough. And even when the approximation is entirely adequate, that means <em>negligible for the purpose at hand</em>, not <em>mathematically zero</em>. The visualization below makes that distinction visible.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>When do sample means look normal?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;seed&quot;:&quot;sampling-shape-clt-v3&quot;,&quot;distribution&quot;:&quot;normal&quot;,&quot;sampleSize&quot;:5,&quot;samples&quot;:0,&quot;scaleMode&quot;:&quot;raw&quot;,&quot;showPopulation&quot;:true,&quot;showDistribution&quot;:true,&quot;showNormal&quot;:false,&quot;controlsOpen&quot;:false}" data-interactive-figure="samplingShapeExplorer" data-interactive-factory="makeSamplingShapeExplorer">
+<div class="interactive-figure-fallback">
+Interactive comparison of population shape and the resulting distribution of sample means.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Population" data-action="{&quot;distribution&quot;:&quot;normal&quot;,&quot;n&quot;:5,&quot;samples&quot;:0,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:false,&quot;controls-open&quot;:false,&quot;animate&quot;:false}">
+<p>Begin with a normal population on a fixed score scale from <span class="math inline">\(-3\)</span> to <span class="math inline">\(+3\)</span>. The lower panel is already in place but remains empty. The earlier figures established how individual samples become sample means; here we will compare the population directly with the long-run distribution of those means.</p>
+</div>
+<div class="tutorial-step" data-title="100,000 means" data-action="{&quot;distribution&quot;:&quot;normal&quot;,&quot;n&quot;:5,&quot;samples&quot;:100000,&quot;sampling-duration&quot;:2000,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:true,&quot;controls-open&quot;:false,&quot;animate&quot;:true}">
+<p>Generate 100,000 independent samples of <span class="math inline">\(n=5\)</span> and plot each sample mean. The histogram columns rise over two seconds as the total accumulates. Once they finish, the predicted normal distribution appears. Because the population itself is normal, the distribution of means is normal at every sample size.</p>
+</div>
+<div class="tutorial-step" data-title="One million" data-action="{&quot;distribution&quot;:&quot;normal&quot;,&quot;n&quot;:5,&quot;samples&quot;:1000000,&quot;sampling-duration&quot;:2000,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:true,&quot;controls-open&quot;:false,&quot;animate&quot;:true}">
+<p>Increase the total to one million sample means. The small random bumps settle down, leaving a smooth histogram that closely follows the prediction. More simulations reveal the sampling distribution more precisely; they do not change the distribution being predicted.</p>
+</div>
+<div class="tutorial-step" data-title="Right skew" data-action="{&quot;distribution&quot;:&quot;skewed&quot;,&quot;n&quot;:5,&quot;samples&quot;:0,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:false,&quot;controls-open&quot;:false,&quot;animate&quot;:true}">
+<p>Now replace the normal population with a strongly right-skewed one. The old fixed formation is beamed upward from left to right; a new fixed formation lands in the same direction. Its left-side peak and long sparse tail span the full score scale. The lower panel resets so we can repeat the comparison.</p>
+</div>
+<div class="tutorial-step" data-title="100,000 means" data-action="{&quot;distribution&quot;:&quot;skewed&quot;,&quot;n&quot;:5,&quot;samples&quot;:100000,&quot;sampling-duration&quot;:2000,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:true,&quot;controls-open&quot;:false,&quot;animate&quot;:true}">
+<p>Again generate 100,000 independent samples of <span class="math inline">\(n=5\)</span>. Averaging five observations makes the distribution of means less skewed and much narrower than the population. When the predicted normal curve appears, the histogram looks close on this shared score scale—but not identical.</p>
+</div>
+<div class="tutorial-step" data-title="One million" data-action="{&quot;distribution&quot;:&quot;skewed&quot;,&quot;n&quot;:5,&quot;samples&quot;:1000000,&quot;sampling-duration&quot;:2000,&quot;scale&quot;:&quot;raw&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:true,&quot;controls-open&quot;:false,&quot;animate&quot;:true}">
+<p>Increase the total to one million sample means. Random bumps nearly disappear, so any remaining mismatch with the prediction is systematic rather than simulation noise. On the population’s score scale, however, the narrow histogram still makes that mismatch difficult to inspect.</p>
+</div>
+<div class="tutorial-step" data-title="Change ruler" data-action="{&quot;distribution&quot;:&quot;skewed&quot;,&quot;n&quot;:5,&quot;samples&quot;:1000000,&quot;scale&quot;:&quot;se&quot;,&quot;show-population&quot;:true,&quot;show-distribution&quot;:true,&quot;show-normal&quot;:true,&quot;controls-open&quot;:true,&quot;animate&quot;:true}">
+<p>Change only the lower panel’s ruler. These are the same one million means, now positioned by their distance from <span class="math inline">\(\mu\)</span> in standard errors. The histogram spreads out, exposing a peak slightly left of the prediction and a longer right tail. Averaging moved the shape toward normality; it did not make the remaining difference zero.</p>
+</div>
+</div>
+</div>
+</div>
+<p>The two tutorial population formations are fixed, precomputed representations of continuous-model densities; they are not finite rosters of people. Every simulated observation is drawn independently, and all the selectable models have finite variance. Those conditions matter. The ordinary central limit theorem does not promise convergence for every imaginable distribution or sampling process.</p>
+</section>
+<section id="center-the-expected-value-of-the-mean" class="level3">
+<h3 data-anchor-id="center-the-expected-value-of-the-mean">Center: The Expected Value of the Mean</h3>
+<p>So the central limit theorem tells us how the sampling distribution will be shaped. It also tells us about the center of the distribution. The mean of the distribution of sample means is called the expected value of the mean, <span class="math inline">\(\mu_M\)</span>. And like I mentioned already, on average, any given sample mean is equal to <span class="math inline">\(\mu_M\)</span>, which is equal to <span class="math inline">\(\mu\)</span>, the true population value. This is because <span class="math inline">\(M\)</span> is an unbiased statistic. And so if we only know a single sample mean, our best guess at the unknown population mean should always be that known sample mean. On average, if we were drawing sample after sample, we’d be right. But usually we don’t draw sample after sample, and for any one sample, we won’t be exactly right every time.</p>
+</section>
+<section id="variability-the-standard-error-of-the-mean" class="level3">
+<h3 data-anchor-id="variability-the-standard-error-of-the-mean">Variability: The Standard Error of the Mean</h3>
+<p>And so the central limit theorem also acknowledges this variability. Variability in the expected value of the mean is the standard deviation of the sample means, also called the standard error of the mean. The symbol for this is <span class="math inline">\(\sigma_M\)</span>. This gives us a measure of how well a sample mean estimates its population mean. This is the concept of sampling error: how much distance is expected on average between our sample statistic and the population parameter.</p>
+<p>The equation for the standard error of the mean is:</p>
+<p><span id="eq-s_m-1"><span class="math display">\[\sigma_M = \frac{\sigma}{\sqrt{n}} \tag{7.1}\]</span></span></p>
+<p>The numerator is the population standard deviation, <span class="math inline">\(\sigma\)</span>. So the larger the variability in the population, the larger the standard error of the mean. The denominator is a function of sample size (its square root). And so the larger our sample size, the smaller the standard error of the mean.</p>
+<p>There are a couple of algebraically equivalent forms of this equation, which can be useful if you have variance, <span class="math inline">\(\sigma^2\)</span>, rather than the standard deviation, <span class="math inline">\(\sigma\)</span>. In that case, you can use:</p>
+<p><span id="eq-s_m-2"><span class="math display">\[\sigma_M = \dfrac{\sqrt{\sigma^2}}{\sqrt{n}} \tag{7.2}\]</span></span></p>
+<p>You can see how they are equivalent: <span class="math inline">\(\sigma^2\)</span> is literally just <span class="math inline">\(\sigma\)</span> squared, so <span class="math inline">\(\sqrt{\sigma^2}\)</span> is the same as <span class="math inline">\(\sigma\)</span>.</p>
+</section>
+<section id="visualizing-standard-error" class="level3">
+<h3 data-anchor-id="visualizing-standard-error">Visualizing Standard Error</h3>
+<p>Here are a couple of ways of visualizing what we mean here. First, here’s a curve representing a population with a standard deviation of 15 and a mean of 100, with <span class="math inline">\(n = 1\)</span>. That just means that we’re looking at all the individuals of the population, reproducing the characteristics of that population itself.</p>
+<div class="columns">
+<div class="column" style="width:25%;">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;yDomain&quot;:[0,0.8],&quot;sd&quot;:1,&quot;style&quot;:&quot;minimal&quot;,&quot;animate&quot;:true}" data-interactive-figure="standardErrorCurveN1" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Normal curve for n equals 1.
+</div>
+</div>
+</div><div class="column" style="width:25%;">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;yDomain&quot;:[0,0.8],&quot;sd&quot;:0.8,&quot;style&quot;:&quot;minimal&quot;,&quot;animate&quot;:true}" data-interactive-figure="standardErrorCurveN4" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Normal curve with lower standard error.
+</div>
+</div>
+</div><div class="column" style="width:25%;">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;yDomain&quot;:[0,0.8],&quot;sd&quot;:0.6,&quot;style&quot;:&quot;minimal&quot;,&quot;animate&quot;:true}" data-interactive-figure="standardErrorCurveN10" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Normal curve with still lower standard error.
+</div>
+</div>
+</div><div class="column" style="width:25%;">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;yDomain&quot;:[0,0.8],&quot;sd&quot;:0.4,&quot;style&quot;:&quot;minimal&quot;,&quot;animate&quot;:true}" data-interactive-figure="standardErrorCurveN30" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Narrow normal curve for a larger sample size.
+</div>
+</div>
+</div>
+</div>
+<p>If we create a sampling distribution of the mean with a sample size of four, you can see how its width changes. Because this example begins with a normal population, the sampling distribution remains normal, but its standard error is lower. In fact, if we calculate it using the equation, we’d find it to be 7.5. If we increase the sample size to ten, we reduce the variability of the distribution more. With a sample size of 30, the distribution is narrower still. There are almost no sample means less than around 90 or greater than around 110. Almost all the sample means are clustered closely around the population mean.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>See how sample size affects the standard error
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;mean&quot;:100,&quot;sd&quot;:15,&quot;xDomain&quot;:[60,140],&quot;n&quot;:1,&quot;controlsOpen&quot;:false}" data-interactive-figure="seDemo" data-interactive-factory="makeStandardErrorCurveDemo">
+<div class="interactive-figure-fallback">
+Interactive standard-error curve showing how sample size changes the sampling distribution.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Population" data-action="{&quot;n&quot;:1,&quot;animate&quot;:true}">
+<p>Behold, the population.</p>
+</div>
+<div class="tutorial-step" data-title="Sample of 4" data-action="{&quot;n&quot;:4,&quot;animate&quot;:true}">
+<p>Increase the sample size.</p>
+</div>
+<div class="tutorial-step" data-title="Sample of 30" data-action="{&quot;n&quot;:30,&quot;animate&quot;:true}">
+<p>Increase it again.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- TODO: The lecture slides show a curve of standard error as a function of sample size (y = 15/sqrt(n), with points marked at n = 1, 4, 10, 30) — slides 08, media/standard-error-curve.svg. No current module plots a function of n; either extend standard-error-curve-demo with a second "SE vs n" view or add a small static figure. -->
+<p>Here’s a different way of illustrating that same idea. Here we’re using a single curve to represent graphically how the standard error of the mean changes along with sample size. Again, this is based on a population with a standard deviation of 15. I’ve labeled with points here the same numbers from before. With a sample size of 4, the standard deviation drops to 7.5. By 30 it’s below three. And of course, as we keep increasing sample size, the standard error keeps falling, although more slowly because it falls with the square root of the sample size rather than directly with sample size.</p>
+</section>
+<section id="returning-to-the-heights-example" class="level3">
+<h3 data-anchor-id="returning-to-the-heights-example">Returning to the Heights Example</h3>
+<p>So here again is our real sampling distribution for that population of four people’s heights. We calculated its actual standard deviation; we found it was 1.58.</p>
+<div class="columns">
+<div class="column">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;variant&quot;:&quot;static&quot;,&quot;population&quot;:[60,62,64,66],&quot;sampleSize&quot;:2,&quot;exhaustive&quot;:true,&quot;replacement&quot;:true,&quot;ordered&quot;:true,&quot;sampleOrder&quot;:&quot;first-varies-fastest&quot;,&quot;binWidth&quot;:1,&quot;xlim&quot;:[59,67],&quot;axisLabel&quot;:&quot;Sample mean height (inches)&quot;,&quot;height&quot;:280}" data-interactive-figure="heightSamplingDistributionStatic" data-interactive-factory="makeSamplingDistributionBuilder">
+<div class="interactive-figure-fallback">
+Static sampling distribution for all possible samples of two heights.
+</div>
+</div>
+</div>
+</div>
+<p>But now the central limit theorem tells us that we don’t have to know every possible sample mean. We can just figure out the standard error of the mean using the population characteristics. The standard deviation of the four heights is 2.24. So if we put it into that equation, we get 2.24 for the population variability divided by the square root of two, which is our sample size. And again, we get the same answer, 1.58.</p>
+<p><span class="math display">\[\sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{2.24}{\sqrt{2}} = 1.58\]</span></p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="07_sampling_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 6 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 6</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="se_decreases"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>As sample size increases, the value of the standard error always
+decreases, assuming population variability stays the same.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-se_decreases" id="07_sampling_learning_checks-se_decreases-option-1" value="true" aria-labelledby="07_sampling_learning_checks-se_decreases-option-1-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-se_decreases-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-se_decreases" id="07_sampling_learning_checks-se_decreases-option-2" value="false" aria-labelledby="07_sampling_learning_checks-se_decreases-option-2-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-se_decreases-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The standard error is sigma divided by the square root of n.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sample_means_description"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which description best fits the distribution of sample means?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_means_description" id="07_sampling_learning_checks-sample_means_description-option-1" value="0" aria-labelledby="07_sampling_learning_checks-sample_means_description-option-1-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_means_description-option-1-text"><p>It is a distribution of means from repeated samples of the same
+size.</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_means_description" id="07_sampling_learning_checks-sample_means_description-option-2" value="1" aria-labelledby="07_sampling_learning_checks-sample_means_description-option-2-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_means_description-option-2-text"><p>It is the raw-score distribution for one sample.</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_means_description" id="07_sampling_learning_checks-sample_means_description-option-3" value="2" aria-labelledby="07_sampling_learning_checks-sample_means_description-option-3-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_means_description-option-3-text"><p>It is always identical to the original population.</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_means_description" id="07_sampling_learning_checks-sample_means_description-option-4" value="3" aria-labelledby="07_sampling_learning_checks-sample_means_description-option-4-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_means_description-option-4-text"><p>It is a list of every score in the population.</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>It is a distribution of means from repeated samples of the same
+size.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The sampling distribution is built from sample statistics, not
+individual raw scores.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sample_mean_equals_mu"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The mean of a sample is always equal to the population mean.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_mean_equals_mu" id="07_sampling_learning_checks-sample_mean_equals_mu-option-1" value="true" aria-labelledby="07_sampling_learning_checks-sample_mean_equals_mu-option-1-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_mean_equals_mu-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-sample_mean_equals_mu" id="07_sampling_learning_checks-sample_mean_equals_mu-option-2" value="false" aria-labelledby="07_sampling_learning_checks-sample_mean_equals_mu-option-2-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-sample_mean_equals_mu-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Sample means vary because of sampling error.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="describe_sampling_distribution"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Samples of <span class="math inline"><em>n</em> = 100</span> are
+selected from a population with <span class="math inline"><em>μ</em> = 40</span> and <span class="math inline"><em>σ</em> = 10</span>. What is the standard error
+of the mean for the distribution of sample means?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>The standard error is <span class="math inline">$\sigma_M = \sigma /
+\sqrt{n}$</span>.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>What is <span class="math inline">$\sqrt{100}$</span>?</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>1</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p><span class="math inline">$\sigma_M = \sigma / \sqrt{n} = 10 /
+\sqrt{100} = 1$</span>. From the information given, we can determine
+that the distribution is centered on an expected value of <span class="math inline"><em>μ</em><sub><em>M</em></sub> = 40</span> and has
+a standard error of 1. Its exact shape also depends on the population,
+although under the usual finite-variance conditions it will often be
+close to normal at this sample size.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="always_normal"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The shape of a distribution of sample means is always normal.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-always_normal" id="07_sampling_learning_checks-always_normal-option-1" value="true" aria-labelledby="07_sampling_learning_checks-always_normal-option-1-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-always_normal-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-always_normal" id="07_sampling_learning_checks-always_normal-option-2" value="false" aria-labelledby="07_sampling_learning_checks-always_normal-option-2-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-always_normal-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>It is exactly normal at every sample size if the original population
+is normal. For a nonnormal finite-variance population, it generally
+becomes progressively closer to normal as sample size increases.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="thirty_is_cutoff"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">6</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Once sample size reaches <span class="math inline"><em>n</em> = 30</span>, a nonnormal sampling
+distribution becomes exactly normal.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-thirty_is_cutoff" id="07_sampling_learning_checks-thirty_is_cutoff-option-1" value="true" aria-labelledby="07_sampling_learning_checks-thirty_is_cutoff-option-1-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-thirty_is_cutoff-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="07_sampling_learning_checks-thirty_is_cutoff" id="07_sampling_learning_checks-thirty_is_cutoff-option-2" value="false" aria-labelledby="07_sampling_learning_checks-thirty_is_cutoff-option-2-text"><div class="quiz-choice-text" id="07_sampling_learning_checks-thirty_is_cutoff-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Convergence toward normality is gradual. Thirty is sometimes a useful
+rule of thumb, but there is no abrupt cutoff, and the required sample
+size depends on the population’s shape.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="07_sampling_learning_checks">{"id":"07_sampling_learning_checks","title":"Learning Checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","questions":[{"id":"se_decreases","explanationHtml":"\u003cp\u003eThe standard error is sigma divided by the square root of n.\u003c/p\u003e","type":"true-false","answer":true,"answerHtml":"\u003cp\u003etrue\u003c/p\u003e","promptHtml":"\u003cp\u003eAs sample size increases, the value of the standard error always\ndecreases, assuming population variability stays the same.\u003c/p\u003e","prompt":"As sample size increases, the value of the standard error always decreases, assuming population variability stays the same.","explanation":"The standard error is sigma divided by the square root of n."},{"id":"sample_means_description","answerHtml":"","type":"multiple-choice","explanationHtml":"\u003cp\u003eThe sampling distribution is built from sample statistics, not\nindividual raw scores.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eIt is a distribution of means from repeated samples of the same\nsize.\u003c/p\u003e","text":"It is a distribution of means from repeated samples of the same size."},{"text":"It is the raw-score distribution for one sample.","textHtml":"\u003cp\u003eIt is the raw-score distribution for one sample.\u003c/p\u003e"},{"text":"It is always identical to the original population.","textHtml":"\u003cp\u003eIt is always identical to the original population.\u003c/p\u003e"},{"text":"It is a list of every score in the population.","textHtml":"\u003cp\u003eIt is a list of every score in the population.\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eWhich description best fits the distribution of sample means?\u003c/p\u003e","prompt":"Which description best fits the distribution of sample means?","explanation":"The sampling distribution is built from sample statistics, not individual raw scores."},{"id":"sample_mean_equals_mu","explanationHtml":"\u003cp\u003eSample means vary because of sampling error.\u003c/p\u003e","type":"true-false","answer":false,"answerHtml":"","promptHtml":"\u003cp\u003eThe mean of a sample is always equal to the population mean.\u003c/p\u003e","prompt":"The mean of a sample is always equal to the population mean.","explanation":"Sample means vary because of sampling error."},{"answerHtml":"\u003cp\u003e1\u003c/p\u003e","answer":"1","tolerance":"1.0e-3","hints":[{"text":"The standard error is \\sigma_M = \\sigma / \\sqrt{n}.","textHtml":"\u003cp\u003eThe standard error is \u003cspan class=\"math inline\"\u003e$\\sigma_M = \\sigma /\n\\sqrt{n}$\u003c/span\u003e.\u003c/p\u003e"},{"text":"What is \\sqrt{100}?","textHtml":"\u003cp\u003eWhat is \u003cspan class=\"math inline\"\u003e$\\sqrt{100}$\u003c/span\u003e?\u003c/p\u003e"}],"id":"describe_sampling_distribution","type":"numeric","explanationHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e$\\sigma_M = \\sigma / \\sqrt{n} = 10 /\n\\sqrt{100} = 1$\u003c/span\u003e. From the information given, we can determine\nthat the distribution is centered on an expected value of \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eμ\u003c/em\u003e\u003csub\u003e\u003cem\u003eM\u003c/em\u003e\u003c/sub\u003e = 40\u003c/span\u003e and has\na standard error of 1. Its exact shape also depends on the population,\nalthough under the usual finite-variance conditions it will often be\nclose to normal at this sample size.\u003c/p\u003e","explanation":"\\sigma_M = \\sigma / \\sqrt{n} = 10 / \\sqrt{100} = 1. From the information given, we can determine that the distribution is centered on an expected value of \\mu_M = 40 and has a standard error of 1. Its exact shape also depends on the population, although under the usual finite-variance conditions it will often be close to normal at this sample size.","prompt":"Samples of n = 100 are selected from a population with \\mu = 40 and \\sigma = 10. What is the standard error of the mean for the distribution of sample means?","promptHtml":"\u003cp\u003eSamples of \u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e = 100\u003c/span\u003e are\nselected from a population with \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eμ\u003c/em\u003e = 40\u003c/span\u003e and \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eσ\u003c/em\u003e = 10\u003c/span\u003e. What is the standard error\nof the mean for the distribution of sample means?\u003c/p\u003e"},{"id":"always_normal","explanationHtml":"\u003cp\u003eIt is exactly normal at every sample size if the original population\nis normal. For a nonnormal finite-variance population, it generally\nbecomes progressively closer to normal as sample size increases.\u003c/p\u003e","type":"true-false","answer":false,"answerHtml":"","promptHtml":"\u003cp\u003eThe shape of a distribution of sample means is always normal.\u003c/p\u003e","prompt":"The shape of a distribution of sample means is always normal.","explanation":"It is exactly normal at every sample size if the original population is normal. For a nonnormal finite-variance population, it generally becomes progressively closer to normal as sample size increases."},{"id":"thirty_is_cutoff","explanationHtml":"\u003cp\u003eConvergence toward normality is gradual. Thirty is sometimes a useful\nrule of thumb, but there is no abrupt cutoff, and the required sample\nsize depends on the population’s shape.\u003c/p\u003e","type":"true-false","answer":false,"answerHtml":"","promptHtml":"\u003cp\u003eOnce sample size reaches \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e = 30\u003c/span\u003e, a nonnormal sampling\ndistribution becomes exactly normal.\u003c/p\u003e","prompt":"Once sample size reaches n = 30, a nonnormal sampling distribution becomes exactly normal.","explanation":"Convergence toward normality is gradual. Thirty is sometimes a useful rule of thumb, but there is no abrupt cutoff, and the required sample size depends on the population’s shape."}]}</script></section>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 data-anchor-id="summary">Summary</h2>
+<p>So to repeat and summarize, under independent sampling from a population with finite mean and variance, the distribution of sample means has an expected value, <span class="math inline">\(\mu_M\)</span>, equal to <span class="math inline">\(\mu\)</span>. It has a standard deviation, or standard error of the mean, of <span class="math inline">\(\sigma / \sqrt{n}\)</span>. Its shape is exactly normal at every <span class="math inline">\(n\)</span> when the population is normal. For a nonnormal population, its standardized shape approaches normality gradually as <span class="math inline">\(n\)</span> increases, at a rate that depends on the population. Thirty is often a useful convention, but it is neither a guarantee nor a mathematical cutoff. These insights power much of the inferential statistics that we’ll move on to later, because they allow us to reason about the probability of sample statistics rather than only individual scores.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./06-probability.html" class="pagination-link" aria-label="Probability">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./08-hypothesis-testing.html" class="pagination-link" aria-label="Hypothesis Testing">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

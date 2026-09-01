@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>10&nbsp; Confidence Intervals – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./11-t-test.html" rel="next">
+<link href="./09-statistical-power.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="10&nbsp; Confidence Intervals – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="10&nbsp; Confidence Intervals – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#confidence-intervals" id="toc-confidence-intervals" class="nav-link active" data-scroll-target="#confidence-intervals">Confidence Intervals</a>
+  <ul class="collapse">
+  <li><a href="#calculating-the-confidence-interval" id="toc-calculating-the-confidence-interval" class="nav-link" data-scroll-target="#calculating-the-confidence-interval">Calculating the Confidence Interval</a></li>
+  <li><a href="#example-class-reaction-time-data" id="toc-example-class-reaction-time-data" class="nav-link" data-scroll-target="#example-class-reaction-time-data">Example: Class Reaction Time Data</a></li>
+  <li><a href="#interpreting-the-confidence-interval" id="toc-interpreting-the-confidence-interval" class="nav-link" data-scroll-target="#interpreting-the-confidence-interval">Interpreting the Confidence Interval</a></li>
+  <li><a href="#factors-affecting-the-width-of-a-confidence-interval" id="toc-factors-affecting-the-width-of-a-confidence-interval" class="nav-link" data-scroll-target="#factors-affecting-the-width-of-a-confidence-interval">Factors Affecting the Width of a Confidence Interval</a></li>
+  <li><a href="#confidence-intervals-and-hypothesis-testing" id="toc-confidence-intervals-and-hypothesis-testing" class="nav-link" data-scroll-target="#confidence-intervals-and-hypothesis-testing">Confidence Intervals and Hypothesis Testing</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/confidence-interval-explorer.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/ci-nhst-diagram.js"></script>
+<p>In this chapter, we will introduce the idea of the confidence interval. This is a complementary concept to null hypothesis significance testing.</p>
+<section id="confidence-intervals" class="level2">
+<h2 data-anchor-id="confidence-intervals">Confidence Intervals</h2>
+<p>Remember, our sample is only interesting to us insofar as it gives us an indication of the population parameters — particularly the population mean, because we want to know if that mean is different from the population mean that the null hypothesis predicts. The confidence interval quantifies how precisely our sample estimates the population mean by giving a range of likely values.</p>
+<p>A confidence interval consists of two features. There’s the point estimate, which is our best guess of the population parameter. Specifically, the point estimate is our sample mean, because you might remember we have said that the sample mean is an unbiased statistic: on average, sample means are equal to the population mean. So if we just have a single sample mean, that is our best guess at the mean of the population from which that sample was drawn.</p>
+<p>However, we know that sample means, though they might be unbiased on average, are not individually perfect estimates of the population mean. So the confidence interval includes a margin of error — a range either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean. That range covers a stated proportion of the distribution. For a 95% confidence interval, the region in the middle of the distribution is 95% of the distribution. You could have a 99% confidence interval, which covers 99% of the distribution, or an 80% confidence interval, which covers only 80% of the distribution.</p>
+<div class="interactive-figure-mount" data-interactive-options="{     &quot;distribution&quot;: &quot;normal&quot;, &quot;mean&quot;: 0, &quot;sd&quot;: 1,     &quot;style&quot;: &quot;minimal&quot;, &quot;xDomain&quot;: [-4, 4],     &quot;shade&quot;: {&quot;tail&quot;: &quot;center&quot;, &quot;p&quot;: 0.95, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;opacity&quot;: 0.3},     &quot;markers&quot;: {&quot;at&quot;: 0, &quot;label&quot;: &quot;Point estimate&quot;, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;labelColor&quot;: &quot;var(--bc-text, currentColor)&quot;},     &quot;intervals&quot;: {&quot;from&quot;: 0, &quot;to&quot;: 1.96, &quot;height&quot;: &quot;curve&quot;, &quot;label&quot;: &quot;Margin of error&quot;, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;},     &quot;maxWidth&quot;: &quot;34rem&quot;   }" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciAnatomy">
+<div class="interactive-figure-fallback">
+A normal curve with its center marked as the point estimate and the central 95% region shaded blue; an arrow from the center to the edge of the shaded region is labeled margin of error.
+</div>
+</div>
+<section id="calculating-the-confidence-interval" class="level3">
+<h3 data-anchor-id="calculating-the-confidence-interval">Calculating the Confidence Interval</h3>
+<p>Calculating the boundaries of the confidence interval isn’t too complicated; it just involves a little algebra. In the hypothesis testing chapter, we used the <span class="math inline">\(z\)</span> equation to calculate <span class="math inline">\(z\)</span>, giving us the exact <span class="math inline">\(z\)</span> score for our observed sample mean based on a population mean we specified from our null hypothesis. In contrast, the confidence interval is not based on that null hypothesis. Instead, we want to calculate <span class="math inline">\(\mu\)</span> — the potential population means which define the upper and lower bounds of the confidence interval. So instead of specifying <span class="math inline">\(\mu\)</span> from the null hypothesis and solving for <span class="math inline">\(z\)</span>, we specify <span class="math inline">\(z\)</span> and we solve for <span class="math inline">\(\mu\)</span>.</p>
+<p><span class="math display">\[ z = \dfrac{M - \mu}{\sigma_M} \]</span></p>
+<p><span class="math display">\[ \mu = M \pm z * \sigma_M \]</span></p>
+<p>Specifically, the <span class="math inline">\(z\)</span> values we specify are the <span class="math inline">\(z\)</span> values which correspond to the boundaries of the confidence interval, and we find them the same way we find our critical cutoff values for alpha — the most extreme 5% (or whatever) of the distribution. So if we specify a 95% confidence interval, we’re saying we want to split the distribution into the 95% in the middle, leaving 5% in the tails, or 2.5% at either end — which is the same as when we specified alpha saying we wanted 5% in the tails, leaving 95% in the middle. Again, like alpha, we can specify different values. We might want a 99% confidence interval or an 80% confidence interval, and that will give us different <span class="math inline">\(z\)</span> scores for the boundaries. But a 95% confidence is fairly standard, the same way that an alpha of 0.05 is.</p>
+<p>We find the <span class="math inline">\(z\)</span> values which correspond to those regions of the normal distribution, multiply by the standard error of the mean, and add to (and subtract from) the sample mean to find the corresponding <span class="math inline">\(\mu\)</span> values. Visually, the equation looks like this: the sample mean <span class="math inline">\(M\)</span> sits at the center as the point estimate, the boundaries of the interval are the potential population means <span class="math inline">\(\mu\)</span>, and the distance from the center to either boundary is <span class="math inline">\(z \times \sigma_M\)</span>.</p>
+<div class="interactive-figure-mount" data-interactive-options="{     &quot;distribution&quot;: &quot;normal&quot;, &quot;mean&quot;: 0, &quot;sd&quot;: 1,     &quot;style&quot;: &quot;minimal&quot;, &quot;xDomain&quot;: [-4, 4],     &quot;shade&quot;: {&quot;tail&quot;: &quot;center&quot;, &quot;p&quot;: 0.95, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;opacity&quot;: 0.3},     &quot;markers&quot;: [       {&quot;at&quot;: 0, &quot;labelMarkup&quot;: &quot;*M*&quot;, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;labelColor&quot;: &quot;var(--bc-text, currentColor)&quot;},       {&quot;at&quot;: -1.96, &quot;labelMarkup&quot;: &quot;*μ*&quot;, &quot;height&quot;: 0.55, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;},       {&quot;at&quot;: 1.96, &quot;labelMarkup&quot;: &quot;*μ*&quot;, &quot;height&quot;: 0.55, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;}     ],     &quot;intervals&quot;: {&quot;from&quot;: 0, &quot;to&quot;: 1.96, &quot;height&quot;: &quot;curve&quot;, &quot;labelMarkup&quot;: &quot;*z* × *σ*_*M*_&quot;, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;},     &quot;maxWidth&quot;: &quot;34rem&quot;   }" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciEquationDiagram">
+<div class="interactive-figure-fallback">
+A normal curve with M marked at the center, the potential population means mu marking the two edges of the shaded 95% region, and an arrow from M to the upper edge labeled z times sigma sub M.
+</div>
+</div>
+</section>
+<section id="example-class-reaction-time-data" class="level3">
+<h3 data-anchor-id="example-class-reaction-time-data">Example: Class Reaction Time Data</h3>
+<p>So let’s calculate a confidence interval for some real data: our class’s reaction times. Like the samples we imagined in the hypothesis testing chapter, our class of <span class="math inline">\(n = 23\)</span> students took the humanbenchmark.com reaction time test, for which the population of test-takers has a mean of <span class="math inline">\(\mu = 284\)</span> milliseconds and a standard deviation of <span class="math inline">\(\sigma = 50\)</span>. The class’s average came out at <span class="math inline">\(M = 322.59\)</span> milliseconds. That sample mean is our point estimate — but how precisely does it estimate the mean of the population that our class represents? Since we know the population standard deviation, the standard error of the mean is <span class="math inline">\(\sigma_M = 50 / \sqrt{23} = 10.43\)</span>.</p>
+<p>The first step is to specify the <span class="math inline">\(z\)</span> values for the boundaries of the confidence interval. That is, we need to decide on our desired confidence and find the <span class="math inline">\(z\)</span> scores which divide the distribution up in that way. Say we want a 95% confidence interval. We need the <span class="math inline">\(z\)</span> scores that cut off the lowest and highest 2.5% of the normal distribution, leaving 95% in the middle. Those should look familiar from the hypothesis testing chapter: they’re <span class="math inline">\(\pm 1.96\)</span>, the same values that mark out the two-tailed critical regions for <span class="math inline">\(\alpha = .05\)</span>.</p>
+<p>Now we can put those values into the equation with our sample mean and standard error of the mean. You should get two answers corresponding to the population means of the two boundaries; allowing for rounding error, you should have gotten something like 302 and 343.</p>
+<p><span class="math display">\[\mu = M \pm z \times \sigma_M = 322.59 \pm 1.96 \times 10.43 = [302.2,\ 343.0]\]</span></p>
+<div class="interactive-figure-mount" data-interactive-options="{     &quot;distribution&quot;: &quot;normal&quot;, &quot;mean&quot;: 322.59, &quot;sd&quot;: 10.43,     &quot;style&quot;: &quot;minimal&quot;, &quot;xAxis&quot;: true, &quot;xDomain&quot;: [280, 365], &quot;xTicks&quot;: 8,     &quot;labels&quot;: {&quot;x&quot;: &quot;Sample mean reaction time (ms)&quot;}, &quot;yLabel&quot;: false,     &quot;shade&quot;: {&quot;from&quot;: 302.16, &quot;to&quot;: 343.02, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;opacity&quot;: 0.3},     &quot;markers&quot;: [       {&quot;at&quot;: 322.59, &quot;label&quot;: &quot;M = 322.59&quot;, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;labelColor&quot;: &quot;var(--bc-text, currentColor)&quot;},       {&quot;at&quot;: 302.16, &quot;label&quot;: &quot;302.2&quot;, &quot;height&quot;: 0.55, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;},       {&quot;at&quot;: 343.02, &quot;label&quot;: &quot;343.0&quot;, &quot;height&quot;: 0.55, &quot;color&quot;: &quot;var(--bc-text, currentColor)&quot;}     ],     &quot;animate&quot;: true, &quot;shadeAnimation&quot;: &quot;grow&quot;,     &quot;maxWidth&quot;: &quot;36rem&quot;   }" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciClassData">
+<div class="interactive-figure-fallback">
+A normal curve centered on the class sample mean of 322.59 ms with the 95% confidence interval from 302.2 to 343.0 shaded blue; the shading grows outward symmetrically from the point estimate to the interval boundaries.
+</div>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="10_confidence_intervals_ci" aria-label="Calculate the CI"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate the CI</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="single_sample_ci"><div class="quiz-prompt"><p>A sample mean is 322.59, the standard error of the mean is 10.43, and
+the 95% boundary z value is 1.96. What is the approximate confidence
+interval?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The interval is 322.59 +/- 1.96 * 10.43, or about [302, 343].</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The margin of error is the boundary z value multiplied by the
+standard error of the mean.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="10_confidence_intervals_ci">{"questions":[{"type":"free-response","prompt":"A sample mean is 322.59, the standard error of the mean is 10.43, and the 95% boundary z value is 1.96. What is the approximate confidence interval?","explanationHtml":"\u003cp\u003eThe margin of error is the boundary z value multiplied by the\nstandard error of the mean.\u003c/p\u003e","id":"single_sample_ci","answerHtml":"\u003cp\u003eThe interval is 322.59 +/- 1.96 * 10.43, or about [302, 343].\u003c/p\u003e","answer":"The interval is 322.59 +/- 1.96 * 10.43, or about [302, 343].","explanation":"The margin of error is the boundary z value multiplied by the standard error of the mean.","promptHtml":"\u003cp\u003eA sample mean is 322.59, the standard error of the mean is 10.43, and\nthe 95% boundary z value is 1.96. What is the approximate confidence\ninterval?\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eCalculate the CI\u003c/p\u003e","title":"Calculate the CI","id":"10_confidence_intervals_ci"}</script></section>
+</section>
+<section id="interpreting-the-confidence-interval" class="level3">
+<h3 data-anchor-id="interpreting-the-confidence-interval">Interpreting the Confidence Interval</h3>
+<p>It’s important to be clear about what the confidence interval does and does not tell us. Again, it primarily indicates the precision of a parameter estimate. It does not say we are 95% sure the true population mean is within this range. It’s easy to get confused about this because it would be so natural to take it as an indication that the true population mean must be within the confidence interval. But like alpha and the Type I error, we’re admitting that 5% of the time (or whatever we choose as our criterion for “quite unlikely”), the unlikely thing will happen. For the most part, the true population mean is something we can just never have concrete knowledge of. As Jerzy Neyman, the statistician who developed confidence intervals, put it: “The parameter is an unknown constant and no probability statement concerning its value may be made.”</p>
+<!-- [Possible typo: "Nyman" in original audio should be "Neyman"] -->
+<p>A deck of playing cards is a known population consisting of the numbers 1 through 13 repeated 4 times, once for each suit. The average of this population (<span class="math inline">\(\mu\)</span>) is 7.00, and the standard deviation (<span class="math inline">\(\sigma\)</span>) is 3.74. The deck is a convenient example of a known population, but generally speaking we don’t know the true population parameter — that’s the whole reason for taking samples and applying statistics! Sampling from a population we <em>do</em> know, though, lets us check every confidence interval against the truth.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Explore confidence interval coverage
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;seed&quot;:&quot;ci-deck-v183&quot;,&quot;confidence&quot;:95,&quot;sampleSize&quot;:5}" data-interactive-factory="makeConfidenceIntervalExplorer" data-interactive-figure="ciCoverage">
+<div class="interactive-figure-fallback">
+Interactive demonstration of confidence-interval coverage: repeated samples of playing cards each produce a confidence interval around their mean, plotted against the deck's true mean of 7. Most intervals capture the true mean, some miss, and the running percentage that capture it approaches the stated confidence level.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="The deck" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:0,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:false}">
+<p>In this visualization, you can take samples from the deck repeatedly. Because this is a known population, the dashed line can mark the true population mean, <span class="math inline">\(\mu = 7\)</span> — the value each sample will estimate.</p>
+</div>
+<div class="tutorial-step" data-title="One sample" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:1,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:true}">
+<p>Each sample produces an estimate of the population parameter with a margin of uncertainty: this is the confidence interval for the sample. These five cards give <span class="math inline interactive-value interactive-math" data-interactive-prefix="M =" data-interactive-empty="..." data-interactive-value="ciCoverage.mean" data-interactive-math="true" data-interactive-format=".2f">M = ...</span>, with a 95% confidence interval of [<span class="interactive-value" data-interactive-value="ciCoverage.ciLower" data-interactive-empty="..." data-interactive-format=".2f">...</span>, <span class="interactive-value" data-interactive-value="ciCoverage.ciUpper" data-interactive-empty="..." data-interactive-format=".2f">...</span>].</p>
+</div>
+<div class="tutorial-step" data-title="Draw more" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:15,&quot;delay&quot;:250,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:true}">
+<p>The visualization really is sampling from a fair deck with a mean of 7. But as you’ll see, some of the confidence intervals don’t include the true population mean. Sample 7 is one: it just so happened that we obtained a sample whose confidence interval didn’t contain <span class="math inline">\(\mu\)</span>.</p>
+</div>
+<div class="tutorial-step" data-title="Long run" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:400,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:false}">
+<p>The confidence interval is a statement about repeated, long-run probabilities: if we sample from a population repeatedly, the proportion of confidence intervals which include the true population mean will be equal to the specified level of confidence. After <span class="interactive-value" data-interactive-value="ciCoverage.drawCount" data-interactive-empty="..." data-interactive-format=".0f">...</span> samples here, that proportion is <span class="interactive-value" data-interactive-value="ciCoverage.capturePercent" data-interactive-empty="..." data-interactive-format=".1f">...</span>%. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it’s not quite true.</p>
+</div>
+<div class="tutorial-step" data-title="80% CI" data-action="{&quot;confidence&quot;:80,&quot;sample-size&quot;:5,&quot;draw&quot;:400,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:true}">
+<p>For example, if we compute an 80% CI for each sample, around 80% of those CIs will include the population mean — here, <span class="interactive-value" data-interactive-value="ciCoverage.capturePercent" data-interactive-empty="..." data-interactive-format=".1f">...</span>%. With a lower confidence like 80%, we’re specifying a narrower range, but we are correspondingly less confident.</p>
+</div>
+<div class="tutorial-step" data-title="Decisions" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:400,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:true,&quot;animate&quot;:true}">
+<p>Maybe that sounds a bit disappointing. Surely the whole point of taking a sample is to be able to say something about the population it came from? Well, yes — this is where confidence intervals connect to null hypothesis significance testing. Let’s say we suspect that someone has removed some cards from our deck and so its population mean is not, in fact, 7. The null hypothesis, that our deck hasn’t been tampered with, would be that <span class="math inline">\(\mu = 7\)</span>: if the null value lies outside our confidence interval, we reject the null hypothesis; if it’s inside, we don’t reject it. This deck really is fair, so each of the <span class="interactive-value" data-interactive-value="ciCoverage.missCount" data-interactive-empty="..." data-interactive-format=".0f">...</span> rejections here would be a mistake — a Type I error.</p>
+</div>
+<div class="tutorial-step" data-title="Sample size" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:30,&quot;draw&quot;:400,&quot;show-mu&quot;:true,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:false}">
+<p>Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With 30 cards per sample, every interval narrows — but the proportion including <span class="math inline">\(\mu\)</span> still matches the specified confidence: <span class="interactive-value" data-interactive-value="ciCoverage.capturePercent" data-interactive-empty="..." data-interactive-format=".1f">...</span>%.</p>
+</div>
+<div class="tutorial-step" data-title="Real research" data-action="{&quot;confidence&quot;:95,&quot;sample-size&quot;:5,&quot;draw&quot;:400,&quot;show-mu&quot;:false,&quot;show-cards&quot;:true,&quot;show-decision&quot;:false,&quot;animate&quot;:false,&quot;controls-open&quot;:true}">
+<p>With the dashed line hidden, this is what real research looks like: the true population mean is something we can just never have concrete knowledge of. Under the frequentist approach, the population parameter is a fixed constant, and we can’t make probabilistic statements about constants. So strictly speaking, the CI for a single sample reflects the uncertainty in that sample’s estimate of the parameter, rather than uncertainty about the true value of the parameter. Open the controls and keep drawing.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="factors-affecting-the-width-of-a-confidence-interval" class="level3">
+<h3 data-anchor-id="factors-affecting-the-width-of-a-confidence-interval">Factors Affecting the Width of a Confidence Interval</h3>
+<p>It’s worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our class reaction time interval: <span class="math inline">\(M = 322.59\)</span>, <span class="math inline">\(\sigma_M = 10.43\)</span>, and a 95% interval of <span class="math inline">\([302.2,\ 343.0]\)</span>.</p>
+<p>The most obvious factor is the confidence level desired — for example, 80%, 95%, or 99%. More confidence (for example, choosing 99% rather than 95%) increases the width of the confidence interval. Less confidence (choosing an 80% confidence interval) decreases the interval width. This is a little bit counterintuitive, because by increasing our confidence from, say, 95% to 99%, we’re actually lowering the precision of our estimate. Another way to think about this is that we could have a 100% confidence interval: we’d say that 100% of sample means will be between minus infinity and plus infinity, but obviously that wouldn’t be a very useful confidence interval. With a lower confidence like 80%, we’re specifying a narrower range, but we are correspondingly less confident. For the class data, an 80% interval uses <span class="math inline">\(z = \pm 1.28\)</span> instead of <span class="math inline">\(\pm 1.96\)</span>, shrinking the interval from about 41 milliseconds wide to about 27.</p>
+<div class="bc-figure-row">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:10.43,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;title&quot;:&quot;80% confidence&quot;,&quot;shade&quot;:{&quot;from&quot;:309.25,&quot;to&quot;:335.94,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[309.2, 335.9]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidth80">
+<div class="interactive-figure-fallback">
+Normal curve for the class data with the narrower 80% confidence interval from 309.2 to 335.9 shaded.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:10.43,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;title&quot;:&quot;95% confidence&quot;,&quot;shade&quot;:{&quot;from&quot;:302.16,&quot;to&quot;:343.02,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[302.2, 343.0]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidth95">
+<div class="interactive-figure-fallback">
+The same normal curve with the wider 95% confidence interval from 302.2 to 343.0 shaded.
+</div>
+</div>
+</div>
+<p>Sample size will affect the precision of our confidence interval as well. As you know, by and large, larger samples result in a smaller standard error of the mean, which will result in a narrower interval. On the other hand, a smaller sample means a larger standard error, meaning less precision. If our class had <span class="math inline">\(n = 100\)</span> students instead of 23, the standard error would drop from <span class="math inline">\(50 / \sqrt{23} = 10.43\)</span> to <span class="math inline">\(50 / \sqrt{100} = 5.00\)</span>, and the 95% interval would narrow from about 41 milliseconds wide to under 20 — a more precise estimate at the same level of confidence. Notice that the whole sampling distribution gets narrower, and the interval narrows with it.</p>
+<div class="bc-figure-row">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:10.43,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;yDomain&quot;:[0,0.088],&quot;title&quot;:&quot;n = 23&quot;,&quot;shade&quot;:{&quot;from&quot;:302.16,&quot;to&quot;:343.02,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[302.2, 343.0]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidthN23">
+<div class="interactive-figure-fallback">
+Sampling distribution for samples of 23 with the 95% confidence interval from 302.2 to 343.0 shaded.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:5,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;yDomain&quot;:[0,0.088],&quot;title&quot;:&quot;n = 100&quot;,&quot;shade&quot;:{&quot;from&quot;:312.79,&quot;to&quot;:332.39,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[312.8, 332.4]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidthN100">
+<div class="interactive-figure-fallback">
+A taller, narrower sampling distribution for samples of 100 with a correspondingly narrower 95% confidence interval from 312.8 to 332.4.
+</div>
+</div>
+</div>
+<p>Finally, the variability of the population matters too. The standard error of the mean depends on the population standard deviation, <span class="math inline">\(\sigma_M = \sigma / \sqrt{n}\)</span>, so a less variable population produces a smaller standard error and a narrower interval from the same sample size. If reaction times had a standard deviation of 25 milliseconds rather than 50, the standard error for our class of 23 would be 5.21 instead of 10.43, and the interval would be about half as wide. Unlike the confidence level and the sample size, though, this isn’t something the researcher gets to choose: the population’s variability is whatever it is.</p>
+<div class="bc-figure-row">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:10.43,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;yDomain&quot;:[0,0.088],&quot;title&quot;:&quot;σ = 50&quot;,&quot;shade&quot;:{&quot;from&quot;:302.16,&quot;to&quot;:343.02,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[302.2, 343.0]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidthSigma50">
+<div class="interactive-figure-fallback">
+Sampling distribution when the population standard deviation is 50, with the 95% confidence interval from 302.2 to 343.0 shaded.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;mean&quot;:322.59,&quot;sd&quot;:5.21,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xDomain&quot;:[280,365],&quot;xTicks&quot;:5,&quot;yDomain&quot;:[0,0.088],&quot;title&quot;:&quot;σ = 25&quot;,&quot;shade&quot;:{&quot;from&quot;:312.37,&quot;to&quot;:332.81,&quot;color&quot;:&quot;var(--bc-comparison-color, #2f6f9f)&quot;,&quot;opacity&quot;:0.3,&quot;labelPosition&quot;:&quot;above&quot;,&quot;label&quot;:&quot;[312.4, 332.8]&quot;}}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="ciWidthSigma25">
+<div class="interactive-figure-fallback">
+A narrower sampling distribution when the population standard deviation is 25, with a 95% confidence interval from 312.4 to 332.8.
+</div>
+</div>
+</div>
+</section>
+<section id="confidence-intervals-and-hypothesis-testing" class="level3">
+<h3 data-anchor-id="confidence-intervals-and-hypothesis-testing">Confidence Intervals and Hypothesis Testing</h3>
+<p>Finally, if you really want a deep understanding of null hypothesis significance testing and confidence intervals, you’ll spend some time trying to grasp how they correspond to one another. It can be tricky to get your head around, but they each apply the same basic logic from different perspectives.</p>
+<p>The <span class="math inline">\(p\)</span> value and the confidence interval will always agree about statistical significance if the confidence interval is <span class="math inline">\(1 - \alpha\)</span>. For example, if alpha is 0.05 and you specify a 95% confidence interval: if <span class="math inline">\(p &lt; \alpha\)</span> for the hypothesis test, then the confidence interval will not contain the null hypothesis expected mean. Or to put it another way, if the confidence interval range does not contain the null hypothesis value, then you know that the results are statistically significant. In this sense, as the card-deck visualization above showed, the interpretation of any single confidence interval is most closely related to the binary decision about the null hypothesis.</p>
+<p>Maybe you already kind of realize why this is the case. Both the alpha level and the confidence level define a distance from a mean to a limit. When alpha corresponds to confidence — when we have alpha .05 and 95% confidence — the distances in both cases are exactly the same. The only difference is that the null hypothesis looks for the distance from the null hypothesis mean to the alpha limit, while the confidence interval looks for the distance from the point estimate to the confidence limit.</p>
+<p>This is hard to grasp, so let’s look at it visually, using our class reaction time data one more time. The null hypothesis perspective is to focus on the distance from the mean of the null distribution to the edge of the critical region. With an alpha of 0.05, this spans 47.5% of the distribution if we’re just looking in one direction. If the sample mean is beyond that boundary, we declare a statistically significant result. The confidence interval perspective is to focus on the distance from the point estimate (which is the sample mean) to the edge of the confidence interval. With a 95% confidence interval, that once again corresponds to 47.5% of the distribution if we’re looking in just one direction.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Explore the CI–hypothesis test correspondence
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;mu0&quot;:284,&quot;sigma&quot;:50,&quot;n&quot;:23,&quot;m&quot;:322.59,&quot;confidence&quot;:95,&quot;showNull&quot;:true,&quot;showCi&quot;:false,&quot;showDistances&quot;:false}" data-interactive-factory="makeCiNhstDiagram" data-interactive-figure="ciNhst">
+<div class="interactive-figure-fallback">
+Interactive diagram of the correspondence between hypothesis testing and confidence intervals: a red null distribution centered on 284 ms with its critical regions shaded, a blue distribution centered on the sample mean with the 95% confidence interval shaded, and dots marking the null mean and the sample mean on the axis.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Null view" data-action="{&quot;m&quot;:322.59,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:true,&quot;show-ci&quot;:false,&quot;show-distances&quot;:false,&quot;animate&quot;:false}">
+<p>Start with the familiar hypothesis-testing picture. The red curve is the distribution of sample means the null hypothesis predicts: centered on <span class="math inline">\(\mu = 284\)</span>, with standard error <span class="math inline">\(\sigma_M = 10.43\)</span> for samples of 23. The shaded tails are the critical regions for <span class="math inline">\(\alpha = .05\)</span>. Our class mean — the blue dot at <span class="math inline">\(M = 322.59\)</span> — falls in the upper critical region, so the result is significant: <span class="math inline interactive-value interactive-math" data-interactive-prefix="p =" data-interactive-empty="..." data-interactive-value="ciNhst.p" data-interactive-math="true" data-interactive-format=".4f">p = ...</span>.</p>
+</div>
+<div class="tutorial-step" data-title="A distance" data-action="{&quot;m&quot;:322.59,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:true,&quot;show-ci&quot;:false,&quot;show-distances&quot;:true,&quot;animate&quot;:true}">
+<p>Significance is really a statement about distance. The arrow marks the span from the null mean to the critical boundary: <span class="math inline">\(1.96 \times \sigma_M\)</span>, or <span class="interactive-value" data-interactive-value="ciNhst.distance" data-interactive-empty="..." data-interactive-format=".1f">...</span> ms. Any sample mean farther than that from 284 is significant, and <span class="math inline">\(M\)</span> is farther than that.</p>
+</div>
+<div class="tutorial-step" data-title="CI view" data-action="{&quot;m&quot;:322.59,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:false,&quot;show-ci&quot;:true,&quot;show-distances&quot;:true,&quot;animate&quot;:true}">
+<p>Now the confidence interval perspective on the very same data. The blue distribution is centered on the point estimate <span class="math inline">\(M\)</span>, and the shaded middle 95% is the confidence interval: [<span class="interactive-value" data-interactive-value="ciNhst.ciLower" data-interactive-empty="..." data-interactive-format=".1f">...</span>, <span class="interactive-value" data-interactive-value="ciNhst.ciUpper" data-interactive-empty="..." data-interactive-format=".1f">...</span>]. The arrow from <span class="math inline">\(M\)</span> to the interval’s edge is <span class="math inline">\(1.96 \times \sigma_M\)</span> again — exactly the same distance as before, measured from the other mean. The null value (the red dot at 284) sits outside the interval.</p>
+</div>
+<div class="tutorial-step" data-title="Both" data-action="{&quot;m&quot;:322.59,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:true,&quot;show-ci&quot;:true,&quot;show-distances&quot;:true,&quot;animate&quot;:true}">
+<p>Put both pictures together and the correspondence is clear: the two arrows are the same length. So the blue dot lies beyond the red boundary exactly when the red dot lies beyond the blue boundary. Rejecting the null because <span class="math inline">\(M\)</span> is in the critical region, and rejecting it because <span class="math inline">\(\mu\)</span> is outside the confidence interval, are the same decision seen from two sides.</p>
+</div>
+<div class="tutorial-step" data-title="Not significant" data-action="{&quot;m&quot;:300,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:true,&quot;show-ci&quot;:true,&quot;show-distances&quot;:true,&quot;animate&quot;:true}">
+<p>Here’s what a non-significant result looks like. If the class mean had been 300 ms, it would sit inside the critical boundaries (<span class="math inline interactive-value interactive-math" data-interactive-prefix="p =" data-interactive-empty="..." data-interactive-value="ciNhst.p" data-interactive-math="true" data-interactive-format=".3f">p = ...</span>), and — correspondingly — the confidence interval [<span class="interactive-value" data-interactive-value="ciNhst.ciLower" data-interactive-empty="..." data-interactive-format=".1f">...</span>, <span class="interactive-value" data-interactive-value="ciNhst.ciUpper" data-interactive-empty="..." data-interactive-format=".1f">...</span>] now includes the null hypothesis mean of 284. The two perspectives always agree.</p>
+</div>
+<div class="tutorial-step" data-title="Explore" data-action="{&quot;m&quot;:300,&quot;n&quot;:23,&quot;confidence&quot;:95,&quot;show-null&quot;:true,&quot;show-ci&quot;:true,&quot;show-distances&quot;:true,&quot;controls-open&quot;:true,&quot;animate&quot;:true}">
+<p>Open the controls and drag the sample mean back and forth. Watch for the moment <span class="math inline">\(M\)</span> crosses the critical boundary: the <span class="math inline">\(p\)</span> value crosses <span class="math inline">\(\alpha = .05\)</span> at exactly the moment the confidence interval slides off the null mean. Changing the sample size or the confidence level moves both boundaries in lockstep, so the two decisions can never disagree.</p>
+</div>
+</div>
+</div>
+</div>
+<p>So we reject the null because the sample mean is far enough away from the null population mean — it’s one of the most extreme means for that distribution, one of the 5% of least common means — and correspondingly, the null hypothesis mean is not contained within the 95% confidence interval. It is one of the most extreme means for the population that produced the confidence interval, one of the 5% of least common means. This is a subtle idea and it’s hard to intuitively grasp. But if you really want to understand this, you’ll spend some time dwelling on it.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="10_confidence_intervals_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 3 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 3</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="expected_z_null"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>On average across many studies, what value of z would you expect if
+the null hypothesis is true each time?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-expected_z_null" id="10_confidence_intervals_learning_checks-expected_z_null-option-1" value="0" aria-labelledby="10_confidence_intervals_learning_checks-expected_z_null-option-1-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-expected_z_null-option-1-text"><p>0</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-expected_z_null" id="10_confidence_intervals_learning_checks-expected_z_null-option-2" value="1" aria-labelledby="10_confidence_intervals_learning_checks-expected_z_null-option-2-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-expected_z_null-option-2-text"><p>1</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-expected_z_null" id="10_confidence_intervals_learning_checks-expected_z_null-option-3" value="2" aria-labelledby="10_confidence_intervals_learning_checks-expected_z_null-option-3-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-expected_z_null-option-3-text"><p>The critical value</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-expected_z_null" id="10_confidence_intervals_learning_checks-expected_z_null-option-4" value="3" aria-labelledby="10_confidence_intervals_learning_checks-expected_z_null-option-4-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-expected_z_null-option-4-text"><p>The sample size</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>If the null is true, the expected difference in the numerator is
+zero.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="significant_z_factors"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which combination is most likely to produce a significant z
+statistic?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-significant_z_factors" id="10_confidence_intervals_learning_checks-significant_z_factors-option-1" value="0" aria-labelledby="10_confidence_intervals_learning_checks-significant_z_factors-option-1-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-significant_z_factors-option-1-text"><p>Large mean difference, small variability, large n</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-significant_z_factors" id="10_confidence_intervals_learning_checks-significant_z_factors-option-2" value="1" aria-labelledby="10_confidence_intervals_learning_checks-significant_z_factors-option-2-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-significant_z_factors-option-2-text"><p>Small mean difference, large variability, small n</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-significant_z_factors" id="10_confidence_intervals_learning_checks-significant_z_factors-option-3" value="2" aria-labelledby="10_confidence_intervals_learning_checks-significant_z_factors-option-3-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-significant_z_factors-option-3-text"><p>Large variability and small n only</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-significant_z_factors" id="10_confidence_intervals_learning_checks-significant_z_factors-option-4" value="3" aria-labelledby="10_confidence_intervals_learning_checks-significant_z_factors-option-4-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-significant_z_factors-option-4-text"><p>A large p-value</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Large mean difference, small variability, large n</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A larger numerator and smaller standard error of the mean produce a
+larger absolute z value.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="single_study_z_null"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>In a single study, what absolute value of z is most expected if the
+null hypothesis is true?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-single_study_z_null" id="10_confidence_intervals_learning_checks-single_study_z_null-option-1" value="0" aria-labelledby="10_confidence_intervals_learning_checks-single_study_z_null-option-1-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-single_study_z_null-option-1-text"><p>A value near 0</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-single_study_z_null" id="10_confidence_intervals_learning_checks-single_study_z_null-option-2" value="1" aria-labelledby="10_confidence_intervals_learning_checks-single_study_z_null-option-2-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-single_study_z_null-option-2-text"><p>A value beyond the critical value</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-single_study_z_null" id="10_confidence_intervals_learning_checks-single_study_z_null-option-3" value="2" aria-labelledby="10_confidence_intervals_learning_checks-single_study_z_null-option-3-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-single_study_z_null-option-3-text"><p>Exactly 1.96 every time</p></div></div><div class="quiz-choice"><input type="radio" name="10_confidence_intervals_learning_checks-single_study_z_null" id="10_confidence_intervals_learning_checks-single_study_z_null-option-4" value="3" aria-labelledby="10_confidence_intervals_learning_checks-single_study_z_null-option-4-text"><div class="quiz-choice-text" id="10_confidence_intervals_learning_checks-single_study_z_null-option-4-text"><p>Exactly the sample size</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A value near 0</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Random samples vary, but values near zero are most common under the
+null.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="10_confidence_intervals_learning_checks">{"questions":[{"type":"multiple-choice","prompt":"On average across many studies, what value of z would you expect if the null hypothesis is true each time?","explanationHtml":"\u003cp\u003eIf the null is true, the expected difference in the numerator is\nzero.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003e0\u003c/p\u003e","text":"0"},{"textHtml":"\u003cp\u003e1\u003c/p\u003e","text":"1"},{"textHtml":"\u003cp\u003eThe critical value\u003c/p\u003e","text":"The critical value"},{"textHtml":"\u003cp\u003eThe sample size\u003c/p\u003e","text":"The sample size"}],"answerHtml":"","promptHtml":"\u003cp\u003eOn average across many studies, what value of z would you expect if\nthe null hypothesis is true each time?\u003c/p\u003e","explanation":"If the null is true, the expected difference in the numerator is zero.","id":"expected_z_null"},{"type":"multiple-choice","prompt":"Which combination is most likely to produce a significant z statistic?","explanationHtml":"\u003cp\u003eA larger numerator and smaller standard error of the mean produce a\nlarger absolute z value.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eLarge mean difference, small variability, large n\u003c/p\u003e","text":"Large mean difference, small variability, large n"},{"textHtml":"\u003cp\u003eSmall mean difference, large variability, small n\u003c/p\u003e","text":"Small mean difference, large variability, small n"},{"textHtml":"\u003cp\u003eLarge variability and small n only\u003c/p\u003e","text":"Large variability and small n only"},{"textHtml":"\u003cp\u003eA large p-value\u003c/p\u003e","text":"A large p-value"}],"answerHtml":"","promptHtml":"\u003cp\u003eWhich combination is most likely to produce a significant z\nstatistic?\u003c/p\u003e","explanation":"A larger numerator and smaller standard error of the mean produce a larger absolute z value.","id":"significant_z_factors"},{"type":"multiple-choice","prompt":"In a single study, what absolute value of z is most expected if the null hypothesis is true?","explanationHtml":"\u003cp\u003eRandom samples vary, but values near zero are most common under the\nnull.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eA value near 0\u003c/p\u003e","text":"A value near 0"},{"textHtml":"\u003cp\u003eA value beyond the critical value\u003c/p\u003e","text":"A value beyond the critical value"},{"textHtml":"\u003cp\u003eExactly 1.96 every time\u003c/p\u003e","text":"Exactly 1.96 every time"},{"textHtml":"\u003cp\u003eExactly the sample size\u003c/p\u003e","text":"Exactly the sample size"}],"answerHtml":"","promptHtml":"\u003cp\u003eIn a single study, what absolute value of z is most expected if the\nnull hypothesis is true?\u003c/p\u003e","explanation":"Random samples vary, but values near zero are most common under the null.","id":"single_study_z_null"}],"titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","title":"Learning Checks","id":"10_confidence_intervals_learning_checks"}</script></section>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./09-statistical-power.html" class="pagination-link" aria-label="Statistical Power">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./11-t-test.html" class="pagination-link" aria-label="The $t$-test">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>15&nbsp; Related Samples ANOVA – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./16-factorial-anova.html" rel="next">
+<link href="./14-anova.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="15&nbsp; Related Samples ANOVA – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="15&nbsp; Related Samples ANOVA – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#recap-between--vs.-within-participants-designs" id="toc-recap-between--vs.-within-participants-designs" class="nav-link" data-scroll-target="#recap-between--vs.-within-participants-designs">Recap: Between- vs.&nbsp;Within-Participants Designs</a></li>
+  <li><a href="#partitioning-variance-in-related-samples-designs" id="toc-partitioning-variance-in-related-samples-designs" class="nav-link" data-scroll-target="#partitioning-variance-in-related-samples-designs">Partitioning Variance in Related-Samples Designs</a>
+  <ul class="collapse">
+  <li><a href="#removing-individual-differences" id="toc-removing-individual-differences" class="nav-link" data-scroll-target="#removing-individual-differences">Removing Individual Differences</a></li>
+  </ul></li>
+  <li><a href="#the-modified-f-ratio" id="toc-the-modified-f-ratio" class="nav-link" data-scroll-target="#the-modified-f-ratio">The Modified <span class="math inline">\(F\)</span> Ratio</a></li>
+  <li><a href="#sums-of-squares-and-degrees-of-freedom" id="toc-sums-of-squares-and-degrees-of-freedom" class="nav-link" data-scroll-target="#sums-of-squares-and-degrees-of-freedom">Sums of Squares and Degrees of Freedom</a>
+  <ul class="collapse">
+  <li><a href="#computing-mean-squares-and-f" id="toc-computing-mean-squares-and-f" class="nav-link" data-scroll-target="#computing-mean-squares-and-f">Computing Mean Squares and <span class="math inline">\(F\)</span></a></li>
+  </ul></li>
+  <li><a href="#worked-example-hypothesis-test" id="toc-worked-example-hypothesis-test" class="nav-link" data-scroll-target="#worked-example-hypothesis-test">Worked Example: Hypothesis Test</a>
+  <ul class="collapse">
+  <li><a href="#step-1-state-the-hypotheses" id="toc-step-1-state-the-hypotheses" class="nav-link" data-scroll-target="#step-1-state-the-hypotheses">Step 1: State the Hypotheses</a></li>
+  <li><a href="#step-2-determine-the-critical-value" id="toc-step-2-determine-the-critical-value" class="nav-link" data-scroll-target="#step-2-determine-the-critical-value">Step 2: Determine the Critical Value</a></li>
+  <li><a href="#step-3-calculate-the-f-ratio" id="toc-step-3-calculate-the-f-ratio" class="nav-link" data-scroll-target="#step-3-calculate-the-f-ratio">Step 3: Calculate the <span class="math inline">\(F\)</span> Ratio</a></li>
+  <li><a href="#step-4-make-a-decision" id="toc-step-4-make-a-decision" class="nav-link" data-scroll-target="#step-4-make-a-decision">Step 4: Make a Decision</a></li>
+  <li><a href="#effect-size-partial-eta2" id="toc-effect-size-partial-eta2" class="nav-link" data-scroll-target="#effect-size-partial-eta2">Effect Size: Partial <span class="math inline">\(\eta^2\)</span></a></li>
+  <li><a href="#post-hoc-tests-tukeys-hsd" id="toc-post-hoc-tests-tukeys-hsd" class="nav-link" data-scroll-target="#post-hoc-tests-tukeys-hsd">Post-Hoc Tests: Tukey’s HSD</a></li>
+  </ul></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting Results</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/variance-partition-diagram.js"></script>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>Last time we introduced the independent-samples ANOVA for use with between-participants designs. This time we’ll introduce another variant, the related-samples ANOVA. Conceptually, there’s really nothing new here. Just like the related-samples <span class="math inline">\(t\)</span>-test, this is for use with within-participants or matched-subjects designs. We’ll just need to examine some of the new sources of variance that we can partition differently here by virtue of the related-samples design.</p>
+</section>
+<section id="recap-between--vs.-within-participants-designs" class="level2">
+<h2 data-anchor-id="recap-between--vs.-within-participants-designs">Recap: Between- vs.&nbsp;Within-Participants Designs</h2>
+<p>To recap the idea of these different designs, the independent-samples ANOVA we used in the previous lecture is for use with between-participants designs in which each sample consists of different people and therefore independent observations. Like I mentioned, because we have different participants in each treatment group, any between-groups variability could either be due to a treatment effect or any individual differences between participants. Again, we might happen to end up with groups with slightly different compositions just by chance alone. With this abstract diagram I first introduced with the related-samples <span class="math inline">\(t\)</span>-test, I genuinely used a random sampling procedure in R to generate these groups of dots. And each group has a slightly different composition of colors. There’s no real systematic difference between the groups. There’s no treatment effect — only the slightly different aggregations of different individuals.</p>
+<p>With a repeated-measures design or a matched-samples design, each group is made up of the same people or people we deliberately paired up to be similar on any variable or variables we think are important. And the primary advantage of these designs is that we rule out those kinds of individual differences as a potential source of variability between groups.</p>
+<p>By eliminating that source of variability, we produce a more powerful test statistic. Like we said when we first introduced this idea, another advantage of repeated-samples designs, though not matched-samples designs, is that we require fewer participants. Everyone contributes data to all treatment conditions. With three conditions we only need a third of the participants compared to an independent-samples design, so this can be a big practical benefit. But remember, there are disadvantages as well. We’re assuming that people haven’t changed in any important way between treatments, but maybe they have. There could be order effects, improvement through practice, some change due to world events, or natural improvement in people’s symptoms.</p>
+</section>
+<section id="partitioning-variance-in-related-samples-designs" class="level2">
+<h2 data-anchor-id="partitioning-variance-in-related-samples-designs">Partitioning Variance in Related-Samples Designs</h2>
+<p>So let’s think about this in terms of partitioning the variance in the data. Let’s start by recapping this procedure for independent-samples designs again. There is the total variability in the data. We can partition that into the variance, or mean square, between groups and variance within groups.</p>
+<p>So what contributes to those different types of variability? Any treatment effect only contributes to variability between groups, not within. In the previous lecture I simplified a little by saying that chance also contributes to differences between groups. But here we can be more specific. That kind of chance difference consists both of sampling error, the general discrepancy between statistics and parameters, and individual differences, the fact that some people score higher or lower than others because of their abilities or traits or preferences or whatever. And both sampling error and individual differences contribute to variance within groups as well.</p>
+<p>So conceptually, to be more specific about things, the independent-samples <span class="math inline">\(F\)</span> ratio equation consists of the treatment effect, sampling error, and individual differences in the numerator, and sampling error and individual differences in the denominator. So the error and individual differences are sort of canceled out by the ratio, quantifying whatever treatment effect is above and beyond those chance differences.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Partitioning variance in a related-samples design
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;preset&quot;:&quot;independent-detailed&quot;}" data-interactive-figure="relatedPartitionDiagram" data-interactive-factory="makeVariancePartitionDiagram">
+<div class="interactive-figure-fallback">
+Diagram partitioning total variability into between-treatments and within-groups variance. For related samples, individual differences drop out of the between-treatments component, so the within-groups variance is further partitioned into error variance (sampling error) and between-subjects variance (individual differences), and the F ratio uses mean square error as its denominator.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Independent samples" data-action="{&quot;preset&quot;:&quot;independent-detailed&quot;,&quot;emphasize&quot;:&quot;none&quot;,&quot;animate&quot;:false}">
+<p>For independent samples, treatment effect, sampling error, and individual differences all contribute to the variance between groups; sampling error and individual differences contribute within groups. The chance sources appear in both parts of the <span class="math inline">\(F\)</span> ratio, so they cancel out.</p>
+</div>
+<div class="tutorial-step" data-title="The problem" data-action="{&quot;preset&quot;:&quot;related-problem&quot;,&quot;emphasize&quot;:&quot;ind-diff&quot;}">
+<p>A related-samples design eliminates individual differences <em>between</em> treatments — it’s the same (or matched) people in every condition. But they still lurk within groups, so the usual ratio is unbalanced: individual differences sit in the denominator with nothing to cancel them in the numerator.</p>
+</div>
+<div class="tutorial-step" data-title="The solution" data-action="{&quot;preset&quot;:&quot;related&quot;,&quot;emphasize&quot;:&quot;ind-diff&quot;}">
+<p>So we partition the within-groups variance itself, splitting the individual differences (between-subjects variance) apart from the sampling error (error variance).</p>
+</div>
+<div class="tutorial-step" data-title="A balanced ratio" data-action="{&quot;preset&quot;:&quot;related&quot;,&quot;emphasize&quot;:&quot;none&quot;}">
+<p>Using <span class="math inline">\(MS_{error}\)</span> as the denominator restores the balance: treatment effect plus sampling error over sampling error alone. The individual differences are out of the equation entirely, giving us a more powerful test.</p>
+</div>
+</div>
+</div>
+</div>
+<section id="removing-individual-differences" class="level3">
+<h3 data-anchor-id="removing-individual-differences">Removing Individual Differences</h3>
+<p>With the related-samples ANOVA, we start out the same, partitioning the total variance into variance between treatments and variance within treatments. Any treatment effect still contributes to variance between groups and not within groups. Sampling error still contributes to both differences between and within groups. But like I said, individual differences are eliminated as a potential source of variability between groups by virtue of the design — it’s the same people or matched subjects in each group. So the individuals do not differ between groups. But of course, they do still differ within groups. So individual differences are a potential source of within-group variance.</p>
+<p>So if we use the same numerator and denominator here as for the independent-samples ANOVA, the ratio wouldn’t be balanced anymore. We’d have treatment plus error in the numerator and error plus individual differences in the denominator. So those different sources of variability would contribute differently to the numerator and denominator and wouldn’t cancel out nicely in the ratio like they did before.</p>
+<p>This would be a problem. And so with related samples, we have a little extra work to do, because, happily, we can partition out the variance in the denominator, separating the sampling error and the individual differences. We will partition that within-group variance into two components: error variance, labeled <span class="math inline">\(MS_{error}\)</span>, and between-subjects variance, <span class="math inline">\(MS_{between\ subjects}\)</span>. As the name suggests, the error variance consists only of sampling error and the between-subjects variance consists only of the individual differences. We’ll see how exactly we’re able to quantify these different sources in a moment.</p>
+</section>
+</section>
+<section id="the-modified-f-ratio" class="level2">
+<h2 data-anchor-id="the-modified-f-ratio">The Modified <span class="math inline">\(F\)</span> Ratio</h2>
+<p>But note that we have a slightly different label for the variance between groups now. We call it “mean square between treatments” to distinguish it from this new component, mean square between subjects. So we will still use the same numerator, <span class="math inline">\(MS_{between\ treatments}\)</span>, but we’re going to use a different denominator for the <span class="math inline">\(F\)</span> ratio: <span class="math inline">\(MS_{error}\)</span>. So conceptually, the balance is restored to our equation. The individual differences are removed from the numerator simply by virtue of the design. And now we’ve removed them from the denominator by partitioning out the individual differences. Our ratio consists of any treatment effect plus sampling error in the numerator, and sampling error alone in the denominator. Now, as before, the ratio effectively cancels out the error, quantifying any treatment effect.</p>
+</section>
+<section id="sums-of-squares-and-degrees-of-freedom" class="level2">
+<h2 data-anchor-id="sums-of-squares-and-degrees-of-freedom">Sums of Squares and Degrees of Freedom</h2>
+<p>So here’s how we calculate this modified <span class="math inline">\(F\)</span> ratio for related-samples data. We start with the sums of squares and degrees of freedom. And the total, between-treatments, and within components are exactly the same as they were for the independent-samples designs.</p>
+<p>Then we get to the two new components for between-subjects and error variability. The equation for between subjects is <span class="math inline">\(\sum P^2 / k - G^2 / N\)</span>. The <span class="math inline">\(P\)</span> here stands for participant totals. Remember, for the between-treatments variability, the equation uses <span class="math inline">\(T\)</span>, treatment totals. Those are the sum of scores within each individual treatment group. For between-subjects variability, the idea is the same, but instead of summing scores for each treatment we sum them for each participant. Then we square the participant totals and divide by <span class="math inline">\(k\)</span>, the number of treatment conditions, getting an average squared score for each participant across the conditions, much like we got an average squared score for each treatment by dividing the squared treatment totals by the number of scores in each treatment.</p>
+<p>The final component, and the one that will become our denominator, is found by subtraction. Anything left over after taking the individual-difference variability out of within-treatments variability is the error variability. So <span class="math inline">\(SS_{error} = SS_{within} - SS_{between\ subjects}\)</span>.</p>
+<p>It’s worth taking the time to really understand these equations on a conceptual level. It should hopefully make more sense when we work through an example a little bit later.</p>
+<section id="computing-mean-squares-and-f" class="level3">
+<h3 data-anchor-id="computing-mean-squares-and-f">Computing Mean Squares and <span class="math inline">\(F\)</span></h3>
+<p>Once we calculate the required sums of squares and degrees of freedom, the rest is easy. We calculate the variances for the numerator and denominator, <span class="math inline">\(MS_{between\ treatments}\)</span> and <span class="math inline">\(MS_{error}\)</span>, by dividing the relevant sums of squares by degrees of freedom. And then we calculate the <span class="math inline">\(F\)</span> ratio by dividing the numerator by the denominator. Again, the numerator is exactly the same we would have used for an independent-samples design, <span class="math inline">\(MS_{between\ treatments}\)</span>. We just have to remember to use the different denominator here, <span class="math inline">\(MS_{error}\)</span>. And the interpretation of the <span class="math inline">\(F\)</span> ratio is exactly the same. The greater than 1 our <span class="math inline">\(F\)</span> ratio is, the more of a treatment effect there appears to be over and above sampling error. And because the denominator excludes an additional source of variability here, it will be smaller, making this a more powerful statistic than the regular independent-samples version.</p>
+<p>It’s a good idea to use a summary table as you work through this by hand. It’s the same as we used last time; it just has additional rows for new sources of variance: between subjects and error.</p>
+<div id="tbl-related-anova-summary-blank" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-related-anova-summary-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.1: A blank related-samples ANOVA summary table.
+</figcaption>
+<div aria-describedby="tbl-related-anova-summary-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Source</th>
+<th style="text-align: center;"><span class="math inline">\(SS\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(MS\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(F\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Between treatments</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Within treatments</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"> Between subjects</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"> Error</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="worked-example-hypothesis-test" class="level2">
+<h2 data-anchor-id="worked-example-hypothesis-test">Worked Example: Hypothesis Test</h2>
+<p>So we’ll run through a hypothesis test using a related-samples design. In fact, we’ll use exactly the same dataset we used in the previous lecture. The idea is we’re running a study to test whether giving people different snacks before a test alters their performance. We have three conditions: we either give people a banana, a candy bar, or nothing.</p>
+<p>Previously, we treated this as a between-participants design, assuming we had different people in each sample, and so we used the independent-samples ANOVA. But let’s say we’ve used a within-participants design. Each row represents a single participant who took all three tests at different times, preceded by a different snack each time. So instead of comparing independent samples we’re comparing related samples, looking at the variability among each participant’s own performance in the three different treatment conditions. So obviously here we’ll use the related-samples ANOVA procedure.</p>
+<section id="step-1-state-the-hypotheses" class="level3">
+<h3 data-anchor-id="step-1-state-the-hypotheses">Step 1: State the Hypotheses</h3>
+<p>As always, we start that hypothesis test by stating our hypotheses. Again, the null here is that all three populations from which we’ve created these samples have identical means — that <span class="math inline">\(\mu_1 = \mu_2 = \mu_3\)</span>. The alternative hypothesis is that at least one condition differs from at least one other.</p>
+</section>
+<section id="step-2-determine-the-critical-value" class="level3">
+<h3 data-anchor-id="step-2-determine-the-critical-value">Step 2: Determine the Critical Value</h3>
+<p>Step two is to determine the critical value for the test. And we do so using the same table as before. The only difference is that we need to be aware of the different degrees of freedom for the different denominator. The numerator is the same as before; <span class="math inline">\(df_{between\ treatments}\)</span> is <span class="math inline">\(k\)</span>, the number of conditions, minus one. We have three conditions, so the degrees of freedom for the numerator here is 2.</p>
+<p>The degrees of freedom for the new denominator, <span class="math inline">\(df_{error}\)</span>, is <span class="math inline">\(df_{within}\)</span> minus <span class="math inline">\(df_{between\ subjects}\)</span>, so <span class="math inline">\(N - k\)</span> for degrees of freedom within, minus <span class="math inline">\(n - 1\)</span>, the number of scores in each group minus one. So here that works out to <span class="math inline">\(9 - 3 = 6\)</span>, minus <span class="math inline">\(3 - 1 = 2\)</span>. Six minus two gives us four. So our critical value is 6.94.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="15_related_anova_degrees_of_freedom" aria-label="Degrees of Freedom and Critical Value"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Degrees of Freedom and Critical Value</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="related_anova_df"><div class="quiz-prompt"><p>For a related-samples ANOVA with 3 conditions and 3 participants,
+what are the numerator and error degrees of freedom described in the
+chapter?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="15_related_anova_degrees_of_freedom-related_anova_df" id="15_related_anova_degrees_of_freedom-related_anova_df-option-1" value="0" aria-labelledby="15_related_anova_degrees_of_freedom-related_anova_df-option-1-text"><div class="quiz-choice-text" id="15_related_anova_degrees_of_freedom-related_anova_df-option-1-text"><p>2 and 4</p></div></div><div class="quiz-choice"><input type="radio" name="15_related_anova_degrees_of_freedom-related_anova_df" id="15_related_anova_degrees_of_freedom-related_anova_df-option-2" value="1" aria-labelledby="15_related_anova_degrees_of_freedom-related_anova_df-option-2-text"><div class="quiz-choice-text" id="15_related_anova_degrees_of_freedom-related_anova_df-option-2-text"><p>1 and 8</p></div></div><div class="quiz-choice"><input type="radio" name="15_related_anova_degrees_of_freedom-related_anova_df" id="15_related_anova_degrees_of_freedom-related_anova_df-option-3" value="2" aria-labelledby="15_related_anova_degrees_of_freedom-related_anova_df-option-3-text"><div class="quiz-choice-text" id="15_related_anova_degrees_of_freedom-related_anova_df-option-3-text"><p>3 and 10</p></div></div><div class="quiz-choice"><input type="radio" name="15_related_anova_degrees_of_freedom-related_anova_df" id="15_related_anova_degrees_of_freedom-related_anova_df-option-4" value="3" aria-labelledby="15_related_anova_degrees_of_freedom-related_anova_df-option-4-text"><div class="quiz-choice-text" id="15_related_anova_degrees_of_freedom-related_anova_df-option-4-text"><p>4 and 2</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>2 and 4</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>df between treatments is k - 1 = 2, and df error is 4 in the worked
+example.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="15_related_anova_degrees_of_freedom">{"id":"15_related_anova_degrees_of_freedom","questions":[{"explanation":"df between treatments is k - 1 = 2, and df error is 4 in the worked example.","explanationHtml":"\u003cp\u003edf between treatments is k - 1 = 2, and df error is 4 in the worked\nexample.\u003c/p\u003e","promptHtml":"\u003cp\u003eFor a related-samples ANOVA with 3 conditions and 3 participants,\nwhat are the numerator and error degrees of freedom described in the\nchapter?\u003c/p\u003e","answerHtml":"","prompt":"For a related-samples ANOVA with 3 conditions and 3 participants, what are the numerator and error degrees of freedom described in the chapter?","id":"related_anova_df","type":"multiple-choice","options":[{"correct":true,"textHtml":"\u003cp\u003e2 and 4\u003c/p\u003e","text":"2 and 4"},{"textHtml":"\u003cp\u003e1 and 8\u003c/p\u003e","text":"1 and 8"},{"textHtml":"\u003cp\u003e3 and 10\u003c/p\u003e","text":"3 and 10"},{"textHtml":"\u003cp\u003e4 and 2\u003c/p\u003e","text":"4 and 2"}]}],"titleHtml":"\u003cp\u003eDegrees of Freedom and Critical Value\u003c/p\u003e","title":"Degrees of Freedom and Critical Value"}</script></section>
+<p>And like I mentioned when we introduced the related-samples <span class="math inline">\(t\)</span>-test, notice that we require a much more extreme critical value to reject the null hypothesis, because of the lower degrees of freedom. But we should have a more powerful test statistic because of the elimination of individual-differences variability.</p>
+</section>
+<section id="step-3-calculate-the-f-ratio" class="level3">
+<h3 data-anchor-id="step-3-calculate-the-f-ratio">Step 3: Calculate the <span class="math inline">\(F\)</span> Ratio</h3>
+<p>Step three is to calculate the <span class="math inline">\(F\)</span> ratio for the data. Like the calculations for the independent-samples ANOVA, this is a little labor intensive. But it’s worth practicing to make sure you understand how to use each equation and what each component represents.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+<p>Again, to save you some trouble,</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="15_related_anova_calculate_f" aria-label="Calculate the F-ratio"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate the F-ratio</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="related_anova_f"><div class="quiz-prompt"><p>If <span class="math inline"><em>M</em><em>S</em><sub><em>b</em><em>e</em><em>t</em><em>w</em><em>e</em><em>e</em><em>n</em>&nbsp;<em>t</em><em>r</em><em>e</em><em>a</em><em>t</em><em>m</em><em>e</em><em>n</em><em>t</em><em>s</em></sub> = 140.4</span>
+and <span class="math inline"><em>M</em><em>S</em><sub><em>e</em><em>r</em><em>r</em><em>o</em><em>r</em></sub> = 3.0</span>,
+what is F?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>46.8</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p><span class="math inline"><em>F</em> = <em>M</em><em>S</em><sub><em>b</em><em>e</em><em>t</em><em>w</em><em>e</em><em>e</em><em>n</em>&nbsp;<em>t</em><em>r</em><em>e</em><em>a</em><em>t</em><em>m</em><em>e</em><em>n</em><em>t</em><em>s</em></sub>/<em>M</em><em>S</em><sub><em>e</em><em>r</em><em>r</em><em>o</em><em>r</em></sub> = 140.4/3.0 = 46.8</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="15_related_anova_calculate_f">{"id":"15_related_anova_calculate_f","questions":[{"explanation":"F = MS_{between\\ treatments} / MS_{error} = 140.4 / 3.0 = 46.8.","tolerance":"0.1","type":"numeric","id":"related_anova_f","answerHtml":"\u003cp\u003e46.8\u003c/p\u003e","prompt":"If MS_{between\\ treatments} = 140.4 and MS_{error} = 3.0, what is F?","explanationHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e = \u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e \u003cem\u003et\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ea\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003em\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003es\u003c/em\u003e\u003c/sub\u003e/\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003eo\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003c/sub\u003e = 140.4/3.0 = 46.8\u003c/span\u003e.\u003c/p\u003e","answer":"46.8","promptHtml":"\u003cp\u003eIf \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e \u003cem\u003et\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ea\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003em\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003es\u003c/em\u003e\u003c/sub\u003e = 140.4\u003c/span\u003e\nand \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003eo\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003c/sub\u003e = 3.0\u003c/span\u003e,\nwhat is F?\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eCalculate the F-ratio\u003c/p\u003e","title":"Calculate the F-ratio"}</script></section>
+<p>I’ve already worked on some of what you’ll need. This table has the <span class="math inline">\(T\)</span> treatment totals for each condition, and their sums of squares. And I’ve added a new column for the <span class="math inline">\(P\)</span> participant totals. And for convenience, here are <span class="math inline">\(n\)</span>, <span class="math inline">\(k\)</span>, uppercase <span class="math inline">\(N\)</span>, <span class="math inline">\(G\)</span>, and <span class="math inline">\(\Sigma X^2\)</span>. Notice that these values are all exactly the same as in the previous lecture because we’re using the same data. Even though I’m giving you these again, it’s important to make sure you understand how I arrived at each one. It would be a good idea for you to calculate them yourself, to double check my work and check your understanding.</p>
+<div id="tbl-related-anova-data" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-related-anova-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.2: The snack data as a within-participants design, with treatment totals (<span class="math inline">\(T\)</span>) and participant totals (<span class="math inline">\(P\)</span>).
+</figcaption>
+<div aria-describedby="tbl-related-anova-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Person</th>
+<th style="text-align: center;">🍌 Banana</th>
+<th style="text-align: center;">🍬 Candy</th>
+<th style="text-align: center;">😐 Control</th>
+<th style="text-align: center;"><span class="math inline">\(P\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">17</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">22</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">24</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(M\)</span></td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;"><span class="math inline">\(T\)</span></td>
+<td style="text-align: center;">33</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">18</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(SS\)</span></td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p><span class="math display">\[n = 3 \qquad k = 3 \qquad N = 9 \qquad G = 63 \qquad \Sigma X^2 = 531\]</span></p>
+<p>So remember, you’ll need to calculate the sums of squares, degrees of freedom, mean squares, and <span class="math inline">\(F\)</span> ratio.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+</section>
+<section id="step-4-make-a-decision" class="level3">
+<h3 data-anchor-id="step-4-make-a-decision">Step 4: Make a Decision</h3>
+<p>Here’s the full working, so you can check your answers:</p>
+<p><span class="math display">\[
+\begin{align}
+SS_{between\ subjects} &amp;= \Sigma \frac{P^2}{k} - \frac{G^2}{N} = \frac{17^2}{3} + \frac{22^2}{3} + \frac{24^2}{3} - \frac{63^2}{9} = 8.67 \\
+SS_{error} &amp;= SS_{within} - SS_{between\ subjects} = 12 - 8.67 = 3.33
+\end{align}
+\]</span></p>
+<p><span class="math display">\[
+MS_{between\ treatments} = \frac{78}{2} = 39 \qquad
+MS_{error} = \frac{3.33}{4} = 0.83 \qquad
+F = \frac{39}{0.83} = 46.8
+\]</span></p>
+<div id="tbl-related-anova-summary" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-related-anova-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.3: Completed related-samples ANOVA summary table for the snack example.
+</figcaption>
+<div aria-describedby="tbl-related-anova-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Source</th>
+<th style="text-align: right;"><span class="math inline">\(SS\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(MS\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Between treatments</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">46.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Within treatments</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"> Between subjects</td>
+<td style="text-align: right;">8.67</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"> Error</td>
+<td style="text-align: right;">3.33</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>So now we’ve calculated our <span class="math inline">\(F\)</span> ratio, we’re ready to make our decision. We compare it to the critical value we figured out from the table, and if our <span class="math inline">\(F\)</span> ratio is bigger than the critical value, we reject the null hypothesis. So here with our <span class="math inline">\(F\)</span> of 46.8, we can comfortably reject the null. There is a significant difference among our three treatment conditions. <span class="math inline">\(p\)</span> is less than <span class="math inline">\(\alpha\)</span>.</p>
+</section>
+<section id="effect-size-partial-eta2" class="level3">
+<h3 data-anchor-id="effect-size-partial-eta2">Effect Size: Partial <span class="math inline">\(\eta^2\)</span></h3>
+<p>Since we have a significant difference, we next need to determine the effect size. Last time we used <span class="math inline">\(\eta^2\)</span>. Here we use a slightly different version called partial eta squared, <span class="math inline">\(\eta^2_p\)</span>. Rather than just the <span class="math inline">\(SS_{total}\)</span> for the denominator, it uses <span class="math inline">\(SS_{total} - SS_{between\ subjects}\)</span>. That’s because we don’t have individual differences in the numerator, the <span class="math inline">\(SS_{between\ treatments}\)</span>, and so we want to get rid of them in the denominator as well. So we call it <span class="math inline">\(\eta^2\)</span> partial to acknowledge that we’re quantifying the variability between treatments as a proportion of the partial rather than the total variability in the data. An equivalent form we could put the denominator in is <span class="math inline">\(SS_{between\ treatments} + SS_{error}\)</span>. And if you understand why that’s the same as <span class="math inline">\(SS_{total} - SS_{between\ subjects}\)</span>, that’s a good indication that you’re grasping this idea of partitioning variance. So here we get an answer of 0.96.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="15_related_anova_partitioning_variance" aria-label="Partitioning Variance"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Partitioning Variance</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="partition_equivalence"><div class="quiz-prompt"><p>In a related-samples ANOVA, <span class="math inline"><em>S</em><em>S</em><sub><em>e</em><em>r</em><em>r</em><em>o</em><em>r</em></sub></span>
+can be found by subtracting <span class="math inline"><em>S</em><em>S</em><sub><em>b</em><em>e</em><em>t</em><em>w</em><em>e</em><em>e</em><em>n</em>&nbsp;<em>s</em><em>u</em><em>b</em><em>j</em><em>e</em><em>c</em><em>t</em><em>s</em></sub></span>
+from <span class="math inline"><em>S</em><em>S</em><sub><em>w</em><em>i</em><em>t</em><em>h</em><em>i</em><em>n</em></sub></span>.</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="15_related_anova_partitioning_variance-partition_equivalence" id="15_related_anova_partitioning_variance-partition_equivalence-option-1" value="true" aria-labelledby="15_related_anova_partitioning_variance-partition_equivalence-option-1-text"><div class="quiz-choice-text" id="15_related_anova_partitioning_variance-partition_equivalence-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="15_related_anova_partitioning_variance-partition_equivalence" id="15_related_anova_partitioning_variance-partition_equivalence-option-2" value="false" aria-labelledby="15_related_anova_partitioning_variance-partition_equivalence-option-2-text"><div class="quiz-choice-text" id="15_related_anova_partitioning_variance-partition_equivalence-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The related-samples design partitions within-treatment variability
+into between-subjects variability and error variability.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="15_related_anova_partitioning_variance">{"id":"15_related_anova_partitioning_variance","questions":[{"explanation":"The related-samples design partitions within-treatment variability into between-subjects variability and error variability.","explanationHtml":"\u003cp\u003eThe related-samples design partitions within-treatment variability\ninto between-subjects variability and error variability.\u003c/p\u003e","promptHtml":"\u003cp\u003eIn a related-samples ANOVA, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003eo\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003c/sub\u003e\u003c/span\u003e\ncan be found by subtracting \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e \u003cem\u003es\u003c/em\u003e\u003cem\u003eu\u003c/em\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ej\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ec\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003es\u003c/em\u003e\u003c/sub\u003e\u003c/span\u003e\nfrom \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003eh\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003c/sub\u003e\u003c/span\u003e.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","prompt":"In a related-samples ANOVA, SS_{error} can be found by subtracting SS_{between\\ subjects} from SS_{within}.","id":"partition_equivalence","answer":true,"type":"true-false"}],"titleHtml":"\u003cp\u003ePartitioning Variance\u003c/p\u003e","title":"Partitioning Variance"}</script></section>
+</section>
+<section id="post-hoc-tests-tukeys-hsd" class="level3">
+<h3 data-anchor-id="post-hoc-tests-tukeys-hsd">Post-Hoc Tests: Tukey’s HSD</h3>
+<p>And step 4c, since the ANOVA revealed a significant difference, is to conduct post-hoc tests to determine where exactly the difference is — which conditions are different from which others. Again, we use the Tukey’s HSD equation. First, we have to find the appropriate studentized range statistic, <span class="math inline">\(q\)</span>, from a table or from R. It depends on the number of means we’re comparing and the degrees of freedom for the denominator of the <span class="math inline">\(F\)</span> ratio. So with three conditions and degrees of freedom of four, <span class="math inline">\(q\)</span> is 5.04.</p>
+<p>We then use that value in this equation, multiplying it by the square root of the denominator of the <span class="math inline">\(F\)</span> ratio divided by <span class="math inline">\(n\)</span>, the number of scores per condition. Here we get an answer of 2.66, meaning that any difference between condition means of 2.66 or greater will be a significant difference at the <span class="math inline">\(.05\)</span> level.</p>
+<p><span class="math display">\[HSD = q \sqrt{\frac{MS_{error}}{n}} = 5.04 \sqrt{\frac{0.83}{3}} = 2.66\]</span></p>
+<p>And remember, the whole point of doing these post-hoc tests is that we are maintaining our experimentwise alpha at <span class="math inline">\(.05\)</span>, even though we’re making multiple comparisons, whereas if we just did a bunch of <span class="math inline">\(t\)</span>-tests, each with its own alpha of <span class="math inline">\(.05\)</span>, we’d end up with a much larger experimentwise alpha rate, meaning a larger chance of having made a Type I false positive error somewhere.</p>
+</section>
+</section>
+<section id="reporting-results" class="level2">
+<h2 data-anchor-id="reporting-results">Reporting Results</h2>
+<p>So finally, we’re ready to report the results and call it a day. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; <span class="math inline">\(p\)</span> compared to <span class="math inline">\(\alpha\)</span>; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.</p>
+<blockquote class="blockquote">
+<p>A single-factor, related-samples ANOVA revealed a significant difference in people’s test scores when the test was preceded by consumption of a banana (<span class="math inline">\(M = 11.00\)</span>; <span class="math inline">\(SD = 2.00\)</span>), a candy bar (<span class="math inline">\(M = 4.00\)</span>; <span class="math inline">\(SD = 1.00\)</span>), and no snack (<span class="math inline">\(M = 6.00\)</span>; <span class="math inline">\(SD = 1.00\)</span>); <span class="math inline">\(F(2, 4) = 46.8\)</span>, <span class="math inline">\(p &lt; .05\)</span>, <span class="math inline">\(\eta^2_p = 0.96\)</span>. Post-hoc tests using Tukey’s HSD revealed that test scores were significantly better following banana consumption than following no snack or candy consumption; the candy condition did not differ significantly from the control condition.</p>
+</blockquote>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="15_related_anova_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="removes_individual_differences"><div class="quiz-prompt"><p>A related-samples ANOVA removes individual differences from the
+denominator of the F ratio.</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="15_related_anova_learning_checks-removes_individual_differences" id="15_related_anova_learning_checks-removes_individual_differences-option-1" value="true" aria-labelledby="15_related_anova_learning_checks-removes_individual_differences-option-1-text"><div class="quiz-choice-text" id="15_related_anova_learning_checks-removes_individual_differences-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="15_related_anova_learning_checks-removes_individual_differences" id="15_related_anova_learning_checks-removes_individual_differences-option-2" value="false" aria-labelledby="15_related_anova_learning_checks-removes_individual_differences-option-2-text"><div class="quiz-choice-text" id="15_related_anova_learning_checks-removes_individual_differences-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>That is the main reason the related-samples ANOVA can be more
+powerful.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="15_related_anova_learning_checks">{"id":"15_related_anova_learning_checks","questions":[{"explanation":"That is the main reason the related-samples ANOVA can be more powerful.","explanationHtml":"\u003cp\u003eThat is the main reason the related-samples ANOVA can be more\npowerful.\u003c/p\u003e","promptHtml":"\u003cp\u003eA related-samples ANOVA removes individual differences from the\ndenominator of the F ratio.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","prompt":"A related-samples ANOVA removes individual differences from the denominator of the F ratio.","id":"removes_individual_differences","answer":true,"type":"true-false"}],"titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","title":"Learning Checks"}</script></section>
+
+
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./14-anova.html" class="pagination-link" aria-label="ANOVA">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./16-factorial-anova.html" class="pagination-link" aria-label="Factorial ANOVA">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

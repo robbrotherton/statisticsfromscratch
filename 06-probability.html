@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>6&nbsp; Probability – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./07-sampling.html" rel="next">
+<link href="./05-z-scores.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="6&nbsp; Probability – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:image" content="https://statisticsfromscratch.com/resources/figures/astragal.jpg">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="6&nbsp; Probability – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:image" content="https://statisticsfromscratch.com/resources/figures/astragal.jpg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#a-brief-history-of-probability" id="toc-a-brief-history-of-probability" class="nav-link active" data-scroll-target="#a-brief-history-of-probability">A Brief History of Probability</a>
+  <ul class="collapse">
+  <li><a href="#catan" id="toc-catan" class="nav-link" data-scroll-target="#catan">Catan</a></li>
+  </ul></li>
+  <li><a href="#defining-probability" id="toc-defining-probability" class="nav-link" data-scroll-target="#defining-probability">Defining Probability</a>
+  <ul class="collapse">
+  <li><a href="#rolling-two-dice" id="toc-rolling-two-dice" class="nav-link" data-scroll-target="#rolling-two-dice">Rolling Two Dice</a></li>
+  <li><a href="#back-to-catan" id="toc-back-to-catan" class="nav-link" data-scroll-target="#back-to-catan">Back to Catan</a></li>
+  <li><a href="#was-your-settlement-a-good-bet" id="toc-was-your-settlement-a-good-bet" class="nav-link" data-scroll-target="#was-your-settlement-a-good-bet">Was Your Settlement a Good Bet?</a></li>
+  </ul></li>
+  <li><a href="#probability-with-marbles" id="toc-probability-with-marbles" class="nav-link" data-scroll-target="#probability-with-marbles">Probability with Marbles</a>
+  <ul class="collapse">
+  <li><a href="#sampling-with-and-without-replacement" id="toc-sampling-with-and-without-replacement" class="nav-link" data-scroll-target="#sampling-with-and-without-replacement">Sampling With and Without Replacement</a></li>
+  <li><a href="#random-sampling" id="toc-random-sampling" class="nav-link" data-scroll-target="#random-sampling">Random Sampling</a></li>
+  </ul></li>
+  <li><a href="#probability-and-distributions-of-scores" id="toc-probability-and-distributions-of-scores" class="nav-link" data-scroll-target="#probability-and-distributions-of-scores">Probability and Distributions of Scores</a></li>
+  <li><a href="#the-normal-distribution" id="toc-the-normal-distribution" class="nav-link" data-scroll-target="#the-normal-distribution">The Normal Distribution</a>
+  <ul class="collapse">
+  <li><a href="#the-normal-distribution-equation" id="toc-the-normal-distribution-equation" class="nav-link" data-scroll-target="#the-normal-distribution-equation">The Normal Distribution Equation</a></li>
+  <li><a href="#areas-under-the-normal-curve" id="toc-areas-under-the-normal-curve" class="nav-link" data-scroll-target="#areas-under-the-normal-curve">Areas Under the Normal Curve</a></li>
+  <li><a href="#the-unit-normal-table" id="toc-the-unit-normal-table" class="nav-link" data-scroll-target="#the-unit-normal-table">The Unit Normal Table</a></li>
+  <li><a href="#from-areas-to-quantiles" id="toc-from-areas-to-quantiles" class="nav-link" data-scroll-target="#from-areas-to-quantiles">From Areas to Quantiles</a></li>
+  </ul></li>
+  <li><a href="#applying-probability-spider-man" id="toc-applying-probability-spider-man" class="nav-link" data-scroll-target="#applying-probability-spider-man">Applying Probability: Spider-Man</a>
+  <ul class="collapse">
+  <li><a href="#a-note-on-normality" id="toc-a-note-on-normality" class="nav-link" data-scroll-target="#a-note-on-normality">A Note on Normality</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/catan-board.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/critical-table-generator.js"></script>
+<script src="resources/js/dice.bundle.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/graph-generator.js"></script>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;outcomes&quot;:[3,4],&quot;throwSeed&quot;:144,&quot;shadowMapSize&quot;:1080,&quot;throwSettings&quot;:{&quot;startDistance&quot;:9,&quot;startHeight&quot;:3.8,&quot;forwardSpeed&quot;:15.9,&quot;lift&quot;:0,&quot;lateralSpeed&quot;:0.7,&quot;spread&quot;:1.5},&quot;gravity&quot;:77,&quot;spinStrength&quot;:0.5,&quot;camera&quot;:[-37.4,32,75],&quot;cameraTarget&quot;:[0.1,0.7,-2.6],&quot;fieldOfView&quot;:3}" data-interactive-figure="probabilityDiceCover" data-interactive-factory="makeDiceCover">
+<div class="interactive-figure-fallback">
+Two oversized dice rolling into view and settling on a three and a four.
+</div>
+</div>
+<p>In the previous chapter, we hinted at thinking probabilistically about extreme scores in a distribution. Here, we’ll go into that idea in more detail. We’ll think about what statisticians mean when they talk about probability and how we go about quantifying it. We’ll need to introduce some new terminology, including random sampling and the normal distribution, and then we’ll return to <span class="math inline">\(z\)</span> scores and see how a normal distribution lets us attach precise probabilities to regions of scores.</p>
+<section id="a-brief-history-of-probability" class="level2">
+<h2 data-anchor-id="a-brief-history-of-probability">A Brief History of Probability</h2>
+<p>People have been thinking about probability for a long time, at least in a broad sense. It’s a useful thing to be able to make predictions about an uncertain future. What are the chances it will rain tomorrow? Can I kill this sabre-toothed tiger, or will it probably kill me first? How much crop should we plant to feed the group? For most of that history, there were no formal ways of articulating <em>how</em> probable something might be. The best people could do was offer rough verbal descriptions, like, “this will happen in most cases.” Aristotle pointed out, for example, that if someone has a fever and you give them honey-water, for the most part they will get better. Sometimes they won’t: it’s not certain, but neither is it entirely unpredictable. It’s something in between, more or less probable.</p>
+<p>But <em>how much</em> more or less? The idea of representing uncertainty with numbers and reasoning about it mathematically was a relatively recent development. One of the early inspirations came not from life-and-death decisions but from games of chance. For thousands of years people have been playing games using bits of animal bone — two-sided, coin-like worked and decorated pieces of bone, or astragali, the four-sided ankle bones of sheep and goats. Games played this way were so popular that some people even manufactured astragali out of clay, stone or glass.</p>
+<div id="fig-astragal" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-astragal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: A Greek glass astragal, from the 3rd–2nd century BCE. Public domain, via <a href="https://www.metmuseum.org/art/collection/search/249807">Metropolitan Museum of Art, New York</a>.
+</figcaption>
+<div aria-describedby="fig-astragal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/astragal.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;6.1: A Greek glass astragal, from the 3rd–2nd century BCE. Public domain, via Metropolitan Museum of Art, New York."><img src="resources/figures/astragal.jpg" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>According to the card describing this glass astragal at the Metropolitan Museum of Art in New York, playing with them was so much fun that “knucklebones have been found in tombs where they must have been intended to help the deceased while away endless time.” (So I guess, in a way, it <em>was</em> a matter of life and death.)</p>
+<p>Astragali have four faces stable enough to land on, but the faces aren’t the same size or shape, so the four results aren’t equally likely. Eventually cubical dice replaced the irregular animal bones. The example below, something like 4,000 years old, even has the convention of opposite sides adding to seven that modern dice follow.</p>
+<div id="fig-old-dice" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-old-dice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: Terracotta die, Mohenjo-daro, c.&nbsp;2600–1900 BCE. Ashmolean museum, eamd.25. Photograph by Zunkir, cc by-sa 4.0.
+</figcaption>
+<div aria-describedby="fig-old-dice-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/mohenjodaro-die.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;6.2: Terracotta die, Mohenjo-daro, c.&nbsp;2600–1900 BCE. Ashmolean museum, eamd.25. Photograph by Zunkir, cc by-sa 4.0."><img src="resources/figures/mohenjodaro-die.jpg" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>These regularly shaped dice proved appealing to gamblers, and eventually to mathematicians, because it meant they could count outcomes and reason about them in a consistent way. No less a mind than Galileo took on a dice puzzle that required exactly the kind of careful counting we’re about to do, so we’ll come back to him once we have the same problem in front of us <span class="citation" data-cites="galileo1898dadi">(<a href="references.html#ref-galileo1898dadi" role="doc-biblioref">Galilei, 1898</a>)</span>. (Possibly Galileo took the puzzle on at the urging of a gambling duke hoping to gain an advantage, though in his report, Galileo tactfully omitted the name of the person who commissioned it.)</p>
+<section id="catan" class="level3">
+<h3 data-anchor-id="catan">Catan</h3>
+<p>Let’s think about a slightly more recent game, Catan. It’s a board game played by rolling a pair of dice (not goat knucklebones, thankfully). The board consists of an arrangement of hexagonal terrain tiles. Each terrain produces a particular resource, such as wood or grain. We’ll ignore the different types of resources: all that matters for us is that resources are good, so you want to get as many as possible. How do you get them? Well, most tiles also get a number token. (The tokens have little dots below their numbers, and some are red. I wonder why 😉.) Players place settlements at the corners where tiles meet. Every time the two dice are rolled, if their sum matches the number on a tile neighboring your settlement, you get to collect that resource. So when you decide where to place your settlement, you are choosing which dice totals you want to be paid by for the rest of the game. (I’m simplifying and ignoring other parts of the game so we can focus on this question of pure probability.)</p>
+<p>Say you put a settlement at the top-left of the board below where the 2, the 10, and the 6 meet. You get resources whenever anyone rolls either 2, 10, or 6, because your settlement touches all three of those tiles.</p>
+<p>So let’s assume you get to go first. You have one settlement to place and you just want to maximize your chances of getting paid each time the dice are rolled. Where would you place your settlement? Pick a spot by clicking on the board below. No need to calculate anything; just go with what looks good.</p>
+<div id="fig-catan" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-catan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: A simplified Catan board. Settlements go at the corners where tiles meet, and the roll of two dice determines which tiles produce.
+</figcaption>
+<div aria-describedby="fig-catan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;mode&quot;:&quot;choose&quot;,&quot;remember&quot;:&quot;bc-catan-choice&quot;}" data-interactive-figure="catanBoardIntro" data-interactive-factory="makeCatanBoard">
+<div class="interactive-figure-fallback">
+A schematic Settlers of Catan board: nineteen hexagonal tiles in three terrain colors, each except the central desert carrying a number from 2 to 12. Settlements go at the corners where tiles meet.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_catan" aria-label="Commit to a corner"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Commit to a corner</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="catan_settlement"><div class="quiz-prompt"><p>Which corner did you pick, and what made it look good? Name it by the
+numbers it touches — the 5-6-9 corner, the 3-8-10 corner, and so on.</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Any corner, so long as you can say what you were going for. Most
+people look for the red 6s and 8s, because the game itself flags those
+as the numbers that come up most often.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>We are deliberately not settling this yet. Hold on to your choice:
+once we have counted the ways two dice can land, we will be able to work
+out the probability that any corner on this board pays out, and you can
+see how your instinct did.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_catan">{"id":"06_probability_catan","questions":[{"id":"catan_settlement","explanationHtml":"\u003cp\u003eWe are deliberately not settling this yet. Hold on to your choice:\nonce we have counted the ways two dice can land, we will be able to work\nout the probability that any corner on this board pays out, and you can\nsee how your instinct did.\u003c/p\u003e","answer":"Any corner, so long as you can say what you were going for. Most people look for the red 6s and 8s, because the game itself flags those as the numbers that come up most often.","explanation":"We are deliberately not settling this yet. Hold on to your choice: once we have counted the ways two dice can land, we will be able to work out the probability that any corner on this board pays out, and you can see how your instinct did.","type":"free-response","answerHtml":"\u003cp\u003eAny corner, so long as you can say what you were going for. Most\npeople look for the red 6s and 8s, because the game itself flags those\nas the numbers that come up most often.\u003c/p\u003e","prompt":"Which corner did you pick, and what made it look good? Name it by the numbers it touches — the 5-6-9 corner, the 3-8-10 corner, and so on.","promptHtml":"\u003cp\u003eWhich corner did you pick, and what made it look good? Name it by the\nnumbers it touches — the 5-6-9 corner, the 3-8-10 corner, and so on.\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eCommit to a corner\u003c/p\u003e","title":"Commit to a corner"}</script></section>
+</section>
+</section>
+<section id="defining-probability" class="level2">
+<h2 data-anchor-id="defining-probability">Defining Probability</h2>
+<p>Let’s lay out some technical terms now, so that we have the precise language we need to reason about whether you picked the best spot when we circle back around to Catan in a few minutes.</p>
+<p>First, what exactly do we mean by <em>probability</em>? Generally speaking, a probability model assigns probabilities to events according to a consistent set of rules. What rules? Well, there are distinct traditions and intense disagreement among statisticians and philosophers, which I am happy to sidestep for the most part. The approach that we will take is based in the frequentist tradition. It’s not the only game in town, and it’s not necessarily the best in every way, but it’s the one that has dominated the social sciences for most of their history, and so its the one you ought to understand first.</p>
+<p>So a probability, in the frequentist sense, is a number that describes what would happen if we could repeat something many times: the proportion of repetitions in which some event of interest would occur in the long run. It ranges from 0, meaning impossible, to 1, meaning certain. A probability of .5 means that, in the long run, we would expect the event to occur about half the time.</p>
+<p>To nail this down more firmly, let’s think about some simple situations in which there are a small number of equally likely outcomes that we can count. (Later, we’ll generalize the same ideas to situations where outcomes are not equally likely, and to continuous variables, where counting individual outcomes no longer works.) We’ll need some terms:</p>
+<ul>
+<li>An <strong>outcome</strong> is one elementary result of a chance process.</li>
+<li>An <strong>event</strong> is the outcome or collection of outcomes we’re actually interested in.</li>
+<li>The <strong>sample space</strong> is the set of <em>all</em> the possible outcomes.</li>
+</ul>
+<p>We use a capital letter <span class="math inline">\(P\)</span> to denote probability and put the event we’re interested in inside parentheses. So <span class="math inline">\(P(A)\)</span> means the probability of Event A. When every outcome in the sample space is equally likely, we can find that probability by counting the outcomes in A and dividing by the total number of possible outcomes.</p>
+<p><span class="math display">\[ P(A) = \frac{\text{number of outcomes in } A}{\text{total number of possible outcomes}} \]</span></p>
+<p>This should make more sense with some concrete examples. If you flip a coin, there are two possible outcomes, heads or tails. The entire sample space consists of those two outcomes. If we want to denote the probability of heads, we would write <span class="math inline">\(P(\text{heads}) = 1/2 = .5\)</span>. That’s because heads is one of the two equally likely outcomes. (Effectively the event is the outcome; there’s only one outcome that gets you heads.) Likewise, we would write the probability of tails as <span class="math inline">\(P(\text{tails}) = 1/2 = .5\)</span>.</p>
+<p>Or we can think about rolling a single fair die. If we’re using a six-sided die, there are six equally likely outcomes in the sample space, the numbers one through six. So the probability of rolling a six is <span class="math inline">\(P(6) = 1/6 \approx .17\)</span>.</p>
+<p>Perhaps we’re interested in the event of rolling an even number on a single six-sided die. Now we have an event that can be produced by more than one outcome. There are three individual outcomes (2, 4, 6) that would constitute that event. So the probability of rolling an even number is <span class="math inline">\(P(\text{even}) = 3/6 = 1/2 = .5\)</span>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_dice" aria-label="Outcomes, sample spaces, and events"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Outcomes, sample spaces, and events</p></div><span class="quiz-progress" aria-label="0 of 3 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 3</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="single_die_sample_space"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>You roll one fair six-sided die. How many outcomes are in the sample
+space?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>6</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The sample space is the set of all possible elementary results: 1, 2,
+3, 4, 5, and 6.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="single_die_event"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Still with one die, what is the probability of rolling an even
+number?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.5</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>“Even” is an event made up of three outcomes — 2, 4, and 6 — out of
+six equally likely outcomes, so P(even) = 3 / 6 = .5.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="equally_likely"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The rule “probability equals favorable outcomes divided by total
+outcomes” works for any situation in which you can list the possible
+outcomes.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_dice-equally_likely" id="06_probability_dice-equally_likely-option-1" value="true" aria-labelledby="06_probability_dice-equally_likely-option-1-text"><div class="quiz-choice-text" id="06_probability_dice-equally_likely-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_dice-equally_likely" id="06_probability_dice-equally_likely-option-2" value="false" aria-labelledby="06_probability_dice-equally_likely-option-2-text"><div class="quiz-choice-text" id="06_probability_dice-equally_likely-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>It only works when those outcomes are equally likely. There are two
+possible outcomes to tomorrow’s weather in the sense that it either
+rains or it doesn’t, but that does not make the probability of rain
+.5.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_dice">{"id":"06_probability_dice","questions":[{"answer":"6","id":"single_die_sample_space","explanationHtml":"\u003cp\u003eThe sample space is the set of all possible elementary results: 1, 2,\n3, 4, 5, and 6.\u003c/p\u003e","answerHtml":"\u003cp\u003e6\u003c/p\u003e","explanation":"The sample space is the set of all possible elementary results: 1, 2, 3, 4, 5, and 6.","type":"numeric","tolerance":"0","prompt":"You roll one fair six-sided die. How many outcomes are in the sample space?","promptHtml":"\u003cp\u003eYou roll one fair six-sided die. How many outcomes are in the sample\nspace?\u003c/p\u003e"},{"answer":"0.5","id":"single_die_event","explanationHtml":"\u003cp\u003e“Even” is an event made up of three outcomes — 2, 4, and 6 — out of\nsix equally likely outcomes, so P(even) = 3 / 6 = .5.\u003c/p\u003e","answerHtml":"\u003cp\u003e0.5\u003c/p\u003e","explanation":"“Even” is an event made up of three outcomes — 2, 4, and 6 — out of six equally likely outcomes, so P(even) = 3 / 6 = .5.","type":"numeric","tolerance":"1.0e-3","prompt":"Still with one die, what is the probability of rolling an even number?","promptHtml":"\u003cp\u003eStill with one die, what is the probability of rolling an even\nnumber?\u003c/p\u003e"},{"id":"equally_likely","explanationHtml":"\u003cp\u003eIt only works when those outcomes are equally likely. There are two\npossible outcomes to tomorrow’s weather in the sense that it either\nrains or it doesn’t, but that does not make the probability of rain\n.5.\u003c/p\u003e","answer":false,"explanation":"It only works when those outcomes are equally likely. There are two possible outcomes to tomorrow’s weather in the sense that it either rains or it doesn’t, but that does not make the probability of rain .5.","type":"true-false","answerHtml":"","prompt":"The rule “probability equals favorable outcomes divided by total outcomes” works for any situation in which you can list the possible outcomes.","promptHtml":"\u003cp\u003eThe rule “probability equals favorable outcomes divided by total\noutcomes” works for any situation in which you can list the possible\noutcomes.\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eOutcomes, sample spaces, and events\u003c/p\u003e","title":"Outcomes, sample spaces, and events"}</script></section>
+<section id="rolling-two-dice" class="level3">
+<h3 data-anchor-id="rolling-two-dice">Rolling Two Dice</h3>
+<p>The same logic applies to rolling multiple dice; the sample space just expands, and we have to be careful about how to count things. In fact, this is what puzzled the 17th century gambler who reached out to Galileo to solve the puzzle <span class="citation" data-cites="galileo1898dadi">(<a href="references.html#ref-galileo1898dadi" role="doc-biblioref">Galilei, 1898</a>)</span>. They noted that some events seem to have the same number of ways of occurring. Like, if you roll a pair of dice, you might get a total of 6 or a total of 7. At first glance, there are three combinations of the numbers 1 through 6 that give a sum of 6: 1 and 5; 2 and 4; 3 and 3. Or you might get a total of 7. There are also three combinations that add up to 7: 1 and 6; 2 and 5; 3 and 4. But gamblers had noticed that 7 actually comes up more often than 6. How can that be, if there are the same number of ways to get each total?<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Galileo’s answer was that those unordered combinations are the wrong things to count. We need to distinguish what each dice does. Did you notice the red and blue dice at the top of the chapter? Red landed on 3 and blue landed on 4, for a sum of 7. But what if red had instead landed on 4 and blue on 3? The total would have been 7 as well. So actually there aren’t just 3 ways of getting 7, there are 6:</p>
+<ul>
+<li>(1,6)</li>
+<li>(6,1)</li>
+<li>(2,5)</li>
+<li>(5,2)</li>
+<li>(3,4)</li>
+<li>(4,3)</li>
+</ul>
+<p>What about 6? The subtlety is that there’s only one way that 3 + 3 can happen. Both dice have to come up 3. So the outcomes that produce a sum of 6 are:</p>
+<ul>
+<li>(1,5)</li>
+<li>(5,1)</li>
+<li>(2,4)</li>
+<li>(4,2)</li>
+<li>(3,3)</li>
+</ul>
+<p>There are only 5 outcomes that give a sum of 6, and 6 that give a sum of 7! That’s why 7 is more likely to come up.</p>
+<p><span class="math display">\[
+P(\text{sum of } 6) = \frac{5}{36} \approx .139
+\]</span></p>
+<p><span class="math display">\[
+P(\text{sum of } 7) = \frac{6}{36} \approx .167
+\]</span></p>
+<p>We can run with the idea and make a table of the sample space for rolling two dice. Each dice can land on 1 through 6. We’ll use those values for the blue dice as the columns, and the value of the red dice as rows. So a two on the first die and a five on the second is a different outcome from a five on the first die and a two on the second, even though both produce a total of seven. We have to count every combination.</p>
+<div id="tbl-dice-sums" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dice-sums-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: The totals associated with all 36 ordered outcomes of rolling two dice.
+</figcaption>
+<div aria-describedby="tbl-dice-sums-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;"></th>
+<th style="text-align: center;"><strong>1</strong></th>
+<th style="text-align: center;"><strong>2</strong></th>
+<th style="text-align: center;"><strong>3</strong></th>
+<th style="text-align: center;"><strong>4</strong></th>
+<th style="text-align: center;"><strong>5</strong></th>
+<th style="text-align: center;"><strong>6</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;"><strong>1</strong></td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><strong>2</strong></td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;"><strong>3</strong></td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><strong>4</strong></td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;"><strong>5</strong></td>
+<td style="text-align: center;">6</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><strong>6</strong></td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p><span class="math display">\[ P(2) = \frac{1}{36} \approx .03 \]</span> <span class="math display">\[ P(12) = \frac{1}{36} \approx .03 \]</span> <span class="math display">\[ P(7) = \frac{6}{36} \approx .17 \]</span></p>
+<p>If we take the 36 sums in the table and draw a bar graph, we can turn the counting we just did into a picture of probability. Rather than plotting the raw frequencies, we’ll divide the frequency of each sum by 36. So the bar for 2 has a height of <span class="math inline">\(1/36\)</span>, while the bar for 7 has a height of <span class="math inline">\(6/36\)</span>.</p>
+<div id="fig-dice-sums-bar-graph" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-dice-sums-bar-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: The probability distribution for the sum of two dice.
+</figcaption>
+<div aria-describedby="fig-dice-sums-bar-graph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;scale&quot;:&quot;proportion&quot;,&quot;data&quot;:[2,3,3,4,4,4,5,5,5,5,6,6,6,6,6,7,7,7,7,7,7,8,8,8,8,8,9,9,9,9,10,10,10,11,11,12],&quot;aspectRatio&quot;:2,&quot;labels&quot;:{&quot;x&quot;:&quot;Sum of two dice&quot;,&quot;y&quot;:&quot;Probability&quot;},&quot;ariaLabel&quot;:&quot;Bar graph showing the theoretical probability distribution for the sum of two dice. Separate bars for sums 2 through 12 have probabilities 1/36, 2/36, 3/36, 4/36, 5/36, 6/36, 5/36, 4/36, 3/36, 2/36, and 1/36.&quot;}" data-interactive-figure="diceSumsBarGraph" data-interactive-factory="makeGraph">
+<div class="interactive-figure-fallback">
+Bar graph showing the theoretical probability distribution for the sum of two dice, rising from 1/36 for a sum of 2 to 6/36 for a sum of 7, then falling symmetrically to 1/36 for a sum of 12.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>We’ve made a useful move here. The table collects 36 individual outcomes, each equally likely. The graph groups those outcomes by the sum of the dice and divides each frequency by 36, so the height of each bar is the probability of that sum. The possible values of this new variable aren’t equally likely: 7 gets six of the 36 outcomes, while 2 gets only one. Taken together, the bars form our first <strong>probability distribution</strong>. They show every possible value of the variable and the probability attached to each one, and their heights add up to 1.</p>
+<p>One more thing to note. If we’re interested in the probability of one event <em>or</em> another, we can add their probabilities together. For example, the probability of rolling a 5 or a 6 is:</p>
+<p><span class="math display">\[ P(5 \text{ or } 6) = P(5) + P(6) = \frac{4}{36} + \frac{5}{36} = \frac{9}{36} \approx .25 \]</span></p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_pair_of_dice" aria-label="Counting with two dice"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Counting with two dice</p></div><span class="quiz-progress" aria-label="0 of 3 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 3</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="sum_nine"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Using the table of 36 outcomes, what is the probability of rolling a
+sum of 9 with two fair dice?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Count the cells containing a 9. Remember that a 4 on the first die
+and a 5 on the second is a different outcome from a 5 on the first die
+and a 4 on the second.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.1111</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>There are four ways to make a 9 — (3,6), (4,5), (5,4), and (6,3) —
+out of 36 equally likely outcomes, so P(9) = 4 / 36 = .11.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sums_eleven_outcomes"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>There are 11 possible sums (2 through 12) but 36 outcomes in the
+sample space. How many outcomes produce a sum of 7?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>6</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Six: (1,6), (2,5), (3,4), (4,3), (5,2), and (6,1). The 11 sums are
+not equally likely precisely because different numbers of outcomes
+produce them, which is why we count outcomes rather than sums.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="corner_three_eight_ten"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Over on the right of the board, one corner touches tiles numbered 3,
+8, and 10. What is the probability that it produces something on a given
+roll — that is, the probability of rolling a 3, an 8, or a 10?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>A single roll cannot be two different sums at once, so no outcome
+gets counted twice. Add up the ways.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.2778</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>There are two ways to roll a 3, five ways to roll an 8, and three
+ways to roll a 10, and no outcome is more than one of them, so P(3 or 8
+or 10) = (2 + 5 + 3) / 36 = 10 / 36 = .28.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_pair_of_dice">{"id":"06_probability_pair_of_dice","questions":[{"promptHtml":"\u003cp\u003eUsing the table of 36 outcomes, what is the probability of rolling a\nsum of 9 with two fair dice?\u003c/p\u003e","hints":[{"textHtml":"\u003cp\u003eCount the cells containing a 9. Remember that a 4 on the first die\nand a 5 on the second is a different outcome from a 5 on the first die\nand a 4 on the second.\u003c/p\u003e","text":"Count the cells containing a 9. Remember that a 4 on the first die and a 5 on the second is a different outcome from a 5 on the first die and a 4 on the second."}],"explanationHtml":"\u003cp\u003eThere are four ways to make a 9 — (3,6), (4,5), (5,4), and (6,3) —\nout of 36 equally likely outcomes, so P(9) = 4 / 36 = .11.\u003c/p\u003e","id":"sum_nine","answerHtml":"\u003cp\u003e0.1111\u003c/p\u003e","tolerance":"5.0e-3","explanation":"There are four ways to make a 9 — (3,6), (4,5), (5,4), and (6,3) — out of 36 equally likely outcomes, so P(9) = 4 / 36 = .11.","type":"numeric","prompt":"Using the table of 36 outcomes, what is the probability of rolling a sum of 9 with two fair dice?","answer":"0.1111"},{"answer":"6","id":"sums_eleven_outcomes","explanationHtml":"\u003cp\u003eSix: (1,6), (2,5), (3,4), (4,3), (5,2), and (6,1). The 11 sums are\nnot equally likely precisely because different numbers of outcomes\nproduce them, which is why we count outcomes rather than sums.\u003c/p\u003e","answerHtml":"\u003cp\u003e6\u003c/p\u003e","explanation":"Six: (1,6), (2,5), (3,4), (4,3), (5,2), and (6,1). The 11 sums are not equally likely precisely because different numbers of outcomes produce them, which is why we count outcomes rather than sums.","type":"numeric","tolerance":"0","prompt":"There are 11 possible sums (2 through 12) but 36 outcomes in the sample space. How many outcomes produce a sum of 7?","promptHtml":"\u003cp\u003eThere are 11 possible sums (2 through 12) but 36 outcomes in the\nsample space. How many outcomes produce a sum of 7?\u003c/p\u003e"},{"promptHtml":"\u003cp\u003eOver on the right of the board, one corner touches tiles numbered 3,\n8, and 10. What is the probability that it produces something on a given\nroll — that is, the probability of rolling a 3, an 8, or a 10?\u003c/p\u003e","hints":[{"textHtml":"\u003cp\u003eA single roll cannot be two different sums at once, so no outcome\ngets counted twice. Add up the ways.\u003c/p\u003e","text":"A single roll cannot be two different sums at once, so no outcome gets counted twice. Add up the ways."}],"explanationHtml":"\u003cp\u003eThere are two ways to roll a 3, five ways to roll an 8, and three\nways to roll a 10, and no outcome is more than one of them, so P(3 or 8\nor 10) = (2 + 5 + 3) / 36 = 10 / 36 = .28.\u003c/p\u003e","id":"corner_three_eight_ten","answerHtml":"\u003cp\u003e0.2778\u003c/p\u003e","tolerance":"5.0e-3","explanation":"There are two ways to roll a 3, five ways to roll an 8, and three ways to roll a 10, and no outcome is more than one of them, so P(3 or 8 or 10) = (2 + 5 + 3) / 36 = 10 / 36 = .28.","type":"numeric","prompt":"Over on the right of the board, one corner touches tiles numbered 3, 8, and 10. What is the probability that it produces something on a given roll — that is, the probability of rolling a 3, an 8, or a 10?","answer":"0.2778"}],"titleHtml":"\u003cp\u003eCounting with two dice\u003c/p\u003e","title":"Counting with two dice"}</script></section>
+</section>
+<section id="back-to-catan" class="level3">
+<h3 data-anchor-id="back-to-catan">Back to Catan</h3>
+<p>Remember in Catan a settlement neighboring three numbers pays out if the total rolled is any one of them.</p>
+<p><span class="math display">\[ P(5 \text{ or } 6 \text{ or } 9) = \frac{4 + 5 + 4}{36} = \frac{13}{36} \approx .36 \]</span></p>
+<p>All of that was done with a pencil. We counted outcomes we never actually observed, and announced how often things would happen without rolling anything. It’s fair to ask whether the world agrees.</p>
+<p>When we repeat a chance process, the proportion of trials on which an event actually happens is its <strong>observed relative frequency</strong>. We can use that relative frequency as an empirical estimate of the event’s probability. Any one roll is unpredictable, but repeated rolls tend to settle into the pattern implied by the possible outcomes.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Does the model survive contact with reality?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;seed&quot;:&quot;probability-dice-v1559&quot;}" data-interactive-figure="probabilityDiceRoller" data-interactive-factory="makeDiceRoller">
+<div class="interactive-figure-fallback">
+Interactive roller for one to five dice with a histogram that accumulates the sums of repeated rolls.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;mode&quot;:&quot;rated&quot;,&quot;rating&quot;:&quot;empirical&quot;,&quot;linkTo&quot;:&quot;probabilityDiceRoller&quot;,&quot;remember&quot;:&quot;bc-catan-choice&quot;,&quot;showBoard&quot;:false}" data-interactive-figure="catanBoardVerdict" data-interactive-factory="makeCatanBoard">
+<div class="interactive-figure-fallback">
+The same schematic Catan board, with every corner shaded from blue to green according to how often it produced a resource across the rolls made so far.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="One roll" data-action="{&quot;rolls&quot;:1,&quot;dice&quot;:2,&quot;show-expected&quot;:false,&quot;show-board&quot;:false,&quot;animate&quot;:true}">
+<p>Throw the dice. They tumble for a second and settle on something — and nothing we just worked out told you which of the 36 outcomes it was going to be. All that counting tells you what to expect. It can’t tell you what you’re about to get.</p>
+</div>
+<div class="tutorial-step" data-title="A game" data-action="{&quot;rolls&quot;:60,&quot;dice&quot;:2,&quot;show-expected&quot;:false,&quot;show-board&quot;:false,&quot;animate&quot;:true}">
+<p>Now sixty rolls — roughly what a full game of Catan gets through. The broad shape is right: the middle is taller than the ends. But look at the detail. Seven, the most likely total of all, came up four times. Three, which should be scarce, came up ten. Over a game’s worth of rolls the model is a rough guide, not a description.</p>
+</div>
+<div class="tutorial-step" data-title="On the board" data-action="{&quot;rolls&quot;:60,&quot;dice&quot;:2,&quot;show-expected&quot;:false,&quot;show-board&quot;:true,&quot;rating&quot;:&quot;empirical&quot;,&quot;highlight&quot;:&quot;reader&quot;,&quot;animate&quot;:true}">
+<p>Here’s what those sixty rolls would have meant on the board. Every corner is shaded by how often it actually paid out: green for the productive spots, blue for the barren ones. If you picked a corner, it’s circled. Eight corners here are exactly tied on paper — each pays on 10 of the 36 outcomes — and after sixty rolls they range from 20% to 50%. Identical probabilities, wildly different results.</p>
+</div>
+<div class="tutorial-step" data-title="A thousand" data-action="{&quot;rolls&quot;:1000,&quot;dice&quot;:2,&quot;show-expected&quot;:false,&quot;show-board&quot;:true,&quot;rating&quot;:&quot;empirical&quot;,&quot;highlight&quot;:&quot;reader&quot;,&quot;animate&quot;:true}">
+<p>A thousand rolls — more Catan than anyone plays in a year. The histogram is turning into a clean staircase up to seven and back down. On the board, those eight tied corners have pulled back together: they now sit between 27% and 30%, and the corner that was really best has climbed to the top where it belongs.</p>
+</div>
+<div class="tutorial-step" data-title="A million" data-action="{&quot;rolls&quot;:1000000,&quot;dice&quot;:2,&quot;show-expected&quot;:true,&quot;show-board&quot;:true,&quot;rating&quot;:&quot;empirical&quot;,&quot;highlight&quot;:&quot;reader&quot;,&quot;animate&quot;:true}">
+<p>A million simulated rolls, with the theoretical distribution laid over the bars. The observed relative frequencies now sit almost exactly on top of the theoretical probabilities. We calculated that pattern by counting 36 outcomes on paper, without rolling anything, and a million repetitions have made it visible. This is the law of large numbers doing its work.</p>
+</div>
+<div class="tutorial-step" data-title="Your corner" data-action="{&quot;rolls&quot;:1000000,&quot;dice&quot;:2,&quot;show-expected&quot;:true,&quot;show-board&quot;:true,&quot;rating&quot;:&quot;theory&quot;,&quot;highlight&quot;:[&quot;reader&quot;,&quot;best-chance&quot;],&quot;animate&quot;:true}">
+<p>So we can stop rolling and go back to counting. Every corner is now shaded by the probability we can work out from the table rather than by anything the dice did — and it’s the same map. Your corner is circled, and the best one on this board, the 5–6–9 corner up near the top, is marked. It produces something on <span class="math inline">\(13/36 \approx .36\)</span> of rolls, and nothing else on the board gets past <span class="math inline">\(10/36\)</span>.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="was-your-settlement-a-good-bet" class="level3">
+<h3 data-anchor-id="was-your-settlement-a-good-bet">Was Your Settlement a Good Bet?</h3>
+<p>The best corner on this board is the one where the 5, the 6 and the 9 meet, up near the top. It pays out on 13 of the 36 possible outcomes — that’s the <span class="math inline">\(P(5 \text{ or } 6 \text{ or } 9) = 13/36\)</span> we worked out a moment ago, about .36 — and nothing else on the board gets past <span class="math inline">\(10/36\)</span>. So if you picked it, nice work.</p>
+<p>But the more interesting thing is what it took to know that. Watching one game’s worth of rolls wouldn’t have told you. After sixty rolls, the 5–6–9 corner was sitting in fourth place, behind three corners with lower theoretical probabilities. Eight corners on this board have <em>exactly</em> the same probability as each other, and after sixty rolls one of them had produced on half the rolls and another on a fifth of them. Nothing distinguished those eight except luck, and luck had spread their observed relative frequencies from 20% to 50%. It took a thousand rolls to squeeze them back to between 27% and 30%, and a million before the picture the dice painted was the picture we had already worked out by counting.</p>
+<p>That’s the whole argument for doing the counting. A run of results is a noisy, misleading guide to the process that produced it, and the shorter the run, the more misleading it gets. The 36 outcomes in that table were there all along, and they were right on the first roll — they just weren’t visible in the first roll, or the first sixty. We’ll spend the rest of this book in exactly that gap: what you can conclude about a process from a limited number of observations of it.</p>
+<p>This tendency for an observed relative frequency to settle toward the underlying probability as the number of trials increases is called the <strong>law of large numbers</strong>. It does not say that a short run must look right, that the fit will improve smoothly with every new roll, or that seven is guaranteed to appear exactly one-sixth of the time. It says that sustained discrepancies become less likely as the same chance process is repeated over and over.</p>
+<p>Of course, that doesn’t make 5–6–9 the best place to settle in every meaningful sense. In a real game, it matters which resources those tiles produce, what you’re trying to build, what the other players have already taken, whether the robber gets in the way, and what you might be able to trade. We defined “best” narrowly as the greatest probability of producing at least one resource on a roll. You can calculate precise probabilities but it won’t win every game for you.</p>
+</section>
+</section>
+<section id="probability-with-marbles" class="level2">
+<h2 data-anchor-id="probability-with-marbles">Probability with Marbles</h2>
+<p>Okay, rolling dice is fun, but every statistics textbook I’ve ever read has used the idea of picking marbles out of a jar to illustrate ideas of probability, so it would be remiss of me not to.</p>
+<p>Actually, the idea has a long and distinguished pedigree. In <em>The Art of Conjecturing</em>, published in 1713, Jacob Bernoulli asked his reader to imagine an urn containing 5,000 pebbles, in some unknown ratio of white to black. (This might sound quaint and arbitrary, but apparently urns of pebbles we used to cast votes in elections at the time, so Bernouilli may have been thinking about a very real issue.) If you were to reach in and randomly draw one black pebble, then one white pebble, and so on, you would eventually get a sense of the ratio of black to white pebbles in the urn. Eventually you could infer the hidden composition of the urn from the relative frequencies they observed? Bernoulli proved that, as the number of draws increased, the observed proportion would become increasingly likely to fall close to the true proportion. This was the result we now call the law of large numbers <span class="citation" data-cites="bernoulli2006conjecturing">(<a href="references.html#ref-bernoulli2006conjecturing" role="doc-biblioref">Bernoulli, 2006</a>)</span>.</p>
+<p>So the urn wasn’t just a convenient container. It let Bernoulli connect a probability he could calculate by counting the contents with a probability someone could estimate from repeated observations. It also made a seemingly small procedural detail — putting each pebble back — mathematically important. We’ll use a slightly less crowded jar to see why.</p>
+<p>The idea is basically the same as the coins or dice. If every marble is equally likely to be selected, we can treat each marble as one outcome. Knowing how many marbles there are in total, and how many of them have a particular color, then allows us to calculate the probability of selecting that color.</p>
+<p>So let’s say we have a jar which contains 25 white marbles and 25 blue marbles. Say we want to know the probability of reaching in and randomly drawing out a white marble. The probability of selecting a white marble is 25 (since there are 25 white marbles) over 50 (since there are 50 marbles in total), which gives us a probability of <span class="math inline">\(25/50\)</span>, which can be simplified to <span class="math inline">\(1/2\)</span>, or .5. The useful thing about the jar metaphor is we can change around the numbers of marbles arbitrarily. So say instead we have a jar with 40 blue marbles and 10 white. Now, the probability of randomly selecting a white marble is <span class="math inline">\(10/50\)</span>, or <span class="math inline">\(1/5\)</span>, or .2.</p>
+<section id="sampling-with-and-without-replacement" class="level3">
+<h3 data-anchor-id="sampling-with-and-without-replacement">Sampling With and Without Replacement</h3>
+<p>Now we want to think about repeated sampling — the probability of drawing certain marbles when we select more than one. Let’s say we’re going to pick out two marbles. The probability of the first one being white is still <span class="math inline">\(10/50\)</span>, or .2. But what is the probability that our second marble will be white?</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_marbles" aria-label="Conditional Probability Without Replacement"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Conditional Probability Without Replacement</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="second_white"><div class="quiz-prompt"><p>A jar has 10 white marbles and 40 blue marbles. You draw one white
+marble and do not replace it. What is the probability that the second
+marble is white?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The probability is 9/49, or about .18, because one white marble has
+been removed and 49 marbles remain.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Without replacement, the second draw depends on the first. In
+symbols, <span class="math inline"><em>P</em>(second white ∣ first
+white) = 9/49</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_marbles">{"id":"06_probability_marbles","questions":[{"id":"second_white","explanationHtml":"\u003cp\u003eWithout replacement, the second draw depends on the first. In\nsymbols, \u003cspan class=\"math inline\"\u003e\u003cem\u003eP\u003c/em\u003e(second white ∣ first\nwhite) = 9/49\u003c/span\u003e.\u003c/p\u003e","answer":"The probability is 9/49, or about .18, because one white marble has been removed and 49 marbles remain.","explanation":"Without replacement, the second draw depends on the first. In symbols, P(\\text{second white} \\mid \\text{first white}) = 9/49.","type":"free-response","answerHtml":"\u003cp\u003eThe probability is 9/49, or about .18, because one white marble has\nbeen removed and 49 marbles remain.\u003c/p\u003e","prompt":"A jar has 10 white marbles and 40 blue marbles. You draw one white marble and do not replace it. What is the probability that the second marble is white?","promptHtml":"\u003cp\u003eA jar has 10 white marbles and 40 blue marbles. You draw one white\nmarble and do not replace it. What is the probability that the second\nmarble is white?\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eConditional Probability Without Replacement\u003c/p\u003e","title":"Conditional Probability Without Replacement"}</script></section>
+<p>The probability of the second marble being white actually depends on how exactly we’re doing our sampling. Specifically, it depends on whether we put the first marble back into the jar before we take the second one. This is the distinction between sampling with and without replacement.</p>
+<p>If we sample <strong>without replacement</strong> — that is, we get a white marble first and don’t put it back before taking a second marble — then the probability of the first marble being white is <span class="math inline">\(10/50\)</span>, or .2. But the probability of the second marble being white, <strong>given that</strong> the first was white, is <span class="math inline">\(9/49\)</span>, or about .184, because there are now only nine white marbles and 49 marbles in total. This is a <strong>conditional probability</strong>: the probability of one event once we know that another event has happened. We can write it as <span class="math inline">\(P(\text{second white}\mid\text{first white})\)</span>. To find the probability that <strong>both</strong> events happen, we multiply the probability of the first by this conditional probability:</p>
+<p><span class="math display">\[P(\text{first white and second white}) = \frac{10}{50} \times \frac{9}{49} = \frac{90}{2450} \approx .0367\]</span></p>
+<p>On the other hand, if we sample <strong>with replacement</strong>, we put the first marble back. The jar’s composition is unchanged, so the probability of white on the second draw is still <span class="math inline">\(10/50=.2\)</span>, regardless of the first result. Two events are <strong>independent</strong> when knowing that one happened does not change the probability of the other. So these two draws are independent, and the probability that both marbles are white is therefore <span class="math inline">\(.2 \times .2 = .04\)</span>.</p>
+</section>
+<section id="random-sampling" class="level3">
+<h3 data-anchor-id="random-sampling">Random Sampling</h3>
+<p>Sampling with replacement matters in the marble example because it makes successive draws independent. But replacement and random sampling are not the same thing. A <strong>random sample</strong> is selected by a chance procedure rather than by someone’s convenience or judgment. We can take a random sample without replacement — in fact, that’s how people are commonly sampled, since we don’t usually want to select the same person twice. The selections are still random even though the first one changes the probabilities for the next one.</p>
+<p>One common design is a <strong>simple random sample</strong>, in which every possible sample of a given size has the same chance of being selected. An <strong>independent random sample</strong> goes further: each observation is randomly drawn from the same population, and learning which observations were selected earlier does not change the probability of the next one. Sampling with replacement gives us that independence in the jar, but it isn’t part of the definition of random sampling.</p>
+<p>Social scientists don’t usually put people back into the population and risk selecting them again. Strictly speaking, then, sampling without replacement from a finite population makes the selections dependent. But if the population is very large compared with the sample, the dependence is usually negligible. Removing one person from a city of a million barely changes the makeup of the people who remain, just as removing one marble from a jar containing a million would barely change the probability on the next draw. In that situation, treating the observations as approximately independent is a useful simplification.</p>
+<p>The size of the population only smooths over the particular bump caused by sampling without replacement. It does not rescue a biased sampling frame, nonresponse, or a sample full of people whose scores are related because they belong to the same family, classroom, or neighborhood. Independence is a claim about how the observations are connected, not just a synonym for “random.”</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_random_sampling_checks" aria-label="Randomness, Sampling, and Independence"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Randomness, Sampling, and Independence</p></div><span class="quiz-progress" aria-label="0 of 5 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 5</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="phone_numbers"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Giving every phone number in a database an equal chance of being
+selected is enough to guarantee a random sample of people from the
+general population.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-phone_numbers" id="06_probability_random_sampling_checks-phone_numbers-option-1" value="true" aria-labelledby="06_probability_random_sampling_checks-phone_numbers-option-1-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-phone_numbers-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-phone_numbers" id="06_probability_random_sampling_checks-phone_numbers-option-2" value="false" aria-labelledby="06_probability_random_sampling_checks-phone_numbers-option-2-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-phone_numbers-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The numbers can be selected randomly from the database while the
+database still omits some people, includes others more than once, or
+reaches people who do not respond. A random selection process does not
+by itself guarantee a representative sample of the population we care
+about.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="street_sample"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Standing on the street and surveying people who happen to walk by is
+a simple random sample of people in the city.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-street_sample" id="06_probability_random_sampling_checks-street_sample-option-1" value="true" aria-labelledby="06_probability_random_sampling_checks-street_sample-option-1-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-street_sample-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-street_sample" id="06_probability_random_sampling_checks-street_sample-option-2" value="false" aria-labelledby="06_probability_random_sampling_checks-street_sample-option-2-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-street_sample-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>This is a convenience sample. People who are in that place at that
+time have a different chance of selection from everyone else in the
+city, so it is not a simple random sample.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="intro_psych_sample"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Getting Intro Psych students to participate for course credit is a
+simple random sample of the general population.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-intro_psych_sample" id="06_probability_random_sampling_checks-intro_psych_sample-option-1" value="true" aria-labelledby="06_probability_random_sampling_checks-intro_psych_sample-option-1-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-intro_psych_sample-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-intro_psych_sample" id="06_probability_random_sampling_checks-intro_psych_sample-option-2" value="false" aria-labelledby="06_probability_random_sampling_checks-intro_psych_sample-option-2-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-intro_psych_sample-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>That sample is constrained by who is enrolled and participating for
+credit, so samples containing other members of the general population
+cannot be selected at all.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="wheel_sample"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Several contestants spinning a fair wheel to pick a number is a
+random process.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-wheel_sample" id="06_probability_random_sampling_checks-wheel_sample-option-1" value="true" aria-labelledby="06_probability_random_sampling_checks-wheel_sample-option-1-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-wheel_sample-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-wheel_sample" id="06_probability_random_sampling_checks-wheel_sample-option-2" value="false" aria-labelledby="06_probability_random_sampling_checks-wheel_sample-option-2-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-wheel_sample-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>If the wheel is fair, each outcome has a known chance of being
+selected.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="without_replacement"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A sample selected randomly without replacement can still be a
+legitimate random sample.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-without_replacement" id="06_probability_random_sampling_checks-without_replacement-option-1" value="true" aria-labelledby="06_probability_random_sampling_checks-without_replacement-option-1-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-without_replacement-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_random_sampling_checks-without_replacement" id="06_probability_random_sampling_checks-without_replacement-option-2" value="false" aria-labelledby="06_probability_random_sampling_checks-without_replacement-option-2-text"><div class="quiz-choice-text" id="06_probability_random_sampling_checks-without_replacement-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Random selection does not require replacement. Without replacement,
+successive selections are dependent because each one changes who
+remains, but the sampling procedure can still be random.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_random_sampling_checks">{"id":"06_probability_random_sampling_checks","questions":[{"id":"phone_numbers","explanationHtml":"\u003cp\u003eThe numbers can be selected randomly from the database while the\ndatabase still omits some people, includes others more than once, or\nreaches people who do not respond. A random selection process does not\nby itself guarantee a representative sample of the population we care\nabout.\u003c/p\u003e","answer":false,"explanation":"The numbers can be selected randomly from the database while the database still omits some people, includes others more than once, or reaches people who do not respond. A random selection process does not by itself guarantee a representative sample of the population we care about.","type":"true-false","answerHtml":"","prompt":"Giving every phone number in a database an equal chance of being selected is enough to guarantee a random sample of people from the general population.","promptHtml":"\u003cp\u003eGiving every phone number in a database an equal chance of being\nselected is enough to guarantee a random sample of people from the\ngeneral population.\u003c/p\u003e"},{"id":"street_sample","explanationHtml":"\u003cp\u003eThis is a convenience sample. People who are in that place at that\ntime have a different chance of selection from everyone else in the\ncity, so it is not a simple random sample.\u003c/p\u003e","answer":false,"explanation":"This is a convenience sample. People who are in that place at that time have a different chance of selection from everyone else in the city, so it is not a simple random sample.","type":"true-false","answerHtml":"","prompt":"Standing on the street and surveying people who happen to walk by is a simple random sample of people in the city.","promptHtml":"\u003cp\u003eStanding on the street and surveying people who happen to walk by is\na simple random sample of people in the city.\u003c/p\u003e"},{"id":"intro_psych_sample","explanationHtml":"\u003cp\u003eThat sample is constrained by who is enrolled and participating for\ncredit, so samples containing other members of the general population\ncannot be selected at all.\u003c/p\u003e","answer":false,"explanation":"That sample is constrained by who is enrolled and participating for credit, so samples containing other members of the general population cannot be selected at all.","type":"true-false","answerHtml":"","prompt":"Getting Intro Psych students to participate for course credit is a simple random sample of the general population.","promptHtml":"\u003cp\u003eGetting Intro Psych students to participate for course credit is a\nsimple random sample of the general population.\u003c/p\u003e"},{"id":"wheel_sample","explanationHtml":"\u003cp\u003eIf the wheel is fair, each outcome has a known chance of being\nselected.\u003c/p\u003e","answer":true,"explanation":"If the wheel is fair, each outcome has a known chance of being selected.","type":"true-false","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","prompt":"Several contestants spinning a fair wheel to pick a number is a random process.","promptHtml":"\u003cp\u003eSeveral contestants spinning a fair wheel to pick a number is a\nrandom process.\u003c/p\u003e"},{"id":"without_replacement","explanationHtml":"\u003cp\u003eRandom selection does not require replacement. Without replacement,\nsuccessive selections are dependent because each one changes who\nremains, but the sampling procedure can still be random.\u003c/p\u003e","answer":true,"explanation":"Random selection does not require replacement. Without replacement, successive selections are dependent because each one changes who remains, but the sampling procedure can still be random.","type":"true-false","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","prompt":"A sample selected randomly without replacement can still be a legitimate random sample.","promptHtml":"\u003cp\u003eA sample selected randomly without replacement can still be a\nlegitimate random sample.\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eRandomness, Sampling, and Independence\u003c/p\u003e","title":"Randomness, Sampling, and Independence"}</script></section>
+</section>
+</section>
+<section id="probability-and-distributions-of-scores" class="level2">
+<h2 data-anchor-id="probability-and-distributions-of-scores">Probability and Distributions of Scores</h2>
+<p>Moving on from coins and dice and jars, we can also think about probabilities for distributions of scores. With a small, finite set of observed scores, the same counting logic applies. We just need to know the total number of equally likely possibilities and the number of outcomes in the event we’re interested in. Then we can calculate the probability of selecting a score equal to a certain value, greater than a certain value, or within a certain range.</p>
+<p>Take this little distribution of ten scores.</p>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;block&quot;,&quot;data&quot;:[1,1,1,1,2,2,2,4,4,5],&quot;xDomain&quot;:[0,6],&quot;xTickValues&quot;:[1,2,3,4,5],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;}}" data-interactive-figure="probabilityBlocksDemo" data-interactive-factory="makeGraph">
+<div class="interactive-figure-fallback">
+Block histogram of ten scores: four 1s, three 2s, two 4s, and one 5.
+</div>
+</div>
+<p>If we select one score at random, each of the ten blocks is one equally likely outcome. Let <span class="math inline">\(X\)</span> stand for the value of the score we select. Four of the ten blocks have a value of 1, so:</p>
+<p><span class="math display">\[ P(X = 1) = \frac{4}{10} = .4 \]</span></p>
+<p>There are no blocks at 3, so <span class="math inline">\(P(X=3)=0\)</span>. And we can define events that collect several values at once:</p>
+<p><span class="math display">\[ P(X \ge 4) = \frac{3}{10} = .3 \]</span></p>
+<p><span class="math display">\[ P(1 &lt; X &lt; 5) = \frac{5}{10} = .5 \]</span></p>
+<p>Taken together, the probabilities attached to all the possible values of <span class="math inline">\(X\)</span> form a <strong>probability distribution</strong>. It tells us not only which scores are possible but how likely each one is. Because one of the possible values must be selected, the probabilities across the whole distribution add up to 1. Here we obtained those probabilities by dividing the frequency at each score by ten. In other words, the block histogram can do double duty: it shows the distribution of ten observed scores, and, if one of those ten blocks is going to be selected at random, it shows the probability distribution for the value we will get.</p>
+</section>
+<section id="the-normal-distribution" class="level2">
+<h2 data-anchor-id="the-normal-distribution">The Normal Distribution</h2>
+<p>What if the distribution isn’t a little collection of ten blocks we can count? This is where the normal distribution makes a key advance possible.</p>
+<p>We have already met some of its history. The curve we now call normal emerged from work on games of chance and was developed as a model for the small errors that accumulate when astronomers repeatedly measure the same thing <span class="citation" data-cites="stahl2006normal">(<a href="references.html#ref-stahl2006normal" role="doc-biblioref">Stahl, 2006</a>)</span>. Then, in the nineteenth century, Adolphe Quetelet made a more surprising move. As we saw in <a href="./03-central-tendency.html">Chapter 3</a>, he treated the chest measurements of 5,738 Scottish soldiers as if their deviations from the average soldier followed the same kind of pattern as astronomers’ errors. The fit wasn’t perfect, but the broader idea stuck: the same probability curve could be used as a model for variation among people, not only variation among repeated measurements <span class="citation" data-cites="gallagher2020quetelet">(<a href="references.html#ref-gallagher2020quetelet" role="doc-biblioref">Gallagher, 2020</a>)</span>.</p>
+<p>Now, here’s the insight that sets us up for much of the inferential statistics ahead. For a distribution in general, knowing only the mean and standard deviation isn’t enough to determine probabilities. But a normal distribution is completely specified by its mean and standard deviation. If a population can be reasonably modelled by a normal distribution, we can determine the probability associated with any region of scores without recording and counting every individual score.</p>
+<p>This is a real shift from counting the blocks above. A normal distribution is <strong>continuous</strong>: between any two possible values lie still more possible values. The probability of selecting any one exact value is therefore zero; probabilities belong to intervals, such as scores below a cutoff or between two values. That doesn’t mean an exact value is impossible. It means that a single point has no width and therefore no area under a continuous curve.</p>
+<p>As we saw in <a href="./02-frequency-distributions.html">Chapter 2</a>, the smooth curve is a model for a distribution, not a literal record of observed frequencies. Within a suitably defined population, a variable such as height can often be approximately bell-shaped, with many observations near the middle and progressively fewer toward either extreme.</p>
+<section id="the-normal-distribution-equation" class="level3">
+<h3 data-anchor-id="the-normal-distribution-equation">The Normal Distribution Equation</h3>
+<p>The reason why we can describe the proportions of this kind of distribution so precisely is that it isn’t just an arbitrary shape. It is a mathematically defined shape.</p>
+<p><span class="math display">\[f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\]</span></p>
+<p>Now, you don’t really have to know this equation for the work we’re going to do throughout this book. So if it makes you queasy just looking at it, don’t worry. But it is worth looking at briefly to get a sense of how it’s constructed. The value <span class="math inline">\(f(x)\)</span> gives the height of the curve at a particular value of <span class="math inline">\(x\)</span>. That height is called the <strong>probability density</strong>; it is not itself the probability of observing that exact value. Then we have <span class="math inline">\(x-\mu\)</span> squared, which should look familiar from our chapter on variability, and <span class="math inline">\(\sigma\)</span> is part of this too, so we know variability has something important to do with the shape. But again, don’t worry about remembering the specifics. Just know that the equation defines the curve precisely, and areas under the curve will give us probabilities.</p>
+</section>
+<section id="areas-under-the-normal-curve" class="level3">
+<h3 data-anchor-id="areas-under-the-normal-curve">Areas Under the Normal Curve</h3>
+<p>And again, because this is a mathematically defined curve, we can determine the area underneath any given section of it. The total area under the curve is 1. The proportion of that area in a region is the probability of a randomly selected score falling in that region, according to the model.</p>
+<p>It is often easiest to work with the <strong>standard normal distribution</strong>, also called the <strong>unit normal distribution</strong>. This is simply a normal distribution with a mean of 0 and a standard deviation of 1. The <span class="math inline">\(z\)</span> scores we learned to calculate in the previous chapter put scores onto that standard scale, so the same set of areas can be used for any normal distribution.</p>
+<p>So, for example, 34.13% of the area of the curve lies between the mean and one standard deviation above the mean. And because it’s symmetrical, the same 34.13% lies between the mean and one standard deviation below the mean. Another 13.59% lies between one and two standard deviations from the mean on each side. And 2.28% lies more than two standard deviations above the mean, with another 2.28% more than two standard deviations below it. Together, the two extreme regions contain about 4.56% of the distribution. This is why we said in the previous chapter that scores more than two standard deviations from the mean are unusual under a normal model.</p>
+<div class="interactive-figure-mount" data-interactive-options="{   &quot;distribution&quot;: &quot;normal&quot;,   &quot;xDomain&quot;: [-4, 4],   &quot;xTicks&quot;: 9,   &quot;style&quot;: &quot;minimal&quot;,   &quot;xAxis&quot;: true,   &quot;yLabel&quot;: false,   &quot;labels&quot;: {&quot;x&quot;: &quot;z-score&quot;},   &quot;markers&quot;: [     {&quot;at&quot;: -2, &quot;label&quot;: false, &quot;color&quot;: &quot;var(--graph-axis-color, #7b818a)&quot;, &quot;dash&quot;: &quot;3 4&quot;, &quot;strokeWidth&quot;: 1.2},     {&quot;at&quot;: -1, &quot;label&quot;: false, &quot;color&quot;: &quot;var(--graph-axis-color, #7b818a)&quot;, &quot;dash&quot;: &quot;3 4&quot;, &quot;strokeWidth&quot;: 1.2},     {&quot;at&quot;: 0, &quot;label&quot;: false, &quot;color&quot;: &quot;var(--graph-axis-color, #7b818a)&quot;, &quot;dash&quot;: &quot;3 4&quot;, &quot;strokeWidth&quot;: 1.2},     {&quot;at&quot;: 1, &quot;label&quot;: false, &quot;color&quot;: &quot;var(--graph-axis-color, #7b818a)&quot;, &quot;dash&quot;: &quot;3 4&quot;, &quot;strokeWidth&quot;: 1.2},     {&quot;at&quot;: 2, &quot;label&quot;: false, &quot;color&quot;: &quot;var(--graph-axis-color, #7b818a)&quot;, &quot;dash&quot;: &quot;3 4&quot;, &quot;strokeWidth&quot;: 1.2}   ],   &quot;shade&quot;: [     {&quot;to&quot;: -2, &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.12},     {&quot;between&quot;: [-2, -1], &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.22},     {&quot;between&quot;: [-1, 0], &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.38},     {&quot;between&quot;: [0, 1], &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.38},     {&quot;between&quot;: [1, 2], &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.22},     {&quot;from&quot;: 2, &quot;label&quot;: &quot;percent&quot;, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;, &quot;opacity&quot;: 0.12}   ],   &quot;animate&quot;: true }" data-interactive-figure="zRegionsLabelled" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Standard normal curve divided at z = -2, -1, 0, 1, and 2, with each region labeled by the percentage of the distribution it contains: 2.28%, 13.59%, 34.13%, 34.13%, 13.59%, and 2.28%.
+</div>
+</div>
+<p>Of course, we aren’t limited to those particular regions. We can take any <span class="math inline">\(z\)</span> score and determine the area — that is, the probability of a score falling above or below that value under a standard normal model. The region beyond a cutoff at either end of the distribution is called a <strong>tail</strong>.</p>
+</section>
+<section id="the-unit-normal-table" class="level3">
+<h3 data-anchor-id="the-unit-normal-table">The Unit Normal Table</h3>
+<p>In the olden days, you would look up something called a <span class="math inline">\(z\)</span> table, a standard normal table, or a unit normal table. Printed tables vary in how they’re arranged. The one below lists <span class="math inline">\(z\)</span> scores along with the areas to their left, to their right, and between the mean and the score. (Computers have made these tables largely obsolete, but it’s useful for us to see how they work, because whatever statistical software you might use in practice is applying the same logic and math.)</p>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;layout&quot;:&quot;areas&quot;,&quot;z&quot;:{&quot;from&quot;:0,&quot;to&quot;:3,&quot;step&quot;:0.01},&quot;zDigits&quot;:2,&quot;areas&quot;:[&quot;left&quot;,&quot;right&quot;,&quot;mean-to-z&quot;],&quot;tableMaxHeight&quot;:&quot;18rem&quot;,&quot;selected&quot;:false}" data-interactive-figure="unitNormalTable" data-interactive-factory="makeCriticalValueTable">
+<div class="interactive-figure-fallback">
+Unit normal table showing areas to the left, right, and between the mean and z.
+</div>
+</div>
+<p>So for a <span class="math inline">\(z\)</span> score of zero, it’s exactly half and half; 50 percent of the distribution lies on either side of zero, because zero is the mean and the distribution is symmetrical. In other words, under a normal model there is a 50 percent chance of observing a score greater than the mean and a 50 percent chance of observing a score lower than the mean.</p>
+<p>If we take a <span class="math inline">\(z\)</span> score of 1, we look for that row in the table. The area to the left of <span class="math inline">\(z=1\)</span> is about .84, so roughly 84 percent of the distribution lies below it. In percentile language, a score with <span class="math inline">\(z=1\)</span> is at about the 84th percentile. The area to the right is just under .16, and the area between the mean (where <span class="math inline">\(z=0\)</span>) and <span class="math inline">\(z=1\)</span> is .3413, just like we saw before.</p>
+<p>Or take a <span class="math inline">\(z\)</span> score of negative one. Now the smaller area is to the left of the score and the larger area is to its right. Printed standard normal tables don’t always list negative <span class="math inline">\(z\)</span> scores, because the symmetry of the distribution means the relevant areas are the same as for a positive <span class="math inline">\(z\)</span> score on the opposite side of the mean.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_distribution" aria-label="Distribution Probabilities"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Distribution Probabilities</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="z_one_left_area"><div class="quiz-prompt"><p>For a standard normal distribution, what proportion of scores falls
+below <span class="math inline"><em>z</em> = 1</span>?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="06_probability_distribution-z_one_left_area" id="06_probability_distribution-z_one_left_area-option-1" value="0" aria-labelledby="06_probability_distribution-z_one_left_area-option-1-text"><div class="quiz-choice-text" id="06_probability_distribution-z_one_left_area-option-1-text"><p>About .16</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_distribution-z_one_left_area" id="06_probability_distribution-z_one_left_area-option-2" value="1" aria-labelledby="06_probability_distribution-z_one_left_area-option-2-text"><div class="quiz-choice-text" id="06_probability_distribution-z_one_left_area-option-2-text"><p>About .34</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_distribution-z_one_left_area" id="06_probability_distribution-z_one_left_area-option-3" value="2" aria-labelledby="06_probability_distribution-z_one_left_area-option-3-text"><div class="quiz-choice-text" id="06_probability_distribution-z_one_left_area-option-3-text"><p>About .84</p></div></div><div class="quiz-choice"><input type="radio" name="06_probability_distribution-z_one_left_area" id="06_probability_distribution-z_one_left_area-option-4" value="3" aria-labelledby="06_probability_distribution-z_one_left_area-option-4-text"><div class="quiz-choice-text" id="06_probability_distribution-z_one_left_area-option-4-text"><p>About .98</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>About .84</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A z-score of 1 leaves about 84% of the distribution below it.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_distribution">{"id":"06_probability_distribution","questions":[{"id":"z_one_left_area","explanationHtml":"\u003cp\u003eA z-score of 1 leaves about 84% of the distribution below it.\u003c/p\u003e","promptHtml":"\u003cp\u003eFor a standard normal distribution, what proportion of scores falls\nbelow \u003cspan class=\"math inline\"\u003e\u003cem\u003ez\u003c/em\u003e = 1\u003c/span\u003e?\u003c/p\u003e","explanation":"A z-score of 1 leaves about 84% of the distribution below it.","type":"multiple-choice","answerHtml":"","prompt":"For a standard normal distribution, what proportion of scores falls below z = 1?","options":[{"textHtml":"\u003cp\u003eAbout .16\u003c/p\u003e","text":"About .16"},{"textHtml":"\u003cp\u003eAbout .34\u003c/p\u003e","text":"About .34"},{"text":"About .84","correct":true,"textHtml":"\u003cp\u003eAbout .84\u003c/p\u003e"},{"textHtml":"\u003cp\u003eAbout .98\u003c/p\u003e","text":"About .98"}]}],"titleHtml":"\u003cp\u003eDistribution Probabilities\u003c/p\u003e","title":"Distribution Probabilities"}</script></section>
+</section>
+<section id="from-areas-to-quantiles" class="level3">
+<h3 data-anchor-id="from-areas-to-quantiles">From Areas to Quantiles</h3>
+<p>So far, we’ve started with a score and asked for an area: what proportion of the distribution falls below <span class="math inline">\(z=1\)</span>? Sometimes we want to go the other way. A <strong>quantile</strong> is a cutoff with a specified proportion of the distribution at or below it. The median, for example, is the .50 quantile. In a normal distribution it sits at the mean, because half the area is on either side.</p>
+<p>Percentiles are quantiles expressed as percentages. Saying that <span class="math inline">\(z=1\)</span> is at about the 84th percentile means that it is the cutoff with about 84% of the distribution below it. Or suppose we wanted the 95th percentile. We would search the table’s left-area column for .95 and find that the answer lies about halfway between <span class="math inline">\(z=1.64\)</span> and <span class="math inline">\(z=1.65\)</span>, or roughly 1.645. The machinery is the same; we’ve just reversed the question. A score gives us an area, while a quantile gives us the score that cuts off a chosen area.</p>
+</section>
+</section>
+<section id="applying-probability-spider-man" class="level2">
+<h2 data-anchor-id="applying-probability-spider-man">Applying Probability: Spider-Man</h2>
+<p>To finish up, let’s turn back to our silly Spider-Man reaction time test from the previous chapter. We found that Peter Parker’s <span class="math inline">\(z\)</span> score was <span class="math inline">\(-2.5\)</span>, and we said that that seemed pretty extreme. But now we’re equipped to determine probabilities under a normal model, and we can be more precise.</p>
+<p>Peter has already recorded his score, so it doesn’t make sense to ask for the probability that <em>he</em> got it. The relevant question is this: if we randomly selected someone from our reference population of ordinary, unbitten people, what is the probability that they would have a reaction time as quick as Peter’s or quicker? As you can see on the normal curve, reaction times that fast make up a very small lower-tail region of the distribution.</p>
+<div id="fig-spiderman-z-score" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-spiderman-z-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: A normal distribution curve with a vertical line at <span class="math inline">\(z = -2.5\)</span>, representing the position of Peter Parker’s reaction time within the standardized population distribution.
+</figcaption>
+<div aria-describedby="fig-spiderman-z-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;xDomain&quot;:[-4,4],&quot;xTicks&quot;:9,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;shade&quot;:{&quot;to&quot;:-2.5},&quot;markers&quot;:{&quot;at&quot;:-2.5,&quot;label&quot;:&quot;z = −2.5&quot;,&quot;height&quot;:0.45,&quot;color&quot;:&quot;var(--bc-accent, #2c7fb8)&quot;},&quot;animate&quot;:true,&quot;labels&quot;:{&quot;x&quot;:&quot;z-score&quot;}}" data-interactive-figure="spideyProbabilityCurve" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Standard normal curve with a vertical line at z equals negative 2.5 and the small region below it shaded.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>If we look up <span class="math inline">\(-2.5\)</span> in the unit normal table, it tells us that only about .0062 of the distribution is down there in the lower tail, or 0.62%:</p>
+<p><span class="math display">\[P(Z \le -2.5) \approx .0062\]</span></p>
+<p>In other words, if we tested a random individual from this population, there’s less than a 1% chance that they would be as quick as or quicker than Peter Parker. That is evidence against the idea that Peter is just an ordinary member of the reference population. It isn’t proof: rare scores do sometimes happen, and this probability is not itself the probability that the spider bite changed him. But it gives us a more precise reason to begin suspecting that something unusual is going on. In <a href="./08-hypothesis-testing.html">Chapter 8</a>, we’ll develop that logic into a formal hypothesis test.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="06_probability_z_scores_table" aria-label="Find the Relevant Probabilities"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Find the Relevant Probabilities</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="peter_tail"><div class="quiz-prompt"><p>For Peter Parker’s reaction time, <span class="math inline"><em>z</em> = −2.5</span>. What is the approximate
+lower- tail probability?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>6.2e-3</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The area below z = -2.5 is about .0062, or 0.62%.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="06_probability_z_scores_table">{"id":"06_probability_z_scores_table","questions":[{"answer":"6.2e-3","id":"peter_tail","explanationHtml":"\u003cp\u003eThe area below z = -2.5 is about .0062, or 0.62%.\u003c/p\u003e","answerHtml":"\u003cp\u003e6.2e-3\u003c/p\u003e","explanation":"The area below z = -2.5 is about .0062, or 0.62%.","type":"numeric","tolerance":"5.0e-4","prompt":"For Peter Parker’s reaction time, z = -2.5. What is the approximate lower- tail probability?","promptHtml":"\u003cp\u003eFor Peter Parker’s reaction time, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003ez\u003c/em\u003e = −2.5\u003c/span\u003e. What is the approximate\nlower- tail probability?\u003c/p\u003e"}],"titleHtml":"\u003cp\u003eFind the Relevant Probabilities\u003c/p\u003e","title":"Find the Relevant Probabilities"}</script></section>
+<section id="a-note-on-normality" class="level3">
+<h3 data-anchor-id="a-note-on-normality">A Note on Normality</h3>
+<p>One last thing to note: these particular probabilities come from a normal model. If the population distribution has a different shape — say, if it’s strongly skewed or bimodal — the normal curve’s areas might not describe it well. So in practice we don’t simply assume that every distribution is normal, and we can’t conclusively “verify” normality from a finite set of observations. We assess whether a normal model is reasonable enough for what we’re trying to do.</p>
+<p>The objects have changed over the course of the chapter — dice outcomes, marbles, blocks in a histogram, areas under a curve — but the underlying question has stayed the same. What are the possible results, and how much of that possibility belongs to the event we care about? In the next chapter, we’ll ask that question about sample means. And we’ll see an important complication: under certain conditions, a distribution of sample means can be approximately normal even when the population of individual scores is not.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-bernoulli2006conjecturing" class="csl-entry" role="listitem">
+Bernoulli, J. (2006). <em>The art of conjecturing, together with <span>“letter to a friend on sets in court tennis”</span></em> (E. D. Sylla, Tran.). Johns Hopkins University Press.
+</div>
+<div id="ref-galileo1898dadi" class="csl-entry" role="listitem">
+Galilei, G. (1898). Sopra le scoperte dei dadi. In <em>Le opere di galileo galilei</em> (Vol. 8, pp. 591–594). Barbera. <a href="https://web.universiteitleiden.nl/fsw/verduin/stathist/galileo.htm">https://web.universiteitleiden.nl/fsw/verduin/stathist/galileo.htm</a>
+</div>
+<div id="ref-gallagher2020quetelet" class="csl-entry" role="listitem">
+Gallagher, E. D. (2020). Was <span class="nocase">Quetelet’s</span> average man normal? <em>The American Statistician</em>, <em>74</em>(3), 301–306. <a href="https://doi.org/10.1080/00031305.2019.1706635">https://doi.org/10.1080/00031305.2019.1706635</a>
+</div>
+<div id="ref-stahl2006normal" class="csl-entry" role="listitem">
+Stahl, S. (2006). The evolution of the normal distribution. <em>Mathematics Magazine</em>, <em>79</em>(2), 96–113. <a href="https://doi.org/10.1080/0025570X.2006.11953386">https://doi.org/10.1080/0025570X.2006.11953386</a>
+</div>
+</div>
+</section>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>I’m simplifying history: Galileo was asked a slightly more complicated version of this puzzle involving three dice. But the point is the same.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./05-z-scores.html" class="pagination-link" aria-label="$z$-Scores">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./07-sampling.html" class="pagination-link" aria-label="Sampling">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

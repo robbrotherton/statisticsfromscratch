@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Rob Brotherton">
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./01-variables.html" rel="next">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent home-page quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Statistics From Scratch</h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    
+<!-- main -->
+<main class="content column-page-right" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Statistics From Scratch</h1>
+<p class="subtitle lead">An Introduction for the Social Sciences</p>
+</div>
+
+<div>
+  <div class="description">
+    An interactive introduction to statistics for students in the social sciences.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta column-page-right">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Rob Brotherton </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level1 unnumbered home-page-heading">
+<h1 class="unnumbered home-page-heading">Introduction</h1>
+<div class="home-dots-hero">
+<svg viewbox="0 0 50 20" preserveaspectratio="xMidYMid meet" role="img" aria-labelledby="home-dots-title home-dots-desc">
+<title id="home-dots-title">
+A colorful distribution of dots
+</title>
+<desc id="home-dots-desc">Three hundred colored dots stack into a bell-shaped distribution.</desc> <g class="home-dots__marks"> <circle cx="27" cy="19" style="--i:0"></circle> <circle cx="21" cy="19" style="--i:1"></circle> <circle cx="32" cy="19" style="--i:2"></circle> <circle cx="30" cy="19" style="--i:3"></circle> <circle cx="38" cy="19" style="--i:4"></circle> <circle cx="31" cy="19" style="--i:5"></circle> <circle cx="15" cy="19" style="--i:6"></circle> <circle cx="23" cy="19" style="--i:7"></circle> <circle cx="40" cy="19" style="--i:8"></circle> <circle cx="39" cy="19" style="--i:9"></circle> <circle cx="30" cy="18" style="--i:10"></circle> <circle cx="25" cy="19" style="--i:11"></circle> <circle cx="28" cy="19" style="--i:12"></circle> <circle cx="25" cy="18" style="--i:13"></circle> <circle cx="25" cy="17" style="--i:14"></circle> <circle cx="26" cy="19" style="--i:15"></circle> <circle cx="34" cy="19" style="--i:16"></circle> <circle cx="25" cy="16" style="--i:17"></circle> <circle cx="24" cy="19" style="--i:18"></circle> <circle cx="23" cy="18" style="--i:19"></circle> <circle cx="37" cy="19" style="--i:20"></circle> <circle cx="26" cy="18" style="--i:21"></circle> <circle cx="35" cy="19" style="--i:22"></circle> <circle cx="35" cy="18" style="--i:23"></circle> <circle cx="30" cy="17" style="--i:24"></circle> <circle cx="23" cy="17" style="--i:25"></circle> <circle cx="35" cy="17" style="--i:26"></circle> <circle cx="32" cy="18" style="--i:27"></circle> <circle cx="18" cy="19" style="--i:28"></circle> <circle cx="35" cy="16" style="--i:29"></circle> <circle cx="26" cy="17" style="--i:30"></circle> <circle cx="33" cy="19" style="--i:31"></circle> <circle cx="19" cy="19" style="--i:32"></circle> <circle cx="13" cy="19" style="--i:33"></circle> <circle cx="32" cy="17" style="--i:34"></circle> <circle cx="22" cy="19" style="--i:35"></circle> <circle cx="23" cy="16" style="--i:36"></circle> <circle cx="32" cy="16" style="--i:37"></circle> <circle cx="21" cy="18" style="--i:38"></circle> <circle cx="20" cy="19" style="--i:39"></circle> <circle cx="36" cy="19" style="--i:40"></circle> <circle cx="26" cy="16" style="--i:41"></circle> <circle cx="35" cy="15" style="--i:42"></circle> <circle cx="11" cy="19" style="--i:43"></circle> <circle cx="18" cy="18" style="--i:44"></circle> <circle cx="18" cy="17" style="--i:45"></circle> <circle cx="26" cy="15" style="--i:46"></circle> <circle cx="22" cy="18" style="--i:47"></circle> <circle cx="31" cy="18" style="--i:48"></circle> <circle cx="11" cy="18" style="--i:49"></circle> <circle cx="20" cy="18" style="--i:50"></circle> <circle cx="20" cy="17" style="--i:51"></circle> <circle cx="24" cy="18" style="--i:52"></circle> <circle cx="28" cy="18" style="--i:53"></circle> <circle cx="41" cy="19" style="--i:54"></circle> <circle cx="20" cy="16" style="--i:55"></circle> <circle cx="21" cy="17" style="--i:56"></circle> <circle cx="31" cy="17" style="--i:57"></circle> <circle cx="24" cy="17" style="--i:58"></circle> <circle cx="36" cy="18" style="--i:59"></circle> <circle cx="16" cy="19" style="--i:60"></circle> <circle cx="34" cy="18" style="--i:61"></circle> <circle cx="14" cy="19" style="--i:62"></circle> <circle cx="42" cy="19" style="--i:63"></circle> <circle cx="26" cy="14" style="--i:64"></circle> <circle cx="23" cy="15" style="--i:65"></circle> <circle cx="22" cy="17" style="--i:66"></circle> <circle cx="32" cy="15" style="--i:67"></circle> <circle cx="29" cy="19" style="--i:68"></circle> <circle cx="24" cy="16" style="--i:69"></circle> <circle cx="26" cy="13" style="--i:70"></circle> <circle cx="21" cy="16" style="--i:71"></circle> <circle cx="17" cy="19" style="--i:72"></circle> <circle cx="26" cy="12" style="--i:73"></circle> <circle cx="31" cy="16" style="--i:74"></circle> <circle cx="22" cy="16" style="--i:75"></circle> <circle cx="27" cy="18" style="--i:76"></circle> <circle cx="20" cy="15" style="--i:77"></circle> <circle cx="19" cy="18" style="--i:78"></circle> <circle cx="25" cy="15" style="--i:79"></circle> <circle cx="35" cy="14" style="--i:80"></circle> <circle cx="23" cy="14" style="--i:81"></circle> <circle cx="20" cy="14" style="--i:82"></circle> <circle cx="13" cy="18" style="--i:83"></circle> <circle cx="17" cy="18" style="--i:84"></circle> <circle cx="15" cy="18" style="--i:85"></circle> <circle cx="18" cy="16" style="--i:86"></circle> <circle cx="16" cy="18" style="--i:87"></circle> <circle cx="28" cy="17" style="--i:88"></circle> <circle cx="23" cy="13" style="--i:89"></circle> <circle cx="15" cy="17" style="--i:90"></circle> <circle cx="19" cy="17" style="--i:91"></circle> <circle cx="26" cy="11" style="--i:92"></circle> <circle cx="30" cy="16" style="--i:93"></circle> <circle cx="31" cy="15" style="--i:94"></circle> <circle cx="25" cy="14" style="--i:95"></circle> <circle cx="44" cy="19" style="--i:96"></circle> <circle cx="20" cy="13" style="--i:97"></circle> <circle cx="33" cy="18" style="--i:98"></circle> <circle cx="23" cy="12" style="--i:99"></circle> <circle cx="30" cy="15" style="--i:100"></circle> <circle cx="24" cy="15" style="--i:101"></circle> <circle cx="22" cy="15" style="--i:102"></circle> <circle cx="24" cy="14" style="--i:103"></circle> <circle cx="25" cy="13" style="--i:104"></circle> <circle cx="11" cy="17" style="--i:105"></circle> <circle cx="37" cy="18" style="--i:106"></circle> <circle cx="31" cy="14" style="--i:107"></circle> <circle cx="16" cy="17" style="--i:108"></circle> <circle cx="11" cy="16" style="--i:109"></circle> <circle cx="28" cy="16" style="--i:110"></circle> <circle cx="31" cy="13" style="--i:111"></circle> <circle cx="32" cy="14" style="--i:112"></circle> <circle cx="27" cy="17" style="--i:113"></circle> <circle cx="24" cy="13" style="--i:114"></circle> <circle cx="28" cy="15" style="--i:115"></circle> <circle cx="19" cy="16" style="--i:116"></circle> <circle cx="20" cy="12" style="--i:117"></circle> <circle cx="39" cy="18" style="--i:118"></circle> <circle cx="19" cy="15" style="--i:119"></circle> <circle cx="24" cy="12" style="--i:120"></circle> <circle cx="17" cy="17" style="--i:121"></circle> <circle cx="40" cy="18" style="--i:122"></circle> <circle cx="22" cy="14" style="--i:123"></circle> <circle cx="33" cy="17" style="--i:124"></circle> <circle cx="33" cy="16" style="--i:125"></circle> <circle cx="17" cy="16" style="--i:126"></circle> <circle cx="28" cy="14" style="--i:127"></circle> <circle cx="20" cy="11" style="--i:128"></circle> <circle cx="6" cy="19" style="--i:129"></circle> <circle cx="34" cy="17" style="--i:130"></circle> <circle cx="30" cy="14" style="--i:131"></circle> <circle cx="17" cy="15" style="--i:132"></circle> <circle cx="9" cy="19" style="--i:133"></circle> <circle cx="20" cy="10" style="--i:134"></circle> <circle cx="33" cy="15" style="--i:135"></circle> <circle cx="29" cy="18" style="--i:136"></circle> <circle cx="24" cy="11" style="--i:137"></circle> <circle cx="12" cy="19" style="--i:138"></circle> <circle cx="35" cy="13" style="--i:139"></circle> <circle cx="33" cy="14" style="--i:140"></circle> <circle cx="31" cy="12" style="--i:141"></circle> <circle cx="18" cy="15" style="--i:142"></circle> <circle cx="30" cy="13" style="--i:143"></circle> <circle cx="19" cy="14" style="--i:144"></circle> <circle cx="21" cy="15" style="--i:145"></circle> <circle cx="15" cy="16" style="--i:146"></circle> <circle cx="28" cy="13" style="--i:147"></circle> <circle cx="21" cy="14" style="--i:148"></circle> <circle cx="32" cy="13" style="--i:149"></circle> <circle cx="32" cy="12" style="--i:150"></circle> <circle cx="18" cy="14" style="--i:151"></circle> <circle cx="37" cy="17" style="--i:152"></circle> <circle cx="36" cy="17" style="--i:153"></circle> <circle cx="21" cy="13" style="--i:154"></circle> <circle cx="29" cy="17" style="--i:155"></circle> <circle cx="18" cy="13" style="--i:156"></circle> <circle cx="19" cy="13" style="--i:157"></circle> <circle cx="8" cy="19" style="--i:158"></circle> <circle cx="34" cy="16" style="--i:159"></circle> <circle cx="28" cy="12" style="--i:160"></circle> <circle cx="29" cy="16" style="--i:161"></circle> <circle cx="18" cy="12" style="--i:162"></circle> <circle cx="14" cy="18" style="--i:163"></circle> <circle cx="33" cy="13" style="--i:164"></circle> <circle cx="13" cy="17" style="--i:165"></circle> <circle cx="25" cy="12" style="--i:166"></circle> <circle cx="19" cy="12" style="--i:167"></circle> <circle cx="23" cy="11" style="--i:168"></circle> <circle cx="23" cy="10" style="--i:169"></circle> <circle cx="39" cy="17" style="--i:170"></circle> <circle cx="21" cy="12" style="--i:171"></circle> <circle cx="20" cy="9" style="--i:172"></circle> <circle cx="7" cy="19" style="--i:173"></circle> <circle cx="38" cy="18" style="--i:174"></circle> <circle cx="26" cy="10" style="--i:175"></circle> <circle cx="21" cy="11" style="--i:176"></circle> <circle cx="30" cy="12" style="--i:177"></circle> <circle cx="19" cy="11" style="--i:178"></circle> <circle cx="16" cy="16" style="--i:179"></circle> <circle cx="17" cy="14" style="--i:180"></circle> <circle cx="26" cy="9" style="--i:181"></circle> <circle cx="28" cy="11" style="--i:182"></circle> <circle cx="12" cy="18" style="--i:183"></circle> <circle cx="40" cy="17" style="--i:184"></circle> <circle cx="19" cy="10" style="--i:185"></circle> <circle cx="28" cy="10" style="--i:186"></circle> <circle cx="29" cy="15" style="--i:187"></circle> <circle cx="27" cy="16" style="--i:188"></circle> <circle cx="24" cy="10" style="--i:189"></circle> <circle cx="19" cy="9" style="--i:190"></circle> <circle cx="25" cy="11" style="--i:191"></circle> <circle cx="30" cy="11" style="--i:192"></circle> <circle cx="15" cy="15" style="--i:193"></circle> <circle cx="22" cy="13" style="--i:194"></circle> <circle cx="20" cy="8" style="--i:195"></circle> <circle cx="18" cy="11" style="--i:196"></circle> <circle cx="37" cy="16" style="--i:197"></circle> <circle cx="15" cy="14" style="--i:198"></circle> <circle cx="39" cy="16" style="--i:199"></circle> <circle cx="35" cy="12" style="--i:200"></circle> <circle cx="13" cy="16" style="--i:201"></circle> <circle cx="23" cy="9" style="--i:202"></circle> <circle cx="33" cy="12" style="--i:203"></circle> <circle cx="19" cy="8" style="--i:204"></circle> <circle cx="37" cy="15" style="--i:205"></circle> <circle cx="6" cy="18" style="--i:206"></circle> <circle cx="29" cy="14" style="--i:207"></circle> <circle cx="34" cy="15" style="--i:208"></circle> <circle cx="26" cy="8" style="--i:209"></circle> <circle cx="23" cy="8" style="--i:210"></circle> <circle cx="23" cy="7" style="--i:211"></circle> <circle cx="23" cy="6" style="--i:212"></circle> <circle cx="42" cy="18" style="--i:213"></circle> <circle cx="38" cy="17" style="--i:214"></circle> <circle cx="17" cy="13" style="--i:215"></circle> <circle cx="25" cy="10" style="--i:216"></circle> <circle cx="14" cy="17" style="--i:217"></circle> <circle cx="26" cy="7" style="--i:218"></circle> <circle cx="19" cy="7" style="--i:219"></circle> <circle cx="23" cy="5" style="--i:220"></circle> <circle cx="30" cy="10" style="--i:221"></circle> <circle cx="24" cy="9" style="--i:222"></circle> <circle cx="27" cy="15" style="--i:223"></circle> <circle cx="34" cy="14" style="--i:224"></circle> <circle cx="13" cy="15" style="--i:225"></circle> <circle cx="30" cy="9" style="--i:226"></circle> <circle cx="21" cy="10" style="--i:227"></circle> <circle cx="34" cy="13" style="--i:228"></circle> <circle cx="24" cy="8" style="--i:229"></circle> <circle cx="16" cy="15" style="--i:230"></circle> <circle cx="30" cy="8" style="--i:231"></circle> <circle cx="25" cy="9" style="--i:232"></circle> <circle cx="30" cy="7" style="--i:233"></circle> <circle cx="18" cy="10" style="--i:234"></circle> <circle cx="22" cy="12" style="--i:235"></circle> <circle cx="25" cy="8" style="--i:236"></circle> <circle cx="22" cy="11" style="--i:237"></circle> <circle cx="22" cy="10" style="--i:238"></circle> <circle cx="28" cy="9" style="--i:239"></circle> <circle cx="17" cy="12" style="--i:240"></circle> <circle cx="25" cy="7" style="--i:241"></circle> <circle cx="18" cy="9" style="--i:242"></circle> <circle cx="29" cy="13" style="--i:243"></circle> <circle cx="18" cy="8" style="--i:244"></circle> <circle cx="34" cy="12" style="--i:245"></circle> <circle cx="25" cy="6" style="--i:246"></circle> <circle cx="26" cy="6" style="--i:247"></circle> <circle cx="29" cy="12" style="--i:248"></circle> <circle cx="29" cy="11" style="--i:249"></circle> <circle cx="28" cy="8" style="--i:250"></circle> <circle cx="18" cy="7" style="--i:251"></circle> <circle cx="20" cy="7" style="--i:252"></circle> <circle cx="9" cy="18" style="--i:253"></circle> <circle cx="26" cy="5" style="--i:254"></circle> <circle cx="35" cy="11" style="--i:255"></circle> <circle cx="16" cy="14" style="--i:256"></circle> <circle cx="29" cy="10" style="--i:257"></circle> <circle cx="30" cy="6" style="--i:258"></circle> <circle cx="25" cy="5" style="--i:259"></circle> <circle cx="15" cy="13" style="--i:260"></circle> <circle cx="21" cy="9" style="--i:261"></circle> <circle cx="36" cy="16" style="--i:262"></circle> <circle cx="31" cy="11" style="--i:263"></circle> <circle cx="29" cy="9" style="--i:264"></circle> <circle cx="44" cy="18" style="--i:265"></circle> <circle cx="23" cy="4" style="--i:266"></circle> <circle cx="27" cy="14" style="--i:267"></circle> <circle cx="31" cy="10" style="--i:268"></circle> <circle cx="24" cy="7" style="--i:269"></circle> <circle cx="33" cy="11" style="--i:270"></circle> <circle cx="29" cy="8" style="--i:271"></circle> <circle cx="23" cy="3" style="--i:272"></circle> <circle cx="24" cy="6" style="--i:273"></circle> <circle cx="5" cy="19" style="--i:274"></circle> <circle cx="20" cy="6" style="--i:275"></circle> <circle cx="25" cy="4" style="--i:276"></circle> <circle cx="35" cy="10" style="--i:277"></circle> <circle cx="19" cy="6" style="--i:278"></circle> <circle cx="13" cy="14" style="--i:279"></circle> <circle cx="23" cy="2" style="--i:280"></circle> <circle cx="25" cy="3" style="--i:281"></circle> <circle cx="13" cy="13" style="--i:282"></circle> <circle cx="10" cy="19" style="--i:283"></circle> <circle cx="18" cy="6" style="--i:284"></circle> <circle cx="35" cy="9" style="--i:285"></circle> <circle cx="14" cy="16" style="--i:286"></circle> <circle cx="28" cy="7" style="--i:287"></circle> <circle cx="26" cy="4" style="--i:288"></circle> <circle cx="30" cy="5" style="--i:289"></circle> <circle cx="30" cy="4" style="--i:290"></circle> <circle cx="45" cy="19" style="--i:291"></circle> <circle cx="27" cy="13" style="--i:292"></circle> <circle cx="20" cy="5" style="--i:293"></circle> <circle cx="26" cy="3" style="--i:294"></circle> <circle cx="15" cy="12" style="--i:295"></circle> <circle cx="22" cy="9" style="--i:296"></circle> <circle cx="19" cy="5" style="--i:297"></circle> <circle cx="24" cy="5" style="--i:298"></circle> <circle cx="17" cy="11" style="--i:299"></circle> </g>
+</svg>
+</div>
+<p>Welcome to <em>Statistics from Scratch</em>! This book is designed to help you learn statistics in a hands-on way, with interactive examples and exercises. (As far as I know, it’s the only statistics textbook to illustrate the hypothesis testing with a swarm of bees!)</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-page-right">
+  <div class="nav-page nav-page-previous">
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./01-variables.html" class="pagination-link" aria-label="Variables &amp; Measurement">
+        <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

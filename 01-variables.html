@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>1&nbsp; Variables &amp; Measurement – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./02-frequency-distributions.html" rel="next">
+<link href="./index.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="1&nbsp; Variables &amp; Measurement – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="1&nbsp; Variables &amp; Measurement – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#where-do-statistics-come-from" id="toc-where-do-statistics-come-from" class="nav-link active" data-scroll-target="#where-do-statistics-come-from">Where do statistics come from?</a></li>
+  <li><a href="#constructs-and-operational-definitions" id="toc-constructs-and-operational-definitions" class="nav-link" data-scroll-target="#constructs-and-operational-definitions">Constructs and operational definitions</a></li>
+  <li><a href="#sec-variables" id="toc-sec-variables" class="nav-link" data-scroll-target="#sec-variables">Describing variables</a>
+  <ul class="collapse">
+  <li><a href="#scales-of-measurement" id="toc-scales-of-measurement" class="nav-link" data-scroll-target="#scales-of-measurement">Scales of measurement</a></li>
+  <li><a href="#gray-areas" id="toc-gray-areas" class="nav-link" data-scroll-target="#gray-areas">Gray areas</a></li>
+  </ul></li>
+  <li><a href="#populations-samples-and-inference" id="toc-populations-samples-and-inference" class="nav-link" data-scroll-target="#populations-samples-and-inference">Populations, samples, and inference</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/hidden-message.js"></script>
+<script src="resources/js/likert-helper.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/sampling-core.js"></script>
+<script src="resources/js/sampling-visuals.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/sampling-pathway.js"></script>
+<div class="interactive-figure-mount" data-interactive-figure="hiddenMessage" data-interactive-options="{}" data-interactive-factory="makeHiddenMessage">
+<div class="interactive-figure-fallback">
+A colorful animated bar chart hides the word STATISTICS.
+</div>
+</div>
+<p>This is a statistics textbook: you’re here for some math, right? Well, sure, we’ve got that to look forward to. But I named this book <em>Statistics From Scratch</em>. The idea is that we’ll try to build and scrutinize our statistical intuitions first, before formalizing principles with equations and theorems and things like that. I mean, I like math as much as the next person (so, not that much if I’m being honest), but it’s a tool, and to use it well we need to understand what we’re doing and why. So in this chapter, we’ll explore the parts of statistical thinking that come before the math: the logic, technical terms, and practical considerations that allow us to usefully point statistical techniques at social-scientific questions.</p>
+<p>And look, we can have some fun here too. See that colorful graph at the top? It’s not just there to look pretty. It actually contains a <em>secret hidden message</em>! Can you figure it out? Think on it a while and feel free to come back for the answer later if you can’t get it right away. When you think you’ve got it, you can type your answer below and check if you’re right.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="01_variables_secret" aria-label="What is the hidden meaning of the graph at the top of the page?"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>What is the hidden meaning of the graph at the top of the page?</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="secret_message"><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>It’s the word “STATISTICS” encoded in the heights of the bars. Each
+bar corresponds to a letter in the word, and the height of each bar
+corresponds to the position of that letter in the alphabet (S=19, T=20,
+A=1, etc.).</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="01_variables_secret">{"title":"What is the hidden meaning of the graph at the top of the page?","titleHtml":"\u003cp\u003eWhat is the hidden meaning of the graph at the top of the page?\u003c/p\u003e","id":"01_variables_secret","questions":[{"type":"free-response","answer":"It’s the word “STATISTICS” encoded in the heights of the bars. Each bar corresponds to a letter in the word, and the height of each bar corresponds to the position of that letter in the alphabet (S=19, T=20, A=1, etc.).","answerHtml":"\u003cp\u003eIt’s the word “STATISTICS” encoded in the heights of the bars. Each\nbar corresponds to a letter in the word, and the height of each bar\ncorresponds to the position of that letter in the alphabet (S=19, T=20,\nA=1, etc.).\u003c/p\u003e","promptHtml":"","id":"secret_message","explanationHtml":""}]}</script></section>
+<p>At the risk of getting too meta too quickly, statistics can be used both to elucidate and to obfuscate. My mysterious little graph was made from some real numeric data, but by leaving out labels or anything else that would help to explain it, I made it hard to understand. Data can be more or less useful, can even tell different stories, depending on how they’re analyzed and presented.</p>
+<p>The choices begin even before we have any data. The student, statistician, researcher, journalist, or anyone else trying to understand or explain something about the world faces countless decisions about how to conceptualize, measure, encode, analyze, visualize, and interpret things. There isn’t always a single obviously correct choice. We need to consider how well a choice captures what we want to study, what evidence supports it, what it reveals or conceals, whether we’re being ethical and transparent. These decisions are not minor technical details. They have real consequences for how we understand the world and each other. So it’s important to be thoughtful and critical about our approach to statistics from the outset.</p>
+<section id="where-do-statistics-come-from" class="level2">
+<h2 data-anchor-id="where-do-statistics-come-from">Where do statistics come from?</h2>
+<p>Another quick quiz to get you thinking about statistics very broadly: what are statistics, what are they for, and how do they get produced? Obviously these aren’t the kinds of questions that have tidy right or wrong answers. It’s just worth taking the time to jot down a few words as we set out on this journey.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="01_variables_where" aria-label="Where do statistics come from?"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Where do statistics come from?</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="where"><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>There isn’t one complete answer. Statistics are produced when
+somebody decides what to study, how to define and measure it, whom to
+collect data from, and how to summarize and present what they find.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="01_variables_where">{"title":"Where do statistics come from?","titleHtml":"\u003cp\u003eWhere do statistics come from?\u003c/p\u003e","id":"01_variables_where","questions":[{"type":"free-response","explanation":"There isn’t one complete answer. Statistics are produced when somebody decides what to study, how to define and measure it, whom to collect data from, and how to summarize and present what they find.","answerHtml":"","checkLabel":"Submit","explanationHtml":"\u003cp\u003eThere isn’t one complete answer. Statistics are produced when\nsomebody decides what to study, how to define and measure it, whom to\ncollect data from, and how to summarize and present what they find.\u003c/p\u003e","id":"where","promptHtml":""}]}</script></section>
+<p>Statistics come in many forms and from many sources and are intended to serve many different purposes. The term <em>statistics</em> comes from the Latin <em>status</em>, meaning <em>state</em> or <em>condition</em>. A “State” as in a political entity also came from the same root, and in the 1700s German scholar Gottfried Achenwall coined <em>Statistik</em>, meaning the study of a nation’s political, social, and economic goings on — the state of the State. Taking a census was an early way of collecting and systematizing data on things like the number of births and deaths in a community, rates of employment, incomes, and so on. These obviously aren’t just abstract facts. They’re political information that is collected and reported for a purpose. When thinking about prototypical “statistics” today, the kind of things that often come to mind are numbers in reports from government agencies that produce, say, crime or employment figures, or the news stories that report those kinds of findings.</p>
+<p>Contemporary academic research is an extension of this theme. While it may be tempting to think of social scientists as objective observers of the world, we ought to remember that researchers are active <em>producers</em> of data and statistics. A researcher’s choices about what to study, how to study it, and how to analyze and present the results are just that: <em>choices</em>. Had the researcher chosen differently at any point they might have arrived at a different understanding of things.</p>
+<p>Here’s an example of how statistics can tell different stories. Researchers used data from the 2020 National Survey on Drug Use and Health to estimate how many children and adolescents under 18 lived with a parent who met the criteria for a past-year, non-nicotine substance use disorder. But they produced two different estimates, using different definitions of “substance use disorder.” One, the DSM-IV criteria, led to an estimate of 9.3 million affected children. Applying the newer DSM-5 criteria to the same data produced an estimate of 16.9 million <span class="citation" data-cites="schepis2025substance">(<a href="references.html#ref-schepis2025substance" role="doc-biblioref">Schepis et al., 2025</a>)</span>. That’s a big difference — 81% more! Which answer was right? The statistics themselves cannot say. Each estimate followed from a recognized, defensible set of diagnostic criteria. Those different definitions led to different statistical answers, even when the underlying data didn’t change.</p>
+<p>Now consider other kinds of questions researchers might be interested in. Maybe we want to know how many people are smokers. Again, we need to define what we mean by a smoker. Is it someone who smoked one cigarette once? In the last year? In the last month? Somebody who regularly smokes? How many cigarettes do you have to smoke to be a regular smoker?</p>
+<p>Or think about claims that the current generation of young adults is psychologically different from previous generations somehow. From Boomers to Zoomers, there have always been stories about how “kids these days” are more or less narcissistic, anxious, introverted, outgoing, or whatever.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> These are all interesting, important, and massively nuanced questions. There are many possible ways to define and measure and test each of these claims, and any statistic you see claiming to offer answers is not just some naturally occurring fact, but the end result of a lot of choices and decisions on the part of the researcher.</p>
+</section>
+<section id="constructs-and-operational-definitions" class="level2">
+<h2 data-anchor-id="constructs-and-operational-definitions">Constructs and operational definitions</h2>
+<p>We’re getting into important issues here, not only for statistics but for research methods more broadly, so let’s introduce some technical terms: <em>constructs</em> and <em>operational definitions</em>.</p>
+<p>A <strong>construct</strong> in the context of social-scientific research is generally an abstract phenomenon, attribute, or characteristic that cannot be directly observed. The <strong>operational definition</strong> specifies how we actually go about measuring that intangible concept.</p>
+<p>It’s easiest to understand these terms by thinking about a few examples. Let’s say we think <em>extraversion</em> is something interesting and important to study. You can’t see somebody’s extraversion. You can’t touch it or weigh it. It’s just an abstract concept that we think describes something that exists: some people are more outgoing than others. So extraversion is a <em>construct</em> in this sense. If we want to study this construct, we need a way of measuring it. One widely used model of personality is the Big Five. As the name suggests, it sees personality as consisting of five traits, including our construct extraversion (the others are openness, conscientiousness, agreeableness, and neuroticism). Quite a few questionnaires have been designed to measure the Big Five traits. Their extraversion items generally ask people how quiet, reserved, talkative, or outgoing they are. Responses to those questions, together with the procedure for combining the responses into a score, provide an <em>operational definition</em>: the means by which we measure the <em>construct</em> of extraversion.</p>
+<div id="fig-extraversion" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-extraversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.1: An example of a Big Five personality scale item measuring extraversion <span class="citation" data-cites="goldberg1992development goldberg1999broad">(<a href="references.html#ref-goldberg1992development" role="doc-biblioref">Goldberg, 1992</a>, <a href="references.html#ref-goldberg1999broad" role="doc-biblioref">1999</a>)</span>.
+</figcaption>
+<div aria-describedby="fig-extraversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="extraversionLikert" data-interactive-options="{&quot;name&quot;:&quot;likert-extraversion&quot;,&quot;prompt&quot;:&quot;I am the life of the party.&quot;,&quot;labels&quot;:[&quot;Disagree&quot;,&quot;Slightly disagree&quot;,&quot;Neutral&quot;,&quot;Slightly agree&quot;,&quot;Agree&quot;]}" data-interactive-factory="makeLikert">
+<div class="interactive-figure-fallback">
+A five-point agreement scale for the statement: I am the life of the party.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>Another example of a construct is intelligence. A researcher might propose that differences in intelligence or kinds of intelligence between people are real and worth knowing about. But you can’t directly access somebody’s intelligence. You need to create some kind of task that you think captures variation in whatever it is you’re calling intelligence. One example of a type of question that might appear on an IQ test presents the series <strong>D · F · I · M · R · ?</strong> and asks what letter comes next <span class="citation" data-cites="condon2014icar">(<a href="references.html#ref-condon2014icar" role="doc-biblioref">Condon &amp; Revelle, 2014</a>)</span>.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> A single question cannot measure someone’s intelligence any more than one question about being the life of the party can tell you if someone is an extravert, but it again illustrates one way an operational definition can turn an abstract construct into a recorded response.</p>
+<p>Lastly, think about something as simple as height. This might seem more straightforward and objective. Unlike personality or intelligence, it’s a physical attribute, at least. But even so, height needs to be defined and operationalized in some way that fits our purposes and whatever equipment we have available. Most obviously, we might record the distance from the floor to the top of a subject’s head according to a tape measure. But if we’re being careful, that’s not quite all there is to it. Shoes on or off? Feet flat on the ground, or are tippy-toes acceptable? Why not? For that matter, why measure from the bottom of the feet to the top of the head? Why not distance from the floor to fingertips at a full stretch? If what we’re really interested in is whether someone can reach something on a high shelf, maybe that’s the more useful thing to measure. And of course, if you didn’t have a tape measure to hand, you’d need to think of some other operational definition entirely.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="01_variables_height_operational_definition" aria-label="Height operational definition"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Height operational definition</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="height_definition"><div class="quiz-prompt"><p>Imagine you want to study height but don’t have a tape measure. What
+would be a useful operational definition of height?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Many procedures could work. You might stand each person against a
+wall and mark the top of their head, compare them with an object of
+known size, or use a phone app calibrated against a known distance.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The procedure should be explicit enough for somebody else to repeat
+and should produce a value you can record. Different procedures may
+capture slightly different versions of height, so the useful choice
+depends partly on what you want the measurement for.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="01_variables_height_operational_definition">{"title":"Height operational definition","titleHtml":"\u003cp\u003eHeight operational definition\u003c/p\u003e","id":"01_variables_height_operational_definition","questions":[{"explanation":"The procedure should be explicit enough for somebody else to repeat and should produce a value you can record. Different procedures may capture slightly different versions of height, so the useful choice depends partly on what you want the measurement for.","answerHtml":"\u003cp\u003eMany procedures could work. You might stand each person against a\nwall and mark the top of their head, compare them with an object of\nknown size, or use a phone app calibrated against a known distance.\u003c/p\u003e","id":"height_definition","type":"free-response","answer":"Many procedures could work. You might stand each person against a wall and mark the top of their head, compare them with an object of known size, or use a phone app calibrated against a known distance.","explanationHtml":"\u003cp\u003eThe procedure should be explicit enough for somebody else to repeat\nand should produce a value you can record. Different procedures may\ncapture slightly different versions of height, so the useful choice\ndepends partly on what you want the measurement for.\u003c/p\u003e","checkLabel":"Compare your procedure","prompt":"Imagine you want to study height but don’t have a tape measure. What would be a useful operational definition of height?","promptHtml":"\u003cp\u003eImagine you want to study height but don’t have a tape measure. What\nwould be a useful operational definition of height?\u003c/p\u003e"}]}</script></section>
+<p>The point is that there are a lot of constructs that we might be interested in. And for any given construct, there are usually a lot of potential operational definitions. How we conceptualize a construct and operationalize it determines the variable we record and, in turn, which statistical analyses might be more or less useful and appropriate.</p>
+</section>
+<section id="sec-variables" class="level2">
+<h2 data-anchor-id="sec-variables">Describing variables</h2>
+<p>Once we have worked out the definition of our construct and decided on the operational definition we will use, we can think about the <em>variable</em> it produces. By variable, we just mean something that can <em>vary</em>; in other words, whatever we’re measuring can take on different values. (In <a href="./04-variability.html">Chapter 4</a> we’ll introduce the idea of <em>variability</em>. The terminology can get a little confusing when we get to talking about how variable (adjective) a variable (noun) is, but let’s just not worry about that.) Time is a variable: if you look at the clock now, and again a bit later, the time will be different. But there are different ways things can vary, and it’s good to be precise about how we’re thinking about our construct and its measurement. What kind of values are possible? And what do they represent? We can introduce some more technical terms here to help nail these things down.</p>
+<p>First, a variable can be <strong>categorical</strong> or <strong>quantitative</strong>. A categorical variable places cases into groups or categories, whereas the values of a quantitative variable represent amounts.</p>
+<p>An example of a categorical variable is eye color. Your driver’s license might record your eye color as BRO (Brown), BLU (Blue), GRN (Green), for example. For this variable, the values tell us only which category was recorded, not <em>how much</em> eye color someone has. This distinction depends on what the values <em>mean</em>, not just how they are encoded. Rather than those three-letter category codes, licenses could use numbers: 1 for blue, 2 for green, and so on. But that still wouldn’t mean that green eyes are greater than blue; the numbers would still just be functioning as category labels.</p>
+<p>In contrast, the values of quantitative variables do represent numerical amounts. But there are different kinds: a quantitative variable can be either <strong>discrete</strong> or <strong>continuous</strong>.</p>
+<p>A discrete quantitative variable is one that can take only certain values, usually whole-number counts. An example would be the number of siblings you have. You might have 0, 1, 2, 3, or more, but you can’t have 0.75 or 2.13 siblings. There are no allowable intermediate values between one count and the next.</p>
+<p>A continuous quantitative variable, on the other hand, can take fractional or decimal values. Height, for example, is a continuous variable. The actor Jake Gyllenhaal is reportedly 5 feet 11 inches tall.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> But what does that mean? If we held up a tape measure next to him, would the top of his head line up precisely with the 5’11” mark? Probably not. Maybe he’d be a little over, say by a quarter of an inch. We’re just rounding to the nearest inch for convenience, but in fact that recorded value covers a range of possible heights, from 5’10.5” to 5’11.5”. There are an infinite number of possible heights within a given range; in practice, we’re limited by the precision of our measurement tools and by how much precision is necessary for our purposes.</p>
+<section id="scales-of-measurement" class="level3">
+<h3 data-anchor-id="scales-of-measurement">Scales of measurement</h3>
+<p>A more detailed way of thinking about the nature of variables was proposed by psychophysicist Stanley Smith Stevens <span class="citation" data-cites="stevens1946theory">(<a href="references.html#ref-stevens1946theory" role="doc-biblioref">1946</a>)</span>. Stevens described four scales of measurement: nominal, ordinal, interval, and ratio. These scales map onto the categorical/quantitative distinction: nominal and ordinal variables are categorical, whereas interval and ratio variables are quantitative. Interval and ratio variables can, in turn, be either discrete or continuous. The scales focus on which comparisons are supported by the values recorded for a variable. You can think of them as cumulative: each scale supports the comparisons of the previous one and adds something new.</p>
+<p><strong>Nominal</strong> means we are purely recording named categories. There is no quantitative distinction between the categories, meaning it doesn’t make sense to say any one category conveys more or less of the construct in question than another. They simply belong to qualitatively different groups. Eye color is a good example. Brown eyes are not “more” or “less” than blue eyes. They are just different.</p>
+<p><strong>Ordinal</strong> scales are still categorical, but in this case the categories are ordered. Here, category membership does convey something about who performed better or whose score is higher or lower. An example is Olympic medals (or, more generally, coming in first, second, third, and so on in a race). We know that the person with the silver medal performed worse than the person with the gold and better than the person who received bronze, but we don’t know exactly how much better or worse anyone did.</p>
+<p><strong>Interval</strong> scales add that information. They tell us who scored higher or lower, and also by how much. The gaps between neighboring values are all quantitatively the same size. In other words, the intervals are all equal. Take temperature: the difference between 10 degrees Celsius and 11 degrees Celsius is the same as the difference between 11 degrees Celsius and 12 degrees Celsius. A single-degree difference means the same thing all the way along the scale.</p>
+<p><strong>Ratio</strong> scales provide the same information as interval scales, but with one additional feature: a meaningful, nonarbitrary zero point. Consider the interval Celsius temperature scale. It has a zero point, but that point was chosen for convenience: zero degrees Celsius is the point at which water freezes, rather than the absence of temperature. Twenty degrees Celsius is not twice as much temperature as ten degrees Celsius. Reaction time, in contrast, is a ratio variable. Zero means that no time has elapsed. This makes ratio comparisons meaningful. Two hundred milliseconds is twice as long as one hundred milliseconds. The number of questions answered correctly on a test is a discrete ratio variable: zero means that no questions were answered correctly, and ten correct answers are twice as many as five. For this count, neither negative scores nor fractions are possible (assuming each question is marked simply right or wrong and we’re not giving partial credit).</p>
+<div id="tbl-scales" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.1: Summary of the four scales of measurement
+</figcaption>
+<div aria-describedby="tbl-scales-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 8%">
+<col style="width: 12%">
+<col style="width: 50%">
+<col style="width: 29%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Scale</th>
+<th>Variable type</th>
+<th>Characteristics</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Nominal</td>
+<td>Categorical</td>
+<td>Categories only; no inherent order</td>
+<td>Eye color; experimental condition</td>
+</tr>
+<tr class="even">
+<td>Ordinal</td>
+<td>Categorical</td>
+<td>Ordered categories; gaps between categories are unequal or unknown</td>
+<td>Olympic medals; education level</td>
+</tr>
+<tr class="odd">
+<td>Interval</td>
+<td>Quantitative</td>
+<td>Ordered numeric values; equal intervals; arbitrary zero</td>
+<td>Temperature (Celsius/Fahrenheit); IQ scores</td>
+</tr>
+<tr class="even">
+<td>Ratio</td>
+<td>Quantitative</td>
+<td>Equal intervals; nonarbitrary zero; meaningful ratios</td>
+<td>Height; reaction time; counts</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="01_variables_measurement_scale_checks" aria-label="Try classifying some variables"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Try classifying some variables</p></div><span class="quiz-progress" aria-label="0 of 4 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 4</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="ssn_scale"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Social Security number:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-ssn_scale" id="01_variables_measurement_scale_checks-ssn_scale-option-1" value="0" aria-labelledby="01_variables_measurement_scale_checks-ssn_scale-option-1-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-ssn_scale-option-1-text"><p>Nominal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-ssn_scale" id="01_variables_measurement_scale_checks-ssn_scale-option-2" value="1" aria-labelledby="01_variables_measurement_scale_checks-ssn_scale-option-2-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-ssn_scale-option-2-text"><p>Ordinal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-ssn_scale" id="01_variables_measurement_scale_checks-ssn_scale-option-3" value="2" aria-labelledby="01_variables_measurement_scale_checks-ssn_scale-option-3-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-ssn_scale-option-3-text"><p>Interval</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-ssn_scale" id="01_variables_measurement_scale_checks-ssn_scale-option-4" value="3" aria-labelledby="01_variables_measurement_scale_checks-ssn_scale-option-4-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-ssn_scale-option-4-text"><p>Ratio</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Nominal</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A Social Security number is an identifier. The numbers are labels,
+not quantities.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="satisfaction_scale"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Customer satisfaction recorded as poor, fair, good, or excellent:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-satisfaction_scale" id="01_variables_measurement_scale_checks-satisfaction_scale-option-1" value="0" aria-labelledby="01_variables_measurement_scale_checks-satisfaction_scale-option-1-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-satisfaction_scale-option-1-text"><p>Nominal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-satisfaction_scale" id="01_variables_measurement_scale_checks-satisfaction_scale-option-2" value="1" aria-labelledby="01_variables_measurement_scale_checks-satisfaction_scale-option-2-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-satisfaction_scale-option-2-text"><p>Ordinal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-satisfaction_scale" id="01_variables_measurement_scale_checks-satisfaction_scale-option-3" value="2" aria-labelledby="01_variables_measurement_scale_checks-satisfaction_scale-option-3-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-satisfaction_scale-option-3-text"><p>Interval</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-satisfaction_scale" id="01_variables_measurement_scale_checks-satisfaction_scale-option-4" value="3" aria-labelledby="01_variables_measurement_scale_checks-satisfaction_scale-option-4-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-satisfaction_scale-option-4-text"><p>Ratio</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Ordinal</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The categories have a meaningful order, but we do not know that the
+gap from poor to fair represents the same amount of satisfaction as the
+gap from good to excellent.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="calendar_year_scale"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Calendar year (for example, 1990, 2000, or 2010):</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-calendar_year_scale" id="01_variables_measurement_scale_checks-calendar_year_scale-option-1" value="0" aria-labelledby="01_variables_measurement_scale_checks-calendar_year_scale-option-1-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-calendar_year_scale-option-1-text"><p>Nominal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-calendar_year_scale" id="01_variables_measurement_scale_checks-calendar_year_scale-option-2" value="1" aria-labelledby="01_variables_measurement_scale_checks-calendar_year_scale-option-2-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-calendar_year_scale-option-2-text"><p>Ordinal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-calendar_year_scale" id="01_variables_measurement_scale_checks-calendar_year_scale-option-3" value="2" aria-labelledby="01_variables_measurement_scale_checks-calendar_year_scale-option-3-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-calendar_year_scale-option-3-text"><p>Interval</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-calendar_year_scale" id="01_variables_measurement_scale_checks-calendar_year_scale-option-4" value="3" aria-labelledby="01_variables_measurement_scale_checks-calendar_year_scale-option-4-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-calendar_year_scale-option-4-text"><p>Ratio</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Interval</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Differences between years are meaningful and use equal units. The
+year 0 is meaningful as a reference date, but it does not represent the
+absence of time. So a ratio such as 2000/1000 does not represent a
+useful ratio of the two points in time.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="message_count_scale"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Number of text messages received today:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-message_count_scale" id="01_variables_measurement_scale_checks-message_count_scale-option-1" value="0" aria-labelledby="01_variables_measurement_scale_checks-message_count_scale-option-1-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-message_count_scale-option-1-text"><p>Nominal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-message_count_scale" id="01_variables_measurement_scale_checks-message_count_scale-option-2" value="1" aria-labelledby="01_variables_measurement_scale_checks-message_count_scale-option-2-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-message_count_scale-option-2-text"><p>Ordinal</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-message_count_scale" id="01_variables_measurement_scale_checks-message_count_scale-option-3" value="2" aria-labelledby="01_variables_measurement_scale_checks-message_count_scale-option-3-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-message_count_scale-option-3-text"><p>Interval</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_measurement_scale_checks-message_count_scale" id="01_variables_measurement_scale_checks-message_count_scale-option-4" value="3" aria-labelledby="01_variables_measurement_scale_checks-message_count_scale-option-4-text"><div class="quiz-choice-text" id="01_variables_measurement_scale_checks-message_count_scale-option-4-text"><p>Ratio</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Ratio</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>This is a count with a true zero: zero messages means none, and
+twenty messages is twice as many as ten. It is also discrete, but its
+measurement scale is ratio.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="01_variables_measurement_scale_checks">{"title":"Try classifying some variables","titleHtml":"\u003cp\u003eTry classifying some variables\u003c/p\u003e","id":"01_variables_measurement_scale_checks","questions":[{"type":"multiple-choice","explanation":"A Social Security number is an identifier. The numbers are labels, not quantities.","explanationHtml":"\u003cp\u003eA Social Security number is an identifier. The numbers are labels,\nnot quantities.\u003c/p\u003e","options":[{"text":"Nominal","correct":true,"textHtml":"\u003cp\u003eNominal\u003c/p\u003e"},{"text":"Ordinal","textHtml":"\u003cp\u003eOrdinal\u003c/p\u003e"},{"text":"Interval","textHtml":"\u003cp\u003eInterval\u003c/p\u003e"},{"text":"Ratio","textHtml":"\u003cp\u003eRatio\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eSocial Security number:\u003c/p\u003e","prompt":"Social Security number:","id":"ssn_scale","answerHtml":""},{"type":"multiple-choice","explanation":"The categories have a meaningful order, but we do not know that the gap from poor to fair represents the same amount of satisfaction as the gap from good to excellent.","explanationHtml":"\u003cp\u003eThe categories have a meaningful order, but we do not know that the\ngap from poor to fair represents the same amount of satisfaction as the\ngap from good to excellent.\u003c/p\u003e","options":[{"text":"Nominal","textHtml":"\u003cp\u003eNominal\u003c/p\u003e"},{"text":"Ordinal","correct":true,"textHtml":"\u003cp\u003eOrdinal\u003c/p\u003e"},{"text":"Interval","textHtml":"\u003cp\u003eInterval\u003c/p\u003e"},{"text":"Ratio","textHtml":"\u003cp\u003eRatio\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eCustomer satisfaction recorded as poor, fair, good, or excellent:\u003c/p\u003e","prompt":"Customer satisfaction recorded as poor, fair, good, or excellent:","id":"satisfaction_scale","answerHtml":""},{"type":"multiple-choice","explanation":"Differences between years are meaningful and use equal units. The year 0 is meaningful as a reference date, but it does not represent the absence of time. So a ratio such as 2000/1000 does not represent a useful ratio of the two points in time.","explanationHtml":"\u003cp\u003eDifferences between years are meaningful and use equal units. The\nyear 0 is meaningful as a reference date, but it does not represent the\nabsence of time. So a ratio such as 2000/1000 does not represent a\nuseful ratio of the two points in time.\u003c/p\u003e","options":[{"text":"Nominal","textHtml":"\u003cp\u003eNominal\u003c/p\u003e"},{"text":"Ordinal","textHtml":"\u003cp\u003eOrdinal\u003c/p\u003e"},{"text":"Interval","correct":true,"textHtml":"\u003cp\u003eInterval\u003c/p\u003e"},{"text":"Ratio","textHtml":"\u003cp\u003eRatio\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eCalendar year (for example, 1990, 2000, or 2010):\u003c/p\u003e","prompt":"Calendar year (for example, 1990, 2000, or 2010):","id":"calendar_year_scale","answerHtml":""},{"type":"multiple-choice","explanation":"This is a count with a true zero: zero messages means none, and twenty messages is twice as many as ten. It is also discrete, but its measurement scale is ratio.","explanationHtml":"\u003cp\u003eThis is a count with a true zero: zero messages means none, and\ntwenty messages is twice as many as ten. It is also discrete, but its\nmeasurement scale is ratio.\u003c/p\u003e","options":[{"text":"Nominal","textHtml":"\u003cp\u003eNominal\u003c/p\u003e"},{"text":"Ordinal","textHtml":"\u003cp\u003eOrdinal\u003c/p\u003e"},{"text":"Interval","textHtml":"\u003cp\u003eInterval\u003c/p\u003e"},{"text":"Ratio","correct":true,"textHtml":"\u003cp\u003eRatio\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eNumber of text messages received today:\u003c/p\u003e","prompt":"Number of text messages received today:","id":"message_count_scale","answerHtml":""}]}</script></section>
+</section>
+<section id="gray-areas" class="level3">
+<h3 data-anchor-id="gray-areas">Gray areas</h3>
+<p>As we’ll see in later chapters, these distinctions can inform our choice of statistical summary, graph, and test. The terms we just laid out are helpful for thinking about the nature of variables, but I don’t want you to think they provide a complete and rigid taxonomy into which we can neatly slot any variable or operational definition. In practice, distinctions aren’t always clear-cut.</p>
+<p>To take an example, we mentioned the personality trait extraversion earlier. The construct might be defined, roughly, as the tendency to be outgoing. (I’m vastly simplifying here, but you get the point.) But what kind of variable captures that construct? We could model it as categorical: either you are extraverted or you are not. Or we could model it as quantitative and continuous: extraversion is a spectrum on which you can score high, low, or anywhere in between.</p>
+<p>And once you feel you’ve got that figured out, you’re not out of the woods yet, because you still need your operational definition and scale of measurement. I gave an example extraversion question in <a href="#fig-extraversion" class="quarto-xref">Figure&nbsp;<span>1.1</span></a>. But most measures have a few questions all asking variations of the same thing, as in <a href="#fig-extraversion-scale" class="quarto-xref">Figure&nbsp;<span>1.2</span></a>. The name for this kind of statement with ordered response options is a <em>Likert</em> item, named after the psychologist Rensis Likert; a set of Likert items becomes a Likert scale. (I have most often heard it pronounced “LIE-kert”, but apparently the correct pronunciation of the name is “LICK-ert”.)</p>
+<div id="fig-extraversion-scale" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-extraversion-scale-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: Three extraversion items, each with an agreement response scale numbered from 1 to 5.
+</figcaption>
+<div aria-describedby="fig-extraversion-scale-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="extraversionScaleLikert" data-interactive-options="{&quot;name&quot;:&quot;likert-extraversion-scale&quot;,&quot;prompts&quot;:[&quot;I feel comfortable around people.&quot;,&quot;I start conversations.&quot;,&quot;I don’t mind being the center of attention.&quot;],&quot;numberQuestions&quot;:false,&quot;questionLines&quot;:2,&quot;labels&quot;:[&quot;1. Disagree&quot;,&quot;2. Slightly disagree&quot;,&quot;3. Neutral&quot;,&quot;4. Slightly agree&quot;,&quot;5. Agree&quot;]}" data-interactive-factory="makeLikert">
+<div class="interactive-figure-fallback">
+Three extraversion items, each with an agreement response scale numbered from 1 to 5.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>What scale of measurement does each question reflect? It can’t be nominal, because the categories have a natural order from disagreement to agreement. It isn’t ratio either, because there is no true zero point. So interval or ordinal? Numbering them 1 through 5 doesn’t automatically make them interval: the numbers are equally spaced on paper, but that doesn’t mean that the difference between <em>disagreeing</em> and <em>slightly disagreeing</em> is the same as the difference between <em>slightly disagreeing</em> and being <em>neutral</em>. These are verbal labels that we can’t assume have equal intervals. So really the response categories are ordinal.</p>
+<p>But usually researchers are not so much interested in people’s responses to individual questions. Rather, they create an overall score by combining a person’s responses across all the questions. How? If our model of extraversion is categorical, we might just count how many of the items a person agreed with (selecting either slightly agree or agree). If they agree with, say, two or more, we might classify them as an extravert; if they agree with one or none, we might classify them as an introvert. We might use a number along the way, but after applying the cutoff the resulting variable is categorical.</p>
+<p>If our model of the construct is quantitative, on the other hand, we might treat the responses as numeric and combine them into a single score by averaging them. This is how many Big Five questionnaires are scored. But does averaging ordinal responses produce an interval scale? Not automatically. Like I said before, the gaps between the response categories cannot be assumed to be equal intervals. If people treat the difference between, say, “slightly disagree” and “neutral” as psychologically bigger or smaller than the difference between “slightly disagree” and “disagree”, a simple average of the numeric responses would not reflect this imbalance. But the <em>if</em> there is important: in practice, a carefully constructed Likert scale can behave <em>enough</em> like an interval scale to be treated that way for many purposes <span class="citation" data-cites="carifio2008likert norman2010likert">(<a href="references.html#ref-carifio2008likert" role="doc-biblioref">Carifio &amp; Perla, 2008</a>; <a href="references.html#ref-norman2010likert" role="doc-biblioref">Norman, 2010</a>)</span>.</p>
+<p>Obviously, this is all a matter of some (by which I mean copious) debate. In fact, when Stevens proposed the nominal/ordinal/interval/ratio taxonomy, he was responding to a debate that had been started by a committee of the British Association for the Advancement of Science fourteen years earlier, in 1932. There is a hint of frustration and disappointment when he writes that their years of “deliberation led only to disagreement, mainly about what is meant by the term measurement” <span class="citation" data-cites="stevens1946theory">(<a href="references.html#ref-stevens1946theory" role="doc-biblioref">Stevens, 1946</a>)</span>. The debate goes on. The point for our purposes is that nothing should be taken for granted. It is good to have helpful terms for things, but we always need to think carefully about how we apply them in any given context.</p>
+</section>
+</section>
+<section id="populations-samples-and-inference" class="level2">
+<h2 data-anchor-id="populations-samples-and-inference">Populations, samples, and inference</h2>
+<p>The last technical terms we’ll introduce here underlie a lot of what we’ll talk about later in the course when we come to inferential statistics — the process of drawing general conclusions from our data.</p>
+<p>The issue is that, generally speaking, social scientists want to understand a <strong>population</strong>, meaning some entire group. The population we’re interested in might be all humans, or all Americans, or all newborn babies, or whatever. One way of understanding that population would be to record the data we need from every single member of the population. Maybe you can foresee a problem here. Usually doing that is not feasible. For one thing, we can’t ethically force everyone to take part in our study. For another, we probably don’t have time to go around asking every human being if they’re the life of the party, or whatever it is we want to know about them.</p>
+<p>All hope is not lost, however. We don’t need to ask <em>everyone</em>. We can ask a <strong>sample</strong>, a smaller subset of the population, and use that sample to make claims about the population. Much of the statistical logic that we’ll encounter later in this book hinges on this leap from sample to population. A sample provides a clue about the population it came from, but the clue is inherently imperfect because any one sample is not going to perfectly represent the population from which it’s drawn. So how much trust can we place in any given sample?</p>
+<p>Think about it this way. If we were to repeatedly draw sample after sample from a population, each sample would look a little bit different and so would give us a slightly different impression of the population from which it was drawn. In practice, we don’t draw sample after sample. We just use one. But we know that our sample isn’t special. It’s just one possible sample out of virtually infinite possibilities. If we’d happened to end up with a slightly different sample, our inferences might be different.</p>
+<div class="interactive no-controls callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Drawing samples from a population
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="populationSampling" data-interactive-options="{&quot;mode&quot;:&quot;categorical&quot;,&quot;seed&quot;:&quot;chapter-one-sampling-177&quot;,&quot;categories&quot;:[&quot;Blue&quot;,&quot;Orange&quot;,&quot;Green&quot;,&quot;Red&quot;,&quot;Purple&quot;],&quot;populationRows&quot;:4,&quot;populationColumns&quot;:25,&quot;sampleSize&quot;:10,&quot;inferenceStrip&quot;:true,&quot;focus&quot;:&quot;population&quot;,&quot;controlsOpen&quot;:false}" data-interactive-factory="makeSamplingPathway">
+<div class="interactive-figure-fallback">
+A balanced population of 100 colored dots and repeated random samples of ten dots.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Population" data-action="{&quot;draw&quot;:0,&quot;show-sample&quot;:true,&quot;population-known&quot;:true,&quot;show-inference&quot;:false,&quot;focus&quot;:&quot;population&quot;,&quot;animate&quot;:false}">
+<p>Here’s a population of 100 colorful dots. You’ll notice it has the same number of dots of each color. When you press the next button, we’ll take a sample of 10 dots from that population. If the sample were to be perfectly representative, it would contain two dots of each color. Do you think that’s what will happen?</p>
+</div>
+<div class="tutorial-step" data-title="Sample 1" data-action="{&quot;draw&quot;:1,&quot;show-sample&quot;:true,&quot;population-known&quot;:true,&quot;show-inference&quot;:false,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}">
+<p>In this case, the sample is not perfectly representative. This sample has only one blue dot but three orange, for example.</p>
+</div>
+<div class="tutorial-step" data-title="Sample 2" data-action="{&quot;draw&quot;:2,&quot;show-sample&quot;:true,&quot;population-known&quot;:true,&quot;show-inference&quot;:false,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}">
+<p>The next sample has three blue and no orange dots! The population stays the same, but each random sample will be different.</p>
+</div>
+<div class="tutorial-step" data-title="The inference problem" data-action="{&quot;draw&quot;:2,&quot;show-sample&quot;:true,&quot;population-known&quot;:false,&quot;show-inference&quot;:true,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}">
+<p>The trouble is that generally we don’t know the population’s true characteristics. Without access to the population, the sample provides our best guess, but each guess will be different.</p>
+</div>
+<div class="tutorial-step" data-title="Sample 3" data-action="{&quot;draw&quot;:3,&quot;show-sample&quot;:true,&quot;population-known&quot;:false,&quot;show-inference&quot;:true,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}">
+<p>Here’s a third sample. It provides a different impression again of the population’s colors, getting the proportions of orange, red, and purple exactly right but overestimating the prevalence of green and missing the existence of blue entirely.</p>
+</div>
+<div class="tutorial-step" data-title="Keep sampling" data-action="{&quot;draw&quot;:4,&quot;show-sample&quot;:true,&quot;population-known&quot;:true,&quot;show-inference&quot;:true,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}" data-repeat-action="{&quot;draw&quot;:&quot;next&quot;,&quot;show-sample&quot;:true,&quot;population-known&quot;:true,&quot;show-inference&quot;:true,&quot;focus&quot;:&quot;comparison&quot;,&quot;animate&quot;:true}" data-repeat-label="Draw another sample">
+<p>Keep clicking the button as many times as you like. I’ve revealed the true population again, so you can see that while it never changes, each sample offers a different estimate of its characteristics.</p>
+</div>
+</div>
+</div>
+</div>
+<p>How do we deal with the inherent variability of samples and our desire to make stable inferences about the population? That’s what we’ll spend much of this book figuring out. We’ll set it aside for a few chapters and circle back in <a href="./07-sampling.html">Chapter 7</a>. For now, I just want to introduce the terminology that will help us keep these distinctions in mind. A numerical value describing a population is called a <strong>parameter</strong>. The corresponding value calculated from a sample is called a <strong>statistic</strong>.</p>
+<div id="tbl-parameter-statistic" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-parameter-statistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.2: Summary of the distinction between population parameters and sample statistics.
+</figcaption>
+<div aria-describedby="tbl-parameter-statistic-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature</th>
+<th>Population</th>
+<th>Sample</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Term</strong></td>
+<td>Parameter</td>
+<td>Statistic</td>
+</tr>
+<tr class="even">
+<td><strong>Scope</strong></td>
+<td>Describes the whole population</td>
+<td>Describes the observed sample</td>
+</tr>
+<tr class="odd">
+<td><strong>Common notation</strong></td>
+<td>Often Greek letters, such as <span class="math inline">\(\mu\)</span> or <span class="math inline">\(\sigma\)</span></td>
+<td>Often Latin letters, such as <span class="math inline">\(M\)</span> or <span class="math inline">\(s\)</span></td>
+</tr>
+<tr class="even">
+<td><strong>Value</strong></td>
+<td>Fixed for a defined population, though usually unknown</td>
+<td>Depends on the sample and will usually differ from one sample to another</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>So, for example, we’ll talk about the mean or average in <a href="./03-central-tendency.html">Chapter 3</a>. A population mean is a parameter, represented by the Greek letter <span class="math inline">\(\mu\)</span> (mu). A sample mean is a statistic, which we will represent using an uppercase italic <span class="math inline">\(M\)</span>.</p>
+<p>These conventions aren’t completely consistent. If we’re talking about the number of individuals in a population or sample, for example, we use uppercase <span class="math inline">\(N\)</span> for the population and lowercase <span class="math inline">\(n\)</span> for the sample.</p>
+<p>The distinction between populations and samples is related to, but not the same as, the distinction between descriptive and inferential statistics. <strong>Descriptive statistics</strong> summarize data we have observed. <strong>Inferential statistics</strong> use sample data to make an informed guess about the population from which the sample was drawn. The same sample statistic can be involved in both. Reporting a sample mean describes the sample; using that sample mean to estimate a population mean is an inference.</p>
+<p>This terminology, and the differences in how we represent populations and samples, will be important to keep in mind as we move forward.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="01_variables_practice" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 6 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 6</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="operational_definition"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which term refers to the concrete way a researcher measures an
+abstract construct?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-operational_definition" id="01_variables_practice-operational_definition-option-1" value="0" aria-labelledby="01_variables_practice-operational_definition-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-operational_definition-option-1-text"><p>Construct</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-operational_definition" id="01_variables_practice-operational_definition-option-2" value="1" aria-labelledby="01_variables_practice-operational_definition-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-operational_definition-option-2-text"><p>Operational definition</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-operational_definition" id="01_variables_practice-operational_definition-option-3" value="2" aria-labelledby="01_variables_practice-operational_definition-option-3-text"><div class="quiz-choice-text" id="01_variables_practice-operational_definition-option-3-text"><p>Variable</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-operational_definition" id="01_variables_practice-operational_definition-option-4" value="3" aria-labelledby="01_variables_practice-operational_definition-option-4-text"><div class="quiz-choice-text" id="01_variables_practice-operational_definition-option-4-text"><p>Parameter</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Distinguish the abstract idea, the procedure used to measure it, and
+the values that procedure produces.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Operational definition</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A construct is the abstract characteristic, such as extraversion or
+intelligence. The operational definition is the actual procedure used to
+measure it.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sample_statistic"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A researcher records the reaction times of 30 students selected from
+a university. What do we call the mean reaction time of those 30
+students?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-sample_statistic" id="01_variables_practice-sample_statistic-option-1" value="0" aria-labelledby="01_variables_practice-sample_statistic-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-sample_statistic-option-1-text"><p>Population parameter</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-sample_statistic" id="01_variables_practice-sample_statistic-option-2" value="1" aria-labelledby="01_variables_practice-sample_statistic-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-sample_statistic-option-2-text"><p>Sample statistic</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-sample_statistic" id="01_variables_practice-sample_statistic-option-3" value="2" aria-labelledby="01_variables_practice-sample_statistic-option-3-text"><div class="quiz-choice-text" id="01_variables_practice-sample_statistic-option-3-text"><p>Sample</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-sample_statistic" id="01_variables_practice-sample_statistic-option-4" value="3" aria-labelledby="01_variables_practice-sample_statistic-option-4-text"><div class="quiz-choice-text" id="01_variables_practice-sample_statistic-option-4-text"><p>Variable</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Sample statistic</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The mean is a numerical value calculated from the sample, so it is a
+sample statistic. The true mean reaction time of all students at the
+university would be a population parameter.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="coded_condition"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>In an experiment, the control condition is coded 0 and the treatment
+condition is coded 1. What kind of variable is condition?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-coded_condition" id="01_variables_practice-coded_condition-option-1" value="0" aria-labelledby="01_variables_practice-coded_condition-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-coded_condition-option-1-text"><p>Nominal categorical</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-coded_condition" id="01_variables_practice-coded_condition-option-2" value="1" aria-labelledby="01_variables_practice-coded_condition-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-coded_condition-option-2-text"><p>Ordinal categorical</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-coded_condition" id="01_variables_practice-coded_condition-option-3" value="2" aria-labelledby="01_variables_practice-coded_condition-option-3-text"><div class="quiz-choice-text" id="01_variables_practice-coded_condition-option-3-text"><p>Discrete quantitative</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-coded_condition" id="01_variables_practice-coded_condition-option-4" value="3" aria-labelledby="01_variables_practice-coded_condition-option-4-text"><div class="quiz-choice-text" id="01_variables_practice-coded_condition-option-4-text"><p>Continuous quantitative</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Ask whether 0 and 1 represent amounts or labels for groups.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Nominal categorical</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The codes are labels for two groups. Coding the conditions with
+numbers does not make the variable quantitative, and neither condition
+is inherently higher than the other.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="likert_scoring"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A questionnaire asks people to rate three extraversion statements
+from 1 (<em>disagree</em>) to 5 (<em>agree</em>). The individual
+responses are ordinal. The researcher then averages them. Which
+conclusion is most careful?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-likert_scoring" id="01_variables_practice-likert_scoring-option-1" value="0" aria-labelledby="01_variables_practice-likert_scoring-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-likert_scoring-option-1-text"><p>Treating the average as approximately interval needs further
+justification</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-likert_scoring" id="01_variables_practice-likert_scoring-option-2" value="1" aria-labelledby="01_variables_practice-likert_scoring-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-likert_scoring-option-2-text"><p>The average is automatically an interval variable</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-likert_scoring" id="01_variables_practice-likert_scoring-option-3" value="2" aria-labelledby="01_variables_practice-likert_scoring-option-3-text"><div class="quiz-choice-text" id="01_variables_practice-likert_scoring-option-3-text"><p>The average must remain ordinal in every analysis</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-likert_scoring" id="01_variables_practice-likert_scoring-option-4" value="3" aria-labelledby="01_variables_practice-likert_scoring-option-4-text"><div class="quiz-choice-text" id="01_variables_practice-likert_scoring-option-4-text"><p>The average becomes a ratio variable</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Distinguish what we know about each response from the modeling choice
+we might make about a carefully constructed combined score.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Treating the average as approximately interval needs further
+justification</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The numbers attached to the response categories do not guarantee
+equal intervals, and averaging does not change that automatically. But a
+carefully constructed scale can sometimes behave enough like an interval
+variable to make that a useful modeling choice.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="age_type"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Age is commonly reported in whole years. What kind of variable is age
+itself?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-age_type" id="01_variables_practice-age_type-option-1" value="0" aria-labelledby="01_variables_practice-age_type-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-age_type-option-1-text"><p>Continuous</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-age_type" id="01_variables_practice-age_type-option-2" value="1" aria-labelledby="01_variables_practice-age_type-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-age_type-option-2-text"><p>Discrete</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Continuous</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Time is infinitely divisible: between any two ages there is always
+another possible age. Reporting age in whole years is a choice about
+measurement precision, not a property of the underlying variable.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="descriptive_inferential"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">6</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A sample of 20 students has a mean reaction time of 310 milliseconds.
+Which statement uses that sample statistic to make an inference?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="01_variables_practice-descriptive_inferential" id="01_variables_practice-descriptive_inferential-option-1" value="0" aria-labelledby="01_variables_practice-descriptive_inferential-option-1-text"><div class="quiz-choice-text" id="01_variables_practice-descriptive_inferential-option-1-text"><p>The sample mean was 310 milliseconds</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-descriptive_inferential" id="01_variables_practice-descriptive_inferential-option-2" value="1" aria-labelledby="01_variables_practice-descriptive_inferential-option-2-text"><div class="quiz-choice-text" id="01_variables_practice-descriptive_inferential-option-2-text"><p>The sample contained 20 students</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-descriptive_inferential" id="01_variables_practice-descriptive_inferential-option-3" value="2" aria-labelledby="01_variables_practice-descriptive_inferential-option-3-text"><div class="quiz-choice-text" id="01_variables_practice-descriptive_inferential-option-3-text"><p>The university mean is probably close to 310 milliseconds</p></div></div><div class="quiz-choice"><input type="radio" name="01_variables_practice-descriptive_inferential" id="01_variables_practice-descriptive_inferential-option-4" value="3" aria-labelledby="01_variables_practice-descriptive_inferential-option-4-text"><div class="quiz-choice-text" id="01_variables_practice-descriptive_inferential-option-4-text"><p>Reaction time was recorded in milliseconds</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The university mean is probably close to 310 milliseconds</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The first, second, and fourth statements describe the observed sample
+or its measurement. Estimating the university mean goes beyond those
+observations to make an inference about the population.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="01_variables_practice">{"title":"Learning Checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","id":"01_variables_practice","questions":[{"explanation":"A construct is the abstract characteristic, such as extraversion or intelligence. The operational definition is the actual procedure used to measure it.","answerHtml":"","id":"operational_definition","type":"multiple-choice","options":[{"text":"Construct","textHtml":"\u003cp\u003eConstruct\u003c/p\u003e"},{"text":"Operational definition","correct":true,"textHtml":"\u003cp\u003eOperational definition\u003c/p\u003e"},{"text":"Variable","textHtml":"\u003cp\u003eVariable\u003c/p\u003e"},{"text":"Parameter","textHtml":"\u003cp\u003eParameter\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eWhich term refers to the concrete way a researcher measures an\nabstract construct?\u003c/p\u003e","prompt":"Which term refers to the concrete way a researcher measures an abstract construct?","explanationHtml":"\u003cp\u003eA construct is the abstract characteristic, such as extraversion or\nintelligence. The operational definition is the actual procedure used to\nmeasure it.\u003c/p\u003e","hints":[{"text":"Distinguish the abstract idea, the procedure used to measure it, and the values that procedure produces.","textHtml":"\u003cp\u003eDistinguish the abstract idea, the procedure used to measure it, and\nthe values that procedure produces.\u003c/p\u003e"}]},{"type":"multiple-choice","explanation":"The mean is a numerical value calculated from the sample, so it is a sample statistic. The true mean reaction time of all students at the university would be a population parameter.","explanationHtml":"\u003cp\u003eThe mean is a numerical value calculated from the sample, so it is a\nsample statistic. The true mean reaction time of all students at the\nuniversity would be a population parameter.\u003c/p\u003e","options":[{"text":"Population parameter","textHtml":"\u003cp\u003ePopulation parameter\u003c/p\u003e"},{"text":"Sample statistic","correct":true,"textHtml":"\u003cp\u003eSample statistic\u003c/p\u003e"},{"text":"Sample","textHtml":"\u003cp\u003eSample\u003c/p\u003e"},{"text":"Variable","textHtml":"\u003cp\u003eVariable\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eA researcher records the reaction times of 30 students selected from\na university. What do we call the mean reaction time of those 30\nstudents?\u003c/p\u003e","prompt":"A researcher records the reaction times of 30 students selected from a university. What do we call the mean reaction time of those 30 students?","id":"sample_statistic","answerHtml":""},{"explanation":"The codes are labels for two groups. Coding the conditions with numbers does not make the variable quantitative, and neither condition is inherently higher than the other.","answerHtml":"","id":"coded_condition","type":"multiple-choice","options":[{"text":"Nominal categorical","correct":true,"textHtml":"\u003cp\u003eNominal categorical\u003c/p\u003e"},{"text":"Ordinal categorical","textHtml":"\u003cp\u003eOrdinal categorical\u003c/p\u003e"},{"text":"Discrete quantitative","textHtml":"\u003cp\u003eDiscrete quantitative\u003c/p\u003e"},{"text":"Continuous quantitative","textHtml":"\u003cp\u003eContinuous quantitative\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eIn an experiment, the control condition is coded 0 and the treatment\ncondition is coded 1. What kind of variable is condition?\u003c/p\u003e","prompt":"In an experiment, the control condition is coded 0 and the treatment condition is coded 1. What kind of variable is condition?","explanationHtml":"\u003cp\u003eThe codes are labels for two groups. Coding the conditions with\nnumbers does not make the variable quantitative, and neither condition\nis inherently higher than the other.\u003c/p\u003e","hints":[{"text":"Ask whether 0 and 1 represent amounts or labels for groups.","textHtml":"\u003cp\u003eAsk whether 0 and 1 represent amounts or labels for groups.\u003c/p\u003e"}]},{"explanation":"The numbers attached to the response categories do not guarantee equal intervals, and averaging does not change that automatically. But a carefully constructed scale can sometimes behave enough like an interval variable to make that a useful modeling choice.","answerHtml":"","id":"likert_scoring","type":"multiple-choice","options":[{"text":"Treating the average as approximately interval needs further justification","correct":true,"textHtml":"\u003cp\u003eTreating the average as approximately interval needs further\njustification\u003c/p\u003e"},{"text":"The average is automatically an interval variable","textHtml":"\u003cp\u003eThe average is automatically an interval variable\u003c/p\u003e"},{"text":"The average must remain ordinal in every analysis","textHtml":"\u003cp\u003eThe average must remain ordinal in every analysis\u003c/p\u003e"},{"text":"The average becomes a ratio variable","textHtml":"\u003cp\u003eThe average becomes a ratio variable\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eA questionnaire asks people to rate three extraversion statements\nfrom 1 (\u003cem\u003edisagree\u003c/em\u003e) to 5 (\u003cem\u003eagree\u003c/em\u003e). The individual\nresponses are ordinal. The researcher then averages them. Which\nconclusion is most careful?\u003c/p\u003e","prompt":"A questionnaire asks people to rate three extraversion statements from 1 (disagree) to 5 (agree). The individual responses are ordinal. The researcher then averages them. Which conclusion is most careful?","explanationHtml":"\u003cp\u003eThe numbers attached to the response categories do not guarantee\nequal intervals, and averaging does not change that automatically. But a\ncarefully constructed scale can sometimes behave enough like an interval\nvariable to make that a useful modeling choice.\u003c/p\u003e","hints":[{"text":"Distinguish what we know about each response from the modeling choice we might make about a carefully constructed combined score.","textHtml":"\u003cp\u003eDistinguish what we know about each response from the modeling choice\nwe might make about a carefully constructed combined score.\u003c/p\u003e"}]},{"type":"multiple-choice","explanation":"Time is infinitely divisible: between any two ages there is always another possible age. Reporting age in whole years is a choice about measurement precision, not a property of the underlying variable.","explanationHtml":"\u003cp\u003eTime is infinitely divisible: between any two ages there is always\nanother possible age. Reporting age in whole years is a choice about\nmeasurement precision, not a property of the underlying variable.\u003c/p\u003e","options":[{"text":"Continuous","correct":true,"textHtml":"\u003cp\u003eContinuous\u003c/p\u003e"},{"text":"Discrete","textHtml":"\u003cp\u003eDiscrete\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eAge is commonly reported in whole years. What kind of variable is age\nitself?\u003c/p\u003e","prompt":"Age is commonly reported in whole years. What kind of variable is age itself?","id":"age_type","answerHtml":""},{"type":"multiple-choice","explanation":"The first, second, and fourth statements describe the observed sample or its measurement. Estimating the university mean goes beyond those observations to make an inference about the population.","explanationHtml":"\u003cp\u003eThe first, second, and fourth statements describe the observed sample\nor its measurement. Estimating the university mean goes beyond those\nobservations to make an inference about the population.\u003c/p\u003e","options":[{"text":"The sample mean was 310 milliseconds","textHtml":"\u003cp\u003eThe sample mean was 310 milliseconds\u003c/p\u003e"},{"text":"The sample contained 20 students","textHtml":"\u003cp\u003eThe sample contained 20 students\u003c/p\u003e"},{"text":"The university mean is probably close to 310 milliseconds","correct":true,"textHtml":"\u003cp\u003eThe university mean is probably close to 310 milliseconds\u003c/p\u003e"},{"text":"Reaction time was recorded in milliseconds","textHtml":"\u003cp\u003eReaction time was recorded in milliseconds\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eA sample of 20 students has a mean reaction time of 310 milliseconds.\nWhich statement uses that sample statistic to make an inference?\u003c/p\u003e","prompt":"A sample of 20 students has a mean reaction time of 310 milliseconds. Which statement uses that sample statistic to make an inference?","id":"descriptive_inferential","answerHtml":""}]}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-carifio2008likert" class="csl-entry" role="listitem">
+Carifio, J., &amp; Perla, R. (2008). Resolving the 50-year debate around using and misusing <span>Likert</span> scales. <em>Medical Education</em>, <em>42</em>(12), 1150–1152. <a href="https://doi.org/10.1111/j.1365-2923.2008.03172.x">https://doi.org/10.1111/j.1365-2923.2008.03172.x</a>
+</div>
+<div id="ref-condon2014icar" class="csl-entry" role="listitem">
+Condon, D. M., &amp; Revelle, W. (2014). The international cognitive ability resource: Development and initial validation of a public-domain measure. <em>Intelligence</em>, <em>43</em>, 52–64. <a href="https://doi.org/10.1016/j.intell.2014.01.004">https://doi.org/10.1016/j.intell.2014.01.004</a>
+</div>
+<div id="ref-goldberg1992development" class="csl-entry" role="listitem">
+Goldberg, L. R. (1992). The development of markers for the big-five factor structure. <em>Psychological Assessment</em>, <em>4</em>(1), 26–42.
+</div>
+<div id="ref-goldberg1999broad" class="csl-entry" role="listitem">
+Goldberg, L. R. (1999). A broad-bandwidth, public domain, personality inventory measuring the lower-level facets of several five-factor models. In I. Mervielde, I. Deary, F. De Fruyt, &amp; F. Ostendorf (Eds.), <em>Personality psychology in europe</em> (Vol. 7, pp. 7–28). Tilburg University Press.
+</div>
+<div id="ref-norman2010likert" class="csl-entry" role="listitem">
+Norman, G. (2010). <span>Likert</span> scales, levels of measurement and the <span>“laws”</span> of statistics. <em>Advances in Health Sciences Education</em>, <em>15</em>(5), 625–632. <a href="https://doi.org/10.1007/s10459-010-9222-y">https://doi.org/10.1007/s10459-010-9222-y</a>
+</div>
+<div id="ref-schepis2025substance" class="csl-entry" role="listitem">
+Schepis, T. S., Veliz, P. T., West, B. T., McCabe, V. V., Hulsey, E., Kcomt, L., &amp; McCabe, S. E. (2025). US youth exposed to parental substance use disorder in the home: A comparison of DSM-IV and DSM-5 criteria. <em>Journal of Addiction Medicine</em>, <em>19</em>(6), 722–725. <a href="https://doi.org/10.1097/adm.0000000000001469">https://doi.org/10.1097/adm.0000000000001469</a>
+</div>
+<div id="ref-stevens1946theory" class="csl-entry" role="listitem">
+Stevens, S. S. (1946). On the theory of scales of measurement. <em>Science</em>, <em>103</em>(2684), 677–680. <a href="https://doi.org/10.1126/science.103.2684.677">https://doi.org/10.1126/science.103.2684.677</a>
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>Seriously, this has been going on for a while. A couple of millennia ago, the Roman poet Horace put a self-deprecating spin on this idea, writing, “Our sires’ age was worse than our grandsires’. We, their sons, are more worthless than they; so in our turn we shall give the world a progeny yet more corrupt.” (Horace, Book III of Odes)<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The answer is <strong>X</strong>: the jumps through the alphabet increase from one place to two, then three, four, and five.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>This example is inspired by the surprisingly detailed and interesting investigation into Gyllenhaal’s height which was part of the <em>Mystery Show</em> podcast episode <em>Source Code</em>. Available on Apple Podcasts, Spotify, or wherever you get your podcasts.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="Introduction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Introduction</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./02-frequency-distributions.html" class="pagination-link" aria-label="Frequency">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

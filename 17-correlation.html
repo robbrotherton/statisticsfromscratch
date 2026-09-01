@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>17&nbsp; Correlation – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./18-regression.html" rel="next">
+<link href="./16-factorial-anova.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="17&nbsp; Correlation – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="17&nbsp; Correlation – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#correlational-research-questions" id="toc-correlational-research-questions" class="nav-link" data-scroll-target="#correlational-research-questions">Correlational Research Questions</a></li>
+  <li><a href="#correlation-does-not-equal-causation" id="toc-correlation-does-not-equal-causation" class="nav-link" data-scroll-target="#correlation-does-not-equal-causation">Correlation Does Not Equal Causation</a></li>
+  <li><a href="#characteristics-of-correlations" id="toc-characteristics-of-correlations" class="nav-link" data-scroll-target="#characteristics-of-correlations">Characteristics of Correlations</a>
+  <ul class="collapse">
+  <li><a href="#magnitude" id="toc-magnitude" class="nav-link" data-scroll-target="#magnitude">Magnitude</a></li>
+  <li><a href="#direction" id="toc-direction" class="nav-link" data-scroll-target="#direction">Direction</a></li>
+  <li><a href="#form" id="toc-form" class="nav-link" data-scroll-target="#form">Form</a></li>
+  </ul></li>
+  <li><a href="#estimating-correlations" id="toc-estimating-correlations" class="nav-link" data-scroll-target="#estimating-correlations">Estimating Correlations</a></li>
+  <li><a href="#pearsons-r-correlation-coefficient" id="toc-pearsons-r-correlation-coefficient" class="nav-link" data-scroll-target="#pearsons-r-correlation-coefficient">Pearson’s <span class="math inline">\(r\)</span> Correlation Coefficient</a>
+  <ul class="collapse">
+  <li><a href="#the-equation" id="toc-the-equation" class="nav-link" data-scroll-target="#the-equation">The Equation</a></li>
+  </ul></li>
+  <li><a href="#hypothesis-testing-with-pearsons-r" id="toc-hypothesis-testing-with-pearsons-r" class="nav-link" data-scroll-target="#hypothesis-testing-with-pearsons-r">Hypothesis Testing with Pearson’s <span class="math inline">\(r\)</span></a>
+  <ul class="collapse">
+  <li><a href="#step-1-state-the-hypotheses" id="toc-step-1-state-the-hypotheses" class="nav-link" data-scroll-target="#step-1-state-the-hypotheses">Step 1: State the Hypotheses</a></li>
+  <li><a href="#step-2-determine-critical-values" id="toc-step-2-determine-critical-values" class="nav-link" data-scroll-target="#step-2-determine-critical-values">Step 2: Determine Critical Values</a></li>
+  <li><a href="#step-3-calculate-the-test-statistic" id="toc-step-3-calculate-the-test-statistic" class="nav-link" data-scroll-target="#step-3-calculate-the-test-statistic">Step 3: Calculate the Test Statistic</a></li>
+  <li><a href="#step-4-make-a-decision" id="toc-step-4-make-a-decision" class="nav-link" data-scroll-target="#step-4-make-a-decision">Step 4: Make a Decision</a></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting Results</a></li>
+  </ul></li>
+  <li><a href="#pearsons-r-as-a-measure-of-effect-size" id="toc-pearsons-r-as-a-measure-of-effect-size" class="nav-link" data-scroll-target="#pearsons-r-as-a-measure-of-effect-size">Pearson’s <span class="math inline">\(r\)</span> as a Measure of Effect Size</a>
+  <ul class="collapse">
+  <li><a href="#interpreting-effect-size" id="toc-interpreting-effect-size" class="nav-link" data-scroll-target="#interpreting-effect-size">Interpreting Effect Size</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/scatterplot.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/critical-table-generator.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>In the final two lectures of the course, we’ll cover the techniques of correlation and regression. Whereas the techniques we’ve covered so far deal with examining differences between groups, correlation and regression focus on associations between variables. As we’ll see, though, this isn’t as big of a difference as you might expect. Correlation and regression are just another extension of the basic ideas of variability, sampling, and probability that have powered all of our inferential statistics so far.</p>
+<p>The key difference between the correlational approach and the designs and statistical tests we’ve covered so far—the <span class="math inline">\(t\)</span> test and ANOVA approach—is that those other approaches are primarily used with data from experimental research studies. This means studies with an independent variable, a grouping variable that divides samples up into different treatment conditions. The statistics then compare those groups looking for differences over and above what we’d expect by chance. Correlational studies measure two or more variables per participant and examine the relationship between those variables—their association, rather than their difference.</p>
+</section>
+<section id="correlational-research-questions" class="level2">
+<h2 data-anchor-id="correlational-research-questions">Correlational Research Questions</h2>
+<p>To give a few quick examples of these kind of psychological research questions, we may be interested in the correlation between a person’s income and their happiness. Do wealthier people tend to say they’re happier? With correlational data, we generally visualize it as a scatterplot like this: one variable on the <span class="math inline">\(x\)</span> axis and the other on the <span class="math inline">\(y\)</span> axis. Each dot represents one person’s pair of scores.</p>
+<div class="interactive-figure-mount" data-interactive-figure="incomeHappinessScatter" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0.55,&quot;n&quot;:45,&quot;seed&quot;:11},&quot;style&quot;:&quot;minimal&quot;,&quot;axisLabels&quot;:true,&quot;xLabel&quot;:&quot;Income&quot;,&quot;yLabel&quot;:&quot;Happiness&quot;,&quot;maxWidth&quot;:&quot;22rem&quot;}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Scatterplot of hypothetical income and happiness scores: a loose cloud of dots drifting upward, suggesting that higher income tends to go with higher happiness.
+</div>
+</div>
+<p>Another question might be, does practice make perfect? We could record the amount of time someone spent practicing a task and record their performance of the task and put those pairs of observations on a scatterplot like this. Or we might suspect that the more absences someone has from a class, the worse their final grade will be for that class. Here, unlike those previous two examples, we’d be expecting that higher scores on one variable would be associated with lower scores on the other. This would be a negative correlation.</p>
+<div class="interactive-figure-mount" data-interactive-figure="absencesGradeScatter" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:-0.65,&quot;n&quot;:45,&quot;seed&quot;:12},&quot;style&quot;:&quot;minimal&quot;,&quot;axisLabels&quot;:true,&quot;xLabel&quot;:&quot;Absences&quot;,&quot;yLabel&quot;:&quot;Final grade&quot;,&quot;maxWidth&quot;:&quot;22rem&quot;}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Scatterplot of hypothetical absences and final grades: the cloud of dots slopes downward, with more absences going with lower grades — a negative correlation.
+</div>
+</div>
+</section>
+<section id="correlation-does-not-equal-causation" class="level2">
+<h2 data-anchor-id="correlation-does-not-equal-causation">Correlation Does Not Equal Causation</h2>
+<p>Now, if you know anything about correlation, it’s probably that correlation does not equal causation. So let’s make this clear first. What this means is that if we just observe a correlation between two variables, we should be extremely careful about concluding that one variable is causing changes in the other.</p>
+<p>Take an example from real research. Drinking coffee is correlated with scoring higher on measures of IQ <span class="citation" data-cites="corley2010caffeine">(<a href="references.html#ref-corley2010caffeine" role="doc-biblioref">Corley et al., 2010</a>)</span>. And as soon as you hear that, it’s easy to start speculating about how the caffeine might improve cognitive function, so habitual consumption should increase general IQ. So maybe we should prescribe a daily dose of coffee to everyone to make us all smarter.</p>
+<p>But you can probably see where I’m going with this. It would be premature to conclude that coffee causes higher IQ if all we’ve done is show that they’re correlated. It could just as easily be the reverse: being smarter causes you to drink more coffee. Again, we could speculate some causal effect whereby people with higher IQ have more sophisticated or refined tastes or are drawn to mild stimulants for whatever reason. But again, we should probably slow our roll. It could be that some third factor, like being richer, might be associated both with coffee consumption and IQ.</p>
+<p>And even then, we haven’t explained the causality. Maybe coffee is more fashionable in more affluent social circles. Maybe higher socioeconomic status makes people healthier and good health promotes higher IQ, or, conversely, poor health inhibits performance on IQ tests. Or maybe higher income is associated with having the resources that allow you to perform better on measures of IQ and to afford to buy more coffee.</p>
+<p>In any case, the point is that causality is difficult to establish and usually requires experiments in which participants are randomly assigned to conditions. You’ll hear much more about why that is in other classes that deal more with research methods. But for now, just know that correlation is not the same thing as causation. That doesn’t mean that knowing about correlations that exist in the world is useless. Far from it. It just means we have to know the limitations of the data and the statistical techniques we apply to it.</p>
+</section>
+<section id="characteristics-of-correlations" class="level2">
+<h2 data-anchor-id="characteristics-of-correlations">Characteristics of Correlations</h2>
+<p>We’ll be calculating a correlation statistic. But before we learn how it’s calculated, it’s important to outline its general conceptual structure. The correlation statistic is a single number that quantifies the association between two variables. It has three characteristics: its absolute magnitude, its direction, and its form.</p>
+<section id="magnitude" class="level3">
+<h3 data-anchor-id="magnitude">Magnitude</h3>
+<p>The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker, less consistent their relationship, the closer the correlation will be to 0. In the four diagrams here, I’ve traced an ellipse around the scattered dots. Basically, the tighter of an ellipse you can draw, the stronger the correlation is. Close to zero, it’s basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.</p>
+<div class="bc-figure-row">
+<div class="interactive-figure-mount" data-interactive-figure="magnitudeScatterR0" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = 0: the ellipse traced around the dots is essentially a circle.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="magnitudeScatterR40" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0.4,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = .40: the ellipse tilts upward but stays wide.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="magnitudeScatterR80" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0.8,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = .80: a much tighter upward-sloping ellipse.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="magnitudeScatterR100" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:1,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Points with r = 1: the ellipse collapses into a straight line joining every point.
+</div>
+</div>
+</div>
+</section>
+<section id="direction" class="level3">
+<h3 data-anchor-id="direction">Direction</h3>
+<p>The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases on one variable are associated with increases on the other—or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other—that they move in opposite directions. Here I have flipped the diagrams around so that they’re now illustrating negative correlations.</p>
+<div class="bc-figure-row">
+<div class="interactive-figure-mount" data-interactive-figure="directionScatterR0" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = 0: a circular cloud with no direction either way.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="directionScatterR40" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:-0.4,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = −.40: a wide ellipse sloping downward.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="directionScatterR80" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:-0.8,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Point cloud with r = −.80: a tight downward-sloping ellipse.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="directionScatterR100" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:-1,&quot;n&quot;:60,&quot;seed&quot;:7},&quot;style&quot;:&quot;minimal&quot;,&quot;showEllipse&quot;:true,&quot;showR&quot;:true,&quot;width&quot;:220}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Points with r = −1: a perfect straight line sloping downward.
+</div>
+</div>
+</div>
+</section>
+<section id="form" class="level3">
+<h3 data-anchor-id="form">Form</h3>
+<p>And finally, there is the form of the association. We will only cover linear correlations. This means basically that we’re imagining that the association forms a straight line. For positive correlations, increases in <span class="math inline">\(X\)</span> are always associated with increases in <span class="math inline">\(Y\)</span>. Or for negative correlations, increases in <span class="math inline">\(X\)</span> are always associated with decreases in <span class="math inline">\(Y\)</span>.</p>
+<p>But there are other forms that correlations can take—nonlinear forms, where the relationship between <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> is different for different values of <span class="math inline">\(X\)</span>. For one set of points, you can imagine a line that curves, so that as <span class="math inline">\(X\)</span> increases, <span class="math inline">\(Y\)</span> decreases, until a certain point where the curve changes direction, and increases in <span class="math inline">\(X\)</span> become associated with increases in <span class="math inline">\(Y\)</span>. Or you can imagine even more complex lines which change directions more than once, attempting to find the best fit for the data. There can be value in these approaches, but for our purposes, we’re going to focus on the basic linear form of correlation.</p>
+</section>
+</section>
+<section id="estimating-correlations" class="level2">
+<h2 data-anchor-id="estimating-correlations">Estimating Correlations</h2>
+<p>A somewhat useful skill to practice is being able to look at a scatterplot and estimate the strength of the correlation. It’s actually easier than you’d think. It takes just a very small amount of practice to get quite good.</p>
+<p>Here’s a very small dataset with just five data points. It’s representing some hypothetical data from a study looking at the amount of sleep students got the night before an exam and their test score. It sounds plausible that these two things would be correlated.</p>
+<div id="tbl-sleep-scores" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sleep-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.1: Hours of sleep the night before an exam and test scores for five students.
+</figcaption>
+<div aria-describedby="tbl-sleep-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Participant</th>
+<th style="text-align: center;">Sleep (hours)</th>
+<th style="text-align: center;">Test score</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">A</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">B</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">C</td>
+<td style="text-align: center;">7</td>
+<td style="text-align: center;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">D</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">E</td>
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">9</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Here’s what those five pairs of scores look like as a scatterplot. From looking at these few points, see if you can come up with a reasonable guess at the strength and direction of the correlation. Remember, the correlation will vary from zero to one or negative one, depending on its strength and its direction. We’ll calculate its actual value a little bit later.</p>
+<div class="interactive-figure-mount" data-interactive-figure="sleepScoresScatter" data-interactive-options="{&quot;points&quot;:[[4,5],[5,8],[7,8],[8,10],[11,9]],&quot;labels&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;,&quot;E&quot;],&quot;pointLabels&quot;:true,&quot;xLabel&quot;:&quot;Sleep (hours)&quot;,&quot;yLabel&quot;:&quot;Test score&quot;,&quot;xDomain&quot;:[0,12],&quot;yDomain&quot;:[0,12],&quot;controls&quot;:false,&quot;maxWidth&quot;:&quot;30rem&quot;}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+Scatterplot of the five students' sleep hours and test scores: the points drift upward from student A at 4 hours and a score of 5 to student D at 8 hours and a score of 10, with E highest on sleep but not on score.
+</div>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="17_correlation_guess" aria-label="Guess the Correlation"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Guess the Correlation</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="guess_correlation"><div class="quiz-prompt"><p>Looking at the scatterplot of the sleep and test score data above,
+students who slept more tended to score higher on the test. What would
+be a reasonable first guess about the correlation?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A reasonable guess would be a positive correlation, perhaps moderate
+to strong depending on how tightly the points cluster around an upward
+line.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The exact value requires calculation, but the direction can often be
+estimated visually.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="17_correlation_guess">{"title":"Guess the Correlation","questions":[{"answer":"A reasonable guess would be a positive correlation, perhaps moderate to strong depending on how tightly the points cluster around an upward line.","id":"guess_correlation","explanation":"The exact value requires calculation, but the direction can often be estimated visually.","explanationHtml":"\u003cp\u003eThe exact value requires calculation, but the direction can often be\nestimated visually.\u003c/p\u003e","prompt":"Looking at the scatterplot of the sleep and test score data above, students who slept more tended to score higher on the test. What would be a reasonable first guess about the correlation?","promptHtml":"\u003cp\u003eLooking at the scatterplot of the sleep and test score data above,\nstudents who slept more tended to score higher on the test. What would\nbe a reasonable first guess about the correlation?\u003c/p\u003e","answerHtml":"\u003cp\u003eA reasonable guess would be a positive correlation, perhaps moderate\nto strong depending on how tightly the points cluster around an upward\nline.\u003c/p\u003e","type":"free-response"}],"titleHtml":"\u003cp\u003eGuess the Correlation\u003c/p\u003e","id":"17_correlation_guess"}</script></section>
+<p>If you want more practice, try the point clouds below: for each one, guess the correlation by eye before revealing its actual value.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Guess the correlation
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="guessCorrelationGame" data-interactive-options="{&quot;generate&quot;:{&quot;r&quot;:0.85,&quot;n&quot;:40,&quot;seed&quot;:21},&quot;ticks&quot;:&quot;none&quot;,&quot;axisLabels&quot;:false,&quot;maxWidth&quot;:&quot;26rem&quot;}" data-interactive-factory="makeScatterplot">
+<div class="interactive-figure-fallback">
+A series of point clouds for practicing estimating correlations by eye.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Cloud 1" data-action="{&quot;generate&quot;:{&quot;r&quot;:0.85,&quot;n&quot;:40,&quot;seed&quot;:21},&quot;show-r&quot;:false,&quot;show-ellipse&quot;:false,&quot;animate&quot;:false}">
+<p>Size up the direction first, then the strength. What’s your guess?</p>
+</div>
+<div class="tutorial-step" data-title="Reveal" data-action="{&quot;generate&quot;:{&quot;r&quot;:0.85,&quot;n&quot;:40,&quot;seed&quot;:21},&quot;show-r&quot;:true,&quot;show-ellipse&quot;:true}">
+<p>A strong positive correlation: <span class="math inline">\(r = .85\)</span>. The ellipse around the points is long and thin.</p>
+</div>
+<div class="tutorial-step" data-title="Cloud 2" data-action="{&quot;generate&quot;:{&quot;r&quot;:0.25,&quot;n&quot;:40,&quot;seed&quot;:22},&quot;show-r&quot;:false,&quot;show-ellipse&quot;:false}">
+<p>A new cloud. Direction, then strength — what’s your guess this time?</p>
+</div>
+<div class="tutorial-step" data-title="Reveal" data-action="{&quot;generate&quot;:{&quot;r&quot;:0.25,&quot;n&quot;:40,&quot;seed&quot;:22},&quot;show-r&quot;:true,&quot;show-ellipse&quot;:true}">
+<p>Much weaker, though still positive: <span class="math inline">\(r = .25\)</span>. The ellipse is nearly a circle.</p>
+</div>
+<div class="tutorial-step" data-title="Cloud 3" data-action="{&quot;generate&quot;:{&quot;r&quot;:-0.6,&quot;n&quot;:40,&quot;seed&quot;:23},&quot;show-r&quot;:false,&quot;show-ellipse&quot;:false}">
+<p>One more. What’s your guess?</p>
+</div>
+<div class="tutorial-step" data-title="Reveal" data-action="{&quot;generate&quot;:{&quot;r&quot;:-0.6,&quot;n&quot;:40,&quot;seed&quot;:23},&quot;show-r&quot;:true,&quot;show-ellipse&quot;:true}">
+<p>This one runs the other way: <span class="math inline">\(r = -.60\)</span>, a moderately strong negative correlation.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="pearsons-r-correlation-coefficient" class="level2">
+<h2 data-anchor-id="pearsons-r-correlation-coefficient">Pearson’s <span class="math inline">\(r\)</span> Correlation Coefficient</h2>
+<p>So now let’s examine the actual correlation statistic that we’ll be using. It’s called Pearson’s <span class="math inline">\(r\)</span> correlation coefficient. It was developed by Karl Pearson. There are other variations of correlation statistics, but Pearson’s <span class="math inline">\(r\)</span> is by far the most widely used. It’s based on the ideas of variability and covariability.</p>
+<p>You’re very familiar with variability by now. It’s the quantification of how much each variable varies, how widely spread or closely clustered scores are. Covariability is the new idea here. It quantifies how much <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> vary in tandem. To what extent are changes in <span class="math inline">\(X\)</span> associated with corresponding changes in <span class="math inline">\(Y\)</span>? So as <span class="math inline">\(X\)</span> increases, <span class="math inline">\(Y\)</span> increases as well, or as <span class="math inline">\(X\)</span> decreases, <span class="math inline">\(Y\)</span> also tends to decrease. Put another way, if there was no covariability, variation in <span class="math inline">\(Y\)</span> would be completely unrelated to the variation in <span class="math inline">\(X\)</span>.</p>
+<section id="the-equation" class="level3">
+<h3 data-anchor-id="the-equation">The Equation</h3>
+<p>Here’s the equation: <span class="math inline">\(r\)</span> equals <span class="math inline">\(SP\)</span> over the square root of <span class="math inline">\(SS_X\)</span> multiplied by <span class="math inline">\(SS_Y\)</span>. <span class="math inline">\(SS_X\)</span> and <span class="math inline">\(SS_Y\)</span> should look familiar. <span class="math inline">\(SS\)</span>, as usual, refers to the sum of squared deviations. So here we have the separate sums of squares for variable <span class="math inline">\(X\)</span> and variable <span class="math inline">\(Y\)</span> to quantify their separate variability in the denominator. And we have this new quantity, <span class="math inline">\(SP\)</span>, which quantifies the covariability of <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>.</p>
+<p>I’ll explain in a moment exactly what <span class="math inline">\(SP\)</span> is. But first, let me point out that if every change in <span class="math inline">\(X\)</span> had a corresponding change in <span class="math inline">\(Y\)</span>, then their variabilities separately would be exactly equal to their covariability. The correlation would equal one or negative one, meaning every change in <span class="math inline">\(X\)</span> is accompanied by an equal change in <span class="math inline">\(Y\)</span>. In other words, all the variability is covariability. There is no variability that isn’t shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero.</p>
+</section>
+</section>
+<section id="hypothesis-testing-with-pearsons-r" class="level2">
+<h2 data-anchor-id="hypothesis-testing-with-pearsons-r">Hypothesis Testing with Pearson’s <span class="math inline">\(r\)</span></h2>
+<p>So let’s dive into a hypothesis test using Pearson’s <span class="math inline">\(r\)</span> correlation coefficient.</p>
+<section id="step-1-state-the-hypotheses" class="level3">
+<h3 data-anchor-id="step-1-state-the-hypotheses">Step 1: State the Hypotheses</h3>
+<p>As always, we begin by formally stating our hypotheses. And as with every other hypothesis test we’ve done, we’re going to use samples of scores, but we don’t actually care about those samples. We’re interested in the population or populations that produce them. So what the correlation hypothesis tests are hypotheses concerning the relationship that exists or doesn’t exist in the population. The lowercase letter <span class="math inline">\(r\)</span> is the correlation coefficient we calculate for our sample. We use the Greek letter <span class="math inline">\(\rho\)</span> to represent the population parameter, the correlation within the population.</p>
+</section>
+<section id="step-2-determine-critical-values" class="level3">
+<h3 data-anchor-id="step-2-determine-critical-values">Step 2: Determine Critical Values</h3>
+<p>Now, this is going to sound weird, but the test statistic for a correlation is actually a <span class="math inline">\(t\)</span> statistic, not the <span class="math inline">\(r\)</span> correlation coefficient that we’ll calculate at first. We’ll see how to calculate that <span class="math inline">\(t\)</span> statistic in step four. But for now, we just need to know its degrees of freedom so we can determine the critical <span class="math inline">\(t\)</span> values. And for bivariate correlations, degrees of freedom is <span class="math inline">\(n\)</span>, the number of pairs of scores, minus two. That’s because we’re dealing with two samples, so we lose one degree of freedom for each sample. But we’re not treating the two samples as independent. We’re looking at the associations between pairs of scores.</p>
+<p>As before, we can check a table or use the <code>qt()</code> function in R to find the critical values. Since our little example dataset has five pairs of scores, our degrees of freedom is five minus two, which is three.</p>
+<div class="interactive-figure-mount" data-interactive-figure="tCriticalValueTable" data-interactive-options="{&quot;title&quot;:&quot;t critical values&quot;,&quot;df&quot;:{&quot;from&quot;:1,&quot;to&quot;:30},&quot;alphas&quot;:[0.1,0.05,0.025,0.01,0.005],&quot;confidence&quot;:true,&quot;selectedTail&quot;:&quot;two&quot;,&quot;selected&quot;:{&quot;df&quot;:3,&quot;tail&quot;:&quot;two&quot;,&quot;alpha&quot;:0.05},&quot;tableMaxHeight&quot;:&quot;18rem&quot;}" data-interactive-factory="makeTTable">
+<div class="interactive-figure-fallback">
+Interactive t critical-value table.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="tCriticalCurve" data-interactive-options="{&quot;distribution&quot;:&quot;t&quot;,&quot;df&quot;:{&quot;$value&quot;:&quot;tCriticalValueTable.df&quot;},&quot;title&quot;:{&quot;$template&quot;:&quot;df = ${tCriticalValueTable.df}&quot;},&quot;style&quot;:&quot;minimal&quot;,&quot;height&quot;:160,&quot;xDomain&quot;:[-4,4],&quot;yDomain&quot;:[0,0.45],&quot;xTicks&quot;:5,&quot;shade&quot;:{&quot;$value&quot;:&quot;tCriticalValueTable.shade&quot;},&quot;maxWidth&quot;:&quot;24rem&quot;}" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+t distribution curve with the selected critical region shaded.
+</div>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="17_correlation_critical_value" aria-label="Critical Value Quiz"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Critical Value Quiz</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="correlation_critical_t"><div class="quiz-prompt"><p>For a correlation with n = 5 pairs of scores and a two-tailed alpha
+of .05, what critical t value is approximately correct?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="17_correlation_critical_value-correlation_critical_t" id="17_correlation_critical_value-correlation_critical_t-option-1" value="0" aria-labelledby="17_correlation_critical_value-correlation_critical_t-option-1-text"><div class="quiz-choice-text" id="17_correlation_critical_value-correlation_critical_t-option-1-text"><p>+/-3.18</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_critical_value-correlation_critical_t" id="17_correlation_critical_value-correlation_critical_t-option-2" value="1" aria-labelledby="17_correlation_critical_value-correlation_critical_t-option-2-text"><div class="quiz-choice-text" id="17_correlation_critical_value-correlation_critical_t-option-2-text"><p>+/-1.96</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_critical_value-correlation_critical_t" id="17_correlation_critical_value-correlation_critical_t-option-3" value="2" aria-labelledby="17_correlation_critical_value-correlation_critical_t-option-3-text"><div class="quiz-choice-text" id="17_correlation_critical_value-correlation_critical_t-option-3-text"><p>+/-2.07</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_critical_value-correlation_critical_t" id="17_correlation_critical_value-correlation_critical_t-option-4" value="3" aria-labelledby="17_correlation_critical_value-correlation_critical_t-option-4-text"><div class="quiz-choice-text" id="17_correlation_critical_value-correlation_critical_t-option-4-text"><p>+/-0.50</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>+/-3.18</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>For correlation, df = n - 2 = 3. With df = 3, the two-tailed .05
+critical values are about +/-3.18.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="17_correlation_critical_value">{"title":"Critical Value Quiz","questions":[{"prompt":"For a correlation with n = 5 pairs of scores and a two-tailed alpha of .05, what critical t value is approximately correct?","id":"correlation_critical_t","explanation":"For correlation, df = n - 2 = 3. With df = 3, the two-tailed .05 critical values are about +/-3.18.","explanationHtml":"\u003cp\u003eFor correlation, df = n - 2 = 3. With df = 3, the two-tailed .05\ncritical values are about +/-3.18.\u003c/p\u003e","options":[{"text":"+/-3.18","textHtml":"\u003cp\u003e+/-3.18\u003c/p\u003e","correct":true},{"text":"+/-1.96","textHtml":"\u003cp\u003e+/-1.96\u003c/p\u003e"},{"text":"+/-2.07","textHtml":"\u003cp\u003e+/-2.07\u003c/p\u003e"},{"text":"+/-0.50","textHtml":"\u003cp\u003e+/-0.50\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eFor a correlation with n = 5 pairs of scores and a two-tailed alpha\nof .05, what critical t value is approximately correct?\u003c/p\u003e","answerHtml":"","type":"multiple-choice"}],"titleHtml":"\u003cp\u003eCritical Value Quiz\u003c/p\u003e","id":"17_correlation_critical_value"}</script></section>
+</section>
+<section id="step-3-calculate-the-test-statistic" class="level3">
+<h3 data-anchor-id="step-3-calculate-the-test-statistic">Step 3: Calculate the Test Statistic</h3>
+<p>So next, we calculate the correlation coefficient, Pearson’s <span class="math inline">\(r\)</span>. Remember the equation: <span class="math inline">\(r\)</span> equals <span class="math inline">\(SP\)</span> over the square root of the sum of squares for <span class="math inline">\(X\)</span> multiplied by the sum of squares for <span class="math inline">\(Y\)</span>.</p>
+<section id="sum-of-squares-recap" class="level4">
+<h4 data-anchor-id="sum-of-squares-recap">Sum of Squares Recap</h4>
+<p>Before getting to <span class="math inline">\(SP\)</span>, let’s recap sum of squares. To calculate the sum of squared deviations, we square the deviation scores. And another way of saying that we square something is to say we multiply it by itself. So the definitional formula we learned for sums of squares was <span class="math inline">\(\Sigma(X - M)^2\)</span>. And another equivalent way of writing that would be <span class="math inline">\(\Sigma(X - M)(X - M)\)</span>. <span class="math inline">\(X\)</span> minus the mean is the deviations. We multiply those deviations by themselves. The squaring is just a convenient notation for this, but it means the same thing.</p>
+<p>And remember the computational formula we learned: <span class="math inline">\(\Sigma X^2\)</span> minus <span class="math inline">\((\Sigma X)^2 / n\)</span>. Another equivalent way of writing that, bearing in mind that squaring is just multiplying something by itself, would be <span class="math inline">\(\Sigma(X)(X)\)</span> minus <span class="math inline">\((\Sigma X)(\Sigma X) / n\)</span>.</p>
+</section>
+<section id="sum-of-products-sp" class="level4">
+<h4 data-anchor-id="sum-of-products-sp">Sum of Products (<span class="math inline">\(SP\)</span>)</h4>
+<p>The reason I point this out is that the numerator does something quite similar, but instead of multiplying deviations by themselves, we multiply them by one another. Our numerator, <span class="math inline">\(SP\)</span>, is the sum of products. Products refer to the product of the deviations. We multiply the deviations for variable <span class="math inline">\(X\)</span> by the deviations for variable <span class="math inline">\(Y\)</span> to get their products. Then we sum those products to get the sum of products.</p>
+<p>The definitional formula for this is <span class="math inline">\(\Sigma(X - M_X)(Y - M_Y)\)</span>. And I hope that by juxtaposing it with the sum of squares formula, you can see the conceptual link. Sums of squares quantifies the variability of an individual variable by multiplying its deviations by themselves. The sum of products quantifies the covariability of two variables by multiplying their deviations by one another.</p>
+<p>The computational formula for sum of products is similarly related to the computational formula for sums of squares: <span class="math inline">\(SP = \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n}\)</span>. Again, this is equivalent to the definitional formula and it achieves basically the same thing as the sum of squares that we’re familiar with, but instead of quantifying variability within a variable, it quantifies covariability across two variables.</p>
+</section>
+<section id="worked-example" class="level4">
+<h4 data-anchor-id="worked-example">Worked Example</h4>
+<p>So here’s the example data I showed earlier. The variable labeled <span class="math inline">\(X\)</span> is the number of hours of sleep these five people said they got the previous night. The variable labeled <span class="math inline">\(Y\)</span> is their score on a test. We want to know if sleep duration is related to test performance. So we’ll calculate the correlation coefficient. We just need these three quantities: the sum of squares for <span class="math inline">\(X\)</span>, the sum of squares for <span class="math inline">\(Y\)</span>, and the sum of products.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="17_correlation_calculate_r" aria-label="Calculate r"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate r</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="calculate_r"><div class="quiz-prompt"><p>If <span class="math inline"><em>S</em><em>P</em> = 15</span>, <span class="math inline"><em>S</em><em>S</em><sub><em>X</em></sub> = 30</span>,
+and <span class="math inline"><em>S</em><em>S</em><sub><em>Y</em></sub> = 10</span>,
+what is Pearson’s r?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.87</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p><span class="math inline"><em>r</em> = <em>S</em><em>P</em>/<em>s</em><em>q</em><em>r</em><em>t</em>(<em>S</em><em>S</em><sub><em>X</em></sub><em>S</em><em>S</em><sub><em>Y</em></sub>) = 15/<em>s</em><em>q</em><em>r</em><em>t</em>(300) = 0.87</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="17_correlation_calculate_r">{"title":"Calculate r","questions":[{"promptHtml":"\u003cp\u003eIf \u003cspan class=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eP\u003c/em\u003e = 15\u003c/span\u003e, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eX\u003c/em\u003e\u003c/sub\u003e = 30\u003c/span\u003e,\nand \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eY\u003c/em\u003e\u003c/sub\u003e = 10\u003c/span\u003e,\nwhat is Pearson’s r?\u003c/p\u003e","id":"calculate_r","explanation":"r = SP / sqrt(SS_X SS_Y) = 15 / sqrt(300) = 0.87.","explanationHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003er\u003c/em\u003e = \u003cem\u003eS\u003c/em\u003e\u003cem\u003eP\u003c/em\u003e/\u003cem\u003es\u003c/em\u003e\u003cem\u003eq\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003et\u003c/em\u003e(\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eX\u003c/em\u003e\u003c/sub\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eY\u003c/em\u003e\u003c/sub\u003e) = 15/\u003cem\u003es\u003c/em\u003e\u003cem\u003eq\u003c/em\u003e\u003cem\u003er\u003c/em\u003e\u003cem\u003et\u003c/em\u003e(300) = 0.87\u003c/span\u003e.\u003c/p\u003e","answer":"0.87","tolerance":"2.0e-2","prompt":"If SP = 15, SS_X = 30, and SS_Y = 10, what is Pearson’s r?","answerHtml":"\u003cp\u003e0.87\u003c/p\u003e","type":"numeric"}],"titleHtml":"\u003cp\u003eCalculate r\u003c/p\u003e","id":"17_correlation_calculate_r"}</script></section>
+<p>Let’s use the definitional approach first. The first thing you would have needed to do is calculate the mean of each variable, then the deviations for <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, then square those deviations, and then sum the squared deviations to get the sum of squares. This gets us the values for the denominator of the <span class="math inline">\(r\)</span> equation. The last step is to multiply the deviations for <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> to get the products. So <span class="math inline">\(-3\)</span> multiplied by <span class="math inline">\(-3\)</span> gives positive nine, <span class="math inline">\(-2\)</span> multiplied by <span class="math inline">\(0\)</span> gives zero, and so on. We then sum those products to get the sum of products, which here is fifteen.</p>
+<div id="tbl-r-definitional" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-r-definitional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.2: The definitional approach. <span class="math inline">\(M_X = 7\)</span>; <span class="math inline">\(SS_X = 30\)</span>; <span class="math inline">\(M_Y = 8\)</span>; <span class="math inline">\(SS_Y = 14\)</span>; <span class="math inline">\(SP = 15\)</span>.
+</figcaption>
+<div aria-describedby="tbl-r-definitional-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;"><span class="math inline">\(X\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(X - M_X\)</span></th>
+<th style="text-align: right;"><span class="math inline">\((X - M_X)^2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(Y\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(Y - M_Y\)</span></th>
+<th style="text-align: right;"><span class="math inline">\((Y - M_Y)^2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(P\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;"><span class="math inline">\(-3\)</span></td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;"><span class="math inline">\(-3\)</span></td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;"><span class="math inline">\(-2\)</span></td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p><span class="math display">\[r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{15}{\sqrt{30 \times 14}} = 0.73\]</span></p>
+<p>Or if you’d prefer to use the computational formulas, it’d go like this. You don’t need to calculate the means first because that’s kind of built into the formula now. But you calculate some different quantities instead of the deviations and squared deviations. Instead, you’d calculate the sum of each variable, <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, and you’d square the scores themselves and calculate the sum of squared scores. You’d also multiply the <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> scores and sum those products. Then you’d use those values in the equations as shown. And if everything went right, you would arrive at exactly the same answer.</p>
+<div id="tbl-r-computational" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-r-computational-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.3: The computational approach.
+</figcaption>
+<div aria-describedby="tbl-r-computational-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;"><span class="math inline">\(X\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(X^2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(Y\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(Y^2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(XY\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">40</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">56</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">80</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">99</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><span class="math inline">\(\Sigma X = 35\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\Sigma X^2 = 275\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\Sigma Y = 40\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\Sigma Y^2 = 334\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\Sigma XY = 295\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p><span class="math display">\[
+\begin{align}
+SS_X &amp;= \Sigma X^2 - \frac{(\Sigma X)^2}{n} = 275 - \frac{35^2}{5} = 30 \\
+SS_Y &amp;= \Sigma Y^2 - \frac{(\Sigma Y)^2}{n} = 334 - \frac{40^2}{5} = 14 \\
+SP &amp;= \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n} = 295 - \frac{35 \times 40}{5} = 15
+\end{align}
+\]</span></p>
+<p><span class="math display">\[r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{15}{\sqrt{30 \times 14}} = 0.73\]</span></p>
+</section>
+</section>
+<section id="step-4-make-a-decision" class="level3">
+<h3 data-anchor-id="step-4-make-a-decision">Step 4: Make a Decision</h3>
+<p>So lastly, we need to make our decision to reject or fail to reject the null hypothesis. And like I said, we can’t do that with the <span class="math inline">\(r\)</span> statistic itself. Rather, we need to convert the <span class="math inline">\(r\)</span> value into a kind of <span class="math inline">\(t\)</span> statistic to see how improbable it is, given the variability in the data, that we would have observed an association this strong or stronger if no association actually exists in the population, as our null hypothesis assumes.</p>
+<p>So first, recall the general conceptual form of any <span class="math inline">\(t\)</span> statistic. It’s composed of a sample statistic minus a population parameter in the numerator and a standard error in the denominator, to reveal how much your observed sample statistic deviates from the null expected value in relation to the standard error—the amount you’d expect the sample to deviate from the population value due to sampling error.</p>
+<p>So the specific form that takes here is <span class="math inline">\(t = \frac{r - \rho}{s_r}\)</span>, where <span class="math inline">\(r\)</span> is the correlation coefficient, <span class="math inline">\(\rho\)</span> is the assumed population correlation, and <span class="math inline">\(s_r\)</span> is the standard error of the correlation. That standard error is found by taking <span class="math inline">\(\sqrt{\frac{1 - r^2}{n - 2}}\)</span>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="17_correlation_significance" aria-label="Significance Quiz"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Significance Quiz</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="correlation_reject"><div class="quiz-prompt"><p>If your correlation test statistic is t = 3.20 and the critical
+values are +/-3.18, can you reject the null hypothesis?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="17_correlation_significance-correlation_reject" id="17_correlation_significance-correlation_reject-option-1" value="0" aria-labelledby="17_correlation_significance-correlation_reject-option-1-text"><div class="quiz-choice-text" id="17_correlation_significance-correlation_reject-option-1-text"><p>Yes, barely</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_significance-correlation_reject" id="17_correlation_significance-correlation_reject-option-2" value="1" aria-labelledby="17_correlation_significance-correlation_reject-option-2-text"><div class="quiz-choice-text" id="17_correlation_significance-correlation_reject-option-2-text"><p>No, because t must be negative</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_significance-correlation_reject" id="17_correlation_significance-correlation_reject-option-3" value="2" aria-labelledby="17_correlation_significance-correlation_reject-option-3-text"><div class="quiz-choice-text" id="17_correlation_significance-correlation_reject-option-3-text"><p>No, because 3.20 is less than 3.18</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_significance-correlation_reject" id="17_correlation_significance-correlation_reject-option-4" value="3" aria-labelledby="17_correlation_significance-correlation_reject-option-4-text"><div class="quiz-choice-text" id="17_correlation_significance-correlation_reject-option-4-text"><p>Cannot tell because t is never used for correlation</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Yes, barely</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The obtained t is just beyond the positive critical value.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="17_correlation_significance">{"title":"Significance Quiz","questions":[{"prompt":"If your correlation test statistic is t = 3.20 and the critical values are +/-3.18, can you reject the null hypothesis?","id":"correlation_reject","explanation":"The obtained t is just beyond the positive critical value.","explanationHtml":"\u003cp\u003eThe obtained t is just beyond the positive critical value.\u003c/p\u003e","options":[{"text":"Yes, barely","textHtml":"\u003cp\u003eYes, barely\u003c/p\u003e","correct":true},{"text":"No, because t must be negative","textHtml":"\u003cp\u003eNo, because t must be negative\u003c/p\u003e"},{"text":"No, because 3.20 is less than 3.18","textHtml":"\u003cp\u003eNo, because 3.20 is less than 3.18\u003c/p\u003e"},{"text":"Cannot tell because t is never used for correlation","textHtml":"\u003cp\u003eCannot tell because t is never used for correlation\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eIf your correlation test statistic is t = 3.20 and the critical\nvalues are +/-3.18, can you reject the null hypothesis?\u003c/p\u003e","answerHtml":"","type":"multiple-choice"}],"titleHtml":"\u003cp\u003eSignificance Quiz\u003c/p\u003e","id":"17_correlation_significance"}</script></section>
+<p>For our sleep data, that works out like this — a <span class="math inline">\(t\)</span> that falls short of the critical value of <span class="math inline">\(\pm 3.18\)</span> for three degrees of freedom, so we fail to reject the null hypothesis despite the seemingly strong correlation:</p>
+<p><span class="math display">\[t = \frac{r - \rho}{s_r} = \frac{0.73 - 0}{\sqrt{\dfrac{1 - 0.73^2}{5 - 2}}} = 1.86\]</span></p>
+</section>
+<section id="reporting-results" class="level3">
+<h3 data-anchor-id="reporting-results">Reporting Results</h3>
+<p>Lastly, as always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson’s <span class="math inline">\(r\)</span>, its degrees of freedom, and the <span class="math inline">\(p\)</span> value for the correlation, or that <span class="math inline">\(p\)</span> is less than or greater than <span class="math inline">\(\alpha\)</span>.</p>
+<blockquote class="blockquote">
+<p>More sleep was associated with higher test scores; however, the correlation did not reach statistical significance; <span class="math inline">\(r(3) = .73\)</span>, <span class="math inline">\(p &gt; .05\)</span>.</p>
+</blockquote>
+</section>
+</section>
+<section id="pearsons-r-as-a-measure-of-effect-size" class="level2">
+<h2 data-anchor-id="pearsons-r-as-a-measure-of-effect-size">Pearson’s <span class="math inline">\(r\)</span> as a Measure of Effect Size</h2>
+<p>You may have noticed we didn’t mention effect size here, as we have done in the past. And that’s because Pearson’s <span class="math inline">\(r\)</span> correlation coefficient actually is itself a measure of effect size. That’s why we couldn’t complete the hypothesis test using <span class="math inline">\(r\)</span> itself. We had to convert it to a <span class="math inline">\(t\)</span> statistic. Remember that effect size is independent of statistical significance.</p>
+<p>Pearson’s <span class="math inline">\(r\)</span> is a measure of effect size because it quantifies the degree of association between two variables on a standardized scale ranging from zero to one. And the correlation itself is independent of sample size. That’s why we can have such a strong correlation in our example dataset and yet fail to reject the null hypothesis.</p>
+<p>And Pearson’s <span class="math inline">\(r\)</span> is actually related to another measure of effect size that we learned about: <span class="math inline">\(r^2\)</span>. You might have noticed that <span class="math inline">\(r^2\)</span> showed up in the calculation for the standard error of the correlation. You might also remember that when we learned about <span class="math inline">\(r^2\)</span> initially, I mentioned how it was related to the <span class="math inline">\(t\)</span> statistic. We could calculate <span class="math inline">\(r^2\)</span> from the <span class="math inline">\(t\)</span> statistic that we had already calculated. So it should be no surprise that <span class="math inline">\(r\)</span>, <span class="math inline">\(r^2\)</span>, and <span class="math inline">\(t\)</span> are all mathematically related. In fact, even Cohen’s <span class="math inline">\(d\)</span> is mathematically related to <span class="math inline">\(r\)</span>. I’ll leave the actual mathematical relationships for anyone algebraically inclined to ponder over. But for us, the point is that these different statistics are all performing related jobs and share similar conceptual foundations.</p>
+<section id="interpreting-effect-size" class="level3">
+<h3 data-anchor-id="interpreting-effect-size">Interpreting Effect Size</h3>
+<!-- note: this is now duplicated earlier in effect size/statistical power chapter. refer back to that chapter here instead of repeating it. -->
+<p>As for how to interpret Pearson’s <span class="math inline">\(r\)</span> as a measure of effect size, you might remember that Cohen offered some rules of thumb for interpreting Cohen’s <span class="math inline">\(d\)</span>. Well, Cohen was also familiar with Pearson’s <span class="math inline">\(r\)</span> and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb and they have been called into question. Cohen himself said that these rules of thumb should be used only reluctantly and when no better basis was available. He even told friends that he regretted having suggested them at all.</p>
+<p>There’s a great recent paper by <span class="citation" data-cites="funder2019evaluating">Funder &amp; Ozer (<a href="references.html#ref-funder2019evaluating" role="doc-biblioref">2019</a>)</span> that looked at what effect sizes are actually typically seen across a wide range of psychological studies, and they suggested these evidence-based alternative interpretive criteria based on actual data. They suggest that an <span class="math inline">\(r\)</span> of .05 indicates an effect that is very small for the explanation of single events, but potentially consequential over time. An effect size <span class="math inline">\(r\)</span> of .1 indicates an effect that is still small at the level of single events, but potentially more ultimately consequential. An effect size <span class="math inline">\(r\)</span> of .2 indicates a medium effect that is of some explanatory and practical use, even in the short run, and therefore even more important. An effect size <span class="math inline">\(r\)</span> of .3 indicates a large effect that is potentially powerful in both the short and the long run. A very large effect size <span class="math inline">\(r\)</span> of .4 or greater, in the context of psychological research, is likely a gross overestimate, the authors argued, that will rarely be found in a large sample or in a replication.</p>
+<p>So from this you can see how context-dependent our interpretation of effect size should be. If you’re a psych major, I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when your professor tells you about some experimental effect, ask them what was the effect size. If they can’t tell you, you should be a little bit skeptical.</p>
+<p>For building an intuitive feel for what correlations of different sizes actually look like, spend some time with <a href="https://rpsychologist.com/correlation/">Kristoffer Magnusson’s interactive correlation visualization</a>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="17_correlation_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 3 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 3</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="rho_null_zero"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>In a nondirectional significance test of a correlation, the null
+hypothesis states that the population correlation is zero.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-rho_null_zero" id="17_correlation_learning_checks-rho_null_zero-option-1" value="true" aria-labelledby="17_correlation_learning_checks-rho_null_zero-option-1-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-rho_null_zero-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-rho_null_zero" id="17_correlation_learning_checks-rho_null_zero-option-2" value="false" aria-labelledby="17_correlation_learning_checks-rho_null_zero-option-2-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-rho_null_zero-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The null states no linear association in the population.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="r_denominator_negative"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The denominator of Pearson’s r cannot be negative.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-r_denominator_negative" id="17_correlation_learning_checks-r_denominator_negative-option-1" value="true" aria-labelledby="17_correlation_learning_checks-r_denominator_negative-option-1-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-r_denominator_negative-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-r_denominator_negative" id="17_correlation_learning_checks-r_denominator_negative-option-2" value="false" aria-labelledby="17_correlation_learning_checks-r_denominator_negative-option-2-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-r_denominator_negative-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The denominator is a square root of sums of squares, so it cannot be
+negative.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="r_numerator_negative"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The numerator of Pearson’s r cannot be negative.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-r_numerator_negative" id="17_correlation_learning_checks-r_numerator_negative-option-1" value="true" aria-labelledby="17_correlation_learning_checks-r_numerator_negative-option-1-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-r_numerator_negative-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="17_correlation_learning_checks-r_numerator_negative" id="17_correlation_learning_checks-r_numerator_negative-option-2" value="false" aria-labelledby="17_correlation_learning_checks-r_numerator_negative-option-2-text"><div class="quiz-choice-text" id="17_correlation_learning_checks-r_numerator_negative-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The sum of products can be negative, producing a negative
+correlation.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="17_correlation_learning_checks">{"title":"Learning Checks","questions":[{"answer":true,"id":"rho_null_zero","explanation":"The null states no linear association in the population.","explanationHtml":"\u003cp\u003eThe null states no linear association in the population.\u003c/p\u003e","prompt":"In a nondirectional significance test of a correlation, the null hypothesis states that the population correlation is zero.","promptHtml":"\u003cp\u003eIn a nondirectional significance test of a correlation, the null\nhypothesis states that the population correlation is zero.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","type":"true-false"},{"answer":true,"id":"r_denominator_negative","explanation":"The denominator is a square root of sums of squares, so it cannot be negative.","explanationHtml":"\u003cp\u003eThe denominator is a square root of sums of squares, so it cannot be\nnegative.\u003c/p\u003e","prompt":"The denominator of Pearson’s r cannot be negative.","promptHtml":"\u003cp\u003eThe denominator of Pearson’s r cannot be negative.\u003c/p\u003e","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","type":"true-false"},{"answer":false,"id":"r_numerator_negative","explanation":"The sum of products can be negative, producing a negative correlation.","explanationHtml":"\u003cp\u003eThe sum of products can be negative, producing a negative\ncorrelation.\u003c/p\u003e","prompt":"The numerator of Pearson’s r cannot be negative.","promptHtml":"\u003cp\u003eThe numerator of Pearson’s r cannot be negative.\u003c/p\u003e","answerHtml":"","type":"true-false"}],"titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","id":"17_correlation_learning_checks"}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-corley2010caffeine" class="csl-entry" role="listitem">
+Corley, J., Jia, X., Kyle, J. A. M., Gow, A. J., Brett, C. E., Starr, J. M., McNeill, G., &amp; Deary, I. J. (2010). Caffeine consumption and cognitive function at age 70: The <span>Lothian</span> <span>Birth</span> <span>Cohort</span> 1936 study. <em>Psychosomatic Medicine</em>, <em>72</em>(2), 206–214. <a href="https://doi.org/10.1097/PSY.0b013e3181c92a9c">https://doi.org/10.1097/PSY.0b013e3181c92a9c</a>
+</div>
+<div id="ref-funder2019evaluating" class="csl-entry" role="listitem">
+Funder, D. C., &amp; Ozer, D. J. (2019). Evaluating effect size in psychological research: Sense and nonsense. <em>Advances in Methods and Practices in Psychological Science</em>, <em>2</em>(2), 156–168. <a href="https://doi.org/10.1177/2515245919847202">https://doi.org/10.1177/2515245919847202</a>
+</div>
+</div>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./16-factorial-anova.html" class="pagination-link" aria-label="Factorial ANOVA">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./18-regression.html" class="pagination-link" aria-label="Regression">
+        <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>4&nbsp; Variability – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./05-z-scores.html" rel="next">
+<link href="./03-central-tendency.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="4&nbsp; Variability – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="4&nbsp; Variability – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#what-is-variability" id="toc-what-is-variability" class="nav-link active" data-scroll-target="#what-is-variability">What is variability?</a></li>
+  <li><a href="#the-range" id="toc-the-range" class="nav-link" data-scroll-target="#the-range">The range</a></li>
+  <li><a href="#deviations" id="toc-deviations" class="nav-link" data-scroll-target="#deviations">Deviations</a></li>
+  <li><a href="#variability-equations-for-populations" id="toc-variability-equations-for-populations" class="nav-link" data-scroll-target="#variability-equations-for-populations">Variability equations for populations</a>
+  <ul class="collapse">
+  <li><a href="#the-importance-of-sums-of-squares" id="toc-the-importance-of-sums-of-squares" class="nav-link" data-scroll-target="#the-importance-of-sums-of-squares">The importance of sums of squares</a></li>
+  </ul></li>
+  <li><a href="#sec-variability-sample" id="toc-sec-variability-sample" class="nav-link" data-scroll-target="#sec-variability-sample">Sample variability and bias</a></li>
+  <li><a href="#variability-equations-for-samples" id="toc-variability-equations-for-samples" class="nav-link" data-scroll-target="#variability-equations-for-samples">Variability equations for samples</a></li>
+  <li><a href="#degrees-of-freedom" id="toc-degrees-of-freedom" class="nav-link" data-scroll-target="#degrees-of-freedom">Degrees of freedom</a></li>
+  <li><a href="#visualizing-statistical-bias" id="toc-visualizing-statistical-bias" class="nav-link" data-scroll-target="#visualizing-statistical-bias">Visualizing statistical bias</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/graph-generator.js"></script>
+<script src="resources/js/variability-table-generator.js"></script>
+<script src="resources/js/height-variability-interactive.js"></script>
+<div class="interactive-figure-mount" data-interactive-factory="makeDistributionFamilyCover" data-interactive-figure="variabilityCover" data-interactive-options="{&quot;renderer&quot;:&quot;webgl&quot;,&quot;distribution&quot;:&quot;normal&quot;,&quot;sd&quot;:[2.4,2.2,2,1.8,1.6,1.4,1.2,1,0.8,0.6],&quot;xDomain&quot;:[-6,6],&quot;yDomain&quot;:[0,0.7],&quot;points&quot;:160,&quot;strokeWidth&quot;:2.6,&quot;opacity&quot;:0.88,&quot;colorCycle&quot;:10,&quot;animation&quot;:&quot;rise&quot;,&quot;duration&quot;:1700,&quot;ease&quot;:&quot;cubic&quot;,&quot;stagger&quot;:&quot;spread&quot;,&quot;delaySpread&quot;:1500,&quot;fallback&quot;:{&quot;animate&quot;:false},&quot;performance&quot;:true,&quot;ariaLabel&quot;:&quot;Animated family of normal curves with increasing standard deviations rising from a baseline&quot;}">
+<div class="interactive-figure-fallback">
+Animated family of normal curves showing different standard deviations.
+</div>
+</div>
+<p>In the previous chapter we talked about measures of central tendency. But there is another crucial characteristic of distributions that we need to know in addition to the center: how widely scattered or closely clustered scores are around it. That’s what we mean by <em>variability</em>. We’ll start with the range, then build up the standard deviation from deviations, sums of squares, and variance. Along the way we’ll meet another important concept: degrees of freedom.</p>
+<section id="what-is-variability" class="level2">
+<h2 data-anchor-id="what-is-variability">What is variability?</h2>
+<p>To start with, let’s consider a few small sets of scores. Imagine you check the reviews of three movies you’re thinking about watching, scored from 0 to 10.</p>
+<blockquote class="blockquote">
+<p><em>Fine, Actually</em>: 5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5</p>
+<p><em>The Good, the Bad and the Okay</em>: 0,&nbsp;4,&nbsp;5,&nbsp;5,&nbsp;6,&nbsp;10</p>
+<p><em>The Polarizing Express</em>: 0,&nbsp;0,&nbsp;1,&nbsp;9,&nbsp;10,&nbsp;10</p>
+</blockquote>
+<p>How might you describe the differences among these sets of ratings? Don’t worry about calculating any new statistics yet. Start with the ideas from the previous chapter and think about what they capture or leave out.</p>
+<div id="quiz-variability-differences" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-quiz figure">
+<div aria-describedby="quiz-variability-differences-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="04_variability_differences" aria-label="Comparing reviews"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Comparing reviews</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="you_friend"><div class="quiz-prompt"><p>How would you describe the differences among the three sets of
+ratings above? Suppose another person reviews each movie. If you had to
+predict each rating using a single number, what would you predict? Would
+you trust all three predictions equally? What do the measures of central
+tendency from the previous chapter capture or leave out?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>All three sets have the same median and mean: 5. The first two also
+have a mode of 5, whereas The Polarizing Express has two modes, 0 and
+10. The ratings for Fine, Actually are all identical. Most ratings for
+The Good, the Bad and the Okay cluster near 5, while those for The
+Polarizing Express are spread towards the extremes. A rating of 5 would
+be a sensible single-number prediction for each movie, but we would
+trust that prediction most for Fine, Actually and least for The
+Polarizing Express.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The mean and median can give us the same single-number prediction for
+distributions whose scores differ substantially in how closely they
+cluster around it. The modes for The Polarizing Express hint at its
+split ratings, but a measure of variability lets us quantify the
+difference in spread.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="04_variability_differences">{"title":"Comparing reviews","questions":[{"explanationHtml":"\u003cp\u003eThe mean and median can give us the same single-number prediction for\ndistributions whose scores differ substantially in how closely they\ncluster around it. The modes for The Polarizing Express hint at its\nsplit ratings, but a measure of variability lets us quantify the\ndifference in spread.\u003c/p\u003e","promptHtml":"\u003cp\u003eHow would you describe the differences among the three sets of\nratings above? Suppose another person reviews each movie. If you had to\npredict each rating using a single number, what would you predict? Would\nyou trust all three predictions equally? What do the measures of central\ntendency from the previous chapter capture or leave out?\u003c/p\u003e","answer":"All three sets have the same median and mean: 5. The first two also have a mode of 5, whereas The Polarizing Express has two modes, 0 and 10. The ratings for Fine, Actually are all identical. Most ratings for The Good, the Bad and the Okay cluster near 5, while those for The Polarizing Express are spread towards the extremes. A rating of 5 would be a sensible single-number prediction for each movie, but we would trust that prediction most for Fine, Actually and least for The Polarizing Express.","type":"free-response","explanation":"The mean and median can give us the same single-number prediction for distributions whose scores differ substantially in how closely they cluster around it. The modes for The Polarizing Express hint at its split ratings, but a measure of variability lets us quantify the difference in spread.","answerHtml":"\u003cp\u003eAll three sets have the same median and mean: 5. The first two also\nhave a mode of 5, whereas The Polarizing Express has two modes, 0 and\n10. The ratings for Fine, Actually are all identical. Most ratings for\nThe Good, the Bad and the Okay cluster near 5, while those for The\nPolarizing Express are spread towards the extremes. A rating of 5 would\nbe a sensible single-number prediction for each movie, but we would\ntrust that prediction most for Fine, Actually and least for The\nPolarizing Express.\u003c/p\u003e","id":"you_friend","prompt":"How would you describe the differences among the three sets of ratings above? Suppose another person reviews each movie. If you had to predict each rating using a single number, what would you predict? Would you trust all three predictions equally? What do the measures of central tendency from the previous chapter capture or leave out?"}],"id":"04_variability_differences","titleHtml":"\u003cp\u003eComparing reviews\u003c/p\u003e"}</script></section>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-quiz quarto-uncaptioned" id="quiz-variability-differences-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Quiz&nbsp;4.1
+</figcaption>
+</figure>
+</div>
+<p>Using the tools we explored in the previous chapter, we find that the median and mean are 5 for all three movies. The mode is also 5 for the first two. <em>The Polarizing Express</em> has two modes, 0 and 10, which already gives us a clue that something different is going on. But none of these measures quantifies just how closely the ratings cluster around the center. Without knowing anything else about the movies, if you were to try to guess how much you will like each one — what score will you most likely give it? — 5 would be a sensible prediction in each case. But it seems a more reliable guess in some cases than others. If we plot the ratings as block histograms, we can see why.</p>
+<div class="bc-figure-row bc-figure-row-wide">
+<div class="interactive-figure-mount" data-interactive-factory="makeGraph" data-interactive-figure="variabilityBlocksStandins" data-interactive-options="{&quot;type&quot;:&quot;block&quot;,&quot;data&quot;:[5,5,5,5,5,5],&quot;xDomain&quot;:[-0.5,10.5],&quot;xTickValues&quot;:[0,5,10],&quot;yDomain&quot;:[0,6],&quot;yTickValues&quot;:[0,2,4,6],&quot;labels&quot;:{&quot;title&quot;:&quot;Fine, Actually&quot;,&quot;x&quot;:&quot;Rating&quot;,&quot;y&quot;:&quot;Frequency&quot;}}">
+<div class="interactive-figure-fallback">
+Block histogram of ratings for Fine, Actually, all at 5.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-factory="makeGraph" data-interactive-figure="variabilityBlocksYou" data-interactive-options="{&quot;type&quot;:&quot;block&quot;,&quot;data&quot;:[0,4,5,5,6,10],&quot;xDomain&quot;:[-0.5,10.5],&quot;xTickValues&quot;:[0,5,10],&quot;yDomain&quot;:[0,6],&quot;yTickValues&quot;:[0,2,4,6],&quot;labels&quot;:{&quot;title&quot;:&quot;The Good, the Bad and the Okay&quot;,&quot;x&quot;:&quot;Rating&quot;,&quot;y&quot;:&quot;Frequency&quot;}}">
+<div class="interactive-figure-fallback">
+Block histogram of ratings for The Good, the Bad and the Okay, mostly clustered around 5 with ratings at 0 and 10.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-factory="makeGraph" data-interactive-figure="variabilityBlocksFriend" data-interactive-options="{&quot;type&quot;:&quot;block&quot;,&quot;data&quot;:[0,0,1,9,10,10],&quot;xDomain&quot;:[-0.5,10.5],&quot;xTickValues&quot;:[0,5,10],&quot;yDomain&quot;:[0,6],&quot;yTickValues&quot;:[0,2,4,6],&quot;labels&quot;:{&quot;title&quot;:&quot;The Polarizing Express&quot;,&quot;x&quot;:&quot;Rating&quot;,&quot;y&quot;:&quot;Frequency&quot;}}">
+<div class="interactive-figure-fallback">
+Block histogram of ratings for The Polarizing Express, clustered near 0 and 10.
+</div>
+</div>
+</div>
+<p>The ratings for <em>Fine, Actually</em> do not vary at all: every reviewer so far gave it a 5. Most of the ratings for <em>The Good, the Bad and the Okay</em> cluster in the middle, aside from the two extremes. The ratings for <em>The Polarizing Express</em> sit much farther towards the extremes, with none in the middle of the scale at all. So <em>Fine, Actually</em> has no variability, <em>The Polarizing Express</em> has relatively high variability, and <em>The Good, the Bad and the Okay</em> sits somewhere in between. The mean gives us the same prediction for all three, but their variability tells us how far individual ratings tend to depart from it.</p>
+<p>How do we quantify that difference? Like measures of central tendency, measures of variability use a single number to summarize a more complex dataset. But this time we’re describing spread rather than center. Greater variability means scores are more widely dispersed, so the center by itself tells us less about what any individual score is likely to look like. And, as with central tendency, there is more than one way to quantify it.</p>
+</section>
+<section id="the-range" class="level2">
+<h2 data-anchor-id="the-range">The range</h2>
+<p>Remember Hipparchus? I mentioned him in Chapter 3 as an early astronomical pioneer, gazing at the heavens, taking measurements, and realizing that his data were not always perfectly consistent. His solution (according to later sources; his own original work is mostly lost) was to take the midrange: the halfway point between the lowest and highest observations <span class="citation" data-cites="stahl2006normal">(<a href="references.html#ref-stahl2006normal" role="doc-biblioref">Stahl, 2006</a>)</span>.</p>
+<p>The utility of this to the early astronomers was to smooth over the discrepant measurements; once the midrange was calculated it could be taken as providing a reliable answer, and the extremes could be largely ignored. But those two values also offer a simple and intuitive way of quantifying variability: the <strong>range</strong>, calculated by subtracting the minimum score from the maximum.</p>
+<p>Here are those ratings from before:</p>
+<blockquote class="blockquote">
+<p><em>Fine, Actually</em>: 5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5<br>
+Range: <span class="math inline">\(5 - 5 = 0\)</span></p>
+<p><em>The Good, the Bad and the Okay</em>: 0,&nbsp;4,&nbsp;5,&nbsp;5,&nbsp;6,&nbsp;10<br>
+Range: <span class="math inline">\(10 - 0 = 10\)</span></p>
+<p><em>The Polarizing Express</em>: 0,&nbsp;0,&nbsp;1,&nbsp;9,&nbsp;10,&nbsp;10<br>
+Range: <span class="math inline">\(10 - 0 = 10\)</span></p>
+</blockquote>
+<p>The range captures one important difference: it is zero for <em>Fine, Actually</em> because its ratings don’t vary. But it gives us the same answer for <em>The Good, the Bad and the Okay</em> and <em>The Polarizing Express</em>. There’s nothing <em>wrong</em> about that. The range is telling us precisely what it is designed to, but it misses the obvious difference between how the ratings are distributed between the extremes.</p>
+<p>This is the main limitation of the range as a measure of variability: it does not consider all the observations. Only the two extremes contribute to its value. As a result, it is not affected by how observations are distributed between them. This characteristic also makes it highly susceptible to outliers. One unusual observation can drastically change the range. It also tends to grow with sample size, simply because larger samples have more opportunities to include extreme values.</p>
+<p>That’s not to say looking at the range isn’t useful for some purposes. Researchers often begin by checking the minimum, maximum, and range to get a quick sense of the values in their data. Sometimes you just don’t know what to expect, so its helpful to see the extremes and how far apart they are. It can also reveal a problem. Suppose we write a new extraversion item that allows responses numbered one to five. A range of three suggests that the item didn’t work well. Maybe asking people “Are you the world’s most extraverted person?” was a bit too much and restricted the range of responses. A range of ten, on the other hand, tells us to check for misrecorded values.</p>
+<p>Useful as the range is, we also want a measure of variability that considers every observation, not just the two extremes. For that, we need a more mathematically sophisticated measure.</p>
+</section>
+<section id="deviations" class="level2">
+<h2 data-anchor-id="deviations">Deviations</h2>
+<p>In chapter 3 we introduced <em>deviations</em>: the differences between each score and the mean. The mean is the point at which those deviations balance, but the deviations themselves also give us a way to quantify how far the scores spread around it.</p>
+<p>For astronomers, deviations offered a way to quantify measurement error: imprecision in their instruments or observations. For statisticians applying the same ideas to human measurements, they captured a different kind of variation. In Quetelet’s measurements of soldiers’ chests, a deviation did not necessarily indicate a mistake of the measuring tape; it described how one person’s body differed from another’s. In either case, if we think of the mean as a prediction, a deviation is the prediction error: how far, and in which direction, the actual score fell from it.</p>
+<p>The next step was to find a way to summarize those deviations in a single number. Should be easy, no? If we want a “standard deviation,” meaning a typical deviation from the mean, why not just calculate the average of all the deviations?</p>
+<div id="quiz-average-deviations" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-quiz figure">
+<div aria-describedby="quiz-average-deviations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="04_variability_average_deviations" aria-label="Average of Deviations"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Average of Deviations</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="average_deviations"><div class="quiz-prompt"><p>Why can we not simply average the raw deviations from the mean to
+measure variability?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The raw deviations from the mean always sum to zero because the mean
+is the balance point of the distribution.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>To measure typical distance from the mean, we need to stop positive
+and negative deviations from canceling out. Squaring deviations is the
+usual solution.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="04_variability_average_deviations">{"title":"Average of Deviations","questions":[{"explanationHtml":"\u003cp\u003eTo measure typical distance from the mean, we need to stop positive\nand negative deviations from canceling out. Squaring deviations is the\nusual solution.\u003c/p\u003e","promptHtml":"\u003cp\u003eWhy can we not simply average the raw deviations from the mean to\nmeasure variability?\u003c/p\u003e","answer":"The raw deviations from the mean always sum to zero because the mean is the balance point of the distribution.","type":"free-response","explanation":"To measure typical distance from the mean, we need to stop positive and negative deviations from canceling out. Squaring deviations is the usual solution.","answerHtml":"\u003cp\u003eThe raw deviations from the mean always sum to zero because the mean\nis the balance point of the distribution.\u003c/p\u003e","id":"average_deviations","prompt":"Why can we not simply average the raw deviations from the mean to measure variability?"}],"id":"04_variability_average_deviations","titleHtml":"\u003cp\u003eAverage of Deviations\u003c/p\u003e"}</script></section>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-quiz quarto-uncaptioned" id="quiz-average-deviations-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Quiz&nbsp;4.2
+</figcaption>
+</figure>
+</div>
+<p>The problem is that, precisely because the mean is the balance point, the deviations above and below balance each other out. To find a mean, we first have to add the values up, but the signed deviations always add up to zero. That means it’s not possible to calculate an average deviation this way. The answer would always be zero.</p>
+<p>So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we’re going to focus on is <strong>squaring each deviation</strong>. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we minimize and partition variance later.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>Having squared the deviations, we can follow up with one connected chain of calculations. Add the squared deviations to get <span class="math inline">\(SS\)</span>, the <strong>sum of squared deviations</strong> (or “sum of squares” for short). Divide <span class="math inline">\(SS\)</span> by the number of observations to get the population <strong>variance</strong>, the mean squared deviation. Then take its square root to get the <strong>standard deviation</strong>. The square root returns us to the original units, so we can interpret the standard deviation as a <em>typical deviation</em> from the mean.<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></p>
+</section>
+<section id="variability-equations-for-populations" class="level2">
+<h2 data-anchor-id="variability-equations-for-populations">Variability equations for populations</h2>
+<p>To complicate life slightly, populations and samples use slightly different calculations. We’ll start with a population and return to samples shortly.</p>
+<p>The table puts the steps into mathematical notation. Population variance is represented by lowercase sigma squared (<span class="math inline">\(\sigma^2\)</span>), and population standard deviation by lowercase sigma (<span class="math inline">\(\sigma\)</span>).</p>
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 77%">
+<col style="width: 22%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Step</th>
+<th style="text-align: left;">Population calculation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1. Find the deviation for each score</td>
+<td style="text-align: left;"><span class="math inline">\(X - \mu\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2. Square the deviations</td>
+<td style="text-align: left;"><span class="math inline">\((X - \mu)^2\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3. Sum the squared deviations</td>
+<td style="text-align: left;"><span class="math inline">\(SS = \Sigma(X - \mu)^2\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4. Calculate variance (mean squared deviation)</td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2 = \frac{SS}{N}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5. Calculate standard deviation (root-mean-square deviation)</td>
+<td style="text-align: left;"><span class="math inline">\(\sigma = \sqrt{\sigma^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Equations in hand, let’s return to the two movies whose ratings had the same range. For now, we’ll treat each complete set of ratings as its own population. We’ll work through <em>The Good, the Bad and the Okay</em> together; then you can try the same procedure for <em>The Polarizing Express</em>.</p>
+<div id="act-calculate-variability" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;4.1: Calculate variability
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-factory="makeVariabilityTable" data-interactive-figure="variabilityTable" data-interactive-options="{&quot;title&quot;:&quot;The Good, the Bad and the Okay&quot;,&quot;data&quot;:[0,4,5,5,6,10],&quot;controls&quot;:false}">
+<div class="interactive-figure-fallback">
+Interactive table calculating deviations, sum of squares, variance, and standard deviation for the ratings of The Good, the Bad and the Okay.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Scores" data-action="{&quot;stage&quot;:&quot;data&quot;,&quot;animate&quot;:false}">
+<p>Start with the original ratings for <em>The Good, the Bad and the Okay</em>. When I’m doing this calculation by hand, I find it easiest to put the scores in the first column of a table, then add columns for the deviations and squared deviations. We’ll fill them from left to right before using the values at the bottom to finish the calculation.</p>
+</div>
+<div class="tutorial-step" data-title="Mean" data-action="{&quot;stage&quot;:&quot;mean&quot;,&quot;animate&quot;:true}">
+<p>First find the population mean. The ratings add to 30, and there are six of them, so <span class="math inline">\(\mu = 30/6 = 5\)</span>. This is the reference point for every deviation in the next column.</p>
+</div>
+<div class="tutorial-step" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Subtract the mean from each score: <span class="math inline">\(X-\mu\)</span>. The deviations are <span class="math inline">\(-5, -1, 0, 0, 1,\)</span> and <span class="math inline">\(5\)</span>. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are.</p>
+</div>
+<div class="tutorial-step" data-title="Squared" data-action="{&quot;stage&quot;:&quot;squared-deviations&quot;,&quot;animate&quot;:true}">
+<p>Now square each deviation. This gives us <span class="math inline">\(25, 1, 0, 0, 1,\)</span> and <span class="math inline">\(25\)</span>. Squaring makes every value nonnegative, so the deviations below and above the mean will no longer cancel each other out.</p>
+</div>
+<div class="tutorial-step" data-title="SS" data-action="{&quot;stage&quot;:&quot;ss&quot;,&quot;animate&quot;:true}">
+<p>Add the squared deviations to get the sum of squares: <span class="math inline">\(SS = 25+1+0+0+1+25 = 52\)</span>. Once the two extra columns are filled, this is simply the total at the bottom of the final column.</p>
+</div>
+<div class="tutorial-step" data-title="Variance" data-action="{&quot;stage&quot;:&quot;variance&quot;,&quot;animate&quot;:true}">
+<p>Divide by the population size, <span class="math inline">\(N\)</span>, to get the variance: <span class="math inline">\(\sigma^2 = 52/6 = 8.67\)</span>. Because we’ve squared the deviations, variance is measured in squared rating points. That makes it useful mathematically, but not especially intuitive on the scale of the original scores.</p>
+</div>
+<div class="tutorial-step" data-title="SD" data-action="{&quot;stage&quot;:&quot;sd&quot;,&quot;animate&quot;:true}">
+<p>Finally, take the square root of the variance: <span class="math inline">\(\sigma = \sqrt{8.67} = 2.94\)</span>. This returns us to the original units, so we can say that a typical deviation from the mean rating for <em>The Good, the Bad and the Okay</em> is around three points.</p>
+</div>
+</div>
+</div>
+</div>
+<div id="quiz-variability-calculation" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-quiz figure">
+<div aria-describedby="quiz-variability-calculation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="04_variability_calculation" aria-label="Now calculate variability for The Polarizing Express"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Now calculate variability for The Polarizing Express</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="polarizing_express_population_sd"><div class="quiz-prompt"><p>Follow the whole procedure for the ratings of The Polarizing Express:
+0, 0, 1, 9, 10, and 10. Treating these six ratings as a population, what
+is the standard deviation?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>Start by finding the mean. Then make columns for <span class="math inline"><em>X</em> − <em>μ</em></span> and <span class="math inline">(<em>X</em> − <em>μ</em>)<sup>2</sup></span>.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>Add the squared deviations, divide by <span class="math inline"><em>N</em> = 6</span>, and take the square root.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>4.69</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The mean rating is <span class="math inline"><em>μ</em> = 5</span>.
+Here is the whole calculation:</p>
+<div class="interactive-figure-mount" data-interactive-figure="polarizingExpressPopulationVariabilityTable" data-interactive-factory="makeVariabilityTable" data-interactive-options="{&quot;title&quot;:&quot;The Polarizing Express&quot;,&quot;data&quot;:[0,0,1,9,10,10],&quot;initialStage&quot;:&quot;sd&quot;,&quot;controls&quot;:false,&quot;tutorial&quot;:false}">
+<div class="interactive-figure-fallback">
+Filled variability table for the ratings of The Polarizing Express,
+showing deviations, squared deviations, SS = 132, population variance =
+22, and population standard deviation = 4.69.
+</div>
+</div>
+<p>Taking the square root of 22 gives a standard deviation of 4.69. This
+is larger than the 2.94 for The Good, the Bad and the Okay, capturing
+the greater spread that the range missed.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="04_variability_calculation">{"title":"Now calculate variability for The Polarizing Express","questions":[{"explanationHtml":"\u003cp\u003eThe mean rating is \u003cspan class=\"math inline\"\u003e\u003cem\u003eμ\u003c/em\u003e = 5\u003c/span\u003e.\nHere is the whole calculation:\u003c/p\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"polarizingExpressPopulationVariabilityTable\"\ndata-interactive-factory=\"makeVariabilityTable\"\ndata-interactive-options=\"{\u0026quot;title\u0026quot;:\u0026quot;The Polarizing Express\u0026quot;,\u0026quot;data\u0026quot;:[0,0,1,9,10,10],\u0026quot;initialStage\u0026quot;:\u0026quot;sd\u0026quot;,\u0026quot;controls\u0026quot;:false,\u0026quot;tutorial\u0026quot;:false}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nFilled variability table for the ratings of The Polarizing Express,\nshowing deviations, squared deviations, SS = 132, population variance =\n22, and population standard deviation = 4.69.\n\u003c/div\u003e\n\u003c/div\u003e\n\u003cp\u003eTaking the square root of 22 gives a standard deviation of 4.69. This\nis larger than the 2.94 for The Good, the Bad and the Okay, capturing\nthe greater spread that the range missed.\u003c/p\u003e","answer":"4.69","type":"numeric","hints":[{"text":"Start by finding the mean. Then make columns for X - \\mu and (X - \\mu)^2.","textHtml":"\u003cp\u003eStart by finding the mean. Then make columns for \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eX\u003c/em\u003e − \u003cem\u003eμ\u003c/em\u003e\u003c/span\u003e and \u003cspan\nclass=\"math inline\"\u003e(\u003cem\u003eX\u003c/em\u003e − \u003cem\u003eμ\u003c/em\u003e)\u003csup\u003e2\u003c/sup\u003e\u003c/span\u003e.\u003c/p\u003e"},{"text":"Add the squared deviations, divide by N = 6, and take the square root.","textHtml":"\u003cp\u003eAdd the squared deviations, divide by \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eN\u003c/em\u003e = 6\u003c/span\u003e, and take the square root.\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eFollow the whole procedure for the ratings of The Polarizing Express:\n0, 0, 1, 9, 10, and 10. Treating these six ratings as a population, what\nis the standard deviation?\u003c/p\u003e","answerHtml":"\u003cp\u003e4.69\u003c/p\u003e","prompt":"Follow the whole procedure for the ratings of The Polarizing Express: 0, 0, 1, 9, 10, and 10. Treating these six ratings as a population, what is the standard deviation?","tolerance":"2.0e-2","id":"polarizing_express_population_sd","explanation":"The mean rating is \\mu = 5. Here is the whole calculation:Filled variability table for the ratings of The Polarizing Express, showing deviations, squared deviations, SS = 132, population variance = 22, and population standard deviation = 4.69.Taking the square root of 22 gives a standard deviation of 4.69. This is larger than the 2.94 for The Good, the Bad and the Okay, capturing the greater spread that the range missed."}],"id":"04_variability_calculation","titleHtml":"\u003cp\u003eNow calculate variability for The Polarizing Express\u003c/p\u003e"}</script></section>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-quiz quarto-uncaptioned" id="quiz-variability-calculation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Quiz&nbsp;4.3
+</figcaption>
+</figure>
+</div>
+<section id="the-importance-of-sums-of-squares" class="level3">
+<h3 data-anchor-id="the-importance-of-sums-of-squares">The importance of sums of squares</h3>
+<!-- HISTORY NOTES — possible short naming/legacy coda here
+- The underlying root-mean-square quantity predates the modern name; nineteenth-century writers used terms such as "mean error," "mean square error," and "error of mean square."
+  - "Probable error" was a different, competing way to put the spread of the error curve into one number, based on its central half rather than its squared deviations.
+- Karl Pearson introduced the name *standard deviation* and the symbol $\sigma$ in print in 1894.
+  - His paper explicitly equated it with Gauss's "mean error" and Airy's "error of mean square."
+  - Nice conceptual turn: a tool developed for scatter in astronomical errors was now being used in biometry to describe variation among organisms.
+- R. A. Fisher coined *variance* in 1918 for the square of standard deviation.
+  - His reason was substantive as well as terminological: independent sources of variability add on the squared scale, so total variation can be partitioned among causes.
+  - Direct plant for later ANOVA: variance becomes useful not merely as a description of spread but as something that can be decomposed.
+- Sources: @pearson1894evolution; @fisher1918relatives.
+-->
+<p>Allow me for a moment to impress upon you the importance of squares. <span class="math inline">\(SS\)</span> is not just an intermediate answer that we can forget about as soon as we’ve found the standard deviation. Later in this book we’ll find ourselves splitting variability into different sources, each with its own sum of squares. By the time we finish ANOVA and regression near the end of the semester, I like to joke with my students that the whole course has been nothing but squares all the way down.</p>
+<p>The tables above followed the <strong>definitional formula</strong> for <span class="math inline">\(SS\)</span>: find each deviation, square it, and add the squared deviations.</p>
+<p><span class="math display">\[
+SS = \Sigma(X - \mu)^2
+\]</span></p>
+<p>There is an algebraically equivalent shortcut called the <strong>computational formula</strong>:</p>
+<p><span class="math display">\[
+SS = \Sigma X^2 - \frac{(\Sigma X)^2}{N}
+\]</span></p>
+<p>For the first term, square every score and add the results. Then subtract the correction term: the sum of the scores squared, divided by the number of scores. For <em>The Good, the Bad and the Okay</em>, <span class="math inline">\(\Sigma X=30\)</span> and <span class="math inline">\(\Sigma X^2=202\)</span>, so:</p>
+<p><span class="math display">\[
+SS = 202 - \frac{30^2}{6} = 202 - 150 = 52
+\]</span></p>
+<p>That is the same answer we found by calculating every deviation. The shortcut likewise gives <span class="math inline">\(SS=132\)</span> for <em>The Polarizing Express</em>, so the rest of both calculations remains unchanged.</p>
+<p>We’ll stick with the definitional approach for now, but tuck this computational arrangement in the back of your mind; it will become our preferred method when we get to the ANOVA section of the book.</p>
+</section>
+</section>
+<section id="sec-variability-sample" class="level2">
+<h2 data-anchor-id="sec-variability-sample">Sample variability and bias</h2>
+<p>So far we’ve treated the movie ratings as populations. I mentioned that we have to do things a little differently for samples. Don’t worry, the difference in the math is tiny, but the reason for it is important.</p>
+<p>In research, we generally use the limited information in a sample to estimate something about a population. Here, we want sample variance to estimate population variance. But if we used precisely the calculation above, dividing by <span class="math inline">\(n\)</span>, the estimate would be <strong>biased</strong>. Bias does not mean that any one sample estimate is wrong: a single sample variance can fall above or below the population variance. It is a long-run property. An <strong>unbiased</strong> estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing <span class="math inline">\(SS\)</span> by <span class="math inline">\(n\)</span>, the estimates would average below the actual population variance; it would underestimate the true value.</p>
+<p>The bias comes from using the sample mean, <span class="math inline">\(M\)</span>, in place of the unknown <span class="math inline">\(\mu\)</span>. Each sample’s <span class="math inline">\(M\)</span> is fitted to the scores in that particular sample, designed to minimizes their sum of squared deviations. As a result, the sum of squared deviations around <span class="math inline">\(M\)</span> can only be smaller than the sum of squared deviations of those same scores around <span class="math inline">\(\mu\)</span>, never larger.</p>
+<div id="act-moving-center" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;4.2: The moving center
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-factory="makeHeightVariabilityDemo" data-interactive-figure="heightVariability" data-interactive-options="{&quot;seed&quot;:&quot;height-variability-v1&quot;,&quot;populationMean&quot;:65,&quot;populationSd&quot;:3,&quot;populationSize&quot;:197,&quot;binWidth&quot;:0.5,&quot;sampleSize&quot;:10,&quot;repeatedSamples&quot;:1000}">
+<div class="interactive-figure-fallback">
+Interactive height-sampling diagram showing each uncorrected sample SD first centered on its fitted sample mean, then shifted to the fixed population mean for comparison.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Population" data-action="{&quot;draw&quot;:2,&quot;show-sample&quot;:false,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:false,&quot;sample-span-center&quot;:&quot;sample&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:false,&quot;fall&quot;:false}">
+<p>Start with the population. The half-inch bins are filled from a hypothetical normal model with mean 65 inches and standard deviation 3 inches, so most people are near the mean and fewer people are in the tails.</p>
+</div>
+<div class="tutorial-step" data-title="Around M" data-action="{&quot;draw&quot;:1,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;sample&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:true}">
+<p>Now draw a sample of <span class="interactive-value" data-interactive-value="heightVariability.n" data-interactive-empty="..." data-interactive-format=".0f">...</span> observations from those actual dots. The red span shows the uncorrected sample SD. It is built from squared deviations around <span class="math inline">\(M\)</span>, with the variance calculated by dividing <span class="math inline">\(SS\)</span> by <span class="math inline">\(n\)</span>. Its center marker sits on <span class="math inline">\(M\)</span>, which was fitted from these same observations.</p>
+</div>
+<div class="tutorial-step" data-title="Shift to μ" data-action="{&quot;draw&quot;:1,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;population&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:false}">
+<p>For comparison, slide that same red span over until its center marker reaches <span class="math inline">\(\mu\)</span>. Its width does not change—we are not recalculating the SD. The movement isolates the choice of center: <span class="math inline">\(M\)</span> moved toward this particular set of scores and minimized their squared deviations, whereas <span class="math inline">\(\mu\)</span> stayed fixed.</p>
+</div>
+<div class="tutorial-step" data-title="Can be high" data-action="{&quot;draw&quot;:12,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;population&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:true}">
+<p>A different sample gives us a different <span class="math inline">\(M\)</span>. Here the uncorrected SD is larger than the population SD, showing that an individual sample can still overestimate variability.</p>
+</div>
+<div class="tutorial-step" data-title="Can be low" data-action="{&quot;draw&quot;:5,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;population&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:true}">
+<p>Here the uncorrected SD is smaller than the population SD. Individual estimates can miss in either direction; what happens every time is that <span class="math inline">\(M\)</span> is fitted afresh.</p>
+</div>
+<div class="tutorial-step" data-title="Keep sampling" data-action="{&quot;draw&quot;:6,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;population&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:true}" data-repeat-action="{&quot;new-sample&quot;:true,&quot;show-sample&quot;:true,&quot;show-population-sd&quot;:true,&quot;show-sample-sd&quot;:true,&quot;sample-span-center&quot;:&quot;population&quot;,&quot;show-summary&quot;:false,&quot;animate&quot;:true,&quot;fall&quot;:true}" data-repeat-label="New sample">
+<p>Keep clicking <strong>New sample</strong> and watch how the fitted <span class="math inline">\(M\)</span> and the width of the uncorrected SD change from one sample to the next.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="variability-equations-for-samples" class="level2">
+<h2 data-anchor-id="variability-equations-for-samples">Variability equations for samples</h2>
+<p>So now we know what the problem is, here’s the solution: divide <span class="math inline">\(SS\)</span> by <span class="math inline">\(n - 1\)</span> rather than <span class="math inline">\(n\)</span>. If only all of life’s problems were so easily solved.</p>
+<p>Here is that correction in context. A population uses the known <span class="math inline">\(\mu\)</span> and divides <span class="math inline">\(SS\)</span> by <span class="math inline">\(N\)</span>; a sample uses its fitted <span class="math inline">\(M\)</span> and divides by <span class="math inline">\(n - 1\)</span>. Apart from the fitted center, denominator, and notation, the steps are the same.</p>
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 63%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Step</th>
+<th style="text-align: left;">Population</th>
+<th style="text-align: left;">Sample</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1. Find the deviation for each score</td>
+<td style="text-align: left;"><span class="math inline">\(X - \mu\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(X - M\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2. Square the deviations</td>
+<td style="text-align: left;"><span class="math inline">\((X - \mu)^2\)</span></td>
+<td style="text-align: left;"><span class="math inline">\((X - M)^2\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3. Sum the squared deviations</td>
+<td style="text-align: left;"><span class="math inline">\(SS = \Sigma(X - \mu)^2\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(SS = \Sigma(X - M)^2\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4. Calculate variance</td>
+<td style="text-align: left;"><span class="math inline">\(\sigma^2 = \frac{SS}{N}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(s^2 = \frac{SS}{df} = \frac{SS}{n - 1}\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">5. Calculate standard deviation</td>
+<td style="text-align: left;"><span class="math inline">\(\sigma = \sqrt{\sigma^2}\)</span></td>
+<td style="text-align: left;"><span class="math inline">\(s = \sqrt{s^2}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This correction makes <span class="math inline">\(s^2\)</span> an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, <span class="math inline">\(s\)</span>, often labeled <span class="math inline">\(SD\)</span> when results are reported in psychology.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="04_variability_sample_calculation" aria-label="From population to sample"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>From population to sample</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="good_bad_okay_sample_sd"><div class="quiz-prompt"><p>Now suppose the six ratings for The Good, the Bad and the Okay are a
+sample from the larger population of ratings that viewers might give it.
+Earlier, you found that <span class="math inline"><em>S</em><em>S</em> = 52</span>. What is the sample
+standard deviation?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>You do not need to calculate the deviations or <span class="math inline"><em>S</em><em>S</em></span> again. Pick up at the
+step where the sample calculation differs from the population
+calculation.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>For <span class="math inline"><em>n</em> = 6</span>, the degrees of
+freedom are <span class="math inline"><em>n</em> − 1 = 5</span>. First
+calculate <span class="math inline"><em>s</em><sup>2</sup> = 52/5</span>, then take the
+square root.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>3.22</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p><span class="math inline"><em>s</em><sup>2</sup> = <em>S</em><em>S</em>/(<em>n</em> − 1) = 52/5 = 10.4</span>.
+Its square root, the sample standard deviation, is about 3.22.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="04_variability_sample_calculation">{"title":"From population to sample","questions":[{"explanationHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003es\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e = \u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e/(\u003cem\u003en\u003c/em\u003e − 1) = 52/5 = 10.4\u003c/span\u003e.\nIts square root, the sample standard deviation, is about 3.22.\u003c/p\u003e","answer":"3.22","type":"numeric","hints":[{"text":"You do not need to calculate the deviations or SS again. Pick up at the step where the sample calculation differs from the population calculation.","textHtml":"\u003cp\u003eYou do not need to calculate the deviations or \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e again. Pick up at the\nstep where the sample calculation differs from the population\ncalculation.\u003c/p\u003e"},{"text":"For n = 6, the degrees of freedom are n - 1 = 5. First calculate s^2 = 52 / 5, then take the square root.","textHtml":"\u003cp\u003eFor \u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e = 6\u003c/span\u003e, the degrees of\nfreedom are \u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1 = 5\u003c/span\u003e. First\ncalculate \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003es\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e = 52/5\u003c/span\u003e, then take the\nsquare root.\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eNow suppose the six ratings for The Good, the Bad and the Okay are a\nsample from the larger population of ratings that viewers might give it.\nEarlier, you found that \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e = 52\u003c/span\u003e. What is the sample\nstandard deviation?\u003c/p\u003e","answerHtml":"\u003cp\u003e3.22\u003c/p\u003e","prompt":"Now suppose the six ratings for The Good, the Bad and the Okay are a sample from the larger population of ratings that viewers might give it. Earlier, you found that SS = 52. What is the sample standard deviation?","tolerance":"2.0e-2","id":"good_bad_okay_sample_sd","explanation":"s^2 = SS / (n - 1) = 52 / 5 = 10.4. Its square root, the sample standard deviation, is about 3.22."}],"id":"04_variability_sample_calculation","titleHtml":"\u003cp\u003eFrom population to sample\u003c/p\u003e"}</script></section>
+</section>
+<section id="degrees-of-freedom" class="level2">
+<h2 data-anchor-id="degrees-of-freedom">Degrees of freedom</h2>
+<p>But wait, why does the correction use exactly <span class="math inline">\(n - 1\)</span>? Suppose I have put three playing cards face down in front of you and tell you that their mean is <span class="math inline">\(M=5\)</span>. There is no way to know the value of the first card, so I show you that it is a three. There is still no way to know the second; it turns out to be a five. But you can now tell me the value of the third card. Given the mean and the other two values, it has to be seven.</p>
+<div class="center" style="font-size: 12em; margin-top: -0.4em; margin-bottom: -0.2em;">
+<p>🃓 🂵 🂠</p>
+</div>
+<p>We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn’t matter. Whatever the last card is, we’ll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once <span class="math inline">\(M\)</span> has been fitted, the deviations have to sum to zero. Any <span class="math inline">\(n - 1\)</span> deviations can vary, but their values determine the last one. So sample variance has <span class="math inline">\(df = n - 1\)</span> <strong>degrees of freedom</strong>.</p>
+<p>If <span class="math inline">\(\mu\)</span> were already known and we measured the sample’s deviations around that fixed population center, they would not be constrained to sum to zero and we would not lose a degree of freedom by fitting <span class="math inline">\(M\)</span>. (Later we’ll meet calculations that fit more means and therefore have different degrees of freedom.)</p>
+</section>
+<section id="visualizing-statistical-bias" class="level2">
+<h2 data-anchor-id="visualizing-statistical-bias">Visualizing statistical bias</h2>
+<p>The moving-center visualization showed the mechanism within each sample. But bias is a long-run property, so now we need to follow estimates across many samples. There is no contradiction in saying that <span class="math inline">\(M\)</span> is an unbiased estimate of <span class="math inline">\(\mu\)</span> while fitting <span class="math inline">\(M\)</span> creates bias in <span class="math inline">\(SS/n\)</span>. Across samples, the errors in <span class="math inline">\(M\)</span> balance around zero. Within each sample, <span class="math inline">\(M\)</span> is the center that minimizes <span class="math inline">\(SS\)</span>.</p>
+<p><a href="#act-tracking-bias" class="quarto-xref">Activity&nbsp;<span>4.3</span></a> tracks both the individual errors and their cumulative average. We will begin with the sample mean, then compare variance calculated using <span class="math inline">\(SS/n\)</span> and <span class="math inline">\(SS/(n - 1)\)</span>.</p>
+<div id="act-tracking-bias" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;4.3: Tracking bias across repeated samples
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-factory="makeHeightVariabilityDemo" data-interactive-figure="varianceBiasTracker" data-interactive-options="{&quot;tracking&quot;:true,&quot;seed&quot;:&quot;height-variability-bias-v61&quot;,&quot;populationMean&quot;:65,&quot;populationSd&quot;:3,&quot;populationSize&quot;:197,&quot;binWidth&quot;:0.5,&quot;sampleSize&quot;:10,&quot;initialSamples&quot;:1,&quot;maxSamples&quot;:1000,&quot;populationSampleScale&quot;:0.76,&quot;varianceReferenceWidth&quot;:7}">
+<div class="interactive-figure-fallback">
+Interactive charts tracking mean and variance estimates across repeated samples.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-major="source" data-major-title="Source" data-title="One sample" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:1,&quot;source-view&quot;:&quot;full&quot;,&quot;show-error-tracker&quot;:false,&quot;show-average-tracker&quot;:false,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>Begin with the sample mean, <span class="math inline">\(M\)</span>, as an estimate of the population mean, <span class="math inline">\(\mu\)</span>. The colored dots are one sample drawn from this fixed population. This particular sample mean might be too low or too high, but one sample cannot tell us whether the estimator itself is biased.</p>
+</div>
+<div class="tutorial-step" data-major="source" data-major-title="Source" data-title="Follow the samples" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:1,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:false,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>The population will stay the same while we draw sample after sample. Let’s shift it out of the way and collect the individual sample means on the timeline below, using the population mean as our fixed reference.</p>
+</div>
+<div class="tutorial-step" data-major="mean" data-major-title="Means" data-title="Five means" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:5,&quot;sample-interval&quot;:500,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:false,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>Now draw four more samples, one at a time. The five squares are the five sample means we’ve seen so far. Each square’s vertical position is that sample’s estimation error, <span class="math inline">\(M-\mu\)</span>: below zero is an underestimate and above zero is an overestimate.</p>
+</div>
+<div class="tutorial-step" data-major="mean" data-major-title="Means" data-title="Average error" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:5,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:true,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>The second tracker summarizes the first. After each new sample, it averages all the errors collected so far. The line may wander at first because a few samples can land mostly high or mostly low. Bias is the long-run position of this average, not the fact that individual estimates scatter around.</p>
+</div>
+<div class="tutorial-step" data-major="mean" data-major-title="Means" data-title="First 100" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:100,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:true,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>Now collect 100 sample means. The individual errors land on both sides of zero while their cumulative average begins to settle down.</p>
+</div>
+<div class="tutorial-step" data-major="mean" data-major-title="Means" data-title="1,000 means" data-action="{&quot;estimator&quot;:&quot;mean&quot;,&quot;samples&quot;:1000,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:true,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>At 1,000 sample means, the average error is <span class="interactive-value" data-interactive-value="varianceBiasTracker.averageMeanError" data-interactive-empty="..." data-interactive-format=".2f">...</span> inches. The overestimates and underestimates balance out, so the sample mean is unbiased.</p>
+</div>
+<div class="tutorial-step" data-major="variance" data-major-title="Variance" data-title="One variance" data-action="{&quot;estimator&quot;:&quot;variance&quot;,&quot;samples&quot;:1,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:true,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>Now reset to one sample and use it to estimate population variance. The red triangles show the calculation that divides <span class="math inline">\(SS\)</span> by <span class="math inline">\(n\)</span>; the blue triangles show the calculation that divides by <span class="math inline">\(n-1\)</span>. Either estimate can miss high or low in one sample, so once again a single result cannot establish bias.</p>
+</div>
+<div class="tutorial-step" data-major="variance" data-major-title="Variance" data-title="Bias and correction" data-action="{&quot;estimator&quot;:&quot;variance&quot;,&quot;samples&quot;:1000,&quot;source-view&quot;:&quot;sample&quot;,&quot;show-error-tracker&quot;:true,&quot;show-average-tracker&quot;:true,&quot;show-expected-bias&quot;:false,&quot;animate&quot;:true}">
+<p>Across many samples, the calculation that divides by <span class="math inline">\(n\)</span> settles below zero. Its errors do not balance out: it systematically underestimates population variance. The corrected estimates that divide by <span class="math inline">\(n-1\)</span> do balance around zero. The correction changes the long-run center of the estimator; it does not eliminate the sample-to-sample scatter.</p>
+</div>
+</div>
+</div>
+</div>
+<p>The two charts distinguish <em>sampling error</em> from <em>bias</em>. The wide vertical scatter in the upper chart is sampling error: estimates differ from sample to sample. The long-run position of the lower line is bias. Neither using the mean nor dividing variance by <span class="math inline">\(n - 1\)</span> makes every estimate accurate; it makes the overestimates and underestimates balance out on average.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="04_variability_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 4 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 4</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="zero_sd"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Is it possible for a sample to have a standard deviation of zero?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="04_variability_learning_checks-zero_sd" id="04_variability_learning_checks-zero_sd-option-1" value="true" aria-labelledby="04_variability_learning_checks-zero_sd-option-1-text"><div class="quiz-choice-text" id="04_variability_learning_checks-zero_sd-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="04_variability_learning_checks-zero_sd" id="04_variability_learning_checks-zero_sd-option-2" value="false" aria-labelledby="04_variability_learning_checks-zero_sd-option-2-text"><div class="quiz-choice-text" id="04_variability_learning_checks-zero_sd-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A standard deviation of zero occurs when every score has the same
+value.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sample_df_four_scores"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A sample has 4 scores. What is the number of degrees of freedom for
+calculating sample variance?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>3</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>For sample variance, df = n - 1 = 4 - 1 = 3.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="ss_to_variance"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A sample of four scores has <span class="math inline"><em>S</em><em>S</em> = 24</span>. What is the
+variance?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>Sample variance is <span class="math inline"><em>S</em><em>S</em></span> divided by its degrees
+of freedom.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>For a sample, the number of degrees of freedom is <span class="math inline"><em>n</em> − 1</span>.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>8</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>For a sample, <span class="math inline"><em>s</em><sup>2</sup> = <em>S</em><em>S</em>/(<em>n</em> − 1) = 24/3 = 8</span>.
+Dividing by <span class="math inline"><em>n</em></span> instead of <span class="math inline"><em>n</em> − 1</span> would give the biased answer
+of 6.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="samples_bias"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Why do we divide <span class="math inline"><em>S</em><em>S</em></span> by <span class="math inline"><em>n</em> − 1</span> rather than <span class="math inline"><em>n</em></span> when estimating population
+variance from a sample?</p></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The sample mean, <span class="math inline"><em>M</em></span>, is
+fitted from the same scores and minimizes their sum of squared
+deviations. Dividing that reduced <span class="math inline"><em>S</em><em>S</em></span> by <span class="math inline"><em>n</em></span> therefore underestimates
+population variance on average. Dividing by <span class="math inline"><em>n</em> − 1</span> corrects the bias.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Missing rare or extreme scores cannot by itself explain systematic
+bias: some samples overestimate variability, and others underestimate
+it. The downward bias comes from centering every sample on its own
+fitted mean. The <span class="math inline"><em>n</em> − 1</span>
+denominator is the degrees-of-freedom correction for sample
+variance.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="04_variability_learning_checks">{"title":"Learning Checks","questions":[{"explanationHtml":"\u003cp\u003eA standard deviation of zero occurs when every score has the same\nvalue.\u003c/p\u003e","promptHtml":"\u003cp\u003eIs it possible for a sample to have a standard deviation of zero?\u003c/p\u003e","answer":true,"type":"true-false","explanation":"A standard deviation of zero occurs when every score has the same value.","answerHtml":"\u003cp\u003etrue\u003c/p\u003e","id":"zero_sd","prompt":"Is it possible for a sample to have a standard deviation of zero?"},{"explanationHtml":"\u003cp\u003eFor sample variance, df = n - 1 = 4 - 1 = 3.\u003c/p\u003e","answer":"3","answerHtml":"\u003cp\u003e3\u003c/p\u003e","promptHtml":"\u003cp\u003eA sample has 4 scores. What is the number of degrees of freedom for\ncalculating sample variance?\u003c/p\u003e","prompt":"A sample has 4 scores. What is the number of degrees of freedom for calculating sample variance?","explanation":"For sample variance, df = n - 1 = 4 - 1 = 3.","tolerance":"0","id":"sample_df_four_scores","type":"numeric"},{"explanationHtml":"\u003cp\u003eFor a sample, \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003es\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e = \u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e/(\u003cem\u003en\u003c/em\u003e − 1) = 24/3 = 8\u003c/span\u003e.\nDividing by \u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e instead of \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e would give the biased answer\nof 6.\u003c/p\u003e","answer":"8","type":"numeric","hints":[{"text":"Sample variance is SS divided by its degrees of freedom.","textHtml":"\u003cp\u003eSample variance is \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e divided by its degrees\nof freedom.\u003c/p\u003e"},{"text":"For a sample, the number of degrees of freedom is n - 1.","textHtml":"\u003cp\u003eFor a sample, the number of degrees of freedom is \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e.\u003c/p\u003e"}],"promptHtml":"\u003cp\u003eA sample of four scores has \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e = 24\u003c/span\u003e. What is the\nvariance?\u003c/p\u003e","answerHtml":"\u003cp\u003e8\u003c/p\u003e","prompt":"A sample of four scores has SS = 24. What is the variance?","tolerance":"1.0e-2","id":"ss_to_variance","explanation":"For a sample, s^2 = SS / (n - 1) = 24 / 3 = 8. Dividing by n instead of n - 1 would give the biased answer of 6."},{"explanationHtml":"\u003cp\u003eMissing rare or extreme scores cannot by itself explain systematic\nbias: some samples overestimate variability, and others underestimate\nit. The downward bias comes from centering every sample on its own\nfitted mean. The \u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e\ndenominator is the degrees-of-freedom correction for sample\nvariance.\u003c/p\u003e","promptHtml":"\u003cp\u003eWhy do we divide \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e by \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e rather than \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e when estimating population\nvariance from a sample?\u003c/p\u003e","answer":"The sample mean, M, is fitted from the same scores and minimizes their sum of squared deviations. Dividing that reduced SS by n therefore underestimates population variance on average. Dividing by n - 1 corrects the bias.","type":"free-response","explanation":"Missing rare or extreme scores cannot by itself explain systematic bias: some samples overestimate variability, and others underestimate it. The downward bias comes from centering every sample on its own fitted mean. The n - 1 denominator is the degrees-of-freedom correction for sample variance.","answerHtml":"\u003cp\u003eThe sample mean, \u003cspan class=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003c/span\u003e, is\nfitted from the same scores and minimizes their sum of squared\ndeviations. Dividing that reduced \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e by \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e therefore underestimates\npopulation variance on average. Dividing by \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e − 1\u003c/span\u003e corrects the bias.\u003c/p\u003e","id":"samples_bias","prompt":"Why do we divide SS by n - 1 rather than n when estimating population variance from a sample?"}],"id":"04_variability_learning_checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e"}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-stahl2006normal" class="csl-entry" role="listitem">
+Stahl, S. (2006). The evolution of the normal distribution. <em>Mathematics Magazine</em>, <em>79</em>(2), 96–113. <a href="https://doi.org/10.1080/0025570X.2006.11953386">https://doi.org/10.1080/0025570X.2006.11953386</a>
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don’t invent and apply themselves: we still have to think about which measure makes the most sense for what we’re trying to do.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>More precisely, the population standard deviation is the <strong>root-mean-square deviation</strong>: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn’t the literal arithmetic mean of the raw deviations or their absolute values. I don’t hear social scientists use the term “root-mean-square deviation” very often, so I’m just going to follow the convention of calling it the standard deviation.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But <span class="math inline">\(s\)</span> is much less biased than an uncorrected standard deviation based on <span class="math inline">\(SS/n\)</span>.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./03-central-tendency.html" class="pagination-link" aria-label="Central Tendency">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./05-z-scores.html" class="pagination-link" aria-label="$z$-Scores">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

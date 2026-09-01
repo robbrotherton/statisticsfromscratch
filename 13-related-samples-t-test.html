@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>13&nbsp; Related Samples t Test – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./14-anova.html" rel="next">
+<link href="./12-independent-samples-t-test.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="13&nbsp; Related Samples t Test – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:image" content="https://statisticsfromscratch.com/resources/figures/triplett.png">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta property="og:image:height" content="300">
+<meta property="og:image:width" content="794">
+<meta name="twitter:title" content="13&nbsp; Related Samples t Test – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:image" content="https://statisticsfromscratch.com/resources/figures/triplett.png">
+<meta name="twitter:image-height" content="300">
+<meta name="twitter:image-width" content="794">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#research-design-between-participants-vs.-within-participants" id="toc-research-design-between-participants-vs.-within-participants" class="nav-link" data-scroll-target="#research-design-between-participants-vs.-within-participants">Research design: Between-participants vs.&nbsp;within-participants</a>
+  <ul class="collapse">
+  <li><a href="#matched-subjects-design" id="toc-matched-subjects-design" class="nav-link" data-scroll-target="#matched-subjects-design">Matched-subjects design</a></li>
+  <li><a href="#advantages-and-disadvantages" id="toc-advantages-and-disadvantages" class="nav-link" data-scroll-target="#advantages-and-disadvantages">Advantages and disadvantages</a></li>
+  </ul></li>
+  <li><a href="#data-structure-and-difference-scores" id="toc-data-structure-and-difference-scores" class="nav-link" data-scroll-target="#data-structure-and-difference-scores">Data structure and difference scores</a></li>
+  <li><a href="#the-related-samples-t-formula" id="toc-the-related-samples-t-formula" class="nav-link" data-scroll-target="#the-related-samples-t-formula">The related samples <span class="math inline">\(t\)</span> formula</a></li>
+  <li><a href="#calculating-the-related-samples-t-statistic" id="toc-calculating-the-related-samples-t-statistic" class="nav-link" data-scroll-target="#calculating-the-related-samples-t-statistic">Calculating the related samples <span class="math inline">\(t\)</span> statistic</a></li>
+  <li><a href="#example-tripletts-social-facilitation-study" id="toc-example-tripletts-social-facilitation-study" class="nav-link" data-scroll-target="#example-tripletts-social-facilitation-study">Example: Triplett’s social facilitation study</a>
+  <ul class="collapse">
+  <li><a href="#comparing-independent-and-related-samples-approaches" id="toc-comparing-independent-and-related-samples-approaches" class="nav-link" data-scroll-target="#comparing-independent-and-related-samples-approaches">Comparing independent and related samples approaches</a></li>
+  <li><a href="#independent-samples-approach-incorrect-for-this-data" id="toc-independent-samples-approach-incorrect-for-this-data" class="nav-link" data-scroll-target="#independent-samples-approach-incorrect-for-this-data">Independent samples approach (incorrect for this data)</a></li>
+  <li><a href="#related-samples-approach-correct" id="toc-related-samples-approach-correct" class="nav-link" data-scroll-target="#related-samples-approach-correct">Related samples approach (correct)</a></li>
+  <li><a href="#effect-size" id="toc-effect-size" class="nav-link" data-scroll-target="#effect-size">Effect size</a></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting results</a></li>
+  </ul></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a></li>
+  <li><a href="#confidence-intervals" id="toc-confidence-intervals" class="nav-link" data-scroll-target="#confidence-intervals">Confidence intervals</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>This will be our last lecture on the <span class="math inline">\(t\)</span> statistic. We’ll introduce one more variant of the <span class="math inline">\(t\)</span> test, the related samples <span class="math inline">\(t\)</span> test, which is used when we want to compare two samples but the two samples are somehow related, most often by consisting of the same people. We’ll discuss the kind of research designs that this involves, the pros and cons of related and independent designs, and we’ll learn how to calculate the related samples <span class="math inline">\(t\)</span> test, paying attention to how it differs from the independent samples <span class="math inline">\(t\)</span> test.</p>
+</section>
+<section id="research-design-between-participants-vs.-within-participants" class="level2">
+<h2 data-anchor-id="research-design-between-participants-vs.-within-participants">Research design: Between-participants vs.&nbsp;within-participants</h2>
+<p>Understanding the applications of the related samples <span class="math inline">\(t\)</span> test requires us to think some more about research design. The design that calls for an independent samples <span class="math inline">\(t\)</span> test, like we learned about in the previous lecture, is also known as a “between-participants” design. That’s because the different experimental treatments, whatever they are, are administered between the different groups of participants. By that I mean that each participant only experiences and contributes data to a single condition of our study.</p>
+<p>In the example where people are given ten dollars and told either to spend it on themselves or someone else, everyone does just one or the other, not both. So because it’s a completely different group of people in each sample, there are at least two reasons why our sample means might differ from one another. One is any treatment effect that increases or decreases scores overall. That’s what we’re hoping to discover. But another reason is just the individual differences between those different groups of people. Because of sampling error, the natural discrepancy between samples and their populations, one group might have a few more people who score high on our measure and the other group a few more people who score low. With this little abstract illustration, the average color of the dots might be a bit different between the two groups even if there’s no treatment effect, no systematic difference between the groups, simply because we ended up with a sample consisting of dots that lean towards one hue more than another, just by random sampling error alone. With large enough samples, differences like these should pretty much balance out. But those individual differences are a potential source of variability that we have to keep in mind.</p>
+<p>Now, compare that to a related samples design, which is also called a “within-participants” design. That’s because the different experimental treatments are administered within our sample of participants, meaning that every participant experiences and contributes data to all treatment conditions. Here we get two scores from each person, one for each condition — unlike the between-participants design where we have different people in each treatment group and record just one score from each person. As a result of this design, individual differences theoretically cannot contribute to any difference we find between the two conditions. There are still individual differences within each sample, because each sample is full of a bunch of different people, or different colored dots here. But it’s those same people, or dots, in each sample. They don’t differ. And so overall, the two samples are the same. Theoretically, any difference between sample one and sample two can’t be due to individual differences. It has to be due to the treatment effect. As usual, reducing variability is a good thing for our hypothesis test. So by reducing or eliminating that source of variability between groups, we end up with a more powerful test statistic.</p>
+<section id="matched-subjects-design" class="level3">
+<h3 data-anchor-id="matched-subjects-design">Matched-subjects design</h3>
+<p>Another variation of the related-samples design is what’s called a matched-subjects design. We have two samples of different people, like the independent samples design. But here each individual in sample A is matched on relevant variables with an individual in sample B. To take a kind of silly example, say we’re doing our ten dollar, spend on yourself or someone else, study. And say we think that people’s height could be a factor. We think for some reason that tall people are generally happier than short people. We want to make sure that that doesn’t end up causing a difference between our samples. We want any difference to be just about the spending behavior. So we might make sure that every individual in sample A is paired up with someone of exactly the same height in sample B. This way we eliminate height as a potential source of difference between the groups because we’re making sure that the pairs of scores we obtain for sample one and sample two are equivalent in height. So height can’t be causing any difference in their reported happiness.</p>
+<p>That’s obviously a kind of dumb example, but real researchers can use this technique to control for things like socioeconomic status, education, and other demographic factors like that when it’s not feasible to just have the same exact people in both treatment conditions of our study. And so it approximates the advantages of the repeated measures design, at least as far as the variables we’ve decided to match people on.</p>
+<p>One thing worth pointing out, though, is that by using the same people in each sample, we cut the number of participants we need to recruit in half. But if we’re just matching subjects like this, we still need the full amount, the same as if we were running a true independent-samples study. But again, we will end up with a more powerful test by canceling out variability due to the individual differences that we have matched our subjects on.</p>
+</section>
+<section id="advantages-and-disadvantages" class="level3">
+<h3 data-anchor-id="advantages-and-disadvantages">Advantages and disadvantages</h3>
+<p>As far as advantages and disadvantages go, the required number of participants is kind of a big deal. Participants can be expensive and time consuming to recruit, especially if we’re not just using intro psych students and giving them course credit. So cutting the number of participants we need in half can be a practically very useful thing to do. It also allows us to study changes within individuals over time. This is often used, for example, to study the efficacy of some psychological treatment or therapy for some psychological disorder. Again, we assume that the people we’re studying aren’t changing too much on psychological traits that we think are stable. So any difference between time one and time two must be due to whatever treatment we administered. And again, statistically, the main advantage is that related samples designs reduce or eliminate individual differences as a source of variability between groups. And the less variability in scores, the more powerful our statistical test.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="13_related_t_designs" aria-label="Think of Designs"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Think of Designs</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="related_designs"><div class="quiz-prompt"><p>Think of one independent-samples design and one related-samples
+design for the same broad research question.</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A good answer contrasts different people in each treatment condition
+with the same people measured in multiple conditions or carefully
+matched pairs.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The design determines whether scores across conditions can be treated
+as independent.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="13_related_t_designs">{"titleHtml":"\u003cp\u003eThink of Designs\u003c/p\u003e","id":"13_related_t_designs","questions":[{"explanationHtml":"\u003cp\u003eThe design determines whether scores across conditions can be treated\nas independent.\u003c/p\u003e","answer":"A good answer contrasts different people in each treatment condition with the same people measured in multiple conditions or carefully matched pairs.","type":"free-response","explanation":"The design determines whether scores across conditions can be treated as independent.","prompt":"Think of one independent-samples design and one related-samples design for the same broad research question.","promptHtml":"\u003cp\u003eThink of one independent-samples design and one related-samples\ndesign for the same broad research question.\u003c/p\u003e","answerHtml":"\u003cp\u003eA good answer contrasts different people in each treatment condition\nwith the same people measured in multiple conditions or carefully\nmatched pairs.\u003c/p\u003e","id":"related_designs"}],"title":"Think of Designs"}</script></section>
+<p>There are disadvantages as well, though. If you think about it for a moment, factors besides our experimental treatment may cause people’s scores to change during the time between measurements. To stick with the idea of a literal treatment for some disorder, say we find that people’s symptom severity is reduced between time one and time two. It’s possible that whatever treatment we administered in between times caused the improvement, but maybe something else did, or maybe their symptoms would have just gotten better anyway, even without our treatment.</p>
+<p>Another potential logistical problem is that participation in the first treatment may influence people’s behavior in the second treatment. This is known as an order effect. Suppose we run our study of giving people ten dollars as a within-participants design. We give people ten dollars to spend on themselves. And then the next day we give people ten dollars to spend on someone else. The fact that we just gave them ten dollars a day before might change how they act. Maybe they’ll feel like they have to do something different. Or maybe they guess what we’re up to and they report their happiness a little differently than they would have otherwise. There are potential remedies for these kind of problems. Counterbalancing can be a way to reduce order effects by having some people do treatment one followed by treatment two, and other people do treatment two first, followed by treatment one. But this isn’t always feasible.</p>
+<p>Finally, another logistical problem is that participants might drop out. I mentioned the benefit of requiring fewer participants, but it can also be logistically trickier to keep track of all those participants and to make sure they fully complete every condition of our study. Especially for studies where we want to follow up with people after some lengthy treatment, people can drop out of our study. And so we may need to recruit more people than we ideally need to, to compensate for that.</p>
+</section>
+</section>
+<section id="data-structure-and-difference-scores" class="level2">
+<h2 data-anchor-id="data-structure-and-difference-scores">Data structure and difference scores</h2>
+<p>Before we get into calculating this <span class="math inline">\(t\)</span> statistic, let’s just look at some example data to see how we’re going to treat it conceptually and how we begin dealing with it mathematically. First, let’s recap the conceptual structure of an independent samples design. We have two independent samples of scores which we use to infer and compare the characteristics of their two respective populations.</p>
+<p>At first, the structure of the data for the related samples design looks similar. We have two samples of scores, but crucially, the two samples are no longer independent. They consist of the same people, or people we’ve deliberately paired up to be similar. So if we treated this data the same way we treat the independent samples data, we’d be violating the assumption of independence of scores.</p>
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Sample A</th>
+<th style="text-align: center;">Sample B</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">43</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">67</td>
+<td style="text-align: center;">57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">38</td>
+<td style="text-align: center;">39</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">41</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">42</td>
+<td style="text-align: center;">36</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>So rather than treating the two sets of scores separately, we turn them into a single sample of scores. And we do that by simply calculating the difference between them for each row, meaning each participant’s pair of scores. We subtract the second from the first to get the difference score, and we can put that as a new column in our table.</p>
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">Sample A</th>
+<th style="text-align: center;">Sample B</th>
+<th style="text-align: center;"><span class="math inline">\(D\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">54</td>
+<td style="text-align: center;">43</td>
+<td style="text-align: center;"><span class="math inline">\(-11\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">67</td>
+<td style="text-align: center;">57</td>
+<td style="text-align: center;"><span class="math inline">\(-10\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">38</td>
+<td style="text-align: center;">39</td>
+<td style="text-align: center;"><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">46</td>
+<td style="text-align: center;">41</td>
+<td style="text-align: center;"><span class="math inline">\(-5\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">42</td>
+<td style="text-align: center;">36</td>
+<td style="text-align: center;"><span class="math inline">\(-6\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>So once we calculate the single sample of difference scores, we’re back conceptually closer to the single-sample <span class="math inline">\(t\)</span> test that we first worked with. We have a single sample of these difference scores and we want to know the characteristics of the population of difference scores that produced our sample of difference scores.</p>
+</section>
+<section id="the-related-samples-t-formula" class="level2">
+<h2 data-anchor-id="the-related-samples-t-formula">The related samples <span class="math inline">\(t\)</span> formula</h2>
+<p>Remember that the basic structure of all <span class="math inline">\(t\)</span> tests is this: a sample statistic minus a population parameter, which is derived from our null hypothesis, divided by an estimated standard error. For the single-sample <span class="math inline">\(t\)</span> test, this took the form of <span class="math inline">\(M - \mu\)</span> over <span class="math inline">\(s_M\)</span>, the estimated standard error of the mean. <span class="math inline">\(\mu\)</span>, the population mean, came from our null hypothesis, which we derived from some practical or theoretical knowledge, like expecting that the population average sleep duration should be eight hours, or that the midpoint of a scale should be the population average score for that scale. For the independent-samples <span class="math inline">\(t\)</span> test the equation was a bit more complicated. The statistic was the difference between sample means. The parameter was the difference between population means, which the null hypothesis told us should be zero. And the denominator was the estimated standard error of the mean difference.</p>
+<p>Conceptually, the related samples <span class="math inline">\(t\)</span> test is most similar to the single-sample <span class="math inline">\(t\)</span> test. You can see all we’ve done is append a subscripted <span class="math inline">\(D\)</span> after all the symbols to denote that we’re dealing with a sample of difference scores rather than regular scores. The statistic is the mean of the difference scores, <span class="math inline">\(M_D\)</span>, and the denominator is the standard error of the difference scores. The population parameter is the mean of the population of difference scores, <span class="math inline">\(\mu_D\)</span>. And maybe you can guess what the null hypothesis will tell us about that. According to the null hypothesis, that parameter should be equal to zero, meaning that we expect no difference on average. So if anything, this is the simplest equation yet, because when we come to calculate the numbers, we can just ignore that zero and just divide the mean of the difference scores by the estimated standard error of the difference scores to find out how much more of a difference we saw than we would expect due to sampling error alone.</p>
+</section>
+<section id="calculating-the-related-samples-t-statistic" class="level2">
+<h2 data-anchor-id="calculating-the-related-samples-t-statistic">Calculating the related samples <span class="math inline">\(t\)</span> statistic</h2>
+<p>So here’s how calculating the related samples <span class="math inline">\(t\)</span> statistic goes. First, we need to calculate the difference scores by subtracting scores of the second sample from the first. Remember, we typically refer to a set of scores with an <span class="math inline">\(X\)</span>, so <span class="math inline">\(X_B - X_A\)</span> just means we go through the data row by row, subtracting one score from the other. Once we have all those difference scores, we can calculate the mean of the difference scores, <span class="math inline">\(M_D\)</span>, just like calculating any other mean. It’s the sum of the difference scores over the number of difference scores. And notice that with a repeated-measures, within-subjects design, <span class="math inline">\(n\)</span> is the number of participants in our study. But with a matched samples design, it’s half the number of participants. Then we calculate the standard error of the mean difference, which is the standard deviation of the difference scores over the square root of <span class="math inline">\(n\)</span>, the number of difference scores. And then we can calculate our <span class="math inline">\(t\)</span> statistic by taking the mean difference minus the population mean difference, which, again, is zero — so it’s kind of irrelevant to the actual math — divided by the estimated standard error of the mean difference. As usual, we’ll need to know the degrees of freedom for the <span class="math inline">\(t\)</span> test, which in this case is <span class="math inline">\(df = n - 1\)</span>, meaning the number of difference scores minus one.</p>
+</section>
+<section id="example-tripletts-social-facilitation-study" class="level2">
+<h2 data-anchor-id="example-tripletts-social-facilitation-study">Example: Triplett’s social facilitation study</h2>
+<p>As usual, let’s work through a quick example of hypothesis testing with this new kind of <span class="math inline">\(t\)</span> test. For this we’ll use the example of Norman Triplett’s study of what is now known as social facilitation <span class="citation" data-cites="triplett1898dynamogenic">(<a href="references.html#ref-triplett1898dynamogenic" role="doc-biblioref">Triplett, 1898</a>)</span>. This is the idea that we perform some kinds of tasks better when we’re competing against someone else rather than just doing it alone. Triplett first examined this in data from cycling competitions where racers either performed against each other or alone against the clock. Triplett’s research was some of the earliest in all of social psychology. He published it in 1898. In fact, statistical techniques like the <span class="math inline">\(t\)</span> test hadn’t been invented at the time. Triplett simply collected and graphed the data looking for patterns. And as you can see, the lower line, meaning the slower cyclists, were those who were running the race individually rather than competing directly against other cyclists.</p>
+<div id="fig-triplett" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-triplett-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: Triplett’s graph of cycling race times for riders competing against other riders versus riding alone against the clock, from his 1898 paper.
+</figcaption>
+<div aria-describedby="fig-triplett-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/triplett.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;13.1: Triplett’s graph of cycling race times for riders competing against other riders versus riding alone against the clock, from his 1898 paper."><img src="resources/figures/triplett.png" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>But Triplett realized he needed some more convincing, more carefully controlled data. So he devised a clever apparatus to study this in a lab. It was a competition machine designed as a children’s game whereby two kids could compete with each other. Two fishing reels were secured to the end of a Y-shaped apparatus that was clamped on top of a heavy table. Bands of silk cord were run over the axles of the reels and across two pulleys, so that turning the reel would cause a small flag sewn into the silk to traverse the length of the four-meter circuit. The task was to turn the reel and complete the circuit four times as quickly as possible. Triplett had children do this a number of times, either by themselves or racing against another kid who was doing it standing right next to them.</p>
+<section id="comparing-independent-and-related-samples-approaches" class="level3">
+<h3 data-anchor-id="comparing-independent-and-related-samples-approaches">Comparing independent and related samples approaches</h3>
+<p>This makes for a good example for us, because there are a number of different ways of comparing the data. We could take each child’s first score when they performed either alone or in competition and compare those sets of scores as independent samples. Or we could take pairs of scores from each child, both when they performed alone and when that same child performed in competition, and we could look at the difference in the children’s own scores as a related-samples <span class="math inline">\(t\)</span> test. Here we’ll try both approaches using the exact same data to see how the different statistical tests compare, and can lead to different answers even when we feed in exactly the same numbers.</p>
+<p>So here are those same numbers, and they’re actually some of the real numbers from Triplett’s study — the times, in seconds, that five children took to complete the reel-turning circuit alone and in competition. Each row comes from a single child. And so this data should properly be treated as a within-subjects design and the related-samples <span class="math inline">\(t\)</span> test used. But we’re going to mishandle the data first. We’re going to treat it as if each sample is made up of different kids. So we’ll use the independent samples <span class="math inline">\(t\)</span> test.</p>
+<div id="tbl-triplett" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-triplett-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.1: Times (in seconds) from Triplett’s competition-machine study.
+</figcaption>
+<div aria-describedby="tbl-triplett-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Participant</th>
+<th style="text-align: right;">Alone</th>
+<th style="text-align: right;">Competition</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Violet F.</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">43</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Anna P.</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Willie H.</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">39</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bessie V.</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">41</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Howard C.</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">36</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<div id="fig-triplett-data" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-triplett-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.2: A page of Triplett’s data from the 1898 paper.
+</figcaption>
+<div aria-describedby="fig-triplett-data-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/triplett-data.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;13.2: A page of Triplett’s data from the 1898 paper."><img src="resources/figures/triplett-data.png" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>So see if you can calculate the independent-samples <span class="math inline">\(t\)</span> statistic for this data.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="13_related_t_independent_samples" aria-label="Independent-Samples t"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Independent-Samples t</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="triplett_independent_t"><div class="quiz-prompt"><p>When the Triplett data are incorrectly treated as independent
+samples, what is the approximate t statistic described in the
+chapter?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="13_related_t_independent_samples-triplett_independent_t" id="13_related_t_independent_samples-triplett_independent_t-option-1" value="0" aria-labelledby="13_related_t_independent_samples-triplett_independent_t-option-1-text"><div class="quiz-choice-text" id="13_related_t_independent_samples-triplett_independent_t-option-1-text"><p>0.99</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_independent_samples-triplett_independent_t" id="13_related_t_independent_samples-triplett_independent_t-option-2" value="1" aria-labelledby="13_related_t_independent_samples-triplett_independent_t-option-2-text"><div class="quiz-choice-text" id="13_related_t_independent_samples-triplett_independent_t-option-2-text"><p>-2.91</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_independent_samples-triplett_independent_t" id="13_related_t_independent_samples-triplett_independent_t-option-3" value="2" aria-labelledby="13_related_t_independent_samples-triplett_independent_t-option-3-text"><div class="quiz-choice-text" id="13_related_t_independent_samples-triplett_independent_t-option-3-text"><p>4.08</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_independent_samples-triplett_independent_t" id="13_related_t_independent_samples-triplett_independent_t-option-4" value="3" aria-labelledby="13_related_t_independent_samples-triplett_independent_t-option-4-text"><div class="quiz-choice-text" id="13_related_t_independent_samples-triplett_independent_t-option-4-text"><p>46.8</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0.99</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Treating the paired data as independent leaves more
+individual-difference variability in the denominator.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="13_related_t_independent_samples">{"titleHtml":"\u003cp\u003eIndependent-Samples t\u003c/p\u003e","id":"13_related_t_independent_samples","questions":[{"explanationHtml":"\u003cp\u003eTreating the paired data as independent leaves more\nindividual-difference variability in the denominator.\u003c/p\u003e","promptHtml":"\u003cp\u003eWhen the Triplett data are incorrectly treated as independent\nsamples, what is the approximate t statistic described in the\nchapter?\u003c/p\u003e","type":"multiple-choice","explanation":"Treating the paired data as independent leaves more individual-difference variability in the denominator.","prompt":"When the Triplett data are incorrectly treated as independent samples, what is the approximate t statistic described in the chapter?","options":[{"correct":true,"textHtml":"\u003cp\u003e0.99\u003c/p\u003e","text":"0.99"},{"text":"-2.91","textHtml":"\u003cp\u003e-2.91\u003c/p\u003e"},{"text":"4.08","textHtml":"\u003cp\u003e4.08\u003c/p\u003e"},{"text":"46.8","textHtml":"\u003cp\u003e46.8\u003c/p\u003e"}],"answerHtml":"","id":"triplett_independent_t"}],"title":"Independent-Samples t"}</script></section>
+<p>This will be good practice for seeing if you understand how to do it. You can either do it with paper and pencil or you can use R if you look ahead to the instructions in the next problem set on how to do <span class="math inline">\(t\)</span> tests in R.</p>
+</section>
+<section id="independent-samples-approach-incorrect-for-this-data" class="level3">
+<h3 data-anchor-id="independent-samples-approach-incorrect-for-this-data">Independent samples approach (incorrect for this data)</h3>
+<p>So let’s say we state a nondirectional hypothesis. Our alternative hypothesis is that there will be a difference and our null is that there will be none. With a two-tailed test, an <span class="math inline">\(\alpha\)</span> of .05 and degrees of freedom of eight, because we’re acting as if we have 10 participants total, and degrees of freedom for the independent samples test is <span class="math inline">\(df = N - 2\)</span>, our critical <span class="math inline">\(t\)</span> values are <span class="math inline">\(\pm 2.31\)</span>. We can calculate the sum of squared deviations, variance, and standard deviation for each sample in the usual way. The pooled variance comes out at 99. The estimated standard error of the mean difference is 6.29. And the <span class="math inline">\(t\)</span> statistic itself works out to 0.99. So we fail to reject the null hypothesis here. The difference between the means was in the direction of kids performing better in competition than alone, as we expected. But it was not an extreme enough difference that we could reject our null hypothesis.</p>
+</section>
+<section id="related-samples-approach-correct" class="level3">
+<h3 data-anchor-id="related-samples-approach-correct">Related samples approach (correct)</h3>
+<p>But remember, we were mistreating the data by using an independent-samples <span class="math inline">\(t\)</span> test. Mathematically, it worked, and we got an answer. But it was not the appropriate test, because each row of the data actually came from the same child. We should be using the related-samples <span class="math inline">\(t\)</span> test here. So let’s try the procedure again but using the related-samples <span class="math inline">\(t\)</span> test.</p>
+<!-- [Note: Original lecture included an interactive element here.] -->
+<p>We start with our hypotheses.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="13_related_t_related_samples" aria-label="Related Samples"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Related Samples</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="triplett_related_t"><div class="quiz-prompt"><p>When the Triplett data are correctly treated as related samples, what
+is the approximate t statistic?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="13_related_t_related_samples-triplett_related_t" id="13_related_t_related_samples-triplett_related_t-option-1" value="0" aria-labelledby="13_related_t_related_samples-triplett_related_t-option-1-text"><div class="quiz-choice-text" id="13_related_t_related_samples-triplett_related_t-option-1-text"><p>-2.91</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_related_samples-triplett_related_t" id="13_related_t_related_samples-triplett_related_t-option-2" value="1" aria-labelledby="13_related_t_related_samples-triplett_related_t-option-2-text"><div class="quiz-choice-text" id="13_related_t_related_samples-triplett_related_t-option-2-text"><p>0.99</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_related_samples-triplett_related_t" id="13_related_t_related_samples-triplett_related_t-option-3" value="2" aria-labelledby="13_related_t_related_samples-triplett_related_t-option-3-text"><div class="quiz-choice-text" id="13_related_t_related_samples-triplett_related_t-option-3-text"><p>1.05</p></div></div><div class="quiz-choice"><input type="radio" name="13_related_t_related_samples-triplett_related_t" id="13_related_t_related_samples-triplett_related_t-option-4" value="3" aria-labelledby="13_related_t_related_samples-triplett_related_t-option-4-text"><div class="quiz-choice-text" id="13_related_t_related_samples-triplett_related_t-option-4-text"><p>29.4</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>-2.91</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Using difference scores removes individual differences and produces a
+more powerful test.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="13_related_t_related_samples">{"titleHtml":"\u003cp\u003eRelated Samples\u003c/p\u003e","id":"13_related_t_related_samples","questions":[{"explanationHtml":"\u003cp\u003eUsing difference scores removes individual differences and produces a\nmore powerful test.\u003c/p\u003e","promptHtml":"\u003cp\u003eWhen the Triplett data are correctly treated as related samples, what\nis the approximate t statistic?\u003c/p\u003e","type":"multiple-choice","explanation":"Using difference scores removes individual differences and produces a more powerful test.","prompt":"When the Triplett data are correctly treated as related samples, what is the approximate t statistic?","options":[{"correct":true,"textHtml":"\u003cp\u003e-2.91\u003c/p\u003e","text":"-2.91"},{"text":"0.99","textHtml":"\u003cp\u003e0.99\u003c/p\u003e"},{"text":"1.05","textHtml":"\u003cp\u003e1.05\u003c/p\u003e"},{"text":"29.4","textHtml":"\u003cp\u003e29.4\u003c/p\u003e"}],"answerHtml":"","id":"triplett_related_t"}],"title":"Related Samples"}</script></section>
+<p>As usual, the nondirectional alternative hypothesis here would be that there is a difference in the kids’ scores alone vs.&nbsp;in competition, that the mean of the difference scores is not equal to zero: <span class="math inline">\(H_1: \mu_D \neq 0\)</span>. The null would be that the mean of the difference scores is equal to zero — that there is no difference in their performance, either alone or in competition: <span class="math inline">\(H_0: \mu_D = 0\)</span>.</p>
+<p>The critical regions for the test will depend on different degrees of freedom. Now for the related-samples test, degrees of freedom is <span class="math inline">\(n - 1\)</span>, meaning the number of difference scores minus one. So here it would be four. And the critical values for a two-tailed <span class="math inline">\(\alpha\)</span> of .05 with four degrees of freedom would be <span class="math inline">\(\pm 2.78\)</span>. Notice that this is more extreme than the critical values for the independent-samples test. And that’s because of the different degrees of freedom. It’s lower here, which means a more variable <span class="math inline">\(t\)</span> distribution, meaning the distribution has a lower peak in the middle and more of the distribution is further out in the tails. So we need a more extreme <span class="math inline">\(t\)</span> statistic to reject the null hypothesis. But remember, the advantage of this test is that we’re ruling out a potential source of variability in the data from individual differences. And so even though the test is more stringent in the sense of requiring a more extreme <span class="math inline">\(t\)</span> to reject the null hypothesis, we should have a more powerful statistic because of the reduced variability in the data.</p>
+<p>To calculate our statistic, we work with the difference scores just like any single sample of scores: find their mean, then their deviations from that mean, squared deviations, sum of squares, variance, and standard deviation.</p>
+<div id="tbl-triplett-differences" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-triplett-differences-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.2: Difference scores and their deviations. <span class="math inline">\(M_D = -6.2\)</span>; <span class="math inline">\(SS = 90.8\)</span>; <span class="math inline">\(s^2_D = 22.7\)</span>; <span class="math inline">\(s_D = 4.76\)</span>.
+</figcaption>
+<div aria-describedby="tbl-triplett-differences-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Participant</th>
+<th style="text-align: right;">Alone</th>
+<th style="text-align: right;">Comp</th>
+<th style="text-align: right;"><span class="math inline">\(D\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D - M_D\)</span></th>
+<th style="text-align: right;"><span class="math inline">\((D - M_D)^2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Violet F.</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;"><span class="math inline">\(-11\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-4.8\)</span></td>
+<td style="text-align: right;">23.04</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Anna P.</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;"><span class="math inline">\(-10\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-3.8\)</span></td>
+<td style="text-align: right;">14.44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Willie H.</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;"><span class="math inline">\(1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(7.2\)</span></td>
+<td style="text-align: right;">51.84</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bessie V.</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;"><span class="math inline">\(-5\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.2\)</span></td>
+<td style="text-align: right;">1.44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Howard C.</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;"><span class="math inline">\(-6\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.2\)</span></td>
+<td style="text-align: right;">0.04</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p><span class="math display">\[s_{M_D} = \frac{s_D}{\sqrt{n}} = \frac{4.76}{\sqrt{5}} = 2.13 \]</span></p>
+<p><span class="math display">\[ t = \frac{M_D - \mu_D}{s_{M_D}} = \frac{-6.2 - 0}{2.13} = -2.91 \]</span></p>
+<p>Calculating our statistic, the standard error comes out to 2.13 and the <span class="math inline">\(t\)</span> statistic comes out to <span class="math inline">\(-2.91\)</span>. So now notice how much more extreme that <span class="math inline">\(t\)</span> value is than the independent-samples <span class="math inline">\(t\)</span> that we calculated before. Again, we’ve used exactly the same data. Nothing changed here except that we acknowledged that each row came from a single participant. The scores were related. And so we calculated the difference between each pair of scores. Doing so ruled out individual differences as a source of variability between the groups, and taking that variability out of the data made our <span class="math inline">\(t\)</span> statistic this much more powerful. And so even though our critical <span class="math inline">\(t\)</span> values were more extreme, we can now reject our null hypothesis. The overall differences between each child’s performance alone and in competition were sufficiently extreme that we can reject that null hypothesis. The probability of finding a set of difference scores this or more extreme is less than .05.</p>
+</section>
+<section id="effect-size" class="level3">
+<h3 data-anchor-id="effect-size">Effect size</h3>
+<p>And since we got a significant result here, we need to calculate its effect size. Cohen’s <span class="math inline">\(d\)</span> works just like the single sample Cohen’s <span class="math inline">\(d\)</span> from a few lectures ago. It’s the mean of the difference scores divided by the standard deviation of the difference scores. Here we get an answer of <span class="math inline">\(d = -1.3\)</span>, meaning a large difference between the groups.</p>
+</section>
+<section id="reporting-results" class="level3">
+<h3 data-anchor-id="reporting-results">Reporting results</h3>
+<p>And lastly, we need to report our results. As usual, we need to report a few key pieces of information. There’s the descriptive statistics, the mean and standard deviation, either for each condition separately or just for the difference scores here. There is the type of test that we performed, the value of the test statistic with its degrees of freedom, and the <span class="math inline">\(p &lt; .05\)</span> or <span class="math inline">\(p &gt; .05\)</span>. And there is the effect size. We state verbally whether the test revealed a significant difference or a nonsignificant difference.</p>
+<blockquote class="blockquote">
+<p>When performing in competition, children completed the race faster on average (<span class="math inline">\(M = 43.2\)</span>; <span class="math inline">\(SD = 8.14\)</span>) than when performing alone (<span class="math inline">\(M = 49.4\)</span>; <span class="math inline">\(SD = 11.48\)</span>). A related-samples <span class="math inline">\(t\)</span> test found the difference to be statistically significant; <span class="math inline">\(t(4) = -2.91\)</span>, <span class="math inline">\(p &lt; .05\)</span>, <span class="math inline">\(d = -1.3\)</span>.</p>
+</blockquote>
+</section>
+</section>
+<section id="assumptions" class="level2">
+<h2 data-anchor-id="assumptions">Assumptions</h2>
+<p>Let’s mention the assumptions for the related samples <span class="math inline">\(t\)</span> test. Observations within each treatment condition must be independent. It’s important to stress that “within each treatment” part here, because obviously the scores are not independent across the two samples. That’s kind of the whole point, that the scores are related by being from the same person or people we’ve deliberately matched up. But because we calculate the difference scores rather than treating the two samples as independent, we’re not violating any assumption here. But the scores within each treatment must still be independent, meaning that they are a true random sample from the population that we’re interested in.</p>
+<p>And second, there’s the familiar assumption about normality here. It’s the population of difference scores being normally distributed that’s important. But as usual, we can ignore this assumption if we have a large enough sample size, because the central limit theorem tells us that the sampling distribution will be normally distributed even if the population isn’t.</p>
+</section>
+<section id="confidence-intervals" class="level2">
+<h2 data-anchor-id="confidence-intervals">Confidence intervals</h2>
+<p>And lastly, we can calculate the confidence interval for our related samples <span class="math inline">\(t\)</span> test much like we’ve done before. Let’s do this twice for the same data again, once as if it were independent-samples data and then again treating it correctly as related-samples data.</p>
+<p>Again, it’s a case of rearranging the equation so that instead of calculating <span class="math inline">\(t\)</span> we’re calculating the new population means that define the edges of our desired confidence interval. Treating it as independent-samples, using the means, the critical <span class="math inline">\(t\)</span>’s, and the standard error we already calculated earlier, we get a confidence interval centered on the difference between means of <span class="math inline">\(-6.2\)</span> with boundaries of <span class="math inline">\(-20.7\)</span> and <span class="math inline">\(+8.3\)</span>. This is a fairly wide interval. And notice that it includes within its range zero.</p>
+<p>Now treating the data more appropriately as related-samples and again using the values we calculated earlier, we get a confidence interval once again centered on <span class="math inline">\(-6.2\)</span>, just like the independent samples interval was, because <span class="math inline">\(-6.2\)</span> is the mean of the difference scores. But now our interval is much narrower. It’s more precise. It ranges from <span class="math inline">\(-12\)</span> to <span class="math inline">\(-0.28\)</span>. So notice now that the interval does not include zero. This is consistent with our hypothesis test concluding that the difference we saw was within the five percent of least likely findings if the null hypothesis were true. So once again, we used exactly the same numbers, but since we could treat them as related samples, we eliminated the variability that comes with including individual differences as a source of variability between groups. And we produced a more powerful test that in this case was capable of rejecting the null hypothesis and producing a confidence interval that excluded the null hypothesis predicted population parameter of zero.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="13_related_t_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="t_zero"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>What would a related-samples t statistic of 0 suggest?</p></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>It suggests that the mean difference is exactly zero relative to the
+estimated standard error, so the data provide no evidence of a treatment
+effect.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A t value of zero occurs when the numerator is zero.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="designs"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>When should you use a related-samples t test rather than an
+independent- samples t test?</p></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Use a related-samples t test when the two sets of scores are paired,
+such as the same people measured twice or matched participants in
+corresponding pairs.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The analysis is based on difference scores for each pair.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="13_related_t_learning_checks">{"titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","id":"13_related_t_learning_checks","questions":[{"explanationHtml":"\u003cp\u003eA t value of zero occurs when the numerator is zero.\u003c/p\u003e","answer":"It suggests that the mean difference is exactly zero relative to the estimated standard error, so the data provide no evidence of a treatment effect.","type":"free-response","explanation":"A t value of zero occurs when the numerator is zero.","prompt":"What would a related-samples t statistic of 0 suggest?","promptHtml":"\u003cp\u003eWhat would a related-samples t statistic of 0 suggest?\u003c/p\u003e","answerHtml":"\u003cp\u003eIt suggests that the mean difference is exactly zero relative to the\nestimated standard error, so the data provide no evidence of a treatment\neffect.\u003c/p\u003e","id":"t_zero"},{"explanationHtml":"\u003cp\u003eThe analysis is based on difference scores for each pair.\u003c/p\u003e","answer":"Use a related-samples t test when the two sets of scores are paired, such as the same people measured twice or matched participants in corresponding pairs.","type":"free-response","explanation":"The analysis is based on difference scores for each pair.","prompt":"When should you use a related-samples t test rather than an independent- samples t test?","promptHtml":"\u003cp\u003eWhen should you use a related-samples t test rather than an\nindependent- samples t test?\u003c/p\u003e","answerHtml":"\u003cp\u003eUse a related-samples t test when the two sets of scores are paired,\nsuch as the same people measured twice or matched participants in\ncorresponding pairs.\u003c/p\u003e","id":"designs"}],"title":"Learning Checks"}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-triplett1898dynamogenic" class="csl-entry" role="listitem">
+Triplett, N. (1898). The dynamogenic factors in pacemaking and competition. <em>The American Journal of Psychology</em>, <em>9</em>(4), 507–533. <a href="https://doi.org/10.2307/1412188">https://doi.org/10.2307/1412188</a>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./12-independent-samples-t-test.html" class="pagination-link" aria-label="Independent Samples t Test">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./14-anova.html" class="pagination-link" aria-label="ANOVA">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

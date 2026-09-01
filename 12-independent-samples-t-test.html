@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>12&nbsp; Independent Samples t Test – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./13-related-samples-t-test.html" rel="next">
+<link href="./11-t-test.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="12&nbsp; Independent Samples t Test – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="12&nbsp; Independent Samples t Test – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#from-single-sample-to-independent-samples" id="toc-from-single-sample-to-independent-samples" class="nav-link" data-scroll-target="#from-single-sample-to-independent-samples">From Single Sample to Independent Samples</a>
+  <ul class="collapse">
+  <li><a href="#the-inferential-logic" id="toc-the-inferential-logic" class="nav-link" data-scroll-target="#the-inferential-logic">The inferential logic</a></li>
+  </ul></li>
+  <li><a href="#the-structure-of-the-t-statistic" id="toc-the-structure-of-the-t-statistic" class="nav-link" data-scroll-target="#the-structure-of-the-t-statistic">The Structure of the <span class="math inline">\(t\)</span> Statistic</a></li>
+  <li><a href="#the-independent-samples-t-formula" id="toc-the-independent-samples-t-formula" class="nav-link" data-scroll-target="#the-independent-samples-t-formula">The Independent Samples <span class="math inline">\(t\)</span> Formula</a>
+  <ul class="collapse">
+  <li><a href="#the-estimated-standard-error-of-the-mean-difference" id="toc-the-estimated-standard-error-of-the-mean-difference" class="nav-link" data-scroll-target="#the-estimated-standard-error-of-the-mean-difference">The estimated standard error of the mean difference</a></li>
+  <li><a href="#pooled-variance" id="toc-pooled-variance" class="nav-link" data-scroll-target="#pooled-variance">Pooled variance</a></li>
+  <li><a href="#putting-it-all-together" id="toc-putting-it-all-together" class="nav-link" data-scroll-target="#putting-it-all-together">Putting it all together</a></li>
+  </ul></li>
+  <li><a href="#hypothesis-testing-example" id="toc-hypothesis-testing-example" class="nav-link" data-scroll-target="#hypothesis-testing-example">Hypothesis Testing Example</a>
+  <ul class="collapse">
+  <li><a href="#step-1-state-the-hypotheses" id="toc-step-1-state-the-hypotheses" class="nav-link" data-scroll-target="#step-1-state-the-hypotheses">Step 1: State the hypotheses</a></li>
+  <li><a href="#step-2-define-the-critical-regions" id="toc-step-2-define-the-critical-regions" class="nav-link" data-scroll-target="#step-2-define-the-critical-regions">Step 2: Define the critical regions</a></li>
+  <li><a href="#step-3-calculate-the-test-statistic" id="toc-step-3-calculate-the-test-statistic" class="nav-link" data-scroll-target="#step-3-calculate-the-test-statistic">Step 3: Calculate the test statistic</a></li>
+  <li><a href="#step-4-make-a-decision" id="toc-step-4-make-a-decision" class="nav-link" data-scroll-target="#step-4-make-a-decision">Step 4: Make a decision</a></li>
+  </ul></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting Results</a></li>
+  <li><a href="#assumptions" id="toc-assumptions" class="nav-link" data-scroll-target="#assumptions">Assumptions</a>
+  <ul class="collapse">
+  <li><a href="#hartleys-f-max-test" id="toc-hartleys-f-max-test" class="nav-link" data-scroll-target="#hartleys-f-max-test">Hartley’s <span class="math inline">\(F\)</span>-max test</a></li>
+  <li><a href="#adjusting-degrees-of-freedom" id="toc-adjusting-degrees-of-freedom" class="nav-link" data-scroll-target="#adjusting-degrees-of-freedom">Adjusting degrees of freedom</a></li>
+  </ul></li>
+  <li><a href="#confidence-intervals" id="toc-confidence-intervals" class="nav-link" data-scroll-target="#confidence-intervals">Confidence Intervals</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/likert-helper.js"></script>
+<script src="resources/js/make-inferential-diagram.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/variability-table-generator.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>We spent the last couple of lectures working with the single sample <span class="math inline">\(t\)</span> statistic. Here, we’ll move on to another variant of the <span class="math inline">\(t\)</span> test: the independent samples <span class="math inline">\(t\)</span> test. We’ll start by comparing the two, seeing what kind of research designs call for which versions of the <span class="math inline">\(t\)</span> test, and then we’ll work through calculating the independent samples <span class="math inline">\(t\)</span> statistic and using it in a hypothesis test.</p>
+</section>
+<section id="from-single-sample-to-independent-samples" class="level2">
+<h2 data-anchor-id="from-single-sample-to-independent-samples">From Single Sample to Independent Samples</h2>
+<p>To refresh your memory of the single sample <span class="math inline">\(t\)</span> statistic, suppose you run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we measure happiness using a five point scale.</p>
+<div class="center">
+<p>Here’s $10! 💵</p>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="moneyLikert" data-interactive-options="{}" data-interactive-factory="makeLikert">
+<div class="interactive-figure-fallback">
+A five-point Likert response scale.
+</div>
+</div>
+<p>Arguably, we have a good reason to think we can predict what the population mean should be if the money has no effect at all. By definition, on average, people should report average happiness levels. In technical terms, the null hypothesis <span class="math inline">\(H_0\)</span> states that the population mean <span class="math inline">\(\mu = 3\)</span>. But we don’t know how variable scores might be, so we can’t claim knowledge of the population standard deviation, <span class="math inline">\(\sigma\)</span>. As a result, we can’t use the <span class="math inline">\(z\)</span>-test. Instead, the single sample <span class="math inline">\(t\)</span> test would be the appropriate statistical test.</p>
+<p>But suppose we have a slightly more complicated design. Suppose we don’t want to give everyone $10 and just see what happens. We want to create two different situations and see if there’s a difference between them. So for this study, imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves — an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Maybe they’ll buy their pal a coffee or whatever. And then later that day we ask everyone in both groups about their current level of happiness.</p>
+<div class="columns">
+<div class="column" style="width:50%;">
+<div class="center">
+<p>Group A:<br>
+Spend this on yourself 💵</p>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="likertSpendSelf" data-interactive-options="{&quot;name&quot;:&quot;likert-spend-self&quot;}" data-interactive-factory="makeLikert">
+<div class="interactive-figure-fallback">
+Likert response scale for the spend-on-yourself group.
+</div>
+</div>
+</div><div class="column" style="width:50%;">
+<div class="center">
+<p>Group B:<br>
+Spend this on someone else 💵</p>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="likertSpendOther" data-interactive-options="{&quot;name&quot;:&quot;likert-spend-other&quot;}" data-interactive-factory="makeLikert">
+<div class="interactive-figure-fallback">
+Likert response scale for the spend-on-someone-else group.
+</div>
+</div>
+</div>
+</div>
+<p>This isn’t a purely hypothetical example, by the way: researchers really have run studies like this, and prosocial spending does seem to make people happier <span class="citation" data-cites="dunn2014prosocial">(<a href="references.html#ref-dunn2014prosocial" role="doc-biblioref">Dunn et al., 2014</a>)</span>.</p>
+<p>We can’t use the single sample <span class="math inline">\(t\)</span> test here because we have <em>two</em> hypothetical populations and we don’t know either of their means. So we can’t formulate a null hypothesis based on expected means the way we could with the single sample design.</p>
+<section id="the-inferential-logic" class="level3">
+<h3 data-anchor-id="the-inferential-logic">The inferential logic</h3>
+<div class="interactive-figure-mount" data-interactive-figure="independentInferentialDiagram" data-interactive-options="{&quot;preset&quot;:&quot;independent&quot;}" data-interactive-factory="makeInferentialDiagram">
+<div class="interactive-figure-fallback">
+Inferential process diagram for an independent-samples t test.
+</div>
+</div>
+<p>Put in terms of the inferential diagram, for the single sample situation we had an original untreated population that we thought we knew something about: its mean. That was the basis of our null hypothesis: that the treated population would have that same mean. We inferred the variability from our sample, and we assumed that both populations would have that same variability, because an assumption of the <span class="math inline">\(t\)</span> test is that the treatment does not alter variability. And the central limit theorem allowed us to predict the shape of the sampling distribution and to determine the probability of observing a sample with a mean as or more extreme than our sample’s mean.</p>
+<p>Now for the more complicated research design with two different samples, things are slightly more complicated. We no longer claim to know anything about the populations that we want to compare. So we have to infer both populations’ characteristics based on their sample means and standard deviations and sample sizes. And then our null hypothesis is, as usual, that there is no difference between these two populations. Since we don’t know either of their means in advance, the null hypothesis doesn’t specify a value that one or the other mean is equal to the way that the single sample <span class="math inline">\(t\)</span> test did. Rather, it specifies that the difference between the two population means is equal to zero, which amounts to the same thing — of course, we’re just not claiming in advance to know either population value like we did before.</p>
+</section>
+</section>
+<section id="the-structure-of-the-t-statistic" class="level2">
+<h2 data-anchor-id="the-structure-of-the-t-statistic">The Structure of the <span class="math inline">\(t\)</span> Statistic</h2>
+<p>Before we get into how to actually calculate the independent samples test, it’s worth just outlining the conceptual structure of the <span class="math inline">\(t\)</span> statistic in general, because this is true of all the variations of the <span class="math inline">\(t\)</span> test. The numerator always takes the form of a sample statistic minus a population parameter, and the denominator is always the estimated standard error for that statistic. So in plainer language, we could say the numerator quantifies how different was what we observed from what we predicted based on the null hypothesis, and the denominator quantifies how big of a difference we would typically see just by chance alone. So the more of a difference we saw over and above what would be expected by chance, the bigger our numerator will be compared to the denominator and the larger the <span class="math inline">\(t\)</span> statistic we will get. Or a succinct, technical way of putting it would be the numerator is constructed from the difference between our data and our hypothesis, and the denominator is the expected sampling error.</p>
+<p>For the single sample <span class="math inline">\(t\)</span> test, the equation looked like this. The sample statistic was the single sample’s mean; we subtracted <span class="math inline">\(\mu\)</span>, the expected population mean; and we divided by the estimated standard error of the mean, which we calculated using the single sample’s standard deviation and our sample size.</p>
+</section>
+<section id="the-independent-samples-t-formula" class="level2">
+<h2 data-anchor-id="the-independent-samples-t-formula">The Independent Samples <span class="math inline">\(t\)</span> Formula</h2>
+<p>This is what the equation looks like for the independent samples test.</p>
+<p><span id="eq-independent-t"><span class="math display">\[ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}}  \tag{12.1}\]</span></span></p>
+<p>The numerator looks a bit more complicated, but remember that basic form: we have a statistic minus a parameter divided by a standard error.</p>
+<p>In this case, our statistic is no longer a single sample mean. Instead, it’s the difference between two sample means, denoted by <span class="math inline">\(M_1\)</span>, the mean of the first sample, minus <span class="math inline">\(M_2\)</span>, the mean of the second sample. And we subtract from that statistic the expected population parameter. And again, it’s not just a single population’s mean, but the difference between two population means.</p>
+<p>Now, if you think about the null hypothesis, you know that it predicts no difference. So the value of <span class="math inline">\(\mu_1 - \mu_2\)</span>, according to our null hypothesis, is always zero. So this numerator is actually a little bit simpler than it looks, because we’re subtracting a population parameter of zero for the difference between those two population means. So when we come to actually calculate this, we could ignore that zero and our numerator will just be the difference between the two sample means.</p>
+<section id="the-estimated-standard-error-of-the-mean-difference" class="level3">
+<h3 data-anchor-id="the-estimated-standard-error-of-the-mean-difference">The estimated standard error of the mean difference</h3>
+<p>The denominator also looks more complicated here. This notation, <span class="math inline">\(s_{M_1 - M_2}\)</span>, refers to the estimated standard error of the mean difference — how much of a difference we’d expect to see between sample means drawn from these populations by chance alone. And calculating that actually is a bit more complicated, because we’ll have to combine our estimates from both samples’ variabilities. So the equation for calculating that denominator, the estimated standard error of the mean difference, looks like this:</p>
+<p><span id="eq-independent-se"><span class="math display">\[ s_{M_1 - M_2} = \sqrt{\frac{s_p^2}{n_1} + \frac{s_p^2}{n_2}}  \tag{12.2}\]</span></span></p>
+<p>It is the square root of <span class="math inline">\(s_p^2\)</span> divided by the sample size of sample one plus <span class="math inline">\(s_p^2\)</span> over <span class="math inline">\(n\)</span> for sample two. If you think back to the calculation for standard error we’ve used in the past, it’s been the square root of variance over <span class="math inline">\(n\)</span>. And so this looks kind of similar, but there’s two things going on here — and presumably that’s because we have two samples — and there’s this unfamiliar symbol <span class="math inline">\(s_p^2\)</span>.</p>
+<p><span id="eq-pooled-variance"><span class="math display">\[ s_p^2 = \frac{SS_1 + SS_2}{df_1 + df_2}  \tag{12.3}\]</span></span></p>
+</section>
+<section id="pooled-variance" class="level3">
+<h3 data-anchor-id="pooled-variance">Pooled variance</h3>
+<p>So what is that? Well, you know that <span class="math inline">\(s^2\)</span> usually refers to a variance, and this is no different. We’re talking about some kind of variance. And the subscript <span class="math inline">\(p\)</span> stands for pooled. This is the pooled variance: the variances of our two samples pooled together to produce an estimate of the population variance based on the separate estimates that each sample is giving us. Remember, the <span class="math inline">\(t\)</span> test generally assumes homogeneity of variance; that the different hypothetical populations we’re thinking about always have the same variance. So we want to come up with a single guess at the single population variability. Each sample gives us an estimate and we pool those estimates together to come up with the best possible guess at that single true population variability.</p>
+<p>So essentially the pooled variance is just a weighted average of the two samples’ variances. And we calculate it by dividing the sum of each sample’s sum of squared deviations by the sum of the samples’ degrees of freedom. Remember, sum of squares divided by degrees of freedom gives us the average squared deviation for a sample — its variance. So here we’re pooling all the sums of squares together and effectively weighting them by sample size, each sample’s degrees of freedom, because bigger samples, with higher degrees of freedom, provide more accurate estimates of population parameters.</p>
+<p>Another form we could put this equation in is degrees of freedom multiplied by the sample variance for each sample, added together in the numerator, and degrees of freedom in the denominator. That is algebraically equivalent to the simpler looking sums of squares version, because <span class="math inline">\(SS\)</span> is equal to variance multiplied by degrees of freedom. So this version of the equation can just be a bit more useful if we’ve already calculated the samples’ variances and we can’t be bothered working out their sums of squares separately. For example, if we’re working in R, there’s a function to calculate variance, but there isn’t one for sums of squares, so it might just be easier to work with this version of the equation.</p>
+</section>
+<section id="putting-it-all-together" class="level3">
+<h3 data-anchor-id="putting-it-all-together">Putting it all together</h3>
+<p>So these are the steps to calculate the independent samples <span class="math inline">\(t\)</span> statistic. Most of the extra work is in the denominator. First, we have to calculate pooled variance, and we use that to calculate the estimated standard error of the mean difference. Then we use that as the denominator with the difference between sample means as the numerator for our <span class="math inline">\(t\)</span> statistic, remembering that the population parameter — the difference between <span class="math inline">\(\mu\)</span>s — is zero and can effectively be ignored when we’re calculating this.</p>
+<p>And this gives us the usual ratio of how much difference we observed to how much we would expect by chance. We’d expect to get an answer of around one if there was no treatment effect at all, because on average we would see just as much difference as we would expect due to chance. The more our <span class="math inline">\(t\)</span> statistic exceeds one, the more difference we saw over and above that expected by chance alone, and the more convincing the evidence of a treatment effect becomes.</p>
+</section>
+</section>
+<section id="hypothesis-testing-example" class="level2">
+<h2 data-anchor-id="hypothesis-testing-example">Hypothesis Testing Example</h2>
+<p>So let’s run with the example of giving two different groups of people $10, telling one group to spend it on themselves and the other group to spend it on someone else.</p>
+<section id="step-1-state-the-hypotheses" class="level3">
+<h3 data-anchor-id="step-1-state-the-hypotheses">Step 1: State the hypotheses</h3>
+<p>As usual, the first step is to state our hypotheses. As always, the null hypothesis is our default assumption that there is no difference between groups, that the treatment has no effect. Specifically, in the case of the independent samples test, the null hypothesis is that <span class="math inline">\(\mu_1 - \mu_2 = 0\)</span>. We state it this way because again we don’t claim to know in advance what the value of <span class="math inline">\(\mu_1\)</span> or <span class="math inline">\(\mu_2\)</span> is. We just expect that the difference between them is zero — or to put it another, more intuitive way, that they are the same.</p>
+<p>The alternative hypothesis is that there is a difference between the groups, that the treatment does have an effect. As before, we could state either a directional or a non-directional hypothesis. A directional hypothesis would state that the difference will be less than zero if we expect a change in that direction, or greater than zero if we expect a change in the other direction. A non-directional hypothesis would state simply that the difference will not be equal to zero, and we’ll be looking for a difference in either direction using a two-tailed test. Researchers most often use two-tailed tests because it’s generally a slightly more stringent test in terms of having a smaller critical region in each tail of the distribution. So let’s run with a two-tailed test for this example.</p>
+</section>
+<section id="step-2-define-the-critical-regions" class="level3">
+<h3 data-anchor-id="step-2-define-the-critical-regions">Step 2: Define the critical regions</h3>
+<p>Step two is to define our critical regions. Again, since the <span class="math inline">\(t\)</span> distribution is actually a family of distributions with a slightly different mathematical curve for every possible value of degrees of freedom, we need to know the degrees of freedom for our test at this point.</p>
+<p>To be long-winded about it, the total degrees of freedom for an independent samples <span class="math inline">\(t\)</span> test is the degrees of freedom for sample one plus the degrees of freedom for sample two, and that is equal to <span class="math inline">\(n_1\)</span>, the number of people in group one, minus one, plus <span class="math inline">\(n_2\)</span>, the number of people in group two, minus one. This is because we lose one degree of freedom for each sample mean that we calculate, because we then have to reuse the scores to calculate deviations from that mean to get the variance and standard deviation. And reusing the scores means that one is no longer free to vary. We have to do this twice here, once for each sample, and so we lose a degree of freedom for each sample. So to be more concise about it, the degrees of freedom is <span class="math inline">\(N\)</span> — meaning here the total number of people in both conditions of the study — minus two.</p>
+<p>So let’s say for our little example here, we’re going to have just five people in each group. That means that the degrees of freedom for each sample is four. So four plus four is eight. Or to use the more concise way of thinking about it, we have ten people in our study in total, so the total degrees of freedom is ten minus two, or eight.</p>
+<p>So we decide on <span class="math inline">\(\alpha\)</span>. For our purposes, we’ll use the traditional .05. And we look up the <span class="math inline">\(t\)</span> distribution with eight degrees of freedom in a table or using R, and we find that the critical <span class="math inline">\(t\)</span> score that cuts off the highest and lowest 5% of the distribution is 2.306.</p>
+</section>
+<section id="step-3-calculate-the-test-statistic" class="level3">
+<h3 data-anchor-id="step-3-calculate-the-test-statistic">Step 3: Calculate the test statistic</h3>
+<p>Step three is where we get our data and calculate our test statistic. Here are the happiness scores for our two groups of five:</p>
+<div style="text-align: center; font-size: 1.05em;">
+<p>Spend on self: 1 5 2 4 3</p>
+<p>Spend on other: 5 5 2 5 3</p>
+</div>
+<p>Remember, for the independent samples <span class="math inline">\(t\)</span> test, this involves calculating the estimated standard error of the mean difference for the denominator, which involves calculating the pooled variance of our two samples. So we’re going to need to know either the sums of squares for each sample or each sample variance.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Calculate each sample’s variability
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="independentTVariabilityTables" data-interactive-options="{&quot;tables&quot;:[{&quot;title&quot;:&quot;Spend on self&quot;,&quot;data&quot;:[1,5,2,4,3],&quot;sample&quot;:true},{&quot;title&quot;:&quot;Spend on other&quot;,&quot;data&quot;:[5,5,2,5,3],&quot;sample&quot;:true}]}" data-interactive-factory="makeVariabilityTables">
+<div class="interactive-figure-fallback">
+Interactive tables calculating deviations, sums of squares, and variance for the two spending groups.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Scores" data-action="{&quot;stage&quot;:&quot;data&quot;,&quot;animate&quot;:false}">
+<p>Start with each group’s scores.</p>
+</div>
+<div class="tutorial-step" data-title="Means" data-action="{&quot;stage&quot;:&quot;mean&quot;,&quot;animate&quot;:true}">
+<p>Find each sample mean: 3 for the spend-on-self group, 4 for the spend-on-other group.</p>
+</div>
+<div class="tutorial-step" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Subtract each group’s mean from its scores.</p>
+</div>
+<div class="tutorial-step" data-title="Squared" data-action="{&quot;stage&quot;:&quot;squared-deviations&quot;,&quot;animate&quot;:true}">
+<p>Square each deviation.</p>
+</div>
+<div class="tutorial-step" data-title="SS" data-action="{&quot;stage&quot;:&quot;ss&quot;,&quot;animate&quot;:true}">
+<p>Sum the squared deviations: <span class="math inline">\(SS_1 = 10\)</span> and <span class="math inline">\(SS_2 = 8\)</span>. These are the ingredients for the pooled variance.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="step-4-make-a-decision" class="level3">
+<h3 data-anchor-id="step-4-make-a-decision">Step 4: Make a decision</h3>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="12_independent_t_variability" aria-label="Calculate Variability"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate Variability</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="pooled_variance"><div class="quiz-prompt"><p>Two independent samples each have n = 5. Their variances are 4 and
+10. What is the pooled variance?</p></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>7</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>With equal sample sizes, the pooled variance is the average of the
+two variances: 7. More generally, weight by degrees of freedom.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="12_independent_t_variability">{"title":"Calculate Variability","titleHtml":"\u003cp\u003eCalculate Variability\u003c/p\u003e","questions":[{"type":"numeric","promptHtml":"\u003cp\u003eTwo independent samples each have n = 5. Their variances are 4 and\n10. What is the pooled variance?\u003c/p\u003e","explanationHtml":"\u003cp\u003eWith equal sample sizes, the pooled variance is the average of the\ntwo variances: 7. More generally, weight by degrees of freedom.\u003c/p\u003e","prompt":"Two independent samples each have n = 5. Their variances are 4 and 10. What is the pooled variance?","explanation":"With equal sample sizes, the pooled variance is the average of the two variances: 7. More generally, weight by degrees of freedom.","answer":"7","answerHtml":"\u003cp\u003e7\u003c/p\u003e","tolerance":"1.0e-2","id":"pooled_variance"}],"id":"12_independent_t_variability"}</script></section>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="12_independent_t_statistic" aria-label="t Statistic Quiz"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>t Statistic Quiz</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="independent_t"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>In the money-and-happiness example, the mean difference is -1 and the
+estimated standard error is 0.95. What is t?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>-1.05</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>t = -1 / 0.95 = -1.05.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="independent_decision"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Based on t = -1.05 and critical t values of +/-2.306, should you
+reject the null hypothesis?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="12_independent_t_statistic-independent_decision" id="12_independent_t_statistic-independent_decision-option-1" value="0" aria-labelledby="12_independent_t_statistic-independent_decision-option-1-text"><div class="quiz-choice-text" id="12_independent_t_statistic-independent_decision-option-1-text"><p>No, fail to reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_statistic-independent_decision" id="12_independent_t_statistic-independent_decision-option-2" value="1" aria-labelledby="12_independent_t_statistic-independent_decision-option-2-text"><div class="quiz-choice-text" id="12_independent_t_statistic-independent_decision-option-2-text"><p>Yes, reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_statistic-independent_decision" id="12_independent_t_statistic-independent_decision-option-3" value="2" aria-labelledby="12_independent_t_statistic-independent_decision-option-3-text"><div class="quiz-choice-text" id="12_independent_t_statistic-independent_decision-option-3-text"><p>Yes, because any nonzero difference is significant</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_statistic-independent_decision" id="12_independent_t_statistic-independent_decision-option-4" value="3" aria-labelledby="12_independent_t_statistic-independent_decision-option-4-text"><div class="quiz-choice-text" id="12_independent_t_statistic-independent_decision-option-4-text"><p>No, because t is negative</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>No, fail to reject the null hypothesis</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The absolute value of t does not exceed the critical value.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="12_independent_t_statistic">{"title":"t Statistic Quiz","titleHtml":"\u003cp\u003et Statistic Quiz\u003c/p\u003e","questions":[{"type":"numeric","promptHtml":"\u003cp\u003eIn the money-and-happiness example, the mean difference is -1 and the\nestimated standard error is 0.95. What is t?\u003c/p\u003e","explanationHtml":"\u003cp\u003et = -1 / 0.95 = -1.05.\u003c/p\u003e","prompt":"In the money-and-happiness example, the mean difference is -1 and the estimated standard error is 0.95. What is t?","explanation":"t = -1 / 0.95 = -1.05.","answer":"-1.05","answerHtml":"\u003cp\u003e-1.05\u003c/p\u003e","tolerance":"2.0e-2","id":"independent_t"},{"type":"multiple-choice","promptHtml":"\u003cp\u003eBased on t = -1.05 and critical t values of +/-2.306, should you\nreject the null hypothesis?\u003c/p\u003e","explanationHtml":"\u003cp\u003eThe absolute value of t does not exceed the critical value.\u003c/p\u003e","prompt":"Based on t = -1.05 and critical t values of +/-2.306, should you reject the null hypothesis?","explanation":"The absolute value of t does not exceed the critical value.","answerHtml":"","options":[{"textHtml":"\u003cp\u003eNo, fail to reject the null hypothesis\u003c/p\u003e","text":"No, fail to reject the null hypothesis","correct":true},{"textHtml":"\u003cp\u003eYes, reject the null hypothesis\u003c/p\u003e","text":"Yes, reject the null hypothesis"},{"textHtml":"\u003cp\u003eYes, because any nonzero difference is significant\u003c/p\u003e","text":"Yes, because any nonzero difference is significant"},{"textHtml":"\u003cp\u003eNo, because t is negative\u003c/p\u003e","text":"No, because t is negative"}],"id":"independent_decision"}],"id":"12_independent_t_statistic"}</script></section>
+<p>As usual, step four is to ask: is the mean difference sufficiently large that it seems unlikely to have come from the null hypothesis distribution, which states that there is no difference? In short, is your calculated <span class="math inline">\(t\)</span> statistic within the critical regions you identified earlier? If it is, you reject the null hypothesis. If it isn’t, you fail to reject the null hypothesis.</p>
+<p>So in this case, our statistic of <span class="math inline">\(-1.05\)</span> is not within the critical region. There was a difference between our two sample means of one point on our five point scale. Given the estimated standard error of the mean difference, that is not sufficiently unlikely to make us reject the null hypothesis in this case. It is not one of the 5% of most extreme means for the null hypothesis sampling distribution.</p>
+</section>
+</section>
+<section id="reporting-results" class="level2">
+<h2 data-anchor-id="reporting-results">Reporting Results</h2>
+<p>So we’ve made our decision for the hypothesis test, but as we saw last time, we aren’t quite done yet. If we had found a significant difference, the next step would have been to calculate the effect size. For the independent samples <span class="math inline">\(t\)</span> test, Cohen’s <span class="math inline">\(d\)</span> divides the difference between the sample means by the pooled standard deviation — the square root of the pooled variance:</p>
+<p><span class="math display">\[d = \frac{M_1 - M_2}{\sqrt{s_p^2}} = \frac{3 - 4}{\sqrt{2.25}} = -0.67\]</span></p>
+<p>But when we find a non-significant difference, effect size is not required because we’ve effectively found that no effect exists to calculate the size of.</p>
+<p>Lastly, even though we got a non-significant result, we still have to report the results. When you find a non-significant difference, you have to be just as meticulous about reporting all the relevant information as if you had found a significant result. Here’s how we might report this one:</p>
+<blockquote class="blockquote">
+<p>A two-tailed independent-samples <span class="math inline">\(t\)</span> test suggested that the difference in average happiness between people in the “spend on self” group (<span class="math inline">\(M = 3\)</span>; <span class="math inline">\(SD = 1.58\)</span>) and the “spend on other” group (<span class="math inline">\(M = 4\)</span>; <span class="math inline">\(SD = 1.41\)</span>) was nonsignificant; <span class="math inline">\(t(8) = -1.05\)</span>, <span class="math inline">\(p &gt; .05\)</span>.</p>
+</blockquote>
+</section>
+<section id="assumptions" class="level2">
+<h2 data-anchor-id="assumptions">Assumptions</h2>
+<p>As we’ve seen, the <span class="math inline">\(t\)</span> test relies on some general assumptions. First, the observations within each sample must be independent of one another. Second, the two populations from which the samples are selected must be normally distributed, unless our sample size is greater than around 30, in which case the sampling distribution will be normal regardless of the shape of the population. Again, these assumptions come straight from the central limit theorem.</p>
+<p>And third, for independent samples <span class="math inline">\(t\)</span> tests, we assume that the two populations from which the samples are selected must have equal variances. Again, this is called homogeneity of variance, and this assumption is required for a couple of reasons. First, as we’ve seen, this inferential process generally assumes that treatments can affect the population’s average score on a measure without affecting its variability. But this is particularly important here because we calculated pooled variance as a weighted average of our two sample variances, and averages are only meaningful if you’re averaging together things that are fundamentally similar. So we average our sample variabilities as estimates of the same single true population variability. If they were actually estimating different variabilities, the average wouldn’t be meaningful — like if you averaged together your guesses of someone’s height and their weight, you’d get a number, but it wouldn’t make any sense as an estimate of anything.</p>
+<section id="hartleys-f-max-test" class="level3">
+<h3 data-anchor-id="hartleys-f-max-test">Hartley’s <span class="math inline">\(F\)</span>-max test</h3>
+<p>Since this assumption is particularly important in the context of the independent samples <span class="math inline">\(t\)</span> test, we can quantify the extent to which the assumption is violated. Hartley’s <span class="math inline">\(F\)</span>-max test provides a hypothesis test of its own, testing the homogeneity of variance assumption.</p>
+<p><span id="eq-f-max"><span class="math display">\[ F_{max} = \frac{s^2_{largest}}{s^2_{smallest}}  \tag{12.4}\]</span></span></p>
+<p>The calculation is simple: we just divide the larger sample variance by the smaller sample variance. This gives a ratio of how much bigger one is than the other. If they’re pretty much the same, the answer will be close to one. The larger the answer, the more different the sample variances are, and the more it looks like the assumption of homogeneity of variance has been violated.</p>
+<p>And like our regular hypothesis tests, the <span class="math inline">\(F\)</span>-max test has its own critical values. If the value you calculate exceeds the critical value, then we have to admit that the homogeneity of variance assumption has not been met and we have to rethink our analysis.</p>
+</section>
+<section id="adjusting-degrees-of-freedom" class="level3">
+<h3 data-anchor-id="adjusting-degrees-of-freedom">Adjusting degrees of freedom</h3>
+<p>Specifically, if the assumption is not met, then we adjust the degrees of freedom for the <span class="math inline">\(t\)</span> test according to a particular equation.</p>
+<p><span id="eq-df-adjustment"><span class="math display">\[df = \frac{(\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2})}
+{\frac{(\frac{s_1^2}{n_1})^2}{n_1-1} + \frac{(\frac{s_2^2}{n_2})^2}{n_2-1}
+} \tag{12.5}\]</span></span></p>
+<p>Now, this is not an equation that you have to know or really to understand, but I like to show it because it has this nice cascading quality — it just looks nice to me. But basically it adjusts the degrees of freedom for the test so that it’s no longer <span class="math inline">\(N - 2\)</span> but whatever this equation works out to. This compensates for the inequality of the sample variances, and we won’t get any farther into the weeds on this than that.</p>
+<p>But you should know that when you run a <span class="math inline">\(t\)</span> test in R using the <code>t.test</code> function, it will automatically apply this correction by default. If you want to override that behavior, you’ll have to specify <code>var.equal = TRUE</code> as an argument within the function to let R know that you are indeed assuming that the homogeneity of variances assumption has been met and that you’d just like to use <span class="math inline">\(N - 2\)</span> as your degrees of freedom. If you forget to specify this argument, or if you specify it as <code>FALSE</code>, then the test will still work. You’ll just see a different value of degrees of freedom — it’ll probably be a strange looking decimal.</p>
+</section>
+</section>
+<section id="confidence-intervals" class="level2">
+<h2 data-anchor-id="confidence-intervals">Confidence Intervals</h2>
+<p>Lastly, we can calculate a confidence interval for an independent samples <span class="math inline">\(t\)</span> test, much as we did for the single sample <span class="math inline">\(t\)</span> test. Again, it quantifies the precision of a statistic. The difference here is that our interval isn’t for a particular population mean, but rather for the difference between samples drawn from a population. It’s based on the sampling distribution for all possible differences between means for a given population. We can calculate it similarly to how we did before, by rearranging the equation @#eq-independent-t to solve for the population parameters.</p>
+<p><span class="math display">\[ t = \dfrac{(M_1-M_2)-(\mu_1-\mu_2)}{s_{M_1-M_2}}\]</span></p>
+<p>To solve for parameter <span class="math inline">\((\mu_1 - \mu_2)\)</span>:</p>
+<p><span class="math display">\[ (\mu_1-\mu_2) = (M_1-M_2) \pm t * s_{M_1-M_2} \]</span></p>
+<p>So for our little money-buying-happiness example, let’s say we want a 95% confidence interval for our mean difference of <span class="math inline">\(-1\)</span> with ten participants and an estimated standard error of the mean difference of 0.95. The critical <span class="math inline">\(t\)</span> values are exactly the same as we had for the hypothesis test because we’re using the same definition of common and uncommon, splitting a distribution into the 5% in the tails and 95% in the middle.</p>
+<div class="interactive-figure-mount" data-interactive-figure="independentCiFigure" data-interactive-options="{     &quot;distribution&quot;: &quot;normal&quot;, &quot;mean&quot;: -1, &quot;sd&quot;: 0.95,     &quot;style&quot;: &quot;minimal&quot;, &quot;xAxis&quot;: true, &quot;xDomain&quot;: [-5, 3], &quot;xTicks&quot;: 5,     &quot;shade&quot;: {&quot;from&quot;: -3.19, &quot;to&quot;: 1.19, &quot;color&quot;: &quot;var(--bc-comparison-color, #2f6f9f)&quot;, &quot;opacity&quot;: 0.3, &quot;labelPosition&quot;: &quot;above&quot;, &quot;label&quot;: &quot;[-3.19, 1.19]&quot;},     &quot;markers&quot;: {&quot;at&quot;: 0, &quot;label&quot;: &quot;H0: 0&quot;, &quot;height&quot;: 0.5, &quot;color&quot;: &quot;var(--bc-accent, #2c7fb8)&quot;},     &quot;labels&quot;: {&quot;x&quot;: &quot;Mean difference (M1 - M2)&quot;},     &quot;maxWidth&quot;: &quot;34rem&quot;   }" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+Normal curve centered on the observed mean difference of -1, with the 95% confidence interval from -3.19 to 1.19 shaded; a marker at 0, the null-hypothesis value, falls inside the shaded interval.
+</div>
+</div>
+<p>You should have gotten answers of <span class="math inline">\(-3.19\)</span> and <span class="math inline">\(+1.19\)</span>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="12_independent_t_confidence_interval" aria-label="Calculate the CI"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate the CI</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="independent_ci"><div class="quiz-prompt"><p>For a mean difference of -1, critical t = 2.306, and estimated
+standard error = 0.95, what is the 95% confidence interval?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>The interval is -1 +/- 2.306 * 0.95, or about [-3.19, 1.19].</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Because the interval includes zero, it agrees with the nonsignificant
+hypothesis test.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="12_independent_t_confidence_interval">{"title":"Calculate the CI","titleHtml":"\u003cp\u003eCalculate the CI\u003c/p\u003e","questions":[{"type":"free-response","answer":"The interval is -1 +/- 2.306 * 0.95, or about [-3.19, 1.19].","explanationHtml":"\u003cp\u003eBecause the interval includes zero, it agrees with the nonsignificant\nhypothesis test.\u003c/p\u003e","prompt":"For a mean difference of -1, critical t = 2.306, and estimated standard error = 0.95, what is the 95% confidence interval?","promptHtml":"\u003cp\u003eFor a mean difference of -1, critical t = 2.306, and estimated\nstandard error = 0.95, what is the 95% confidence interval?\u003c/p\u003e","answerHtml":"\u003cp\u003eThe interval is -1 +/- 2.306 * 0.95, or about [-3.19, 1.19].\u003c/p\u003e","explanation":"Because the interval includes zero, it agrees with the nonsignificant hypothesis test.","id":"independent_ci"}],"id":"12_independent_t_confidence_interval"}</script></section>
+<p>Notice here that the confidence interval includes a mean difference of zero within that range. Our hypothesis test failed to reject the null hypothesis because our observed difference of <span class="math inline">\(-1\)</span> was not among the least common 5% of differences for the null distribution.</p>
+<p>Again, the confidence interval and hypothesis test outcome are related and will always be in agreement if the <span class="math inline">\(\alpha\)</span> for the test corresponds to the width of the confidence interval. Like I said before, this is a tricky idea to get your head around, but it’s worth putting in the time to really understand why this is the case.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="12_independent_t_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="ci_excludes_zero"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>An independent-samples t test finds a mean difference of 2.3 and a
+95% CI of [0.3, 4.3]. Can you predict whether the hypothesis test
+rejects the null at alpha = .05?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_excludes_zero" id="12_independent_t_learning_checks-ci_excludes_zero-option-1" value="0" aria-labelledby="12_independent_t_learning_checks-ci_excludes_zero-option-1-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_excludes_zero-option-1-text"><p>Yes, because the interval excludes 0</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_excludes_zero" id="12_independent_t_learning_checks-ci_excludes_zero-option-2" value="1" aria-labelledby="12_independent_t_learning_checks-ci_excludes_zero-option-2-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_excludes_zero-option-2-text"><p>No, because every confidence interval rejects the null</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_excludes_zero" id="12_independent_t_learning_checks-ci_excludes_zero-option-3" value="2" aria-labelledby="12_independent_t_learning_checks-ci_excludes_zero-option-3-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_excludes_zero-option-3-text"><p>No, because the mean difference is positive</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_excludes_zero" id="12_independent_t_learning_checks-ci_excludes_zero-option-4" value="3" aria-labelledby="12_independent_t_learning_checks-ci_excludes_zero-option-4-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_excludes_zero-option-4-text"><p>Cannot tell anything from the interval</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Yes, because the interval excludes 0</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A 95% CI that excludes the null value of zero corresponds to p &lt;
+.05 for a two-tailed test.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="ci_zero_certain"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A confidence interval for an independent-samples test that includes
+zero establishes that the true population parameter is 95% certain to be
+zero.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_zero_certain" id="12_independent_t_learning_checks-ci_zero_certain-option-1" value="true" aria-labelledby="12_independent_t_learning_checks-ci_zero_certain-option-1-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_zero_certain-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="12_independent_t_learning_checks-ci_zero_certain" id="12_independent_t_learning_checks-ci_zero_certain-option-2" value="false" aria-labelledby="12_independent_t_learning_checks-ci_zero_certain-option-2-text"><div class="quiz-choice-text" id="12_independent_t_learning_checks-ci_zero_certain-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Including zero means zero is a plausible value within the interval;
+it does not establish certainty.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="12_independent_t_learning_checks">{"title":"Learning Checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","questions":[{"type":"multiple-choice","promptHtml":"\u003cp\u003eAn independent-samples t test finds a mean difference of 2.3 and a\n95% CI of [0.3, 4.3]. Can you predict whether the hypothesis test\nrejects the null at alpha = .05?\u003c/p\u003e","explanationHtml":"\u003cp\u003eA 95% CI that excludes the null value of zero corresponds to p \u0026lt;\n.05 for a two-tailed test.\u003c/p\u003e","prompt":"An independent-samples t test finds a mean difference of 2.3 and a 95% CI of [0.3, 4.3]. Can you predict whether the hypothesis test rejects the null at alpha = .05?","explanation":"A 95% CI that excludes the null value of zero corresponds to p \u003c .05 for a two-tailed test.","answerHtml":"","options":[{"textHtml":"\u003cp\u003eYes, because the interval excludes 0\u003c/p\u003e","text":"Yes, because the interval excludes 0","correct":true},{"textHtml":"\u003cp\u003eNo, because every confidence interval rejects the null\u003c/p\u003e","text":"No, because every confidence interval rejects the null"},{"textHtml":"\u003cp\u003eNo, because the mean difference is positive\u003c/p\u003e","text":"No, because the mean difference is positive"},{"textHtml":"\u003cp\u003eCannot tell anything from the interval\u003c/p\u003e","text":"Cannot tell anything from the interval"}],"id":"ci_excludes_zero"},{"type":"true-false","answer":false,"explanationHtml":"\u003cp\u003eIncluding zero means zero is a plausible value within the interval;\nit does not establish certainty.\u003c/p\u003e","prompt":"A confidence interval for an independent-samples test that includes zero establishes that the true population parameter is 95% certain to be zero.","promptHtml":"\u003cp\u003eA confidence interval for an independent-samples test that includes\nzero establishes that the true population parameter is 95% certain to be\nzero.\u003c/p\u003e","answerHtml":"","explanation":"Including zero means zero is a plausible value within the interval; it does not establish certainty.","id":"ci_zero_certain"}],"id":"12_independent_t_learning_checks"}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-dunn2014prosocial" class="csl-entry" role="listitem">
+Dunn, E. W., Aknin, L. B., &amp; Norton, M. I. (2014). Prosocial spending and happiness: Using money to benefit others pays off. <em>Current Directions in Psychological Science</em>, <em>23</em>(1), 41–47. <a href="https://doi.org/10.1177/0963721413512503">https://doi.org/10.1177/0963721413512503</a>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./11-t-test.html" class="pagination-link" aria-label="The $t$-test">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./13-related-samples-t-test.html" class="pagination-link" aria-label="Related Samples t Test">
+        <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

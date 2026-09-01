@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>3&nbsp; Central Tendency – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./04-variability.html" rel="next">
+<link href="./02-frequency-distributions.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="3&nbsp; Central Tendency – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:image" content="https://statisticsfromscratch.com/resources/figures/hipparchus.jpg">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="3&nbsp; Central Tendency – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:image" content="https://statisticsfromscratch.com/resources/figures/hipparchus.jpg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#what-is-central-tendency" id="toc-what-is-central-tendency" class="nav-link active" data-scroll-target="#what-is-central-tendency">What is central tendency?</a></li>
+  <li><a href="#the-mode" id="toc-the-mode" class="nav-link" data-scroll-target="#the-mode">The mode</a>
+  <ul class="collapse">
+  <li><a href="#multiple-modes" id="toc-multiple-modes" class="nav-link" data-scroll-target="#multiple-modes">Multiple modes</a></li>
+  </ul></li>
+  <li><a href="#the-median" id="toc-the-median" class="nav-link" data-scroll-target="#the-median">The median</a></li>
+  <li><a href="#the-mean" id="toc-the-mean" class="nav-link" data-scroll-target="#the-mean">The mean</a>
+  <ul class="collapse">
+  <li><a href="#calculating-the-mean" id="toc-calculating-the-mean" class="nav-link" data-scroll-target="#calculating-the-mean">Calculating the mean</a></li>
+  </ul></li>
+  <li><a href="#comparing-the-three-measures" id="toc-comparing-the-three-measures" class="nav-link" data-scroll-target="#comparing-the-three-measures">Comparing the three measures</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/graph-generator.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/median-tutorial.js"></script>
+<script src="resources/js/mean-balance-beam.js"></script>
+<script src="resources/js/income-distribution.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<div class="interactive-figure-mount" data-interactive-figure="meanBalanceBeamCover" data-interactive-options="{&quot;variant&quot;:&quot;cover&quot;,&quot;initialPositions&quot;:[1,2,6,6,10],&quot;labels&quot;:false,&quot;deviationSums&quot;:false,&quot;meanMarker&quot;:false,&quot;controls&quot;:false,&quot;draggable&quot;:false,&quot;addOnClick&quot;:false,&quot;wobble&quot;:&quot;once-visible&quot;}" data-interactive-factory="makeMeanBalanceBeam">
+<div class="interactive-figure-fallback">
+Animated balance beam showing the mean as a balance point.
+</div>
+</div>
+<p>Our topic for this chapter is central tendency, or figuring out what a typical score in a distribution looks like. There are three measures of central tendency we’ll cover: the mode, the median, and the mean. Some or all of this will most likely be familiar to you already. But it’s important that we understand conceptually what each of these measures represents and what situations make each one more or less appropriate for our purposes.</p>
+<section id="what-is-central-tendency" class="level2">
+<h2 data-anchor-id="what-is-central-tendency">What is central tendency?</h2>
+<p>Generally speaking, what we want from a measure of central tendency is a single value to help us describe and summarize a set of data. In the questions below, don’t worry about remembering statistical specifics. I just want you to try to start from scratch and explain what seems a sensible approach in each case. What kind of score is most central, or typical, or representative in some way?</p>
+<div id="quiz-central-tendency" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-quiz figure">
+<div aria-describedby="quiz-central-tendency-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="03_central_tendency_center_1" aria-label="Finding the center"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Finding the center</p></div><span class="quiz-progress" aria-label="0 of 4 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 4</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="nominal_center"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Suppose the children in two preschool classes were asked to choose
+their favorite color from blue, pink, red, and green. If you had to
+choose one response to represent each class, which would you choose?
+Does your choice represent both classes equally well?</p>
+<div class="bc-figure-row bc-figure-row-wide">
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyCenterNominalClearBar" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;width&quot;:360,&quot;height&quot;:300,&quot;yDomain&quot;:[0,20],&quot;yTickValues&quot;:[0,5,10,15,20],&quot;data&quot;:[{&quot;x&quot;:&quot;Blue&quot;,&quot;frequency&quot;:18,&quot;fill&quot;:&quot;var(--graph-series-1, #0072b2)&quot;},{&quot;x&quot;:&quot;Pink&quot;,&quot;frequency&quot;:5,&quot;fill&quot;:&quot;var(--graph-series-5, #cc79a7)&quot;},{&quot;x&quot;:&quot;Red&quot;,&quot;frequency&quot;:4,&quot;fill&quot;:&quot;var(--graph-series-4, #d55e00)&quot;},{&quot;x&quot;:&quot;Green&quot;,&quot;frequency&quot;:3,&quot;fill&quot;:&quot;var(--graph-series-3, #009e73)&quot;}],&quot;labels&quot;:{&quot;title&quot;:&quot;Preschool class A&quot;,&quot;x&quot;:&quot;Favorite color&quot;,&quot;y&quot;:&quot;Children&quot;},&quot;ariaLabel&quot;:&quot;Bar chart for preschool class A. Eighteen children chose blue, five chose pink, four chose red, and three chose green. Each bar is colored to match its written color label.&quot;}">
+<div class="interactive-figure-fallback">
+Preschool class A: 18 children chose blue, 5 chose pink, 4 chose red,
+and 3 chose green.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyCenterNominalCloseBar" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;width&quot;:360,&quot;height&quot;:300,&quot;yDomain&quot;:[0,20],&quot;yTickValues&quot;:[0,5,10,15,20],&quot;data&quot;:[{&quot;x&quot;:&quot;Blue&quot;,&quot;frequency&quot;:9,&quot;fill&quot;:&quot;var(--graph-series-1, #0072b2)&quot;},{&quot;x&quot;:&quot;Pink&quot;,&quot;frequency&quot;:8,&quot;fill&quot;:&quot;var(--graph-series-5, #cc79a7)&quot;},{&quot;x&quot;:&quot;Red&quot;,&quot;frequency&quot;:7,&quot;fill&quot;:&quot;var(--graph-series-4, #d55e00)&quot;},{&quot;x&quot;:&quot;Green&quot;,&quot;frequency&quot;:6,&quot;fill&quot;:&quot;var(--graph-series-3, #009e73)&quot;}],&quot;labels&quot;:{&quot;title&quot;:&quot;Preschool class B&quot;,&quot;x&quot;:&quot;Favorite color&quot;,&quot;y&quot;:&quot;Children&quot;},&quot;ariaLabel&quot;:&quot;Bar chart for preschool class B. Nine children chose blue, eight chose pink, seven chose red, and six chose green. Each bar is colored to match its written color label.&quot;}">
+<div class="interactive-figure-fallback">
+Preschool class B: 9 children chose blue, 8 chose pink, 7 chose red, and
+6 chose green.
+</div>
+</div>
+</div></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Compare the tallest bar with the second-tallest bar in each
+class.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Blue is the most common response in both classes. But it represents
+class A much better: 18 of the 30 children chose it, while in class B it
+finished only one vote ahead of pink.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Choosing one category hides how decisive that choice was. Class A has
+a clear favorite; class B is much more evenly divided. A single summary
+can be accurate while still leaving out something useful about the
+group.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="ordinal_center"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Suppose these are the final letter grades for a class. If you had to
+choose one grade to summarize the class, which would you choose? Unlike
+colors, grades can be put in order. Does that give you another sensible
+answer?</p>
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyCenterLetterGradesBar" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;width&quot;:760,&quot;height&quot;:380,&quot;maxWidth&quot;:&quot;760px&quot;,&quot;cssMargin&quot;:&quot;0 auto&quot;,&quot;margin&quot;:{&quot;top&quot;:22,&quot;right&quot;:22,&quot;bottom&quot;:62,&quot;left&quot;:64},&quot;yDomain&quot;:[0,4],&quot;yTickValues&quot;:[0,1,2,3,4],&quot;data&quot;:[{&quot;x&quot;:&quot;F&quot;,&quot;frequency&quot;:1},{&quot;x&quot;:&quot;D&quot;,&quot;frequency&quot;:1},{&quot;x&quot;:&quot;C&quot;,&quot;frequency&quot;:1},{&quot;x&quot;:&quot;B&quot;,&quot;frequency&quot;:2},{&quot;x&quot;:&quot;A&quot;,&quot;frequency&quot;:4}],&quot;labels&quot;:{&quot;x&quot;:&quot;Letter grade&quot;,&quot;y&quot;:&quot;Students&quot;},&quot;ariaLabel&quot;:&quot;Ordered bar chart of final letter grades from F through A. One student each received F, D, and C, two received B, and four received A.&quot;}">
+<div class="interactive-figure-fallback">
+Final letter grades from F through A: 1 student each received F, D, and
+C, 2 received B, and 4 received A.
+</div>
+</div></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Imagine writing down one grade for each student and arranging all
+nine grades from F through A.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A is the most common grade, so that is one sensible answer. But B
+falls halfway through the ordered grades: 3 students received a lower
+grade and 4 received a higher grade, with the 2 Bs spanning the middle
+of the list. So A captures the peak of the distribution, while B
+captures its middle position.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The new ingredient here is order. Favorite colors could only be
+counted, but grades can also be lined up. That makes a second kind of
+center possible, and the two answers need not agree.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="symmetric_center"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Suppose these are scores on a test out of 10. Which number would you
+choose to represent the center of the scores? Can you find more than one
+reason for choosing it?</p>
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyCenterSymmetricHistogram" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;histogram&quot;,&quot;aspectRatio&quot;:2,&quot;data&quot;:[2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8],&quot;xDomain&quot;:[0,10],&quot;xTickValues&quot;:[0,1,2,3,4,5,6,7,8,9,10],&quot;labels&quot;:{&quot;x&quot;:&quot;Test score (out of 10)&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;ariaLabel&quot;:&quot;Histogram of 16 test scores. The frequencies for scores 2 through 8 are 1, 2, 3, 4, 3, 2, and 1, forming a symmetrical distribution centered at 5.&quot;}">
+<div class="interactive-figure-fallback">
+Sixteen test scores form a symmetrical distribution centered at 5. For
+scores 2 through 8, the frequencies are 1, 2, 3, 4, 3, 2, and 1.
+</div>
+</div></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Try three approaches: find the tallest bar, count in from the two
+ends, and compare scores the same distance below and above 5.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>A score of 5 is the natural choice. It occurs most often, it falls
+halfway through the ordered scores, and the scores balance symmetrically
+around it.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="bimodal_center"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Here is a more complicated-looking distribution. Would a single
+number give a useful description of its center? What would it capture or
+hide? Would one typical score or more than one be most useful?</p>
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyCenterBimodalHistogram" data-interactive-factory="makeGraph" data-interactive-options="{&quot;type&quot;:&quot;histogram&quot;,&quot;width&quot;:760,&quot;height&quot;:420,&quot;maxWidth&quot;:&quot;760px&quot;,&quot;cssMargin&quot;:&quot;0 auto&quot;,&quot;margin&quot;:{&quot;top&quot;:22,&quot;right&quot;:22,&quot;bottom&quot;:58,&quot;left&quot;:64},&quot;data&quot;:[{&quot;lower&quot;:0.3,&quot;upper&quot;:0.3467,&quot;frequency&quot;:4},{&quot;lower&quot;:0.3467,&quot;upper&quot;:0.3933,&quot;frequency&quot;:3},{&quot;lower&quot;:0.3933,&quot;upper&quot;:0.44,&quot;frequency&quot;:12},{&quot;lower&quot;:0.44,&quot;upper&quot;:0.4867,&quot;frequency&quot;:22},{&quot;lower&quot;:0.4867,&quot;upper&quot;:0.5333,&quot;frequency&quot;:40},{&quot;lower&quot;:0.5333,&quot;upper&quot;:0.58,&quot;frequency&quot;:29},{&quot;lower&quot;:0.58,&quot;upper&quot;:0.6267,&quot;frequency&quot;:32},{&quot;lower&quot;:0.6267,&quot;upper&quot;:0.6733,&quot;frequency&quot;:20},{&quot;lower&quot;:0.6733,&quot;upper&quot;:0.72,&quot;frequency&quot;:13},{&quot;lower&quot;:0.72,&quot;upper&quot;:0.7667,&quot;frequency&quot;:11},{&quot;lower&quot;:0.7667,&quot;upper&quot;:0.8133,&quot;frequency&quot;:9},{&quot;lower&quot;:0.8133,&quot;upper&quot;:0.86,&quot;frequency&quot;:10},{&quot;lower&quot;:0.86,&quot;upper&quot;:0.9067,&quot;frequency&quot;:17},{&quot;lower&quot;:0.9067,&quot;upper&quot;:0.9533,&quot;frequency&quot;:20},{&quot;lower&quot;:0.9533,&quot;upper&quot;:1,&quot;frequency&quot;:33}],&quot;xDomain&quot;:[0.3,1],&quot;xTickValues&quot;:[0.3,0.4,0.5,0.6,0.7,0.8,0.9,1],&quot;yDomain&quot;:[0,40],&quot;yTickValues&quot;:[0,5,10,15,20,25,30,35,40],&quot;labels&quot;:{&quot;x&quot;:&quot;Score&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;ariaLabel&quot;:&quot;Histogram labeled Score and Frequency, with two unequal peaks and observations spread through the valley between them.&quot;}">
+<div class="interactive-figure-fallback">
+A histogram labeled Score and Frequency, with two unequal peaks and
+observations spread through the valley between them.
+</div>
+</div></div></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Compare a value in the valley between the peaks with one value near
+each peak. What does each description preserve or hide?</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>There isn’t one required response. The larger peak captures where
+scores occur most often. A value between the peaks describes the
+distribution’s overall location, but falls in a valley containing
+relatively few scores. Two values, one near each peak, better preserve
+where the scores cluster. The useful choice depends on what we want the
+summary to represent.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="03_central_tendency_center_1">{"id":"03_central_tendency_center_1","questions":[{"checkLabel":"Compare your answer","promptHtml":"\u003cp\u003eSuppose the children in two preschool classes were asked to choose\ntheir favorite color from blue, pink, red, and green. If you had to\nchoose one response to represent each class, which would you choose?\nDoes your choice represent both classes equally well?\u003c/p\u003e\n\u003cdiv class=\"bc-figure-row bc-figure-row-wide\"\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"centralTendencyCenterNominalClearBar\"\ndata-interactive-factory=\"makeGraph\"\ndata-interactive-options=\"{\u0026quot;type\u0026quot;:\u0026quot;bar\u0026quot;,\u0026quot;width\u0026quot;:360,\u0026quot;height\u0026quot;:300,\u0026quot;yDomain\u0026quot;:[0,20],\u0026quot;yTickValues\u0026quot;:[0,5,10,15,20],\u0026quot;data\u0026quot;:[{\u0026quot;x\u0026quot;:\u0026quot;Blue\u0026quot;,\u0026quot;frequency\u0026quot;:18,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-1, #0072b2)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Pink\u0026quot;,\u0026quot;frequency\u0026quot;:5,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-5, #cc79a7)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Red\u0026quot;,\u0026quot;frequency\u0026quot;:4,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-4, #d55e00)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Green\u0026quot;,\u0026quot;frequency\u0026quot;:3,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-3, #009e73)\u0026quot;}],\u0026quot;labels\u0026quot;:{\u0026quot;title\u0026quot;:\u0026quot;Preschool class A\u0026quot;,\u0026quot;x\u0026quot;:\u0026quot;Favorite color\u0026quot;,\u0026quot;y\u0026quot;:\u0026quot;Children\u0026quot;},\u0026quot;ariaLabel\u0026quot;:\u0026quot;Bar chart for preschool class A. Eighteen children chose blue, five chose pink, four chose red, and three chose green. Each bar is colored to match its written color label.\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nPreschool class A: 18 children chose blue, 5 chose pink, 4 chose red,\nand 3 chose green.\n\u003c/div\u003e\n\u003c/div\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"centralTendencyCenterNominalCloseBar\"\ndata-interactive-factory=\"makeGraph\"\ndata-interactive-options=\"{\u0026quot;type\u0026quot;:\u0026quot;bar\u0026quot;,\u0026quot;width\u0026quot;:360,\u0026quot;height\u0026quot;:300,\u0026quot;yDomain\u0026quot;:[0,20],\u0026quot;yTickValues\u0026quot;:[0,5,10,15,20],\u0026quot;data\u0026quot;:[{\u0026quot;x\u0026quot;:\u0026quot;Blue\u0026quot;,\u0026quot;frequency\u0026quot;:9,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-1, #0072b2)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Pink\u0026quot;,\u0026quot;frequency\u0026quot;:8,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-5, #cc79a7)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Red\u0026quot;,\u0026quot;frequency\u0026quot;:7,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-4, #d55e00)\u0026quot;},{\u0026quot;x\u0026quot;:\u0026quot;Green\u0026quot;,\u0026quot;frequency\u0026quot;:6,\u0026quot;fill\u0026quot;:\u0026quot;var(--graph-series-3, #009e73)\u0026quot;}],\u0026quot;labels\u0026quot;:{\u0026quot;title\u0026quot;:\u0026quot;Preschool class B\u0026quot;,\u0026quot;x\u0026quot;:\u0026quot;Favorite color\u0026quot;,\u0026quot;y\u0026quot;:\u0026quot;Children\u0026quot;},\u0026quot;ariaLabel\u0026quot;:\u0026quot;Bar chart for preschool class B. Nine children chose blue, eight chose pink, seven chose red, and six chose green. Each bar is colored to match its written color label.\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nPreschool class B: 9 children chose blue, 8 chose pink, 7 chose red, and\n6 chose green.\n\u003c/div\u003e\n\u003c/div\u003e\n\u003c/div\u003e","answerHtml":"\u003cp\u003eBlue is the most common response in both classes. But it represents\nclass A much better: 18 of the 30 children chose it, while in class B it\nfinished only one vote ahead of pink.\u003c/p\u003e","prompt":"Suppose the children in two preschool classes were asked to choose their favorite color from blue, pink, red, and green. If you had to choose one response to represent each class, which would you choose? Does your choice represent both classes equally well?Preschool class A: 18 children chose blue, 5 chose pink, 4 chose red, and 3 chose green.Preschool class B: 9 children chose blue, 8 chose pink, 7 chose red, and 6 chose green.","hints":[{"text":"Compare the tallest bar with the second-tallest bar in each class.","textHtml":"\u003cp\u003eCompare the tallest bar with the second-tallest bar in each\nclass.\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eChoosing one category hides how decisive that choice was. Class A has\na clear favorite; class B is much more evenly divided. A single summary\ncan be accurate while still leaving out something useful about the\ngroup.\u003c/p\u003e","id":"nominal_center","explanation":"Choosing one category hides how decisive that choice was. Class A has a clear favorite; class B is much more evenly divided. A single summary can be accurate while still leaving out something useful about the group.","type":"free-response","answer":"Blue is the most common response in both classes. But it represents class A much better: 18 of the 30 children chose it, while in class B it finished only one vote ahead of pink."},{"checkLabel":"Compare your answer","promptHtml":"\u003cp\u003eSuppose these are the final letter grades for a class. If you had to\nchoose one grade to summarize the class, which would you choose? Unlike\ncolors, grades can be put in order. Does that give you another sensible\nanswer?\u003c/p\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"centralTendencyCenterLetterGradesBar\"\ndata-interactive-factory=\"makeGraph\"\ndata-interactive-options=\"{\u0026quot;type\u0026quot;:\u0026quot;bar\u0026quot;,\u0026quot;width\u0026quot;:760,\u0026quot;height\u0026quot;:380,\u0026quot;maxWidth\u0026quot;:\u0026quot;760px\u0026quot;,\u0026quot;cssMargin\u0026quot;:\u0026quot;0 auto\u0026quot;,\u0026quot;margin\u0026quot;:{\u0026quot;top\u0026quot;:22,\u0026quot;right\u0026quot;:22,\u0026quot;bottom\u0026quot;:62,\u0026quot;left\u0026quot;:64},\u0026quot;yDomain\u0026quot;:[0,4],\u0026quot;yTickValues\u0026quot;:[0,1,2,3,4],\u0026quot;data\u0026quot;:[{\u0026quot;x\u0026quot;:\u0026quot;F\u0026quot;,\u0026quot;frequency\u0026quot;:1},{\u0026quot;x\u0026quot;:\u0026quot;D\u0026quot;,\u0026quot;frequency\u0026quot;:1},{\u0026quot;x\u0026quot;:\u0026quot;C\u0026quot;,\u0026quot;frequency\u0026quot;:1},{\u0026quot;x\u0026quot;:\u0026quot;B\u0026quot;,\u0026quot;frequency\u0026quot;:2},{\u0026quot;x\u0026quot;:\u0026quot;A\u0026quot;,\u0026quot;frequency\u0026quot;:4}],\u0026quot;labels\u0026quot;:{\u0026quot;x\u0026quot;:\u0026quot;Letter grade\u0026quot;,\u0026quot;y\u0026quot;:\u0026quot;Students\u0026quot;},\u0026quot;ariaLabel\u0026quot;:\u0026quot;Ordered bar chart of final letter grades from F through A. One student each received F, D, and C, two received B, and four received A.\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nFinal letter grades from F through A: 1 student each received F, D, and\nC, 2 received B, and 4 received A.\n\u003c/div\u003e\n\u003c/div\u003e","answerHtml":"\u003cp\u003eA is the most common grade, so that is one sensible answer. But B\nfalls halfway through the ordered grades: 3 students received a lower\ngrade and 4 received a higher grade, with the 2 Bs spanning the middle\nof the list. So A captures the peak of the distribution, while B\ncaptures its middle position.\u003c/p\u003e","prompt":"Suppose these are the final letter grades for a class. If you had to choose one grade to summarize the class, which would you choose? Unlike colors, grades can be put in order. Does that give you another sensible answer?Final letter grades from F through A: 1 student each received F, D, and C, 2 received B, and 4 received A.","hints":[{"text":"Imagine writing down one grade for each student and arranging all nine grades from F through A.","textHtml":"\u003cp\u003eImagine writing down one grade for each student and arranging all\nnine grades from F through A.\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eThe new ingredient here is order. Favorite colors could only be\ncounted, but grades can also be lined up. That makes a second kind of\ncenter possible, and the two answers need not agree.\u003c/p\u003e","id":"ordinal_center","explanation":"The new ingredient here is order. Favorite colors could only be counted, but grades can also be lined up. That makes a second kind of center possible, and the two answers need not agree.","type":"free-response","answer":"A is the most common grade, so that is one sensible answer. But B falls halfway through the ordered grades: 3 students received a lower grade and 4 received a higher grade, with the 2 Bs spanning the middle of the list. So A captures the peak of the distribution, while B captures its middle position."},{"type":"free-response","promptHtml":"\u003cp\u003eSuppose these are scores on a test out of 10. Which number would you\nchoose to represent the center of the scores? Can you find more than one\nreason for choosing it?\u003c/p\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"centralTendencyCenterSymmetricHistogram\"\ndata-interactive-factory=\"makeGraph\"\ndata-interactive-options=\"{\u0026quot;type\u0026quot;:\u0026quot;histogram\u0026quot;,\u0026quot;aspectRatio\u0026quot;:2,\u0026quot;data\u0026quot;:[2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8],\u0026quot;xDomain\u0026quot;:[0,10],\u0026quot;xTickValues\u0026quot;:[0,1,2,3,4,5,6,7,8,9,10],\u0026quot;labels\u0026quot;:{\u0026quot;x\u0026quot;:\u0026quot;Test score (out of 10)\u0026quot;,\u0026quot;y\u0026quot;:\u0026quot;Frequency\u0026quot;},\u0026quot;ariaLabel\u0026quot;:\u0026quot;Histogram of 16 test scores. The frequencies for scores 2 through 8 are 1, 2, 3, 4, 3, 2, and 1, forming a symmetrical distribution centered at 5.\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nSixteen test scores form a symmetrical distribution centered at 5. For\nscores 2 through 8, the frequencies are 1, 2, 3, 4, 3, 2, and 1.\n\u003c/div\u003e\n\u003c/div\u003e","answerHtml":"\u003cp\u003eA score of 5 is the natural choice. It occurs most often, it falls\nhalfway through the ordered scores, and the scores balance symmetrically\naround it.\u003c/p\u003e","prompt":"Suppose these are scores on a test out of 10. Which number would you choose to represent the center of the scores? Can you find more than one reason for choosing it?Sixteen test scores form a symmetrical distribution centered at 5. For scores 2 through 8, the frequencies are 1, 2, 3, 4, 3, 2, and 1.","hints":[{"text":"Try three approaches: find the tallest bar, count in from the two ends, and compare scores the same distance below and above 5.","textHtml":"\u003cp\u003eTry three approaches: find the tallest bar, count in from the two\nends, and compare scores the same distance below and above 5.\u003c/p\u003e"}],"explanationHtml":"","checkLabel":"Compare your answer","answer":"A score of 5 is the natural choice. It occurs most often, it falls halfway through the ordered scores, and the scores balance symmetrically around it.","id":"symmetric_center"},{"type":"free-response","promptHtml":"\u003cp\u003eHere is a more complicated-looking distribution. Would a single\nnumber give a useful description of its center? What would it capture or\nhide? Would one typical score or more than one be most useful?\u003c/p\u003e\n\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"centralTendencyCenterBimodalHistogram\"\ndata-interactive-factory=\"makeGraph\"\ndata-interactive-options=\"{\u0026quot;type\u0026quot;:\u0026quot;histogram\u0026quot;,\u0026quot;width\u0026quot;:760,\u0026quot;height\u0026quot;:420,\u0026quot;maxWidth\u0026quot;:\u0026quot;760px\u0026quot;,\u0026quot;cssMargin\u0026quot;:\u0026quot;0 auto\u0026quot;,\u0026quot;margin\u0026quot;:{\u0026quot;top\u0026quot;:22,\u0026quot;right\u0026quot;:22,\u0026quot;bottom\u0026quot;:58,\u0026quot;left\u0026quot;:64},\u0026quot;data\u0026quot;:[{\u0026quot;lower\u0026quot;:0.3,\u0026quot;upper\u0026quot;:0.3467,\u0026quot;frequency\u0026quot;:4},{\u0026quot;lower\u0026quot;:0.3467,\u0026quot;upper\u0026quot;:0.3933,\u0026quot;frequency\u0026quot;:3},{\u0026quot;lower\u0026quot;:0.3933,\u0026quot;upper\u0026quot;:0.44,\u0026quot;frequency\u0026quot;:12},{\u0026quot;lower\u0026quot;:0.44,\u0026quot;upper\u0026quot;:0.4867,\u0026quot;frequency\u0026quot;:22},{\u0026quot;lower\u0026quot;:0.4867,\u0026quot;upper\u0026quot;:0.5333,\u0026quot;frequency\u0026quot;:40},{\u0026quot;lower\u0026quot;:0.5333,\u0026quot;upper\u0026quot;:0.58,\u0026quot;frequency\u0026quot;:29},{\u0026quot;lower\u0026quot;:0.58,\u0026quot;upper\u0026quot;:0.6267,\u0026quot;frequency\u0026quot;:32},{\u0026quot;lower\u0026quot;:0.6267,\u0026quot;upper\u0026quot;:0.6733,\u0026quot;frequency\u0026quot;:20},{\u0026quot;lower\u0026quot;:0.6733,\u0026quot;upper\u0026quot;:0.72,\u0026quot;frequency\u0026quot;:13},{\u0026quot;lower\u0026quot;:0.72,\u0026quot;upper\u0026quot;:0.7667,\u0026quot;frequency\u0026quot;:11},{\u0026quot;lower\u0026quot;:0.7667,\u0026quot;upper\u0026quot;:0.8133,\u0026quot;frequency\u0026quot;:9},{\u0026quot;lower\u0026quot;:0.8133,\u0026quot;upper\u0026quot;:0.86,\u0026quot;frequency\u0026quot;:10},{\u0026quot;lower\u0026quot;:0.86,\u0026quot;upper\u0026quot;:0.9067,\u0026quot;frequency\u0026quot;:17},{\u0026quot;lower\u0026quot;:0.9067,\u0026quot;upper\u0026quot;:0.9533,\u0026quot;frequency\u0026quot;:20},{\u0026quot;lower\u0026quot;:0.9533,\u0026quot;upper\u0026quot;:1,\u0026quot;frequency\u0026quot;:33}],\u0026quot;xDomain\u0026quot;:[0.3,1],\u0026quot;xTickValues\u0026quot;:[0.3,0.4,0.5,0.6,0.7,0.8,0.9,1],\u0026quot;yDomain\u0026quot;:[0,40],\u0026quot;yTickValues\u0026quot;:[0,5,10,15,20,25,30,35,40],\u0026quot;labels\u0026quot;:{\u0026quot;x\u0026quot;:\u0026quot;Score\u0026quot;,\u0026quot;y\u0026quot;:\u0026quot;Frequency\u0026quot;},\u0026quot;ariaLabel\u0026quot;:\u0026quot;Histogram labeled Score and Frequency, with two unequal peaks and observations spread through the valley between them.\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nA histogram labeled Score and Frequency, with two unequal peaks and\nobservations spread through the valley between them.\n\u003c/div\u003e\n\u003c/div\u003e","answerHtml":"","prompt":"Here is a more complicated-looking distribution. Would a single number give a useful description of its center? What would it capture or hide? Would one typical score or more than one be most useful?A histogram labeled Score and Frequency, with two unequal peaks and observations spread through the valley between them.","hints":[{"text":"Compare a value in the valley between the peaks with one value near each peak. What does each description preserve or hide?","textHtml":"\u003cp\u003eCompare a value in the valley between the peaks with one value near\neach peak. What does each description preserve or hide?\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eThere isn’t one required response. The larger peak captures where\nscores occur most often. A value between the peaks describes the\ndistribution’s overall location, but falls in a valley containing\nrelatively few scores. Two values, one near each peak, better preserve\nwhere the scores cluster. The useful choice depends on what we want the\nsummary to represent.\u003c/p\u003e","checkLabel":"Submit","explanation":"There isn’t one required response. The larger peak captures where scores occur most often. A value between the peaks describes the distribution’s overall location, but falls in a valley containing relatively few scores. Two values, one near each peak, better preserve where the scores cluster. The useful choice depends on what we want the summary to represent.","id":"bimodal_center"}],"title":"Finding the center","titleHtml":"\u003cp\u003eFinding the center\u003c/p\u003e"}</script></section>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-quiz quarto-uncaptioned" id="quiz-central-tendency-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Quiz&nbsp;3.1
+</figcaption>
+</figure>
+</div>
+<p>In working through those examples, you probably found yourself using a few different ideas about what a useful summary should do. Each example changed what kind of information was available. Favorite colors could be counted. Letter grades might also be put in order. Numerical scores had meaningful distances between them, which made it possible to think about balance as well. And the two-peaked distribution showed a difficulty we can run into: reducing a distribution to one value inevitably leaves something out. Sometimes we might need more than one.</p>
+<p>Putting the terminology from Chapter 1 onto those examples, favorite color is a nominal categorical variable, letter grade is an ordinal categorical variable, and test score is quantitative. Those distinctions lead to the three approaches we’ll focus on:</p>
+<div class="table-responsive">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Measure</th>
+<th>Question</th>
+<th>Information required</th>
+<th>Works with</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Mode</td>
+<td>What occurs most often?</td>
+<td>Category membership and frequency</td>
+<td>Nominal, ordinal, or quantitative data</td>
+</tr>
+<tr class="even">
+<td>Median</td>
+<td>What lies halfway through the ordered observations?</td>
+<td>Order</td>
+<td>Ordinal or quantitative data</td>
+</tr>
+<tr class="odd">
+<td>Mean</td>
+<td>Where do the numerical values balance?</td>
+<td>Numerical magnitudes and meaningful distances</td>
+<td>Quantitative data only</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>So the mode, median, and mean offer distinct definitions of central tendency. They have different requirements of the data and answer different questions. For some kinds of data we can use more than one measure; we might find they give similar answers, or that their answers diverge. That doesn’t make one inherently better than another. We need to look at each measure in a bit more detail to drill into what each one is capable of and when they are more or less useful.</p>
+</section>
+<section id="the-mode" class="level2">
+<h2 data-anchor-id="the-mode">The mode</h2>
+<p>The mode answers a simple question: what happened the most? More technically, the value of the mode is the category or score with the highest frequency. If we’re looking at histograms or bar charts or whatever, the mode is generally the tallest bar. In a frequency table, it’s the row with the highest frequency.</p>
+<p>The mode is generally most useful with categorical data, either nominal or ordinal. In the kids’ favorite colors example from <a href="#quiz-central-tendency" class="quarto-xref">Quiz&nbsp;<span>3.1</span></a>, blue was the mode for both classes. But in the second class it was only just ahead of the other colors. It’s true to call blue the mode for both classes, but it is a relatively less useful description of the data from class B. Depending on our purposes, we might want to think of that class’s data as not having a clear mode — which is still a useful description. With the letter grades example (an ordinal variable) the mode was an A grade. No problem there (though as we’ll see the median gives a different answer).</p>
+<p>The mode can also be determined for quantitative data. But just because we <em>can</em> doesn’t mean we <em>should</em>. Whether it is useful depends on the range of the scores and what values are possible. Say we have a discrete quantitative variable like the data represented in the third quiz question. The values represented scores on a ten-question test. Here’s that data again in the form of a frequency table:</p>
+<div id="tbl-simple-mode" class="bc-mode-table quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-simple-mode-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.1: A simple frequency table for the test scores from the opening quiz. The mode is 5.
+</figcaption>
+<div aria-describedby="tbl-simple-mode-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="bc-mode-table caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Score</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><span class="bc-mode-marker">5</span></td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Both from the histogram in <a href="#quiz-central-tendency" class="quarto-xref">Quiz&nbsp;<span>3.1</span></a> and the frequency table above, we can see that the mode is 5. Very straightforward.</p>
+<p>But what if the test had a hundred questions rather than ten, and the data were evenly spread across the 0–100 range of possible scores? We saw an example of this situation in <a href="./02-frequency-distributions.html#sec-grouped-frequency">Chapter 2</a>. We would have a table with many rows, most of which would have a frequency of zero or one, and we wouldn’t be able to extract a useful mode.</p>
+<p>One way around this problem is to find the mode for a grouped version of the data rather than the raw scores. Following the rules of thumb we laid out in Chapter 2, we could group the scores into bins, like 0 through 9, 10 through 19, and so on. Then we could make a grouped frequency table:</p>
+<div class="bc-mode-table">
+<div id="tbl-grouped" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-grouped-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.2: Grouped frequency table
+</figcaption>
+<div aria-describedby="tbl-grouped-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Score bin</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0–9</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10–19</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">20–29</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">30–39</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">40–49</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;"><span class="bc-mode-marker">50–59</span></td>
+<td style="text-align: right;">18</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">60–69</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">70–79</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">80–89</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">90–99</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Now we can easily identify the modal bin. Like we mentioned in our discussion of grouped frequency in Chapter 2, grouping the scores discards information. We can’t tell what exact score was the most common, only which bin contained the most scores. Here the modal bin is 50 through 59. We don’t know what score or scores were the most common within that range. And the grouping in <a href="#tbl-grouped" class="quarto-xref">Table&nbsp;<span>3.2</span></a> is not the only way to group those scores; a different choice of bin width or cut points would give us a different modal bin.</p>
+<section id="multiple-modes" class="level3">
+<h3 data-anchor-id="multiple-modes">Multiple modes</h3>
+<p>The other thing worth mentioning is that a set of data can have more than one mode. If two exact values tie for the highest frequency, both are modes. More broadly, we can describe the <em>shape</em> of a distribution as bimodal or multimodal when its frequencies form two or more distinct peaks, even if the peaks are not exactly the same height.</p>
+<p>Remember the last distribution from <a href="#quiz-central-tendency" class="quarto-xref">Quiz&nbsp;<span>3.1</span></a>? It actually comes from a perceptual psychology study. Researchers wanted to know how well people could discriminate between major and minor musical modes. They created “tone-scrambles”: 32 musical notes played rapid fire over the course of two seconds in random order, creating an effect, according to the researchers’ evocative description, “akin to alien birdsong.” One of these weird birds tweeted major thirds while the other presumably more melancholy bird tweeted minor thirds. Listeners classified each scramble as one type or the other, and the researchers measured the proportion they classified correctly <span class="citation" data-cites="chubb2013bimodal">(<a href="references.html#ref-chubb2013bimodal" role="doc-biblioref">Chubb et al., 2013</a>)</span>.</p>
+<p>The graph in <a href="#fig-tone-scramble-performance" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> pools data across three experiments. The distribution it shows goes up and down and up again in two waves. There’s one peak close to 0.5, which is what you would see if people were just guessing. And another peak near 1, or nearly perfect performance. The researchers took this as evidence that the task sorted listeners fairly cleanly into a group with little sensitivity to the difference (performing close to chance) and another with high sensitivity.</p>
+<div id="fig-tone-scramble-performance" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-tone-scramble-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Distribution of proportion correct in the test phase across 275 listeners, pooled across three tone-scramble experiments. Recreated from <span class="citation" data-cites="chubb2013bimodal">Chubb et al. (<a href="references.html#ref-chubb2013bimodal" role="doc-biblioref">2013</a>)</span>, Figure 6.
+</figcaption>
+<div aria-describedby="fig-tone-scramble-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="toneIdentificationDemo" data-interactive-options="{}" data-interactive-factory="makeToneIdentificationGraph">
+<div class="interactive-figure-fallback">
+Histogram of proportion correct for 275 listeners. One peak is near chance performance at 0.5 and another is near perfect performance at 1.0, with fewer listeners between them.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>This is a difference between the mode and the median or the mean. We wouldn’t usually talk about a distribution as having two means or two medians. But we can talk about a distribution as being bimodal or even multimodal if that seems a useful description.</p>
+</section>
+</section>
+<section id="the-median" class="level2">
+<h2 data-anchor-id="the-median">The median</h2>
+<p>While the mode focuses on frequency — what happened most often? — the median focuses on <em>order</em>; if we put our data in order from smallest to largest, what value splits the observations in the middle? So the mode is just the most common, but the median starts to put the “center” in central tendency.</p>
+<p>The median is also called the 50th percentile. Since it is the middle position of the ordered data, at least half (i.e., 50%) of the observations are at or below the median, and at least half are at or above it. (The “at least” qualifier is important, because as we’ll see, multiple observations can have the same value as the median, meaning the at-or-below and at-or-above groups overlap.)</p>
+<p>Since it requires a meaningful order, the median doesn’t work with a purely nominal categorical variable. We couldn’t find the median favorite color, for example. But it can be used with ordinal variables. Let’s work through finding the median for the ordinal letter-grade data in the quiz at the start of the chapter.</p>
+<div id="act-median" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;3.1: Find the median grade
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="medianTutorial" data-interactive-options="{&quot;examples&quot;:{&quot;odd&quot;:{&quot;values&quot;:[5,2,5,1,4,5,3,4,5],&quot;kind&quot;:&quot;ordinal&quot;,&quot;labels&quot;:{&quot;1&quot;:&quot;F&quot;,&quot;2&quot;:&quot;D&quot;,&quot;3&quot;:&quot;C&quot;,&quot;4&quot;:&quot;B&quot;,&quot;5&quot;:&quot;A&quot;},&quot;noun&quot;:&quot;letter grades&quot;},&quot;even&quot;:{&quot;values&quot;:[5,2,5,1,4,5,3,4],&quot;kind&quot;:&quot;ordinal&quot;,&quot;labels&quot;:{&quot;1&quot;:&quot;F&quot;,&quot;2&quot;:&quot;D&quot;,&quot;3&quot;:&quot;C&quot;,&quot;4&quot;:&quot;B&quot;,&quot;5&quot;:&quot;A&quot;},&quot;noun&quot;:&quot;letter grades&quot;},&quot;evenBoundary&quot;:{&quot;values&quot;:[5,2,5,1,4,5,3,3],&quot;kind&quot;:&quot;ordinal&quot;,&quot;labels&quot;:{&quot;1&quot;:&quot;F&quot;,&quot;2&quot;:&quot;D&quot;,&quot;3&quot;:&quot;C&quot;,&quot;4&quot;:&quot;B&quot;,&quot;5&quot;:&quot;A&quot;},&quot;noun&quot;:&quot;letter grades&quot;}}}" data-interactive-factory="makeMedianTutorial">
+<div class="interactive-figure-fallback">
+Letter grades are ordered to find the median in odd- and even-sized sets, including a case where the middle falls between C and B.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Raw data" data-action="{&quot;example&quot;:&quot;odd&quot;,&quot;order&quot;:&quot;raw&quot;,&quot;emphasize&quot;:&quot;none&quot;,&quot;annotation&quot;:&quot;none&quot;,&quot;animate&quot;:false}">
+<p>Here are the nine grades from the opening quiz: four As, two Bs, and one each of C, D, and F. They’re unsorted right now. To find the median we need to impose order.</p>
+</div>
+<div class="tutorial-step" data-title="Order" data-action="{&quot;example&quot;:&quot;odd&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;none&quot;,&quot;annotation&quot;:&quot;none&quot;,&quot;animate&quot;:true}">
+<p>Letter grades are ordinal categories, so we can put them in ascending order from F through A. Now that they’re arranged, we can look for the one that falls right in the middle.</p>
+</div>
+<div class="tutorial-step" data-title="Middle" data-action="{&quot;example&quot;:&quot;odd&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;middle&quot;,&quot;annotation&quot;:&quot;median&quot;,&quot;animate&quot;:true}">
+<p>With nine observations, the fifth position is the middle. The student in that position earned a B, so the median grade is B.</p>
+</div>
+<div class="tutorial-step" data-title="Halves" data-action="{&quot;example&quot;:&quot;odd&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;halves&quot;,&quot;annotation&quot;:&quot;median&quot;,&quot;animate&quot;:true}">
+<p>Three students earned grades below B, four earned grades above it, and two earned B itself. The striped B cards belong to both the at-or-below and at-or-above groups. This is why that “at least” qualification was necessary: it would not quite be accurate to say 50% of scores are below and 50% are above the median here. Note also the discrepancy between the median and the mode, which was an A.</p>
+</div>
+<div class="tutorial-step" data-title="Even number" data-action="{&quot;example&quot;:&quot;even&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;none&quot;,&quot;annotation&quot;:&quot;none&quot;,&quot;animate&quot;:true}" data-major="even" data-major-title="Even number">
+<p>In that data, there were an odd number of observations so the middle observation was a single actual value in the data. What if there had been an even number of scores?</p>
+</div>
+<div class="tutorial-step" data-title="Same category" data-action="{&quot;example&quot;:&quot;even&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;positional-halves&quot;,&quot;annotation&quot;:&quot;median&quot;,&quot;animate&quot;:true}" data-major="even" data-major-title="Even number">
+<p>Maybe the two middle observations belong to the same category. In that case, no problem: the median is that category.</p>
+</div>
+<div class="tutorial-step" data-title="Between" data-action="{&quot;example&quot;:&quot;evenBoundary&quot;,&quot;order&quot;:&quot;ascending&quot;,&quot;emphasize&quot;:&quot;positional-halves&quot;,&quot;annotation&quot;:&quot;middle&quot;,&quot;animate&quot;:true}">
+<p>However, if the median falls between two ordinal categories, there isn’t a meaningful halfway point between them. Like, if the 50th percentile was between a C and a B, we couldn’t say the median was “C and a half” or something. In that case we have to use our discretion. We might report that the median is between the categories, or that both categories can be considered median, or we might pick one or the other as the better representation of the middle. The important thing is to be clear and intentional.</p>
+</div>
+</div>
+</div>
+</div>
+<p>The median works the same way with quantitative data, since numerical scores have an inherent order. Take the symmetrical distribution of test scores from the third quiz question:</p>
+<div id="fig-median-test-scores" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-median-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.2: The sixteen test scores from the opening quiz, arranged in order.
+</figcaption>
+<div aria-describedby="fig-median-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="medianQuizScores" data-interactive-options="{&quot;values&quot;:[2,3,3,4,4,4,5,5,5,5,6,6,6,7,7,8],&quot;kind&quot;:&quot;quantitative&quot;,&quot;noun&quot;:&quot;test scores&quot;,&quot;revealOnVisible&quot;:true}" data-interactive-factory="makeMedianCards">
+<div class="interactive-figure-fallback">
+Sixteen ordered test scores: 2; two 3s; three 4s; four 5s; three 6s; two 7s; and 8. The two middle scores are both 5, so the median is 5.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>5 was the most common score, making it the mode. There are an even number of observations, so there are two middle positions: the eighth and ninth. Both contain 5, making the median 5 as well. So in this case, the mode and median point to the same place. (As we saw in <a href="#act-median" class="quarto-xref">Activity&nbsp;<span>3.1</span></a>, this agreement is not inevitable.)</p>
+<p>What about when we have an even number of scores? That posed a slight problem for ordinal data, but if the variable is quantitative, no problem at all: we take the point halfway between the two middle values. That’s a meaningful value for the median since on a quantitative scale the distances between numbers are all consistent (unlike the distances between ordinal categories).</p>
+<div id="fig-even-median-quant" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-even-median-quant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.3: Four quantitative scores with a median of 75, halfway between the two middle scores.
+</figcaption>
+<div aria-describedby="fig-even-median-quant-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="medianEvenQuantitative" data-interactive-options="{&quot;values&quot;:[65,70,80,90],&quot;kind&quot;:&quot;quantitative&quot;,&quot;noun&quot;:&quot;scores&quot;,&quot;revealOnVisible&quot;:true}" data-interactive-factory="makeMedianCards">
+<div class="interactive-figure-fallback">
+Four ordered quantitative scores: 65, 70, 80, and 90. The median is 75, halfway between the two middle scores.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="03_central_tendency_median" aria-label="Median and ordinal data"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Median and ordinal data</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="ordinal_median"><div class="quiz-prompt"><p>Six customers give ordered satisfaction responses. The two middle
+responses are neutral and satisfied. What is the most appropriate way to
+describe the median?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_median-ordinal_median" id="03_central_tendency_median-ordinal_median-option-1" value="0" aria-labelledby="03_central_tendency_median-ordinal_median-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_median-ordinal_median-option-1-text"><p>Between neutral and satisfied</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_median-ordinal_median" id="03_central_tendency_median-ordinal_median-option-2" value="1" aria-labelledby="03_central_tendency_median-ordinal_median-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_median-ordinal_median-option-2-text"><p>The average of the category codes</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_median-ordinal_median" id="03_central_tendency_median-ordinal_median-option-3" value="2" aria-labelledby="03_central_tendency_median-ordinal_median-option-3-text"><div class="quiz-choice-text" id="03_central_tendency_median-ordinal_median-option-3-text"><p>Whichever response is more common</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_median-ordinal_median" id="03_central_tendency_median-ordinal_median-option-4" value="3" aria-labelledby="03_central_tendency_median-ordinal_median-option-4-text"><div class="quiz-choice-text" id="03_central_tendency_median-ordinal_median-option-4-text"><p>No median</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Between neutral and satisfied</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The responses can be ordered, so their middle positions are
+meaningful even though the variable is categorical. But there is no
+defined halfway amount between neutral and satisfied: averaging category
+codes would assume equal gaps. Any convention for resolving that
+boundary should be stated.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="03_central_tendency_median">{"id":"03_central_tendency_median","questions":[{"prompt":"Six customers give ordered satisfaction responses. The two middle responses are neutral and satisfied. What is the most appropriate way to describe the median?","explanationHtml":"\u003cp\u003eThe responses can be ordered, so their middle positions are\nmeaningful even though the variable is categorical. But there is no\ndefined halfway amount between neutral and satisfied: averaging category\ncodes would assume equal gaps. Any convention for resolving that\nboundary should be stated.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eBetween neutral and satisfied\u003c/p\u003e","text":"Between neutral and satisfied"},{"text":"The average of the category codes","textHtml":"\u003cp\u003eThe average of the category codes\u003c/p\u003e"},{"text":"Whichever response is more common","textHtml":"\u003cp\u003eWhichever response is more common\u003c/p\u003e"},{"text":"No median","textHtml":"\u003cp\u003eNo median\u003c/p\u003e"}],"type":"multiple-choice","id":"ordinal_median","promptHtml":"\u003cp\u003eSix customers give ordered satisfaction responses. The two middle\nresponses are neutral and satisfied. What is the most appropriate way to\ndescribe the median?\u003c/p\u003e","explanation":"The responses can be ordered, so their middle positions are meaningful even though the variable is categorical. But there is no defined halfway amount between neutral and satisfied: averaging category codes would assume equal gaps. Any convention for resolving that boundary should be stated.","answerHtml":""}],"title":"Median and ordinal data","titleHtml":"\u003cp\u003eMedian and ordinal data\u003c/p\u003e"}</script></section>
+</section>
+<section id="the-mean" class="level2">
+<h2 data-anchor-id="the-mean">The mean</h2>
+<p>The mean, or average, is more nuanced because it uses every numerical value, not only their ordered positions. To calculate it, we add all the scores and then divide by the number of scores.</p>
+<p>It might seem like a simple idea, and we’ll soon see what’s so elegant and useful about it. But it took a long time to catch on. It’s worth taking a brief historical tour of the idea to get a sense of its uses (and abuses).</p>
+<p>Averaging, as a mathematical idea, has been around for a long time. The Pythagoreans discussed it in the third century BCE, but in the context of musical theory rather than data analysis. You would think scientists whose job involves taking multiple observations and figuring out what to make of them would have been quick to adopt the mean for their purposes, but it took a while. Astronomy provides an extensive historical record <span class="citation" data-cites="raper2017shock">(see <a href="references.html#ref-raper2017shock" role="doc-biblioref">Raper, 2017</a>)</span>. As long ago as the second century BCE, the Greek astronomer Hipparchus was observing the positions of celestial bodies, recording things like times, angles, and distances.</p>
+<div id="fig-hipparchus" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-hipparchus-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.4: A sixteenth-century illustration of Hipparchus, anachronistically using the sort of quadrant familiar to a sixteenth-century illustrator. There was some clever equipment in Hipparchus’s day; he wasn’t exactly just eyeballing things, but there was plenty of room for measurement error.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>
+</figcaption>
+<div aria-describedby="fig-hipparchus-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/hipparchus.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;3.4: A sixteenth-century illustration of Hipparchus, anachronistically using the sort of quadrant familiar to a sixteenth-century illustrator. There was some clever equipment in Hipparchus’s day; he wasn’t exactly just eyeballing things, but there was plenty of room for measurement error."><img src="resources/figures/hipparchus.jpg" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>Hipparchus and other astronomers realized that of course any one observation could be a bit off, so there’s value in combining multiple observations. But how? He reportedly used the midrange (halfway between the lowest and highest values). Even by the 17th century, great thinkers including Johannes Kepler, Tycho Brahe, and Galileo still hadn’t come to a consensus, variously using the midrange, median, sometimes the mean, and sometimes methods that they just made up themselves and didn’t particularly bother to explain <span class="citation" data-cites="stahl2006normal">(<a href="references.html#ref-stahl2006normal" role="doc-biblioref">Stahl, 2006</a>)</span>.</p>
+<p>It was over the course of the 18th century that the mean began to become the standard. By 1777, mathematician and physicist Daniel Bernoulli<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> wrote that among astronomers (who “as a class are men of the most scrupulous sagacity”), the mean had become a “universally accepted rule for handling several slightly discrepant observations of the same event” <span class="citation" data-cites="bernoulli1961choice">(<a href="references.html#ref-bernoulli1961choice" role="doc-biblioref">Bernoulli, 1961, p. 3</a>)</span>.<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></p>
+<p>Why is the mean so valuable for handling discrepant observations? Well, when your measurements of the same thing come out a bit different each time, how can you know which one to trust? The mean, in a sense, allows us to trust no one observation in particular, but rather to put them all together and allow the “errors” to cancel out.</p>
+<p>To see what I mean, consider the foot — as in the imperial unit of distance. Things have been measured in feet for a long time, since a foot is a convenient human-scale unit, and usually easy to come by. Just look down. But obviously it’s not very standardized. My foot isn’t necessarily the same length as yours. This can lead to trouble. A “rod” was a common unit of land measurement, generally defined as something like 16 feet. But because of the issue of unstandardized feet, different towns often had different standards for what exactly a rod was, opening the door to property and taxation disputes when administering surveys across regions.</p>
+<p>In his surveying manual <em>Geometrei</em>, the sixteenth-century mathematician and general Renaissance man Jakob Köbel offered a solution.</p>
+<blockquote class="blockquote">
+<p>Stand at the door of a church on a Sunday and bid 16 men to stop, tall ones and small ones, as they happen to pass out when the service is finished; then make them put their feet one behind the other, and the length thus obtained shall be a right and lawful rod to measure and survey the land with, and the 16th part of it shall be the right and lawful foot.<span class="citation" data-cites="addy1925littlejohn">(<a href="references.html#ref-addy1925littlejohn" role="doc-biblioref">Addy, 1925, p. 215</a>)</span></p>
+</blockquote>
+<div id="fig-kobel-rod" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-kobel-rod-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.5: Sixteen men line up their feet toe to heel to establish a surveying rod. Woodcut from Jakob Köbel’s <em>Geometrei</em>, first published in 1535 or 1536. Image from <span class="citation" data-cites="addy1925littlejohn">Addy (<a href="references.html#ref-addy1925littlejohn" role="doc-biblioref">1925</a>)</span>.
+</figcaption>
+<div aria-describedby="fig-kobel-rod-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/kobel-rod.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;3.5: Sixteen men line up their feet toe to heel to establish a surveying rod. Woodcut from Jakob Köbel’s Geometrei, first published in 1535 or 1536. Image from @addy1925littlejohn."><img src="resources/figures/kobel-rod.png" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>This practical procedure illustrates the logic of the mean. Any one foot (as in, the foot at the end of someone’s leg) is a bit different from any other. But if we take a bunch of them and figure out the average, we end up with an idealized foot that can be used as a more standardized and reliable unit of length than any one actual foot.</p>
+<p>There is an important condition: the “errors” must be random, rather than systematically biased in one direction. Köbel advised lurking outside Sunday mass because the congregation would fairly represent the town’s male population. If we repeated the procedure at the New York Knicks’ locker room door, or outside a classroom of second-graders, we’d get very different results.</p>
+<p>Note how the mean provides a model of the thing being measured. The sixteenth part of the measured rod — the idealized average “foot” — will not necessarily be the same as any of the individual feet from which it was calculated. The mean represents an ideal, not the actual. This is a powerful and useful thing. We can use the ideal foot without having to deal with all the individual idiosyncratic feet. But as we know, with great power comes great responsibility. If we rely on ideals and neglect reality, we can get into another kind of trouble.</p>
+<p>This becomes most obvious when the mean is used to describe and understand <em>people</em>. (Not just their feet.) Belgian astronomer and statistician Adolphe Quetelet was a pioneer of using statistical techniques like the average to understand human and social data. In 1846, Quetelet examined the chest circumference measurements of more than 5,000 Scottish soldiers. He treated each soldier’s distance from the mean like an astronomer treated an observation’s distance from the true position of a star: as error <span class="citation" data-cites="gallagher2020quetelet">(<a href="references.html#ref-gallagher2020quetelet" role="doc-biblioref">Gallagher, 2020</a>)</span>. The mean represented the “true” soldier; actual soldiers were imperfect variations. Quetelet called this abstraction <em>l’homme moyen</em>, the average man. He saw in l’homme moyen the possibility of the same kind of harmonious proportion in health, beauty, and moral balance that the Pythagoreans found in music. An individual combining all of the average man’s qualities would represent “everything grand, beautiful, and good” and resemble a “type of perfection” <span class="citation" data-cites="quetelet1835surhomme">(<a href="references.html#ref-quetelet1835surhomme" role="doc-biblioref">Quetelet, 1835, pp. 274–276</a>)</span>.</p>
+<p>Quetelet acknowledged, however, that this perfect identity could “scarcely be realized.” No one person can be average in every respect. Statistical findings from the masses should not be mechanically applied to individuals. A doctor should not merely treat every patient as if they were average but rather consider each individually <span class="citation" data-cites="quetelet1835surhomme">(<a href="references.html#ref-quetelet1835surhomme" role="doc-biblioref">Quetelet, 1835, pp. 267–269</a>)</span>.</p>
+<p>The French modernist architect Le Corbusier did not allow any such reservations to constrain his own work. In designing buildings and urban spaces, Corbusier calculated people’s requirements for air, heat, light, and space, turning statistical abstractions and quantitative assumptions into blueprints for reality. Real people, as opposed to statistical aggregates, want their living spaces to do more than satisfy minimum physical requirements. They cook, work, socialize, gossip, relax, and make a place their own. But Le Corbusier brushed this aside: “Each man will live in an ordered relation to the whole.” No need to worry about individual wants, hopes, desires, because “human happiness already exists expressed in terms of numbers, of mathematics, of properly calculated designs” <span class="citation" data-cites="scott1998seeing">(<a href="references.html#ref-scott1998seeing" role="doc-biblioref">Scott, 1998, pp. 112–113</a>)</span>.</p>
+<p>The reason I bring all this up here is to show that the mean is a simple and powerful tool, but we should not let the mathematical elegance lull us into forgetting that we are dealing with a deliberately simplified statistical summary rather than a direct representation of reality. (For one thing, the mean never tells us by itself how much variation surrounds it. That is the problem we’ll take up in the next chapter.)</p>
+<section id="calculating-the-mean" class="level3">
+<h3 data-anchor-id="calculating-the-mean">Calculating the mean</h3>
+<p>Ok, history lesson over. Let’s talk more about the math. Again, when we want to calculate the mean, all we do is sum the scores and then divide by the number of scores. (Since we’re doing real math here, the mean only works with quantitative data; a mean cannot be computed for categorical data.)</p>
+<p><span id="eq-mean-pop"><span class="math display">\[  \mu = \frac{\Sigma X}{N}  \tag{3.1}\]</span></span></p>
+<p><span id="eq-mean-sample"><span class="math display">\[  M = \frac{\Sigma X}{n}  \tag{3.2}\]</span></span></p>
+<p>The <span class="math inline">\(\Sigma\)</span> symbol tells us to add, and <span class="math inline">\(X\)</span> represents each score. The other symbols differ depending on whether we’re talking about a sample or a population. For a population (<a href="#eq-mean-pop" class="quarto-xref">Equation&nbsp;<span>3.1</span></a>), we call the mean <span class="math inline">\(\mu\)</span> and divide by uppercase <span class="math inline">\(N\)</span>, the number of individuals in the population. For a sample (<a href="#eq-mean-sample" class="quarto-xref">Equation&nbsp;<span>3.2</span></a>), we call the mean <span class="math inline">\(M\)</span> and divide by lowercase <span class="math inline">\(n\)</span>, the number of observations in the sample. (Sometimes statisticians refer to the mean as <span class="math inline">\(\bar{X}\)</span> (“x bar”). But social scientists generally use this <span class="math inline">\(\mu\)</span> or <span class="math inline">\(M\)</span> notation, so, with apologies to real statisticians, that’s what we’re going to use for our purposes.)</p>
+<p>Why is this such an elegant and effective statistic? In our historical tour we encountered the idea of measurement errors, as when an astronomer might measure an angle slightly too low today and slightly too high tomorrow. And we also mentioned another kind of variability, as when some soldiers’ chest circumferences are bigger than average and some are smaller than average. Let me now use the more neutral term <strong>deviations</strong>.</p>
+<p>A deviation is the difference between a score and some reference point, keeping track of direction. Here we can think about deviations from the mean. A score <span class="math inline">\(X\)</span> above the mean has a positive deviation, while a score below it has a negative deviation. We can express the difference as <span class="math inline">\(X - M\)</span>. If we calculate the deviation for every score and then add them up, we always get the same answer: <span class="math inline">\(\Sigma(X - M) = 0\)</span>. This is what is special about the mean. It is the one reference point around which the signed deviations sum to zero.</p>
+<p>How does this work? <span class="math inline">\(\Sigma X\)</span> lumps all the observed scores into one total. Dividing that total by <span class="math inline">\(n\)</span> shares it equally among the <span class="math inline">\(n\)</span> observations. Imagine a bunch of people with buckets of water, all filled to a different level. Some people’s buckets are almost filled to the brim, some people’s are almost empty. We have them all dump their water into one big tank (<span class="math inline">\(\Sigma X\)</span>), and then share it back out equally (divide by <span class="math inline">\(n\)</span>). Now everyone has exactly the same amount in their bucket (the average amount, <span class="math inline">\(M\)</span>).</p>
+<p>Put another way, <span class="math inline">\(M=\frac{\Sigma X}{n}\)</span> rearranges to <span class="math inline">\(nM=\Sigma X\)</span>: if we replaced every observed score (the initial inconsistent buckets) with <span class="math inline">\(M\)</span> (the identically-filled average buckets), the total does not change. The extra contribution of scores above the mean is exactly matched by the shortfall of scores below it; the deviations balance.</p>
+<p>Think back to Köbel’s sixteen feet. The length of them all lined up provided “the right and lawful rod.” That’s <span class="math inline">\(\Sigma X\)</span>. Dividing by <span class="math inline">\(n=16\)</span> gave “the right and lawful foot.” That’s the mean — the average foot becomes the town standard. Some of the men’s feet were bigger than average, some were smaller. The extra length contributed by the bigger feet was matched by the shortfall from the smaller ones. The procedure lets all those deviations come out in the wash.</p>
+<p>You can begin to see more clearly what kind of “center” the mean offers, as compared to the other measures we have encountered. The mode gives us a representative score in the sense of the one with the highest frequency. The median gives us the middle score by ordering them and splitting the set in two. The mean gives us the center of the distribution in terms of balance: the point around which all the deviations above and below that point are in balance.</p>
+<div id="act-mean-balance" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;3.2: The mean as a balance point
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="meanBalanceBeam" data-interactive-options="{&quot;initialPositions&quot;:[1,2,6,6,10],&quot;labels&quot;:true,&quot;boxLabels&quot;:false,&quot;deviationSums&quot;:false,&quot;dropOnVisible&quot;:true,&quot;draggable&quot;:false,&quot;addOnClick&quot;:false,&quot;removeOnClick&quot;:false,&quot;controlsOpen&quot;:false}" data-interactive-factory="makeMeanBalanceBeam">
+<div class="interactive-figure-fallback">
+Stepped balance-beam demonstration. Five observations balance at their mean of 5. Their signed deviations sum to zero; moving the pivot or adding a new observation tips the beam until the pivot moves to the new mean.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Balance" data-action="{&quot;positions&quot;:[1,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:false,&quot;deviation-sums&quot;:false,&quot;animate&quot;:false}">
+<p>Here’s another sort of visual, physical way of thinking about the average. Picture the kind of block histogram we mentioned in the previous chapter, with scores as boxes piled up on the x axis categories. And picture the x axis itself as a balance beam. The mean is the point along the x axis where scores are “balanced,” with the same “weight,” so to speak, on either side. Notice that there are two boxes to the left and three to the right. Balance doesn’t require the same number on each side: a box farther from the pivot has more leverage than one close to it. For this little dataset, <span class="math inline">\(\Sigma X = 1+2+6+6+10=25\)</span>, so <span class="math inline">\(M=25/5=5\)</span>.</p>
+</div>
+<div class="tutorial-step" data-title="Deviations" data-action="{&quot;positions&quot;:[1,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:false,&quot;animate&quot;:true}">
+<p>Now each box is labeled by its deviation from <span class="math inline">\(M = 5\)</span>: its distance above or below the mean. The scores to the left are 4 and 3 points below the mean. To the right, two scores are 1 point above it and one is 5 points above it.</p>
+</div>
+<div class="tutorial-step" data-title="Sums" data-action="{&quot;positions&quot;:[1,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;animate&quot;:true}">
+<p>The lines at the bottom add those deviations end to end. The negative deviations sum to −7 and the positive deviations sum to +7. They balance. This is what it means for the deviations to sum to zero, <span class="math inline">\(\Sigma (X - M) = 0\)</span>.</p>
+</div>
+<div class="tutorial-step" data-title="Wrong pivot" data-action="{&quot;positions&quot;:[1,2,6,6,10],&quot;pivot&quot;:4,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;animate&quot;:true}">
+<p>Suppose we tried to balance the scores at 4 instead. The deviations are now measured from that point, and they no longer cancel out: the negative side sums to −5 while the positive side sums to +10. So the beam is no longer balanced, and it tips over.</p>
+</div>
+<div class="tutorial-step" data-title="Restored" data-action="{&quot;positions&quot;:[1,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;animate&quot;:true}">
+<p>Returning the pivot to the mean restores the balance, for this particular set of scores. But what if the scores changed? The mean would have to change too.</p>
+</div>
+<div class="tutorial-step" data-title="New score" data-action="{&quot;positions&quot;:[1,2,2,6,6,10],&quot;pivot&quot;:5,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;animate&quot;:true}">
+<p>Now let’s add one more observation at 2 while leaving the pivot at the old mean of 5. The new score adds another negative deviation, so the two sides no longer cancel out and the beam tips. The mean of the expanded set must have changed.</p>
+</div>
+<div class="tutorial-step" data-title="New mean" data-action="{&quot;positions&quot;:[1,2,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;animate&quot;:true}">
+<p>The six scores sum to 27, so the new mean is <span class="math inline">\(27/6\)</span>, or 4.5. Moving the pivot to that point restores the balance: the negative deviations and positive deviations once again cancel out.</p>
+</div>
+<div class="tutorial-step" data-title="Try it" data-action="{&quot;positions&quot;:[1,2,2,6,6,10],&quot;pivot&quot;:&quot;mean&quot;,&quot;labels&quot;:true,&quot;box-labels&quot;:true,&quot;deviation-sums&quot;:true,&quot;interactive&quot;:true,&quot;controls-open&quot;:true,&quot;animate&quot;:true}">
+<p>Now try changing the distribution yourself. Drag the red pivot to test another balance point. Click an empty spot to add a box, or click an existing box to remove it. Watch how the dashed ghost marks the mean whenever the pivot is in the wrong place.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="comparing-the-three-measures" class="level2">
+<h2 data-anchor-id="comparing-the-three-measures">Comparing the three measures</h2>
+<p>Now we’ve explored the ins and outs of three measures of central tendency: the mode describes the most frequent score (or scores); the median orders the observations and divides them in half; the mean balances their values. When we can compute all three measures for a quantitative distribution, we might find that they pretty much agree, or that they diverge.</p>
+<p>To see why, let’s start with an extreme example. Suppose we stand on a street corner and ask the people passing by their incomes. For some reason they agree to tell us, and we list the first seven answers below.</p>
+<div style="text-align: center; font-size: 1.2em;">
+<p>🙂 $30,000<br>
+🙂 $40,000<br>
+🙂 $45,000<br>
+🙂 $50,000<br>
+🙂 $55,000<br>
+🙂 $60,000<br>
+🙂 $70,000</p>
+</div>
+<p>We can locate the median right in the middle of the ordered incomes at $50,000. We can also calculate the mean, by adding up all the values and dividing by 7. At this point, we’d find that it’s the same as the median, $50,000.</p>
+<p>But the next person who walks by happens to be real estate tycoon Mr.&nbsp;Monopoly, with an annual income of a billion dollars.<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> Now our data look like this:</p>
+<div style="text-align: center; font-size: 1.2em;">
+<p>🙂 $30,000<br>
+🙂 $40,000<br>
+🙂 $45,000<br>
+🙂 $50,000<br>
+🙂 $55,000<br>
+🙂 $60,000<br>
+🙂 $70,000<br>
+🤑 $1,000,000,000</p>
+</div>
+<p>If we recalculate the median, we find that it hasn’t budged much. It’s $52,500, halfway between the fourth and fifth values. As we’ve seen, the median depends primarily on <em>position</em>. Four incomes fall on either side of it. It doesn’t matter too much what the values at either end of the distribution are. Once Mr.&nbsp;Monopoly is at the upper end, his income could be one hundred thousand dollars or ten billion dollars, the median would be the same either way.</p>
+<p>If we recalculate the mean, however, we find that it shoots up to around $125 million. The reason is that the mean balances all the deviations, and an extreme deviation requires the mean to move to accommodate it. So now exactly what Mr.&nbsp;Monopoly’s income is matters, and the farther it is from all the other observations, the more it pulls the mean in that direction.</p>
+<p>Obviously, this is an intentionally contrived example, but this is a genuine issue for researchers who are interested in income distributions. U.S. household income forms a positively <strong>skewed</strong> distribution. A relatively small number of households have extremely high incomes, while most have much lower incomes. For census data from 2024, the median and mean diverge by almost $40,000 (see <a href="#fig-income-distribution" class="quarto-xref">Figure&nbsp;<span>3.6</span></a>). Our choice of which to report or focus on can give quite a different impression of the “typical” household’s income.</p>
+<div id="fig-income-distribution" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-income-distribution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.6: Distribution of U.S. household income in 2024, with mean and median markers. Histogram bars represent $5,000 bins, except for the final striped bar which combines all households with incomes of $200,000 or more (16% of households). Data source: <a href="https://www.census.gov/data/tables/time-series/demo/income-poverty/cps-hinc/hinc-01.html">U.S. Census Bureau</a>.
+</figcaption>
+<div aria-describedby="fig-income-distribution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="incomeDistribution" data-interactive-options="{}" data-interactive-factory="makeIncomeDistributionChart">
+<div class="interactive-figure-fallback">
+Histogram of U.S. household income with mean and median markers.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>To take another example, we pointed out the bimodality of the tone-identification data from earlier in the chapter. But that distribution is also a bit skewed. The two peaks are not exactly the same height; the whole distribution is a bit more clustered at the lower-performing end, and skewed a bit by the smaller number of high performers.</p>
+<div id="fig-tone-scramble-centers" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-tone-scramble-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.7: Distribution of tone-identification performance with the median and mean estimated from the grouped data. Recreated from <span class="citation" data-cites="chubb2013bimodal">Chubb et al. (<a href="references.html#ref-chubb2013bimodal" role="doc-biblioref">2013</a>)</span>, Figure 6.
+</figcaption>
+<div aria-describedby="fig-tone-scramble-centers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-figure="toneIdentificationCenters" data-interactive-options="{&quot;showCenters&quot;:true}" data-interactive-factory="makeToneIdentificationGraph">
+<div class="interactive-figure-fallback">
+Histogram of proportion correct for 275 listeners, with an estimated median of 0.62 and mean of 0.67. The distribution has peaks near chance performance at 0.5 and near perfect performance at 1.0.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>The median remains near the upper edge of the larger, lower-performing cluster, while the mean is pulled farther toward the space between the two peaks. Arguably for this data any one measure of central tendency on its own doesn’t tell the complete story of the distribution’s shape.</p>
+<p>Stepping back from real data and looking instead at generic distribution curves, we can watch how those three kinds of center respond to changes in normality, skew, and bimodality.</p>
+<div id="act-distributions" class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Activity&nbsp;3.3: Watch the center change
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-figure="centralTendencyMorph" data-interactive-options="{&quot;skew&quot;:0,&quot;bimodal&quot;:0,&quot;controlsOpen&quot;:false,&quot;transitionDuration&quot;:1100,&quot;ariaLabel&quot;:&quot;A distribution smoothly changes from one symmetrical peak, through positive and negative skew, into two symmetrical peaks.&quot;}" data-interactive-factory="makeCentralTendencyMorph">
+<div class="interactive-figure-fallback">
+A distribution changes from one symmetrical peak, where the mode, median, and mean coincide, through positive skew, where the mean lies farthest into the tail, back through symmetry into negative skew, and finally into two symmetrical peaks, where the mean and median lie in the valley between the modes.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Normal" data-action="{&quot;skew&quot;:0,&quot;bimodal&quot;:0,&quot;controls-open&quot;:false,&quot;animate&quot;:true,&quot;duration&quot;:900}">
+<p>We begin with a normal distribution, symmetrical and with one peak. The mode is in the middle, where the highest frequency is observed. The median divides the distribution into two halves, right in the middle. And the mean is the balance point, also right in the middle. In this case, all three measures point to the same place because the distribution is symmetrical and unimodal.</p>
+</div>
+<div class="tutorial-step" data-title="Asymmetrical" data-action="{&quot;skew&quot;:0.35,&quot;bimodal&quot;:0,&quot;controls-open&quot;:false,&quot;animate&quot;:true,&quot;duration&quot;:1100}">
+<p>Now we can start to make the distribution asymmetrical. Here we see positive skew: a tail begins to grow toward the higher end of the scale. The three markers begin to differ because their definitions respond to different features of the distribution.</p>
+</div>
+<div class="tutorial-step" data-title="Positive skew" data-action="{&quot;skew&quot;:1,&quot;bimodal&quot;:0,&quot;controls-open&quot;:false,&quot;animate&quot;:true,&quot;duration&quot;:2000}">
+<p>The more the distribution is skewed, the more the measures diverge. The mode stays at the peak, where scores are most concentrated. The median moves to the right to keep half the distribution on either side. The mean moves farthest toward the tail: values far from the old balance point have more leverage, as they did in the income example.</p>
+</div>
+<div class="tutorial-step" data-title="Negative skew" data-action="{&quot;skew&quot;:-1,&quot;bimodal&quot;:0,&quot;controls-open&quot;:false,&quot;animate&quot;:true,&quot;duration&quot;:1600}">
+<p>With negative skew, the pattern is the opposite. The mode is the highest of the three values, because that’s where the peak is. The median is lower, keeping half of the distribution above and below. And the mean is lowest.</p>
+</div>
+<div class="tutorial-step" data-title="Bimodal" data-action="{&quot;skew&quot;:0,&quot;bimodal&quot;:1,&quot;controls-open&quot;:false,&quot;animate&quot;:true,&quot;duration&quot;:1350}">
+<p>If the distribution is bimodal, we label both modal peaks. Since the distribution is symmetrical again, the median and mean align in the middle. But that middle is a valley containing relatively few observations. The modal peaks on either side show where scores are actually concentrated.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="summary" class="level2">
+<h2 data-anchor-id="summary">Summary</h2>
+<p>The mode works with any variable type and can reveal more than one concentration, but it may be unclear or uninformative when exact values are sparse or tied. The median gives ordered data a relatively stable middle and is not easily shifted by outliers, but it ignores how far observations fall from that middle. The mean preserves those numerical distances and balances all the deviations, making it especially useful for the analyses we’ll meet later, but it requires meaningfully quantitative values and can be shifted substantially by extremes.</p>
+<p>No measure is automatically the best description. For reasonably symmetrical, single-peaked quantitative data, all three often point to roughly the same place. When they don’t, the difference tells us something about the shape of the distribution.</p>
+<p>Moving forward, the mean will be our measure of choice, because we’ll most often be dealing with quantitative data where the mean can acknowledge every data point. As we’ll see, part of its value to us is in those deviations which it balances. We won’t overlook them; in fact, they’ll be central to much of what we end up doing.</p>
+<p>The mean offers us a model of a world in which everyone is identical; we could replace Köbel’s sixteen churchgoers with sixteen stand-ins, identical mannequins whose feet were all exactly equal to the mean, and end up with the same answer for the length of the rod. But in the real world, the things we’re interested in usually aren’t all exactly average. Observations do deviate from the mean. This kind of variability is worth quantifying, which is what we’ll turn to in the next chapter.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="03_central_tendency_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 7 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 7</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="prediction"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>For the scores 90, 90, 85, 80, and 0, which measure of central
+tendency is largest?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-prediction" id="03_central_tendency_learning_checks-prediction-option-1" value="0" aria-labelledby="03_central_tendency_learning_checks-prediction-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-prediction-option-1-text"><p>Mode</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-prediction" id="03_central_tendency_learning_checks-prediction-option-2" value="1" aria-labelledby="03_central_tendency_learning_checks-prediction-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-prediction-option-2-text"><p>Median</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-prediction" id="03_central_tendency_learning_checks-prediction-option-3" value="2" aria-labelledby="03_central_tendency_learning_checks-prediction-option-3-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-prediction-option-3-text"><p>Mean</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-prediction" id="03_central_tendency_learning_checks-prediction-option-4" value="3" aria-labelledby="03_central_tendency_learning_checks-prediction-option-4-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-prediction-option-4-text"><p>They are all equal</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Mode</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The mode is 90, the median is 85, and the mean is 69.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="sample_mean"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A sample of 5 scores has a total of <span class="math inline"><em>Σ</em><em>X</em> = 40</span>. What is its
+mean?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>For a sample, start with <span class="math inline"><em>M</em> = <em>Σ</em><em>X</em>/<em>n</em></span>.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>8</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Dividing the total by the sample size gives <span class="math inline"><em>M</em> = 40/5 = 8</span>. The letter <span class="math inline"><em>M</em></span> and lowercase <span class="math inline"><em>n</em></span> refer to a sample.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="deviation_balance"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>What is always true of the signed deviations from the mean?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-deviation_balance" id="03_central_tendency_learning_checks-deviation_balance-option-1" value="0" aria-labelledby="03_central_tendency_learning_checks-deviation_balance-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-deviation_balance-option-1-text"><p>They sum to zero</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-deviation_balance" id="03_central_tendency_learning_checks-deviation_balance-option-2" value="1" aria-labelledby="03_central_tendency_learning_checks-deviation_balance-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-deviation_balance-option-2-text"><p>Every deviation equals zero</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-deviation_balance" id="03_central_tendency_learning_checks-deviation_balance-option-3" value="2" aria-labelledby="03_central_tendency_learning_checks-deviation_balance-option-3-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-deviation_balance-option-3-text"><p>There are equally many positive and negative deviations</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-deviation_balance" id="03_central_tendency_learning_checks-deviation_balance-option-4" value="3" aria-labelledby="03_central_tendency_learning_checks-deviation_balance-option-4-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-deviation_balance-option-4-text"><p>Their absolute values sum to zero</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>They sum to zero</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The negative and positive deviations balance in total, so their
+signed sum is zero. They do not need to be equal in number or cancel
+one-for-one.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="nominal_choice"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A survey asks commuters to choose their main way of traveling to
+campus: walking, bicycle, bus, subway, or car. Which measure of central
+tendency can be reported without imposing an arbitrary order on those
+categories?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-nominal_choice" id="03_central_tendency_learning_checks-nominal_choice-option-1" value="0" aria-labelledby="03_central_tendency_learning_checks-nominal_choice-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-nominal_choice-option-1-text"><p>Mode</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-nominal_choice" id="03_central_tendency_learning_checks-nominal_choice-option-2" value="1" aria-labelledby="03_central_tendency_learning_checks-nominal_choice-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-nominal_choice-option-2-text"><p>Median</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-nominal_choice" id="03_central_tendency_learning_checks-nominal_choice-option-3" value="2" aria-labelledby="03_central_tendency_learning_checks-nominal_choice-option-3-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-nominal_choice-option-3-text"><p>Mean</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-nominal_choice" id="03_central_tendency_learning_checks-nominal_choice-option-4" value="3" aria-labelledby="03_central_tendency_learning_checks-nominal_choice-option-4-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-nominal_choice-option-4-text"><p>All three</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Mode</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The categories can be counted but have no inherent order or numerical
+distance. So we can identify the most common response, but a median or
+mean would require information the variable does not contain.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="above_mean"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>It is possible for more than 50% of the scores in a distribution to
+have values above the mean.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_mean" id="03_central_tendency_learning_checks-above_mean-option-1" value="true" aria-labelledby="03_central_tendency_learning_checks-above_mean-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_mean-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_mean" id="03_central_tendency_learning_checks-above_mean-option-2" value="false" aria-labelledby="03_central_tendency_learning_checks-above_mean-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_mean-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A few very low scores can pull the mean downward, leaving most scores
+above it.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="above_mode"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">6</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>It is possible for more than 50% of the scores in a distribution to
+have values above the mode.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_mode" id="03_central_tendency_learning_checks-above_mode-option-1" value="true" aria-labelledby="03_central_tendency_learning_checks-above_mode-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_mode-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_mode" id="03_central_tendency_learning_checks-above_mode-option-2" value="false" aria-labelledby="03_central_tendency_learning_checks-above_mode-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_mode-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The mode is only the most frequent score. It does not have to split
+the distribution in half.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="above_median"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">7</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>It is possible for more than 50% of the scores in a distribution to
+have values above the median.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_median" id="03_central_tendency_learning_checks-above_median-option-1" value="true" aria-labelledby="03_central_tendency_learning_checks-above_median-option-1-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_median-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="03_central_tendency_learning_checks-above_median" id="03_central_tendency_learning_checks-above_median-option-2" value="false" aria-labelledby="03_central_tendency_learning_checks-above_median-option-2-text"><div class="quiz-choice-text" id="03_central_tendency_learning_checks-above_median-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>At least half of the observations must have values at or below the
+median, so no more than half can be strictly above it. Ties can mean
+that several observations equal the median; they do not create an
+exception to this definition.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="03_central_tendency_learning_checks">{"id":"03_central_tendency_learning_checks","questions":[{"prompt":"For the scores 90, 90, 85, 80, and 0, which measure of central tendency is largest?","explanationHtml":"\u003cp\u003eThe mode is 90, the median is 85, and the mean is 69.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eMode\u003c/p\u003e","text":"Mode"},{"text":"Median","textHtml":"\u003cp\u003eMedian\u003c/p\u003e"},{"text":"Mean","textHtml":"\u003cp\u003eMean\u003c/p\u003e"},{"text":"They are all equal","textHtml":"\u003cp\u003eThey are all equal\u003c/p\u003e"}],"type":"multiple-choice","id":"prediction","promptHtml":"\u003cp\u003eFor the scores 90, 90, 85, 80, and 0, which measure of central\ntendency is largest?\u003c/p\u003e","explanation":"The mode is 90, the median is 85, and the mean is 69.","answerHtml":""},{"tolerance":"0","id":"sample_mean","promptHtml":"\u003cp\u003eA sample of 5 scores has a total of \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eΣ\u003c/em\u003e\u003cem\u003eX\u003c/em\u003e = 40\u003c/span\u003e. What is its\nmean?\u003c/p\u003e","answerHtml":"\u003cp\u003e8\u003c/p\u003e","prompt":"A sample of 5 scores has a total of \\Sigma X = 40. What is its mean?","hints":[{"text":"For a sample, start with M = \\Sigma X / n.","textHtml":"\u003cp\u003eFor a sample, start with \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e = \u003cem\u003eΣ\u003c/em\u003e\u003cem\u003eX\u003c/em\u003e/\u003cem\u003en\u003c/em\u003e\u003c/span\u003e.\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eDividing the total by the sample size gives \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e = 40/5 = 8\u003c/span\u003e. The letter \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003c/span\u003e and lowercase \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e refer to a sample.\u003c/p\u003e","type":"numeric","explanation":"Dividing the total by the sample size gives M = 40/5 = 8. The letter M and lowercase n refer to a sample.","answer":"8"},{"prompt":"What is always true of the signed deviations from the mean?","explanationHtml":"\u003cp\u003eThe negative and positive deviations balance in total, so their\nsigned sum is zero. They do not need to be equal in number or cancel\none-for-one.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eThey sum to zero\u003c/p\u003e","text":"They sum to zero"},{"text":"Every deviation equals zero","textHtml":"\u003cp\u003eEvery deviation equals zero\u003c/p\u003e"},{"text":"There are equally many positive and negative deviations","textHtml":"\u003cp\u003eThere are equally many positive and negative deviations\u003c/p\u003e"},{"text":"Their absolute values sum to zero","textHtml":"\u003cp\u003eTheir absolute values sum to zero\u003c/p\u003e"}],"type":"multiple-choice","id":"deviation_balance","promptHtml":"\u003cp\u003eWhat is always true of the signed deviations from the mean?\u003c/p\u003e","explanation":"The negative and positive deviations balance in total, so their signed sum is zero. They do not need to be equal in number or cancel one-for-one.","answerHtml":""},{"prompt":"A survey asks commuters to choose their main way of traveling to campus: walking, bicycle, bus, subway, or car. Which measure of central tendency can be reported without imposing an arbitrary order on those categories?","explanationHtml":"\u003cp\u003eThe categories can be counted but have no inherent order or numerical\ndistance. So we can identify the most common response, but a median or\nmean would require information the variable does not contain.\u003c/p\u003e","options":[{"correct":true,"textHtml":"\u003cp\u003eMode\u003c/p\u003e","text":"Mode"},{"text":"Median","textHtml":"\u003cp\u003eMedian\u003c/p\u003e"},{"text":"Mean","textHtml":"\u003cp\u003eMean\u003c/p\u003e"},{"text":"All three","textHtml":"\u003cp\u003eAll three\u003c/p\u003e"}],"type":"multiple-choice","id":"nominal_choice","promptHtml":"\u003cp\u003eA survey asks commuters to choose their main way of traveling to\ncampus: walking, bicycle, bus, subway, or car. Which measure of central\ntendency can be reported without imposing an arbitrary order on those\ncategories?\u003c/p\u003e","explanation":"The categories can be counted but have no inherent order or numerical distance. So we can identify the most common response, but a median or mean would require information the variable does not contain.","answerHtml":""},{"prompt":"It is possible for more than 50% of the scores in a distribution to have values above the mean.","explanationHtml":"\u003cp\u003eA few very low scores can pull the mean downward, leaving most scores\nabove it.\u003c/p\u003e","id":"above_mean","promptHtml":"\u003cp\u003eIt is possible for more than 50% of the scores in a distribution to\nhave values above the mean.\u003c/p\u003e","type":"true-false","explanation":"A few very low scores can pull the mean downward, leaving most scores above it.","answer":true,"answerHtml":"\u003cp\u003etrue\u003c/p\u003e"},{"prompt":"It is possible for more than 50% of the scores in a distribution to have values above the mode.","explanationHtml":"\u003cp\u003eThe mode is only the most frequent score. It does not have to split\nthe distribution in half.\u003c/p\u003e","id":"above_mode","promptHtml":"\u003cp\u003eIt is possible for more than 50% of the scores in a distribution to\nhave values above the mode.\u003c/p\u003e","type":"true-false","explanation":"The mode is only the most frequent score. It does not have to split the distribution in half.","answer":true,"answerHtml":"\u003cp\u003etrue\u003c/p\u003e"},{"prompt":"It is possible for more than 50% of the scores in a distribution to have values above the median.","explanationHtml":"\u003cp\u003eAt least half of the observations must have values at or below the\nmedian, so no more than half can be strictly above it. Ties can mean\nthat several observations equal the median; they do not create an\nexception to this definition.\u003c/p\u003e","id":"above_median","promptHtml":"\u003cp\u003eIt is possible for more than 50% of the scores in a distribution to\nhave values above the median.\u003c/p\u003e","type":"true-false","explanation":"At least half of the observations must have values at or below the median, so no more than half can be strictly above it. Ties can mean that several observations equal the median; they do not create an exception to this definition.","answer":false,"answerHtml":""}],"title":"Learning Checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e"}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-addy1925littlejohn" class="csl-entry" role="listitem">
+Addy, S. O. (1925). Little john’s grave and the lawful village perch. <em>Derbyshire Archaeological Journal</em>, <em>47</em>, 206–221. <a href="https://archaeologydataservice.ac.uk/catalogue/adsdata/arch-2300-1/dissemination/pdf/047/DAJ_v047_1925_206-221.pdf">https://archaeologydataservice.ac.uk/catalogue/adsdata/arch-2300-1/dissemination/pdf/047/DAJ_v047_1925_206-221.pdf</a>
+</div>
+<div id="ref-bernoulli1961choice" class="csl-entry" role="listitem">
+Bernoulli, D. (1961). The most probable choice between several discrepant observations and the formation therefrom of the most likely induction (C. G. Allen, Tran.). <em>Biometrika</em>, <em>48</em>(1–2), 3–18. <a href="https://doi.org/10.1093/biomet/48.1-2.3">https://doi.org/10.1093/biomet/48.1-2.3</a>
+</div>
+<div id="ref-chubb2013bimodal" class="csl-entry" role="listitem">
+Chubb, C., Dickson, C. A., Dean, T., Fagan, C., Mann, D. S., Wright, C. E., Guan, M., Silva, A. E., Gregersen, P. K., &amp; Kowalsky, E. (2013). Bimodal distribution of performance in discriminating major/minor modes. <em>The Journal of the Acoustical Society of America</em>, <em>134</em>(4), 3067–3078. <a href="https://doi.org/10.1121/1.4816546">https://doi.org/10.1121/1.4816546</a>
+</div>
+<div id="ref-gallagher2020quetelet" class="csl-entry" role="listitem">
+Gallagher, E. D. (2020). Was <span class="nocase">Quetelet’s</span> average man normal? <em>The American Statistician</em>, <em>74</em>(3), 301–306. <a href="https://doi.org/10.1080/00031305.2019.1706635">https://doi.org/10.1080/00031305.2019.1706635</a>
+</div>
+<div id="ref-quetelet1835surhomme" class="csl-entry" role="listitem">
+Quetelet, A. (1835). <em>Sur l’homme et le développement de ses facultés, ou essai de physique sociale</em> (Vol. 2). Bachelier. <a href="https://books.google.com/books?id=6v8OAAAAQAAJ">https://books.google.com/books?id=6v8OAAAAQAAJ</a>
+</div>
+<div id="ref-raper2017shock" class="csl-entry" role="listitem">
+Raper, S. (2017). The shock of the mean. <em>Significance</em>, <em>14</em>(6), 12–17. <a href="https://doi.org/10.1111/j.1740-9713.2017.01087.x">https://doi.org/10.1111/j.1740-9713.2017.01087.x</a>
+</div>
+<div id="ref-scott1998seeing" class="csl-entry" role="listitem">
+Scott, J. C. (1998). <em>Seeing like a state: How certain schemes to improve the human condition have failed</em>. Yale University Press. <a href="https://yalebooks.yale.edu/book/9780300078152/seeing-like-a-state/">https://yalebooks.yale.edu/book/9780300078152/seeing-like-a-state/</a>
+</div>
+<div id="ref-stahl2006normal" class="csl-entry" role="listitem">
+Stahl, S. (2006). The evolution of the normal distribution. <em>Mathematics Magazine</em>, <em>79</em>(2), 96–113. <a href="https://doi.org/10.1080/0025570X.2006.11953386">https://doi.org/10.1080/0025570X.2006.11953386</a>
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>Detail from the title-page border of William Cuningham’s <em>The Cosmographical Glasse</em> (1559), cropped from <a href="https://www.britishmuseum.org/collection/image/225898001">British Museum image 225898001</a>. © The Trustees of the British Museum. Shared under a <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0) licence</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>Daniel Bernoulli was the nephew of Jacob Bernoulli, who we’ll run into in Chapter 6.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>The flattery may have been strategic, since Bernoulli was in fact aiming to persuade astronomers of the limitations of the mean.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>For what it’s worth, Forbes actually estimated that Mr.&nbsp;Monopoly, a.k.a. Rich Uncle Pennybags, had a net worth of $7.1 billion <a href="https://web.archive.org/web/20260221073032/https://www.forbes.com/2006/11/20/uncle-pennybags-money-tech-media_cx_de_06fict15_monopoly.html">back in a 2006 article</a>, and <a href="https://web.archive.org/web/20081229023831/http://www.forbes.com/2007/12/11/fictional-characters-wealth-oped-books-fict1507-cx_de_mn_1211fictionalintro.html">later claimed</a> that he lost it all in the 2007 subprime mortgage crash.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-frequency-distributions.html" class="pagination-link" aria-label="Frequency">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./04-variability.html" class="pagination-link" aria-label="Variability">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

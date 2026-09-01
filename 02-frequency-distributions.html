@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>2&nbsp; Frequency – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./03-central-tendency.html" rel="next">
+<link href="./01-variables.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="2&nbsp; Frequency – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:image" content="https://statisticsfromscratch.com/resources/figures/graunt-table-casualties.png">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta property="og:image:height" content="1633">
+<meta property="og:image:width" content="2000">
+<meta name="twitter:title" content="2&nbsp; Frequency – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:image" content="https://statisticsfromscratch.com/resources/figures/graunt-table-casualties.png">
+<meta name="twitter:image-height" content="1633">
+<meta name="twitter:image-width" content="2000">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#what-is-frequency" id="toc-what-is-frequency" class="nav-link active" data-scroll-target="#what-is-frequency">What is frequency?</a>
+  <ul class="collapse">
+  <li><a href="#why-frequency" id="toc-why-frequency" class="nav-link" data-scroll-target="#why-frequency">Why frequency?</a></li>
+  </ul></li>
+  <li><a href="#frequency-tables" id="toc-frequency-tables" class="nav-link" data-scroll-target="#frequency-tables">Frequency tables</a></li>
+  <li><a href="#sec-grouped-frequency" id="toc-sec-grouped-frequency" class="nav-link" data-scroll-target="#sec-grouped-frequency">Grouped frequency tables</a>
+  <ul class="collapse">
+  <li><a href="#continuous-variables" id="toc-continuous-variables" class="nav-link" data-scroll-target="#continuous-variables">Continuous variables</a></li>
+  </ul></li>
+  <li><a href="#frequency-graphs" id="toc-frequency-graphs" class="nav-link" data-scroll-target="#frequency-graphs">Frequency graphs</a>
+  <ul class="collapse">
+  <li><a href="#bar-graphs" id="toc-bar-graphs" class="nav-link" data-scroll-target="#bar-graphs">Bar graphs</a></li>
+  <li><a href="#histograms" id="toc-histograms" class="nav-link" data-scroll-target="#histograms">Histograms</a></li>
+  <li><a href="#frequency-polygons" id="toc-frequency-polygons" class="nav-link" data-scroll-target="#frequency-polygons">Frequency polygons</a></li>
+  <li><a href="#smooth-curves" id="toc-smooth-curves" class="nav-link" data-scroll-target="#smooth-curves">Smooth curves</a></li>
+  </ul></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/visibility-helper.js"></script>
+<script src="resources/js/graph-generator.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/frequency-table-tutorial.js"></script>
+<script src="resources/js/frequency-distribution-cover.js"></script>
+<script src="resources/js/presidential-approval.js"></script>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;aspectRatio&quot;:&quot;2:1&quot;}" data-interactive-factory="makeFrequencyDistributionCover" data-interactive-figure="frequencyDistributionCover">
+<div class="interactive-figure-fallback">
+The same scores animating through a bar graph, a histogram, a frequency polygon, and a smooth frequency curve.
+</div>
+</div>
+<p>In this chapter, we’ll introduce our first actual statistic, <em>frequency</em>, and we’ll explore how it can be reported in tables and visualized using bar graphs, histograms, frequency polygons, and smooth curves.</p>
+<section id="what-is-frequency" class="level2">
+<h2 data-anchor-id="what-is-frequency">What is frequency?</h2>
+<p>Suppose you have a stack of 100 paper surveys that people have filled out. Each one asked the same question: “In general, how do you feel about the current President of the United States?” The people answering had three options to choose from: “approve,” “disapprove,” or “no opinion.” How might you begin to organize and summarize your findings?</p>
+<p>One thing you might do is take the whole stack and sort the surveys into three piles, one for each response. If you got down to eye-level with the desk and looked at the three resulting stacks from the side, you would have a perfectly serviceable visual representation of the frequency of each response, meaning simply how frequently each occurred. The taller the pile, the more people picked that response. In <a href="#fig-surveys" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>, you can clearly see that more people picked “approve” than either of the other options by quite a wide margin.</p>
+<div id="fig-surveys" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-surveys-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: A representation of 100 surveys stacked up on a desk, sorted by response to the question “In general, how do you feel about the current President of the United States?”
+</figcaption>
+<div aria-describedby="fig-surveys-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{}" data-interactive-factory="makeApprovalBlockHistogram" data-interactive-figure="surveyResponseStacks">
+<div class="interactive-figure-fallback">
+Block histogram with 81 thin survey sheets stacked under Approve, 8 under Disapprove, and 11 under No opinion.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>If you wanted to be a bit more precise, you could count how many surveys are in each pile and record the numbers in a table. You could also calculate the percentage of the total responses that each category represents. <a href="#tbl-approval" class="quarto-xref">Table&nbsp;<span>2.1</span></a> shows the results of a real survey like this. It was carried out by the Gallup polling organization in 1945 during the presidency of Harry S. Truman. More than 3,000 people were asked “Do you approve or disapprove of the way Truman is handling his job as President?” Notice the specificity: it didn’t ask people to give a detailed narrative of their every opinion of Truman, just to choose from “approve” or “disapprove,” or “no opinion” if they couldn’t pick one of those. The table of results shows the number of people who picked each response, as well as the percentage of the total valid responses that each category represents. (The full sample consisted of 3,096 people. The numbers in the table add up to slightly less than that, though, because valid responses to that question weren’t recorded for everyone who took the survey. It can be surprisingly hard to get a lot of people to answer a question.)</p>
+<div id="tbl-approval" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-approval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.1: President Harry S. Truman’s approval ratings from a survey of 3,096 adults conducted Oct 5–Oct 10, 1945. Source: <a href="https://ropercenter.cornell.edu/ipoll/study/31087340">Gallup/Roper</a>.
+</figcaption>
+<div aria-describedby="tbl-approval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Opinion</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+<th style="text-align: right;">Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Approve</td>
+<td style="text-align: right;">2,465</td>
+<td style="text-align: right;">81%</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Disapprove</td>
+<td style="text-align: right;">258</td>
+<td style="text-align: right;">8%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">No opinion</td>
+<td style="text-align: right;">323</td>
+<td style="text-align: right;">11%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Once we’ve calculated an approval percentage for one survey, we can put the results of many surveys together to see how approval ratings have changed over time. <a href="#fig-presidential-approval" class="quarto-xref">Figure&nbsp;<span>2.2</span></a> is a time series: it plots the percentage of “approve” responses across all completed presidential terms from Truman through Biden.</p>
+<div id="fig-presidential-approval" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-presidential-approval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.2: Presidential job approval ratings across all completed presidential terms from Truman through Biden. Data from the <a href="https://www.presidency.ucsb.edu/statistics/data/presidential-job-approval-all-data">American Presidency Project</a>.
+</figcaption>
+<div aria-describedby="fig-presidential-approval-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;excludeTerms&quot;:[{&quot;president&quot;:&quot;Franklin D. Roosevelt&quot;,&quot;term&quot;:&quot;1st term&quot;},{&quot;president&quot;:&quot;Donald J. Trump&quot;,&quot;term&quot;:&quot;2nd term&quot;}],&quot;xStartYear&quot;:1944,&quot;xEndYear&quot;:2025}" data-interactive-factory="makePresidentialApprovalChart" data-interactive-figure="presidentialApproval">
+<div class="interactive-figure-fallback">
+Line chart of presidential job approval across completed terms from Truman through Biden.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>Do you notice any trends? You might look for differences between presidents. Some — Truman, both Bushes — had a very big difference between their highest and lowest approval ratings, while others stayed within a narrower range. Or you might look for common themes across all the presidents. In most cases, presidents seem to end up with lower approval ratings than they started with. And that helps us to put the results of a single survey into context. The data in <a href="#tbl-approval" class="quarto-xref">Table&nbsp;<span>2.1</span></a> came from early in Truman’s presidency; the numbers would have looked different if we instead examined a survey conducted later in his term.</p>
+<section id="why-frequency" class="level3">
+<h3 data-anchor-id="why-frequency">Why frequency?</h3>
+<p>Let’s take a step back for a moment and think about why frequency is such a fundamental concept in statistics. What are we trying to do?</p>
+<p>Formally, statistics (like frequency) are mathematical procedures used to collect, organize, summarize, and interpret information. They allow for standardized evaluation and comparison, which can help uncover meaningful patterns in data.</p>
+<p>Slightly more informally:</p>
+<blockquote class="blockquote">
+<p>Statistics are a bunch of numbers looking for an argument.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+</blockquote>
+<p>That quip bluntly highlights what more formal definitions dress up in more clinical terms. Statistics are produced and reported for a purpose. Data don’t interpret themselves, no matter what statistical procedures we subject them to. Ultimately, <em>we</em> have to form the argument about what the numbers mean. Even making something as seemingly simple and objective as a frequency table or graph is an intentional act, and we should consider the purpose behind it.</p>
+<p>With the polling data, the purpose is to see the overall trend: is the president popular or not? By forcing respondents to simply sort themselves into one of the applicable boxes, the question is largely blind to the myriad reasons <em>why</em> any given individual answered the way they did, all the idiosyncratic enthusiasms and grievances that contributed to someone ticking the approve or disapprove box. That can be a good thing: sometimes we need to see the big picture first, and it can guide us toward the issues we want to drill into later. But “what is the trend?” is a different question from “why this trend?” We need to keep in mind what questions a summary can answer and what questions it cannot. Why was that question chosen, and not another?</p>
+</section>
+</section>
+<section id="frequency-tables" class="level2">
+<h2 data-anchor-id="frequency-tables">Frequency tables</h2>
+<p>Now that we’ve seen frequency in action, let’s work through building a frequency table from scratch.</p>
+<p>In general, a frequency table organizes and displays data and conveys how observations are distributed. It shows at least two things: the values, categories, or bins that make up the variable, and the frequency — by which we just mean the number of observations — that falls into each one. It may also contain some additional information, such as proportions, percentages, or cumulative frequencies.</p>
+<p>Exactly what goes in the first column depends on the kind of variable we’re dealing with. For a categorical variable, each row represents a recorded category. If the variable is nominal, there’s no inherent order to the categories, and so we can arrange them in whatever order is most useful. That could be alphabetical, in the order that categories were first observed, or in ascending or descending order of frequency. If the variable is ordinal, the rows have a meaningful order and would be arranged either lowest to highest or highest to lowest.</p>
+<p>For a discrete quantitative variable with only a few possible values, each row can represent one value. (Things become slightly more complicated for continuous variables or quantitative variables with a lot of possible values, so we’ll come back to them in the next section.)</p>
+<p>Let’s put together a simple table step by step. For this example, imagine we’ve asked fifteen people how many languages are regularly spoken in their household. So the resulting numbers reflect observations of this discrete quantitative variable.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Build a frequency table
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;data&quot;:[2,1,2,3,4,3,3,2,2,1,5,3,4,1,2],&quot;variable&quot;:&quot;Languages&quot;,&quot;dataLabel&quot;:&quot;Languages spoken at home&quot;,&quot;ariaLabel&quot;:&quot;Frequency table under construction for the number of languages spoken at home&quot;}" data-interactive-factory="makeFrequencyTableTutorial" data-interactive-figure="frequencyTableTutorial">
+<div class="interactive-figure-fallback">
+Step-by-step tutorial building a frequency table from 15 responses about the number of languages regularly spoken at home.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-title="Raw data" data-major="start" data-major-title="Start" data-action="{&quot;table&quot;:false,&quot;columns&quot;:[],&quot;rows&quot;:[],&quot;frequencies&quot;:[],&quot;highlight&quot;:null,&quot;animate&quot;:false}">
+<p>Here are the raw data. The observed values run from 1 through 5. Even with a relatively small toy dataset, it is hard to make much sense of the numbers without a bit of organization and summarization.</p>
+</div>
+<div class="tutorial-step" data-title="Two columns" data-major="structure" data-major-title="Structure" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:[],&quot;frequencies&quot;:[],&quot;highlight&quot;:null,&quot;animate&quot;:true}">
+<p>To start constructing our table, we will make a header row and two columns. The first column will contain the recorded values. Here we’ll label it <strong>Languages</strong>, since that’s what those numbers represent. The second will contain the frequencies: the number of times each value was observed. We’ll label it <span class="math inline">\(f\)</span>. (You will sometimes see <span class="math inline">\(n\)</span> or <span class="math inline">\(N\)</span> used instead of <span class="math inline">\(f\)</span>. But since we’ll be using those symbols elsewhere to indicate the total number of observations in a sample or population, we’ll stick with <span class="math inline">\(f\)</span> for frequency so as not to confuse each individual row’s count with the fixed total.)</p>
+</div>
+<div class="tutorial-step" data-title="List the values" data-major="structure" data-major-title="Structure" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:[],&quot;highlight&quot;:null,&quot;animate&quot;:true}">
+<p>To fill in the table, the first job is to list the values from low to high (though high to low would also work). The lowest possible response was 1 (you can’t have zero languages). There’s theoretically no maximum number of languages that could be spoken, but the highest answer we got was 5, so we can stop there.</p>
+</div>
+<div class="tutorial-step" data-title="Count the 1s" data-major="count" data-major-title="Count" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:[1],&quot;highlight&quot;:1,&quot;animate&quot;:true}">
+<p>Now we start counting. Three participants reported 1 language, so the row for 1 has a frequency of 3.</p>
+</div>
+<div class="tutorial-step" data-title="Count the 2s" data-major="count" data-major-title="Count" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:[1,2],&quot;highlight&quot;:2,&quot;animate&quot;:true}">
+<p>Next, count the 2s. Five participants reported 2 languages, so record a frequency of 5 in the row for 2.</p>
+</div>
+<div class="tutorial-step" data-title="Count the 3s" data-major="count" data-major-title="Count" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:[1,2,3],&quot;highlight&quot;:3,&quot;animate&quot;:true}">
+<p>Four participants reported 3 languages. Add 4 to its frequency row.</p>
+</div>
+<div class="tutorial-step" data-title="Count the 4s" data-major="count" data-major-title="Count" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:[1,2,3,4],&quot;highlight&quot;:4,&quot;animate&quot;:true}">
+<p>Two participants reported 4 languages. Add 2 to its frequency row.</p>
+</div>
+<div class="tutorial-step" data-title="Count the 5s" data-major="count" data-major-title="Count" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:&quot;all&quot;,&quot;highlight&quot;:5,&quot;animate&quot;:true}">
+<p>Finally, just one participant reported 5 languages. Add 1 to its row, and the basic frequency table is complete.</p>
+</div>
+<div class="tutorial-step" data-title="Read the pattern" data-major="interpret" data-major-title="Interpret" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:&quot;all&quot;,&quot;highlight&quot;:null,&quot;animate&quot;:true}">
+<p>Now the pattern is easier to see: most participants reported 2 or 3 languages, while only one reported 5. By organizing the responses and counting their frequencies, we turn the raw data into something we can begin to understand in general terms.</p>
+</div>
+<div class="tutorial-step" data-title="Additional columns" data-major="extend" data-major-title="Extend" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;,&quot;proportion&quot;,&quot;percent&quot;,&quot;cumulativeFrequency&quot;,&quot;cumulativePercent&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:&quot;all&quot;,&quot;highlight&quot;:null,&quot;order&quot;:&quot;ascending&quot;,&quot;animate&quot;:true}">
+<p>Several optional columns can make the table more informative. Proportion is frequency divided by the total number of responses, <span class="math inline">\(p = f/N\)</span>, and percentage is <span class="math inline">\(p \times 100\)</span>. Cumulative <span class="math inline">\(f\)</span> is the running count as you move down the rows, while cumulative percentage is the running percentage. Because this table runs from low to high, the cumulative columns tell us how many responses are <em>at or below</em> each value. The last row reaches a cumulative <span class="math inline">\(f\)</span> of 15 and 100%, accounting for all the responses.</p>
+</div>
+<div class="tutorial-step" data-title="High to low" data-major="order" data-major-title="Order" data-action="{&quot;table&quot;:true,&quot;columns&quot;:[&quot;label&quot;,&quot;frequency&quot;,&quot;proportion&quot;,&quot;percent&quot;,&quot;cumulativeFrequency&quot;,&quot;cumulativePercent&quot;],&quot;rows&quot;:&quot;all&quot;,&quot;frequencies&quot;:&quot;all&quot;,&quot;highlight&quot;:null,&quot;order&quot;:&quot;descending&quot;,&quot;animate&quot;:true}">
+<p>We could instead sort the values from high to low. The frequencies and proportions do not change, but the cumulative columns now build downward from the highest value, so they tell us how many responses are <em>at or above</em> each value. Descending order can foreground larger values or values above a threshold; ascending order can foreground smaller values or values below a threshold. Which is more useful depends on what we want to know about the data.</p>
+</div>
+</div>
+</div>
+</div>
+<p>One thing to note: the possible values of a variable may not all appear in the data, but we might include them in our table with a frequency of zero. Suppose the data in the exercise above had not included anybody who said 3 languages. We would still include a row for 3 with a frequency of 0. With a quantitative variable, including unobserved values within the range we display keeps gaps in the data visible. Or suppose the same data had represented the number of siblings each participant has rather than number of languages spoken at home. Then the possible scores would start at 0. Even if there were no responses of 0 in the data, it could still be useful to include a row for it with a frequency of 0, making that absence explicit. Whether we extend the table beyond the observed scores to cover the variable’s entire possible range depends on what is useful. That can make sense when the possible range is known and manageable, but less sense when the range is very large or has no fixed upper limit. (We stopped the table above at 5, the highest observed value, because there is no theoretical limit to the number of languages a household could speak.) With a nominal variable, we might include only categories that actually occurred, or include an empty category if its absence is itself noteworthy. As always, choices, choices.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="02_frequency_table_practice" aria-label="Build a frequency table"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Build a frequency table</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="quiz_score_possible_values"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A quiz has five questions. For each student, we record the number of
+questions they answered correctly. What are all the possible values of
+this variable?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_table_practice-quiz_score_possible_values" id="02_frequency_table_practice-quiz_score_possible_values-option-1" value="0" aria-labelledby="02_frequency_table_practice-quiz_score_possible_values-option-1-text"><div class="quiz-choice-text" id="02_frequency_table_practice-quiz_score_possible_values-option-1-text"><p>0, 1, 2, 3, 4, and 5</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_table_practice-quiz_score_possible_values" id="02_frequency_table_practice-quiz_score_possible_values-option-2" value="1" aria-labelledby="02_frequency_table_practice-quiz_score_possible_values-option-2-text"><div class="quiz-choice-text" id="02_frequency_table_practice-quiz_score_possible_values-option-2-text"><p>1, 2, 3, 4, and 5</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_table_practice-quiz_score_possible_values" id="02_frequency_table_practice-quiz_score_possible_values-option-3" value="2" aria-labelledby="02_frequency_table_practice-quiz_score_possible_values-option-3-text"><div class="quiz-choice-text" id="02_frequency_table_practice-quiz_score_possible_values-option-3-text"><p>0 and 5 only</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_table_practice-quiz_score_possible_values" id="02_frequency_table_practice-quiz_score_possible_values-option-4" value="3" aria-labelledby="02_frequency_table_practice-quiz_score_possible_values-option-4-text"><div class="quiz-choice-text" id="02_frequency_table_practice-quiz_score_possible_values-option-4-text"><p>Any value from 0 to 5, including decimals</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Think about the lowest and highest possible numbers of correct
+answers, including what happens if a student gets every question
+wrong.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0, 1, 2, 3, 4, and 5</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A student could get none of the questions right or all five right, so
+the scale runs from 0 through 5. Because we are counting whole
+questions, values such as 2.5 are not possible.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="construct_quiz_frequency_table"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Here are the scores from 18 students on the five-question quiz:</p>
+<p>4, 2, 5, 3, 4, 5, 2, 4, 1, 3, 5, 4, 2, 5, 3, 4, 1, 2</p>
+<p>On a piece of paper, construct a frequency table with a row for every
+possible score. Once you have completed the table, what frequency does
+it show for a score of 0?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>Use all the possible values from the previous question as the rows of
+your table.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>Look through the raw scores for any 0s. If none appear, the row still
+needs a recorded frequency.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>0</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><div class="interactive-figure-mount" data-interactive-figure="frequencyTablePracticeAnswer" data-interactive-factory="makeFrequencyTable" data-interactive-options="{&quot;data&quot;:[4,2,5,3,4,5,2,4,1,3,5,4,2,5,3,4,1,2],&quot;categories&quot;:[0,1,2,3,4,5],&quot;variable&quot;:&quot;Questions correct&quot;,&quot;ariaLabel&quot;:&quot;Frequency table for scores on a five-question quiz, including a frequency of zero for a score of zero&quot;}">
+<div class="interactive-figure-fallback">
+Completed table: score 0 has frequency 0; score 1 has frequency 2; score
+2 has frequency 4; score 3 has frequency 3; score 4 has frequency 5;
+score 5 has frequency 4.
+</div>
+</div>
+<p>Nobody scored 0, so its frequency is 0. We still include that row
+because 0 is a genuine possible score: the empty row makes it explicit
+that nobody got every question wrong.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="02_frequency_table_practice">{"id":"02_frequency_table_practice","titleHtml":"\u003cp\u003eBuild a frequency table\u003c/p\u003e","title":"Build a frequency table","questions":[{"explanation":"A student could get none of the questions right or all five right, so the scale runs from 0 through 5. Because we are counting whole questions, values such as 2.5 are not possible.","explanationHtml":"\u003cp\u003eA student could get none of the questions right or all five right, so\nthe scale runs from 0 through 5. Because we are counting whole\nquestions, values such as 2.5 are not possible.\u003c/p\u003e","answerHtml":"","hints":[{"textHtml":"\u003cp\u003eThink about the lowest and highest possible numbers of correct\nanswers, including what happens if a student gets every question\nwrong.\u003c/p\u003e","text":"Think about the lowest and highest possible numbers of correct answers, including what happens if a student gets every question wrong."}],"promptHtml":"\u003cp\u003eA quiz has five questions. For each student, we record the number of\nquestions they answered correctly. What are all the possible values of\nthis variable?\u003c/p\u003e","options":[{"textHtml":"\u003cp\u003e0, 1, 2, 3, 4, and 5\u003c/p\u003e","correct":true,"text":"0, 1, 2, 3, 4, and 5"},{"textHtml":"\u003cp\u003e1, 2, 3, 4, and 5\u003c/p\u003e","text":"1, 2, 3, 4, and 5"},{"textHtml":"\u003cp\u003e0 and 5 only\u003c/p\u003e","text":"0 and 5 only"},{"textHtml":"\u003cp\u003eAny value from 0 to 5, including decimals\u003c/p\u003e","text":"Any value from 0 to 5, including decimals"}],"id":"quiz_score_possible_values","type":"multiple-choice","prompt":"A quiz has five questions. For each student, we record the number of questions they answered correctly. What are all the possible values of this variable?"},{"answer":"0","explanation":"Completed table: score 0 has frequency 0; score 1 has frequency 2; score 2 has frequency 4; score 3 has frequency 3; score 4 has frequency 5; score 5 has frequency 4.Nobody scored 0, so its frequency is 0. We still include that row because 0 is a genuine possible score: the empty row makes it explicit that nobody got every question wrong.","tolerance":"0","explanationHtml":"\u003cdiv class=\"interactive-figure-mount\"\ndata-interactive-figure=\"frequencyTablePracticeAnswer\"\ndata-interactive-factory=\"makeFrequencyTable\"\ndata-interactive-options=\"{\u0026quot;data\u0026quot;:[4,2,5,3,4,5,2,4,1,3,5,4,2,5,3,4,1,2],\u0026quot;categories\u0026quot;:[0,1,2,3,4,5],\u0026quot;variable\u0026quot;:\u0026quot;Questions correct\u0026quot;,\u0026quot;ariaLabel\u0026quot;:\u0026quot;Frequency table for scores on a five-question quiz, including a frequency of zero for a score of zero\u0026quot;}\"\u003e\n\u003cdiv class=\"interactive-figure-fallback\"\u003e\nCompleted table: score 0 has frequency 0; score 1 has frequency 2; score\n2 has frequency 4; score 3 has frequency 3; score 4 has frequency 5;\nscore 5 has frequency 4.\n\u003c/div\u003e\n\u003c/div\u003e\n\u003cp\u003eNobody scored 0, so its frequency is 0. We still include that row\nbecause 0 is a genuine possible score: the empty row makes it explicit\nthat nobody got every question wrong.\u003c/p\u003e","answerHtml":"\u003cp\u003e0\u003c/p\u003e","promptHtml":"\u003cp\u003eHere are the scores from 18 students on the five-question quiz:\u003c/p\u003e\n\u003cp\u003e4, 2, 5, 3, 4, 5, 2, 4, 1, 3, 5, 4, 2, 5, 3, 4, 1, 2\u003c/p\u003e\n\u003cp\u003eOn a piece of paper, construct a frequency table with a row for every\npossible score. Once you have completed the table, what frequency does\nit show for a score of 0?\u003c/p\u003e","id":"construct_quiz_frequency_table","prompt":"Here are the scores from 18 students on the five-question quiz:4, 2, 5, 3, 4, 5, 2, 4, 1, 3, 5, 4, 2, 5, 3, 4, 1, 2On a piece of paper, construct a frequency table with a row for every possible score. Once you have completed the table, what frequency does it show for a score of 0?","type":"numeric","hints":[{"textHtml":"\u003cp\u003eUse all the possible values from the previous question as the rows of\nyour table.\u003c/p\u003e","text":"Use all the possible values from the previous question as the rows of your table."},{"textHtml":"\u003cp\u003eLook through the raw scores for any 0s. If none appear, the row still\nneeds a recorded frequency.\u003c/p\u003e","text":"Look through the raw scores for any 0s. If none appear, the row still needs a recorded frequency."}]}]}</script></section>
+</section>
+<section id="sec-grouped-frequency" class="level2">
+<h2 data-anchor-id="sec-grouped-frequency">Grouped frequency tables</h2>
+<p>The table we just made is fairly compact because our toy sample contains only five distinct values, all clustered within a short span. But when a quantitative variable has many possible values across a wider range, an ungrouped table can become unwieldy.</p>
+<p>Take these scores from a 20-question multiple-choice test taken by 40 students. Each score is a whole-number count of how many questions a student answered correctly.</p>
+<div style="text-align: center; font-size: 1.1em;">
+<p>3 5 6 7 10 12 13 13<br>
+14 14 14 15 15 15 16 16<br>
+17 17 17 17 17 18 18 18<br>
+18 18 19 19 19 19 20 20<br>
+20 20 20 20 20 20 20 20</p>
+</div>
+<p>An ungrouped frequency table covering the observed range from 3 through 20 would need 18 rows. If we included every possible test score from 0 through 20, it would need 21. And quite a few of those rows would have a frequency of zero or one. Here are the first few:</p>
+<div id="tbl-ungrouped-test-scores" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ungrouped-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.2: The first eight rows of an ungrouped frequency table for the test scores. Several possible scores at the low end did not occur at all, and the others occurred only once.
+</figcaption>
+<div aria-describedby="tbl-ungrouped-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Test score</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">7</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">⋮</td>
+<td style="text-align: right;">⋮</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>This tells us exactly what happened at each possible score, but it doesn’t give us a very compact summary. A solution is to create a <strong>grouped frequency table</strong>. Instead of giving every possible score its own row, we divide the scale into <strong>bins</strong> and count how many observations fall into each one. (Bins are also sometimes called <em>class intervals</em> or <em>categories</em>, but I think <em>bin</em> is the most useful term here: it avoids confusion with the idea of categorical data, and statistical software commonly uses <em>bin</em> and <em>bin width</em> in this context.)</p>
+<p>So how should we construct the bins? There is no single mathematically required answer, but there are some helpful rules of thumb:</p>
+<ol type="1">
+<li>Choose enough bins, given the range of the data, to reveal the shape of the distribution without simply recreating the raw list. Around ten bins is often a good starting point, but that isn’t written in stone. In some cases more or fewer than ten may be better.</li>
+<li>Use bins of equal width. Bin widths such as 2, 5, or 10 can be easy to read, but 3 or 7 or whatever can be perfectly valid depending on the data and the purpose.</li>
+<li>Choose a lower limit at or below the lowest observed value. A multiple of the bin width is often tidy, but that’s more an aesthetic preference than a mathematical necessity.</li>
+<li>Make the bins cover the range you want to show without gaps or overlaps, so that every observation belongs to exactly one bin. If the variable has a meaningful, manageable range of possible values, it can be useful to include all of them, even those that did not occur.</li>
+<li>Have fun and be yourself. By which I mean, ignore the rules if you think doing so makes for a more effective summary. You can find examples in the very next chapter which go against the advice about starting on a multiple of the bin width (<a href="03-central-tendency.html#fig-tone-scramble-performance" class="quarto-xref">Figure&nbsp;<span>3.1</span></a>) and about keeping all bins equal width (<a href="03-central-tendency.html#fig-income-distribution" class="quarto-xref">Figure&nbsp;<span>3.6</span></a>). The most important thing is to make choices that suit your data and your purpose.</li>
+</ol>
+<p>With those rules of thumb in mind, <a href="#tbl-grouped-test-scores" class="quarto-xref">Table&nbsp;<span>2.3</span></a> shows one way of grouping those test scores. I chose a bin width of 3, because it divides the full range of possible scores (0 through 20) neatly into seven equal bins. That’s a little fewer than our rule-of-thumb target of around ten, and the resulting bin width of 3 is less pleasing than, say, 2 or 5, but it includes every possible score. Rules of thumb are there to help us make a useful summary, not to make the choice for us.</p>
+<div id="tbl-grouped-test-scores" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-grouped-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.3: A grouped frequency table for the 20-question test scores, using bins three points wide.
+</figcaption>
+<div aria-describedby="tbl-grouped-test-scores-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Test score</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+<th style="text-align: right;">%</th>
+<th style="text-align: right;">Cumulative %</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0–2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3–5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">5.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6–8</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">5.0</td>
+<td style="text-align: right;">10.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">9–11</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2.5</td>
+<td style="text-align: right;">12.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">12–14</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">15.0</td>
+<td style="text-align: right;">27.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">15–17</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">25.0</td>
+<td style="text-align: right;">52.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">18–20</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">47.5</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Now the broader pattern is easier to see: scores are bunched toward the top of the scale, while low scores are rare. But we lose resolution. The table tells us that nineteen people scored somewhere from 18 through 20, but not how many got each score. We have chosen to sacrifice some detail in order to make the general pattern more visible. Different choices could make that pattern more or less clear; there are no mechanical rules to follow. The best we can do is make informed and reasonable choices.</p>
+<section id="continuous-variables" class="level3">
+<h3 data-anchor-id="continuous-variables">Continuous variables</h3>
+<p>Grouping is also generally necessary with continuous data. The exact recorded values depend on the precision of our measurement. With enough precision, no two observations might be exactly alike, in which case an ungrouped frequency table would barely be a summary at all.</p>
+<p>For example, here are fifteen observations with much the same broad pattern as the data we used to construct that simple table a moment ago. But rather than being discrete, this time let’s suppose the values reflect a continuous variable. Perhaps they are times, recorded on a stopwatch to the nearest tenth of a second.</p>
+<div style="text-align: center; font-size: 1.1em;">
+<p>2.3 0.8 1.9 3.4 3.7 2.6 3.1 2.2<br>
+1.6 1.4 4.8 2.5 4.3 0.7 2.0</p>
+</div>
+<p>We could build a frequency table for these scores by giving each recorded value its own row, but no two observations are the same at this level of precision, so all the frequencies would be 1. We’d also have a lot of zero-frequency rows if we include a row for each decimal along the range of the data: listing every 0.1 increment between the lowest (0.7) and highest (4.8) values would take 42 rows. That would not be much of a summary.</p>
+<p>So we’ll group these scores too. One reasonable approach would be to round to the nearest whole number. What that means, specifically, is to define the boundaries of each bin with <strong>cut points</strong>: one bin covers 0.5 to 1.5, the next 1.5 to 2.5, then 2.5 to 3.5, and so on up to 5.5. This gives a bin width of 1.0. But let’s be careful: notice that we recorded a score of 2.5. Which bin does it go into, 1.5–2.5 or 2.5–3.5? There is no mathematical law that says what we have to do. One common convention, and the one we’ll use here, is for a bin to include its lower cut point and exclude its upper one. So the 1.5–2.5 bin holds everything from 1.5 up to <em>but not including</em> 2.5. The score of 2.5 goes into the next bin, 2.5–3.5. (This matches the familiar convention of rounding a value ending in .5 up to the next whole number.)</p>
+<p>The resulting grouped frequency table is shown in <a href="#tbl-grouped-continuous" class="quarto-xref">Table&nbsp;<span>2.4</span></a>.</p>
+<div id="tbl-grouped-continuous" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-grouped-continuous-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.4: A grouped frequency table for the continuous scores, using bins one unit wide.
+</figcaption>
+<div aria-describedby="tbl-grouped-continuous-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Score bin</th>
+<th style="text-align: right;"><span class="math inline">\(f\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0.5–1.5</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1.5–2.5</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2.5–3.5</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3.5–4.5</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4.5–5.5</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>Now we have a reasonable summary. In fact, this table has five rows carrying exactly the same frequencies as the simple discrete-data version we built earlier. The summary looks almost the same, even though it is built from conceptually different data. There, the row labeled 2 meant <em>exactly</em> 2 languages were regularly spoken at home, a response five participants gave. Here, the row labeled 1.5–2.5 means a score from 1.5 up to but not including 2.5, and no two of the five observations in that bin are the same.</p>
+<p>Without wanting to become too philosophical about things, it’s worth noticing that with continuous data <em>we already did this</em> without thinking about it. Why were the times recorded to the nearest tenth of a second? Why not hundredths or thousandths? Presumably the imaginary researcher behind this data had her reasons: the stopwatch only showed tenths, or she couldn’t be bothered writing down two decimal places, or whatever. In any case, a recorded score of 2.5 represents a measurement that was somewhere from 2.45 up to but not including 2.55 before rounding. We had already reduced the resolution of the data when we decided how precisely to record it. For continuous variables, then, binning isn’t an entirely new operation so much as lowering the resolution of data that is already arbitrarily coarse.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="02_frequency_bin_width" aria-label="Choosing a bin width"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Choosing a bin width</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="sensible_bin_width"><div class="quiz-prompt"><p>A researcher records 60 reaction times ranging from 210 to 790
+milliseconds. If we want a compact grouped table that still shows the
+shape of the distribution, which bin width is the most sensible starting
+choice?</p></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_bin_width-sensible_bin_width" id="02_frequency_bin_width-sensible_bin_width-option-1" value="0" aria-labelledby="02_frequency_bin_width-sensible_bin_width-option-1-text"><div class="quiz-choice-text" id="02_frequency_bin_width-sensible_bin_width-option-1-text"><p>1 millisecond</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_bin_width-sensible_bin_width" id="02_frequency_bin_width-sensible_bin_width-option-2" value="1" aria-labelledby="02_frequency_bin_width-sensible_bin_width-option-2-text"><div class="quiz-choice-text" id="02_frequency_bin_width-sensible_bin_width-option-2-text"><p>50 milliseconds</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_bin_width-sensible_bin_width" id="02_frequency_bin_width-sensible_bin_width-option-3" value="2" aria-labelledby="02_frequency_bin_width-sensible_bin_width-option-3-text"><div class="quiz-choice-text" id="02_frequency_bin_width-sensible_bin_width-option-3-text"><p>300 milliseconds</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_bin_width-sensible_bin_width" id="02_frequency_bin_width-sensible_bin_width-option-4" value="3" aria-labelledby="02_frequency_bin_width-sensible_bin_width-option-4-text"><div class="quiz-choice-text" id="02_frequency_bin_width-sensible_bin_width-option-4-text"><p>600 milliseconds</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>The reaction times cover about 580 milliseconds. Think about roughly
+how many bins each width would create.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>50 milliseconds</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A width of 50 milliseconds gives us about twelve bins: compact enough
+to summarize the data, but enough to show their shape. A width of 1
+would create hundreds of bins, while 300 or 600 would leave only one or
+two. No single width is mathematically required, but 50 is the most
+useful of these choices.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="02_frequency_bin_width">{"id":"02_frequency_bin_width","titleHtml":"\u003cp\u003eChoosing a bin width\u003c/p\u003e","title":"Choosing a bin width","questions":[{"explanation":"A width of 50 milliseconds gives us about twelve bins: compact enough to summarize the data, but enough to show their shape. A width of 1 would create hundreds of bins, while 300 or 600 would leave only one or two. No single width is mathematically required, but 50 is the most useful of these choices.","explanationHtml":"\u003cp\u003eA width of 50 milliseconds gives us about twelve bins: compact enough\nto summarize the data, but enough to show their shape. A width of 1\nwould create hundreds of bins, while 300 or 600 would leave only one or\ntwo. No single width is mathematically required, but 50 is the most\nuseful of these choices.\u003c/p\u003e","answerHtml":"","hints":[{"textHtml":"\u003cp\u003eThe reaction times cover about 580 milliseconds. Think about roughly\nhow many bins each width would create.\u003c/p\u003e","text":"The reaction times cover about 580 milliseconds. Think about roughly how many bins each width would create."}],"promptHtml":"\u003cp\u003eA researcher records 60 reaction times ranging from 210 to 790\nmilliseconds. If we want a compact grouped table that still shows the\nshape of the distribution, which bin width is the most sensible starting\nchoice?\u003c/p\u003e","options":[{"textHtml":"\u003cp\u003e1 millisecond\u003c/p\u003e","text":"1 millisecond"},{"textHtml":"\u003cp\u003e50 milliseconds\u003c/p\u003e","correct":true,"text":"50 milliseconds"},{"textHtml":"\u003cp\u003e300 milliseconds\u003c/p\u003e","text":"300 milliseconds"},{"textHtml":"\u003cp\u003e600 milliseconds\u003c/p\u003e","text":"600 milliseconds"}],"id":"sensible_bin_width","type":"multiple-choice","prompt":"A researcher records 60 reaction times ranging from 210 to 790 milliseconds. If we want a compact grouped table that still shows the shape of the distribution, which bin width is the most sensible starting choice?"}]}</script></section>
+</section>
+</section>
+<section id="frequency-graphs" class="level2">
+<h2 data-anchor-id="frequency-graphs">Frequency graphs</h2>
+<p>Sometimes a table really is the best tool for conveying frequencies. A useful historical example is John Graunt, a 17th-century pioneer of demography, epidemiology, and vital statistics. (At the time none of these were established fields of study; Graunt was a haberdasher by trade.) He studied London’s <em>Bills of Mortality</em>, tallies of births and deaths that had been published weekly since the early 1600s. In his 1662 book, <em>Natural and Political Observations Made upon the Bills of Mortality</em>, Graunt pulled together years of records, organized them into tables like <a href="#fig-graunt-table" class="quarto-xref">Figure&nbsp;<span>2.3</span></a>, and used the comparisons to reason statistically about the size and health of the city’s population <span class="citation" data-cites="sutherland1963graunt connor2024graunt">(<a href="references.html#ref-connor2024graunt" role="doc-biblioref">Connor, 2024</a>; <a href="references.html#ref-sutherland1963graunt" role="doc-biblioref">Sutherland, 1963</a>)</span>.</p>
+<div id="fig-graunt-table" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-graunt-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.3: Graunt’s <em>Table of Casualties</em>, comparing deaths attributed to dozens of causes across individual years and grouped totals. This reproduction accompanied Graunt’s <em>Observations</em> in the 1899 edition of <em>The Economic Writings of Sir William Petty</em>, volume 2. Public-domain scan from <a href="https://commons.wikimedia.org/wiki/File:PettyEcWritingsVol2_TableCasualties.jpg">Wikimedia Commons</a>
+</figcaption>
+<div aria-describedby="fig-graunt-table-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/graunt-table-casualties.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;2.3: Graunt’s Table of Casualties, comparing deaths attributed to dozens of causes across individual years and grouped totals. This reproduction accompanied Graunt’s Observations in the 1899 edition of The Economic Writings of Sir William Petty, volume 2. Public-domain scan from Wikimedia Commons"><img src="resources/figures/graunt-table-casualties.png" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>But a table isn’t the only way to make patterns visible. Two centuries later, another Londoner, the doctor John Snow, investigated a cholera outbreak around Broad Street in 1854. Snow suspected that cholera spread through contaminated drinking water, in contrast to the prevailing belief that it was spread through bad air. As part of compiling his evidence, Snow produced a map, shown in <a href="#fig-snow-map" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>, marking each cholera death in the area with a short black bar at the address where the deceased had lived. The bars stack up around the Broad Street water pump, which was indeed later found to have been contaminated by sewage <span class="citation" data-cites="snow1855cholera">(<a href="references.html#ref-snow1855cholera" role="doc-biblioref">Snow, 1855</a>)</span>.</p>
+<div id="fig-snow-map" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-snow-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.4: John Snow’s map of the 1854 cholera outbreak in Soho, London. Each short black bar represents a death; the bars cluster around the Broad Street water pump.
+</figcaption>
+<div aria-describedby="fig-snow-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="resources/figures/snow-map.jpg" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2.4: John Snow’s map of the 1854 cholera outbreak in Soho, London. Each short black bar represents a death; the bars cluster around the Broad Street water pump."><img src="resources/figures/snow-map.jpg" class="img-fluid figure-img"></a>
+</div>
+</figure>
+</div>
+<p>The map by itself did not prove that bad water was the cause of disease rather than bad air, but it provided a very effective way of presenting the geographical evidence <span class="citation" data-cites="brody2000snow">(<a href="references.html#ref-brody2000snow" role="doc-biblioref">Brody et al., 2000</a>)</span>. So Graunt’s table and Snow’s map are doing the same basic job: organizing frequencies so that we can make sense of them. The most useful form depends on how we want to convey the data. A table makes it easy to look up exact numbers and compare rows and columns. A well-designed graph can make patterns stand out visually.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="02_frequency_data_viz" aria-label="Data Visualization Reflection"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Data Visualization Reflection</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="data_viz_example"><div class="quiz-prompt"><p>Can you think of a compelling data visualization you have seen? What
+did it show? How did it help you understand something about the
+world?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Maps, news graphics, weather plots, election charts, and sports
+graphics all count. Focus on what the visual form helped you notice, not
+just the topic it was about.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Whatever example you chose, it was worth pausing to notice what the
+visual form made easy to see—a comparison, trend, cluster, gap, or
+location, perhaps. As a next step, ask what the same design leaves out
+or makes harder to see. If you drew a blank, or you’d simply like more
+examples, have a look at <a href="https://www.reddit.com/r/dataisbeautiful/">r/dataisbeautiful</a>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="02_frequency_data_viz">{"id":"02_frequency_data_viz","titleHtml":"\u003cp\u003eData Visualization Reflection\u003c/p\u003e","title":"Data Visualization Reflection","questions":[{"explanation":"Whatever example you chose, it was worth pausing to notice what the visual form made easy to see—a comparison, trend, cluster, gap, or location, perhaps. As a next step, ask what the same design leaves out or makes harder to see. If you drew a blank, or you’d simply like more examples, have a look at r/dataisbeautiful.","explanationHtml":"\u003cp\u003eWhatever example you chose, it was worth pausing to notice what the\nvisual form made easy to see—a comparison, trend, cluster, gap, or\nlocation, perhaps. As a next step, ask what the same design leaves out\nor makes harder to see. If you drew a blank, or you’d simply like more\nexamples, have a look at \u003ca\nhref=\"https://www.reddit.com/r/dataisbeautiful/\"\u003er/dataisbeautiful\u003c/a\u003e.\u003c/p\u003e","answerHtml":"","hints":[{"textHtml":"\u003cp\u003eMaps, news graphics, weather plots, election charts, and sports\ngraphics all count. Focus on what the visual form helped you notice, not\njust the topic it was about.\u003c/p\u003e","text":"Maps, news graphics, weather plots, election charts, and sports graphics all count. Focus on what the visual form helped you notice, not just the topic it was about."}],"promptHtml":"\u003cp\u003eCan you think of a compelling data visualization you have seen? What\ndid it show? How did it help you understand something about the\nworld?\u003c/p\u003e","id":"data_viz_example","checkLabel":"Submit","prompt":"Can you think of a compelling data visualization you have seen? What did it show? How did it help you understand something about the world?","type":"free-response"}]}</script></section>
+<p>We’re going to stick with simpler graphs to show frequency. We’ll cover four basic types of frequency graph: bar graphs, histograms, frequency polygons, and smooth curves.</p>
+<p>Which one is most useful depends partly on the kind of variable we’re dealing with: categorical or quantitative, discrete or continuous, and nominal, ordinal, interval, or ratio (see <a href="01-variables.html#sec-variables">Chapter 1</a>). It also depends on what we’re trying to show. Are we describing the scores in a sample, representing a population, or comparing two or more distributions?</p>
+<p>These distinctions can guide our choice, but there aren’t any rules written in stone. The same data can often be graphed in more than one reasonable way. The question is how we want the data to be understood, and what visual features can we use to help communicate that understanding?</p>
+<section id="bar-graphs" class="level3">
+<h3 data-anchor-id="bar-graphs">Bar graphs</h3>
+<p>First, we have the bar graph. As the name suggests, this consists of bars, one for each category or possible score. The height of each bar represents its frequency: the number of observations in that category or with that score. Bar graphs are most useful for categorical data — either nominal or ordinal scales — or for discrete quantitative data when each possible score gets its own bar. That’s because a key feature of a bar graph is that there are gaps between the bars; they do not touch. This provides a visual cue that the categories or exact scores are separate from one another. If the variable is discrete quantitative, such as the number of questions answered correctly on a short quiz, the x-axis would be arranged in order of the possible scores, either low to high or high to low. If the variable is ordinal, the categories would be arranged in order. For a nominal variable, the order of the bars, like the order of rows in a frequency table, would be more arbitrary.</p>
+<p>The bar graph in <a href="#fig-bar" class="quarto-xref">Figure&nbsp;<span>2.5</span></a> returns to our hypothetical data about the number of languages spoken at home. Since this is a discrete quantitative variable, each value in the frequency table gets its own separate bar.</p>
+<div id="fig-bar" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.5: A bar graph of the hypothetical number of languages spoken at home from the frequency-table tutorial.
+</figcaption>
+<div aria-describedby="fig-bar-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;data&quot;:[1,1,1,2,2,2,2,2,3,3,3,3,4,4,5],&quot;labels&quot;:{&quot;x&quot;:&quot;Languages&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;animate&quot;:true,&quot;ariaLabel&quot;:&quot;Bar graph of the number of languages spoken at home, with separate bars for values one through five.&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="barGraphDemo">
+<div class="interactive-figure-fallback">
+Bar graph of the number of languages spoken at home, with gaps between the five observed values.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>For a real-world example, here I’ve graphed the number of gold, silver, and bronze medals won by Team USA in the 2024 Paris Olympics. Medal type is an ordinal variable. They represent categories with a meaningful order, but the gaps between them don’t represent equal quantities. A bar graph is useful here because it keeps the three categories visibly distinct with gaps between them while preserving their order.</p>
+<div id="fig-medals" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-medals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.6: A bar graph of Olympic medals won by Team USA in the 2024 Paris Olympics. Gold, silver, and bronze are ordinal categories, so the bars are separated by gaps.
+</figcaption>
+<div aria-describedby="fig-medals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;bar&quot;,&quot;data&quot;:[{&quot;x&quot;:&quot;Gold&quot;,&quot;frequency&quot;:40,&quot;fill&quot;:&quot;var(--graph-medal-gold, #d4af37)&quot;},{&quot;x&quot;:&quot;Silver&quot;,&quot;frequency&quot;:44,&quot;fill&quot;:&quot;var(--graph-medal-silver, #b8bcc2)&quot;},{&quot;x&quot;:&quot;Bronze&quot;,&quot;frequency&quot;:42,&quot;fill&quot;:&quot;var(--graph-medal-bronze, #b08d57)&quot;}],&quot;labels&quot;:{&quot;x&quot;:&quot;Type of Medal&quot;,&quot;y&quot;:&quot;Count&quot;},&quot;stroke&quot;:&quot;none&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="usaMedalsBarGraph">
+<div class="interactive-figure-fallback">
+Bar graph of Team USA medals from the 2024 Paris Olympics.
+</div>
+</div>
+</div>
+</figure>
+</div>
+</section>
+<section id="histograms" class="level3">
+<h3 data-anchor-id="histograms">Histograms</h3>
+<p>Next, we have the histogram. A histogram looks almost identical to a bar graph, but it treats the x-axis as a quantitative scale divided into ordered, adjacent bins. This is conveyed visually by having the bars touch, rather than separating them with gaps as we do for distinct categories or exact scores in a bar graph. Each bar represents a bin, and its height represents the frequency within that bin. Histograms are especially useful for continuous variables, or for quantitative variables with many possible values that we have grouped. That second case can include discrete data: once we combine several neighboring scores into each bin, the bars represent intervals along the scale rather than individual possible scores.</p>
+<p>The numbers alone do not tell us which graph to use. <a href="#fig-histogram" class="quarto-xref">Figure&nbsp;<span>2.7</span></a> represents the continuous measurements from <a href="#tbl-grouped-continuous" class="quarto-xref">Table&nbsp;<span>2.4</span></a>. We divided the scale into bins one unit wide, so the first bar represents scores from 0.5 up to but not including 1.5. The raw measurements include decimal values, even though the bin midpoints happen to be whole numbers. If the same pattern instead came from exact counts of languages spoken at home, the separate bars in <a href="#fig-bar" class="quarto-xref">Figure&nbsp;<span>2.5</span></a> would be more useful. What the values mean matters, not just whether they happen to be written as whole numbers.</p>
+<div id="fig-histogram" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.7: A histogram of the continuous scores from <a href="#tbl-grouped-continuous" class="quarto-xref">Table&nbsp;<span>2.4</span></a>.
+</figcaption>
+<div aria-describedby="fig-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;histogram&quot;,&quot;data&quot;:[2.3,0.8,1.9,3.4,3.7,2.6,3.1,2.2,1.6,1.4,4.8,2.5,4.3,0.7,2.0],&quot;cuts&quot;:[0.5,1.5,2.5,3.5,4.5,5.5],&quot;xDomain&quot;:[0.5,5.5],&quot;xTickValues&quot;:[1,2,3,4,5],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;animate&quot;:true,&quot;ariaLabel&quot;:&quot;Histogram of continuous scores grouped into five bins one unit wide.&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="histogramDemo">
+<div class="interactive-figure-fallback">
+Histogram of continuous scores grouped into five touching bins.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>This is all fairly self-explanatory, but just for complete clarity, you can imagine each individual observation on a histogram as a box, and you’re just piling the boxes up inside the relevant bin on the x-axis. This isn’t really a common kind of graph, but it’s helpful to visualize how the height of each bar represents the number of observations in that bin, and we’ll use the idea of building up distributions by stacking boxes in future chapters, so it’s useful to picture the data this way now. When we draw actual histograms, we leave off the boxes and just indicate frequency with the height of the bars.</p>
+<div id="fig-box-histogram" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-box-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.8: A box histogram of the continuous scores. Each box represents one observation in its bin.
+</figcaption>
+<div aria-describedby="fig-box-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;block&quot;,&quot;data&quot;:[2.3,0.8,1.9,3.4,3.7,2.6,3.1,2.2,1.6,1.4,4.8,2.5,4.3,0.7,2.0],&quot;cuts&quot;:[0.5,1.5,2.5,3.5,4.5,5.5],&quot;xDomain&quot;:[0.5,5.5],&quot;xTickValues&quot;:[1,2,3,4,5],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;animate&quot;:true,&quot;ariaLabel&quot;:&quot;Block histogram of continuous scores, with one box for each observation in its bin.&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="blockHistogramDemo">
+<div class="interactive-figure-fallback">
+Block histogram showing individual observations stacked within five score bins.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>And here’s a histogram made from our grouped test-score frequencies. The table’s first bin was labeled 0–2 because those are the three possible whole-number scores it contains. On the quantitative x-axis, the corresponding bar extends from the boundary at -0.5 up to the boundary at 2.5, placing the scores 0, 1, and 2 in the middle. The next bin begins at that same boundary, so the bars touch and the bins cover the full scale without gaps or overlaps. The 0–2 bin is still represented even though it is empty; its bar simply has a height of zero.</p>
+<div id="fig-grouped-histogram" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-grouped-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.9: An example of a grouped histogram.
+</figcaption>
+<div aria-describedby="fig-grouped-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;histogram&quot;,&quot;data&quot;:[{&quot;lower&quot;:-0.5,&quot;upper&quot;:2.5,&quot;label&quot;:&quot;0-2&quot;,&quot;frequency&quot;:0},{&quot;lower&quot;:2.5,&quot;upper&quot;:5.5,&quot;label&quot;:&quot;3-5&quot;,&quot;frequency&quot;:2},{&quot;lower&quot;:5.5,&quot;upper&quot;:8.5,&quot;label&quot;:&quot;6-8&quot;,&quot;frequency&quot;:2},{&quot;lower&quot;:8.5,&quot;upper&quot;:11.5,&quot;label&quot;:&quot;9-11&quot;,&quot;frequency&quot;:1},{&quot;lower&quot;:11.5,&quot;upper&quot;:14.5,&quot;label&quot;:&quot;12-14&quot;,&quot;frequency&quot;:6},{&quot;lower&quot;:14.5,&quot;upper&quot;:17.5,&quot;label&quot;:&quot;15-17&quot;,&quot;frequency&quot;:10},{&quot;lower&quot;:17.5,&quot;upper&quot;:20.5,&quot;label&quot;:&quot;18-20&quot;,&quot;frequency&quot;:19}],&quot;labels&quot;:{&quot;x&quot;:&quot;Test Score&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;xDomain&quot;:[-0.5,20.5],&quot;xTickValues&quot;:[0,3,6,9,12,15,18,20],&quot;ariaLabel&quot;:&quot;Histogram of scores on a 20-question test, grouped into seven bins three points wide.&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="groupedHistogramDemo">
+<div class="interactive-figure-fallback">
+Histogram of scores on a 20-question test, grouped into seven bins three points wide.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>This histogram is not the only possible picture of the test scores. A different reasonable bin width or starting point would organize the observations somewhat differently and could change the shape we see. The bins are part of our summary of the data, not categories that were waiting in the raw scores for us to discover.</p>
+</section>
+<section id="frequency-polygons" class="level3">
+<h3 data-anchor-id="frequency-polygons">Frequency polygons</h3>
+<p>A frequency polygon represents the same underlying frequencies as a histogram, but instead of bars, we place a dot at the appropriate height above each score (or above the midpoint of each bin) and connect the dots with lines. We also add a zero-frequency point one bin beyond either end, so that the line meets the x-axis and completes the polygon. (The dots are optional; it’s really the line that makes it a frequency polygon.)</p>
+<div id="fig-freqpoly" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-freqpoly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.10: A frequency polygon.
+</figcaption>
+<div aria-describedby="fig-freqpoly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;freq poly&quot;,&quot;data&quot;:[1,1,1,2,2,2,2,2,3,3,3,3,4,4,5],&quot;xDomain&quot;:[0,6],&quot;xTickValues&quot;:[0,1,2,3,4,5,6],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;animate&quot;:true, &quot;animationDuration&quot;: 1000}" data-interactive-factory="makeGraph" data-interactive-figure="frequencyPolygonDemo">
+<div class="interactive-figure-fallback">
+Frequency polygon for the demo scores.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>For a single set of scores, choosing between a histogram and a frequency polygon may largely be a matter of preference or convention. Comparing the histogram in <a href="#fig-histogram" class="quarto-xref">Figure&nbsp;<span>2.7</span></a> and the frequency polygon in <a href="#fig-freqpoly" class="quarto-xref">Figure&nbsp;<span>2.10</span></a>, which are both based on the same five frequencies, you can see how the formats emphasize slightly different things. A histogram makes the bins and their frequencies tangible, while a frequency polygon draws the eye toward the overall shape of the distribution.</p>
+<p>That becomes particularly useful when we want to compare two or more distributions, because several lines can be overlaid without obscuring one another as much as several sets of bars would. Say we have two different classes take a quiz and we want to know if the distributions of scores are different. Did one class do better? Did one class not do so well? Was performance more consistent in one class than the other?</p>
+<div id="fig-comparison-freqpoly" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-comparison-freqpoly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.11: A frequency polygon comparing two classes’ quiz scores. Class A is shown with a solid line, and Class B is shown with a dashed line.
+</figcaption>
+<div aria-describedby="fig-comparison-freqpoly-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;frequency polygon&quot;,&quot;series&quot;:[{&quot;name&quot;:&quot;Class A&quot;,&quot;data&quot;:[1,1,1,2,2,2,3,3,4,5]},{&quot;name&quot;:&quot;Class B&quot;,&quot;data&quot;:[1,2,2,3,3,4,4,5,5,5]}],&quot;categories&quot;:[1,2,3,4,5],&quot;xDomain&quot;:[0,6],&quot;dashed&quot;:true,&quot;labels&quot;:{&quot;x&quot;:&quot;Quiz Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;}}" data-interactive-factory="makeGraph" data-interactive-figure="comparisonFrequencyPolygon">
+<div class="interactive-figure-fallback">
+Frequency polygons comparing two classes.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>It’s worth noticing that the straight lines joining the dots arguably imply something that wasn’t literally in the data. A line segment between two plotted points interpolates frequencies for scores we may not have recorded. <a href="#fig-freqpoly-labeled" class="quarto-xref">Figure&nbsp;<span>2.12</span></a> duplicates the original generic example of a frequency polygon in <a href="#fig-freqpoly" class="quarto-xref">Figure&nbsp;<span>2.10</span></a>, but it adds dashed guides at a score of 1.5. At that point, the line reaches a height of 4, visually implying a frequency of 4. But there were no actual scores of 1.5 in this dataset. At the two ends, the conventional zero-frequency points extend the shape beyond the range of scores we observed. These help present the distribution as a single coherent shape.</p>
+<div id="fig-freqpoly-labeled" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-freqpoly-labeled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.12: A frequency polygon, with red dashed guides highlighting the implied frequency at a score of 1.5. The vertical guide extends up to the line first, followed by the horizontal guide extending across to the y-axis.
+</figcaption>
+<div aria-describedby="fig-freqpoly-labeled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;freq poly&quot;,&quot;data&quot;:[1,1,1,2,2,2,2,2,3,3,3,3,4,4,5],&quot;xDomain&quot;:[0,6],&quot;xTickValues&quot;:[0,1,2,3,4,5,6],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;,&quot;y&quot;:&quot;Frequency&quot;},&quot;interpolationGuides&quot;:[{&quot;x&quot;:1.5,&quot;xLabel&quot;:&quot;1.5&quot;,&quot;label&quot;:&quot;At a score of 1.5, the line visually implies a frequency of 4.&quot;}],&quot;animateInterpolationGuides&quot;:true,&quot;interpolationGuideAnimationDuration&quot;:650,&quot;ariaLabel&quot;:&quot;A frequency polygon with red dashed guides marking the visually implied frequency of 4 at an unobserved score of 1.5.&quot;}" data-interactive-factory="makeGraph" data-interactive-figure="frequencyPolygonLabeledDemo">
+<div class="interactive-figure-fallback">
+Frequency polygon with dashed guides showing that the line visually implies a frequency of 4 at the unobserved score 1.5.
+</div>
+</div>
+</div>
+</figure>
+</div>
+</section>
+<section id="smooth-curves" class="level3">
+<h3 data-anchor-id="smooth-curves">Smooth curves</h3>
+<p>Lastly, we have smooth curves. A smoothed frequency curve takes this idea of supplying a shape between observed points a step further. Instead of joining frequency points with straight line segments, it uses a smooth curve to estimate the shape between and around the observed scores. (A lot of math can go into determining the exact shape of the curves. Thankfully we don’t need to get into that here.) So a curve based on a sample, like <a href="#fig-sample-curve" class="quarto-xref">Figure&nbsp;<span>2.13</span></a>, does not represent exact frequencies at every point. The smoothness is part of the model we have imposed on the data.</p>
+<div id="fig-sample-curve" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-sample-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.13: A smoothed frequency curve, based on the same pattern of five frequencies as the previous bar, histogram, and frequency polygon examples.
+</figcaption>
+<div aria-describedby="fig-sample-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;type&quot;:&quot;curve&quot;,&quot;data&quot;:[1,1,1,2,2,2,2,2,3,3,3,3,4,4,5],&quot;xDomain&quot;:[0,6],&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;},&quot;smoothing&quot;:0.45,&quot;interpolation&quot;:&quot;linear&quot;,&quot;animate&quot;:true}" data-interactive-factory="makeGraph" data-interactive-figure="frequencyCurveDemo">
+<div class="interactive-figure-fallback">
+Smoothed frequency curve for the demo scores.
+</div>
+</div>
+</div>
+</figure>
+</div>
+<p>There’s a funny sort of paradox here: while the curve is very <em>mathematically</em> precise, it isn’t literally representing the data we recorded but rather some kind of model of it. This makes curves especially useful when we’re thinking about a population. As we saw in Chapter 1, we usually observe a sample but ultimately want to understand the population from which it came. We don’t have full knowledge of the distribution of scores in the population, but a precise mathematical model can be very helpful in understanding it. A histogram or frequency polygon can describe the scores we actually observed in our sample; a smooth curve can represent our hypothetical model of the population. Again, this is a useful convention rather than a strict rule: a known population could be displayed using a histogram, and a smooth curve is only as useful as the assumptions behind it.</p>
+<p>One curve in particular is going to become very familiar. The bell-shaped curve in <a href="#fig-normal-curve" class="quarto-xref">Figure&nbsp;<span>2.14</span></a> is the normal curve. This curve often represents a simple hypothetical model of how scores might be distributed across a population. In practice, we might use a sample to infer the population’s characteristics and then use a normal curve to represent the distribution implied by that model, including scores we haven’t directly observed. This turns out to be very useful for testing hypotheses about how well our data fit a particular model. We’ll explore this idea more fully beginning in <a href="./06-probability.html">Chapter 6</a>.</p>
+<div id="fig-normal-curve" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-fig figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-fig" id="fig-normal-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.14: A normal curve, representing a simple model of a population of scores.
+</figcaption>
+<div aria-describedby="fig-normal-curve-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;normal&quot;,&quot;style&quot;:&quot;minimal&quot;,&quot;xAxis&quot;:true,&quot;xTicks&quot;:0,&quot;tickLabels&quot;:false,&quot;axisLabels&quot;:true,&quot;yLabel&quot;:false,&quot;labels&quot;:{&quot;x&quot;:&quot;Scores&quot;},&quot;animate&quot;:true,&quot;ariaLabel&quot;:&quot;A symmetrical bell-shaped normal curve representing a hypothetical population of scores.&quot;}" data-interactive-factory="makeDistributionGraph" data-interactive-figure="normalCurvePreview">
+<div class="interactive-figure-fallback">
+A symmetrical bell-shaped normal curve representing a hypothetical population of scores.
+</div>
+</div>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="summary" class="level2">
+<h2 data-anchor-id="summary">Summary</h2>
+<p>So each move from bars to straight lines to smooth curves can make patterns easier to see. That can be useful, but it can also be misleading if we forget which parts came from the data and which parts came from the way we chose to model and display them. In any case, the most useful graph depends on the type of data we’re dealing with and what we want to say about them. It isn’t an inherent feature of the data, but a choice we make to convey our interpretation. There are useful rules of thumb, but the data do not demand one particular graph. Remember, statistics are a bunch of numbers looking for an argument. How you visualize them is part of the argument.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="02_frequency_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 6 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 6</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="graph_types"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which variable is most naturally shown with a bar graph rather than a
+histogram?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-graph_types" id="02_frequency_learning_checks-graph_types-option-1" value="0" aria-labelledby="02_frequency_learning_checks-graph_types-option-1-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-graph_types-option-1-text"><p>Marital-status categories</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-graph_types" id="02_frequency_learning_checks-graph_types-option-2" value="1" aria-labelledby="02_frequency_learning_checks-graph_types-option-2-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-graph_types-option-2-text"><p>Test-score intervals</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-graph_types" id="02_frequency_learning_checks-graph_types-option-3" value="2" aria-labelledby="02_frequency_learning_checks-graph_types-option-3-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-graph_types-option-3-text"><p>50-millisecond reaction-time bins</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-graph_types" id="02_frequency_learning_checks-graph_types-option-4" value="3" aria-labelledby="02_frequency_learning_checks-graph_types-option-4-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-graph_types-option-4-text"><p>Viewing time rounded to whole minutes</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Marital-status categories</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Marital status consists of separate categories, so a bar graph makes
+sense. The other options describe quantitative values arranged along a
+scale, which can be shown in adjacent histogram bins. Rounding
+continuous time to whole minutes does not turn it into a categorical
+variable.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="grouped_reaction_time_n"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>This grouped frequency table shows participants’ reaction times.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Reaction time (milliseconds)</th>
+<th style="text-align: right;"><span class="math inline"><em>f</em></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">200–249</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td style="text-align: left;">250–299</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr>
+<td style="text-align: left;">300–349</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr>
+<td style="text-align: left;">350–399</td>
+<td style="text-align: right;">6</td>
+</tr>
+</tbody>
+</table>
+<p>How many participants were in the study?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Each participant belongs to exactly one bin. Add the frequencies in
+the <span class="math inline"><em>f</em></span> column.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>25</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The bins cover the observed scores without gaps or overlaps, so each
+participant is counted exactly once. Adding the frequencies gives <span class="math inline">3 + 7 + 9 + 6 = 25</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="percentage_three_or_more_siblings"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>This frequency table shows how many siblings a group of people
+reported.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Number of siblings</th>
+<th style="text-align: right;"><span class="math inline"><em>f</em></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr>
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr>
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr>
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr>
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+<p>What percentage of people reported 3 or more siblings?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint 1</strong><p>Add the frequencies for 3 and 4 siblings, then divide by the total
+frequency.</p></div><div class="quiz-hint" data-quiz-hint-index="2" hidden=""><strong>Hint 2</strong><p>There are <span class="math inline">4 + 1 = 5</span> people with 3 or
+more siblings out of 20 people altogether. Convert <span class="math inline">5/20</span> to a percentage.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>25</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The frequencies for 3 and 4 siblings add to 5. The total frequency is
+20, so <span class="math inline">5/20 × 100 = 25%</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="compare_class_distributions"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A psychologist measures loneliness among first-year students who live
+on campus and first-year students who commute. We want to overlay the
+two distributions of loneliness scores so we can compare their shapes.
+Which graph is especially useful for this purpose?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-compare_class_distributions" id="02_frequency_learning_checks-compare_class_distributions-option-1" value="0" aria-labelledby="02_frequency_learning_checks-compare_class_distributions-option-1-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-compare_class_distributions-option-1-text"><p>Bar graph</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-compare_class_distributions" id="02_frequency_learning_checks-compare_class_distributions-option-2" value="1" aria-labelledby="02_frequency_learning_checks-compare_class_distributions-option-2-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-compare_class_distributions-option-2-text"><p>Histogram</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-compare_class_distributions" id="02_frequency_learning_checks-compare_class_distributions-option-3" value="2" aria-labelledby="02_frequency_learning_checks-compare_class_distributions-option-3-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-compare_class_distributions-option-3-text"><p>Frequency polygon</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-compare_class_distributions" id="02_frequency_learning_checks-compare_class_distributions-option-4" value="3" aria-labelledby="02_frequency_learning_checks-compare_class_distributions-option-4-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-compare_class_distributions-option-4-text"><p>Pie chart</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Think about whether several sets of bars or several lines can share
+the same axes without hiding one another.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Frequency polygon</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>A frequency polygon is built from the same frequencies as a
+histogram, but several lines can be overlaid without obscuring one
+another as much as several sets of bars. A histogram could still
+describe either group on its own; the frequency polygon is a useful
+choice for this comparison, not a rule the data force us to follow.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="grouped_table_information_loss"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A grouped table places reaction times into 50-millisecond bins:
+200–249, 250–299, 300–349, and so on. Which information can we no longer
+recover from the grouped table alone?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-grouped_table_information_loss" id="02_frequency_learning_checks-grouped_table_information_loss-option-1" value="0" aria-labelledby="02_frequency_learning_checks-grouped_table_information_loss-option-1-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-grouped_table_information_loss-option-1-text"><p>Total number of participants</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-grouped_table_information_loss" id="02_frequency_learning_checks-grouped_table_information_loss-option-2" value="1" aria-labelledby="02_frequency_learning_checks-grouped_table_information_loss-option-2-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-grouped_table_information_loss-option-2-text"><p>Frequency in the 300–349 millisecond bin</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-grouped_table_information_loss" id="02_frequency_learning_checks-grouped_table_information_loss-option-3" value="2" aria-labelledby="02_frequency_learning_checks-grouped_table_information_loss-option-3-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-grouped_table_information_loss-option-3-text"><p>Frequency at exactly 317 milliseconds</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-grouped_table_information_loss" id="02_frequency_learning_checks-grouped_table_information_loss-option-4" value="3" aria-labelledby="02_frequency_learning_checks-grouped_table_information_loss-option-4-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-grouped_table_information_loss-option-4-text"><p>Most frequent bin</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>Ask what happens to the exact values once several of them are counted
+in the same row.</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Frequency at exactly 317 milliseconds</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The table preserves the frequency in each bin, so we can still
+recover the total, compare bins, and identify the most frequent one. But
+it no longer shows how those observations were divided among the exact
+values within a bin.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="smooth_curve_exact_frequencies"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">6</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A smooth curve based on a sample shows the exact observed frequency
+at every point along the scale.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-smooth_curve_exact_frequencies" id="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-1" value="true" aria-labelledby="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-1-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="02_frequency_learning_checks-smooth_curve_exact_frequencies" id="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-2" value="false" aria-labelledby="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-2-text"><div class="quiz-choice-text" id="02_frequency_learning_checks-smooth_curve_exact_frequencies-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""><div class="quiz-hint" data-quiz-hint-index="1" hidden=""><strong>Hint</strong><p>The curve fills in values between and around the observed scores.
+Were all of those values actually recorded?</p></div></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>False. A smooth curve models the shape between and around the
+observed scores; it is not a literal inventory of the sample. That can
+be useful when we use a sample to imagine a population, but the
+smoothness is part of the model rather than something we observed
+directly.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="02_frequency_learning_checks">{"id":"02_frequency_learning_checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e","title":"Learning Checks","questions":[{"explanationHtml":"\u003cp\u003eMarital status consists of separate categories, so a bar graph makes\nsense. The other options describe quantitative values arranged along a\nscale, which can be shown in adjacent histogram bins. Rounding\ncontinuous time to whole minutes does not turn it into a categorical\nvariable.\u003c/p\u003e","explanation":"Marital status consists of separate categories, so a bar graph makes sense. The other options describe quantitative values arranged along a scale, which can be shown in adjacent histogram bins. Rounding continuous time to whole minutes does not turn it into a categorical variable.","promptHtml":"\u003cp\u003eWhich variable is most naturally shown with a bar graph rather than a\nhistogram?\u003c/p\u003e","options":[{"textHtml":"\u003cp\u003eMarital-status categories\u003c/p\u003e","correct":true,"text":"Marital-status categories"},{"textHtml":"\u003cp\u003eTest-score intervals\u003c/p\u003e","text":"Test-score intervals"},{"textHtml":"\u003cp\u003e50-millisecond reaction-time bins\u003c/p\u003e","text":"50-millisecond reaction-time bins"},{"textHtml":"\u003cp\u003eViewing time rounded to whole minutes\u003c/p\u003e","text":"Viewing time rounded to whole minutes"}],"id":"graph_types","type":"multiple-choice","prompt":"Which variable is most naturally shown with a bar graph rather than a histogram?","answerHtml":""},{"answer":"25","explanation":"The bins cover the observed scores without gaps or overlaps, so each participant is counted exactly once. Adding the frequencies gives 3 + 7 + 9 + 6 = 25.","tolerance":"0","explanationHtml":"\u003cp\u003eThe bins cover the observed scores without gaps or overlaps, so each\nparticipant is counted exactly once. Adding the frequencies gives \u003cspan\nclass=\"math inline\"\u003e3 + 7 + 9 + 6 = 25\u003c/span\u003e.\u003c/p\u003e","answerHtml":"\u003cp\u003e25\u003c/p\u003e","promptHtml":"\u003cp\u003eThis grouped frequency table shows participants’ reaction times.\u003c/p\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n\u003cth style=\"text-align: left;\"\u003eReaction time (milliseconds)\u003c/th\u003e\n\u003cth style=\"text-align: right;\"\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003ef\u003c/em\u003e\u003c/span\u003e\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e200–249\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e3\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e250–299\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e7\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e300–349\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e9\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e350–399\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e6\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cp\u003eHow many participants were in the study?\u003c/p\u003e","id":"grouped_reaction_time_n","hints":[{"textHtml":"\u003cp\u003eEach participant belongs to exactly one bin. Add the frequencies in\nthe \u003cspan class=\"math inline\"\u003e\u003cem\u003ef\u003c/em\u003e\u003c/span\u003e column.\u003c/p\u003e","text":"Each participant belongs to exactly one bin. Add the frequencies in the f column."}],"prompt":"This grouped frequency table shows participants’ reaction times.Reaction time (milliseconds)f200–2493250–2997300–3499350–3996How many participants were in the study?","type":"numeric"},{"answer":"25","explanation":"The frequencies for 3 and 4 siblings add to 5. The total frequency is 20, so 5/20 \\times 100 = 25\\%.","tolerance":"0.1","explanationHtml":"\u003cp\u003eThe frequencies for 3 and 4 siblings add to 5. The total frequency is\n20, so \u003cspan class=\"math inline\"\u003e5/20 × 100 = 25%\u003c/span\u003e.\u003c/p\u003e","answerHtml":"\u003cp\u003e25\u003c/p\u003e","promptHtml":"\u003cp\u003eThis frequency table shows how many siblings a group of people\nreported.\u003c/p\u003e\n\u003ctable\u003e\n\u003cthead\u003e\n\u003ctr\u003e\n\u003cth style=\"text-align: left;\"\u003eNumber of siblings\u003c/th\u003e\n\u003cth style=\"text-align: right;\"\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003ef\u003c/em\u003e\u003c/span\u003e\u003c/th\u003e\n\u003c/tr\u003e\n\u003c/thead\u003e\n\u003ctbody\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e0\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e2\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e1\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e6\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e2\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e7\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e3\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e4\u003c/td\u003e\n\u003c/tr\u003e\n\u003ctr\u003e\n\u003ctd style=\"text-align: left;\"\u003e4\u003c/td\u003e\n\u003ctd style=\"text-align: right;\"\u003e1\u003c/td\u003e\n\u003c/tr\u003e\n\u003c/tbody\u003e\n\u003c/table\u003e\n\u003cp\u003eWhat percentage of people reported 3 or more siblings?\u003c/p\u003e","id":"percentage_three_or_more_siblings","prompt":"This frequency table shows how many siblings a group of people reported.Number of siblingsf0216273441What percentage of people reported 3 or more siblings?","type":"numeric","hints":[{"textHtml":"\u003cp\u003eAdd the frequencies for 3 and 4 siblings, then divide by the total\nfrequency.\u003c/p\u003e","text":"Add the frequencies for 3 and 4 siblings, then divide by the total frequency."},{"textHtml":"\u003cp\u003eThere are \u003cspan class=\"math inline\"\u003e4 + 1 = 5\u003c/span\u003e people with 3 or\nmore siblings out of 20 people altogether. Convert \u003cspan\nclass=\"math inline\"\u003e5/20\u003c/span\u003e to a percentage.\u003c/p\u003e","text":"There are 4 + 1 = 5 people with 3 or more siblings out of 20 people altogether. Convert 5/20 to a percentage."}]},{"explanation":"A frequency polygon is built from the same frequencies as a histogram, but several lines can be overlaid without obscuring one another as much as several sets of bars. A histogram could still describe either group on its own; the frequency polygon is a useful choice for this comparison, not a rule the data force us to follow.","explanationHtml":"\u003cp\u003eA frequency polygon is built from the same frequencies as a\nhistogram, but several lines can be overlaid without obscuring one\nanother as much as several sets of bars. A histogram could still\ndescribe either group on its own; the frequency polygon is a useful\nchoice for this comparison, not a rule the data force us to follow.\u003c/p\u003e","answerHtml":"","hints":[{"textHtml":"\u003cp\u003eThink about whether several sets of bars or several lines can share\nthe same axes without hiding one another.\u003c/p\u003e","text":"Think about whether several sets of bars or several lines can share the same axes without hiding one another."}],"promptHtml":"\u003cp\u003eA psychologist measures loneliness among first-year students who live\non campus and first-year students who commute. We want to overlay the\ntwo distributions of loneliness scores so we can compare their shapes.\nWhich graph is especially useful for this purpose?\u003c/p\u003e","options":[{"textHtml":"\u003cp\u003eBar graph\u003c/p\u003e","text":"Bar graph"},{"textHtml":"\u003cp\u003eHistogram\u003c/p\u003e","text":"Histogram"},{"textHtml":"\u003cp\u003eFrequency polygon\u003c/p\u003e","correct":true,"text":"Frequency polygon"},{"textHtml":"\u003cp\u003ePie chart\u003c/p\u003e","text":"Pie chart"}],"id":"compare_class_distributions","type":"multiple-choice","prompt":"A psychologist measures loneliness among first-year students who live on campus and first-year students who commute. We want to overlay the two distributions of loneliness scores so we can compare their shapes. Which graph is especially useful for this purpose?"},{"explanation":"The table preserves the frequency in each bin, so we can still recover the total, compare bins, and identify the most frequent one. But it no longer shows how those observations were divided among the exact values within a bin.","explanationHtml":"\u003cp\u003eThe table preserves the frequency in each bin, so we can still\nrecover the total, compare bins, and identify the most frequent one. But\nit no longer shows how those observations were divided among the exact\nvalues within a bin.\u003c/p\u003e","answerHtml":"","hints":[{"textHtml":"\u003cp\u003eAsk what happens to the exact values once several of them are counted\nin the same row.\u003c/p\u003e","text":"Ask what happens to the exact values once several of them are counted in the same row."}],"promptHtml":"\u003cp\u003eA grouped table places reaction times into 50-millisecond bins:\n200–249, 250–299, 300–349, and so on. Which information can we no longer\nrecover from the grouped table alone?\u003c/p\u003e","options":[{"textHtml":"\u003cp\u003eTotal number of participants\u003c/p\u003e","text":"Total number of participants"},{"textHtml":"\u003cp\u003eFrequency in the 300–349 millisecond bin\u003c/p\u003e","text":"Frequency in the 300–349 millisecond bin"},{"textHtml":"\u003cp\u003eFrequency at exactly 317 milliseconds\u003c/p\u003e","correct":true,"text":"Frequency at exactly 317 milliseconds"},{"textHtml":"\u003cp\u003eMost frequent bin\u003c/p\u003e","text":"Most frequent bin"}],"id":"grouped_table_information_loss","type":"multiple-choice","prompt":"A grouped table places reaction times into 50-millisecond bins: 200–249, 250–299, 300–349, and so on. Which information can we no longer recover from the grouped table alone?"},{"answer":false,"explanation":"False. A smooth curve models the shape between and around the observed scores; it is not a literal inventory of the sample. That can be useful when we use a sample to imagine a population, but the smoothness is part of the model rather than something we observed directly.","explanationHtml":"\u003cp\u003eFalse. A smooth curve models the shape between and around the\nobserved scores; it is not a literal inventory of the sample. That can\nbe useful when we use a sample to imagine a population, but the\nsmoothness is part of the model rather than something we observed\ndirectly.\u003c/p\u003e","answerHtml":"","promptHtml":"\u003cp\u003eA smooth curve based on a sample shows the exact observed frequency\nat every point along the scale.\u003c/p\u003e","id":"smooth_curve_exact_frequencies","hints":[{"textHtml":"\u003cp\u003eThe curve fills in values between and around the observed scores.\nWere all of those values actually recorded?\u003c/p\u003e","text":"The curve fills in values between and around the observed scores. Were all of those values actually recorded?"}],"type":"true-false","prompt":"A smooth curve based on a sample shows the exact observed frequency at every point along the scale."}]}</script></section>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list" style="display: none">
+<div id="ref-brody2000snow" class="csl-entry" role="listitem">
+Brody, H., Rip, M. R., Vinten-Johansen, P., Paneth, N., &amp; Rachman, S. (2000). Map-making and myth-making in broad street: The london cholera epidemic, 1854. <em>The Lancet</em>, <em>356</em>(9223), 64–68. <a href="https://doi.org/10.1016/S0140-6736(00)02442-9">https://doi.org/10.1016/S0140-6736(00)02442-9</a>
+</div>
+<div id="ref-connor2024graunt" class="csl-entry" role="listitem">
+Connor, H. (2024). John <span>Graunt</span> <span>F.R.S.</span> (1620–74): The founding father of human demography, epidemiology and vital statistics. <em>Journal of Medical Biography</em>, <em>32</em>(1), 57–69. <a href="https://doi.org/10.1177/09677720221079826">https://doi.org/10.1177/09677720221079826</a>
+</div>
+<div id="ref-snow1855cholera" class="csl-entry" role="listitem">
+Snow, J. (1855). <em>On the mode of communication of cholera</em> (2nd ed.). John Churchill. <a href="https://www.gutenberg.org/ebooks/72894">https://www.gutenberg.org/ebooks/72894</a>
+</div>
+<div id="ref-sutherland1963graunt" class="csl-entry" role="listitem">
+Sutherland, I. (1963). John <span>Graunt</span>: A tercentenary tribute. <em>Journal of the Royal Statistical Society. Series A (General)</em>, <em>126</em>(4), 537–556. <a href="https://doi.org/10.2307/2982578">https://doi.org/10.2307/2982578</a>
+</div>
+</div>
+</section>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn1"><p>This appears in the book <em>3,500 Good Quotes for Speakers</em>, unattributed.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./01-variables.html" class="pagination-link" aria-label="Variables &amp; Measurement">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./03-central-tendency.html" class="pagination-link" aria-label="Central Tendency">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.21">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="An interactive introduction to statistics for students in the social sciences.">
+
+<title>14&nbsp; ANOVA – Statistics From Scratch</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./15-related-samples-anova.html" rel="next">
+<link href="./13-related-samples-t-test.html" rel="prev">
+<link href="./resources/icons/favicon.svg" rel="icon" type="image/svg+xml">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-7e9717d9caa9b4d114d189eaeb260ada.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ea1d7ac60288e0f1efdbc993fd8432ae.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-8d0c04945b25659051bbcf23cdcc155c.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-5a2b80d7da4b00826349d34b651d2a93.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="resources/js/interactive-runtime.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="resources/css/site-theme.css">
+<link rel="stylesheet" href="resources/css/quiz.css">
+<meta property="og:title" content="14&nbsp; ANOVA – Statistics From Scratch">
+<meta property="og:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta property="og:site_name" content="Statistics From Scratch">
+<meta name="twitter:title" content="14&nbsp; ANOVA – Statistics From Scratch">
+<meta name="twitter:description" content="An interactive introduction to statistics for students in the social sciences.">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed fullcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg border-bottom" data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics From Scratch <span class="bc-navbar-author">by Rob Brotherton</span></span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools tools-end">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></h1>
+        </a>     
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introduction</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01-variables.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Variables &amp; Measurement</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-frequency-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Frequency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-central-tendency.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Central Tendency</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./04-variability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Variability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./05-z-scores.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title"><span class="math inline">\(z\)</span>-Scores</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Probability</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./07-sampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Sampling</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./08-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Hypothesis Testing</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./09-statistical-power.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Statistical Power</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./10-confidence-intervals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Confidence Intervals</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./11-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">The <span class="math inline">\(t\)</span>-test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./12-independent-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Independent Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./13-related-samples-t-test.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./14-anova.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./15-related-samples-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./16-factorial-anova.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Factorial ANOVA</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./17-correlation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Correlation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./18-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Regression</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#recap-the-independent-samples-t-statistic" id="toc-recap-the-independent-samples-t-statistic" class="nav-link" data-scroll-target="#recap-the-independent-samples-t-statistic">Recap: The Independent Samples <em>t</em> Statistic</a></li>
+  <li><a href="#what-contributes-to-variability" id="toc-what-contributes-to-variability" class="nav-link" data-scroll-target="#what-contributes-to-variability">What Contributes to Variability?</a></li>
+  <li><a href="#three-types-of-variability" id="toc-three-types-of-variability" class="nav-link" data-scroll-target="#three-types-of-variability">Three Types of Variability</a>
+  <ul class="collapse">
+  <li><a href="#total-variability" id="toc-total-variability" class="nav-link" data-scroll-target="#total-variability">Total variability</a></li>
+  <li><a href="#between-groups-variability" id="toc-between-groups-variability" class="nav-link" data-scroll-target="#between-groups-variability">Between-groups variability</a></li>
+  <li><a href="#within-groups-variability" id="toc-within-groups-variability" class="nav-link" data-scroll-target="#within-groups-variability">Within-groups variability</a></li>
+  <li><a href="#a-new-conceptual-equation" id="toc-a-new-conceptual-equation" class="nav-link" data-scroll-target="#a-new-conceptual-equation">A new conceptual equation</a></li>
+  </ul></li>
+  <li><a href="#calculating-the-components-of-variance" id="toc-calculating-the-components-of-variance" class="nav-link" data-scroll-target="#calculating-the-components-of-variance">Calculating the Components of Variance</a>
+  <ul class="collapse">
+  <li><a href="#total-variance" id="toc-total-variance" class="nav-link" data-scroll-target="#total-variance">Total variance</a></li>
+  <li><a href="#within-groups-variance" id="toc-within-groups-variance" class="nav-link" data-scroll-target="#within-groups-variance">Within-groups variance</a></li>
+  <li><a href="#between-groups-variance" id="toc-between-groups-variance" class="nav-link" data-scroll-target="#between-groups-variance">Between-groups variance</a></li>
+  </ul></li>
+  <li><a href="#the-f-ratio" id="toc-the-f-ratio" class="nav-link" data-scroll-target="#the-f-ratio">The <span class="math inline">\(F\)</span> Ratio</a></li>
+  <li><a href="#relationship-between-t-and-f" id="toc-relationship-between-t-and-f" class="nav-link" data-scroll-target="#relationship-between-t-and-f">Relationship Between <span class="math inline">\(t\)</span> and <span class="math inline">\(F\)</span></a></li>
+  <li><a href="#summary-so-far" id="toc-summary-so-far" class="nav-link" data-scroll-target="#summary-so-far">Summary So Far</a></li>
+  <li><a href="#expanding-to-more-than-two-groups" id="toc-expanding-to-more-than-two-groups" class="nav-link" data-scroll-target="#expanding-to-more-than-two-groups">Expanding to More Than Two Groups</a></li>
+  <li><a href="#why-anova-is-needed" id="toc-why-anova-is-needed" class="nav-link" data-scroll-target="#why-anova-is-needed">Why ANOVA Is Needed</a></li>
+  <li><a href="#anova-terminology" id="toc-anova-terminology" class="nav-link" data-scroll-target="#anova-terminology">ANOVA Terminology</a></li>
+  <li><a href="#calculating-the-f-ratio" id="toc-calculating-the-f-ratio" class="nav-link" data-scroll-target="#calculating-the-f-ratio">Calculating the <span class="math inline">\(F\)</span> Ratio</a>
+  <ul class="collapse">
+  <li><a href="#mean-squares" id="toc-mean-squares" class="nav-link" data-scroll-target="#mean-squares">Mean Squares</a></li>
+  <li><a href="#notation-and-symbols" id="toc-notation-and-symbols" class="nav-link" data-scroll-target="#notation-and-symbols">Notation and Symbols</a></li>
+  <li><a href="#computational-formulas" id="toc-computational-formulas" class="nav-link" data-scroll-target="#computational-formulas">Computational Formulas</a></li>
+  <li><a href="#degrees-of-freedom" id="toc-degrees-of-freedom" class="nav-link" data-scroll-target="#degrees-of-freedom">Degrees of Freedom</a></li>
+  <li><a href="#the-summary-table" id="toc-the-summary-table" class="nav-link" data-scroll-target="#the-summary-table">The Summary Table</a></li>
+  </ul></li>
+  <li><a href="#hypothesis-testing-example" id="toc-hypothesis-testing-example" class="nav-link" data-scroll-target="#hypothesis-testing-example">Hypothesis Testing Example</a>
+  <ul class="collapse">
+  <li><a href="#step-1-state-the-hypotheses" id="toc-step-1-state-the-hypotheses" class="nav-link" data-scroll-target="#step-1-state-the-hypotheses">Step 1: State the Hypotheses</a></li>
+  <li><a href="#step-2-find-the-critical-value" id="toc-step-2-find-the-critical-value" class="nav-link" data-scroll-target="#step-2-find-the-critical-value">Step 2: Find the Critical Value</a></li>
+  <li><a href="#step-3-calculate-the-test-statistic" id="toc-step-3-calculate-the-test-statistic" class="nav-link" data-scroll-target="#step-3-calculate-the-test-statistic">Step 3: Calculate the Test Statistic</a></li>
+  <li><a href="#step-4-make-a-decision" id="toc-step-4-make-a-decision" class="nav-link" data-scroll-target="#step-4-make-a-decision">Step 4: Make a Decision</a></li>
+  </ul></li>
+  <li><a href="#effect-size-eta2" id="toc-effect-size-eta2" class="nav-link" data-scroll-target="#effect-size-eta2">Effect Size: <span class="math inline">\(\eta^2\)</span></a></li>
+  <li><a href="#reporting-results" id="toc-reporting-results" class="nav-link" data-scroll-target="#reporting-results">Reporting Results</a></li>
+  <li><a href="#post-hoc-tests" id="toc-post-hoc-tests" class="nav-link" data-scroll-target="#post-hoc-tests">Post-Hoc Tests</a>
+  <ul class="collapse">
+  <li><a href="#why-not-just-use-t-tests" id="toc-why-not-just-use-t-tests" class="nav-link" data-scroll-target="#why-not-just-use-t-tests">Why Not Just Use <span class="math inline">\(t\)</span> Tests?</a></li>
+  <li><a href="#tukeys-honestly-significant-difference-hsd" id="toc-tukeys-honestly-significant-difference-hsd" class="nav-link" data-scroll-target="#tukeys-honestly-significant-difference-hsd">Tukey’s Honestly Significant Difference (HSD)</a></li>
+  </ul></li>
+  <li><a href="#assumptions-of-anova" id="toc-assumptions-of-anova" class="nav-link" data-scroll-target="#assumptions-of-anova">Assumptions of ANOVA</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-body" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">ANOVA</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta column-body">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<script src="resources/js/d3.min.js"></script>
+<script src="resources/js/stat-helpers.js"></script>
+<script src="resources/js/interactive-figure.js"></script>
+<script src="resources/js/distribution-generator.js"></script>
+<script src="resources/js/critical-table-generator.js"></script>
+<script src="resources/js/anova-variability-explorer.js"></script>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;renderer&quot;:&quot;webgl&quot;,&quot;distribution&quot;:&quot;f&quot;,&quot;df1&quot;:{&quot;from&quot;:5,&quot;to&quot;:30},&quot;df2&quot;:{&quot;from&quot;:5,&quot;to&quot;:30},&quot;pairing&quot;:&quot;zip&quot;,&quot;xDomain&quot;:[0,3],&quot;points&quot;:301,&quot;strokeWidth&quot;:1.35,&quot;opacity&quot;:0.9,&quot;colorCycle&quot;:26,&quot;chroma&quot;:100,&quot;luminance&quot;:65,&quot;animation&quot;:&quot;draw&quot;,&quot;duration&quot;:1300,&quot;ease&quot;:&quot;cubic-in&quot;,&quot;stagger&quot;:&quot;spread&quot;,&quot;delaySpread&quot;:1700,&quot;fallback&quot;:{&quot;animate&quot;:false},&quot;performance&quot;:true,&quot;ariaLabel&quot;:&quot;Animated family of F distribution curves revealed from left to right&quot;}" data-interactive-figure="anovaCover" data-interactive-factory="makeDistributionFamilyCover">
+<div class="interactive-figure-fallback">
+Animated family of F distribution curves.
+</div>
+</div>
+<section id="introduction" class="level2">
+<h2 data-anchor-id="introduction">Introduction</h2>
+<p>We’re moving into the final section of the course, leaving behind the <span class="math inline">\(t\)</span> statistic and moving on to ANOVA, which stands for analysis of variance. This isn’t as radical a departure as it might seem, though. As we’ll see, the ANOVA procedure is just a more general version of what we’ve used the <span class="math inline">\(t\)</span> tests to achieve: analyzing patterns of variability. So here we’ll introduce the purpose and logic of ANOVA. We’ll discuss the kind of research designs that call for it, and we’ll learn to calculate the <span class="math inline">\(F\)</span> statistic which is used for hypothesis testing with ANOVA.</p>
+</section>
+<section id="recap-the-independent-samples-t-statistic" class="level2">
+<h2 data-anchor-id="recap-the-independent-samples-t-statistic">Recap: The Independent Samples <em>t</em> Statistic</h2>
+<p>We’ll start by recapping some of the ideas we’ve already encountered, which foreshadowed the logic of ANOVA. Consider again the independent samples <span class="math inline">\(t\)</span> statistic, which allowed us to compare two samples. Suppose we have a little study comparing the efficacy of different snacks on test performance. We have one sample of people eat a banana before completing a test, and we give another sample of people a candy bar. And we find a mean of 11 for the banana group and 4 for the candy group.</p>
+<div id="tbl-snacks-two" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-snacks-two-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: Test scores for the two snack conditions.
+</figcaption>
+<div aria-describedby="tbl-snacks-two-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">🍌 Banana</th>
+<th style="text-align: center;">🍬 Candy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(M = 11\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(M = 4\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>The conceptual structure of the <span class="math inline">\(t\)</span> statistic was the difference between groups over the difference between groups expected by chance. Specifically, the numerator was the difference between sample means, found by subtracting one from the other. And the denominator was the estimated standard error of the mean difference: the size of difference between means we’d typically see by chance.</p>
+<p>For this data, the numerator is eleven minus four and the denominator works out to 1.29. You’re welcome to double check my work. So the <span class="math inline">\(t\)</span> statistic works out to 5.42. Since you’re pretty familiar with <span class="math inline">\(t\)</span> distributions by now, you might guess that that’s big enough of a <span class="math inline">\(t\)</span> value to be statistically significant. And you’d be right.</p>
+<p>But the difference between sample means is just one way of quantifying a kind of variability — how much scores varied from one another. It’s a convenient way of quantifying variability when we’re just dealing with two samples, because subtracting the mean of one from the mean of the other to find the difference is mathematically so easy to do, and calculating the standard error isn’t much harder. But it’s variability that we’re really interested in, not specifically the difference between sample means. And there are other ways of quantifying variability.</p>
+</section>
+<section id="what-contributes-to-variability" class="level2">
+<h2 data-anchor-id="what-contributes-to-variability">What Contributes to Variability?</h2>
+<p>Before we move on to other ways of quantifying variability, let’s just analyze this equation conceptually. Again, let’s think about what contributes to the numerator and the denominator here.</p>
+<p>So what contributes to the variability between groups? In other words, why might the group means be different? One reason is if there is a real treatment effect. The treatment effect causes an increase or decrease in people’s scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that samples don’t perfectly represent the population from which they’re drawn. There’s always some variability due to sampling error. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So the numerator is composed of any treatment effect plus chance.</p>
+<p>The denominator, on the other hand, is all chance. Remember, the standard error quantifies the variability of the sampling distribution. It’s the standard deviation of all possible samples of a given size drawn from a population. So there is no treatment effect there. It’s pure chance: the variability between groups we’d expect to see by chance alone.</p>
+<p>So a conceptual distillation of the equation would be treatment plus chance over chance. Having chance in both the numerator and denominator, it algebraically simplifies out, leaving us with a <span class="math inline">\(t\)</span> statistic that quantifies how much of a treatment effect there seems to be over and above chance differences.</p>
+</section>
+<section id="three-types-of-variability" class="level2">
+<h2 data-anchor-id="three-types-of-variability">Three Types of Variability</h2>
+<p>So now let’s start thinking in terms of variability more generally, and especially what factors contribute to different kinds of variability.</p>
+<section id="total-variability" class="level3">
+<h3 data-anchor-id="total-variability">Total variability</h3>
+<p>There’s the total variability in the data. We have six scores here and they’re all different from one another. If we could quantify that overall variability among the scores we’ve recorded, that would tell us the total variability in the data due to any source.</p>
+</section>
+<section id="between-groups-variability" class="level3">
+<h3 data-anchor-id="between-groups-variability">Between-groups variability</h3>
+<p>But we can think about more specific types of variability. There’s the variability between groups. Again, with two samples, we can most obviously see this as the simple difference between those means, but put more generally we’re quantifying how variable those group means are.</p>
+<p>So let’s think again about what might cause that kind of variability. It’s exactly as we said for the numerator of the <span class="math inline">\(t\)</span> equation. Groups may vary from one another because a treatment effect differently affected the groups’ average scores, or they may vary because of chance alone — the sampling error that causes one sample to be different from the next.</p>
+</section>
+<section id="within-groups-variability" class="level3">
+<h3 data-anchor-id="within-groups-variability">Within-groups variability</h3>
+<p>There is another kind of variability we could think about here: the variability within each group. That means taking each sample on its own terms. How variable are the scores within those respective groups? Are they very widely spread or closely clustered together?</p>
+<p>Now, why would scores vary within groups? It can’t be because of a treatment effect. The treatment only differs between groups, not within them. Here we’re just looking within each group on its own terms. So if we quantify the variability among scores within groups, all we’re seeing is variability due to chance differences among scores.</p>
+</section>
+<section id="a-new-conceptual-equation" class="level3">
+<h3 data-anchor-id="a-new-conceptual-equation">A new conceptual equation</h3>
+<p>So now we can reformulate a new conceptual equation. If we take the variability between groups and divide it by the variability within groups, this is equivalent to dividing treatment variability plus chance variability by chance variability alone. And so as a conceptual ratio, the chance differences cancel out and the answer will reveal the extent of variability caused by the treatment alone. And as you realize, this is exactly the same conceptual form we ended up with for the <span class="math inline">\(t\)</span> statistic. It achieves the same goal, but in a slightly different way.</p>
+<div class="interactive callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Activity</span>Seeing the logic of ANOVA
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div class="interactive-figure-mount" data-interactive-options="{&quot;stage&quot;:&quot;populations&quot;,&quot;calculations&quot;:false,&quot;controlsOpen&quot;:false}" data-interactive-figure="anovaVariabilityExplorer" data-interactive-factory="makeAnovaVariabilityExplorer">
+<div class="interactive-figure-fallback">
+Interactive diagram showing three groups of scores, then total, within-groups, and between-groups squared deviations, and finally the comparison at the heart of the F ratio.
+</div>
+</div>
+<div class="callout-footer">
+<div class="tutorial-step" data-major="scores" data-major-title="Scores" data-title="Scores" data-action="{&quot;stage&quot;:&quot;populations&quot;,&quot;phase&quot;:&quot;observe&quot;,&quot;animate&quot;:false}">
+<p>We have three populations, represented here by samples of five scores. People differ within every population, and the populations are centered in different places.</p>
+</div>
+<div class="tutorial-step" data-major="total" data-major-title="Total" data-title="Observe" data-action="{&quot;stage&quot;:&quot;total&quot;,&quot;phase&quot;:&quot;observe&quot;,&quot;animate&quot;:true}">
+<p>Set group membership aside without moving the scores. For <strong>total variability</strong>, every score is considered relative to the grand mean.</p>
+</div>
+<div class="tutorial-step" data-major="total" data-major-title="Total" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;total&quot;,&quot;phase&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Draw each score’s <strong>deviation from the grand mean</strong>. Longer lines represent scores that contribute more total variability.</p>
+</div>
+<div class="tutorial-step" data-major="total" data-major-title="Total" data-title="Squares" data-action="{&quot;stage&quot;:&quot;total&quot;,&quot;phase&quot;:&quot;squares&quot;,&quot;animate&quot;:true}">
+<p>Turn every deviation into the edge of a square. The area of each square is that score’s <strong>squared deviation</strong>.</p>
+</div>
+<div class="tutorial-step" data-major="total" data-major-title="Total" data-title="Sum" data-action="{&quot;stage&quot;:&quot;total&quot;,&quot;phase&quot;:&quot;sum&quot;,&quot;animate&quot;:true}">
+<p>Add the squared deviations together. Their copies collect on the right and form the <strong>total sum of squares</strong>.</p>
+</div>
+<div class="tutorial-step" data-major="within" data-major-title="Within" data-title="Observe" data-action="{&quot;stage&quot;:&quot;within&quot;,&quot;phase&quot;:&quot;observe&quot;,&quot;animate&quot;:true}">
+<p>Bring the groups back into focus. For <strong>within-groups variability</strong>, every score is considered relative to its own group mean.</p>
+</div>
+<div class="tutorial-step" data-major="within" data-major-title="Within" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;within&quot;,&quot;phase&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Draw each score’s deviation from its group mean. These are differences among people who received the same treatment.</p>
+</div>
+<div class="tutorial-step" data-major="within" data-major-title="Within" data-title="Squares" data-action="{&quot;stage&quot;:&quot;within&quot;,&quot;phase&quot;:&quot;squares&quot;,&quot;animate&quot;:true}">
+<p>Turn those deviations into squares. Together they represent the background variability found inside the groups.</p>
+</div>
+<div class="tutorial-step" data-major="within" data-major-title="Within" data-title="Sum" data-action="{&quot;stage&quot;:&quot;within&quot;,&quot;phase&quot;:&quot;sum&quot;,&quot;animate&quot;:true}">
+<p>Add these squared deviations to form the <strong>within-groups sum of squares</strong> on the right.</p>
+</div>
+<div class="tutorial-step" data-major="between" data-major-title="Between" data-title="Observe" data-action="{&quot;stage&quot;:&quot;between&quot;,&quot;phase&quot;:&quot;observe&quot;,&quot;animate&quot;:true}">
+<p>Now focus on the group means. For <strong>between-groups variability</strong>, each group mean is considered relative to the grand mean.</p>
+</div>
+<div class="tutorial-step" data-major="between" data-major-title="Between" data-title="Deviations" data-action="{&quot;stage&quot;:&quot;between&quot;,&quot;phase&quot;:&quot;deviations&quot;,&quot;animate&quot;:true}">
+<p>Draw each group mean’s deviation from the grand mean. Greater separation among the means produces longer lines.</p>
+</div>
+<div class="tutorial-step" data-major="between" data-major-title="Between" data-title="Squares" data-action="{&quot;stage&quot;:&quot;between&quot;,&quot;phase&quot;:&quot;squares&quot;,&quot;animate&quot;:true}">
+<p>Turn each mean’s deviation into a square. Each group mean represents all five scores in that group, not just one score.</p>
+</div>
+<div class="tutorial-step" data-major="between" data-major-title="Between" data-title="Sum" data-action="{&quot;stage&quot;:&quot;between&quot;,&quot;phase&quot;:&quot;sum&quot;,&quot;animate&quot;:true}">
+<p>Count each square five times, once for every score represented by its mean. These copies form the <strong>between-groups sum of squares</strong>.</p>
+</div>
+<div class="tutorial-step" data-major="compare" data-major-title="Compare" data-title="Compare" data-action="{&quot;stage&quot;:&quot;compare&quot;,&quot;phase&quot;:&quot;compare&quot;,&quot;animate&quot;:true}">
+<p>The squared distances add up. Total variability partitions exactly into <strong>between</strong> plus <strong>within</strong>. When between-groups variability is large compared with within-groups variability, the treatment stands out from the background noise. That comparison is the crux of the <span class="math inline">\(F\)</span> ratio.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="calculating-the-components-of-variance" class="level2">
+<h2 data-anchor-id="calculating-the-components-of-variance">Calculating the Components of Variance</h2>
+<p>So how do we actually quantify these different sources of variability in the data? You’ll be glad to know there’s nothing mathematically new about this. We can use tools we’ve already learned about. We’ll just apply them in slightly new ways. More specifically, we’re going to use variance, which you’ll remember we find by dividing <span class="math inline">\(SS\)</span>, the sum of squared deviations, by <span class="math inline">\(df\)</span>, degrees of freedom.</p>
+<section id="total-variance" class="level3">
+<h3 data-anchor-id="total-variance">Total variance</h3>
+<p>First we can think about the total variability in the data. Again, here we ignore any distinction between groups. We just take every score we’ve recorded as a single set of numbers. And to find the total variability in all those numbers, we find the sum of squared deviations of all those scores from what we’ll call a grand mean, which refers to the mean of all scores, again ignoring the different groups. The <span class="math inline">\(df_{total}\)</span> is uppercase <span class="math inline">\(N\)</span> minus one, meaning the total number of scores minus one. Again, I encourage you to double check my sums, but for these six scores, we get 83.5 over 5 for an answer of 16.7 for the total variance.</p>
+</section>
+<section id="within-groups-variance" class="level3">
+<h3 data-anchor-id="within-groups-variance">Within-groups variance</h3>
+<p>Next, we’ll work out the variance within groups. For this, we find the sum of squared deviations for each individual group from its own respective group mean, and then we add up those sum of squares values. So we denote this as <span class="math inline">\(\Sigma SS\)</span> — the sum of sums of squares for each treatment. To find the variance, we divide by the sum of the degrees of freedom for each treatment. And for each treatment, degrees of freedom is lowercase <span class="math inline">\(n\)</span> minus one, meaning the number of scores in that treatment minus one.</p>
+<p>Again, this is not a new procedure; we’ve already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent samples <span class="math inline">\(t\)</span> statistic, we did exactly this: take each treatment’s sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample’s variance. So variance within groups is eight plus two over two plus two, which gives 2.5.</p>
+</section>
+<section id="between-groups-variance" class="level3">
+<h3 data-anchor-id="between-groups-variance">Between-groups variance</h3>
+<p>Now, to find the variance between groups. The easiest way, if we already calculated the sum of squares and degrees of freedom values for total and within-groups variability, is to subtract within from total to get between. That’s because the values for between and within must add up to the total. That’s the whole idea — that we’re partitioning the total variability into these two components. So subtracting within from total gets us between. Here that works out to 83.5 minus 10 over 5 minus 4.</p>
+</section>
+</section>
+<section id="the-f-ratio" class="level2">
+<h2 data-anchor-id="the-f-ratio">The <span class="math inline">\(F\)</span> Ratio</h2>
+<p>So now we can come back to where we started. We wanted to partition the variance in the data into between-groups variance and within-groups variance. By finding the different kinds of sums of squares and degrees of freedom and dividing them to find the different variances, we end up for this little dataset with 73.5 over 2.5 for an answer of 29.4. And so this is the ANOVA, the analysis of variance procedure. And this is our new statistic. It’s called the <span class="math inline">\(F\)</span> ratio. It’s named after its inventor, Sir Ronald Fisher, who developed this concept in the 1920s.</p>
+<p>Like I said before, it is conceptually related to the <span class="math inline">\(t\)</span> statistic. It achieves the same thing: constructing a ratio of treatment effect plus chance differences over chance alone, to get a ratio of how much more of a difference seems to be coming from the treatment effect than we would expect to see by chance alone.</p>
+</section>
+<section id="relationship-between-t-and-f" class="level2">
+<h2 data-anchor-id="relationship-between-t-and-f">Relationship Between <span class="math inline">\(t\)</span> and <span class="math inline">\(F\)</span></h2>
+<p>And not only are the <span class="math inline">\(t\)</span> statistic and <span class="math inline">\(F\)</span> ratio conceptually related, they are mathematically related. If you square the <span class="math inline">\(t\)</span> value we calculated, you’ll find it’s 29.4. Or if you prefer, you can find the square root of the <span class="math inline">\(F\)</span> ratio, 29.4, and you’ll find it comes to 5.42, the same as <span class="math inline">\(t\)</span>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_t_and_f" aria-label="Why F = t squared"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Why F = t squared</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="why_f_t_squared"><div class="quiz-prompt"><p>Why does <span class="math inline"><em>F</em> = <em>t</em><sup>2</sup></span> when
+ANOVA compares only two groups?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Both tests quantify the same treatment effect relative to chance
+variability. ANOVA works with variances, so the corresponding value is
+squared relative to t.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>With two groups, the independent-samples t test and one-way ANOVA are
+mathematically equivalent.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_t_and_f">{"questions":[{"promptHtml":"\u003cp\u003eWhy does \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e = \u003cem\u003et\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e\u003c/span\u003e when\nANOVA compares only two groups?\u003c/p\u003e","type":"free-response","id":"why_f_t_squared","explanationHtml":"\u003cp\u003eWith two groups, the independent-samples t test and one-way ANOVA are\nmathematically equivalent.\u003c/p\u003e","answer":"Both tests quantify the same treatment effect relative to chance variability. ANOVA works with variances, so the corresponding value is squared relative to t.","explanation":"With two groups, the independent-samples t test and one-way ANOVA are mathematically equivalent.","prompt":"Why does F = t^2 when ANOVA compares only two groups?","answerHtml":"\u003cp\u003eBoth tests quantify the same treatment effect relative to chance\nvariability. ANOVA works with variances, so the corresponding value is\nsquared relative to t.\u003c/p\u003e"}],"title":"Why F = t squared","id":"14_anova_t_and_f","titleHtml":"\u003cp\u003eWhy F = t squared\u003c/p\u003e"}</script></section>
+<p>Maybe you can think of why this is the case. Remember that variance is the average squared deviation. The <span class="math inline">\(t\)</span> statistic kept things in the original units by simply finding the difference between means and the standard error of the mean, which is a kind of standard deviation. And remember that standard deviation is the square root of variance. The ANOVA procedure, instead of finding the difference between means, finds the variance among means. So basically everything was squared along the way here and we never transformed it back into the original units, which is why when we compare just two groups like this, we find that <span class="math inline">\(F = t^2\)</span>.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 4 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 4</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="t_positive_negative"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>A t statistic can be either positive or negative.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_positive_negative" id="14_anova_learning_checks-t_positive_negative-option-1" value="true" aria-labelledby="14_anova_learning_checks-t_positive_negative-option-1-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_positive_negative-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_positive_negative" id="14_anova_learning_checks-t_positive_negative-option-2" value="false" aria-labelledby="14_anova_learning_checks-t_positive_negative-option-2-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_positive_negative-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>True</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The sign indicates the direction of the mean difference.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="flexible_statistic"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which statistic, t or F, is more flexible in the sense of applying to
+a wider range of design contexts?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-flexible_statistic" id="14_anova_learning_checks-flexible_statistic-option-1" value="0" aria-labelledby="14_anova_learning_checks-flexible_statistic-option-1-text"><div class="quiz-choice-text" id="14_anova_learning_checks-flexible_statistic-option-1-text"><p>F</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-flexible_statistic" id="14_anova_learning_checks-flexible_statistic-option-2" value="1" aria-labelledby="14_anova_learning_checks-flexible_statistic-option-2-text"><div class="quiz-choice-text" id="14_anova_learning_checks-flexible_statistic-option-2-text"><p>t</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-flexible_statistic" id="14_anova_learning_checks-flexible_statistic-option-3" value="2" aria-labelledby="14_anova_learning_checks-flexible_statistic-option-3-text"><div class="quiz-choice-text" id="14_anova_learning_checks-flexible_statistic-option-3-text"><p>They are identical in every design</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-flexible_statistic" id="14_anova_learning_checks-flexible_statistic-option-4" value="3" aria-labelledby="14_anova_learning_checks-flexible_statistic-option-4-text"><div class="quiz-choice-text" id="14_anova_learning_checks-flexible_statistic-option-4-text"><p>Neither can compare means</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>F</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>ANOVA and F ratios can extend to more than two groups and multiple
+factors.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="t_and_f_relation"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>When comparing exactly two groups with equivalent assumptions, how
+are t and F related?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_and_f_relation" id="14_anova_learning_checks-t_and_f_relation-option-1" value="0" aria-labelledby="14_anova_learning_checks-t_and_f_relation-option-1-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_and_f_relation-option-1-text"><p><span class="math inline"><em>F</em> = <em>t</em><sup>2</sup></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_and_f_relation" id="14_anova_learning_checks-t_and_f_relation-option-2" value="1" aria-labelledby="14_anova_learning_checks-t_and_f_relation-option-2-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_and_f_relation-option-2-text"><p><span class="math inline"><em>t</em> = <em>F</em><sup>2</sup></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_and_f_relation" id="14_anova_learning_checks-t_and_f_relation-option-3" value="2" aria-labelledby="14_anova_learning_checks-t_and_f_relation-option-3-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_and_f_relation-option-3-text"><p><span class="math inline"><em>F</em> = <em>t</em>/2</span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-t_and_f_relation" id="14_anova_learning_checks-t_and_f_relation-option-4" value="3" aria-labelledby="14_anova_learning_checks-t_and_f_relation-option-4-text"><div class="quiz-choice-text" id="14_anova_learning_checks-t_and_f_relation-option-4-text"><p>They are unrelated</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p><span class="math inline"><em>F</em> = <em>t</em><sup>2</sup></span></p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>The two tests are mathematically equivalent for two groups.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="f_positive_negative"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>An F statistic can be positive or negative.</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-f_positive_negative" id="14_anova_learning_checks-f_positive_negative-option-1" value="true" aria-labelledby="14_anova_learning_checks-f_positive_negative-option-1-text"><div class="quiz-choice-text" id="14_anova_learning_checks-f_positive_negative-option-1-text"><p>True</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_learning_checks-f_positive_negative" id="14_anova_learning_checks-f_positive_negative-option-2" value="false" aria-labelledby="14_anova_learning_checks-f_positive_negative-option-2-text"><div class="quiz-choice-text" id="14_anova_learning_checks-f_positive_negative-option-2-text"><p>False</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>False</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>F is a ratio of variances, and variances cannot be negative.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_learning_checks">{"questions":[{"promptHtml":"\u003cp\u003eA t statistic can be either positive or negative.\u003c/p\u003e","type":"true-false","id":"t_positive_negative","explanationHtml":"\u003cp\u003eThe sign indicates the direction of the mean difference.\u003c/p\u003e","answer":true,"explanation":"The sign indicates the direction of the mean difference.","prompt":"A t statistic can be either positive or negative.","answerHtml":"\u003cp\u003etrue\u003c/p\u003e"},{"promptHtml":"\u003cp\u003eWhich statistic, t or F, is more flexible in the sense of applying to\na wider range of design contexts?\u003c/p\u003e","type":"multiple-choice","id":"flexible_statistic","options":[{"text":"F","textHtml":"\u003cp\u003eF\u003c/p\u003e","correct":true},{"text":"t","textHtml":"\u003cp\u003et\u003c/p\u003e"},{"text":"They are identical in every design","textHtml":"\u003cp\u003eThey are identical in every design\u003c/p\u003e"},{"text":"Neither can compare means","textHtml":"\u003cp\u003eNeither can compare means\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eANOVA and F ratios can extend to more than two groups and multiple\nfactors.\u003c/p\u003e","explanation":"ANOVA and F ratios can extend to more than two groups and multiple factors.","prompt":"Which statistic, t or F, is more flexible in the sense of applying to a wider range of design contexts?","answerHtml":""},{"promptHtml":"\u003cp\u003eWhen comparing exactly two groups with equivalent assumptions, how\nare t and F related?\u003c/p\u003e","type":"multiple-choice","id":"t_and_f_relation","options":[{"text":"F = t^2","textHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e = \u003cem\u003et\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e\u003c/span\u003e\u003c/p\u003e","correct":true},{"text":"t = F^2","textHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003et\u003c/em\u003e = \u003cem\u003eF\u003c/em\u003e\u003csup\u003e2\u003c/sup\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"F = t / 2","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e = \u003cem\u003et\u003c/em\u003e/2\u003c/span\u003e\u003c/p\u003e"},{"text":"They are unrelated","textHtml":"\u003cp\u003eThey are unrelated\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eThe two tests are mathematically equivalent for two groups.\u003c/p\u003e","explanation":"The two tests are mathematically equivalent for two groups.","prompt":"When comparing exactly two groups with equivalent assumptions, how are t and F related?","answerHtml":""},{"promptHtml":"\u003cp\u003eAn F statistic can be positive or negative.\u003c/p\u003e","type":"true-false","id":"f_positive_negative","explanationHtml":"\u003cp\u003eF is a ratio of variances, and variances cannot be negative.\u003c/p\u003e","answer":false,"explanation":"F is a ratio of variances, and variances cannot be negative.","prompt":"An F statistic can be positive or negative.","answerHtml":""}],"title":"Learning Checks","id":"14_anova_learning_checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e"}</script></section>
+</section>
+<section id="summary-so-far" class="level2">
+<h2 data-anchor-id="summary-so-far">Summary So Far</h2>
+<p>And this is basically the hard part over with. If you understand what we’ve just done — how it relates to the basic concepts we introduced earlier in the course, and to the <span class="math inline">\(t\)</span> statistic, and why it works to quantify the treatment effect — then you’ll have a good grasp of the ANOVA procedure. All we need to do next is cover the kind of research that necessitates ANOVA, the terminology that goes along with it, and the nuances of the procedure.</p>
+<!-- [Note: Original lecture suggested replaying the first part of the lecture and revisiting earlier lectures for review.] -->
+</section>
+<section id="expanding-to-more-than-two-groups" class="level2">
+<h2 data-anchor-id="expanding-to-more-than-two-groups">Expanding to More Than Two Groups</h2>
+<p>Now let’s expand our example to see why ANOVA can be so useful. Suppose we’re still interested in the effects of different kinds of snacks, but we want to include a control condition where people take the test without having consumed any snack. Without the control condition, all we could say was that banana people did better than candy people. But we want to know if the banana makes people do better or the candy makes people do worse as compared to nothing at all, just not having a snack. For that, we need a baseline performance to compare both treatment groups to.</p>
+<p>So take a look at this little dataset and the group means. Just from eyeballing it, does it look like the banana improved scores or did the candy bar hurt scores?</p>
+<div id="tbl-snacks-three" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-snacks-three-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.2: Test scores for the three snack conditions.
+</figcaption>
+<div aria-describedby="tbl-snacks-three-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: center;">🍌 Banana</th>
+<th style="text-align: center;">🍬 Candy</th>
+<th style="text-align: center;">😐 Control</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">11</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;"><span class="math inline">\(M = 11\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(M = 4\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(M = 6\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_differences" aria-label="Eyeballing Data"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Eyeballing Data</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="eyeballing_groups"><div class="quiz-prompt"><p>When comparing three group means by eye, what should you look for
+before running ANOVA?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Look for whether between-group differences appear large relative to
+the variability within groups.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>ANOVA formalizes that comparison as variability between treatments
+divided by variability expected by chance.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_differences">{"questions":[{"promptHtml":"\u003cp\u003eWhen comparing three group means by eye, what should you look for\nbefore running ANOVA?\u003c/p\u003e","type":"free-response","id":"eyeballing_groups","explanationHtml":"\u003cp\u003eANOVA formalizes that comparison as variability between treatments\ndivided by variability expected by chance.\u003c/p\u003e","answer":"Look for whether between-group differences appear large relative to the variability within groups.","explanation":"ANOVA formalizes that comparison as variability between treatments divided by variability expected by chance.","prompt":"When comparing three group means by eye, what should you look for before running ANOVA?","answerHtml":"\u003cp\u003eLook for whether between-group differences appear large relative to\nthe variability within groups.\u003c/p\u003e"}],"title":"Eyeballing Data","id":"14_anova_differences","titleHtml":"\u003cp\u003eEyeballing Data\u003c/p\u003e"}</script></section>
+<p>From eyeballing the data, you probably got a sense of the overall trends. Taking the control condition as our baseline, the candy group did a little worse, but not too much. Given the overall variability among scores, it’s hard to tell whether that’s a real difference or just chance sampling error. But the banana people did way better than the control condition and better still than the candy condition. If you had to guess, you’d probably be pretty confident that that is a statistically significant difference.</p>
+<p>And what we’re doing here intuitively is exactly what we did over the past few slides, looking at how variable scores are within groups and how variable they are between groups to get a sense of how much more of a difference there seems to be between groups than we would expect thanks to sampling error.</p>
+</section>
+<section id="why-anova-is-needed" class="level2">
+<h2 data-anchor-id="why-anova-is-needed">Why ANOVA Is Needed</h2>
+<p>But how can we be sure whether any differences are statistically significant? Our old friend the <span class="math inline">\(t\)</span>-test can’t help us here. It only works when we have at most two samples. The independent samples <span class="math inline">\(t\)</span> test is based on the simple difference between means, subtracting one from the other. But we can’t just do eleven minus four minus six here. That wouldn’t make any sense. So we’ll use ANOVA, analysis of variance, and the <span class="math inline">\(F\)</span> ratio, just like we calculated for the two groups before. This is the advantage of ANOVA. It can handle any number of samples, not just two.</p>
+</section>
+<section id="anova-terminology" class="level2">
+<h2 data-anchor-id="anova-terminology">ANOVA Terminology</h2>
+<p>There’s some new terminology that comes with ANOVA. The “factor” refers to the independent variable, the construct which we’re manipulating and which designates the groups being compared. For our little example study here, we might label the factor pre-test nutritional intervention, or snack type for short.</p>
+<p>The “levels” are the individual treatments that make up a factor. So here we have three levels of our snack type factor: the banana treatment, the candy treatment, and the control — no snack — treatment. When you see this reported in the design section of a journal article, it’ll usually be something like “a one-by-three between-participants ANOVA design.” The one-by-three refers to the number of factors first and the number of levels of each factor. You can have any number of levels and factors. For example, we’ll introduce two-by-two designs in a couple of lectures’ time, where we’ll have two factors with two conditions each. But for this lecture we’ll just focus on the one-by-three between-participants design.</p>
+</section>
+<section id="calculating-the-f-ratio" class="level2">
+<h2 data-anchor-id="calculating-the-f-ratio">Calculating the <span class="math inline">\(F\)</span> Ratio</h2>
+<p>So calculating the <span class="math inline">\(F\)</span> ratio involves these steps. First, deal with all those sums of squares and degrees of freedom. Second, calculate the variances for the numerator and denominator.</p>
+<section id="mean-squares" class="level3">
+<h3 data-anchor-id="mean-squares">Mean Squares</h3>
+<p>And one last new piece of terminology here: in the context of ANOVA, we refer to variance as the “mean square” (<span class="math inline">\(MS\)</span>), because as you remember, a variance is just the average squared deviation — the mean square. So we need <span class="math inline">\(MS_{between}\)</span> and <span class="math inline">\(MS_{within}\)</span>, both of which we find by dividing the relevant sum of squares by the relevant degrees of freedom. And then we divide <span class="math inline">\(MS_{between}\)</span> by <span class="math inline">\(MS_{within}\)</span> to find the <span class="math inline">\(F\)</span> ratio.</p>
+</section>
+<section id="notation-and-symbols" class="level3">
+<h3 data-anchor-id="notation-and-symbols">Notation and Symbols</h3>
+<p>We’ve already calculated an <span class="math inline">\(F\)</span> ratio at the start of this lecture, so if you followed that, you already know how to do this. But I’m including this as a reference for the equations we use for each component of the variability along the way.</p>
+<!-- [Note: Original lecture included a reference slide with equations for each variability component.] -->
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_notation_learning_checks" aria-label="Learning Checks"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Learning Checks</p></div><span class="quiz-progress" aria-label="0 of 5 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 5</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="condition_variance"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The variance of scores in each treatment condition is most directly
+part of which source?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-condition_variance" id="14_anova_notation_learning_checks-condition_variance-option-1" value="0" aria-labelledby="14_anova_notation_learning_checks-condition_variance-option-1-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-condition_variance-option-1-text"><p>Within-treatment variability</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-condition_variance" id="14_anova_notation_learning_checks-condition_variance-option-2" value="1" aria-labelledby="14_anova_notation_learning_checks-condition_variance-option-2-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-condition_variance-option-2-text"><p>Grand total only</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-condition_variance" id="14_anova_notation_learning_checks-condition_variance-option-3" value="2" aria-labelledby="14_anova_notation_learning_checks-condition_variance-option-3-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-condition_variance-option-3-text"><p>The treatment total</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-condition_variance" id="14_anova_notation_learning_checks-condition_variance-option-4" value="3" aria-labelledby="14_anova_notation_learning_checks-condition_variance-option-4-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-condition_variance-option-4-text"><p>The number of factors</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Within-treatment variability</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Within-treatment variability describes how scores vary inside each
+group.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="grand_total_symbol"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The sum of all scores in the study is usually symbolized as:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-grand_total_symbol" id="14_anova_notation_learning_checks-grand_total_symbol-option-1" value="0" aria-labelledby="14_anova_notation_learning_checks-grand_total_symbol-option-1-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-grand_total_symbol-option-1-text"><p><span class="math inline"><em>G</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-grand_total_symbol" id="14_anova_notation_learning_checks-grand_total_symbol-option-2" value="1" aria-labelledby="14_anova_notation_learning_checks-grand_total_symbol-option-2-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-grand_total_symbol-option-2-text"><p><span class="math inline"><em>T</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-grand_total_symbol" id="14_anova_notation_learning_checks-grand_total_symbol-option-3" value="2" aria-labelledby="14_anova_notation_learning_checks-grand_total_symbol-option-3-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-grand_total_symbol-option-3-text"><p><span class="math inline"><em>n</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-grand_total_symbol" id="14_anova_notation_learning_checks-grand_total_symbol-option-4" value="3" aria-labelledby="14_anova_notation_learning_checks-grand_total_symbol-option-4-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-grand_total_symbol-option-4-text"><p><span class="math inline"><em>F</em></span></p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p><span class="math inline"><em>G</em></span></p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>G is the grand total.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="total_n_symbol"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">3</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The total number of scores recorded in the study is usually
+symbolized as:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-total_n_symbol" id="14_anova_notation_learning_checks-total_n_symbol-option-1" value="0" aria-labelledby="14_anova_notation_learning_checks-total_n_symbol-option-1-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-total_n_symbol-option-1-text"><p><span class="math inline"><em>N</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-total_n_symbol" id="14_anova_notation_learning_checks-total_n_symbol-option-2" value="1" aria-labelledby="14_anova_notation_learning_checks-total_n_symbol-option-2-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-total_n_symbol-option-2-text"><p><span class="math inline"><em>n</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-total_n_symbol" id="14_anova_notation_learning_checks-total_n_symbol-option-3" value="2" aria-labelledby="14_anova_notation_learning_checks-total_n_symbol-option-3-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-total_n_symbol-option-3-text"><p><span class="math inline"><em>T</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-total_n_symbol" id="14_anova_notation_learning_checks-total_n_symbol-option-4" value="3" aria-labelledby="14_anova_notation_learning_checks-total_n_symbol-option-4-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-total_n_symbol-option-4-text"><p><span class="math inline"><em>S</em><em>S</em></span></p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p><span class="math inline"><em>N</em></span></p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Uppercase N refers to the total number of scores.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="treatment_total_symbol"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">4</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>The sum of scores within each treatment condition is usually
+symbolized as:</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-treatment_total_symbol" id="14_anova_notation_learning_checks-treatment_total_symbol-option-1" value="0" aria-labelledby="14_anova_notation_learning_checks-treatment_total_symbol-option-1-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-treatment_total_symbol-option-1-text"><p><span class="math inline"><em>T</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-treatment_total_symbol" id="14_anova_notation_learning_checks-treatment_total_symbol-option-2" value="1" aria-labelledby="14_anova_notation_learning_checks-treatment_total_symbol-option-2-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-treatment_total_symbol-option-2-text"><p><span class="math inline"><em>G</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-treatment_total_symbol" id="14_anova_notation_learning_checks-treatment_total_symbol-option-3" value="2" aria-labelledby="14_anova_notation_learning_checks-treatment_total_symbol-option-3-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-treatment_total_symbol-option-3-text"><p><span class="math inline"><em>F</em></span></p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-treatment_total_symbol" id="14_anova_notation_learning_checks-treatment_total_symbol-option-4" value="3" aria-labelledby="14_anova_notation_learning_checks-treatment_total_symbol-option-4-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-treatment_total_symbol-option-4-text"><p><span class="math inline"><em>M</em><em>S</em></span></p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p><span class="math inline"><em>T</em></span></p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>T refers to a treatment total.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="t_numerator_concept"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">5</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>Which ANOVA component is conceptually closest to the numerator of the
+independent-samples t statistic?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-t_numerator_concept" id="14_anova_notation_learning_checks-t_numerator_concept-option-1" value="0" aria-labelledby="14_anova_notation_learning_checks-t_numerator_concept-option-1-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-t_numerator_concept-option-1-text"><p>Between-groups variability</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-t_numerator_concept" id="14_anova_notation_learning_checks-t_numerator_concept-option-2" value="1" aria-labelledby="14_anova_notation_learning_checks-t_numerator_concept-option-2-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-t_numerator_concept-option-2-text"><p>Within-groups variability</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-t_numerator_concept" id="14_anova_notation_learning_checks-t_numerator_concept-option-3" value="2" aria-labelledby="14_anova_notation_learning_checks-t_numerator_concept-option-3-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-t_numerator_concept-option-3-text"><p>Total sample size</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_notation_learning_checks-t_numerator_concept" id="14_anova_notation_learning_checks-t_numerator_concept-option-4" value="3" aria-labelledby="14_anova_notation_learning_checks-t_numerator_concept-option-4-text"><div class="quiz-choice-text" id="14_anova_notation_learning_checks-t_numerator_concept-option-4-text"><p>The p-value</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>Between-groups variability</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Both capture observed differences among treatment means.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_notation_learning_checks">{"questions":[{"promptHtml":"\u003cp\u003eThe variance of scores in each treatment condition is most directly\npart of which source?\u003c/p\u003e","type":"multiple-choice","id":"condition_variance","options":[{"text":"Within-treatment variability","textHtml":"\u003cp\u003eWithin-treatment variability\u003c/p\u003e","correct":true},{"text":"Grand total only","textHtml":"\u003cp\u003eGrand total only\u003c/p\u003e"},{"text":"The treatment total","textHtml":"\u003cp\u003eThe treatment total\u003c/p\u003e"},{"text":"The number of factors","textHtml":"\u003cp\u003eThe number of factors\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eWithin-treatment variability describes how scores vary inside each\ngroup.\u003c/p\u003e","explanation":"Within-treatment variability describes how scores vary inside each group.","prompt":"The variance of scores in each treatment condition is most directly part of which source?","answerHtml":""},{"promptHtml":"\u003cp\u003eThe sum of all scores in the study is usually symbolized as:\u003c/p\u003e","type":"multiple-choice","id":"grand_total_symbol","options":[{"text":"G","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eG\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e","correct":true},{"text":"T","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eT\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"n","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"F","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eG is the grand total.\u003c/p\u003e","explanation":"G is the grand total.","prompt":"The sum of all scores in the study is usually symbolized as:","answerHtml":""},{"promptHtml":"\u003cp\u003eThe total number of scores recorded in the study is usually\nsymbolized as:\u003c/p\u003e","type":"multiple-choice","id":"total_n_symbol","options":[{"text":"N","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eN\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e","correct":true},{"text":"n","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003en\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"T","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eT\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"SS","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eS\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eUppercase N refers to the total number of scores.\u003c/p\u003e","explanation":"Uppercase N refers to the total number of scores.","prompt":"The total number of scores recorded in the study is usually symbolized as:","answerHtml":""},{"promptHtml":"\u003cp\u003eThe sum of scores within each treatment condition is usually\nsymbolized as:\u003c/p\u003e","type":"multiple-choice","id":"treatment_total_symbol","options":[{"text":"T","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eT\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e","correct":true},{"text":"G","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eG\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"F","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"},{"text":"MS","textHtml":"\u003cp\u003e\u003cspan class=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003c/span\u003e\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eT refers to a treatment total.\u003c/p\u003e","explanation":"T refers to a treatment total.","prompt":"The sum of scores within each treatment condition is usually symbolized as:","answerHtml":""},{"promptHtml":"\u003cp\u003eWhich ANOVA component is conceptually closest to the numerator of the\nindependent-samples t statistic?\u003c/p\u003e","type":"multiple-choice","id":"t_numerator_concept","options":[{"text":"Between-groups variability","textHtml":"\u003cp\u003eBetween-groups variability\u003c/p\u003e","correct":true},{"text":"Within-groups variability","textHtml":"\u003cp\u003eWithin-groups variability\u003c/p\u003e"},{"text":"Total sample size","textHtml":"\u003cp\u003eTotal sample size\u003c/p\u003e"},{"text":"The p-value","textHtml":"\u003cp\u003eThe p-value\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eBoth capture observed differences among treatment means.\u003c/p\u003e","explanation":"Both capture observed differences among treatment means.","prompt":"Which ANOVA component is conceptually closest to the numerator of the independent-samples t statistic?","answerHtml":""}],"title":"Learning Checks","id":"14_anova_notation_learning_checks","titleHtml":"\u003cp\u003eLearning Checks\u003c/p\u003e"}</script></section>
+<p>The table summarizes the symbols we use, some of which are new here. <span class="math inline">\(k\)</span> refers to the number of treatment conditions, and of course each condition has its own <span class="math inline">\(n\)</span>, the number of scores in that condition, which we refer to with a lowercase <span class="math inline">\(n\)</span> with a subscripted number or letter or label for each condition. Uppercase <span class="math inline">\(N\)</span> is the total number of scores recorded in the entire study. Uppercase <span class="math inline">\(T\)</span> refers to a treatment total, the sum of scores within a treatment condition, and <span class="math inline">\(G\)</span> refers to the grand total, the sum of all the scores across all conditions of the study.</p>
+<div id="tbl-anova-notation" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anova-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.3: ANOVA notation.
+</figcaption>
+<div aria-describedby="tbl-anova-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Symbol</th>
+<th style="text-align: left;">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: left;">Number of treatment conditions</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(n_1, n_2, \dots\)</span></td>
+<td style="text-align: left;">Number of scores in each treatment</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(N\)</span></td>
+<td style="text-align: left;">Total number of scores in the study</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(T_1, T_2, \dots\)</span></td>
+<td style="text-align: left;">Sum of scores (<span class="math inline">\(\Sigma X\)</span>) for each treatment</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(G\)</span></td>
+<td style="text-align: left;">Grand total of all scores in the study</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</section>
+<section id="computational-formulas" class="level3">
+<h3 data-anchor-id="computational-formulas">Computational Formulas</h3>
+<p>The reason it’s useful to work out the <span class="math inline">\(T\)</span>s for each condition and <span class="math inline">\(G\)</span> is that we can then use the computational version of the sum of squares equation. Remember all those — like two years ago — when we learned about calculating sums of squares? We’ve mostly been using the definitional approach since then to work things out first, calculating the deviations, then squared deviations, then the sum of squares. But the computational approach can be a little more efficient, which is useful here, since there are so many variance components to work out.</p>
+<p>The computational formula for <span class="math inline">\(SS_{total}\)</span> is <span class="math inline">\(\Sigma X^2\)</span> — the sum of all squared scores — minus <span class="math inline">\(G^2 / N\)</span>. Then for <span class="math inline">\(SS_{within}\)</span>, we work it out for each condition and then sum our answers. And if we know those, we can work out <span class="math inline">\(SS_{between}\)</span> by subtraction. But there is a computational equation for that if we want to work it out directly: it’s <span class="math inline">\(\Sigma (T^2 / n)\)</span> for each condition, minus <span class="math inline">\(G^2 / N\)</span>.</p>
+</section>
+<section id="degrees-of-freedom" class="level3">
+<h3 data-anchor-id="degrees-of-freedom">Degrees of Freedom</h3>
+<p>For degrees of freedom, <span class="math inline">\(df_{total}\)</span> is <span class="math inline">\(N\)</span> — the total number of scores in the study — minus one. <span class="math inline">\(df_{within}\)</span> is the total number of scores minus the number of treatment conditions. And <span class="math inline">\(df_{between}\)</span> is the number of conditions minus one.</p>
+</section>
+<section id="the-summary-table" class="level3">
+<h3 data-anchor-id="the-summary-table">The Summary Table</h3>
+<p>Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the <span class="math inline">\(F\)</span> ratio.</p>
+<div id="tbl-anova-summary-blank" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anova-summary-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.4: A blank ANOVA summary table.
+</figcaption>
+<div aria-describedby="tbl-anova-summary-blank-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Source</th>
+<th style="text-align: center;"><span class="math inline">\(SS\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(MS\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(F\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Between treatments</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Within treatments</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</section>
+</section>
+<section id="hypothesis-testing-example" class="level2">
+<h2 data-anchor-id="hypothesis-testing-example">Hypothesis Testing Example</h2>
+<p>So let’s work through a hypothesis test for our snack type / task performance example.</p>
+<section id="step-1-state-the-hypotheses" class="level3">
+<h3 data-anchor-id="step-1-state-the-hypotheses">Step 1: State the Hypotheses</h3>
+<p>As usual, we state our hypotheses first. The null here is that all three population means are the same; there is no treatment effect to cause them to differ. If this is true, the numerator and denominator of the <span class="math inline">\(F\)</span> equation will be approximately the same — there will be as much variability between treatments as there is within — and so we should get an <span class="math inline">\(F\)</span> ratio close to one. The alternative hypothesis is that there is a treatment effect, and so at least one population mean differs from one other. Note that they may not all differ from one another; we’re just saying that there will be some difference among the conditions somewhere.</p>
+<p>If this is the case, the numerator will be bigger than the denominator because it contains that treatment effect while the denominator is all chance, so <span class="math inline">\(F\)</span> should be noticeably larger than one. For the one-by-three snack type example, the null is that type of snack has no effect and there are no differences among the three conditions. The alternative is that snack type does have an effect, and at least one condition will differ from another.</p>
+</section>
+<section id="step-2-find-the-critical-value" class="level3">
+<h3 data-anchor-id="step-2-find-the-critical-value">Step 2: Find the Critical Value</h3>
+<p>How much larger than one does our <span class="math inline">\(F\)</span> ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the <span class="math inline">\(t\)</span> distributions, there is a different <span class="math inline">\(F\)</span> distribution for each value of degrees of freedom. It’s even slightly more complicated here because we have two different degrees of freedom values: one for the numerator (<span class="math inline">\(MS_{between}\)</span>) and one for the denominator (<span class="math inline">\(MS_{within}\)</span>).</p>
+<p>And it’s worth just noting here that unlike the normal and <span class="math inline">\(t\)</span> distributions we’ve seen before, the distributions for <span class="math inline">\(F\)</span> are not symmetrical; all the values are positive and the distributions are positively skewed — if you can think of why that might be.</p>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_f_distribution" aria-label="Why is F always positive?"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Why is F always positive?</p></div></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="why_f_positive"><div class="quiz-prompt"><p>Why is the F statistic always positive?</p></div><div class="quiz-control"><textarea placeholder="Write your response" aria-label="Written response"></textarea></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>F is a ratio of mean squares, and mean squares are variances based on
+squared deviations. Squared quantities cannot be negative.</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>This is also why F distributions are positively skewed rather than
+symmetrical around zero.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_f_distribution">{"questions":[{"promptHtml":"\u003cp\u003eWhy is the F statistic always positive?\u003c/p\u003e","type":"free-response","id":"why_f_positive","explanationHtml":"\u003cp\u003eThis is also why F distributions are positively skewed rather than\nsymmetrical around zero.\u003c/p\u003e","answer":"F is a ratio of mean squares, and mean squares are variances based on squared deviations. Squared quantities cannot be negative.","explanation":"This is also why F distributions are positively skewed rather than symmetrical around zero.","prompt":"Why is the F statistic always positive?","answerHtml":"\u003cp\u003eF is a ratio of mean squares, and mean squares are variances based on\nsquared deviations. Squared quantities cannot be negative.\u003c/p\u003e"}],"title":"Why is F always positive?","id":"14_anova_f_distribution","titleHtml":"\u003cp\u003eWhy is F always positive?\u003c/p\u003e"}</script></section>
+<p>So as usual, we can refer to a table of critical values for the <span class="math inline">\(F\)</span> distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see <span class="math inline">\(F\)</span> with the degrees of freedom in parentheses like this, it’s always in the order of numerator first and then denominator. So <span class="math inline">\(F(3, 10)\)</span> means three degrees of freedom for the numerator and ten for the denominator. So if you want to know the critical value for an alpha of 0.05 and those degrees of freedom, you’d look for the column for three and the row for ten and find the critical value would be 3.71. <!-- [Possible typo: original said "3.7" — verify against actual F table; F(3,10) at α = .05 is approximately 3.71.] --></p>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;title&quot;:&quot;F critical values&quot;,&quot;alpha&quot;:0.05,&quot;df1&quot;:{&quot;from&quot;:1,&quot;to&quot;:6},&quot;df2&quot;:[1,2,3,4,5,6,8,10,12,15,20,30],&quot;selected&quot;:{&quot;df1&quot;:3,&quot;df2&quot;:10,&quot;alpha&quot;:0.05},&quot;maxWidth&quot;:&quot;46rem&quot;,&quot;tableMinWidth&quot;:&quot;34rem&quot;}" data-interactive-figure="fCriticalValueTable" data-interactive-factory="makeFTable">
+<div class="interactive-figure-fallback">
+Interactive F critical-value table for alpha .05.
+</div>
+</div>
+<div class="interactive-figure-mount" data-interactive-options="{&quot;distribution&quot;:&quot;f&quot;,&quot;df1&quot;:{&quot;$value&quot;:&quot;fCriticalValueTable.df1&quot;},&quot;df2&quot;:{&quot;$value&quot;:&quot;fCriticalValueTable.df2&quot;},&quot;title&quot;:{&quot;$template&quot;:&quot;F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})&quot;},&quot;xDomain&quot;:[0,8],&quot;xTicks&quot;:5,&quot;shade&quot;:{&quot;$value&quot;:&quot;fCriticalValueTable.shade&quot;},&quot;maxWidth&quot;:&quot;24rem&quot;}" data-interactive-figure="fCriticalCurve" data-interactive-factory="makeDistributionGraph">
+<div class="interactive-figure-fallback">
+F distribution curve with the selected critical region shaded.
+</div>
+</div>
+</section>
+<section id="step-3-calculate-the-test-statistic" class="level3">
+<h3 data-anchor-id="step-3-calculate-the-test-statistic">Step 3: Calculate the Test Statistic</h3>
+<p>Step three is to calculate the test statistic, the <span class="math inline">\(F\)</span> ratio, using the equations that I showed before. For our snack data, the ingredients are: <span class="math inline">\(N = 9\)</span> scores in total, <span class="math inline">\(n = 3\)</span> per condition, <span class="math inline">\(k = 3\)</span> conditions, treatment totals <span class="math inline">\(T_{banana} = 33\)</span>, <span class="math inline">\(T_{candy} = 12\)</span>, and <span class="math inline">\(T_{control} = 18\)</span>, a grand total of <span class="math inline">\(G = 63\)</span>, and a sum of squared scores of <span class="math inline">\(\Sigma X^2 = 531\)</span>.</p>
+<p><span class="math display">\[
+\begin{align}
+SS_{total} &amp;= \Sigma X^2 - \frac{G^2}{N} \\ &amp;= 531 - \frac{63^2}{9} = 90 \\
+SS_{within} &amp;= \Sigma SS_{each\ treatment} \\ &amp;= 8 + 2 + 2 = 12 \\
+SS_{between} &amp;= \Sigma \frac{T^2}{n} - \frac{G^2}{N} \\ &amp;= \frac{33^2}{3} + \frac{12^2}{3} + \frac{18^2}{3} - \frac{63^2}{9} = 78
+\end{align}
+\]</span></p>
+<p><span class="math display">\[ df_{total} = N - 1 = 8 \]</span> <span class="math display">\[ df_{within} = N - k = 6 \]</span> <span class="math display">\[ df_{between} = k - 1 = 2 \]</span></p>
+<p><span class="math display">\[ MS_{between} = \frac{78}{2} = 39 \]</span> <span class="math display">\[ MS_{within} = \frac{12}{6} = 2 \]</span> <span class="math display">\[ F = \frac{MS_{between}}{MS_{within}} = \frac{39}{2} = 19.5 \]</span></p>
+<p>And here’s the completed summary table:</p>
+<div id="tbl-anova-summary" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anova-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.5: Completed ANOVA summary table for the snack example.
+</figcaption>
+<div aria-describedby="tbl-anova-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Source</th>
+<th style="text-align: right;"><span class="math inline">\(SS\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(MS\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(F\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Between treatments</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">19.5</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Within treatments</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Total</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<section class="quiz callout callout-style-default callout-note callout-titled" data-quiz-id="14_anova_calculate_f" aria-label="Calculate F Quiz"><div class="callout-header d-flex align-content-center"><div class="callout-icon-container"><i class="callout-icon"></i></div><div class="callout-caption-container flex-fill"><p>Calculate F Quiz</p></div><span class="quiz-progress" aria-label="0 of 2 questions answered" hidden=""><i class="bi bi-check-circle-fill" aria-hidden="true" hidden=""></i><span data-quiz-progress-label="">0 of 2</span></span></div><div class="callout-body-container callout-body"><article class="quiz-question" data-question-id="anova_decision"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">1</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>If your calculated F ratio is 3.00 and the critical value is 3.10,
+should you reject the null hypothesis?</p></div></div><div class="quiz-control"><fieldset class="quiz-options"><legend class="visually-hidden">Response options</legend><div class="quiz-choice"><input type="radio" name="14_anova_calculate_f-anova_decision" id="14_anova_calculate_f-anova_decision-option-1" value="0" aria-labelledby="14_anova_calculate_f-anova_decision-option-1-text"><div class="quiz-choice-text" id="14_anova_calculate_f-anova_decision-option-1-text"><p>No, fail to reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_calculate_f-anova_decision" id="14_anova_calculate_f-anova_decision-option-2" value="1" aria-labelledby="14_anova_calculate_f-anova_decision-option-2-text"><div class="quiz-choice-text" id="14_anova_calculate_f-anova_decision-option-2-text"><p>Yes, reject the null hypothesis</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_calculate_f-anova_decision" id="14_anova_calculate_f-anova_decision-option-3" value="2" aria-labelledby="14_anova_calculate_f-anova_decision-option-3-text"><div class="quiz-choice-text" id="14_anova_calculate_f-anova_decision-option-3-text"><p>Yes, because F is positive</p></div></div><div class="quiz-choice"><input type="radio" name="14_anova_calculate_f-anova_decision" id="14_anova_calculate_f-anova_decision-option-4" value="3" aria-labelledby="14_anova_calculate_f-anova_decision-option-4-text"><div class="quiz-choice-text" id="14_anova_calculate_f-anova_decision-option-4-text"><p>No, because F must be less than 1</p></div></div></fieldset></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>No, fail to reject the null hypothesis</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p>Reject only when the calculated F exceeds the critical value.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article><article class="quiz-question" data-question-id="anova_f_ratio"><div class="quiz-question-header"><span class="quiz-qbadge" aria-hidden="true"><span class="quiz-qbadge-number">2</span><i class="bi bi-check"></i></span><div class="quiz-prompt"><p>If <span class="math inline"><em>M</em><em>S</em><sub><em>b</em><em>e</em><em>t</em><em>w</em><em>e</em><em>e</em><em>n</em></sub> = 12</span>
+and <span class="math inline"><em>M</em><em>S</em><sub><em>w</em><em>i</em><em>t</em><em>h</em><em>i</em><em>n</em></sub> = 4</span>,
+what is the F ratio?</p></div></div><div class="quiz-control"><div class="quiz-input-shell quiz-input-shell-numeric"><input type="text" inputmode="decimal" autocomplete="off" placeholder="Enter a number" aria-label="Numeric response"><span class="quiz-input-status" aria-hidden="true"></span></div></div><div class="quiz-actions" hidden=""><button type="button" data-quiz-action="check"></button><button type="button" class="quiz-secondary" data-quiz-action="hint" hidden="">Show hint</button><button type="button" class="quiz-secondary" data-quiz-action="reveal" hidden="">Show answer</button><button type="button" class="quiz-secondary" data-quiz-action="diagnostics" hidden="">Check your work</button><button type="button" class="quiz-clear" data-quiz-action="clear" aria-label="Clear saved response" hidden="">Clear</button></div><div class="quiz-feedback" aria-live="polite" hidden=""><strong data-quiz-feedback-label=""></strong></div><div class="quiz-hints-panel" hidden=""></div><div class="quiz-explanation-panel" hidden=""><div class="quiz-model-answer"><strong>Answer</strong><p>3</p></div><div class="quiz-explanation-rendered"><strong>Explanation</strong><p><span class="math inline"><em>F</em> = <em>M</em><em>S</em><sub><em>b</em><em>e</em><em>t</em><em>w</em><em>e</em><em>e</em><em>n</em></sub>/<em>M</em><em>S</em><sub><em>w</em><em>i</em><em>t</em><em>h</em><em>i</em><em>n</em></sub> = 12/4 = 3</span>.</p></div></div><div class="quiz-diagnostics" hidden=""></div></article></div><script type="application/json" class="quiz-data" data-quiz-id="14_anova_calculate_f">{"questions":[{"promptHtml":"\u003cp\u003eIf your calculated F ratio is 3.00 and the critical value is 3.10,\nshould you reject the null hypothesis?\u003c/p\u003e","type":"multiple-choice","id":"anova_decision","options":[{"text":"No, fail to reject the null hypothesis","textHtml":"\u003cp\u003eNo, fail to reject the null hypothesis\u003c/p\u003e","correct":true},{"text":"Yes, reject the null hypothesis","textHtml":"\u003cp\u003eYes, reject the null hypothesis\u003c/p\u003e"},{"text":"Yes, because F is positive","textHtml":"\u003cp\u003eYes, because F is positive\u003c/p\u003e"},{"text":"No, because F must be less than 1","textHtml":"\u003cp\u003eNo, because F must be less than 1\u003c/p\u003e"}],"explanationHtml":"\u003cp\u003eReject only when the calculated F exceeds the critical value.\u003c/p\u003e","explanation":"Reject only when the calculated F exceeds the critical value.","prompt":"If your calculated F ratio is 3.00 and the critical value is 3.10, should you reject the null hypothesis?","answerHtml":""},{"id":"anova_f_ratio","explanationHtml":"\u003cp\u003e\u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eF\u003c/em\u003e = \u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003c/sub\u003e/\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003eh\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003c/sub\u003e = 12/4 = 3\u003c/span\u003e.\u003c/p\u003e","prompt":"If MS_{between} = 12 and MS_{within} = 4, what is the F ratio?","promptHtml":"\u003cp\u003eIf \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003eb\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003ee\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003c/sub\u003e = 12\u003c/span\u003e\nand \u003cspan\nclass=\"math inline\"\u003e\u003cem\u003eM\u003c/em\u003e\u003cem\u003eS\u003c/em\u003e\u003csub\u003e\u003cem\u003ew\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003et\u003c/em\u003e\u003cem\u003eh\u003c/em\u003e\u003cem\u003ei\u003c/em\u003e\u003cem\u003en\u003c/em\u003e\u003c/sub\u003e = 4\u003c/span\u003e,\nwhat is the F ratio?\u003c/p\u003e","type":"numeric","answer":"3","explanation":"F = MS_{between} / MS_{within} = 12 / 4 = 3.","tolerance":"1.0e-2","answerHtml":"\u003cp\u003e3\u003c/p\u003e"}],"title":"Calculate F Quiz","id":"14_anova_calculate_f","titleHtml":"\u003cp\u003eCalculate F Quiz\u003c/p\u003e"}</script></section>
+</section>
+<section id="step-4-make-a-decision" class="level3">
+<h3 data-anchor-id="step-4-make-a-decision">Step 4: Make a Decision</h3>
+<p>As usual, step four is to make our decision. And as usual, we compare the test statistic that we just calculated — the <span class="math inline">\(F\)</span> ratio in this case — to the critical value that we looked up in the table or using R. And so in this case, our <span class="math inline">\(F\)</span> ratio is statistically significant. That tells us there is a difference among the conditions somewhere.</p>
+</section>
+</section>
+<section id="effect-size-eta2" class="level2">
+<h2 data-anchor-id="effect-size-eta2">Effect Size: <span class="math inline">\(\eta^2\)</span></h2>
+<p>Since we got a significant test statistic, we want to know the effect size. For ANOVA, our measure of effect size is called eta squared (<span class="math inline">\(\eta^2\)</span>). This reflects the percentage of variance accounted for by the treatment effect. Now, maybe that sounds familiar — this is the same concept as <span class="math inline">\(r^2\)</span>, another measure of effect size that we introduced in the context of the <span class="math inline">\(t\)</span> test previously, which reflects the proportion of variance explained by the treatment effect. For ANOVA, we find <span class="math inline">\(\eta^2\)</span> by dividing <span class="math inline">\(SS_{between}\)</span> by <span class="math inline">\(SS_{total}\)</span>.</p>
+<p><span class="math display">\[\eta^2 = \frac{SS_{between}}{SS_{total}} = \frac{78}{90} = 0.87\]</span></p>
+</section>
+<section id="reporting-results" class="level2">
+<h2 data-anchor-id="reporting-results">Reporting Results</h2>
+<p>And as usual, we need to report the results. And again, this is basically just a list of certain things that we have to report. There are the descriptive statistics — that means the treatment means and standard deviations. We need to state what kind of hypothesis test we performed, whether it revealed a significant difference or not, and we need to report the pertinent values: the <span class="math inline">\(F\)</span> statistic with its degrees of freedom, the <span class="math inline">\(p\)</span> value as less than or greater than alpha, and the effect size <span class="math inline">\(\eta^2\)</span>.</p>
+<blockquote class="blockquote">
+<p>A single-factor, independent-samples ANOVA revealed a significant difference between people who consumed a banana (<span class="math inline">\(M = 11\)</span>; <span class="math inline">\(SD = 2\)</span>), a candy bar (<span class="math inline">\(M = 4\)</span>; <span class="math inline">\(SD = 1\)</span>), and the control condition (<span class="math inline">\(M = 6\)</span>; <span class="math inline">\(SD = 1\)</span>); <span class="math inline">\(F(2, 6) = 19.5\)</span>, <span class="math inline">\(p &lt; .05\)</span>, <span class="math inline">\(\eta^2 = 0.87\)</span>.</p>
+</blockquote>
+</section>
+<section id="post-hoc-tests" class="level2">
+<h2 data-anchor-id="post-hoc-tests">Post-Hoc Tests</h2>
+<p>If we got a significant result, maybe you’re not quite satisfied yet. After all, we’ve established that at least one of our conditions is different from at least one other. But we obviously would want to know which one is different from which others. Are they all different from one another? Does just one condition do better or worse than the others? To answer these questions, we need to conduct what are called post-hoc tests. These are more tests that we run after the main ANOVA analysis, if it revealed a significant difference. Specifically, how we conduct these post-hoc tests is we compare two group means at a time. These are called pairwise comparisons — we’re comparing pairs of conditions.</p>
+<section id="why-not-just-use-t-tests" class="level3">
+<h3 data-anchor-id="why-not-just-use-t-tests">Why Not Just Use <span class="math inline">\(t\)</span> Tests?</h3>
+<p>Maybe you’re thinking, “Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the <span class="math inline">\(t\)</span> test? Why couldn’t we just start with the <span class="math inline">\(t\)</span> tests? Why bother with the ANOVA at all?” And you’re not wrong. The reason why we have to go through this whole ANOVA procedure, and we don’t just dive right in with the pairwise tests, is that with more than two groups, we have to run more than one test to compare all those means. With three groups, there are three comparisons to make: A to B, A to C, and B to C. And if we just did three regular <span class="math inline">\(t\)</span> tests, our alpha would grow larger than 0.05. Each test would have its own Type I error rate defined by its alpha level, and so those three error rates would accumulate, giving us an experiment-wise alpha that was greater than 0.05.</p>
+<p>By performing the initial ANOVA as a single test, it keeps the alpha for that initial test at 0.05, and only if we find a significant difference with that first test do we conduct post-hoc tests, which are specifically designed to control the experiment-wise error rate and to keep it at an acceptable level of 0.05.</p>
+</section>
+<section id="tukeys-honestly-significant-difference-hsd" class="level3">
+<h3 data-anchor-id="tukeys-honestly-significant-difference-hsd">Tukey’s Honestly Significant Difference (HSD)</h3>
+<p>There’s more than one kind of post-hoc test you can do, but we’ll just mention one. It’s called Tukey’s Honestly Significant Difference test, which is a great name for a test. It allows us to find the minimum difference between pairs of treatment means so that we can say they are significantly different at the level <span class="math inline">\(p &lt; \alpha_{experiment\text{-}wise}\)</span>. <!-- [Possible typo: original audio said "p is last time the experiment wise alpha" — transcription likely garbled "p is less than the experiment-wise alpha."] --></p>
+<p>The equation to find the honestly significant difference is <span class="math inline">\(HSD = q \cdot \sqrt{MS_{within} / n}\)</span>, where <span class="math inline">\(n\)</span> is the number of scores in each condition. <span class="math inline">\(q\)</span> here is the studentized range statistic, and there are tables to look up its critical values, just like other test statistics.</p>
+<p>Here’s a little table: across the top are the number of conditions in your study, and the rows are possible degrees of freedom for the denominator of the <span class="math inline">\(F\)</span> ratio.</p>
+<div id="tbl-q-values" class="quarto-float quarto-figure quarto-figure-center">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-q-values-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.6: Critical values of the studentized range statistic <span class="math inline">\(q\)</span> for <span class="math inline">\(\alpha = .05\)</span>, by number of conditions (columns) and <span class="math inline">\(df\)</span> for the denominator (rows).
+</figcaption>
+<div aria-describedby="tbl-q-values-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="table-responsive">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: right;"><span class="math inline">\(df\)</span></th>
+<th style="text-align: right;">2</th>
+<th style="text-align: right;">3</th>
+<th style="text-align: right;">4</th>
+<th style="text-align: right;">5</th>
+<th style="text-align: right;">6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">3.64</td>
+<td style="text-align: right;">4.60</td>
+<td style="text-align: right;">5.22</td>
+<td style="text-align: right;">5.67</td>
+<td style="text-align: right;">6.03</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">3.46</td>
+<td style="text-align: right;">4.34</td>
+<td style="text-align: right;">4.90</td>
+<td style="text-align: right;">5.30</td>
+<td style="text-align: right;">5.63</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">3.34</td>
+<td style="text-align: right;">4.16</td>
+<td style="text-align: right;">4.68</td>
+<td style="text-align: right;">5.06</td>
+<td style="text-align: right;">5.36</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3.26</td>
+<td style="text-align: right;">4.04</td>
+<td style="text-align: right;">4.53</td>
+<td style="text-align: right;">4.89</td>
+<td style="text-align: right;">5.17</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">3.20</td>
+<td style="text-align: right;">3.95</td>
+<td style="text-align: right;">4.41</td>
+<td style="text-align: right;">4.76</td>
+<td style="text-align: right;">5.02</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3.15</td>
+<td style="text-align: right;">3.88</td>
+<td style="text-align: right;">4.33</td>
+<td style="text-align: right;">4.65</td>
+<td style="text-align: right;">4.91</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+<p>So for our little data set, there are three conditions and the degrees of freedom for the denominator was six, so our <span class="math inline">\(q\)</span> value is 4.34. Putting that into the equation, we get an answer of 3.54.</p>
+<p><span class="math display">\[HSD = q \sqrt{\frac{MS_{within}}{n}} = 4.34 \sqrt{\frac{2}{3}} = 3.54\]</span> That means that we’re looking for a difference between groups of more than 3.54 in order to say that that difference is statistically significant.</p>
+<p>So looking back at the condition means, we can now say that the people given a banana did significantly better than the people given the candy bar, and significantly better than the control group. But the candy bar group did not differ from the control condition.</p>
+</section>
+</section>
+<section id="assumptions-of-anova" class="level2">
+<h2 data-anchor-id="assumptions-of-anova">Assumptions of ANOVA</h2>
+<p>One last thing we need to mention are the assumptions that ANOVA relies upon, and you’ll be happy to know there’s nothing new here. These are precisely the same as for the <span class="math inline">\(t\)</span> test: we assume the independence of the observations, the normality of the population (or a large enough sample size), and we assume homogeneity of variance. And given the conceptual and mathematical relationship between the <span class="math inline">\(t\)</span> statistic and ANOVA, of course the assumptions had to be the same. It’s exactly the same logic, based on the same central limit theorem insights, so we have the same assumptions.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script src="resources/js/quiz.js"></script>
+<script src="resources/js/anchor-navigation.js"></script>
+<script src="resources/js/sidebar-toc.js"></script>
+<script>window.interactiveRuntime && window.interactiveRuntime.init();</script>
+<script src="resources/js/mobile-nav.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/statisticsfromscratch\.com");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+            // target, if specified
+            link.setAttribute("target", "_blank");
+            if (link.getAttribute("rel") === null) {
+              link.setAttribute("rel", "noopener");
+            }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation column-body">
+  <div class="nav-page nav-page-previous">
+      <a href="./13-related-samples-t-test.html" class="pagination-link" aria-label="Related Samples t Test">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Related Samples t Test</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./15-related-samples-anova.html" class="pagination-link" aria-label="Related Samples ANOVA">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Related Samples ANOVA</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
