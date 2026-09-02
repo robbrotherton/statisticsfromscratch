@@ -192,36 +192,44 @@ So far we've treated the movie ratings as populations. I mentioned that we have 
 
 Like I mentioned in Chapter 1, there's overlap between descriptive and inferential statistics. Here, we want to know our sample's variance, but not because we especially care about the sample itself. Rather, we want to use it as an estimate of the population variance. The trouble is that if we used precisely the calculation above, dividing $SS$ by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a sample's variance can over- or underestimate its population variance. Bias is a long-run tendency. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the average of all the estimates would be less than the actual population variance; it would underestimate the true value.
 
-The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimizes their sum of squared deviations. As a result, the sum of squared deviations around $M$ can only be smaller than the sum of squared deviations of those same scores around $\mu$, never larger.
+The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimize their sum of squared deviations. As a result, the sum of squared deviations around $M$ can only be smaller than the sum of squared deviations of those same scores around $\mu$, never larger.
 
 ::::: {#act-moving-center .callout-tip .interactive}
 ## The moving center
 
-{{< interactive-figure heightVariability makeHeightVariabilityDemo options='{"seed":"height-variability-v1","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"repeatedSamples":1000}' fallback="Interactive height-sampling diagram showing each uncorrected sample SD first centered on its fitted sample mean, then shifted to the fixed population mean for comparison." >}}
+{{< interactive-figure heightVariability makeHeightVariabilityDemo options='{"seed":"height-variability-v1","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"repeatedSamples":1000,"axisMode":"center","axisLabel":false,"unitLabel":"","sdScale":"population"}' fallback="Interactive sampling diagram comparing the same sample's deviations around its fitted mean and the fixed population mean." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Population" data-action='{"draw":2,"show-sample":false,"show-population-sd":true,"show-sample-sd":false,"sample-span-center":"sample","show-summary":false,"animate":false,"fall":false}'}
-Start with the population. The half-inch bins are filled from a hypothetical normal model with mean 65 inches and standard deviation 3 inches, so most people are near the mean and fewer people are in the tails.
+::: {.tutorial-step data-title="Population" data-action='{"draw":2,"show-sample":false,"focus-sample":false,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"sample-span-center":"sample","show-summary":false,"animate":false,"fall":false}'}
+Here we have a happy little population, a symmetrical mound of colorful dots. It has a fixed mean, $\mu$, and standard deviation, $\sigma$. The length of the black line underneath shows $\mu \pm \sigma$. We'll use that fixed span as our reference length, so in this picture $\sigma =$ {{< interactive-value heightVariability.displayPopulationSd format=".0f" >}}.
 :::
 
-::: {.tutorial-step data-title="Around M" data-action='{"draw":1,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":true}'}
-Now draw a sample of {{< interactive-value heightVariability.n format=".0f" >}} observations from those actual dots. The red span shows the uncorrected sample SD. It is built from squared deviations around $M$, with the variance calculated by dividing $SS$ by $n$. Its center marker sits on $M$, which was fitted from these same observations.
+::: {.tutorial-step data-title="Take a sample" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":true}'}
+Now we draw a sample of {{< interactive-value heightVariability.n format=".0f" >}} dots from the population. We want to compute the variability of the sample, but how?
 :::
 
-::: {.tutorial-step data-title="Shift to μ" data-action='{"draw":1,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
-For comparison, slide that same red span over until its center marker reaches $\mu$. Its width does not change—we are not recalculating the SD. The movement isolates the choice of center: $M$ moved toward this particular set of scores and minimized their squared deviations, whereas $\mu$ stayed fixed.
+::: {.tutorial-step data-title="From μ" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
+Because this is a simulation, we know $\mu$. So we can calculate the sample's squared deviations from $\mu$, divide by $n$ to get variance, and take the square root to get SD. The dashed blue line shows the answer relative to the population SD: {{< interactive-value heightVariability.displaySampleSdFromMu format=".2f" >}}. This is the SD we would get using the fixed population mean.
 :::
 
-::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
-A different sample gives us a different $M$. Here the uncorrected SD is larger than the population SD, showing that an individual sample can still overestimate variability.
+::: {.tutorial-step data-title="From M" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
+But usually we can't do that: we don't know $\mu$! So instead we find the sample mean, $M$, and calculate the squared deviations around *it*. The solid red line shows that answer, {{< interactive-value heightVariability.displaySampleSdFromM format=".2f" >}}, centered on $M$ because that's how we calculated it.
 :::
 
-::: {.tutorial-step data-title="Can be low" data-action='{"draw":5,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
-Here the uncorrected SD is smaller than the population SD. Individual estimates can miss in either direction; what happens every time is that $M$ is fitted afresh.
+::: {.tutorial-step data-title="Line them up" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
+Now that we've calculated it, let's slide the red span over so all three SD lines are centered on $\mu$ and we can compare them. The red span fits inside the dashed blue one. Computing the sample's SD around $M$ rather than $\mu$ gave a smaller answer.
 :::
 
-::: {.tutorial-step data-title="Keep sampling" data-action='{"draw":6,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}' data-repeat-action='{"new-sample":true,"show-sample":true,"show-population-sd":true,"show-sample-sd":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}' data-repeat-label="New sample"}
-Keep clicking **New sample** and watch how the fitted $M$ and the width of the uncorrected SD change from one sample to the next.
+::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+A new sample gives us a different $M$, and different standard deviations computed around $\mu$ or $M$ (the actual population $\sigma$ is fixed and doesn't change). Here the red sample SD is larger than the actual population $\sigma$. An individual sample can still overestimate variability. But the red $M$-based span is still no wider than the dashed $\mu$-based span.
+:::
+
+::: {.tutorial-step data-title="Can be low" data-action='{"draw":5,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+For every new sample, the red line will be narrower than the blue one (or they might be the same if the sample mean $M$ happens to be equal to $\mu$).
+:::
+
+::: {.tutorial-step data-title="Keep sampling" data-action='{"draw":6,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-action='{"new-sample":true,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-label="New sample"}
+Keep clicking to take as many new samples as you like. Both computed standard deviations will change, and either can land above or below the population SD. But the $M$-based answer can never be larger than the $\mu$-based answer for the same observations, because it is always fitted to the new sample mean---a moving target. That built-in shrinkage is what creates the long-run bias.
 :::
 ::::
 
@@ -231,17 +239,17 @@ Keep clicking **New sample** and watch how the fitted $M$ and the width of the u
 
 So now we know what the problem is, here's the solution: divide $SS$ by $n - 1$ rather than $n$. If only all of life's problems were so easily solved.
 
-Here is that correction in context. A population uses the known $\mu$ and divides $SS$ by $N$; a sample uses its fitted $M$ and divides by $n - 1$. Apart from the fitted center, denominator, and notation, the steps are the same.
+Here is the table of steps and equations again, with a new column applying them to samples. There are differences in notation---the greek symbols $\mu$ and $\sigma$ and uppercase $N$ for populations; $M$, $s$, and $n$ for samples. But aside from the different denominator in step 4, the process is the same.
 
 | Step | Population | Sample |
 |:------|:-|:-|
 | 1. Find the deviation for each score | $X - \mu$ | $X - M$ |
 | 2. Square the deviations | $(X - \mu)^2$ | $(X - M)^2$ |
 | 3. Sum the squared deviations | $SS = \Sigma(X - \mu)^2$ | $SS = \Sigma(X - M)^2$ |
-| 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{df} = \frac{SS}{n - 1}$ |
+| 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{n - 1}$ |
 | 5. Calculate standard deviation | $\sigma = \sqrt{\sigma^2}$ | $s = \sqrt{s^2}$ |
 
-This correction makes $s^2$ an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
+The adjusted denominator makes sample variance, $s^2$, an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
 
 {{< include quizzes/04-variability-sample-calculation.qmd >}}
 
