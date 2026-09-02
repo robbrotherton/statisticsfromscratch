@@ -33,6 +33,17 @@ test("a numeric question without an answer collects a number instead of grading 
   assert.match(runtime, /function outOfRangeMessage\(question, response\)/);
 });
 
+test("rich quiz fields preserve TeX for the page-level MathJax pass", () => {
+  assert.match(filter, /html_math_method = "mathjax"/);
+  assert.match(
+    filter,
+    /local function write_html\(document\)[\s\S]*?pandoc\.write\(document, "html", HTML_WRITER_OPTIONS\)/
+  );
+  assert.match(filter, /return write_html\(pandoc\.read\(markdown, "markdown"\)\)/);
+  assert.match(filter, /return write_html\(pandoc\.Pandoc\(\{ pandoc\.Para\(value\) \}\)\)/);
+  assert.match(filter, /return write_html\(pandoc\.Pandoc\(value\)\)/);
+});
+
 test("secondary action labels describe what they reveal or hide", () => {
   for (const label of [
     "Show hint",

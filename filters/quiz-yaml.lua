@@ -25,20 +25,28 @@ local function is_blank(value)
   return value == nil or trim(value) == ""
 end
 
+local HTML_WRITER_OPTIONS = {
+  html_math_method = "mathjax",
+}
+
+local function write_html(document)
+  return trim(pandoc.write(document, "html", HTML_WRITER_OPTIONS))
+end
+
 local function markdown_to_html(value)
   local markdown = trim(value)
   if markdown == "" then
     return ""
   end
-  return trim(pandoc.write(pandoc.read(markdown, "markdown"), "html"))
+  return write_html(pandoc.read(markdown, "markdown"))
 end
 
 local function inlines_to_html(value)
-  return trim(pandoc.write(pandoc.Pandoc({ pandoc.Para(value) }), "html"))
+  return write_html(pandoc.Pandoc({ pandoc.Para(value) }))
 end
 
 local function blocks_to_html(value)
-  return trim(pandoc.write(pandoc.Pandoc(value), "html"))
+  return write_html(pandoc.Pandoc(value))
 end
 
 local function rich_value(value, html)
