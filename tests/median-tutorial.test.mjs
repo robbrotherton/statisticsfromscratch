@@ -93,7 +93,7 @@ test("the tutorial reuses the opening letter-grade data", () => {
 
   const graphOptions = Array.from(openingQuiz.matchAll(/options='([^']+)'/g))
     .map((match) => JSON.parse(match[1]));
-  const gradeGraph = graphOptions.find((options) => options.labels?.title === "Final grades");
+  const gradeGraph = graphOptions.find((options) => options.labels?.x === "Letter grade");
   assert.deepEqual(gradeGraph.data.map((entry) => entry.x), ["F", "D", "C", "B", "A"]);
   const rank = { F: 1, D: 2, C: 3, B: 4, A: 5 };
   const quizGrades = gradeGraph.data.flatMap((entry) =>
@@ -105,7 +105,7 @@ test("the tutorial reuses the opening letter-grade data", () => {
   );
   assert.match(chapter, /mode was an A grade/);
   assert.match(section, /The striped B cards belong to both/);
-  assert.match(section, /In that case we have to use our discretion/);
+  assert.match(section, /The important thing is to be clear and intentional/);
 });
 
 test("the completed card figures use the requested display order and cover each later case", () => {

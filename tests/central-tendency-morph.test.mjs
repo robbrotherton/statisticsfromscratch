@@ -10,7 +10,7 @@ const graphSource = readFileSync(new URL("../resources/js/graph-generator.js", i
 
 function comparisonSteps() {
   const start = chapter.indexOf("## Watch the center change");
-  const end = chapter.indexOf("### Returning to tone identification", start);
+  const end = chapter.indexOf("## Summary", start);
   assert.ok(start >= 0 && end > start, "comparison tutorial should be present");
 
   return Array.from(chapter.slice(start, end).matchAll(
@@ -45,19 +45,19 @@ function graphContext() {
   return context;
 }
 
-test("the comparison returns to the opening with one guided morph", () => {
-  assert.match(chapter, /At the beginning of the chapter/);
+test("the comparison moves from concrete distributions to one guided morph", () => {
+  assert.match(chapter, /Stepping back from real data/);
   assert.ok(
-    chapter.indexOf("### The effect of outliers") < chapter.indexOf("## Watch the center change"),
+    chapter.indexOf("#fig-income-distribution") < chapter.indexOf("## Watch the center change"),
     "the concrete income example should precede the generic distribution morph"
   );
   assert.ok(
-    chapter.indexOf("## Watch the center change") < chapter.indexOf("### Returning to tone identification"),
-    "the tone-identification data should apply the generic comparison"
+    chapter.indexOf("#fig-tone-scramble-centers") < chapter.indexOf("## Watch the center change"),
+    "the tone-identification data should precede the generic distribution morph"
   );
   assert.equal((chapter.match(/makeCentralTendencyMorph/g) || []).length, 1);
   assert.doesNotMatch(chapter, /centralTendency(?:Normal|Positive|Negative|Bimodal)/);
-  assert.match(chapter, /\.callout-tip \.interactive \.with-controls/);
+  assert.match(chapter, /#act-distributions \.callout-tip \.interactive/);
 
   const steps = comparisonSteps();
   assert.deepEqual(
@@ -139,10 +139,10 @@ test("every sampled intermediate shape remains a normalized mixture", () => {
   });
 });
 
-test("the tone-identification callback uses honest grouped estimates", () => {
+test("the tone-identification comparison uses honest grouped estimates", () => {
   assert.equal((chapter.match(/makeToneIdentificationGraph/g) || []).length, 2);
   assert.match(chapter, /toneIdentificationCenters makeToneIdentificationGraph options='\{"showCenters":true\}'/);
-  assert.match(chapter, /markers are only estimates/);
+  assert.match(chapter, /median and mean estimated from the grouped data/);
 
   const context = graphContext();
   const centers = context.bcToneIdentificationGroupedCenters();

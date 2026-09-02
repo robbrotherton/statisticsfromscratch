@@ -6,7 +6,7 @@ const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.u
 const source = readFileSync(new URL("../resources/js/mean-balance-beam.js", import.meta.url), "utf8");
 
 function balanceTutorialSteps() {
-  const start = chapter.indexOf("## Explore the balance point");
+  const start = chapter.indexOf("## The mean as a balance point");
   const end = chapter.indexOf("## Comparing the three measures", start);
   assert.ok(start >= 0 && end > start, "balance tutorial section should be present");
 
