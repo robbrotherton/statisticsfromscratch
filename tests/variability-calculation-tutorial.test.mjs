@@ -70,3 +70,8 @@ test("the table generator defaults to population or sample mean notation consist
   );
   assert.match(source, /const deviationSymbol = opts\.deviationSymbol \|\|/);
 });
+
+test("summary results render each complete equation as inline math", () => {
+  assert.match(source, /bcVariabilityInlineMath\(`\$\{symbol\} = \$\{value\}`\)/);
+  assert.doesNotMatch(source, /createTextNode\(` \$\{value\}`\)/);
+});

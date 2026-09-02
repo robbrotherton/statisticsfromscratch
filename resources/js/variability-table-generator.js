@@ -138,7 +138,6 @@ bcVariabilityEnsureStyles = () => {
       width: 100%;
       min-width: var(--vt-table-min-width);
       margin: 0 auto;
-      font-family: var(--vt-math-font-family, var(--bc-math-font-family, MJXZERO, MJXTEX, "MathJax_Main", "STIX Two Math", "Cambria Math", "Times New Roman", serif));
       table-layout: fixed;
     }
 
@@ -159,8 +158,9 @@ bcVariabilityEnsureStyles = () => {
     }
 
     .variability-table th {
-      padding-bottom: 0.4rem;
+      padding-bottom: 0.22rem;
       border-bottom-color: var(--vt-border-color);
+      line-height: 1;
     }
 
     .variability-table .vt-data-last td {
@@ -334,8 +334,7 @@ bcVariabilityInlineMath = function() {
 bcVariabilitySummaryNode = (symbol, value) => {
   const span = document.createElement("span");
   span.className = "vt-summary-value";
-  span.appendChild(bcVariabilityInlineMath(`${symbol} =`));
-  span.appendChild(document.createTextNode(` ${value}`));
+  span.appendChild(bcVariabilityInlineMath(`${symbol} = ${value}`));
   return span;
 }
 
