@@ -536,13 +536,46 @@ bcGraphCreateSvg = (opts = {}, type = "histogram", dimensions = bcGraphDimension
   return svg;
 }
 
+// Axis furniture keeps a fixed CSS font size while responsive graphs redraw at
+// their actual width. Give compact charts correspondingly tighter default
+// reserves, then ease back to the established roomy defaults as space returns.
+// Explicit margins remain exact, so unusually wide tick labels can still claim
+// whatever room they need.
+bcGraphFluidDefault = (width, compact, roomy) => {
+  const compactWidth = 240;
+  const roomyWidth = 480;
+  const progress = Math.max(0, Math.min(1,
+    (Number(width) - compactWidth) / (roomyWidth - compactWidth)
+  ));
+  return Math.round(compact + (roomy - compact) * progress);
+}
+
+bcGraphDefaultLeftMargin = (opts, width) => {
+  const values = opts.yTickValues !== undefined
+    ? opts.yTickValues
+    : Array.isArray(opts.yTicks) ? opts.yTicks : null;
+  if (!Array.isArray(values) || !values.length) return 64;
+
+  const formatter = typeof (opts.yTickFormat || opts.yFormat) === "function"
+    ? opts.yTickFormat || opts.yFormat
+    : String;
+  const widest = values.reduce((length, value) =>
+    Math.max(length, String(formatter(value)).length), 1);
+  // A one-character tick fits comfortably beside the y title in 48 px. Each
+  // extra character claims roughly one tick-font character of additional room;
+  // longer labels retain the established 64 px reserve even on a narrow chart.
+  const compact = Math.min(64, 48 + (widest - 1) * 7);
+  return bcGraphFluidDefault(width, compact, 64);
+}
+
 bcGraphResolveMargin = (opts = {}) => {
   const margin = opts.margin || {};
+  const width = bcGraphDimensions(opts).width;
   return {
     top: bcGraphValueOr(margin.top, opts.title || (opts.labels && opts.labels.title) ? 42 : 22),
     right: bcGraphValueOr(margin.right, 22),
-    bottom: bcGraphValueOr(margin.bottom, 58),
-    left: bcGraphValueOr(margin.left, 64)
+    bottom: bcGraphValueOr(margin.bottom, bcGraphFluidDefault(width, 48, 58)),
+    left: bcGraphValueOr(margin.left, bcGraphDefaultLeftMargin(opts, width))
   };
 }
 
