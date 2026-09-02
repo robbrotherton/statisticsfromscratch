@@ -29,13 +29,18 @@ How might you describe the differences among these sets of ratings? Don't worry 
 
 Using the tools we explored in the previous chapter, we find that the median and mean are 5 for all three movies. The mode is also 5 for the first two. *The Polarizing Express* has two modes, 0 and 10, which already gives us a clue that something different is going on. But none of these measures quantifies just how closely the ratings cluster around the center. Without knowing anything else about the movies, if you were to try to guess how much you will like each one --- what score will you most likely give it? --- 5 would be a sensible prediction in each case. But it seems a more reliable guess in some cases than others. If we plot the ratings as block histograms, we can see why.
 
+:::: {#fig-movie-reviews}
 ::: {.bc-figure-row .bc-figure-row-wide}
 {{< interactive-figure variabilityBlocksStandins makeGraph options='{"type":"block","data":[5,5,5,5,5,5],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"Fine, Actually","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for Fine, Actually, all at 5." >}}
 
 {{< interactive-figure variabilityBlocksYou makeGraph options='{"type":"block","data":[0,4,5,5,6,10],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"The Good, the Bad and the Okay","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for The Good, the Bad and the Okay, mostly clustered around 5 with ratings at 0 and 10." >}}
 
 {{< interactive-figure variabilityBlocksFriend makeGraph options='{"type":"block","data":[0,0,1,9,10,10],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"The Polarizing Express","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for The Polarizing Express, clustered near 0 and 10." >}}
+
+
 :::
+Some fake reviews for three fake movies.
+::::
 
 The ratings for *Fine, Actually* do not vary at all: every reviewer so far gave it a 5. Most of the ratings for *The Good, the Bad and the Okay* cluster in the middle, aside from the two extremes. The ratings for *The Polarizing Express* sit much farther towards the extremes, with none in the middle of the scale at all. So *Fine, Actually* has no variability, *The Polarizing Express* has relatively high variability, and *The Good, the Bad and the Okay* sits somewhere in between. The mean gives us the same prediction for all three, but their variability tells us how far individual ratings tend to depart from it. 
 
@@ -43,11 +48,11 @@ How do we quantify that difference? Like measures of central tendency, measures 
 
 ## The range
 
-Remember Hipparchus? I mentioned him in Chapter 3 as an early astronomical pioneer, gazing at the heavens, taking measurements, and realizing that his data were not always perfectly consistent. His solution (according to later sources; his own original work is mostly lost) was to take the midrange: the halfway point between the lowest and highest observations [@stahl2006normal].
+Remember Hipparchus? I mentioned him in [Chapter 3](#sec-mean) as an early astronomical pioneer, gazing at the heavens, taking measurements, and realizing that his data were not always perfectly consistent. His solution (according to later sources; his own original work is mostly lost) was to take the midrange: the halfway point between the lowest and highest observations [@stahl2006normal].
 
 The utility of this to the early astronomers was to smooth over the discrepant measurements; once the midrange was calculated it could be taken as providing a reliable answer, and the extremes could be largely ignored. But those two values also offer a simple and intuitive way of quantifying variability: the __range__, calculated by subtracting the minimum score from the maximum.
 
-Here are those ratings from before:
+Here are those movie ratings from before:
 
 > *Fine, Actually*: 5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5,&nbsp;5\
 > Range: $5 - 5 = 0$
@@ -68,9 +73,9 @@ Useful as the range is, we also want a measure of variability that considers eve
 
 ## Deviations
 
-In chapter 3 we introduced *deviations*: the differences between each score and the mean. The mean is the point at which those deviations balance, but the deviations themselves also give us a way to quantify how far the scores spread around it.
+In Chapter 3 we introduced *deviations*: the differences between each score and the mean. The mean is the point at which those deviations balance, but the deviations themselves also give us a way to quantify how far the scores spread around it.
 
-For astronomers, deviations offered a way to quantify measurement error: imprecision in their instruments or observations. For statisticians applying the same ideas to human measurements, they captured a different kind of variation. In Quetelet's measurements of soldiers' chests, a deviation did not necessarily indicate a mistake of the measuring tape; it described how one person's body differed from another's. In either case, if we think of the mean as a prediction, a deviation is the prediction error: how far, and in which direction, the actual score fell from it.
+Astronomers realized this too. Deviations offered a way to quantify the imprecision of their instruments or observations. For statisticians applying the same ideas to human measurements, they captured a different kind of variation. In Quetelet's measurements of soldiers' chests, a deviation did not necessarily indicate a mistake of the measuring tape; it described how one person's body differed from another's. In either case, if we think of the mean as a prediction, a deviation is the prediction error: how far, and in which direction, the actual score fell from it.
 
 The next step was to find a way to summarize those deviations in a single number. Should be easy, no? If we want a "standard deviation," meaning a typical deviation from the mean, why not just calculate the average of all the deviations?
 
@@ -82,7 +87,7 @@ The problem is that, precisely because the mean is the balance point, the deviat
 
 So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we minimize and partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
 
-Having squared the deviations, we can follow up with one connected chain of calculations. Add the squared deviations to get $SS$, the __sum of squared deviations__ (or "sum of squares" for short). Divide $SS$ by the number of observations to get the population __variance__, the mean squared deviation. Then take its square root to get the __standard deviation__. The square root returns us to the original units, so we can interpret the standard deviation as a *typical deviation* from the mean.^[More precisely, the population standard deviation is the **root-mean-square deviation**: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn't the literal arithmetic mean of the raw deviations or their absolute values. I don't hear social scientists use the term "root-mean-square deviation" very often, so I'm just going to follow the convention of calling it the standard deviation.]
+Having squared the deviations, we can continue with one connected chain of calculations. Add the squared deviations to get $SS$, the __sum of squared deviations__ (or "sum of squares" for short). Divide $SS$ by the number of observations to get the population __variance__, the mean squared deviation. Then take its square root to get the __standard deviation__. The square root returns us to the original units, so we can interpret the standard deviation as a *typical deviation* from the mean.^[More precisely, the population standard deviation is the **root-mean-square deviation**: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn't the literal arithmetic mean of the raw deviations or their absolute values. I don't hear social scientists use the term "root-mean-square deviation" very often, so I'm just going to follow the convention of calling it the standard deviation.]
 
 ## Variability equations for populations
 
@@ -90,7 +95,7 @@ To complicate life slightly, populations and samples use slightly different calc
 
 The table puts the steps into mathematical notation. Population variance is represented by lowercase sigma squared ($\sigma^2$), and population standard deviation by lowercase sigma ($\sigma$).
 
-| Step | Population calculation |
+| Step | Calculation |
 |:------|:-|
 | 1. Find the deviation for each score | $X - \mu$ |
 | 2. Square the deviations | $(X - \mu)^2$ |
@@ -98,7 +103,9 @@ The table puts the steps into mathematical notation. Population variance is repr
 | 4. Calculate variance (mean squared deviation) | $\sigma^2 = \frac{SS}{N}$ |
 | 5. Calculate standard deviation (root-mean-square deviation) | $\sigma = \sqrt{\sigma^2}$ |
 
-Equations in hand, let's return to the two movies whose ratings had the same range. For now, we'll treat each complete set of ratings as its own population. We'll work through *The Good, the Bad and the Okay* together; then you can try the same procedure for *The Polarizing Express*.
+: Summary and notation for calculating population variance and standard deviation. {#tbl-variability-population}
+
+Equations in hand, let's return to the two movies whose ratings had the same range. For now, we'll treat each complete set of ratings as its own population. We'll work through *The Good, the Bad and the Okay* together, following that sequence of five steps; then you can try the same procedure for *The Polarizing Express*.
 
 ::::: {#act-calculate-variability .callout-tip .interactive}
 ## Calculate variability
@@ -107,27 +114,27 @@ Equations in hand, let's return to the two movies whose ratings had the same ran
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Scores" data-action='{"stage":"data","animate":false}'}
-Start with the original ratings for *The Good, the Bad and the Okay*. When I'm doing this calculation by hand, I find it easiest to put the scores in the first column of a table, then add columns for the deviations and squared deviations. We'll fill them from left to right before using the values at the bottom to finish the calculation.
+When I'm doing these calculations by hand, I find it easiest to put the scores in the first column of a table, labeled $X$. We'll add to this table as we go along. So here are the original ratings for *The Good, the Bad and the Okay*.
 :::
 
 ::: {.tutorial-step data-title="Mean" data-action='{"stage":"mean","animate":true}'}
-First find the population mean. The ratings add to 30, and there are six of them, so $\mu = 30/6 = 5$. This is the reference point for every deviation in the next column.
+First find the population mean. The ratings add to 30, and there are six of them, so $\mu = 30/6 = 5$. This will be the reference point for every deviation in the next column.
 :::
 
 ::: {.tutorial-step data-title="Deviations" data-action='{"stage":"deviations","animate":true}'}
-Subtract the mean from each score: $X-\mu$. The deviations are $-5, -1, 0, 0, 1,$ and $5$. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are.
+Now I add a column for the deviations. Subtract the mean from each score: $X-\mu$. The deviations are $-5, -1, 0, 0, 1,$ and $5$. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are. If you simply add up these five values, you get an answer of zero.
 :::
 
 ::: {.tutorial-step data-title="Squared" data-action='{"stage":"squared-deviations","animate":true}'}
-Now square each deviation. This gives us $25, 1, 0, 0, 1,$ and $25$. Squaring makes every value nonnegative, so the deviations below and above the mean will no longer cancel each other out.
+Next I add a column for the squared deviations. This gives us $25, 1, 0, 0, 1,$ and $25$. Squaring makes every value nonnegative, so when we add them up in the next step we won't get zero.
 :::
 
 ::: {.tutorial-step data-title="SS" data-action='{"stage":"ss","animate":true}'}
-Add the squared deviations to get the sum of squares: $SS = 25+1+0+0+1+25 = 52$. Once the two extra columns are filled, this is simply the total at the bottom of the final column.
+Now we add up all the squared deviations to get the sum of squares: $SS = 25+1+0+0+1+25 = 52$.
 :::
 
 ::: {.tutorial-step data-title="Variance" data-action='{"stage":"variance","animate":true}'}
-Divide by the population size, $N$, to get the variance: $\sigma^2 = 52/6 = 8.67$. Because we've squared the deviations, variance is measured in squared rating points. That makes it useful mathematically, but not especially intuitive on the scale of the original scores.
+Next divide $SS$ by the population size, $N$, to get the variance: $\sigma^2 = 52/6 = 8.67$. Because we've squared the deviations, variance is measured in squared rating points. That makes it useful mathematically, but not especially intuitive on the scale of the original scores.
 :::
 
 ::: {.tutorial-step data-title="SD" data-action='{"stage":"sd","animate":true}'}
@@ -169,13 +176,13 @@ $$
 SS = \Sigma X^2 - \frac{(\Sigma X)^2}{N}
 $$
 
-For the first term, square every score and add the results. Then subtract the correction term: the sum of the scores squared, divided by the number of scores. For *The Good, the Bad and the Okay*, $\Sigma X=30$ and $\Sigma X^2=202$, so:
+Order of operations is important here. For the first term, $\Sigma X^2$, square every score and sum the results. Then subtract the correction term: the sum of the scores squared, divided by the number of scores. For *The Good, the Bad and the Okay*, $\Sigma X=30$ and $\Sigma X^2=202$, so:
 
 $$
 SS = 202 - \frac{30^2}{6} = 202 - 150 = 52
 $$
 
-That is the same answer we found by calculating every deviation. The shortcut likewise gives $SS=132$ for *The Polarizing Express*, so the rest of both calculations remains unchanged.
+That is the same answer we found in @act-calculate-variability following the definitional approach. The shortcut likewise gives $SS=132$ for *The Polarizing Express*, so the rest of both calculations remains unchanged.
 
 We'll stick with the definitional approach for now, but tuck this computational arrangement in the back of your mind; it will become our preferred method when we get to the ANOVA section of the book.
 
@@ -183,7 +190,7 @@ We'll stick with the definitional approach for now, but tuck this computational 
 
 So far we've treated the movie ratings as populations. I mentioned that we have to do things a little differently for samples. Don't worry, the difference in the math is tiny, but the reason for it is important.
 
-In research, we generally use the limited information in a sample to estimate something about a population. Here, we want sample variance to estimate population variance. But if we used precisely the calculation above, dividing by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a single sample variance can fall above or below the population variance. It is a long-run property. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the estimates would average below the actual population variance; it would underestimate the true value.
+Like I mentioned in Chapter 1, there's overlap between descriptive and inferential statistics. Here, we want to know our sample's variance, but not because we especially care about the sample itself. Rather, we want to use it as an estimate of the population variance. The trouble is that if we used precisely the calculation above, dividing $SS$ by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a sample's variance can over- or underestimate its population variance. Bias is a long-run tendency. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the average of all the estimates would be less than the actual population variance; it would underestimate the true value.
 
 The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimizes their sum of squared deviations. As a result, the sum of squared deviations around $M$ can only be smaller than the sum of squared deviations of those same scores around $\mu$, never larger.
 
