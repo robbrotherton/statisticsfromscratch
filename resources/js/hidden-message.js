@@ -62,7 +62,7 @@ makeHiddenMessage = function() {
       .attr("height", 0)
       .attr("rx", 2)
       .style("fill", d => color(d.rank))
-      .style("stroke", "var(--bc-text, currentColor)")
+      .style("stroke", "var(--sfs-text, currentColor)")
       .style("stroke-opacity", 0.3)
       .attr("stroke-width", 1);
 

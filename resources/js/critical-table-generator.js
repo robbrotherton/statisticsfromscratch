@@ -271,17 +271,17 @@ bcCriticalTableNotify = (rootNode) => {
 }
 
 bcCriticalTableEnsureStyles = () => {
-  if (document.getElementById("bc-critical-table-styles")) return;
+  if (document.getElementById("sfs-critical-table-styles")) return;
   if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
   const style = document.createElement("style");
-  style.id = "bc-critical-table-styles";
+  style.id = "sfs-critical-table-styles";
   style.textContent = `
     .critical-value-table {
-      --cvt-muted-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --cvt-accent-color: var(--bc-accent, var(--bs-primary, #2c3e50));
-      --cvt-highlight-bg: var(--bc-highlight-bg, color-mix(in srgb, var(--cvt-accent-color) 12%, transparent));
-      --bc-figure-max-width: var(--cvt-max-width, 54rem);
+      --cvt-muted-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --cvt-accent-color: var(--sfs-accent, var(--bs-primary, #2c3e50));
+      --cvt-highlight-bg: var(--sfs-highlight-bg, color-mix(in srgb, var(--cvt-accent-color) 12%, transparent));
+      --sfs-figure-max-width: var(--cvt-max-width, 54rem);
     }
 
     .critical-value-table .cvt-heading {
@@ -302,17 +302,17 @@ bcCriticalTableEnsureStyles = () => {
     }
 
     .critical-value-table .cvt-table-wrap.cvt-scrollable.cvt-scroll-at-top:not(.cvt-scroll-at-bottom) {
-      box-shadow: inset 0 -1rem 0.8rem -0.85rem color-mix(in srgb, var(--bc-text, var(--bs-body-color, #212529)) 45%, transparent);
+      box-shadow: inset 0 -1rem 0.8rem -0.85rem color-mix(in srgb, var(--sfs-text, var(--bs-body-color, #212529)) 45%, transparent);
     }
 
     .critical-value-table .cvt-table-wrap.cvt-scrollable.cvt-scroll-at-bottom:not(.cvt-scroll-at-top) {
-      box-shadow: inset 0 1rem 0.8rem -0.85rem color-mix(in srgb, var(--bc-text, var(--bs-body-color, #212529)) 45%, transparent);
+      box-shadow: inset 0 1rem 0.8rem -0.85rem color-mix(in srgb, var(--sfs-text, var(--bs-body-color, #212529)) 45%, transparent);
     }
 
     .critical-value-table .cvt-table-wrap.cvt-scrollable:not(.cvt-scroll-at-top):not(.cvt-scroll-at-bottom) {
       box-shadow:
-        inset 0 1rem 0.8rem -0.85rem color-mix(in srgb, var(--bc-text, var(--bs-body-color, #212529)) 45%, transparent),
-        inset 0 -1rem 0.8rem -0.85rem color-mix(in srgb, var(--bc-text, var(--bs-body-color, #212529)) 45%, transparent);
+        inset 0 1rem 0.8rem -0.85rem color-mix(in srgb, var(--sfs-text, var(--bs-body-color, #212529)) 45%, transparent),
+        inset 0 -1rem 0.8rem -0.85rem color-mix(in srgb, var(--sfs-text, var(--bs-body-color, #212529)) 45%, transparent);
     }
 
     .critical-value-table table {
@@ -326,7 +326,7 @@ bcCriticalTableEnsureStyles = () => {
     .critical-value-table caption {
       caption-side: top;
       padding-bottom: 0.35rem;
-      color: var(--bc-text, var(--bs-body-color, #212529));
+      color: var(--sfs-text, var(--bs-body-color, #212529));
       font-weight: 700;
       text-align: center;
     }
@@ -340,7 +340,7 @@ bcCriticalTableEnsureStyles = () => {
     }
 
     .critical-value-table th {
-      color: var(--bc-text, var(--bs-body-color, #212529));
+      color: var(--sfs-text, var(--bs-body-color, #212529));
       font-weight: 700;
     }
 
@@ -372,7 +372,7 @@ bcCriticalTableEnsureStyles = () => {
       min-width: var(--cvt-cell-min-width, 2.8rem);
       padding: 0.08rem 0.2rem;
       border: 1px solid transparent;
-      border-radius: var(--bc-radius-sm, 4px);
+      border-radius: var(--sfs-radius-sm, 4px);
       background: transparent;
       color: inherit;
       font: inherit;
@@ -391,7 +391,7 @@ bcCriticalTableEnsureStyles = () => {
     .critical-value-table .cvt-cell-button[aria-pressed="true"] {
       border-color: var(--cvt-accent-color);
       background: var(--cvt-highlight-bg);
-      color: var(--bc-text, var(--bs-body-color, #212529));
+      color: var(--sfs-text, var(--bs-body-color, #212529));
       font-weight: 700;
     }
 
@@ -451,16 +451,16 @@ bcCriticalTableRange = (count) =>
 bcCriticalTableBuildRoot = (opts = {}, className = "") => {
   bcCriticalTableEnsureStyles();
   const root = bcCriticalTableCreate("div")
-    .attr("class", `critical-value-table bc-figure ${className}`.trim())
+    .attr("class", `critical-value-table sfs-figure ${className}`.trim())
     .attr("id", opts.id || null)
     .style("--cvt-max-width", opts.maxWidth || null)
     .style("--cvt-table-min-width", opts.tableMinWidth || null)
     .style("--cvt-cell-min-width", opts.cellMinWidth || opts.tableCellMinWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
 
   if (opts.title) {
     root.append("div")
-      .attr("class", "cvt-heading bc-control-title")
+      .attr("class", "cvt-heading sfs-control-title")
       .text(opts.title);
   }
 
@@ -691,7 +691,7 @@ bcCriticalTableNormalAreas = (opts = {}) => {
 
   const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
-    .attr("class", "bc-data-table")
+    .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "Unit normal area table");
   if (opts.caption) table.append("caption").text(opts.caption);
 
@@ -746,7 +746,7 @@ bcCriticalTableNormalLookup = (opts = {}) => {
 
   const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
-    .attr("class", "bc-data-table")
+    .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "Unit normal lookup table");
   if (opts.caption) table.append("caption").text(opts.caption);
 
@@ -860,7 +860,7 @@ bcCriticalTableT = (opts = {}) => {
 
   const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
-    .attr("class", "bc-data-table")
+    .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "t critical value table");
   if (opts.caption) table.append("caption").text(opts.caption);
 
@@ -983,7 +983,7 @@ bcCriticalTableF = (opts = {}) => {
 
   const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
-    .attr("class", "bc-data-table")
+    .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "F critical value table");
   if (opts.caption) table.append("caption").text(opts.caption);
 

@@ -134,7 +134,7 @@ test("responsive layouts follow container width and dispose cleanly", () => {
   assert.equal(layouts.length, 2);
   assert.equal(layouts[1].mode, "compact");
   assert.equal(layouts[1].width, 392);
-  assert.equal(loaded.root.styleValues.get("--bc-layout-width"), "392px");
+  assert.equal(loaded.root.styleValues.get("--sfs-layout-width"), "392px");
 
   loaded.observer().resize(390);
   loaded.flushFrames();

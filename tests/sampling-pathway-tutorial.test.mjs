@@ -74,14 +74,14 @@ test("the IQ tutorial splits one sample into select, compute, and place states",
   assert.equal(oneSample[1].action["fall-observations"], false);
   assert.equal(oneSample[1].action["fall-mean"], false);
   assert.equal(oneSample[1].action["converge-mean"], true);
-  assert.match(oneSample[1].text, /bc-data-emphasis/);
+  assert.match(oneSample[1].text, /sfs-data-emphasis/);
 
   assert.equal(oneSample[2].action["show-mean"], false);
   assert.equal(oneSample[2].action["show-distribution"], true);
   assert.equal(oneSample[2].action.focus, "distribution");
   assert.equal(oneSample[2].action["fall-observations"], false);
   assert.equal(oneSample[2].action["fall-mean"], true);
-  assert.match(oneSample[2].text, /bc-data-emphasis/);
+  assert.match(oneSample[2].text, /sfs-data-emphasis/);
 });
 
 test("later states keep the active sample and its mean emphasized together", () => {
@@ -94,7 +94,7 @@ test("later states keep the active sample and its mean emphasized together", () 
     assert.equal(step.action.focus, "sample-mean");
     assert.equal(step.action.observations, true);
     assert.equal(step.action["show-distribution"], true);
-    assert.match(step.text, /bc-data-emphasis/);
+    assert.match(step.text, /sfs-data-emphasis/);
   }
 });
 
@@ -111,7 +111,7 @@ test("mean convergence runs at teaching speed and is skipped for the fast patter
 test("the mean animation uses interruptible ghosts and honors reduced motion", () => {
   assert.match(pathwaySource, /case "converge-mean":/);
   assert.match(visualsSource, /bcs-mean-ghost-layer/);
-  assert.match(visualsSource, /bcs-mean-ghost bc-graph-point/);
+  assert.match(visualsSource, /bcs-mean-ghost sfs-graph-point/);
   assert.match(visualsSource, /state\.convergeMean && !reducedMotion\(\)/);
   assert.match(visualsSource, /meanGhostLayer\.selectAll\("\*"\)\.interrupt\(\)\.remove\(\)/);
 });
@@ -136,7 +136,7 @@ test("the finite height pathway reuses convergence without selection emphasis", 
     assert.equal(step.action["show-distribution"], true);
     assert.equal(step.action["highlight-current"], false);
     assert.equal(step.action["converge-mean"], true);
-    assert.match(step.text, /bc-data-emphasis/);
+    assert.match(step.text, /sfs-data-emphasis/);
   }
   assert.equal(heightSteps.at(-1).action.delay, 1200);
 });

@@ -20,11 +20,11 @@
 (function (global) {
   "use strict";
 
-  const STYLE_ID = "bc-catan-board-styles";
+  const STYLE_ID = "sfs-catan-board-styles";
   const SQRT3 = Math.sqrt(3);
   const ROW_SIZES = [3, 4, 5, 4, 3];
   const VERTEX_COUNT = 54;
-  const SELECTION_EVENT = "bc-catan:selection";
+  const SELECTION_EVENT = "sfs-catan:selection";
 
   const DEFAULT_NUMBERS = [
     2, 5, 11,
@@ -52,7 +52,7 @@
     style.id = STYLE_ID;
     style.textContent = `
       .catan-board {
-        --bc-figure-max-width: var(--cb-max-width, min(32rem, 100%));
+        --sfs-figure-max-width: var(--cb-max-width, min(32rem, 100%));
 
         /* Muted, flat terrain. Every fill is mixed toward the page
            background, so one set of hues works in both themes: on white the
@@ -64,10 +64,10 @@
         --cb-desert: #c0ad83;
         --cb-terrain-strength: 62%;
         --cb-terrain-filter: none;
-        --cb-outline: color-mix(in srgb, #40667d 55%, var(--bc-bg));
+        --cb-outline: color-mix(in srgb, #40667d 55%, var(--sfs-bg));
 
-        --cb-token-face: color-mix(in srgb, #f8f1de 88%, var(--bc-bg));
-        --cb-token-edge: color-mix(in srgb, #8a7c5c 60%, var(--bc-bg));
+        --cb-token-face: color-mix(in srgb, #f8f1de 88%, var(--sfs-bg));
+        --cb-token-edge: color-mix(in srgb, #8a7c5c 60%, var(--sfs-bg));
         --cb-token-ink: #23201a;
         --cb-token-hot: #b3261e;
 
@@ -78,26 +78,26 @@
         --cb-ramp-blue: #2f7fbf;
         --cb-ramp-teal: #1f95a8;
         --cb-ramp-green: #0f9e5a;
-        --cb-ramp-low: color-mix(in srgb, var(--cb-ramp-blue) 44%, var(--bc-bg));
-        --cb-ramp-mid: color-mix(in srgb, var(--cb-ramp-teal) 82%, var(--bc-bg));
+        --cb-ramp-low: color-mix(in srgb, var(--cb-ramp-blue) 44%, var(--sfs-bg));
+        --cb-ramp-mid: color-mix(in srgb, var(--cb-ramp-teal) 82%, var(--sfs-bg));
         --cb-ramp-high: var(--cb-ramp-green);
 
-        --cb-house-quiet: color-mix(in srgb, var(--bc-text) 20%, var(--bc-bg));
-        --cb-house-edge: color-mix(in srgb, var(--bc-text) 55%, var(--bc-bg));
-        --cb-mark: var(--bc-if-step-accent, var(--bc-accent));
+        --cb-house-quiet: color-mix(in srgb, var(--sfs-text) 20%, var(--sfs-bg));
+        --cb-house-edge: color-mix(in srgb, var(--sfs-text) 55%, var(--sfs-bg));
+        --cb-mark: var(--sfs-if-step-accent, var(--sfs-accent));
         /* The accent alone is a mid-blue in the dark theme and sinks into a
            dark terrain hex; pulling it toward the text colour keeps the
            reader's own settlement the loudest thing on either board. */
-        --cb-selected: color-mix(in srgb, var(--cb-mark) 68%, var(--bc-text));
-        --cb-number-size: var(--bc-figure-label-size);
+        --cb-selected: color-mix(in srgb, var(--cb-mark) 68%, var(--sfs-text));
+        --cb-number-size: var(--sfs-figure-label-size);
         --cb-duration: 460ms;
       }
 
-      .catan-board[data-bc-layout="compact"] {
+      .catan-board[data-sfs-layout="compact"] {
         /* The number tokens are the one dense in-plot annotation layer here,
            and they are the layer the tutorial runtime allows to step
            down on a narrow layout. Everything else holds its token size. */
-        --cb-number-size: var(--bc-figure-micro-size);
+        --cb-number-size: var(--sfs-figure-micro-size);
       }
 
       /* With the ramp on, terrain must stop competing with it: the hexes drop
@@ -124,26 +124,26 @@
       }
 
       .catan-board .cb-hex {
-        stroke: var(--bc-bg);
+        stroke: var(--sfs-bg);
         stroke-width: 1.5;
         stroke-linejoin: round;
         transition: fill var(--cb-duration) ease;
       }
 
       .catan-board .cb-hex[data-terrain="wood"] {
-        fill: color-mix(in srgb, var(--cb-wood) var(--cb-terrain-strength), var(--bc-bg));
+        fill: color-mix(in srgb, var(--cb-wood) var(--cb-terrain-strength), var(--sfs-bg));
       }
 
       .catan-board .cb-hex[data-terrain="grain"] {
-        fill: color-mix(in srgb, var(--cb-grain) var(--cb-terrain-strength), var(--bc-bg));
+        fill: color-mix(in srgb, var(--cb-grain) var(--cb-terrain-strength), var(--sfs-bg));
       }
 
       .catan-board .cb-hex[data-terrain="brick"] {
-        fill: color-mix(in srgb, var(--cb-brick) var(--cb-terrain-strength), var(--bc-bg));
+        fill: color-mix(in srgb, var(--cb-brick) var(--cb-terrain-strength), var(--sfs-bg));
       }
 
       .catan-board .cb-hex[data-terrain="desert"] {
-        fill: color-mix(in srgb, var(--cb-desert) var(--cb-terrain-strength), var(--bc-bg));
+        fill: color-mix(in srgb, var(--cb-desert) var(--cb-terrain-strength), var(--sfs-bg));
       }
 
       .catan-board .cb-outline {
@@ -192,7 +192,7 @@
       }
 
       .catan-board .cb-glyph {
-        stroke: var(--bc-bg);
+        stroke: var(--sfs-bg);
         stroke-width: 0.9;
         stroke-linejoin: round;
         fill: var(--cb-house-quiet);
@@ -207,8 +207,8 @@
          pointer or under keyboard focus, and stays once a corner is chosen.
          The hit targets are always live; only the glyph is hidden. */
       .catan-board[data-cb-mode="choose"] .cb-vertex .cb-glyph {
-        fill: color-mix(in srgb, var(--cb-mark) 45%, var(--bc-bg));
-        stroke: var(--bc-bg);
+        fill: color-mix(in srgb, var(--cb-mark) 45%, var(--sfs-bg));
+        stroke: var(--sfs-bg);
         stroke-width: 1;
         opacity: 0;
         transition:
@@ -227,14 +227,14 @@
       .catan-board .cb-vertex[data-selected="true"] .cb-glyph,
       .catan-board[data-cb-mode="choose"] .cb-vertex[data-selected="true"] .cb-glyph {
         fill: var(--cb-selected);
-        stroke: var(--bc-bg);
+        stroke: var(--sfs-bg);
         stroke-width: 1.4;
         opacity: 1;
       }
 
       .catan-board .cb-focus-ring {
         fill: none;
-        stroke: var(--bc-focus, var(--bc-accent));
+        stroke: var(--sfs-focus, var(--sfs-accent));
         stroke-width: 2;
         opacity: 0;
         transition: opacity 140ms ease;
@@ -270,11 +270,11 @@
       }
 
       .catan-board .cb-mark-text {
-        font-size: var(--bc-figure-small-size);
+        font-size: var(--sfs-figure-small-size);
         font-weight: 600;
         fill: var(--cb-mark);
         paint-order: stroke fill;
-        stroke: var(--bc-bg);
+        stroke: var(--sfs-bg);
         stroke-width: 3.5;
         stroke-linejoin: round;
       }
@@ -286,8 +286,8 @@
         justify-content: center;
         gap: 0.25rem 0.5rem;
         margin: 0.55rem 0 0.15rem;
-        color: var(--bc-muted);
-        font-size: var(--bc-figure-note-size);
+        color: var(--sfs-muted);
+        font-size: var(--sfs-figure-note-size);
         line-height: 1.3;
       }
 
@@ -312,7 +312,7 @@
         width: clamp(5rem, 34vw, 9rem);
         height: 0.5rem;
         border-radius: 999px;
-        border: 1px solid var(--bc-border);
+        border: 1px solid var(--sfs-border);
         background: linear-gradient(
           to right,
           var(--cb-ramp-low),
@@ -329,15 +329,15 @@
       .catan-board .cb-readout {
         min-height: 2.9rem;
         margin-top: 0.35rem;
-        font-size: var(--bc-figure-note-size);
+        font-size: var(--sfs-figure-note-size);
       }
 
       .catan-board .cb-readout-detail {
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
       }
 
       .catan-board .cb-readout-strong {
-        color: var(--bc-text);
+        color: var(--sfs-text);
         font-weight: 700;
       }
 
@@ -704,9 +704,9 @@
       if (!detail.action) return;
       handler(detail.action, detail);
     };
-    document.addEventListener("bc-if:tutorial-step-action", listener);
+    document.addEventListener("sfs-if:tutorial-step-action", listener);
     return function () {
-      document.removeEventListener("bc-if:tutorial-step-action", listener);
+      document.removeEventListener("sfs-if:tutorial-step-action", listener);
     };
   }
 
@@ -755,16 +755,16 @@
     }
 
     const root = d3.create("div")
-      .attr("class", "catan-board bc-figure")
+      .attr("class", "catan-board sfs-figure")
       .style("--cb-max-width", opts.maxWidth || null);
     const rootNode = root.node();
     rootNode.dataset.cbHidden = state.showBoard ? "false" : "true";
 
     const chartWrap = root.append("div")
-      .attr("class", "cb-chart-wrap bc-chart-wrap");
+      .attr("class", "cb-chart-wrap sfs-chart-wrap");
 
     const svg = chartWrap.append("svg")
-      .attr("class", "cb-svg bc-svg")
+      .attr("class", "cb-svg sfs-svg")
       .attr("role", "group")
       .attr("preserveAspectRatio", "xMidYMid meet");
 
@@ -781,7 +781,7 @@
     // a label half-hidden behind a settlement would be worse than useless.
     const markLayer = boardGroup.append("g").attr("class", "cb-mark-layer");
 
-    // A hidden probe lets the module honour --bc-figure-* type sizes without
+    // A hidden probe lets the module honour --sfs-figure-* type sizes without
     // ever writing a px font-size: the token circles are sized from whatever
     // the stylesheet resolves the numeral to at this layout.
     const probe = svg.append("text")
@@ -808,14 +808,14 @@
     const legendHigh = legendScale.append("span").attr("class", "cb-legend-end");
 
     const readout = root.append("div")
-      .attr("class", "bc-readout cb-readout")
+      .attr("class", "sfs-readout cb-readout")
       .attr("aria-live", "polite");
-    const readoutPrimary = readout.append("div").attr("class", "bc-readout-row");
-    const readoutPrimaryLabel = readoutPrimary.append("span").attr("class", "bc-readout-label");
-    const readoutPrimaryValue = readoutPrimary.append("span").attr("class", "bc-readout-value");
-    const readoutSecondary = readout.append("div").attr("class", "bc-readout-row");
-    const readoutSecondaryLabel = readoutSecondary.append("span").attr("class", "bc-readout-label");
-    const readoutSecondaryValue = readoutSecondary.append("span").attr("class", "bc-readout-value");
+    const readoutPrimary = readout.append("div").attr("class", "sfs-readout-row");
+    const readoutPrimaryLabel = readoutPrimary.append("span").attr("class", "sfs-readout-label");
+    const readoutPrimaryValue = readoutPrimary.append("span").attr("class", "sfs-readout-value");
+    const readoutSecondary = readout.append("div").attr("class", "sfs-readout-row");
+    const readoutSecondaryLabel = readoutSecondary.append("span").attr("class", "sfs-readout-label");
+    const readoutSecondaryValue = readoutSecondary.append("span").attr("class", "sfs-readout-value");
 
     const MARK_SLOTS = [
       { kind: "reader", label: "your pick", direction: [1, -1] },

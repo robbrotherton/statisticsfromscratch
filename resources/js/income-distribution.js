@@ -159,7 +159,7 @@ makeIncomeDistributionChart = function() {
 
   const markerData = [
     { label: "Median", value: medianIncome, color: "var(--graph-series-3, #009e73)", anchor: "end", dx: -6 },
-    { label: "Mean", value: meanIncome, color: "var(--bc-danger-color, #c63f3f)", anchor: "start", dx: 6 }
+    { label: "Mean", value: meanIncome, color: "var(--sfs-danger-color, #c63f3f)", anchor: "start", dx: 6 }
   ];
 
   const markers = svg.append("g")

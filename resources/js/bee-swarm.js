@@ -73,36 +73,36 @@
     var style = document.createElement("style");
     style.id = STYLE_ID;
     style.textContent = [
-      ".bee-swarm { --bc-figure-max-width: var(--bs-max-width, 52rem); }",
+      ".bee-swarm { --sfs-figure-max-width: var(--bs-max-width, 52rem); }",
       ".bee-swarm .bs-chart-wrap { position: relative; overflow: visible; }",
       ".bee-swarm .bs-swarm-canvas {",
       "  position: absolute; left: 0; top: -50%; width: 100%; height: 200%;",
       "  pointer-events: none; z-index: 2;",
       "}",
-      ".bee-swarm .bc-svg { position: relative; z-index: 1; }",
+      ".bee-swarm .sfs-svg { position: relative; z-index: 1; }",
       ".bee-swarm .bs-null-curve { fill: none; stroke: var(--graph-series-1, #0072b2); stroke-width: 1.5; }",
-      ".bee-swarm .bs-critical-region { fill: var(--bc-danger, #dc3545); opacity: 0.35; stroke: none; }",
+      ".bee-swarm .bs-critical-region { fill: var(--sfs-danger, #dc3545); opacity: 0.35; stroke: none; }",
       ".bee-swarm .bs-hive-marker { fill: " + HIVE_COLOR + "; }",
       ".bee-swarm .bs-null-hive-marker {",
       "  fill: none; stroke: " + HIVE_COLOR + "; stroke-width: 1.5; stroke-dasharray: 3 2;",
       "}",
       ".bee-swarm .bs-mean-line { stroke: " + HIVE_COLOR + "; stroke-width: 1.5; stroke-dasharray: 4 4; }",
-      ".bee-swarm .bs-mean-line.is-significant { stroke: var(--bc-danger, #dc3545); }",
+      ".bee-swarm .bs-mean-line.is-significant { stroke: var(--sfs-danger, #dc3545); }",
       ".bee-swarm .bs-readouts {",
       "  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;",
       "  gap: 1rem 1.75rem; margin-top: 0.5rem; font-variant-numeric: tabular-nums;",
       "}",
       ".bee-swarm .bs-tracker { display: flex; align-items: center; gap: 0.6rem; }",
-      ".bee-swarm .bs-tracker-arc { fill: var(--bc-danger, #dc3545); }",
-      ".bee-swarm .bs-tracker-rest { fill: var(--bc-border, #ccc); }",
+      ".bee-swarm .bs-tracker-arc { fill: var(--sfs-danger, #dc3545); }",
+      ".bee-swarm .bs-tracker-rest { fill: var(--sfs-border, #ccc); }",
       ".bee-swarm .bs-tracker-value { font-size: 0.95rem; font-weight: 600; fill: currentColor; }",
       ".bee-swarm .bs-readout-stack { display: flex; flex-direction: column; gap: 0.1rem; }",
-      ".bee-swarm .bs-readout-label { font-size: 0.72rem; color: var(--bc-muted, #6c757d); }",
+      ".bee-swarm .bs-readout-label { font-size: 0.72rem; color: var(--sfs-muted, #6c757d); }",
       ".bee-swarm .bs-readout-value { font-size: 0.9rem; }",
       ".bee-swarm .bs-seg { display: flex; gap: 0.25rem; flex-wrap: wrap; }",
-      ".bee-swarm .bs-seg .bc-button[aria-pressed=\"true\"] {",
-      "  background: var(--bc-accent, #2c7fb8); color: var(--bc-bg, #fff);",
-      "  border-color: var(--bc-accent, #2c7fb8);",
+      ".bee-swarm .bs-seg .sfs-button[aria-pressed=\"true\"] {",
+      "  background: var(--sfs-accent, #2c7fb8); color: var(--sfs-bg, #fff);",
+      "  border-color: var(--sfs-accent, #2c7fb8);",
       "}",
       ".bee-swarm .bs-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }",
       ".bee-swarm .bs-row-label { font-size: 0.8rem; min-width: 5.2rem; }",
@@ -114,8 +114,8 @@
       "  display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; margin: 0;",
       "}",
       ".bee-swarm input[type=\"range\"] { flex: 1 1 8rem; min-width: 6rem; }",
-      ".bee-swarm[aria-busy=\"true\"] .bs-actions .bc-button:not(.bs-reset),",
-      ".bee-swarm[aria-busy=\"true\"] .bs-seg .bc-button,",
+      ".bee-swarm[aria-busy=\"true\"] .bs-actions .sfs-button:not(.bs-reset),",
+      ".bee-swarm[aria-busy=\"true\"] .bs-seg .sfs-button,",
       ".bee-swarm[aria-busy=\"true\"] input { pointer-events: none; opacity: 0.55; }"
     ].join("\n");
     document.head.appendChild(style);
@@ -210,17 +210,17 @@
     // ---- DOM ---------------------------------------------------------------
 
     var root = d3.create("div")
-      .attr("class", "bee-swarm bc-figure")
+      .attr("class", "bee-swarm sfs-figure")
       .style("--bs-max-width", opts.maxWidth || null);
     var rootNode = root.node();
 
     var controls = root.append("div").attr("class", "bs-controls");
     var controlsNode = controls.node();
 
-    var chartWrap = root.append("div").attr("class", "bs-chart-wrap bc-chart-wrap");
+    var chartWrap = root.append("div").attr("class", "bs-chart-wrap sfs-chart-wrap");
 
     var svg = chartWrap.append("svg")
-      .attr("class", "bc-svg bc-graph")
+      .attr("class", "sfs-svg sfs-graph")
       .attr("viewBox", [0, 0, W, H])
       .attr("role", "img")
       .attr("aria-label",
@@ -233,25 +233,25 @@
       .x(function(point) { return point.x; })
       .y(function(point) { return yDensity(point.y); });
 
-    var nullCurveLayer = svg.append("g").attr("class", "bc-if-reveal");
+    var nullCurveLayer = svg.append("g").attr("class", "sfs-if-reveal");
     var nullCurvePath = nullCurveLayer.append("path").attr("class", "bs-null-curve");
 
-    var criticalLayer = svg.append("g").attr("class", "bc-if-reveal");
+    var criticalLayer = svg.append("g").attr("class", "sfs-if-reveal");
     var leftTailPath = criticalLayer.append("path").attr("class", "bs-critical-region");
     var rightTailPath = criticalLayer.append("path").attr("class", "bs-critical-region");
 
-    var nullHiveLayer = svg.append("g").attr("class", "bc-if-reveal");
+    var nullHiveLayer = svg.append("g").attr("class", "sfs-if-reveal");
     nullHiveLayer.append("rect")
       .attr("class", "bs-null-hive-marker")
       .attr("x", -8).attr("y", -8).attr("width", 16).attr("height", 16)
       .attr("transform", "translate(" + MU0 + "," + (H * 0.5) + ") rotate(45)");
 
-    var hiveLayer = svg.append("g").attr("class", "bc-if-reveal");
+    var hiveLayer = svg.append("g").attr("class", "sfs-if-reveal");
     var hiveMarker = hiveLayer.append("rect")
       .attr("class", "bs-hive-marker")
       .attr("x", -8).attr("y", -8).attr("width", 16).attr("height", 16);
 
-    var meanLayer = svg.append("g").attr("class", "bc-if-reveal");
+    var meanLayer = svg.append("g").attr("class", "sfs-if-reveal");
     var meanLine = meanLayer.append("line")
       .attr("class", "bs-mean-line")
       .attr("y1", 16).attr("y2", H - 16);
@@ -264,7 +264,7 @@
 
     // Readout row: the significance tracker (donut + elapsed time) is a
     // toggleable reveal layer; d and SE stay visible whenever it is shown.
-    var readouts = root.append("div").attr("class", "bs-readouts bc-readout bc-if-reveal");
+    var readouts = root.append("div").attr("class", "bs-readouts sfs-readout sfs-if-reveal");
     var tracker = readouts.append("div").attr("class", "bs-tracker");
     var trackerSvg = tracker.append("svg")
       .attr("width", 76).attr("height", 76).attr("viewBox", [-38, -38, 76, 76])
@@ -530,7 +530,7 @@
       else stopLoop();
     }
 
-    document.addEventListener("bc-motion:change", evaluate);
+    document.addEventListener("sfs-motion:change", evaluate);
 
     // ---- fast-forward ------------------------------------------------------
 
@@ -753,7 +753,7 @@
     function makeButton(parent, icon, label, extraClass) {
       var button = parent.append("button")
         .attr("type", "button")
-        .attr("class", "bc-button" + (extraClass ? " " + extraClass : ""))
+        .attr("class", "sfs-button" + (extraClass ? " " + extraClass : ""))
         .node();
       var iconNode = document.createElement("i");
       iconNode.className = "bi bi-" + icon;
@@ -767,7 +767,7 @@
     function makeSegButton(parent, label, onSelect) {
       var button = parent.append("button")
         .attr("type", "button")
-        .attr("class", "bc-button")
+        .attr("class", "sfs-button")
         .text(label)
         .node();
       button.addEventListener("click", function() {
@@ -777,9 +777,9 @@
       return button;
     }
 
-    var swarmPanel = controls.append("div").attr("class", "bc-control-panel bc-if-control-panel");
+    var swarmPanel = controls.append("div").attr("class", "sfs-control-panel sfs-if-control-panel");
 
-    var variabilityRow = swarmPanel.append("div").attr("class", "bs-row bc-control-row");
+    var variabilityRow = swarmPanel.append("div").attr("class", "bs-row sfs-control-row");
     variabilityRow.append("span").attr("class", "bs-row-label").text("Variability");
     var variabilitySeg = variabilityRow.append("div").attr("class", "bs-seg");
     var variabilityButtons = ["Low", "Medium", "High"].map(function(label, index) {
@@ -788,7 +788,7 @@
       });
     });
 
-    var nRow = swarmPanel.append("div").attr("class", "bs-row bc-control-row");
+    var nRow = swarmPanel.append("div").attr("class", "bs-row sfs-control-row");
     nRow.append("span").attr("class", "bs-row-label").text("Bees");
     var nSeg = nRow.append("div").attr("class", "bs-seg");
     var nButtons = core.N_BEES_VALUES.map(function(value, index) {
@@ -797,7 +797,7 @@
       });
     });
 
-    var hiveRow = swarmPanel.append("div").attr("class", "bs-row bc-control-row");
+    var hiveRow = swarmPanel.append("div").attr("class", "bs-row sfs-control-row");
     var hiveLabel = hiveRow.append("label").attr("class", "bs-row-label").text("Hive offset");
     var hiveSlider = hiveRow.append("input")
       .attr("type", "range").attr("min", 0).attr("max", 100).attr("step", 1)
@@ -809,8 +809,8 @@
     });
     hiveLabel.attr("for", null);
 
-    var playbackPanel = controls.append("div").attr("class", "bc-control-panel bc-if-control-panel");
-    var actions = playbackPanel.append("div").attr("class", "bs-actions bc-action-row");
+    var playbackPanel = controls.append("div").attr("class", "sfs-control-panel sfs-if-control-panel");
+    var actions = playbackPanel.append("div").attr("class", "bs-actions sfs-action-row");
     var playButton = makeButton(actions, "play-fill", "Play");
     var ffButton = makeButton(actions, "fast-forward-fill", "+60s");
     var resetButton = makeButton(actions, "arrow-counterclockwise", "Reset", "bs-reset");
@@ -833,7 +833,7 @@
       afterDiscreteChange();
     });
 
-    var layersPanel = controls.append("div").attr("class", "bc-control-panel bc-if-control-panel");
+    var layersPanel = controls.append("div").attr("class", "sfs-control-panel sfs-if-control-panel");
     var layerGrid = layersPanel.append("div").attr("class", "bs-layer-grid");
 
     var layerDefs = [

@@ -6,5 +6,5 @@ import { readFileSync } from "node:fs";
 export const STYLE_PARTS = ["base", "home", "figures", "tables", "tutorials", "navbar"];
 
 export const siteStyles = STYLE_PARTS
-  .map((name) => readFileSync(new URL(`../resources/css/bc-${name}.css`, import.meta.url), "utf8"))
+  .map((name) => readFileSync(new URL(`../resources/css/sfs-${name}.css`, import.meta.url), "utf8"))
   .join("\n");

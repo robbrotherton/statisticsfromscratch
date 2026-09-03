@@ -475,7 +475,7 @@ test("a second figure in the callout hears the claiming figure's steps", () => {
     heard.push({ action, index: detail.index });
   });
 
-  claiming.dispatchEvent(new FakeCustomEvent("bc-if:tutorial-step-action", {
+  claiming.dispatchEvent(new FakeCustomEvent("sfs-if:tutorial-step-action", {
     bubbles: true,
     detail: { action: { rolls: 60, "show-board": true }, index: 2 }
   }));
@@ -483,7 +483,7 @@ test("a second figure in the callout hears the claiming figure's steps", () => {
   assert.deepEqual(heard[0], { action: { rolls: 60, "show-board": true }, index: 2 });
 
   stop();
-  claiming.dispatchEvent(new FakeCustomEvent("bc-if:tutorial-step-action", {
+  claiming.dispatchEvent(new FakeCustomEvent("sfs-if:tutorial-step-action", {
     bubbles: true,
     detail: { action: { rolls: 1000 }, index: 3 }
   }));
@@ -498,7 +498,7 @@ test("the observer ignores its own events unless it asks for them", () => {
   context.interactiveFigure.observeTutorialActions(listening, (action) => loud.push(action),
     { includeSelf: true });
 
-  listening.dispatchEvent(new FakeCustomEvent("bc-if:tutorial-step-action", {
+  listening.dispatchEvent(new FakeCustomEvent("sfs-if:tutorial-step-action", {
     bubbles: true,
     detail: { action: { rolls: 1 }, index: 0 }
   }));
@@ -515,7 +515,7 @@ test("observing survives a figure that is not in the document yet", () => {
 
   const heard = [];
   const stop = context.interactiveFigure.observeTutorialActions(late, (action) => heard.push(action));
-  claiming.dispatchEvent(new FakeCustomEvent("bc-if:tutorial-step-action", {
+  claiming.dispatchEvent(new FakeCustomEvent("sfs-if:tutorial-step-action", {
     bubbles: true, detail: { action: { rolls: 1 }, index: 0 }
   }));
   assert.equal(heard.length, 0, "nothing is delivered before the figure is connected");

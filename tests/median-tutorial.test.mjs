@@ -135,7 +135,7 @@ test("the completed card figures use the requested display order and cover each 
   );
   assert.match(section, /The sixteen test scores from the opening quiz/);
   assert.match(section, /the eighth and ninth/);
-  assert.match(chapter, /\| 2 \| 1 \|[\s\S]*?\| 3 \| 2 \|[\s\S]*?\| 4 \| 3 \|[\s\S]*?\| \[5\]\{\.bc-mode-marker\} \| 4 \|[\s\S]*?\| 6 \| 3 \|[\s\S]*?\| 7 \| 2 \|[\s\S]*?\| 8 \| 1 \|/);
+  assert.match(chapter, /\| 2 \| 1 \|[\s\S]*?\| 3 \| 2 \|[\s\S]*?\| 4 \| 3 \|[\s\S]*?\| \[5\]\{\.sfs-mode-marker\} \| 4 \|[\s\S]*?\| 6 \| 3 \|[\s\S]*?\| 7 \| 2 \|[\s\S]*?\| 8 \| 1 \|/);
   assert.doesNotMatch(section, /#fig-even-median-[12]/);
   assert.match(section, /#fig-median-test-scores/);
   assert.match(section, /#fig-even-median-quant/);
@@ -144,7 +144,7 @@ test("the completed card figures use the requested display order and cover each 
 test("sorting and visibility reveals are accessible, interruptible, and motion-aware", () => {
   assert.match(source, /interactiveRuntime/);
   assert.match(source, /motion\.shouldAnimate/);
-  assert.match(source, /bc-if:cancel-transitions/);
+  assert.match(source, /sfs-if:cancel-transitions/);
   assert.match(source, /getAnimations\(\{ subtree: true \}\)/);
   assert.match(source, /ordered from low to high/);
   assert.match(source, /The single middle observation, and the median/);

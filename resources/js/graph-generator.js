@@ -523,8 +523,8 @@ bcGraphCreateSvg = (opts = {}, type = "histogram", dimensions = bcGraphDimension
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", ariaLabel)
-    .classed("bc-graph", true)
-    .classed(`bc-graph-${type}`, true)
+    .classed("sfs-graph", true)
+    .classed(`sfs-graph-${type}`, true)
     .style("width", bcGraphValueOr(opts.cssWidth, "100%"))
     .style("max-width", bcGraphValueOr(opts.maxWidth, "100%"))
     .style("height", "auto")
@@ -581,11 +581,11 @@ bcGraphResolveMargin = (opts = {}) => {
 
 bcGraphStyleAxis = (axis) => {
   axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} bc-graph-axis`;
+      return `${this.getAttribute("class") || ""} sfs-graph-axis`;
     })
-    .call((g) => g.selectAll("text").attr("class", "bc-graph-tick-label"))
-    .call((g) => g.selectAll("line").attr("class", "bc-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "bc-graph-domain"));
+    .call((g) => g.selectAll("text").attr("class", "sfs-graph-tick-label"))
+    .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
+    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
 }
 
 bcGraphAllIntegers = (values) =>
@@ -768,7 +768,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 
   if (title) {
     svg.append("text")
-      .attr("class", "bc-graph-title")
+      .attr("class", "sfs-graph-title")
       .attr("x", margin.left)
       .attr("y", 18)
       .text(title);
@@ -776,7 +776,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 
   if (xLabel !== false) {
     svg.append("text")
-      .attr("class", "bc-graph-label bc-graph-x-label")
+      .attr("class", "sfs-graph-label sfs-graph-x-label")
       .attr("x", (margin.left + width - margin.right) / 2)
       .attr("y", height - 12)
       .attr("text-anchor", "middle")
@@ -785,7 +785,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 
   if (yLabel !== false) {
     svg.append("text")
-      .attr("class", "bc-graph-label bc-graph-y-label")
+      .attr("class", "sfs-graph-label sfs-graph-y-label")
       .attr("x", -(margin.top + height - margin.bottom) / 2)
       .attr("y", 17)
       .attr("transform", "rotate(-90)")
@@ -797,7 +797,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 bcGraphAddLegend = (svg, series, opts, width, margin) => {
   if (series.length < 2 || opts.legend === false) return;
   const legend = svg.append("g")
-    .attr("class", "bc-graph-legend")
+    .attr("class", "sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 120},${margin.top})`);
 
   const items = legend.selectAll("g")
@@ -833,12 +833,12 @@ bcGraphAddReferenceMarkers = (svg, opts, x, margin, height) => {
   if (!markerData.length) return;
 
   const markers = svg.append("g")
-    .attr("class", "bc-graph-reference-markers")
+    .attr("class", "sfs-graph-reference-markers")
     .attr("aria-hidden", "true")
     .selectAll("g")
     .data(markerData)
     .join("g")
-      .attr("class", "bc-graph-reference-marker")
+      .attr("class", "sfs-graph-reference-marker")
       .attr("transform", (d) => `translate(${x(d.value)},0)`);
 
   markers.append("line")
@@ -846,14 +846,14 @@ bcGraphAddReferenceMarkers = (svg, opts, x, margin, height) => {
     .attr("y2", height - margin.bottom)
     .attr("stroke-dasharray", (d) => bcGraphValueOr(d.dash, "5 4"))
     .attr("stroke-width", (d) => bcGraphValueOr(d.strokeWidth, 2))
-    .style("stroke", (d) => d.color || "var(--bc-danger-color, #c63f3f)");
+    .style("stroke", (d) => d.color || "var(--sfs-danger-color, #c63f3f)");
 
   markers.filter((d) => d.label !== undefined && d.label !== null && d.label !== false)
     .append("text")
       .attr("x", (d) => bcGraphValueOr(d.dx, 6))
       .attr("y", (d) => margin.top + bcGraphValueOr(d.dy, 16))
       .attr("text-anchor", (d) => bcGraphValueOr(d.anchor, "start"))
-      .style("fill", (d) => d.color || "var(--bc-danger-color, #c63f3f)")
+      .style("fill", (d) => d.color || "var(--sfs-danger-color, #c63f3f)")
       .text((d) => d.label);
 }
 
@@ -988,7 +988,7 @@ bcGraphSeriesStroke = (seriesDatum, opts, index, fallback) => {
 bcGraphDrawGrid = (svg, y, opts, margin, width, scale = "frequency") => {
   if (!opts.grid) return;
   svg.append("g")
-    .attr("class", "bc-graph-grid")
+    .attr("class", "sfs-graph-grid")
     .attr("transform", `translate(${margin.left},0)`)
     .call(bcGraphLeftAxis(y, opts, scale)
       .tickSize(-(width - margin.left - margin.right))
@@ -1091,7 +1091,7 @@ bcGraphPlayEntrance = (svg, threshold, play, namespace = "") => {
 // loops back), so revealing left-to-right in x is visually the same as
 // tracing the line with a pen, without any path-length math at all.
 bcGraphRevealClips = (svg, lineSelection, left, top, width, height) => lineSelection.nodes().map((node) => {
-  const clipId = bcGraphNextClipId("bc-graph-reveal-clip");
+  const clipId = bcGraphNextClipId("sfs-graph-reveal-clip");
   const rect = svg.append("clipPath").attr("id", clipId)
     .append("rect")
       .attr("x", left)
@@ -1112,7 +1112,7 @@ bcGraphFallDurationForDistance = (distance) =>
   Math.sqrt(2 * Math.max(0, distance) / bcGraphFallGravity) * 1000
 
 bcGraphHashSeed = (seed) => {
-  const text = String(seed ?? "bc-block-fall-v1");
+  const text = String(seed ?? "sfs-block-fall-v1");
   let hash = 2166136261;
   for (let index = 0; index < text.length; index += 1) {
     hash ^= text.charCodeAt(index);
@@ -1144,7 +1144,7 @@ bcGraphBlockFallRanks = (blockData, opts = {}) => {
 
   const seed = bcGraphValueOr(
     opts.blockFallSeed,
-    bcGraphValueOr(opts.fallSeed, bcGraphValueOr(opts.seed, "bc-block-fall-v1"))
+    bcGraphValueOr(opts.fallSeed, bcGraphValueOr(opts.seed, "sfs-block-fall-v1"))
   );
   const random = bcGraphSeededRandom(seed);
   const stacks = Array.from(
@@ -1229,11 +1229,11 @@ bcGraphMakeBarGraph = (opts = {}, type = "bar") => {
   const entrance = bcGraphEntranceOptions(opts);
 
   const bars = svg.append("g")
-    .attr("class", "bc-graph-bars")
+    .attr("class", "sfs-graph-bars")
     .selectAll("rect")
     .data(rowData)
     .join("rect")
-      .attr("class", "bc-graph-bar")
+      .attr("class", "sfs-graph-bar")
       .attr("x", (d) => x(bcGraphIntervalLabel(d.row)) + xSeries(d.series.name))
       .attr("y", (d) => entrance.enabled ? y(0) : y(bcGraphMeasure(d.row, scale)))
       .attr("width", xSeries.bandwidth())
@@ -1277,7 +1277,7 @@ bcGraphMakeBarGraph = (opts = {}, type = "bar") => {
     .call(bcGraphLeftAxis(y, opts, scale));
   bcGraphStyleAxis(xAxis);
   bcGraphStyleAxis(yAxis);
-  if (opts.yAxisLine === false) yAxis.select(".bc-graph-domain").remove();
+  if (opts.yAxisLine === false) yAxis.select(".sfs-graph-domain").remove();
 
   bcGraphAddLabels(svg, opts, type, margin, width, height, scale);
   bcGraphAddLegend(svg, series, opts, width, margin);
@@ -1335,7 +1335,7 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     const blockPixelHeight = Math.abs(y(0) - y(blockUnit));
     // Blocks fall from a shared ceiling above the plot, like objects dropped
     // from a shelf — same constant-gravity model as sampling-visuals.js's
-    // mean-boxes (see bcGraphFallDurationForDistance). `.bc-graph` sets
+    // mean-boxes (see bcGraphFallDurationForDistance). `.sfs-graph` sets
     // overflow:visible (so axis labels etc. aren't clipped), so a ceiling
     // above y=0 would otherwise just render as a visible block sitting above
     // the plot rather than staying out of sight — a clipPath scoped to this
@@ -1367,9 +1367,9 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
         : center - blockWidth(datum) / 2;
     };
 
-    const blocksGroup = svg.append("g").attr("class", "bc-graph-bars bc-graph-blocks");
+    const blocksGroup = svg.append("g").attr("class", "sfs-graph-bars sfs-graph-blocks");
     if (entrance.enabled) {
-      const clipId = bcGraphNextClipId("bc-graph-block-clip");
+      const clipId = bcGraphNextClipId("sfs-graph-block-clip");
       svg.append("clipPath").attr("id", clipId)
         .append("rect").attr("x", 0).attr("y", 0).attr("width", width).attr("height", height);
       blocksGroup.attr("clip-path", `url(#${clipId})`);
@@ -1379,7 +1379,7 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
       .selectAll("rect")
       .data(blockData)
       .join("rect")
-        .attr("class", "bc-graph-bar bc-graph-block")
+        .attr("class", "sfs-graph-bar sfs-graph-block")
         .attr("x", (d) => entrance.enabled ? blockOriginX(d) : blockTargetX(d))
         .attr("y", (d) => entrance.enabled ? ceilingY : y(d.blockUpper))
         .attr("width", blockWidth)
@@ -1431,11 +1431,11 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     }
   } else {
     const bars = svg.append("g")
-      .attr("class", "bc-graph-bars")
+      .attr("class", "sfs-graph-bars")
       .selectAll("rect")
       .data(rowData)
       .join("rect")
-        .attr("class", "bc-graph-bar")
+        .attr("class", "sfs-graph-bar")
         .attr("x", (d) => bcGraphHistogramX(d.row, x, overlayOffset, d.seriesIndex))
         .attr("y", (d) => entrance.enabled ? y(0) : y(bcGraphMeasure(d.row, scale)))
         .attr("width", (d) => bcGraphHistogramWidth(d.row, x, overlayWidth, barGap))
@@ -1480,7 +1480,7 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     .call(bcGraphLeftAxis(y, opts, scale));
   bcGraphStyleAxis(xAxis);
   bcGraphStyleAxis(yAxis);
-  if (opts.yAxisLine === false) yAxis.select(".bc-graph-domain").remove();
+  if (opts.yAxisLine === false) yAxis.select(".sfs-graph-domain").remove();
 
   bcGraphAddLabels(svg, opts, type, margin, width, height, scale);
   bcGraphAddLegend(svg, series, opts, width, margin);
@@ -1526,7 +1526,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .filter((guide) => guide && typeof guide === "object");
   const color = bcGraphValueOr(
     opts.interpolationGuideColor,
-    "color-mix(in srgb, var(--bc-danger-color, #c63f3f) 78%, var(--bc-text, #212529))"
+    "color-mix(in srgb, var(--sfs-danger-color, #c63f3f) 78%, var(--sfs-text, #212529))"
   );
   const dash = bcGraphValueOr(opts.interpolationGuideDash, "6 4");
   const strokeWidth = bcGraphValueOr(opts.interpolationGuideStrokeWidth, 1.8);
@@ -1564,15 +1564,15 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
   if (!resolvedGuides.length) return;
 
   const guideGroups = svg.append("g")
-    .attr("class", "bc-graph-interpolation-guides")
+    .attr("class", "sfs-graph-interpolation-guides")
     .attr("aria-hidden", "true")
     .selectAll("g")
     .data(resolvedGuides)
     .join("g")
-      .attr("class", "bc-graph-interpolation-guide");
+      .attr("class", "sfs-graph-interpolation-guide");
 
   const verticals = guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-line bc-graph-interpolation-guide-vertical")
+    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-vertical")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => d.xPixel)
     .attr("y1", plotBottom)
@@ -1583,7 +1583,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   const horizontals = guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-line bc-graph-interpolation-guide-horizontal")
+    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-horizontal")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => animationEnabled ? d.xPixel : margin.left)
     .attr("y1", (d) => d.yPixel)
@@ -1594,18 +1594,18 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   const markers = guideGroups.append("circle")
-    .attr("class", "bc-graph-interpolation-guide-marker")
+    .attr("class", "sfs-graph-interpolation-guide-marker")
     .attr("cx", (d) => d.xPixel)
     .attr("cy", (d) => d.yPixel)
     .attr("r", bcGraphValueOr(opts.interpolationGuidePointRadius, 4))
-    .attr("fill", "var(--bc-bg, #fff)")
+    .attr("fill", "var(--sfs-bg, #fff)")
     .attr("stroke", color)
     .attr("stroke-width", 2)
     .attr("vector-effect", "non-scaling-stroke")
     .style("opacity", animationEnabled ? 0 : 1);
 
   guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-tick")
+    .attr("class", "sfs-graph-interpolation-guide-tick")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => d.xPixel)
     .attr("y1", plotBottom)
@@ -1615,7 +1615,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   guideGroups.append("text")
-    .attr("class", "bc-graph-tick-label bc-graph-interpolation-guide-label")
+    .attr("class", "sfs-graph-tick-label sfs-graph-interpolation-guide-label")
     .attr("x", (d) => d.xPixel)
     .attr("y", plotBottom + 21)
     .attr("text-anchor", "middle")
@@ -1687,14 +1687,14 @@ bcGraphMakePolygon = (opts = {}) => {
   const entrance = bcGraphEntranceOptions(opts);
 
   const groups = svg.append("g")
-    .attr("class", "bc-graph-polygons")
+    .attr("class", "sfs-graph-polygons")
     .selectAll("g")
     .data(series)
     .join("g")
-      .attr("class", "bc-graph-polygon-series");
+      .attr("class", "sfs-graph-polygon-series");
 
   const lines = groups.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
     .style("stroke", (d, i) => bcGraphSeriesStroke(d, opts, i, bcGraphDefaultColors[i % bcGraphDefaultColors.length]))
     .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2))
@@ -1718,7 +1718,7 @@ bcGraphMakePolygon = (opts = {}) => {
           fraction: revealWidth ? (x(point.x) - revealLeft) / revealWidth : 0
         })))
       .join("circle")
-        .attr("class", "bc-graph-point")
+        .attr("class", "sfs-graph-point")
         .attr("cx", (d) => x(d.x))
         .attr("cy", (d) => y(d.y))
         .attr("r", bcGraphValueOr(opts.pointRadius, 3))
@@ -1808,23 +1808,23 @@ bcGraphMakeCurve = (opts = {}) => {
   const entrance = bcGraphEntranceOptions(opts);
 
   const groups = svg.append("g")
-    .attr("class", "bc-graph-curves")
+    .attr("class", "sfs-graph-curves")
     .selectAll("g")
     .data(series)
     .join("g")
-      .attr("class", "bc-graph-curve-series");
+      .attr("class", "sfs-graph-curve-series");
 
   let areas = null;
   if (bcGraphValueOr(opts.area, false)) {
     areas = groups.append("path")
-      .attr("class", "bc-graph-area")
+      .attr("class", "sfs-graph-area")
       .attr("fill", (d, i) => d.color || bcGraphDefaultColors[i % bcGraphDefaultColors.length])
       .attr("d", (d) => area(d.rows))
       .style("opacity", entrance.enabled ? 0 : null);
   }
 
   const lines = groups.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
     .style("stroke", (d, i) => bcGraphSeriesStroke(d, opts, i, bcGraphDefaultColors[i % bcGraphDefaultColors.length]))
     .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2))
@@ -2048,7 +2048,7 @@ makeToneIdentificationGraph = (opts = {}) => {
       {
         label: `Mean ≈ ${centers.mean.toFixed(2)}`,
         value: centers.mean,
-        color: "var(--bc-danger-color, #c63f3f)",
+        color: "var(--sfs-danger-color, #c63f3f)",
         anchor: "start",
         dx: 6
       }
@@ -2113,8 +2113,8 @@ makeApprovalBlockHistogram = (opts = {}) => {
     margin: { top: 28, right: 22, bottom: 68, left: 62 },
     barGap: 24,
     blockGap: 0.35,
-    blockStroke: "var(--bc-control-bg)",
-    blockFill: "var(--bc-text)",
+    blockStroke: "var(--sfs-control-bg)",
+    blockFill: "var(--sfs-text)",
     blockFallOrder: "random",
     blockFallSeed: "approval-paper-stacks-v8",
     // blockFallOriginX: "center",
@@ -2157,7 +2157,7 @@ makeFrequencyTable = (opts = {}) => {
   }, opts.headers || {});
 
   const table = d3.create("table")
-    .attr("class", "bc-frequency-table table table-sm");
+    .attr("class", "sfs-frequency-table table table-sm");
 
   if (opts.ariaLabel) table.attr("aria-label", opts.ariaLabel);
   if (opts.caption) table.append("caption").text(opts.caption);

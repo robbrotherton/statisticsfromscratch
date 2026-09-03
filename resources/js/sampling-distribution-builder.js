@@ -11,13 +11,13 @@ sdbEnsureStyles = () => {
     .sampling-distribution-builder {
       --sdb-block: var(--graph-block-fill, currentColor);
       --sdb-block-stroke: var(--graph-block-stroke, var(--bs-body-bg, #fff));
-      --sdb-current: var(--bc-current-color, #d1495b);
-      --bc-figure-max-width: var(--sdb-max-width, 48rem);
+      --sdb-current: var(--sfs-current-color, #d1495b);
+      --sfs-figure-max-width: var(--sdb-max-width, 48rem);
     }
 
     .sampling-distribution-builder.sdb-cover {
       --sdb-max-width: 46rem;
-      --bc-figure-max-width: var(--sdb-max-width);
+      --sfs-figure-max-width: var(--sdb-max-width);
     }
 
     .sampling-distribution-builder .sdb-button .bi {
@@ -26,7 +26,7 @@ sdbEnsureStyles = () => {
 
     .sampling-distribution-builder .sdb-count {
       min-width: 6.8rem;
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       font-variant-numeric: tabular-nums;
       font-size: 0.9rem;
       line-height: 1.2;
@@ -406,8 +406,8 @@ makeSamplingDistributionBuilder = function(opts) {
   let chartBottom = currentHeight - margin.bottom;
 
   const root = d3.create("div")
-    .attr("class", "bc-figure sampling-distribution-builder " + (isCover ? "bc-figure-cover sdb-cover" : isStatic ? "sdb-static" : "sdb-interactive"))
-    .style("--bc-figure-max-width", opts.maxWidth || (isCover ? "46rem" : "48rem"))
+    .attr("class", "sfs-figure sampling-distribution-builder " + (isCover ? "sfs-figure-cover sdb-cover" : isStatic ? "sdb-static" : "sdb-interactive"))
+    .style("--sfs-figure-max-width", opts.maxWidth || (isCover ? "46rem" : "48rem"))
     .style("--sdb-max-width", opts.maxWidth || (isCover ? "46rem" : "48rem"));
   const rootNode = root.node();
 
@@ -429,12 +429,12 @@ makeSamplingDistributionBuilder = function(opts) {
 
   if (state.controls) {
     controls = root.append("div")
-      .attr("class", "sdb-controls bc-control-grid");
+      .attr("class", "sdb-controls sfs-control-grid");
 
     const displayPanel = controls.append("section")
-      .attr("class", "sdb-group bc-control-panel bc-if-control-panel");
+      .attr("class", "sdb-group sfs-control-panel sfs-if-control-panel");
     displayPanel.append("p")
-      .attr("class", "sdb-group-title bc-control-title")
+      .attr("class", "sdb-group-title sfs-control-title")
       .text("Show");
     observationsInput = addCheckbox(displayPanel, "Observations", state.showObservations);
     meanInput = addCheckbox(displayPanel, "Mean", state.showMean);
@@ -442,12 +442,12 @@ makeSamplingDistributionBuilder = function(opts) {
     actionsInput = addCheckbox(displayPanel, "Action buttons", state.showActions);
 
     actionsPanel = controls.append("section")
-      .attr("class", "sdb-group bc-control-panel bc-if-control-panel");
+      .attr("class", "sdb-group sfs-control-panel sfs-if-control-panel");
     actionsPanel.append("p")
-      .attr("class", "sdb-group-title bc-control-title")
+      .attr("class", "sdb-group-title sfs-control-title")
       .text("Actions");
     const actionRow = actionsPanel.append("div")
-      .attr("class", "sdb-action-row bc-action-row");
+      .attr("class", "sdb-action-row sfs-action-row");
     const reset = addButton(actionRow, "arrow-counterclockwise", "Reset");
     const next = addButton(actionRow, "skip-forward-fill", "Next sample");
     const play = addButton(actionRow, "play-fill", "Run");
@@ -463,30 +463,30 @@ makeSamplingDistributionBuilder = function(opts) {
   }
 
   const readout = root.append("div")
-    .attr("class", "sdb-readout bc-readout");
+    .attr("class", "sdb-readout sfs-readout");
   const observationsRow = readout.append("div")
-    .attr("class", "sdb-readout-row bc-readout-row sdb-observations-row");
+    .attr("class", "sdb-readout-row sfs-readout-row sdb-observations-row");
   observationsRow.append("span")
-    .attr("class", "sdb-readout-label bc-readout-label")
+    .attr("class", "sdb-readout-label sfs-readout-label")
     .text("Observations");
   const observationsValue = observationsRow.append("span")
-    .attr("class", "sdb-readout-value bc-readout-value")
+    .attr("class", "sdb-readout-value sfs-readout-value")
     .node();
   const meanRow = readout.append("div")
-    .attr("class", "sdb-readout-row bc-readout-row sdb-mean-row");
+    .attr("class", "sdb-readout-row sfs-readout-row sdb-mean-row");
   meanRow.append("span")
-    .attr("class", "sdb-readout-label bc-readout-label")
+    .attr("class", "sdb-readout-label sfs-readout-label")
     .text("Mean");
   const meanValue = meanRow.append("span")
-    .attr("class", "sdb-readout-value bc-readout-value")
+    .attr("class", "sdb-readout-value sfs-readout-value")
     .node();
 
   const chartWrap = root.append("div")
-    .attr("class", "sdb-chart-wrap bc-chart-wrap");
+    .attr("class", "sdb-chart-wrap sfs-chart-wrap");
   const svg = chartWrap.append("svg")
     .attr("viewBox", [0, 0, width, currentHeight])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph bc-graph-block-histogram")
+    .attr("class", "sfs-svg sfs-graph sfs-graph-block-histogram")
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel || "Block histogram showing repeated sample means forming a sampling distribution");
 
@@ -496,14 +496,14 @@ makeSamplingDistributionBuilder = function(opts) {
   const maxBlockSize = Math.max(2, sdbFiniteNumber(opts.maxBlockSize ?? opts.blockMaxSize, isCover ? 18 : isStatic ? 28 : 18));
 
   const blocksLayer = svg.append("g")
-    .attr("class", "sdb-blocks bc-graph-blocks");
+    .attr("class", "sdb-blocks sfs-graph-blocks");
 
   const axisLayer = svg.append("g")
-    .attr("class", "sdb-axis bc-axis bc-graph-axis")
+    .attr("class", "sdb-axis sfs-axis sfs-graph-axis")
     .attr("transform", "translate(0," + chartBottom + ")");
 
   const axisLabel = svg.append("text")
-    .attr("class", "sdb-axis-label bc-axis-label bc-graph-label bc-graph-x-label")
+    .attr("class", "sdb-axis-label sfs-axis-label sfs-graph-label sfs-graph-x-label")
     .attr("x", (margin.left + width - margin.right) / 2)
     .attr("y", currentHeight - 24)
     .attr("text-anchor", "middle")
@@ -511,7 +511,7 @@ makeSamplingDistributionBuilder = function(opts) {
 
   function addCheckbox(parent, label, checked) {
     const row = parent.append("label")
-      .attr("class", "sdb-check-row bc-check-row");
+      .attr("class", "sdb-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked)
@@ -523,7 +523,7 @@ makeSamplingDistributionBuilder = function(opts) {
   function addButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "sdb-button bc-button")
+      .attr("class", "sdb-button sfs-button")
       .attr("aria-label", label)
       .attr("title", label)
       .attr("data-prevent-swipe", "")
@@ -703,7 +703,7 @@ makeSamplingDistributionBuilder = function(opts) {
 
     blockSelection = blockSelection.enter()
       .append("rect")
-      .attr("class", "sdb-block bc-graph-block")
+      .attr("class", "sdb-block sfs-graph-block")
       .merge(blockSelection)
       .attr("x", (d) => {
         if (!layout.axisSquareBlocks) return x(d.bin) - layout.xOffset;

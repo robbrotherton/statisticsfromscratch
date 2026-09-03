@@ -87,12 +87,12 @@ test("the chapter opens with the aligned X-to-z ruler cover", () => {
     22
   );
   assert.match(styles, /z-score-cover \.zsc-math-label/);
-  assert.match(styles, /font-family: var\(--bc-math-font-family\)/);
+  assert.match(styles, /font-family: var\(--sfs-math-font-family\)/);
   assert.match(styles,
-    /z-score-cover \.zsc-raw-axis \.bc-graph-domain,[\s\S]*?stroke: var\(--graph-axis-color\)/
+    /z-score-cover \.zsc-raw-axis \.sfs-graph-domain,[\s\S]*?stroke: var\(--graph-axis-color\)/
   );
   assert.match(styles,
-    /z-score-cover \.zsc-z-axis \.bc-graph-domain,[\s\S]*?stroke: var\(--graph-data-color\)/
+    /z-score-cover \.zsc-z-axis \.sfs-graph-domain,[\s\S]*?stroke: var\(--graph-data-color\)/
   );
   assert.match(styles,
     /z-score-cover \.zsc-raw-axis \.zsc-math-label[\s\S]*?fill: var\(--graph-axis-color\)/
@@ -115,7 +115,7 @@ test("the math examples use corresponding seven-bin histograms", () => {
   assert.match(standardizedSection, /Here are the two math test distributions again/);
   assert.match(standardizedSection, /same seven bins[\s\S]*?haven't regrouped any observations/);
   assert.match(standardizedSection,
-    /bc-standardization-comparison-row[\s\S]*?easyMathStandardized[\s\S]*?hardMathStandardized/
+    /sfs-standardization-comparison-row[\s\S]*?easyMathStandardized[\s\S]*?hardMathStandardized/
   );
   assert.match(standardizedSection, /easyMathStandardized makeMathTestHistogram options='\{"test":"easy","standardized":true/);
   assert.match(standardizedSection, /hardMathStandardized makeMathTestHistogram options='\{"test":"hard","standardized":true/);
@@ -128,13 +128,13 @@ test("the math examples use corresponding seven-bin histograms", () => {
   assert.match(source, /rawAxisSideLabel: "\(s\)"/);
   assert.match(source, /statConvention: "sample"/);
   assert.match(source, /const SELECTED_VALUE_MARKER = Object\.freeze/);
-  assert.match(source, /color: "var\(--bc-danger-color, #c63f3f\)"/);
+  assert.match(source, /color: "var\(--sfs-danger-color, #c63f3f\)"/);
   assert.match(source, /dash: "6 4"/);
   assert.match(source, /strokeWidth: 2\.6/);
   assert.equal((source.match(/selectedValueMarker\(\{/g) || []).length, 4);
   assert.match(graphSource, /stroke-width", \(d\) => bcGraphValueOr\(d\.strokeWidth, 2\)/);
   assert.doesNotMatch(styles,
-    /\.bc-graph \.bc-graph-reference-marker line \{[^}]*stroke-width:/
+    /\.sfs-graph \.sfs-graph-reference-marker line \{[^}]*stroke-width:/
   );
   assert.doesNotMatch(standardizedSection, /Completion time \(s\) · μ/);
 });
@@ -144,12 +144,12 @@ test("selected-value markers use the same red dashed treatment throughout Chapte
     /label: "X = (?:5|80)"[\s\S]{0,140}?(?:graph-data-color|dash: "none")/
   );
   assert.match(reactionSource,
-    /label: `X = \$\{x\}`[\s\S]*?color: "var\(--bc-danger-color, #c63f3f\)"[\s\S]*?dash: "6 4"[\s\S]*?strokeWidth: 2\.6/
+    /label: `X = \$\{x\}`[\s\S]*?color: "var\(--sfs-danger-color, #c63f3f\)"[\s\S]*?dash: "6 4"[\s\S]*?strokeWidth: 2\.6/
   );
   assert.match(chapter,
-    /"at":159,"label":"X = 159","height":0\.5,"color":"var\(--bc-danger-color, #c63f3f\)","dash":"6 4","strokeWidth":2\.6/
+    /"at":159,"label":"X = 159","height":0\.5,"color":"var\(--sfs-danger-color, #c63f3f\)","dash":"6 4","strokeWidth":2\.6/
   );
-  assert.doesNotMatch(chapter, /"markers"[^\n]*?--bc-accent/);
+  assert.doesNotMatch(chapter, /"markers"[^\n]*?--sfs-accent/);
 });
 
 test("the engineered math data have exact target sample statistics and distinct mounds", () => {
@@ -242,10 +242,10 @@ test("the aligned-axis component derives the requested SD convention and uses un
   assert.match(source, /spreadSymbol = sampleConvention \? "s" : "σ"/);
   assert.match(source, /label: centerSymbol \+ " − " \+ spreadSymbol/);
   assert.match(source, /label: centerSymbol \+ " \+ " \+ spreadSymbol/);
-  assert.match(source, /class", "ss-stat-label ss-guide-label bc-graph-label"/);
+  assert.match(source, /class", "ss-stat-label ss-guide-label sfs-graph-label"/);
   assert.doesNotMatch(source, /ss-sd-span|sdSpans|spanY/);
   assert.doesNotMatch(styles, /standardized-score-graph \.ss-sd-span/);
-  assert.match(styles, /standardized-score-graph \.ss-stat-label[\s\S]*?font-family: var\(--bc-math-font-family\)/);
+  assert.match(styles, /standardized-score-graph \.ss-stat-label[\s\S]*?font-family: var\(--sfs-math-font-family\)/);
   assert.match(source, /selectAll\("\.dg-marker-line"\)[\s\S]*?\.attr\("y1", zY\)/);
   assert.match(source, /attr\("y2", zY\)/);
   assert.doesNotMatch(source, /ss-sd-bracket|ss-sd-cap|\.text\("μ = "|\.text\("σ = "/);
@@ -265,8 +265,8 @@ test("static examples and the tutorial extend the shared graph and ruler systems
   assert.match(source, /global\.makeDistributionGraph\(\{/);
   assert.match(source, /global\.bcGraphStyleAxis\(rawAxis\)/);
   assert.match(source, /global\.bcGraphStyleAxis\(zAxis\)/);
-  assert.match(styles, /bc-standardization-comparison-row/);
-  assert.match(styles, /standardized-score-graph \.ss-z-axis \.bc-graph-domain/);
+  assert.match(styles, /sfs-standardization-comparison-row/);
+  assert.match(styles, /standardized-score-graph \.ss-z-axis \.sfs-graph-domain/);
   assert.match(styles, /standardized-score-graph \.ss-mean-line/);
   assert.match(styles, /standardized-score-graph \.ss-sd-line/);
   assert.doesNotMatch(styles, /standardized-score-graph \.ss-sd-span/);
@@ -283,7 +283,7 @@ test("IQ and SAT modes stay aligned and motion remains responsive and interrupti
   assert.match(source, /satScore: nextState\.scene === "curve" \? 700 : null/);
   assert.match(source, /interactiveRuntime/);
   assert.match(source, /motion\.shouldAnimate/);
-  assert.match(source, /bc-if:cancel-transitions/);
+  assert.match(source, /sfs-if:cancel-transitions/);
   assert.match(source, /Promise\.allSettled/);
   assert.match(source, /context\.signal/);
   assert.match(source, /observeResponsiveLayout/);

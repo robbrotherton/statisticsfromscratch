@@ -21,7 +21,7 @@ test("the cards carry their own paint rather than relying on page rules", () => 
 });
 
 test("the cards rest face up, so the prose holds when the turn never plays", () => {
-  const backs = drawing.match(/<g class="bc-card-back"[^>]*>/g) ?? [];
+  const backs = drawing.match(/<g class="sfs-card-back"[^>]*>/g) ?? [];
   assert.equal(backs.length, 2, "the two turning cards each have a back");
   for (const back of backs) {
     assert.match(back, /opacity="0"/, "a hidden back must not depend on the stylesheet");

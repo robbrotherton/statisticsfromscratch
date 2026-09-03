@@ -150,6 +150,6 @@ test("the shared tutorial runtime opts into terminal repetition only when declar
   assert.match(tutorialSource, /atEnd && !repeatAction/);
   assert.match(tutorialSource, /repeatActions\[index\], true/);
   assert.match(tutorialSource, /repeatsAtEnd \? "arrow-repeat" : "chevron-right"/);
-  assert.match(pathwaySource, /visually-hidden bc-if-fit-ignore/);
-  assert.match(tutorialSource, /child\.classList\.contains\("bc-if-fit-ignore"\)/);
+  assert.match(pathwaySource, /visually-hidden sfs-if-fit-ignore/);
+  assert.match(tutorialSource, /child\.classList\.contains\("sfs-if-fit-ignore"\)/);
 });

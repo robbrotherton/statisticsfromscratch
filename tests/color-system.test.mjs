@@ -88,7 +88,7 @@ test("the chapter 1 cover uses shared semantic series instead of a local D3 pale
     assert.match(cover, new RegExp(`--graph-series-${index + 1}, [^\\n]*${color}`));
   });
   assert.doesNotMatch(cover, /schemeCategory10|schemeTableau10/);
-  assert.match(cover, /--bc-text, currentColor/);
+  assert.match(cover, /--sfs-text, currentColor/);
 });
 
 test("the homepage dots inherit the shared semantic series palette", () => {

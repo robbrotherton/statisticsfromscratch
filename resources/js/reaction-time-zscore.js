@@ -24,8 +24,8 @@
     style.textContent = `
       .reaction-time-zscore .rtz-empty {
         margin: 0;
-        color: var(--bc-muted);
-        font-size: var(--bc-figure-note-size, 0.8125rem);
+        color: var(--sfs-muted);
+        font-size: var(--sfs-figure-note-size, 0.8125rem);
       }
 
       .reaction-time-zscore .rtz-recap {
@@ -112,7 +112,7 @@
     const format = d3.format(".2f");
 
     const root = d3.create("div")
-      .attr("class", "reaction-time-zscore rtz-" + mode + " bc-figure");
+      .attr("class", "reaction-time-zscore rtz-" + mode + " sfs-figure");
     const empty = root.append("p").attr("class", "rtz-empty");
     const content = root.append("div").attr("class", "rtz-content");
 
@@ -130,14 +130,14 @@
     function appendStat(row, symbol, value) {
       const stat = row.append("span").attr("class", "rtz-stat");
       stat.append("span")
-        .attr("class", "bc-readout-label")
+        .attr("class", "sfs-readout-label")
         .node()
         .appendChild(inlineMath(symbol));
-      stat.append("span").attr("class", "bc-readout-value").text(value);
+      stat.append("span").attr("class", "sfs-readout-value").text(value);
     }
 
     function renderRecap(x) {
-      const row = content.append("div").attr("class", "rtz-recap bc-readout-row");
+      const row = content.append("div").attr("class", "rtz-recap sfs-readout-row");
       appendStat(row, "X", x + " ms");
       appendStat(row, "\\mu", mean + " ms");
       appendStat(row, "\\sigma", sd + " ms");
@@ -155,7 +155,7 @@
 
       const ruler = rulerTicks(z);
       const chartWrap = content.append("div")
-        .attr("class", "rtz-chart-wrap bc-chart-wrap");
+        .attr("class", "rtz-chart-wrap sfs-chart-wrap");
       chartWrap.node().appendChild(global.makeStandardizedScoreGraph({
         title: opts.title === undefined ? "Reaction times (ms)" : opts.title,
         mean: mean,
@@ -169,7 +169,7 @@
           at: x,
           label: `X = ${x}`,
           height: 0.5,
-          color: "var(--bc-danger-color, #c63f3f)",
+          color: "var(--sfs-danger-color, #c63f3f)",
           dash: "6 4",
           strokeWidth: 2.6
         },
