@@ -1,8 +1,8 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
-  const visuals = global.bcSamplingVisuals;
+  const sampling = global.sfsSampling;
+  const visuals = global.sfsSamplingVisuals;
   const RAW_DOMAIN = [-3, 3];
   const SE_DOMAIN = [-3, 3];
   const MAX_SIMULATIONS = 2000000;
@@ -62,7 +62,7 @@
 
       .sse-controls .sse-value,
       .sse-controls .sse-status {
-        color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+        color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
         font-variant-numeric: tabular-nums;
       }
 
@@ -73,10 +73,10 @@
         gap: 0.45rem;
       }
 
-      .sse-controls .sse-scale-buttons .bc-button[aria-pressed="true"] {
-        color: var(--bs-btn-active-color, var(--bc-bg, white));
-        background: var(--bc-accent, var(--bs-primary, #2c6e9b));
-        border-color: var(--bc-accent, var(--bs-primary, #2c6e9b));
+      .sse-controls .sse-scale-buttons .sfs-button[aria-pressed="true"] {
+        color: var(--bs-btn-active-color, var(--sfs-bg, white));
+        background: var(--sfs-accent, var(--bs-primary, #2c6e9b));
+        border-color: var(--sfs-accent, var(--bs-primary, #2c6e9b));
       }
 
       .sse-controls .sse-status {
@@ -85,12 +85,12 @@
         font-size: 0.9rem;
       }
 
-      .sampling-shape-explorer[data-bc-layout="compact"] .sse-controls .sse-button-row .bc-button,
-      .sampling-shape-explorer[data-bc-layout="compact"] .sse-controls .sse-scale-buttons .bc-button {
+      .sampling-shape-explorer[data-sfs-layout="compact"] .sse-controls .sse-button-row .sfs-button,
+      .sampling-shape-explorer[data-sfs-layout="compact"] .sse-controls .sse-scale-buttons .sfs-button {
           flex: 1 1 8rem;
           min-height: 44px;
       }
-      .sampling-shape-explorer[data-bc-layout="compact"] .sse-controls .sse-status {
+      .sampling-shape-explorer[data-sfs-layout="compact"] .sse-controls .sse-status {
         flex: 1 1 100%;
       }
     `;
@@ -100,7 +100,7 @@
   function makeButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "bc-button")
+      .attr("class", "sfs-button")
       .attr("aria-label", label)
       .attr("title", label)
       .attr("data-prevent-swipe", "")
@@ -115,7 +115,7 @@
   }
 
   function checkbox(parent, label, checked) {
-    const row = parent.append("label").attr("class", "bc-check-row");
+    const row = parent.append("label").attr("class", "sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked)
@@ -209,20 +209,20 @@
     rebuildModel(true);
 
     const root = d3.create("div")
-      .attr("class", "sampling-shape-explorer bc-sampling-figure bc-figure")
-      .style("--bc-figure-max-width", opts.maxWidth || "48rem");
+      .attr("class", "sampling-shape-explorer sfs-sampling-figure sfs-figure")
+      .style("--sfs-figure-max-width", opts.maxWidth || "48rem");
     const rootNode = root.node();
-    const controls = root.append("div").attr("class", "sse-controls bc-control-grid");
+    const controls = root.append("div").attr("class", "sse-controls sfs-control-grid");
 
     function controlGroup(title) {
       const group = controls.append("section")
-        .attr("class", "bc-control-panel bc-if-control-panel");
-      group.append("p").attr("class", "bc-control-title").text(title);
+        .attr("class", "sfs-control-panel sfs-if-control-panel");
+      group.append("p").attr("class", "sfs-control-title").text(title);
       return group;
     }
 
     const modelControls = controlGroup("Model");
-    const shapeRow = modelControls.append("label").attr("class", "sse-control-row bc-control-row");
+    const shapeRow = modelControls.append("label").attr("class", "sse-control-row sfs-control-row");
     shapeRow.append("span").text("Population");
     const shapeInput = shapeRow.append("select")
       .attr("aria-label", "Population shape")
@@ -239,7 +239,7 @@
       shapeInput.appendChild(option);
     });
 
-    const nRow = modelControls.append("label").attr("class", "sse-control-row bc-control-row");
+    const nRow = modelControls.append("label").attr("class", "sse-control-row sfs-control-row");
     nRow.append("span").text("Sample size n");
     const nValue = nRow.append("span").attr("class", "sse-value").node();
     const nInput = nRow.append("input")
@@ -255,7 +255,7 @@
     const seScaleButton = makeButton(scaleButtons, "arrows-expand", "Standard-error scale");
 
     const samplingControls = controlGroup("Simulation");
-    const buttonRow = samplingControls.append("div").attr("class", "sse-button-row bc-action-row");
+    const buttonRow = samplingControls.append("div").attr("class", "sse-button-row sfs-action-row");
     const hundredThousand = makeButton(buttonRow, "bar-chart-steps", "Add 100,000");
     const million = makeButton(buttonRow, "bar-chart-fill", "Add 1,000,000");
     const reset = makeButton(buttonRow, "arrow-counterclockwise", "Reset");
@@ -267,7 +267,7 @@
     const inspectControls = controlGroup("Inspect");
     const normalInput = checkbox(inspectControls, "Compare with normal", state.showNormal);
 
-    const chartWrap = root.append("div").attr("class", "bc-chart-wrap");
+    const chartWrap = root.append("div").attr("class", "sfs-chart-wrap");
     let svg = null;
     let title = null;
     let populationPlot = null;
@@ -350,7 +350,7 @@
 
       chartWrap.selectAll("*").remove();
       svg = chartWrap.append("svg")
-        .attr("class", "bc-svg bc-graph")
+        .attr("class", "sfs-svg sfs-graph")
         .attr("viewBox", [0, 0, width, height])
         .attr("preserveAspectRatio", "xMidYMid meet")
         .attr("role", "img");
@@ -831,7 +831,7 @@
       stopSampling() { cancelSimulation(true); }
     };
 
-    rootNode.dataset.bcLayout = compact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = compact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({

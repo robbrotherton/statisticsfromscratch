@@ -1,8 +1,8 @@
 // Ch. 2 cover: the same underlying scores rendered first as a bar graph,
 // then widened into a histogram, then overlaid with a frequency polygon,
 // then morphed into a smooth frequency curve. Reuses graph-generator.js's
-// data/geometry helpers (bcGraphFrequencyRows, bcGraphPolygonPoints,
-// bcGraphNormalPdf) so the shapes match the chapter's own demo figures.
+// data/geometry helpers (sfsGraphFrequencyRows, sfsGraphPolygonPoints,
+// sfsGraphNormalPdf) so the shapes match the chapter's own demo figures.
 
 fdCoverDefaultData = [1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 5]
 
@@ -73,13 +73,13 @@ fdCoverPiecewiseLinear = (points) => {
 makeFrequencyDistributionCover = (opts = {}) => {
   const type = "frequency-cover";
   const data = opts.data || fdCoverDefaultData;
-  const dimensions = bcGraphDimensions(opts, type);
+  const dimensions = sfsGraphDimensions(opts, type);
   const { width, height } = dimensions;
   const margin = Object.assign({ top: 20, right: 16, bottom: 20, left: 16 }, opts.margin);
-  const svg = bcGraphCreateSvg(opts, type, dimensions);
+  const svg = sfsGraphCreateSvg(opts, type, dimensions);
 
-  const rows = bcGraphFrequencyRows(data, { type: "histogram" });
-  const xPadding = bcGraphValueOr(opts.xPadding, 0.5);
+  const rows = sfsGraphFrequencyRows(data, { type: "histogram" });
+  const xPadding = sfsGraphValueOr(opts.xPadding, 0.5);
   const xDomain = opts.xDomain || [d3.min(rows, (r) => r.lower) - xPadding, d3.max(rows, (r) => r.upper) + xPadding];
   const maxFrequency = d3.max(rows, (r) => r.frequency);
   const yDomain = [0, maxFrequency * 1.18];
@@ -102,36 +102,36 @@ makeFrequencyDistributionCover = (opts = {}) => {
   // One fixed color per mark for the whole sequence — bars stay series-1 as
   // they widen into a histogram, the line/points stay series-3 as the
   // polygon deforms into the curve. Same data-series palette used for
-  // multi-series comparisons elsewhere (bcGraphDefaultColors), so the cover
+  // multi-series comparisons elsewhere (sfsGraphDefaultColors), so the cover
   // borrows its color language from the rest of the book rather than
   // inventing its own.
-  const barColor = bcGraphValueOr(opts.barColor, bcGraphDefaultColors[0]);
-  const lineColor = bcGraphValueOr(opts.lineColor, bcGraphDefaultColors[2]);
+  const barColor = sfsGraphValueOr(opts.barColor, sfsGraphDefaultColors[0]);
+  const lineColor = sfsGraphValueOr(opts.lineColor, sfsGraphDefaultColors[2]);
 
   const bars = svg.append("g")
     .attr("class", "fd-cover-bars")
     .selectAll("rect")
     .data(rows)
     .join("rect")
-      .attr("class", "bc-graph-bar")
+      .attr("class", "sfs-graph-bar")
       .attr("x", (d) => x(d.x) - gappedBarWidth(d) / 2)
       .attr("width", (d) => gappedBarWidth(d))
       .attr("y", y(0))
       .attr("height", 0)
       .style("fill", barColor);
-      // No explicit stroke: the shared `.bc-graph .bc-graph-bar` rule in
+      // No explicit stroke: the shared `.sfs-graph .sfs-graph-bar` rule in
       // site-theme.css already applies `--graph-bar-stroke` here (this SVG
-      // carries the `bc-graph` class), matching the real bar/histogram
+      // carries the `sfs-graph` class), matching the real bar/histogram
       // demo figures rather than duplicating that value.
 
   const linear = d3.line().curve(d3.curveLinear).x((d) => x(d.x)).y((d) => y(d.y));
-  const polygonPoints = bcGraphPolygonPoints(rows, "frequency");
+  const polygonPoints = sfsGraphPolygonPoints(rows, "frequency");
 
   const line = svg.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
     .style("stroke", lineColor)
-    .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2.5))
+    .attr("stroke-width", sfsGraphValueOr(opts.strokeWidth, 2.5))
     .attr("d", linear(polygonPoints))
     .style("opacity", 0);
 
@@ -140,10 +140,10 @@ makeFrequencyDistributionCover = (opts = {}) => {
     .selectAll("circle")
     .data(polygonPoints.filter((p) => p.point))
     .join("circle")
-      .attr("class", "bc-graph-point")
+      .attr("class", "sfs-graph-point")
       .attr("cx", (d) => x(d.x))
       .attr("cy", (d) => y(d.y))
-      .attr("r", bcGraphValueOr(opts.pointRadius, 3.5))
+      .attr("r", sfsGraphValueOr(opts.pointRadius, 3.5))
       .style("fill", lineColor)
       .style("opacity", 0);
 
@@ -153,7 +153,7 @@ makeFrequencyDistributionCover = (opts = {}) => {
   // curve, the dense polygon sample is pixel-identical to the coarse
   // polygon (the extra points fall exactly on its straight segments), so
   // swapping to it produces no visible pop before the morph begins.
-  const sampleCount = bcGraphValueOr(opts.samplePoints, 121);
+  const sampleCount = sfsGraphValueOr(opts.samplePoints, 121);
   const sampleXs = d3.range(sampleCount).map((i) => xDomain[0] + (i * (xDomain[1] - xDomain[0])) / (sampleCount - 1));
   const polygonYAt = fdCoverPiecewiseLinear(polygonPoints);
   // The curve end-shape is a spline through these exact same polygon
@@ -166,7 +166,7 @@ makeFrequencyDistributionCover = (opts = {}) => {
   const endSamples = sampleXs.map((xv) => ({ x: xv, y: Math.max(0, curveYAt(xv)) }));
   const denseLine = d3.line().curve(d3.curveLinear).x((d) => x(d.x)).y((d) => y(d.y));
 
-  const reduced = bcGraphPrefersReducedMotion();
+  const reduced = sfsGraphPrefersReducedMotion();
 
   if (reduced) {
     points.remove();
@@ -179,27 +179,27 @@ makeFrequencyDistributionCover = (opts = {}) => {
     return svg.node();
   }
 
-  const barDuration = bcGraphValueOr(opts.barDuration, 750);
-  const barStagger = bcGraphValueOr(opts.barStagger, 75);
-  const growDuration = bcGraphValueOr(opts.growDuration, 650);
-  const pause = bcGraphValueOr(opts.pauseDuration, 180);
-  const polygonDuration = bcGraphValueOr(opts.polygonDuration, 650);
-  const curveDuration = bcGraphValueOr(opts.curveDuration, 850);
-  const fadeDuration = bcGraphValueOr(opts.fadeDuration, 550);
-  const threshold = bcGraphValueOr(opts.animationThreshold, 0.5);
+  const barDuration = sfsGraphValueOr(opts.barDuration, 750);
+  const barStagger = sfsGraphValueOr(opts.barStagger, 75);
+  const growDuration = sfsGraphValueOr(opts.growDuration, 650);
+  const pause = sfsGraphValueOr(opts.pauseDuration, 180);
+  const polygonDuration = sfsGraphValueOr(opts.polygonDuration, 650);
+  const curveDuration = sfsGraphValueOr(opts.curveDuration, 850);
+  const fadeDuration = sfsGraphValueOr(opts.fadeDuration, 550);
+  const threshold = sfsGraphValueOr(opts.animationThreshold, 0.5);
 
   const barsPhaseTotal = barDuration + (rows.length - 1) * barStagger + growDuration;
   const polygonPhaseStart = barsPhaseTotal + pause;
   const curvePhaseStart = polygonPhaseStart + polygonDuration + pause;
 
   // The line draws left-to-right via a clip rect that grows in width, not
-  // stroke-dasharray/dashoffset (see bcGraphRevealClips in graph-generator.js
+  // stroke-dasharray/dashoffset (see sfsGraphRevealClips in graph-generator.js
   // for why) — the rect is left fully open once the draw finishes, so it
   // doesn't need touching again once the line's `d` starts morphing into
   // the curve afterward.
   const revealLeft = margin.left;
   const revealWidth = Math.max(0, width - margin.left - margin.right);
-  const [revealClip] = bcGraphRevealClips(svg, line, revealLeft, 0, revealWidth, height);
+  const [revealClip] = sfsGraphRevealClips(svg, line, revealLeft, 0, revealWidth, height);
 
   const play = () => {
     bars.interrupt()
@@ -254,6 +254,6 @@ makeFrequencyDistributionCover = (opts = {}) => {
       .style("opacity", 0);
   };
 
-  bcGraphPlayEntrance(svg, threshold, play);
+  sfsGraphPlayEntrance(svg, threshold, play);
   return svg.node();
 }

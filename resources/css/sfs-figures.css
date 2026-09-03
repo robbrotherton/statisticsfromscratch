@@ -1,0 +1,642 @@
+/* Figures: the mount and row layouts every interactive figure sits in, the
+   shared control widgets (buttons, readouts, check rows), the graph
+   primitives, and the chapter-specific figures built on top of them.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Small-multiple rows: interactive figures laid out side by side. */
+.sfs-figure-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+}
+
+.sfs-figure-row > .interactive-figure-mount {
+  flex: 1 1 7.5rem;
+  min-width: 7rem;
+  max-width: 15rem;
+  margin: 0;
+}
+
+/* Wider variant: two larger panels per row (e.g. 2x2 grids). */
+.sfs-figure-row.sfs-figure-row-wide > .interactive-figure-mount {
+  flex-basis: 14rem;
+  min-width: 12rem;
+  max-width: 22rem;
+}
+
+.sfs-figure-row .sfs-figure {
+  margin: 0;
+}
+
+/* Likert items: one response card can contain a short multi-item scale. */
+.likert-card {
+  --sfs-figure-max-width: 46rem;
+  width: fit-content;
+  padding: 1rem;
+  border: 1px solid var(--sfs-border);
+  border-radius: var(--sfs-radius-md);
+  background: var(--sfs-bg);
+  text-align: left;
+}
+
+.likert-card.likert-multiple {
+  width: min(100%, var(--sfs-figure-max-width));
+}
+
+.likert-card.likert-align-responses {
+  container-type: inline-size;
+}
+
+.likert-groups {
+  display: grid;
+  gap: 1.25rem 2rem;
+}
+
+.likert-multiple .likert-groups {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.likert-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.likert-group legend {
+  float: none;
+  width: auto;
+  margin: 0 0 0.65rem;
+  padding: 0;
+  color: var(--sfs-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+@container (min-width: 40rem) {
+  .likert-align-responses .likert-group legend {
+    min-height: var(--likert-question-min-height);
+  }
+}
+
+.likert-options {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.likert-label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  min-height: 1.55rem;
+  line-height: 1.35;
+  cursor: pointer;
+}
+
+.likert-button {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.17rem 0 0;
+}
+
+.sfs-chart-wrap {
+  position: relative;
+  min-width: 0;
+  overflow: visible;
+}
+
+.sfs-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.sfs-control-grid {
+  display: grid;
+  gap: var(--sfs-control-gap);
+}
+
+.sfs-control-panel {
+  position: relative;
+  min-width: 0;
+}
+
+.sfs-control-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.sfs-control-row {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, auto) minmax(2.7rem, auto) 1fr;
+  gap: 0.45rem;
+  align-items: center;
+  min-height: 1.8rem;
+  margin: 0.22rem 0;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.sfs-check-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.65rem;
+  margin: 0.18rem 0;
+  font-size: 0.95rem;
+  line-height: 1.25;
+}
+
+.sfs-check-row input[type="checkbox"],
+.sfs-figure input[type="checkbox"] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+}
+
+.sfs-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sfs-action-gap);
+  align-items: center;
+}
+
+.sfs-button,
+.sfs-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--sfs-button-min-height);
+  border: 1px solid var(--sfs-border);
+  border-radius: var(--sfs-radius-sm);
+  background: var(--sfs-bg);
+  color: var(--sfs-text);
+  font: inherit;
+  line-height: 1.15;
+  cursor: pointer;
+}
+
+.sfs-button {
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.92rem;
+}
+
+.sfs-icon-button {
+  width: var(--sfs-button-min-height);
+  height: var(--sfs-button-min-height);
+  padding: 0;
+}
+
+.sfs-button:hover:not(:disabled),
+.sfs-button:focus-visible:not(:disabled),
+.sfs-icon-button:hover:not(:disabled),
+.sfs-icon-button:focus-visible:not(:disabled) {
+  border-color: var(--sfs-focus);
+  color: var(--sfs-focus);
+}
+
+.sfs-button:focus-visible,
+.sfs-icon-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.sfs-button:disabled,
+.sfs-icon-button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.sfs-button .bi,
+.sfs-icon-button .bi {
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
+.sfs-readout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  min-height: 3.35rem;
+  margin: 0 0 0.35rem;
+  color: var(--sfs-text);
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.sfs-readout[hidden] {
+  display: none !important;
+}
+
+.sfs-readout-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem 0.45rem;
+  min-width: 0;
+  align-items: baseline;
+}
+
+.sfs-readout-label {
+  flex: 0 0 auto;
+  color: var(--sfs-muted);
+  font-weight: 700;
+}
+
+.sfs-readout-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.sfs-graph {
+  max-width: 100%;
+  height: auto;
+  overflow: visible;
+  color: var(--sfs-text);
+  font-family: var(--bs-body-font-family);
+}
+
+.sfs-graph text {
+  fill: var(--graph-text-color);
+  font-family: inherit;
+}
+
+.sfs-graph .sfs-graph-title {
+  fill: var(--sfs-text);
+  font-size: var(--sfs-figure-title-size);
+  font-weight: 700;
+}
+
+.sfs-graph .sfs-graph-label,
+.sfs-axis-label {
+  fill: var(--sfs-text);
+  font-size: var(--sfs-figure-label-size);
+}
+
+.sfs-graph .sfs-graph-tick-label,
+.sfs-graph .sfs-graph-legend text,
+.sfs-tick-label {
+  fill: var(--graph-text-color);
+  font-size: var(--sfs-figure-tick-size);
+}
+
+.sfs-graph .sfs-graph-domain,
+.sfs-graph .sfs-graph-tick-line,
+.sfs-axis path,
+.sfs-axis line {
+  stroke: var(--graph-axis-color);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-axis text {
+  fill: var(--graph-text-color);
+}
+
+.sfs-graph .sfs-graph-grid .tick line {
+  stroke: var(--graph-grid-color);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-grid text {
+  display: none;
+}
+
+.sfs-graph .sfs-graph-grid .domain {
+  display: none;
+}
+
+.sfs-graph .sfs-graph-bar {
+  fill: var(--graph-bar-fill);
+  stroke: var(--graph-bar-stroke);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-block {
+  fill: var(--graph-block-fill);
+  stroke: var(--graph-block-stroke);
+  shape-rendering: crispEdges;
+}
+
+.sfs-graph .sfs-graph-line {
+  stroke: var(--graph-line-color);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-area {
+  fill-opacity: 0.16;
+}
+
+.sfs-graph .sfs-graph-point {
+  fill: var(--graph-point-fill);
+  stroke: var(--graph-point-stroke);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-legend line {
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-reference-marker line {
+  vector-effect: non-scaling-stroke;
+}
+
+.sfs-graph .sfs-graph-reference-marker text {
+  font-size: var(--sfs-figure-label-size);
+  font-weight: 700;
+}
+
+.sfs-data-emphasis {
+  color: var(--graph-data-color);
+  font-weight: 700;
+}
+
+/* Chapter 4 degrees of freedom: the three playing cards drawn in
+   resources/figures/playing-cards.svg, inlined into the page by the inline-svg
+   shortcode. The drawing carries its own colour as presentation attributes;
+   only the turn lives here. It cannot live in the file: a style element inside
+   an inline SVG is parsed by the HTML parser, and its rules never reach the
+   copies that <use> makes. */
+.sfs-playing-cards .sfs-card-turn {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* reveal-on-view adds the class once the figure scrolls into view. Each card
+   squashes to its edge, swaps sides at the halfway point, and opens out face
+   up; the second card waits its turn on --sfs-turn-delay. */
+.sfs-playing-cards.is-dealt .sfs-card-turn,
+.sfs-playing-cards.is-dealt .sfs-card-turn > g {
+  animation-duration: 620ms;
+  animation-delay: var(--sfs-turn-delay, 0ms);
+  animation-fill-mode: both;
+}
+
+.sfs-playing-cards.is-dealt .sfs-card-turn {
+  animation-name: sfs-card-turn;
+  animation-timing-function: ease-in-out;
+}
+
+.sfs-playing-cards.is-dealt .sfs-card-back,
+.sfs-playing-cards.is-dealt .sfs-card-front {
+  animation-timing-function: step-end;
+}
+
+.sfs-playing-cards.is-dealt .sfs-card-back {
+  animation-name: sfs-card-conceal;
+}
+
+.sfs-playing-cards.is-dealt .sfs-card-front {
+  animation-name: sfs-card-reveal;
+}
+
+@keyframes sfs-card-turn {
+  from { transform: scaleX(1); }
+  50% { transform: scaleX(0.03); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes sfs-card-conceal {
+  from { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes sfs-card-reveal {
+  from { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* Chapter 5 cover: one abstract block distribution, with the original-score
+   ruler retained while its aligned z-score ruler emerges beneath it. The
+   blocks come from the shared graph generator and use the standard series
+   palette; the ruler colors preserve the chapter's instructional grammar. */
+.z-score-cover,
+.z-score-cover .zsc-source-graph {
+  width: 100%;
+}
+
+.z-score-cover .zsc-source-graph {
+  margin: 0;
+  max-width: none;
+}
+
+.z-score-cover .zsc-source-graph {
+  overflow: visible;
+}
+
+.z-score-cover .sfs-graph-block {
+  stroke-width: 1.25;
+}
+
+.z-score-cover .zsc-axis .sfs-graph-domain,
+.z-score-cover .zsc-axis .sfs-graph-tick-line {
+  stroke-width: 1.7;
+}
+
+.z-score-cover .zsc-math-label {
+  font-family: var(--sfs-math-font-family);
+  font-size: 1.08rem;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.z-score-cover .zsc-raw-axis .sfs-graph-domain,
+.z-score-cover .zsc-raw-axis .sfs-graph-tick-line {
+  stroke: var(--graph-axis-color);
+}
+
+.z-score-cover .zsc-raw-axis .zsc-math-label {
+  fill: var(--graph-axis-color);
+}
+
+.z-score-cover .zsc-z-axis .sfs-graph-domain,
+.z-score-cover .zsc-z-axis .sfs-graph-tick-line {
+  stroke: var(--graph-data-color);
+}
+
+.z-score-cover .zsc-z-axis .zsc-math-label {
+  fill: var(--graph-data-color);
+}
+
+/* Chapter 5 aligned raw-score and z-score examples. Each panel is composed
+   from the shared histogram/curve/block generators, with the same compact
+   ruler layer added below its original x axis. */
+.sfs-figure-row.sfs-standardization-comparison-row > .interactive-figure-mount {
+  flex: 1 1 20rem;
+  min-width: min(100%, 17rem);
+  max-width: 30rem;
+}
+
+.standardized-score-graph,
+.standardized-score-graph .ss-source-graph {
+  width: 100%;
+  margin: 0;
+}
+
+.standardized-score-graph .ss-source-graph > svg,
+.standardized-score-graph > svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.standardized-score-graph .ss-axis-side-label {
+  fill: var(--sfs-muted);
+  font-size: var(--sfs-figure-tick-size);
+  font-weight: 600;
+}
+
+.standardized-score-graph .ss-z-axis-side-label,
+.standardized-score-graph .ss-z-axis .sfs-graph-tick-label {
+  fill: var(--graph-data-color);
+  font-weight: 700;
+}
+
+.standardized-score-graph .ss-z-axis .sfs-graph-domain,
+.standardized-score-graph .ss-z-axis .sfs-graph-tick-line {
+  stroke: var(--graph-data-color);
+  stroke-width: 1.5;
+}
+
+.standardized-score-graph .ss-mean-line {
+  stroke: var(--sfs-muted);
+  stroke-width: 1.35;
+  stroke-dasharray: 3 4;
+  vector-effect: non-scaling-stroke;
+}
+
+.standardized-score-graph .ss-sd-line {
+  stroke: var(--sfs-muted);
+  stroke-width: 1.2;
+  stroke-dasharray: 1 4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.standardized-score-graph .ss-stat-label {
+  fill: var(--sfs-muted);
+  font-family: var(--sfs-math-font-family);
+  font-size: var(--sfs-figure-tick-size);
+  font-style: italic;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--sfs-bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+/* Chapter 5 standardization tutorial: one stationary distribution with
+   interchangeable physical-looking coordinate strips beneath it. */
+.standardization-ruler {
+  --sr-focus: var(--graph-data-color);
+}
+
+.standardization-ruler .sr-chart-wrap {
+  overflow: hidden;
+}
+
+.standardization-ruler .sr-plot-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.standardization-ruler .sr-plot-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+
+.standardization-ruler .sr-shared-plot,
+.standardization-ruler .sr-ruler-svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.standardization-ruler .sr-ruler {
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.standardization-ruler .sr-ruler-board {
+  fill: var(--sfs-control-bg);
+  stroke: var(--sfs-border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.standardization-ruler .sr-ruler-title {
+  font-weight: 600;
+}
+
+.standardization-ruler .sr-ruler-operation {
+  fill: var(--sr-focus);
+  font-weight: 700;
+  opacity: 0;
+}
+
+.standardization-ruler .sr-ruler-testWorking .sfs-graph-tick-label {
+  font-variant-numeric: tabular-nums;
+}
+
+.standardization-ruler .sr-ruler.is-reference {
+  color: var(--sfs-muted);
+}
+
+.standardization-ruler .sr-ruler.is-reference .sr-ruler-title,
+.standardization-ruler .sr-ruler.is-reference .sfs-graph-tick-label {
+  fill: var(--sfs-muted);
+}
+
+.standardization-ruler .sr-ruler.is-reference .sr-ruler-board,
+.standardization-ruler .sr-ruler.is-reference .sfs-graph-domain,
+.standardization-ruler .sr-ruler.is-reference .sfs-graph-tick-line {
+  stroke: color-mix(in srgb, var(--sfs-muted) 72%, transparent);
+}
+
+.standardization-ruler .sr-ruler.is-focus .sr-ruler-board {
+  fill: color-mix(in srgb, var(--sr-focus) 10%, var(--sfs-control-bg));
+  stroke: var(--sr-focus);
+  stroke-width: 1.75;
+}
+
+.standardization-ruler .sr-ruler.is-focus .sr-ruler-title,
+.standardization-ruler .sr-ruler.is-focus .sfs-graph-tick-label {
+  fill: var(--sr-focus);
+  font-weight: 700;
+}
+
+.standardization-ruler .sr-ruler.is-focus .sfs-graph-domain,
+.standardization-ruler .sr-ruler.is-focus .sfs-graph-tick-line {
+  stroke: var(--sr-focus);
+  stroke-width: 1.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .standardization-ruler .sr-ruler,
+  .standardization-ruler .sr-plot-layer {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+

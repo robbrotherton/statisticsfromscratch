@@ -1,4 +1,4 @@
-bcFrequencyTableTutorialBoolean = (value, fallback = false) => {
+sfsFrequencyTableTutorialBoolean = (value, fallback = false) => {
   if (value === undefined || value === null) return fallback;
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
@@ -8,32 +8,32 @@ bcFrequencyTableTutorialBoolean = (value, fallback = false) => {
   return Boolean(value);
 }
 
-bcFrequencyTableTutorialRawValue = (entry) => {
+sfsFrequencyTableTutorialRawValue = (entry) => {
   if (!entry || typeof entry !== "object") return entry;
   const keys = ["x", "value", "score", "category", "label"];
   const key = keys.find((candidate) => entry[candidate] !== undefined);
   return key ? entry[key] : entry;
 }
 
-bcFrequencyTableTutorialKey = (value) => String(bcFrequencyTableTutorialRawValue(value));
+sfsFrequencyTableTutorialKey = (value) => String(sfsFrequencyTableTutorialRawValue(value));
 
-bcFrequencyTableTutorialKeys = (value, rows, fallback) => {
+sfsFrequencyTableTutorialKeys = (value, rows, fallback) => {
   if (value === undefined) return new Set(fallback || []);
   if (value === "all" || value === true) return new Set(rows.map((row) => row.key));
   if (value === false || value === null) return new Set();
   const values = Array.isArray(value) ? value : [value];
-  return new Set(values.map(bcFrequencyTableTutorialKey));
+  return new Set(values.map(sfsFrequencyTableTutorialKey));
 }
 
-bcFrequencyTableTutorialOrder = (value) => {
+sfsFrequencyTableTutorialOrder = (value) => {
   const normalized = String(value || "ascending").trim().toLowerCase();
   return ["descending", "desc", "high-to-low"].includes(normalized)
     ? "descending"
     : "ascending";
 }
 
-bcFrequencyTableTutorialOrderedRows = (rows, order) => {
-  const ordered = bcFrequencyTableTutorialOrder(order) === "descending"
+sfsFrequencyTableTutorialOrderedRows = (rows, order) => {
+  const ordered = sfsFrequencyTableTutorialOrder(order) === "descending"
     ? rows.slice().reverse()
     : rows.slice();
   const total = ordered.reduce((sum, row) => sum + row.frequency, 0);
@@ -50,7 +50,7 @@ bcFrequencyTableTutorialOrderedRows = (rows, order) => {
   });
 }
 
-bcFrequencyTableTutorialSetup = (rootNode, applyTutorialAction, opts = {}) => {
+sfsFrequencyTableTutorialSetup = (rootNode, applyTutorialAction, opts = {}) => {
   if (!window.interactiveFigure || !window.interactiveFigure.createTutorial) return;
   if (opts.tutorial === false) return;
 
@@ -64,7 +64,7 @@ bcFrequencyTableTutorialSetup = (rootNode, applyTutorialAction, opts = {}) => {
 
     const callout = rootNode.closest(".callout");
     const footer = callout ? callout.querySelector(".callout-footer") : null;
-    if (!footer || footer.dataset.bcIfTutorial === "true") return;
+    if (!footer || footer.dataset.sfsIfTutorial === "true") return;
 
     const steps = Array.from(footer.children)
       .filter((child) => child.classList && child.classList.contains("tutorial-step"));
@@ -112,28 +112,28 @@ makeFrequencyTableTutorial = (opts = {}) => {
   const allKeys = rows.map((row) => row.key);
 
   const root = d3.create("div")
-    .attr("class", "frequency-table-tutorial bc-figure bc-if-root");
+    .attr("class", "frequency-table-tutorial sfs-figure sfs-if-root");
   const rootNode = root.node();
   if (api && api.adopt) api.adopt(rootNode, {});
 
   const chartWrap = root.append("div")
-    .attr("class", "bc-chart-wrap");
+    .attr("class", "sfs-chart-wrap");
 
   chartWrap.append("div")
-    .attr("class", "bc-control-title center")
+    .attr("class", "sfs-control-title center")
     .text(dataLabel);
 
   const scoreList = chartWrap.append("div")
     .attr("class", "d-flex flex-wrap justify-content-center gap-2 fs-5")
     .attr("role", "list")
-    .attr("aria-label", `${dataLabel}: ${rawData.map(bcFrequencyTableTutorialRawValue).join(", ")}`);
+    .attr("aria-label", `${dataLabel}: ${rawData.map(sfsFrequencyTableTutorialRawValue).join(", ")}`);
 
   rawData.forEach((entry) => {
-    const value = bcFrequencyTableTutorialRawValue(entry);
+    const value = sfsFrequencyTableTutorialRawValue(entry);
     scoreList.append("span")
       .attr("class", "px-1")
       .attr("role", "listitem")
-      .attr("data-frequency-key", bcFrequencyTableTutorialKey(value))
+      .attr("data-frequency-key", sfsFrequencyTableTutorialKey(value))
       .text(value);
   });
 
@@ -336,32 +336,32 @@ makeFrequencyTableTutorial = (opts = {}) => {
     clearRowOrderMotion();
   };
 
-  rootNode.addEventListener("bc-if:cancel-transitions", cancelMotion);
+  rootNode.addEventListener("sfs-if:cancel-transitions", cancelMotion);
 
   const setState = (action = {}, options = {}) => {
     const columnSet = new Set(action.columns === undefined ? state.columns : action.columns);
-    const rowSet = bcFrequencyTableTutorialKeys(action.rows, rows, state.rows);
-    const frequencySet = bcFrequencyTableTutorialKeys(
+    const rowSet = sfsFrequencyTableTutorialKeys(action.rows, rows, state.rows);
+    const frequencySet = sfsFrequencyTableTutorialKeys(
       action.frequencies,
       rows,
       state.frequencies
     );
     const order = action.order === undefined
       ? state.order
-      : bcFrequencyTableTutorialOrder(action.order);
+      : sfsFrequencyTableTutorialOrder(action.order);
     const tableVisible = action.table === undefined
       ? state.table
-      : bcFrequencyTableTutorialBoolean(action.table, true);
+      : sfsFrequencyTableTutorialBoolean(action.table, true);
     const highlight = Object.prototype.hasOwnProperty.call(action, "highlight")
       ? action.highlight
       : state.highlight;
     const highlightKey = highlight === null || highlight === false || highlight === ""
       ? null
-      : bcFrequencyTableTutorialKey(highlight);
+      : sfsFrequencyTableTutorialKey(highlight);
     const animate = options.animate === undefined
       ? action.animate !== false
       : options.animate !== false;
-    const displayRows = bcFrequencyTableTutorialOrderedRows(rows, order);
+    const displayRows = sfsFrequencyTableTutorialOrderedRows(rows, order);
     const orderChanged = order !== renderedOrder;
 
     if (orderChanged && animate && state.table && tableVisible) {
@@ -399,11 +399,11 @@ makeFrequencyTableTutorial = (opts = {}) => {
     }
 
     scoreNodes.forEach((score) => {
-      score.classList.toggle("bc-highlight", score.dataset.frequencyKey === highlightKey);
+      score.classList.toggle("sfs-highlight", score.dataset.frequencyKey === highlightKey);
     });
     bodyRows.forEach((row) => {
       row.querySelectorAll("th, td").forEach((cell) => {
-        cell.classList.toggle("bc-highlight", row.dataset.frequencyKey === highlightKey);
+        cell.classList.toggle("sfs-highlight", row.dataset.frequencyKey === highlightKey);
       });
     });
 
@@ -505,17 +505,17 @@ makeFrequencyTableTutorial = (opts = {}) => {
       cancelMotion,
       dispose() {
         if (resizeObserver) resizeObserver.disconnect();
-        rootNode.removeEventListener("bc-if:cancel-transitions", cancelMotion);
+        rootNode.removeEventListener("sfs-if:cancel-transitions", cancelMotion);
         cancelMotion();
       }
     });
   }
 
-  bcFrequencyTableTutorialSetup(rootNode, applyTutorialAction, opts);
+  sfsFrequencyTableTutorialSetup(rootNode, applyTutorialAction, opts);
 
   return rootNode;
 }
 
-if (window.bcGraphs) {
-  window.bcGraphs.makeFrequencyTableTutorial = makeFrequencyTableTutorial;
+if (window.sfsGraphs) {
+  window.sfsGraphs.makeFrequencyTableTutorial = makeFrequencyTableTutorial;
 }

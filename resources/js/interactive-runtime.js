@@ -1,7 +1,7 @@
 (function(global) {
   "use strict";
 
-  const MOTION_STORAGE_KEY = "bc-reduce-motion";
+  const MOTION_STORAGE_KEY = "sfs-reduce-motion";
   const QUARTO_THEME_STORAGE_KEY = "quarto-color-scheme";
   const CAPTURE_SEED = 1101;
   const rootElement = document.documentElement;
@@ -102,18 +102,18 @@
     rootElement.dataset.motion = lastAppliedMotionAttribute;
     rootElement.dataset.capture = captureMode ? "true" : "false";
     if (captureMode) {
-      rootElement.style.setProperty("--bc-capture-width", captureWidth + "px");
+      rootElement.style.setProperty("--sfs-capture-width", captureWidth + "px");
     }
 
     // Backward compatibility for figures already checking this project-level
     // flag. It always reflects the effective policy, never only one source.
-    global.bcReducedMotion = state.reducedMotion;
+    global.sfsReducedMotion = state.reducedMotion;
 
     if (notify && previous !== state.reducedMotion) {
       const detail = motion.details();
       if (state.reducedMotion) {
         state.figures.forEach(function(figure) {
-          const contract = figure.node && figure.node.bcInteractive;
+          const contract = figure.node && figure.node.sfsInteractive;
           const cancelMotion = contract &&
             (contract.cancelMotion || contract.cancel);
           if (typeof cancelMotion === "function") {
@@ -132,7 +132,7 @@
           console.error("Reduced-motion listener failed:", error);
         }
       });
-      document.dispatchEvent(new CustomEvent("bc-motion:change", { detail }));
+      document.dispatchEvent(new CustomEvent("sfs-motion:change", { detail }));
     }
   }
 
@@ -415,7 +415,7 @@
     const expectedGeneration = renderGeneration === undefined
       ? figure.renderGeneration
       : renderGeneration;
-    const contract = figure.node && figure.node.bcInteractive;
+    const contract = figure.node && figure.node.sfsInteractive;
     if (!contract || Number(contract.version) < 1) {
       if (figure.renderGeneration !== expectedGeneration) return;
       setReadiness(
@@ -440,7 +440,7 @@
       if (figure.renderGeneration !== expectedGeneration) return;
       setReadiness(figure, "ready");
       figure.readyGeneration += 1;
-      figure.mount.dispatchEvent(new CustomEvent("bc-interactive:ready", {
+      figure.mount.dispatchEvent(new CustomEvent("sfs-interactive:ready", {
         bubbles: true,
         detail: {
           id: figure.id,
@@ -470,7 +470,7 @@
       if (!node) return;
 
       const live = liveLayer(figure);
-      const previousContract = figure.node && figure.node.bcInteractive;
+      const previousContract = figure.node && figure.node.sfsInteractive;
       const dispose = previousContract &&
         (previousContract.dispose || previousContract.cancel);
       if (typeof dispose === "function") {
@@ -625,7 +625,7 @@
     if (!figure || !figure.node) {
       throw makeReadinessError({ id: String(id) }, "unknown or unmounted figure id");
     }
-    const contract = figure.node.bcInteractive;
+    const contract = figure.node.sfsInteractive;
     if (!contract || typeof contract.setTutorialStep !== "function") {
       throw makeReadinessError(figure, "tutorial step control is unsupported");
     }
@@ -709,10 +709,10 @@
 
   function makeCheckRow(input, labelText) {
     const row = document.createElement("div");
-    row.className = "bc-settings-check";
+    row.className = "sfs-settings-check";
 
     const label = document.createElement("label");
-    label.className = "bc-settings-check-label";
+    label.className = "sfs-settings-check-label";
     label.htmlFor = input.id;
     label.textContent = labelText;
 
@@ -722,19 +722,19 @@
 
   function makeThemeSetting() {
     const field = document.createElement("fieldset");
-    field.className = "bc-settings-field";
+    field.className = "sfs-settings-field";
 
     const legend = document.createElement("legend");
-    legend.className = "bc-settings-field-label";
+    legend.className = "sfs-settings-field-label";
     legend.textContent = "Theme";
     field.appendChild(legend);
 
     const options = document.createElement("div");
-    options.className = "bc-settings-options";
+    options.className = "sfs-settings-options";
 
     const help = document.createElement("div");
-    help.className = "bc-settings-help";
-    help.id = "bc-settings-theme-help";
+    help.className = "sfs-settings-help";
+    help.id = "sfs-settings-theme-help";
     help.textContent = "Follows your device's light or dark mode.";
 
     const current = readThemePreference();
@@ -744,10 +744,10 @@
       ["dark", "Dark"]
     ].forEach(function(entry) {
       const input = document.createElement("input");
-      input.className = "bc-settings-input";
+      input.className = "sfs-settings-input";
       input.type = "radio";
-      input.name = "bc-settings-theme";
-      input.id = "bc-settings-theme-" + entry[0];
+      input.name = "sfs-settings-theme";
+      input.id = "sfs-settings-theme-" + entry[0];
       input.value = entry[0];
       input.checked = entry[0] === current;
       if (entry[0] === "system") {
@@ -771,16 +771,16 @@
 
   function makeCheckboxSetting(id, labelText, checked) {
     const field = document.createElement("div");
-    field.className = "bc-settings-field";
+    field.className = "sfs-settings-field";
 
     const input = document.createElement("input");
-    input.className = "bc-settings-input";
+    input.className = "sfs-settings-input";
     input.type = "checkbox";
     input.id = id;
     input.checked = Boolean(checked);
 
     const help = document.createElement("div");
-    help.className = "bc-settings-help";
+    help.className = "sfs-settings-help";
     help.id = id + "-help";
     input.setAttribute("aria-describedby", help.id);
 
@@ -789,46 +789,46 @@
   }
 
   function initSettings() {
-    if (document.querySelector(".bc-settings")) {
-      rootElement.classList.add("bc-settings-ready");
+    if (document.querySelector(".sfs-settings")) {
+      rootElement.classList.add("sfs-settings-ready");
       return;
     }
     const tools = document.querySelector(".quarto-navbar-tools");
     if (!tools) return;
 
     const settings = document.createElement("div");
-    settings.className = "bc-settings dropdown";
+    settings.className = "sfs-settings dropdown";
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "bc-settings-button quarto-navigation-tool";
+    button.className = "sfs-settings-button quarto-navigation-tool";
     button.setAttribute("data-bs-toggle", "dropdown");
     button.setAttribute("data-bs-auto-close", "outside");
     button.setAttribute("aria-expanded", "false");
-    button.setAttribute("aria-controls", "bc-settings-menu");
+    button.setAttribute("aria-controls", "sfs-settings-menu");
     button.setAttribute("aria-label", "Reader settings");
     button.title = "Reader settings";
     button.innerHTML = '<i class="bi bi-gear" aria-hidden="true"></i>';
 
     const menu = document.createElement("div");
-    menu.className = "dropdown-menu dropdown-menu-end bc-settings-menu";
-    menu.id = "bc-settings-menu";
+    menu.className = "dropdown-menu dropdown-menu-end sfs-settings-menu";
+    menu.id = "sfs-settings-menu";
     menu.setAttribute("aria-label", "Reader settings");
 
     const heading = document.createElement("div");
-    heading.className = "bc-settings-heading";
+    heading.className = "sfs-settings-heading";
     heading.textContent = "Settings";
 
     const themeSetting = makeThemeSetting();
     const motionCheckbox = makeCheckboxSetting(
-      "bc-settings-reduce-motion",
+      "sfs-settings-reduce-motion",
       "Reduce motion",
       state.userReducedMotion
     );
     menu.append(heading, themeSetting, motionCheckbox.field);
     settings.append(button, menu);
     tools.appendChild(settings);
-    rootElement.classList.add("bc-settings-ready");
+    rootElement.classList.add("sfs-settings-ready");
 
     function updateMotionSetting() {
       const details = motion.details();

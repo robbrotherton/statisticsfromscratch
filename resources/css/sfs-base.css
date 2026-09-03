@@ -1,0 +1,371 @@
+/* Palette tokens, the dark-theme corrections Bootstrap leaves out, the
+   pinned header and reader-settings menu, and the reduced-motion and
+   capture switches that the rest of the book's animation keys off.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-sans-3/SourceSans3VF-Upright.ttf.woff2")
+    format("woff2-variations");
+}
+
+@font-face {
+  font-family: "Source Sans 3";
+  font-style: italic;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("../fonts/source-sans-3/SourceSans3VF-Italic.ttf.woff2")
+    format("woff2-variations");
+}
+
+:root {
+  --sfs-text: var(--bs-body-color);
+  --sfs-bg: var(--bs-body-bg);
+  --sfs-muted: var(--bs-secondary-color);
+  --sfs-border: var(--bs-border-color);
+  --sfs-table-rule-color: var(--sfs-text);
+  --sfs-accent: var(--bs-primary);
+  --sfs-focus: var(--sfs-accent);
+  /* Not --bs-tertiary-bg: the dark theme stylesheet leaves it light. */
+  --sfs-control-bg: color-mix(in srgb, var(--bs-body-color) 5%, var(--bs-body-bg));
+  --sfs-highlight-bg: color-mix(in srgb, var(--sfs-accent) 12%, transparent);
+  --sfs-current-color: #d1495b;
+  --sfs-danger-color: #c63f3f;
+  --sfs-comparison-color: #2f6f9f;
+  --sfs-neutral-color: #7b818a;
+  --sfs-radius-sm: 4px;
+  --sfs-radius-md: 6px;
+  --sfs-radius-lg: 8px;
+  --sfs-figure-margin: 1.25rem auto;
+  --sfs-figure-max-width: 48rem;
+  --sfs-cover-max-width: 46rem;
+  --sfs-control-gap: 0.8rem;
+  --sfs-action-gap: 0.4rem;
+  --sfs-button-min-height: 2rem;
+  /* Semantic figure typography. SVG-based figures should consume these as
+     CSS sizes rather than changing font size with the chart breakpoint.
+     A figure keeps them at their real size by letting its viewBox track the
+     chart wrap's measured width (see observeResponsiveLayout) instead of
+     leaving the viewBox fixed while CSS scales the whole box down.
+     --sfs-figure-micro-size is the one concession to narrow layouts: a dense
+     in-plot annotation layer, such as direct labels on a many-series line
+     chart, may step down to it while axis furniture stays fixed. */
+  --sfs-figure-title-size: 1rem;
+  --sfs-figure-label-size: 0.875rem;
+  --sfs-figure-note-size: 0.8125rem;
+  --sfs-figure-tick-size: 0.8125rem;
+  --sfs-figure-small-size: 0.75rem;
+  --sfs-figure-micro-size: 0.6875rem;
+  --sfs-math-font-family: MJXZERO, MJXTEX, "MathJax_Main", "STIX Two Math", "Cambria Math", "Times New Roman", serif;
+  --graph-axis-color: var(--sfs-text);
+  --graph-data-color: #0072b2;
+  --graph-text-color: var(--sfs-muted);
+  --graph-grid-color: color-mix(in srgb, var(--sfs-text) 12%, transparent);
+  --graph-bar-fill: var(--graph-data-color);
+  --graph-bar-stroke: color-mix(in srgb, var(--graph-data-color) 70%, var(--sfs-text));
+  --graph-block-fill: var(--graph-bar-fill);
+  --graph-block-stroke: var(--graph-bar-stroke);
+  --graph-line-color: var(--graph-data-color);
+  --graph-point-fill: var(--graph-data-color);
+  --graph-point-stroke: var(--sfs-bg);
+  /* Seven chromatic colors from Okabe and Ito's Color Universal Design
+     palette. Black is omitted because neutral text and axes already use
+     --sfs-text. Series 6–7 need redundant cues on light backgrounds. */
+  --graph-series-1: var(--graph-data-color);
+  --graph-series-2: #e69f00;
+  --graph-series-3: #009e73;
+  --graph-series-4: #d55e00;
+  --graph-series-5: #cc79a7;
+  --graph-series-6: #56b4e9;
+  --graph-series-7: #f0e442;
+  --graph-medal-gold: #d4af37;
+  --graph-medal-silver: #b8bcc2;
+  --graph-medal-bronze: #b08d57;
+}
+
+/* The dark Bootstrap theme paints form-control backgrounds dark but never
+   declares a color scheme, so unstyled inputs keep UA light-mode text and
+   chrome (black on dark). */
+body.quarto-dark {
+  color-scheme: dark;
+}
+
+#quarto-header .navbar {
+  --sfs-navbar-accent: color-mix(
+    in srgb,
+    var(--quarto-scss-export-callout-color-tip, var(--bs-success)) 70%,
+    var(--quarto-body-color)
+  );
+  background-color: var(--quarto-body-bg);
+  border-bottom: 0 !important;
+}
+
+#quarto-header .navbar .navbar-title {
+  color: var(--sfs-navbar-accent);
+  letter-spacing: 0.015em;
+  text-transform: uppercase;
+  font-weight: 700;
+  /* font-size: 0.9em; */
+}
+
+#quarto-header .navbar .sfs-navbar-author {
+  font-size: 0.8em;
+  font-weight: 300;
+}
+
+@media (max-width: 991.98px) {
+  #quarto-header .navbar .sfs-navbar-author {
+    display: none;
+  }
+}
+
+#quarto-header .navbar .quarto-navigation-tool,
+#quarto-header .navbar #quarto-search .aa-DetachedSearchButton {
+  color: var(--sfs-navbar-accent);
+}
+
+#quarto-header .navbar #quarto-search .aa-DetachedSearchButtonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  color: var(--sfs-navbar-accent);
+}
+
+#quarto-header .navbar #quarto-search .aa-SubmitIcon {
+  color: var(--sfs-navbar-accent);
+  fill: currentColor;
+}
+
+#quarto-header .navbar .quarto-navbar-tools {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
+
+#quarto-header .navbar #quarto-search {
+  display: flex;
+  align-items: center;
+  width: 40px;
+  margin-left: 0.25rem !important;
+}
+
+#quarto-header .navbar .sfs-settings-button,
+#quarto-header .navbar #quarto-search .aa-DetachedSearchButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+#quarto-header .navbar #quarto-search .aa-SubmitIcon {
+  width: 26px;
+  height: 26px;
+  font-size: 26px;
+  line-height: 1;
+}
+
+#quarto-header .navbar .sfs-settings-button .bi {
+  width: 24px;
+  height: 24px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Quarto's theme pill is replaced by the reader-settings menu below. Keeping
+   the original control in the DOM preserves Quarto's own theme machinery. */
+html.sfs-settings-ready .quarto-navbar-tools > .quarto-color-scheme-toggle {
+  display: none !important;
+}
+
+.sfs-settings {
+  display: inline-flex;
+  align-items: center;
+}
+
+.sfs-settings-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--sfs-radius-sm);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.sfs-settings-button:hover,
+.sfs-settings-button:focus-visible,
+.sfs-settings-button[aria-expanded="true"] {
+  background: transparent;
+  color: inherit;
+}
+
+.sfs-settings-button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.sfs-settings-button::after {
+  display: none;
+}
+
+.sfs-settings-button .bi {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* The menu paints itself in the page's colours, but it lives inside the
+   dark-themed navbar, which would otherwise hand the radios and checkbox a
+   dark color-scheme and paint them as filled blobs on the light site. */
+.sfs-settings-menu {
+  color-scheme: light;
+  /* Popper leaves the menu almost no available width, so min-width is what
+     actually sizes it: wide enough for the theme options on one line. */
+  --bs-dropdown-min-width: 20.5rem;
+  min-width: var(--bs-dropdown-min-width);
+  max-width: 22rem;
+  padding: 0.6rem 0.8rem 0.7rem;
+  color: var(--sfs-text);
+  background: var(--sfs-bg);
+  border-color: var(--sfs-border);
+  box-shadow: 0 0.35rem 1rem color-mix(in srgb, #000 18%, transparent);
+  font-size: 0.875rem;
+  line-height: 1.35;
+}
+
+body.quarto-dark .sfs-settings-menu {
+  color-scheme: dark;
+}
+
+.sfs-settings-heading {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--sfs-border);
+  color: var(--sfs-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* The theme field is a fieldset, so reset the browser's fieldset and legend
+   defaults rather than relying on Bootstrap's reboot alone. */
+.sfs-settings-field {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sfs-settings-field + .sfs-settings-field {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sfs-border);
+}
+
+.sfs-settings-field-label {
+  display: block;
+  float: none;
+  width: auto;
+  margin: 0 0 0.25rem;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 600;
+  line-height: inherit;
+}
+
+/* The theme options sit on one line, wrapping only if the menu is squeezed. */
+.sfs-settings-options {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 0.9rem;
+  row-gap: 0.1rem;
+}
+
+/* Own the control/label geometry here: Bootstrap's .form-check lays its input
+   out with a float and a negative margin, which leaves no reliable gap. */
+.sfs-settings-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+}
+
+.sfs-settings-input {
+  flex: none;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0;
+  accent-color: var(--sfs-accent);
+  cursor: pointer;
+}
+
+.sfs-settings-input:disabled {
+  cursor: default;
+}
+
+.sfs-settings-check-label {
+  margin: 0;
+  cursor: pointer;
+}
+
+.sfs-settings-check:has(.sfs-settings-input:disabled) .sfs-settings-check-label {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.sfs-settings-help {
+  margin-top: 0.2rem;
+  color: var(--sfs-muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+html[data-motion="reduced"] {
+  scroll-behavior: auto !important;
+}
+
+html[data-motion="reduced"] *,
+html[data-motion="reduced"] *::before,
+html[data-motion="reduced"] *::after {
+  scroll-behavior: auto !important;
+  animation-delay: 0s !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-delay: 0s !important;
+  transition-duration: 0.001ms !important;
+}
+
+html[data-capture="true"] *,
+html[data-capture="true"] *::before,
+html[data-capture="true"] *::after {
+  caret-color: transparent !important;
+}
+
+html[data-capture="true"] .interactive-figure-mount {
+  width: min(100%, var(--sfs-capture-width, 760px));
+  margin-right: auto;
+  margin-left: auto;
+}
+
+html[data-capture="true"] .sfs-figure-row > .interactive-figure-mount {
+  width: auto;
+}
+
+.center {
+  text-align: center;
+}
+

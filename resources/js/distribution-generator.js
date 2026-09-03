@@ -1,6 +1,6 @@
-bcDistributionStats = window.bcStats || {}
+sfsDistributionStats = window.sfsStats || {}
 
-bcDistributionDefaultColors = [
+sfsDistributionDefaultColors = [
   "var(--graph-series-1, var(--graph-line-color, #0072b2))",
   "var(--graph-series-2, #e69f00)",
   "var(--graph-series-3, #009e73)",
@@ -10,26 +10,26 @@ bcDistributionDefaultColors = [
   "var(--graph-series-7, #f0e442)"
 ]
 
-bcDistributionValueOr = (value, fallback) =>
+sfsDistributionValueOr = (value, fallback) =>
   value === undefined || value === null ? fallback : value
 
-bcDistributionFiniteNumber = (value, fallback) => {
+sfsDistributionFiniteNumber = (value, fallback) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
 
-bcDistributionPositiveNumber = (value, fallback) => {
-  const number = bcDistributionFiniteNumber(value);
+sfsDistributionPositiveNumber = (value, fallback) => {
+  const number = sfsDistributionFiniteNumber(value);
   return number > 0 ? number : fallback;
 }
 
-bcDistributionBound = (value) => {
+sfsDistributionBound = (value) => {
   if (value === undefined || value === null || value === "") return undefined;
   const number = Number(value);
   return Number.isFinite(number) || number === Infinity || number === -Infinity ? number : undefined;
 }
 
-bcDistributionBoolean = (value, fallback = false) => {
+sfsDistributionBoolean = (value, fallback = false) => {
   if (value === undefined || value === null) return fallback;
   if (typeof value === "string") {
     const normalized = value.trim().toLowerCase();
@@ -39,16 +39,16 @@ bcDistributionBoolean = (value, fallback = false) => {
   return Boolean(value);
 }
 
-bcDistributionAsArray = (value, fallback = []) => {
-  const source = bcDistributionValueOr(value, fallback);
+sfsDistributionAsArray = (value, fallback = []) => {
+  const source = sfsDistributionValueOr(value, fallback);
   return Array.isArray(source) ? source.slice() : [source].filter((item) => item !== undefined && item !== null);
 }
 
-bcDistributionNormalizeKey = (value) =>
+sfsDistributionNormalizeKey = (value) =>
   String(value || "").trim().toLowerCase().replace(/[\s_]+/g, "-")
 
-bcDistributionNormalizeType = (value) => {
-  const key = bcDistributionNormalizeKey(value || "normal");
+sfsDistributionNormalizeType = (value) => {
+  const key = sfsDistributionNormalizeKey(value || "normal");
   if (["normal", "norm", "gaussian", "z", "z-score", "z-distribution"].includes(key)) return "normal";
   if (["t", "student", "student-t", "student-t-distribution", "tdistribution", "t-distribution"].includes(key)) return "t";
   if (["f", "f-distribution", "fdistribution", "variance-ratio"].includes(key)) return "f";
@@ -57,7 +57,7 @@ bcDistributionNormalizeType = (value) => {
   return key;
 }
 
-bcDistributionDistributionLabel = (dist) => {
+sfsDistributionDistributionLabel = (dist) => {
   if (dist.name) return dist.name;
   if (dist.type === "t") return `t(df = ${dist.df})`;
   if (dist.type === "f") return `F(${dist.df1}, ${dist.df2})`;
@@ -66,30 +66,30 @@ bcDistributionDistributionLabel = (dist) => {
   return "Normal";
 }
 
-bcDistributionSpec = (source = {}, parent = {}, index = 0) => {
-  const type = bcDistributionNormalizeType(
-    bcDistributionValueOr(source.distribution, bcDistributionValueOr(source.type, bcDistributionValueOr(parent.distribution, parent.type)))
+sfsDistributionSpec = (source = {}, parent = {}, index = 0) => {
+  const type = sfsDistributionNormalizeType(
+    sfsDistributionValueOr(source.distribution, sfsDistributionValueOr(source.type, sfsDistributionValueOr(parent.distribution, parent.type)))
   );
-  const mean = bcDistributionFiniteNumber(
-    bcDistributionValueOr(source.mean, bcDistributionValueOr(source.mu, bcDistributionValueOr(source.center, bcDistributionValueOr(parent.mean, bcDistributionValueOr(parent.mu, parent.center))))),
+  const mean = sfsDistributionFiniteNumber(
+    sfsDistributionValueOr(source.mean, sfsDistributionValueOr(source.mu, sfsDistributionValueOr(source.center, sfsDistributionValueOr(parent.mean, sfsDistributionValueOr(parent.mu, parent.center))))),
     0
   );
   // Hypothesis's Via/pywb replay layer treats `location` as a special browser
   // global. Avoid a local binding with that name so its script rewriting cannot
   // create a temporal-dead-zone collision while this value is initialized.
-  const locationValue = bcDistributionFiniteNumber(
-    bcDistributionValueOr(source.location, bcDistributionValueOr(source.shift, bcDistributionValueOr(source.center, bcDistributionValueOr(source.mean, bcDistributionValueOr(parent.location, parent.shift))))),
+  const locationValue = sfsDistributionFiniteNumber(
+    sfsDistributionValueOr(source.location, sfsDistributionValueOr(source.shift, sfsDistributionValueOr(source.center, sfsDistributionValueOr(source.mean, sfsDistributionValueOr(parent.location, parent.shift))))),
     0
   );
-  const scale = bcDistributionPositiveNumber(
-    bcDistributionValueOr(source.scale, bcDistributionValueOr(source.sd, bcDistributionValueOr(source.sigma, bcDistributionValueOr(parent.scale, bcDistributionValueOr(parent.sd, parent.sigma))))),
+  const scale = sfsDistributionPositiveNumber(
+    sfsDistributionValueOr(source.scale, sfsDistributionValueOr(source.sd, sfsDistributionValueOr(source.sigma, sfsDistributionValueOr(parent.scale, sfsDistributionValueOr(parent.sd, parent.sigma))))),
     1
   );
-  const df = Math.max(1e-9, bcDistributionPositiveNumber(bcDistributionValueOr(source.df, parent.df), 10));
-  const df1 = Math.max(1e-9, bcDistributionPositiveNumber(bcDistributionValueOr(source.df1, bcDistributionValueOr(source.numeratorDf, parent.df1)), 5));
-  const df2 = Math.max(1e-9, bcDistributionPositiveNumber(bcDistributionValueOr(source.df2, bcDistributionValueOr(source.denominatorDf, parent.df2)), 20));
-  const shape = bcDistributionFiniteNumber(
-    bcDistributionValueOr(source.shape, bcDistributionValueOr(source.skew, bcDistributionValueOr(source.alpha, bcDistributionValueOr(parent.shape, parent.skew)))),
+  const df = Math.max(1e-9, sfsDistributionPositiveNumber(sfsDistributionValueOr(source.df, parent.df), 10));
+  const df1 = Math.max(1e-9, sfsDistributionPositiveNumber(sfsDistributionValueOr(source.df1, sfsDistributionValueOr(source.numeratorDf, parent.df1)), 5));
+  const df2 = Math.max(1e-9, sfsDistributionPositiveNumber(sfsDistributionValueOr(source.df2, sfsDistributionValueOr(source.denominatorDf, parent.df2)), 20));
+  const shape = sfsDistributionFiniteNumber(
+    sfsDistributionValueOr(source.shape, sfsDistributionValueOr(source.skew, sfsDistributionValueOr(source.alpha, sfsDistributionValueOr(parent.shape, parent.skew)))),
     0
   );
 
@@ -108,11 +108,11 @@ bcDistributionSpec = (source = {}, parent = {}, index = 0) => {
     df1,
     df2,
     shape,
-    color: source.color || source.stroke || bcDistributionDefaultColors[index % bcDistributionDefaultColors.length],
-    stroke: source.stroke || source.color || bcDistributionDefaultColors[index % bcDistributionDefaultColors.length],
-    strokeWidth: bcDistributionPositiveNumber(source.strokeWidth, bcDistributionPositiveNumber(parent.strokeWidth, 2.4)),
-    strokeDasharray: bcDistributionValueOr(source.strokeDasharray, bcDistributionValueOr(source.dash, source.dashed ? "6 4" : null)),
-    opacity: bcDistributionFiniteNumber(source.opacity, bcDistributionFiniteNumber(parent.opacity, 1)),
+    color: source.color || source.stroke || sfsDistributionDefaultColors[index % sfsDistributionDefaultColors.length],
+    stroke: source.stroke || source.color || sfsDistributionDefaultColors[index % sfsDistributionDefaultColors.length],
+    strokeWidth: sfsDistributionPositiveNumber(source.strokeWidth, sfsDistributionPositiveNumber(parent.strokeWidth, 2.4)),
+    strokeDasharray: sfsDistributionValueOr(source.strokeDasharray, sfsDistributionValueOr(source.dash, source.dashed ? "6 4" : null)),
+    opacity: sfsDistributionFiniteNumber(source.opacity, sfsDistributionFiniteNumber(parent.opacity, 1)),
     source
   };
 
@@ -125,12 +125,12 @@ bcDistributionSpec = (source = {}, parent = {}, index = 0) => {
     delete componentParent.components;
     delete componentParent.parts;
 
-    const rawComponents = bcDistributionAsArray(bcDistributionValueOr(source.components, source.parts), [{}]);
+    const rawComponents = sfsDistributionAsArray(sfsDistributionValueOr(source.components, source.parts), [{}]);
     const components = rawComponents.map((component, componentIndex) =>
-      bcDistributionSpec(component || {}, componentParent, componentIndex)
+      sfsDistributionSpec(component || {}, componentParent, componentIndex)
     );
     const rawWeights = components.map((component) =>
-      bcDistributionPositiveNumber(component.source.weight, 1)
+      sfsDistributionPositiveNumber(component.source.weight, 1)
     );
     const totalWeight = rawWeights.reduce((sum, weight) => sum + weight, 0) || 1;
     components.forEach((component, componentIndex) => {
@@ -139,46 +139,46 @@ bcDistributionSpec = (source = {}, parent = {}, index = 0) => {
     dist.components = components;
   }
 
-  dist.label = bcDistributionDistributionLabel(dist);
+  dist.label = sfsDistributionDistributionLabel(dist);
   return dist;
 }
 
-bcDistributionSpecs = (opts = {}) => {
+sfsDistributionSpecs = (opts = {}) => {
   const source = opts.distributions || opts.series;
   if (source) {
-    return bcDistributionAsArray(source).map((dist, index) => bcDistributionSpec(dist, opts, index));
+    return sfsDistributionAsArray(source).map((dist, index) => sfsDistributionSpec(dist, opts, index));
   }
-  return [bcDistributionSpec(opts, {}, 0)];
+  return [sfsDistributionSpec(opts, {}, 0)];
 }
 
-bcDistributionPdf = (dist, x) => {
-  if (dist.type === "t") return bcDistributionStats.tPdf(x, dist.df, dist.mean, dist.scale);
-  if (dist.type === "f") return bcDistributionStats.fPdf(x, dist.df1, dist.df2, dist.location, dist.scale);
-  if (dist.type === "skew-normal") return bcDistributionStats.skewNormalPdf(x, dist.location, dist.scale, dist.shape);
+sfsDistributionPdf = (dist, x) => {
+  if (dist.type === "t") return sfsDistributionStats.tPdf(x, dist.df, dist.mean, dist.scale);
+  if (dist.type === "f") return sfsDistributionStats.fPdf(x, dist.df1, dist.df2, dist.location, dist.scale);
+  if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalPdf(x, dist.location, dist.scale, dist.shape);
   if (dist.type === "mixture") {
     return (dist.components || []).reduce((sum, component) =>
-      sum + component.weight * bcDistributionPdf(component, x), 0);
+      sum + component.weight * sfsDistributionPdf(component, x), 0);
   }
-  return bcDistributionStats.normalPdf(x, dist.mean, dist.sd);
+  return sfsDistributionStats.normalPdf(x, dist.mean, dist.sd);
 }
 
-bcDistributionCdf = (dist, x) => {
-  if (dist.type === "t") return bcDistributionStats.tCdf(x, dist.df, dist.mean, dist.scale);
-  if (dist.type === "f") return bcDistributionStats.fCdf(x, dist.df1, dist.df2, dist.location, dist.scale);
-  if (dist.type === "skew-normal") return bcDistributionStats.skewNormalCdf(x, dist.location, dist.scale, dist.shape);
+sfsDistributionCdf = (dist, x) => {
+  if (dist.type === "t") return sfsDistributionStats.tCdf(x, dist.df, dist.mean, dist.scale);
+  if (dist.type === "f") return sfsDistributionStats.fCdf(x, dist.df1, dist.df2, dist.location, dist.scale);
+  if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalCdf(x, dist.location, dist.scale, dist.shape);
   if (dist.type === "mixture") {
     return (dist.components || []).reduce((sum, component) =>
-      sum + component.weight * bcDistributionCdf(component, x), 0);
+      sum + component.weight * sfsDistributionCdf(component, x), 0);
   }
-  return bcDistributionStats.normalCdf(x, dist.mean, dist.sd);
+  return sfsDistributionStats.normalCdf(x, dist.mean, dist.sd);
 }
 
-bcDistributionMixtureQuantile = (dist, p) => {
+sfsDistributionMixtureQuantile = (dist, p) => {
   if (p <= 0) return -Infinity;
   if (p >= 1) return Infinity;
 
   const componentQuantiles = (dist.components || [])
-    .map((component) => bcDistributionQuantile(component, p))
+    .map((component) => sfsDistributionQuantile(component, p))
     .filter(Number.isFinite);
   if (!componentQuantiles.length) return NaN;
 
@@ -190,7 +190,7 @@ bcDistributionMixtureQuantile = (dist, p) => {
 
   for (let i = 0; i < 90; i += 1) {
     const midpoint = (lower + upper) / 2;
-    if (bcDistributionCdf(dist, midpoint) < p) {
+    if (sfsDistributionCdf(dist, midpoint) < p) {
       lower = midpoint;
     } else {
       upper = midpoint;
@@ -200,24 +200,24 @@ bcDistributionMixtureQuantile = (dist, p) => {
   return (lower + upper) / 2;
 }
 
-bcDistributionQuantile = (dist, p) => {
-  if (dist.type === "t") return bcDistributionStats.tInv(p, dist.df, dist.mean, dist.scale);
-  if (dist.type === "f") return bcDistributionStats.fInv(p, dist.df1, dist.df2, dist.location, dist.scale);
-  if (dist.type === "skew-normal") return bcDistributionStats.skewNormalInv(p, dist.location, dist.scale, dist.shape);
-  if (dist.type === "mixture") return bcDistributionMixtureQuantile(dist, p);
-  return bcDistributionStats.normalInv(p, dist.mean, dist.sd);
+sfsDistributionQuantile = (dist, p) => {
+  if (dist.type === "t") return sfsDistributionStats.tInv(p, dist.df, dist.mean, dist.scale);
+  if (dist.type === "f") return sfsDistributionStats.fInv(p, dist.df1, dist.df2, dist.location, dist.scale);
+  if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalInv(p, dist.location, dist.scale, dist.shape);
+  if (dist.type === "mixture") return sfsDistributionMixtureQuantile(dist, p);
+  return sfsDistributionStats.normalInv(p, dist.mean, dist.sd);
 }
 
-bcDistributionFinitePdf = (dist, x) => {
-  const y = bcDistributionPdf(dist, x);
+sfsDistributionFinitePdf = (dist, x) => {
+  const y = sfsDistributionPdf(dist, x);
   return Number.isFinite(y) && y >= 0 ? y : 0;
 }
 
-bcDistributionDefaultDomain = (dist) => {
+sfsDistributionDefaultDomain = (dist) => {
   const lowerP = dist.type === "f" ? 0.001 : 0.0008;
   const upperP = dist.type === "f" ? 0.995 : 0.9992;
-  let lower = bcDistributionQuantile(dist, lowerP);
-  let upper = bcDistributionQuantile(dist, upperP);
+  let lower = sfsDistributionQuantile(dist, lowerP);
+  let upper = sfsDistributionQuantile(dist, upperP);
 
   if (!Number.isFinite(lower) || !Number.isFinite(upper) || lower >= upper) {
     if (dist.type === "f") {
@@ -236,27 +236,27 @@ bcDistributionDefaultDomain = (dist) => {
   return [dist.type === "f" ? Math.max(dist.location, lower - pad) : lower - pad, upper + pad];
 }
 
-bcDistributionResolveDomain = (distributions, opts = {}) => {
+sfsDistributionResolveDomain = (distributions, opts = {}) => {
   const explicit = opts.xDomain || opts.domain;
   if (explicit && explicit.length >= 2) return explicit.map(Number);
 
-  const domains = distributions.map(bcDistributionDefaultDomain);
+  const domains = distributions.map(sfsDistributionDefaultDomain);
   return [
     d3.min(domains, (domain) => domain[0]),
     d3.max(domains, (domain) => domain[1])
   ];
 }
 
-bcDistributionCurveData = (dist, domain, points = 360) => {
+sfsDistributionCurveData = (dist, domain, points = 360) => {
   const count = Math.max(2, Math.round(points));
   const step = (domain[1] - domain[0]) / (count - 1);
   return d3.range(count).map((index) => {
     const x = domain[0] + index * step;
-    return { x, y: bcDistributionFinitePdf(dist, x), distribution: dist };
+    return { x, y: sfsDistributionFinitePdf(dist, x), distribution: dist };
   });
 }
 
-bcDistributionSegmentData = (dist, from, to, domain, points = 240) => {
+sfsDistributionSegmentData = (dist, from, to, domain, points = 240) => {
   const lower = Math.max(Number.isFinite(from) ? from : domain[0], domain[0]);
   const upper = Math.min(Number.isFinite(to) ? to : domain[1], domain[1]);
   if (!(upper > lower)) return [];
@@ -266,146 +266,146 @@ bcDistributionSegmentData = (dist, from, to, domain, points = 240) => {
   const step = (upper - lower) / count;
   return d3.range(count + 1).map((index) => {
     const x = lower + index * step;
-    return { x, y: bcDistributionFinitePdf(dist, x), distribution: dist };
+    return { x, y: sfsDistributionFinitePdf(dist, x), distribution: dist };
   });
 }
 
-bcDistributionOverlapData = (distA, distB, domain, points = 360) => {
+sfsDistributionOverlapData = (distA, distB, domain, points = 360) => {
   const count = Math.max(2, Math.round(points));
   const step = (domain[1] - domain[0]) / (count - 1);
   return d3.range(count).map((index) => {
     const x = domain[0] + index * step;
     return {
       x,
-      y: Math.min(bcDistributionFinitePdf(distA, x), bcDistributionFinitePdf(distB, x)),
+      y: Math.min(sfsDistributionFinitePdf(distA, x), sfsDistributionFinitePdf(distB, x)),
       distributions: [distA, distB]
     };
   });
 }
 
-bcDistributionDistributionBySelector = (selector, distributions) => {
+sfsDistributionDistributionBySelector = (selector, distributions) => {
   if (selector === undefined || selector === null || selector === "") return distributions[0];
   if (typeof selector === "number") return distributions[selector] || distributions[selector - 1] || distributions[0];
 
-  const key = bcDistributionNormalizeKey(selector);
+  const key = sfsDistributionNormalizeKey(selector);
   if (key === "first") return distributions[0];
   if (key === "last") return distributions[distributions.length - 1];
 
   return distributions.find((dist) =>
-    bcDistributionNormalizeKey(dist.key) === key ||
-    bcDistributionNormalizeKey(dist.name) === key ||
-    bcDistributionNormalizeKey(dist.label) === key ||
-    bcDistributionNormalizeKey(dist.type) === key
+    sfsDistributionNormalizeKey(dist.key) === key ||
+    sfsDistributionNormalizeKey(dist.name) === key ||
+    sfsDistributionNormalizeKey(dist.label) === key ||
+    sfsDistributionNormalizeKey(dist.type) === key
   ) || distributions[0];
 }
 
-bcDistributionShadedDistributions = (selector, distributions) => {
-  if (bcDistributionNormalizeKey(selector) === "all") return distributions;
-  return [bcDistributionDistributionBySelector(selector, distributions)];
+sfsDistributionShadedDistributions = (selector, distributions) => {
+  if (sfsDistributionNormalizeKey(selector) === "all") return distributions;
+  return [sfsDistributionDistributionBySelector(selector, distributions)];
 }
 
-bcDistributionProbability = (spec, fallback) => {
-  const value = bcDistributionFiniteNumber(
-    bcDistributionValueOr(spec.alpha, bcDistributionValueOr(spec.probability, bcDistributionValueOr(spec.prob, bcDistributionValueOr(spec.p, spec.area))))
+sfsDistributionProbability = (spec, fallback) => {
+  const value = sfsDistributionFiniteNumber(
+    sfsDistributionValueOr(spec.alpha, sfsDistributionValueOr(spec.probability, sfsDistributionValueOr(spec.prob, sfsDistributionValueOr(spec.p, spec.area))))
   );
   return Number.isFinite(value) && value > 0 && value < 1 ? value : fallback;
 }
 
-bcDistributionShadeBounds = (spec, dist) => {
-  if (Array.isArray(spec.between) && spec.between.length >= 2 && !["overlap", "intersection"].includes(bcDistributionNormalizeKey(spec.kind || spec.type))) {
-    return [{ from: bcDistributionBound(spec.between[0]), to: bcDistributionBound(spec.between[1]) }];
+sfsDistributionShadeBounds = (spec, dist) => {
+  if (Array.isArray(spec.between) && spec.between.length >= 2 && !["overlap", "intersection"].includes(sfsDistributionNormalizeKey(spec.kind || spec.type))) {
+    return [{ from: sfsDistributionBound(spec.between[0]), to: sfsDistributionBound(spec.between[1]) }];
   }
 
-  const explicitFrom = bcDistributionBound(bcDistributionValueOr(spec.from, bcDistributionValueOr(spec.lower, bcDistributionValueOr(spec.x1, spec.start))));
-  const explicitTo = bcDistributionBound(bcDistributionValueOr(spec.to, bcDistributionValueOr(spec.upper, bcDistributionValueOr(spec.x2, spec.end))));
+  const explicitFrom = sfsDistributionBound(sfsDistributionValueOr(spec.from, sfsDistributionValueOr(spec.lower, sfsDistributionValueOr(spec.x1, spec.start))));
+  const explicitTo = sfsDistributionBound(sfsDistributionValueOr(spec.to, sfsDistributionValueOr(spec.upper, sfsDistributionValueOr(spec.x2, spec.end))));
   if (explicitFrom !== undefined || explicitTo !== undefined) {
-    return [{ from: bcDistributionValueOr(explicitFrom, -Infinity), to: bcDistributionValueOr(explicitTo, Infinity) }];
+    return [{ from: sfsDistributionValueOr(explicitFrom, -Infinity), to: sfsDistributionValueOr(explicitTo, Infinity) }];
   }
 
-  const tail = bcDistributionNormalizeKey(spec.tail || spec.region || spec.areaType || spec.side);
+  const tail = sfsDistributionNormalizeKey(spec.tail || spec.region || spec.areaType || spec.side);
   if (["left", "lower", "low"].includes(tail)) {
-    const p = bcDistributionProbability(spec, 0.05);
-    return [{ from: -Infinity, to: bcDistributionQuantile(dist, p) }];
+    const p = sfsDistributionProbability(spec, 0.05);
+    return [{ from: -Infinity, to: sfsDistributionQuantile(dist, p) }];
   }
 
   if (["right", "upper", "high"].includes(tail)) {
-    const p = bcDistributionProbability(spec, 0.05);
-    return [{ from: bcDistributionQuantile(dist, 1 - p), to: Infinity }];
+    const p = sfsDistributionProbability(spec, 0.05);
+    return [{ from: sfsDistributionQuantile(dist, 1 - p), to: Infinity }];
   }
 
   if (["two", "both", "two-tailed", "two-tail", "tails"].includes(tail)) {
-    const p = bcDistributionProbability(spec, 0.05);
+    const p = sfsDistributionProbability(spec, 0.05);
     return [
-      { from: -Infinity, to: bcDistributionQuantile(dist, p / 2) },
-      { from: bcDistributionQuantile(dist, 1 - p / 2), to: Infinity }
+      { from: -Infinity, to: sfsDistributionQuantile(dist, p / 2) },
+      { from: sfsDistributionQuantile(dist, 1 - p / 2), to: Infinity }
     ];
   }
 
   if (["center", "central", "middle", "confidence", "ci", "interval"].includes(tail)) {
-    const central = spec.alpha !== undefined ? 1 - bcDistributionProbability(spec, 0.05) : bcDistributionProbability(spec, 0.95);
+    const central = spec.alpha !== undefined ? 1 - sfsDistributionProbability(spec, 0.05) : sfsDistributionProbability(spec, 0.95);
     const side = (1 - central) / 2;
     return [
-      { from: bcDistributionQuantile(dist, side), to: bcDistributionQuantile(dist, 1 - side) }
+      { from: sfsDistributionQuantile(dist, side), to: sfsDistributionQuantile(dist, 1 - side) }
     ];
   }
 
   return [];
 }
 
-bcDistributionShadeLabel = (spec, dist, bounds) => {
+sfsDistributionShadeLabel = (spec, dist, bounds) => {
   const raw = spec.label;
   if (raw === undefined || raw === null || raw === false) return { label: undefined, labelValue: undefined };
 
-  const area = bcDistributionCdf(dist, bcDistributionValueOr(bounds.to, Infinity)) -
-    bcDistributionCdf(dist, bcDistributionValueOr(bounds.from, -Infinity));
-  if (typeof raw === "string" && !["percent", "percentage", "proportion", "area", "auto"].includes(bcDistributionNormalizeKey(raw))) {
+  const area = sfsDistributionCdf(dist, sfsDistributionValueOr(bounds.to, Infinity)) -
+    sfsDistributionCdf(dist, sfsDistributionValueOr(bounds.from, -Infinity));
+  if (typeof raw === "string" && !["percent", "percentage", "proportion", "area", "auto"].includes(sfsDistributionNormalizeKey(raw))) {
     return { label: raw, labelValue: area };
   }
 
-  const key = typeof raw === "string" ? bcDistributionNormalizeKey(raw) : "percent";
+  const key = typeof raw === "string" ? sfsDistributionNormalizeKey(raw) : "percent";
   const format = spec.labelFormat || (["proportion", "area"].includes(key) ? ".4f" : ".2%");
   return { label: d3.format(format)(area), labelValue: area };
 }
 
-bcDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => {
-  const shadeSpecs = bcDistributionAsArray(opts.shade || opts.shading || opts.shades);
+sfsDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => {
+  const shadeSpecs = sfsDistributionAsArray(opts.shade || opts.shading || opts.shades);
   return shadeSpecs.flatMap((rawSpec, index) => {
     const spec = typeof rawSpec === "string" ? { tail: rawSpec } : rawSpec || {};
-    const kind = bcDistributionNormalizeKey(spec.kind || spec.type);
-    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--bc-neutral-color, #7b818a)" : "var(--bc-danger-color, #c63f3f)");
-    const opacity = bcDistributionFiniteNumber(spec.opacity, kind === "overlap" ? 0.32 : 0.28);
+    const kind = sfsDistributionNormalizeKey(spec.kind || spec.type);
+    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-danger-color, #c63f3f)");
+    const opacity = sfsDistributionFiniteNumber(spec.opacity, kind === "overlap" ? 0.32 : 0.28);
 
     if (["overlap", "intersection"].includes(kind)) {
       const pair = Array.isArray(spec.between) ? spec.between : [0, 1];
-      const distA = bcDistributionDistributionBySelector(pair[0], distributions);
-      const distB = bcDistributionDistributionBySelector(pair[1], distributions);
+      const distA = sfsDistributionDistributionBySelector(pair[0], distributions);
+      const distB = sfsDistributionDistributionBySelector(pair[1], distributions);
       return [{
         kind: "overlap",
         color,
         opacity,
         label: typeof spec.label === "string" ? spec.label : undefined,
-        labelPosition: bcDistributionNormalizeKey(spec.labelPosition || "auto"),
-        labelOffset: bcDistributionFiniteNumber(spec.labelOffset, 0),
-        data: bcDistributionOverlapData(distA, distB, domain, spec.points || opts.points || 360),
+        labelPosition: sfsDistributionNormalizeKey(spec.labelPosition || "auto"),
+        labelOffset: sfsDistributionFiniteNumber(spec.labelOffset, 0),
+        data: sfsDistributionOverlapData(distA, distB, domain, spec.points || opts.points || 360),
         spec,
         index
       }];
     }
 
-    return bcDistributionShadedDistributions(spec.distribution || spec.dist || spec.series, distributions)
-      .flatMap((dist) => bcDistributionShadeBounds(spec, dist).map((bounds) => Object.assign({
+    return sfsDistributionShadedDistributions(spec.distribution || spec.dist || spec.series, distributions)
+      .flatMap((dist) => sfsDistributionShadeBounds(spec, dist).map((bounds) => Object.assign({
         kind: "area",
         distribution: dist,
         from: bounds.from,
         to: bounds.to,
         color,
         opacity,
-        labelPosition: bcDistributionNormalizeKey(spec.labelPosition || "auto"),
-        labelOffset: bcDistributionFiniteNumber(spec.labelOffset, 0),
-        data: bcDistributionSegmentData(dist, bounds.from, bounds.to, domain, spec.points || opts.shadePoints || 240),
+        labelPosition: sfsDistributionNormalizeKey(spec.labelPosition || "auto"),
+        labelOffset: sfsDistributionFiniteNumber(spec.labelOffset, 0),
+        data: sfsDistributionSegmentData(dist, bounds.from, bounds.to, domain, spec.points || opts.shadePoints || 240),
         spec,
         index
-      }, bcDistributionShadeLabel(spec, dist, bounds))))
+      }, sfsDistributionShadeLabel(spec, dist, bounds))))
       .filter((item) => item.data.length > 1);
   });
 }
@@ -413,7 +413,7 @@ bcDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => {
 // Converts a small label markup — *italic* and _subscript_ — into SVG tspan
 // HTML, so shortcode options can express math-ish labels without quote
 // escaping. Subscripts run first, so nested italics like _*M*_ work.
-bcDistributionLabelMarkup = (value) => {
+sfsDistributionLabelMarkup = (value) => {
   const escaped = String(value)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -423,13 +423,13 @@ bcDistributionLabelMarkup = (value) => {
     .replace(/\*([^*]+)\*/g, "<tspan font-style=\"italic\">$1</tspan>");
 }
 
-bcDistributionLabelHtml = (spec) => {
+sfsDistributionLabelHtml = (spec) => {
   if (typeof spec.labelHtml === "string") return spec.labelHtml;
-  if (typeof spec.labelMarkup === "string") return bcDistributionLabelMarkup(spec.labelMarkup);
+  if (typeof spec.labelMarkup === "string") return sfsDistributionLabelMarkup(spec.labelMarkup);
   return undefined;
 }
 
-bcDistributionMarkerDefaults = {
+sfsDistributionMarkerDefaults = {
   mode: { color: "var(--graph-series-3, #009e73)", dash: "10 5" },
   median: { color: "var(--graph-series-2, #e69f00)", dash: "6 6" },
   mean: { color: "var(--graph-series-5, #cc79a7)", dash: "2 5" }
@@ -440,44 +440,44 @@ bcDistributionMarkerDefaults = {
 // the median, and a fulcrum beneath the baseline for the mean. It is opt-in so
 // ordinary score and critical-value markers elsewhere in the book remain
 // conventional reference lines.
-bcDistributionConceptualMarkerDefaults = {
+sfsDistributionConceptualMarkerDefaults = {
   mode: { color: "var(--graph-series-2, #e69f00)" },
   median: { color: "var(--graph-series-3, #009e73)" },
-  mean: { color: "var(--bc-danger-color, #c63f3f)" }
+  mean: { color: "var(--sfs-danger-color, #c63f3f)" }
 }
 
-bcDistributionIsCentralTendencyPresentation = (value) => [
+sfsDistributionIsCentralTendencyPresentation = (value) => [
   "central-tendency",
   "conceptual",
   "definitions",
   "definition"
-].includes(bcDistributionNormalizeKey(value))
+].includes(sfsDistributionNormalizeKey(value))
 
-bcDistributionMarkerStatKey = (value) => {
+sfsDistributionMarkerStatKey = (value) => {
   if (typeof value !== "string") return null;
-  const key = bcDistributionNormalizeKey(value);
+  const key = sfsDistributionNormalizeKey(value);
   if (["mean", "average", "mu", "m"].includes(key)) return "mean";
   if (["median", "mdn"].includes(key)) return "median";
   if (["mode", "modes", "peak", "peaks"].includes(key)) return "mode";
   return null;
 }
 
-bcDistributionMeanValue = (dist) => {
+sfsDistributionMeanValue = (dist) => {
   if (dist.type === "f") return dist.df2 > 2 ? dist.location + dist.scale * dist.df2 / (dist.df2 - 2) : NaN;
-  if (dist.type === "skew-normal") return bcDistributionStats.skewNormalMean(dist.location, dist.scale, dist.shape);
+  if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalMean(dist.location, dist.scale, dist.shape);
   if (dist.type === "mixture") {
     return (dist.components || []).reduce((sum, component) =>
-      sum + component.weight * bcDistributionMeanValue(component), 0);
+      sum + component.weight * sfsDistributionMeanValue(component), 0);
   }
   return dist.mean;
 }
 
-bcDistributionModes = (dist, domain) => {
+sfsDistributionModes = (dist, domain) => {
   const count = 512;
   const step = (domain[1] - domain[0]) / count;
   if (!(step > 0)) return [];
 
-  const ys = d3.range(count + 1).map((i) => bcDistributionFinitePdf(dist, domain[0] + i * step));
+  const ys = d3.range(count + 1).map((i) => sfsDistributionFinitePdf(dist, domain[0] + i * step));
   const yMax = d3.max(ys) || 0;
   if (!(yMax > 0)) return [];
 
@@ -490,7 +490,7 @@ bcDistributionModes = (dist, domain) => {
     for (let iteration = 0; iteration < 60; iteration += 1) {
       const m1 = lower + (upper - lower) / 3;
       const m2 = upper - (upper - lower) / 3;
-      if (bcDistributionFinitePdf(dist, m1) < bcDistributionFinitePdf(dist, m2)) {
+      if (sfsDistributionFinitePdf(dist, m1) < sfsDistributionFinitePdf(dist, m2)) {
         lower = m1;
       } else {
         upper = m2;
@@ -502,40 +502,40 @@ bcDistributionModes = (dist, domain) => {
   return modes;
 }
 
-bcDistributionMarkerItems = (opts = {}, distributions = [], domain = [0, 1]) => {
-  const markerSpecs = bcDistributionAsArray(opts.markers || opts.marker);
+sfsDistributionMarkerItems = (opts = {}, distributions = [], domain = [0, 1]) => {
+  const markerSpecs = sfsDistributionAsArray(opts.markers || opts.marker);
   return markerSpecs.flatMap((rawSpec, index) => {
     const spec = typeof rawSpec === "object" && rawSpec !== null ? rawSpec : { at: rawSpec };
-    const dist = bcDistributionDistributionBySelector(spec.distribution || spec.dist || spec.series, distributions);
-    const at = bcDistributionValueOr(spec.at, bcDistributionValueOr(spec.x, spec.value));
-    const statKey = bcDistributionMarkerStatKey(at);
+    const dist = sfsDistributionDistributionBySelector(spec.distribution || spec.dist || spec.series, distributions);
+    const at = sfsDistributionValueOr(spec.at, sfsDistributionValueOr(spec.x, spec.value));
+    const statKey = sfsDistributionMarkerStatKey(at);
 
     let positions;
-    if (statKey === "mean") positions = [bcDistributionMeanValue(dist)];
-    else if (statKey === "median") positions = [bcDistributionQuantile(dist, 0.5)];
-    else if (statKey === "mode") positions = bcDistributionModes(dist, domain);
-    else positions = [bcDistributionFiniteNumber(at)];
+    if (statKey === "mean") positions = [sfsDistributionMeanValue(dist)];
+    else if (statKey === "median") positions = [sfsDistributionQuantile(dist, 0.5)];
+    else if (statKey === "mode") positions = sfsDistributionModes(dist, domain);
+    else positions = [sfsDistributionFiniteNumber(at)];
 
-    const presentationValue = bcDistributionValueOr(
+    const presentationValue = sfsDistributionValueOr(
       spec.presentation,
-      bcDistributionValueOr(spec.markerPresentation, opts.markerPresentation)
+      sfsDistributionValueOr(spec.markerPresentation, opts.markerPresentation)
     );
-    const presentation = statKey && bcDistributionIsCentralTendencyPresentation(presentationValue)
+    const presentation = statKey && sfsDistributionIsCentralTendencyPresentation(presentationValue)
       ? statKey
       : "line";
     const defaults = statKey
       ? (presentation === "line"
-          ? bcDistributionMarkerDefaults[statKey]
-          : bcDistributionConceptualMarkerDefaults[statKey])
+          ? sfsDistributionMarkerDefaults[statKey]
+          : sfsDistributionConceptualMarkerDefaults[statKey])
       : {};
-    const rawHeight = bcDistributionValueOr(spec.height, spec.extent);
-    const heightFraction = bcDistributionFiniteNumber(rawHeight);
+    const rawHeight = sfsDistributionValueOr(spec.height, spec.extent);
+    const heightFraction = sfsDistributionFiniteNumber(rawHeight);
     // "curve" (default): baseline to the pdf; "full": to the top of the plot;
     // a number in (0, 1]: that fraction of the plot height, for marking scores
     // so far into a tail that the curve height would be an invisible stub.
     const height = Number.isFinite(heightFraction) && heightFraction > 0 && heightFraction <= 1
       ? heightFraction
-      : ["full", "plot", "top", "divider"].includes(bcDistributionNormalizeKey(rawHeight)) ? "full" : "curve";
+      : ["full", "plot", "top", "divider"].includes(sfsDistributionNormalizeKey(rawHeight)) ? "full" : "curve";
 
     return positions
       .filter((position) => Number.isFinite(position) && position >= domain[0] && position <= domain[1])
@@ -549,20 +549,20 @@ bcDistributionMarkerItems = (opts = {}, distributions = [], domain = [0, 1]) => 
 
         return {
           x: position,
-          y: bcDistributionFinitePdf(dist, position),
+          y: sfsDistributionFinitePdf(dist, position),
           distribution: dist,
           stat: statKey,
           presentation,
           height,
-          color: spec.color || spec.stroke || defaults.color || "var(--bc-neutral-color, #7b818a)",
-          dash: bcDistributionValueOr(spec.dash, bcDistributionValueOr(spec.strokeDasharray, defaults.dash || "6 4")),
-          strokeWidth: bcDistributionPositiveNumber(spec.strokeWidth, 2),
-          opacity: bcDistributionFiniteNumber(spec.opacity, 0.95),
+          color: spec.color || spec.stroke || defaults.color || "var(--sfs-neutral-color, #7b818a)",
+          dash: sfsDistributionValueOr(spec.dash, sfsDistributionValueOr(spec.strokeDasharray, defaults.dash || "6 4")),
+          strokeWidth: sfsDistributionPositiveNumber(spec.strokeWidth, 2),
+          opacity: sfsDistributionFiniteNumber(spec.opacity, 0.95),
           label,
-          labelHtml: bcDistributionLabelHtml(spec),
+          labelHtml: sfsDistributionLabelHtml(spec),
           labelAnchor: ["start", "middle", "end"].includes(spec.labelAnchor) ? spec.labelAnchor : "middle",
-          labelDx: bcDistributionFiniteNumber(spec.labelDx, 0),
-          labelDy: bcDistributionFiniteNumber(spec.labelDy, 0),
+          labelDx: sfsDistributionFiniteNumber(spec.labelDx, 0),
+          labelDy: sfsDistributionFiniteNumber(spec.labelDy, 0),
           spec,
           index
         };
@@ -570,43 +570,43 @@ bcDistributionMarkerItems = (opts = {}, distributions = [], domain = [0, 1]) => 
   });
 }
 
-bcDistributionIntervalItems = (opts = {}, distributions = [], domain = [0, 1]) => {
-  const intervalSpecs = bcDistributionAsArray(opts.intervals || opts.interval);
+sfsDistributionIntervalItems = (opts = {}, distributions = [], domain = [0, 1]) => {
+  const intervalSpecs = sfsDistributionAsArray(opts.intervals || opts.interval);
   return intervalSpecs.map((rawSpec, index) => {
     const spec = rawSpec || {};
-    const dist = bcDistributionDistributionBySelector(spec.distribution || spec.dist || spec.series, distributions);
-    const from = bcDistributionFiniteNumber(bcDistributionValueOr(spec.from, spec.x1), domain[0]);
-    const to = bcDistributionFiniteNumber(bcDistributionValueOr(spec.to, spec.x2), domain[1]);
+    const dist = sfsDistributionDistributionBySelector(spec.distribution || spec.dist || spec.series, distributions);
+    const from = sfsDistributionFiniteNumber(sfsDistributionValueOr(spec.from, spec.x1), domain[0]);
+    const to = sfsDistributionFiniteNumber(sfsDistributionValueOr(spec.to, spec.x2), domain[1]);
     // "curve" centers the bar between the baseline and the curve's height at
     // the interval's outer limit; a number is a fraction of the plot height.
-    const heightKey = bcDistributionNormalizeKey(spec.height);
+    const heightKey = sfsDistributionNormalizeKey(spec.height);
     return {
       from: Math.max(domain[0], Math.min(from, to)),
       to: Math.min(domain[1], Math.max(from, to)),
       distribution: dist,
       height: ["curve", "curve-mid", "curve-midpoint", "auto"].includes(heightKey)
         ? "curve"
-        : bcDistributionClamp(bcDistributionFiniteNumber(spec.height, 0.42), 0, 1),
-      color: spec.color || spec.stroke || "var(--bc-neutral-color, #7b818a)",
-      strokeWidth: bcDistributionPositiveNumber(spec.strokeWidth, 2),
-      opacity: bcDistributionFiniteNumber(spec.opacity, 0.95),
+        : sfsDistributionClamp(sfsDistributionFiniteNumber(spec.height, 0.42), 0, 1),
+      color: spec.color || spec.stroke || "var(--sfs-neutral-color, #7b818a)",
+      strokeWidth: sfsDistributionPositiveNumber(spec.strokeWidth, 2),
+      opacity: sfsDistributionFiniteNumber(spec.opacity, 0.95),
       arrows: spec.arrows !== false,
       label: typeof spec.label === "string" ? spec.label : undefined,
-      labelHtml: bcDistributionLabelHtml(spec),
-      labelDx: bcDistributionFiniteNumber(spec.labelDx, 0),
-      labelDy: bcDistributionFiniteNumber(spec.labelDy, 0),
+      labelHtml: sfsDistributionLabelHtml(spec),
+      labelDx: sfsDistributionFiniteNumber(spec.labelDx, 0),
+      labelDy: sfsDistributionFiniteNumber(spec.labelDy, 0),
       spec,
       index
     };
   }).filter((item) => item.to > item.from);
 }
 
-bcDistributionCurveFactory = (opts = {}) => {
-  const value = bcDistributionValueOr(opts.interpolation, bcDistributionValueOr(opts.curveFactory, opts.curve));
+sfsDistributionCurveFactory = (opts = {}) => {
+  const value = sfsDistributionValueOr(opts.interpolation, sfsDistributionValueOr(opts.curveFactory, opts.curve));
   if (typeof value === "function") return value;
   if (value === undefined || value === null) return d3.curveMonotoneX;
 
-  const key = bcDistributionNormalizeKey(value);
+  const key = sfsDistributionNormalizeKey(value);
   const curves = {
     basis: d3.curveBasis,
     cardinal: d3.curveCardinal,
@@ -619,21 +619,21 @@ bcDistributionCurveFactory = (opts = {}) => {
   return curves[key] || d3.curveMonotoneX;
 }
 
-bcDistributionDisplay = (opts = {}) => {
-  const style = bcDistributionNormalizeKey(opts.style || opts.display || opts.variant);
+sfsDistributionDisplay = (opts = {}) => {
+  const style = sfsDistributionNormalizeKey(opts.style || opts.display || opts.variant);
   const minimal = ["minimal", "bare", "plain", "curve-only", "curve"].includes(style);
-  const showAxes = bcDistributionBoolean(
-    bcDistributionValueOr(opts.axes, bcDistributionValueOr(opts.axis, bcDistributionValueOr(opts.showAxes, opts.showAxis))),
+  const showAxes = sfsDistributionBoolean(
+    sfsDistributionValueOr(opts.axes, sfsDistributionValueOr(opts.axis, sfsDistributionValueOr(opts.showAxes, opts.showAxis))),
     !minimal
   );
-  const showXAxis = bcDistributionBoolean(bcDistributionValueOr(opts.xAxis, opts.showXAxis), showAxes);
-  const showYAxis = bcDistributionBoolean(bcDistributionValueOr(opts.yAxis, opts.showYAxis), showAxes);
-  const showAxisLabels = bcDistributionBoolean(
-    bcDistributionValueOr(opts.axisLabels, bcDistributionValueOr(opts.showAxisLabels, opts.labels)),
+  const showXAxis = sfsDistributionBoolean(sfsDistributionValueOr(opts.xAxis, opts.showXAxis), showAxes);
+  const showYAxis = sfsDistributionBoolean(sfsDistributionValueOr(opts.yAxis, opts.showYAxis), showAxes);
+  const showAxisLabels = sfsDistributionBoolean(
+    sfsDistributionValueOr(opts.axisLabels, sfsDistributionValueOr(opts.showAxisLabels, opts.labels)),
     minimal ? false : opts.labels === false ? false : true
   );
-  const showAxisLines = bcDistributionBoolean(bcDistributionValueOr(opts.axisLines, opts.showAxisLines), true);
-  const showTickLabels = bcDistributionBoolean(bcDistributionValueOr(opts.tickLabels, opts.showTickLabels), true);
+  const showAxisLines = sfsDistributionBoolean(sfsDistributionValueOr(opts.axisLines, opts.showAxisLines), true);
+  const showTickLabels = sfsDistributionBoolean(sfsDistributionValueOr(opts.tickLabels, opts.showTickLabels), true);
 
   return {
     showAxes,
@@ -647,50 +647,50 @@ bcDistributionDisplay = (opts = {}) => {
   };
 }
 
-bcDistributionDimensions = (opts = {}) => {
-  const width = bcDistributionPositiveNumber(opts.width, 640);
-  const conceptualMarkers = bcDistributionIsCentralTendencyPresentation(opts.markerPresentation);
-  const aspectRatio = bcDistributionPositiveNumber(opts.aspectRatio, conceptualMarkers ? 1.65 : 2.2);
-  const height = bcDistributionPositiveNumber(opts.height, width / aspectRatio);
+sfsDistributionDimensions = (opts = {}) => {
+  const width = sfsDistributionPositiveNumber(opts.width, 640);
+  const conceptualMarkers = sfsDistributionIsCentralTendencyPresentation(opts.markerPresentation);
+  const aspectRatio = sfsDistributionPositiveNumber(opts.aspectRatio, conceptualMarkers ? 1.65 : 2.2);
+  const height = sfsDistributionPositiveNumber(opts.height, width / aspectRatio);
   return { width, height, aspectRatio };
 }
 
-bcDistributionMargin = (opts = {}, display = bcDistributionDisplay(opts)) => {
+sfsDistributionMargin = (opts = {}, display = sfsDistributionDisplay(opts)) => {
   const raw = opts.margin || {};
-  const title = bcDistributionValueOr(opts.title, opts.labels && opts.labels.title);
-  const conceptualMarkers = bcDistributionIsCentralTendencyPresentation(opts.markerPresentation);
+  const title = sfsDistributionValueOr(opts.title, opts.labels && opts.labels.title);
+  const conceptualMarkers = sfsDistributionIsCentralTendencyPresentation(opts.markerPresentation);
   return {
-    top: bcDistributionValueOr(raw.top, title ? 42 : conceptualMarkers ? 32 : 22),
-    right: bcDistributionValueOr(raw.right, 24),
-    bottom: bcDistributionValueOr(
+    top: sfsDistributionValueOr(raw.top, title ? 42 : conceptualMarkers ? 32 : 22),
+    right: sfsDistributionValueOr(raw.right, 24),
+    bottom: sfsDistributionValueOr(
       raw.bottom,
       conceptualMarkers ? 62 : display.showXAxis || display.showXLabel ? 54 : 16
     ),
-    left: bcDistributionValueOr(raw.left, display.showYAxis || display.showYLabel ? 60 : 18)
+    left: sfsDistributionValueOr(raw.left, display.showYAxis || display.showYLabel ? 60 : 18)
   };
 }
 
-bcDistributionStyleAxis = (axis, display) => {
+sfsDistributionStyleAxis = (axis, display) => {
   axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} bc-axis bc-graph-axis`;
+      return `${this.getAttribute("class") || ""} sfs-axis sfs-graph-axis`;
     })
-    .call((g) => g.selectAll("text").attr("class", "bc-tick-label bc-graph-tick-label"))
-    .call((g) => g.selectAll("line").attr("class", "bc-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "bc-graph-domain"));
+    .call((g) => g.selectAll("text").attr("class", "sfs-tick-label sfs-graph-tick-label"))
+    .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
+    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
 
   if (!display.showAxisLines) axis.selectAll("path,line").style("display", "none");
   if (!display.showTickLabels) axis.selectAll("text").style("display", "none");
 }
 
-bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
+sfsDistributionAddLabels = (svg, opts, display, margin, width, height) => {
   const labels = opts.labels || {};
-  const title = bcDistributionValueOr(opts.title, labels.title);
-  const xLabel = bcDistributionValueOr(opts.xLabel, labels.x || labels.xLabel || "Score");
-  const yLabel = bcDistributionValueOr(opts.yLabel, labels.y || labels.yLabel || "Density");
+  const title = sfsDistributionValueOr(opts.title, labels.title);
+  const xLabel = sfsDistributionValueOr(opts.xLabel, labels.x || labels.xLabel || "Score");
+  const yLabel = sfsDistributionValueOr(opts.yLabel, labels.y || labels.yLabel || "Density");
 
   if (title) {
     svg.append("text")
-      .attr("class", "dg-title bc-graph-title")
+      .attr("class", "dg-title sfs-graph-title")
       .attr("x", margin.left)
       .attr("y", 18)
       .text(title);
@@ -698,7 +698,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
 
   if (display.showXLabel && xLabel !== false) {
     svg.append("text")
-      .attr("class", "dg-x-label bc-graph-label bc-axis-label")
+      .attr("class", "dg-x-label sfs-graph-label sfs-axis-label")
       .attr("x", (margin.left + width - margin.right) / 2)
       .attr("y", height - 12)
       .attr("text-anchor", "middle")
@@ -707,7 +707,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
 
   if (display.showYLabel && yLabel !== false) {
     svg.append("text")
-      .attr("class", "dg-y-label bc-graph-label bc-axis-label")
+      .attr("class", "dg-y-label sfs-graph-label sfs-axis-label")
       .attr("x", -(margin.top + height - margin.bottom) / 2)
       .attr("y", 17)
       .attr("transform", "rotate(-90)")
@@ -716,7 +716,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
   }
 }
 
-bcDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
+sfsDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   const raw = opts.markerLegend;
   if (raw === undefined || raw === null || raw === false) return null;
 
@@ -728,12 +728,12 @@ bcDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   });
   if (!rows.length) return null;
 
-  const side = bcDistributionNormalizeKey(raw) === "left" ? "left" : "right";
+  const side = sfsDistributionNormalizeKey(raw) === "left" ? "left" : "right";
   const legendWidth = d3.max(rows, (row) => String(row.label).length) * 6.5 + 26;
   const legendX = side === "left" ? margin.left + 12 : width - margin.right - legendWidth;
 
   const legend = svg.append("g")
-    .attr("class", "dg-marker-legend bc-graph-legend")
+    .attr("class", "dg-marker-legend sfs-graph-legend")
     .attr("data-fade-opacity", 1)
     .attr("transform", `translate(${legendX},${margin.top + 6})`);
 
@@ -759,11 +759,11 @@ bcDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   return legend;
 }
 
-bcDistributionAddLegend = (svg, distributions, opts, width, margin) => {
+sfsDistributionAddLegend = (svg, distributions, opts, width, margin) => {
   if (distributions.length < 2 || opts.legend === false) return;
 
   const legend = svg.append("g")
-    .attr("class", "dg-legend bc-graph-legend")
+    .attr("class", "dg-legend sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
 
   const items = legend.selectAll("g")
@@ -786,14 +786,14 @@ bcDistributionAddLegend = (svg, distributions, opts, width, margin) => {
     .text((d) => d.name || d.label);
 }
 
-bcDistributionEnsureStyles = () => {
-  if (document.getElementById("bc-distribution-generator-styles")) return;
+sfsDistributionEnsureStyles = () => {
+  if (document.getElementById("sfs-distribution-generator-styles")) return;
 
   const style = document.createElement("style");
-  style.id = "bc-distribution-generator-styles";
+  style.id = "sfs-distribution-generator-styles";
   style.textContent = `
     .distribution-graph {
-      --bc-figure-max-width: var(--dg-max-width, 48rem);
+      --sfs-figure-max-width: var(--dg-max-width, 48rem);
     }
 
     .distribution-graph .dg-shade {
@@ -841,17 +841,17 @@ bcDistributionEnsureStyles = () => {
 
     .distribution-graph .dg-conceptual-label,
     .distribution-graph .dg-median-half-label {
-      fill: var(--bc-text);
+      fill: var(--sfs-text);
       font-size: 0.78rem;
       font-weight: 600;
       paint-order: stroke;
-      stroke: var(--bc-bg);
+      stroke: var(--sfs-bg);
       stroke-linejoin: round;
       stroke-width: 3px;
     }
 
     .distribution-graph .dg-median-half-label {
-      fill: var(--bc-muted);
+      fill: var(--sfs-muted);
       font-size: 0.72rem;
       font-weight: 500;
     }
@@ -869,7 +869,7 @@ bcDistributionEnsureStyles = () => {
     }
 
     .distribution-explorer {
-      --bc-figure-max-width: var(--dpe-max-width, 48rem);
+      --sfs-figure-max-width: var(--dpe-max-width, 48rem);
     }
 
     .distribution-explorer .dpe-chart-wrap {
@@ -888,12 +888,12 @@ bcDistributionEnsureStyles = () => {
     .distribution-explorer .dpe-value {
       justify-self: end;
       min-width: 3.25rem;
-      color: var(--bc-muted);
+      color: var(--sfs-muted);
       font-variant-numeric: tabular-nums;
     }
 
     .distribution-explorer .dpe-reference-curve {
-      stroke: var(--bc-neutral-color, #7b818a);
+      stroke: var(--sfs-neutral-color, #7b818a);
       stroke-dasharray: 7 5;
     }
 
@@ -902,11 +902,11 @@ bcDistributionEnsureStyles = () => {
     }
 
     .central-tendency-morph {
-      --bc-figure-max-width: var(--ctm-max-width, 48rem);
+      --sfs-figure-max-width: var(--ctm-max-width, 48rem);
     }
 
     .central-tendency-morph .ctm-state-label {
-      fill: var(--bc-muted);
+      fill: var(--sfs-muted);
       font-size: 0.78rem;
       font-weight: 600;
     }
@@ -922,7 +922,7 @@ bcDistributionEnsureStyles = () => {
 
     .central-tendency-morph .ctm-shape-readout {
       grid-column: 2;
-      color: var(--bc-muted);
+      color: var(--sfs-muted);
       font-size: 0.85rem;
     }
 
@@ -941,7 +941,7 @@ bcDistributionEnsureStyles = () => {
     }
 
     .distribution-family-cover {
-      --bc-figure-max-width: var(--dfc-max-width, var(--bc-cover-max-width, 46rem));
+      --sfs-figure-max-width: var(--dfc-max-width, var(--sfs-cover-max-width, 46rem));
     }
 
     .distribution-family-cover .dfc-chart-wrap {
@@ -962,25 +962,25 @@ bcDistributionEnsureStyles = () => {
   document.head.appendChild(style);
 }
 
-bcDistributionPrefersReducedMotion = () =>
+sfsDistributionPrefersReducedMotion = () =>
   window.interactiveRuntime && window.interactiveRuntime.motion
     ? window.interactiveRuntime.motion.isReduced()
     : Boolean(window.matchMedia &&
         window.matchMedia("(prefers-reduced-motion: reduce)").matches)
 
-bcDistributionShouldAnimate = (opts = {}) =>
-  bcDistributionBoolean(bcDistributionValueOr(opts.animate, opts.animation), false) &&
-  !bcDistributionPrefersReducedMotion()
+sfsDistributionShouldAnimate = (opts = {}) =>
+  sfsDistributionBoolean(sfsDistributionValueOr(opts.animate, opts.animation), false) &&
+  !sfsDistributionPrefersReducedMotion()
 
-bcDistributionAnimationTrigger = (opts = {}) => {
-  const raw = bcDistributionValueOr(opts.animationTrigger, bcDistributionValueOr(opts.trigger, opts.animateOn));
-  const key = bcDistributionNormalizeKey(raw || "visible");
+sfsDistributionAnimationTrigger = (opts = {}) => {
+  const raw = sfsDistributionValueOr(opts.animationTrigger, sfsDistributionValueOr(opts.trigger, opts.animateOn));
+  const key = sfsDistributionNormalizeKey(raw || "visible");
   if (["immediate", "now", "load"].includes(key)) return "immediate";
   if (["manual", "click"].includes(key)) return "manual";
   return "visible";
 }
 
-bcDistributionOnVisible = (element, callback, threshold = 0.3) => {
+sfsDistributionOnVisible = (element, callback, threshold = 0.3) => {
   if (!element) {
     requestAnimationFrame(callback);
     return;
@@ -1033,17 +1033,17 @@ bcDistributionOnVisible = (element, callback, threshold = 0.3) => {
 // path is; it only needs the plot's own pixel bounds, which are exact by
 // construction. Every curve here is monotonic in x, so wiping left to right is
 // visually identical to tracing it with a pen. Same fix, same reasoning, as
-// bcGraphRevealClips in graph-generator.js.
-bcDistributionRevealClips = (svg, selection, bounds = {}) => {
+// sfsGraphRevealClips in graph-generator.js.
+sfsDistributionRevealClips = (svg, selection, bounds = {}) => {
   const nodes = typeof selection.nodes === "function" ? selection.nodes() : [];
   if (!nodes.length) return null;
 
-  const pad = bcDistributionFiniteNumber(bounds.pad, 6);
-  const left = bcDistributionFiniteNumber(bounds.left, 0) - pad;
-  const width = Math.max(0, bcDistributionFiniteNumber(bounds.width, 0) + pad * 2);
+  const pad = sfsDistributionFiniteNumber(bounds.pad, 6);
+  const left = sfsDistributionFiniteNumber(bounds.left, 0) - pad;
+  const width = Math.max(0, sfsDistributionFiniteNumber(bounds.width, 0) + pad * 2);
   // Generous vertical bounds: the reveal only cares about x, and a curve group
   // may carry its own vertical transform (the family cover scales in y).
-  const height = Math.max(1, bcDistributionFiniteNumber(bounds.height, 0));
+  const height = Math.max(1, sfsDistributionFiniteNumber(bounds.height, 0));
   const defs = svg.append("defs");
   const base = `dg-reveal-${Math.round(performance.now() * 1000)}-${Math.round(Math.random() * 1e6)}`;
 
@@ -1061,21 +1061,21 @@ bcDistributionRevealClips = (svg, selection, bounds = {}) => {
   });
 }
 
-bcDistributionAnimate = (lineSelection, shadeSelection, opts = {}, rootNode = null, fadeSelection = null, growClips = null, revealBounds = null) => {
-  if (!bcDistributionBoolean(bcDistributionValueOr(opts.animate, opts.animation), false) || bcDistributionPrefersReducedMotion()) return;
+sfsDistributionAnimate = (lineSelection, shadeSelection, opts = {}, rootNode = null, fadeSelection = null, growClips = null, revealBounds = null) => {
+  if (!sfsDistributionBoolean(sfsDistributionValueOr(opts.animate, opts.animation), false) || sfsDistributionPrefersReducedMotion()) return;
 
   const revealClips = revealBounds && revealBounds.svg
-    ? bcDistributionRevealClips(revealBounds.svg, lineSelection, revealBounds)
+    ? sfsDistributionRevealClips(revealBounds.svg, lineSelection, revealBounds)
     : null;
 
-  const lineDuration = bcDistributionPositiveNumber(opts.lineDuration || opts.animationDuration, 1150);
-  const lineDelay = bcDistributionPositiveNumber(opts.lineDelay, 90);
+  const lineDuration = sfsDistributionPositiveNumber(opts.lineDuration || opts.animationDuration, 1150);
+  const lineDelay = sfsDistributionPositiveNumber(opts.lineDelay, 90);
   const lineCount = typeof lineSelection.size === "function" ? lineSelection.size() : 1;
   const defaultShadeDelay = lineDuration + Math.max(0, lineCount - 1) * lineDelay + 120;
   const shadeDelay = opts.shadeDelay === undefined || opts.shadeDelay === null
     ? defaultShadeDelay
-    : bcDistributionPositiveNumber(opts.shadeDelay, defaultShadeDelay);
-  const shadeDuration = bcDistributionPositiveNumber(opts.shadeDuration, 650);
+    : sfsDistributionPositiveNumber(opts.shadeDelay, defaultShadeDelay);
+  const shadeDuration = sfsDistributionPositiveNumber(opts.shadeDuration, 650);
 
   const reset = () => {
     lineSelection.interrupt();
@@ -1160,10 +1160,10 @@ bcDistributionAnimate = (lineSelection, shadeSelection, opts = {}, rootNode = nu
 
   reset();
 
-  const trigger = bcDistributionAnimationTrigger(opts);
-  const threshold = bcDistributionFiniteNumber(opts.visibilityThreshold, 0.3);
+  const trigger = sfsDistributionAnimationTrigger(opts);
+  const threshold = sfsDistributionFiniteNumber(opts.visibilityThreshold, 0.3);
   if (trigger === "visible") {
-    bcDistributionOnVisible(rootNode || lineSelection.node() && lineSelection.node().ownerSVGElement, run, threshold);
+    sfsDistributionOnVisible(rootNode || lineSelection.node() && lineSelection.node().ownerSVGElement, run, threshold);
   } else if (trigger !== "manual") {
     requestAnimationFrame(run);
   }
@@ -1171,8 +1171,8 @@ bcDistributionAnimate = (lineSelection, shadeSelection, opts = {}, rootNode = nu
   return run;
 }
 
-bcDistributionSequence = (source, fallback = []) => {
-  const value = bcDistributionValueOr(source, fallback);
+sfsDistributionSequence = (source, fallback = []) => {
+  const value = sfsDistributionValueOr(source, fallback);
   if (Array.isArray(value)) {
     return value
       .map((item) => Number(item))
@@ -1182,15 +1182,15 @@ bcDistributionSequence = (source, fallback = []) => {
   if (typeof value === "number") return Number.isFinite(value) ? [value] : [];
 
   if (value && typeof value === "object") {
-    const from = bcDistributionFiniteNumber(
-      bcDistributionValueOr(value.from, bcDistributionValueOr(value.start, bcDistributionValueOr(value.min, value.lower))),
+    const from = sfsDistributionFiniteNumber(
+      sfsDistributionValueOr(value.from, sfsDistributionValueOr(value.start, sfsDistributionValueOr(value.min, value.lower))),
       1
     );
-    const to = bcDistributionFiniteNumber(
-      bcDistributionValueOr(value.to, bcDistributionValueOr(value.end, bcDistributionValueOr(value.max, value.upper))),
+    const to = sfsDistributionFiniteNumber(
+      sfsDistributionValueOr(value.to, sfsDistributionValueOr(value.end, sfsDistributionValueOr(value.max, value.upper))),
       from
     );
-    const rawStep = bcDistributionPositiveNumber(value.step, 1);
+    const rawStep = sfsDistributionPositiveNumber(value.step, 1);
     const step = to >= from ? rawStep : -rawStep;
     const values = [];
     const epsilon = Math.abs(step) / 1e6;
@@ -1205,7 +1205,7 @@ bcDistributionSequence = (source, fallback = []) => {
   return [];
 }
 
-bcDistributionFamilyColors = (count, opts = {}) => {
+sfsDistributionFamilyColors = (count, opts = {}) => {
   const explicit = opts.colors || opts.paletteColors;
   if (Array.isArray(explicit) && explicit.length) {
     return d3.range(count).map((index) => explicit[index % explicit.length]);
@@ -1216,33 +1216,33 @@ bcDistributionFamilyColors = (count, opts = {}) => {
     return d3.range(count).map((index) => palette(index, count));
   }
 
-  const key = bcDistributionNormalizeKey(palette || "hue");
+  const key = sfsDistributionNormalizeKey(palette || "hue");
   if (["default", "series", "tokens"].includes(key)) {
-    return d3.range(count).map((index) => bcDistributionDefaultColors[index % bcDistributionDefaultColors.length]);
+    return d3.range(count).map((index) => sfsDistributionDefaultColors[index % sfsDistributionDefaultColors.length]);
   }
 
   if (["rainbow", "spectrum"].includes(key) && typeof d3.interpolateRainbow === "function") {
     return d3.range(count).map((index) => d3.interpolateRainbow(index / Math.max(1, count)));
   }
 
-  const cycle = Math.max(1, Math.round(bcDistributionPositiveNumber(opts.colorCycle, Math.min(count, 10))));
-  const hueStart = bcDistributionFiniteNumber(opts.hueStart, 15);
-  const chroma = bcDistributionFiniteNumber(opts.chroma, 85);
-  const luminance = bcDistributionFiniteNumber(opts.luminance, 62);
+  const cycle = Math.max(1, Math.round(sfsDistributionPositiveNumber(opts.colorCycle, Math.min(count, 10))));
+  const hueStart = sfsDistributionFiniteNumber(opts.hueStart, 15);
+  const chroma = sfsDistributionFiniteNumber(opts.chroma, 85);
+  const luminance = sfsDistributionFiniteNumber(opts.luminance, 62);
 
   return d3.range(count).map((index) =>
     String(d3.hcl((hueStart + 360 * (index % cycle) / cycle) % 360, chroma, luminance))
   );
 }
 
-bcDistributionFamilySources = (opts = {}) => {
+sfsDistributionFamilySources = (opts = {}) => {
   const explicit = opts.distributions || opts.series;
-  if (explicit) return bcDistributionAsArray(explicit);
+  if (explicit) return sfsDistributionAsArray(explicit);
 
-  const type = bcDistributionNormalizeType(opts.distribution || opts.type || "t");
+  const type = sfsDistributionNormalizeType(opts.distribution || opts.type || "t");
 
   if (type === "t") {
-    return bcDistributionSequence(opts.df || opts.degreesOfFreedom, { from: 1, to: 100, step: 1 })
+    return sfsDistributionSequence(opts.df || opts.degreesOfFreedom, { from: 1, to: 100, step: 1 })
       .map((df) => ({
         type,
         distribution: type,
@@ -1255,7 +1255,7 @@ bcDistributionFamilySources = (opts = {}) => {
   if (type === "f") {
     const explicitPairs = opts.pairs || opts.dfPairs || opts.degreesOfFreedomPairs;
     if (explicitPairs) {
-      return bcDistributionAsArray(explicitPairs)
+      return sfsDistributionAsArray(explicitPairs)
         .map((pair, index) => Array.isArray(pair)
           ? { df1: pair[0], df2: pair[1], index }
           : Object.assign({ index }, pair)
@@ -1263,16 +1263,16 @@ bcDistributionFamilySources = (opts = {}) => {
         .map((pair) => ({
           type,
           distribution: type,
-          df1: bcDistributionFiniteNumber(pair.df1 || pair.numeratorDf, 2),
-          df2: bcDistributionFiniteNumber(pair.df2 || pair.denominatorDf, 20),
+          df1: sfsDistributionFiniteNumber(pair.df1 || pair.numeratorDf, 2),
+          df2: sfsDistributionFiniteNumber(pair.df2 || pair.denominatorDf, 20),
           key: pair.key || `f-${pair.df1 || pair.numeratorDf}-${pair.df2 || pair.denominatorDf}`,
           name: pair.name || pair.label || `F(${pair.df1 || pair.numeratorDf}, ${pair.df2 || pair.denominatorDf})`
         }));
     }
 
-    const df1Values = bcDistributionSequence(bcDistributionValueOr(opts.df1, opts.numeratorDf), [2]);
-    const df2Values = bcDistributionSequence(bcDistributionValueOr(opts.df2, opts.denominatorDf), { from: 2, to: 60, step: 2 });
-    const pairing = bcDistributionNormalizeKey(
+    const df1Values = sfsDistributionSequence(sfsDistributionValueOr(opts.df1, opts.numeratorDf), [2]);
+    const df2Values = sfsDistributionSequence(sfsDistributionValueOr(opts.df2, opts.denominatorDf), { from: 2, to: 60, step: 2 });
+    const pairing = sfsDistributionNormalizeKey(
       opts.pairing || opts.pairMode || opts.pairsMode || (opts.grid || opts.cartesian ? "grid" : "zip")
     );
 
@@ -1305,7 +1305,7 @@ bcDistributionFamilySources = (opts = {}) => {
     });
   }
 
-  return bcDistributionSequence(opts.sd || opts.sigma || opts.scale, { from: 0.5, to: 2.5, step: 0.1 })
+  return sfsDistributionSequence(opts.sd || opts.sigma || opts.scale, { from: 0.5, to: 2.5, step: 0.1 })
     .map((scale) => ({
       type,
       distribution: type,
@@ -1316,31 +1316,31 @@ bcDistributionFamilySources = (opts = {}) => {
     }));
 }
 
-bcDistributionFamilySpecs = (opts = {}) => {
-  const sources = bcDistributionFamilySources(opts);
-  const colors = bcDistributionFamilyColors(sources.length, opts);
-  const defaultStrokeWidth = bcDistributionPositiveNumber(opts.strokeWidth, 1.35);
-  const defaultOpacity = bcDistributionFiniteNumber(opts.opacity, 0.92);
+sfsDistributionFamilySpecs = (opts = {}) => {
+  const sources = sfsDistributionFamilySources(opts);
+  const colors = sfsDistributionFamilyColors(sources.length, opts);
+  const defaultStrokeWidth = sfsDistributionPositiveNumber(opts.strokeWidth, 1.35);
+  const defaultOpacity = sfsDistributionFiniteNumber(opts.opacity, 0.92);
 
   return sources.map((source, index) => {
     const colored = Object.assign({}, source);
     if (!colored.color && !colored.stroke) colored.color = colors[index];
     if (colored.opacity === undefined) colored.opacity = defaultOpacity;
     if (colored.strokeWidth === undefined) colored.strokeWidth = defaultStrokeWidth;
-    return bcDistributionSpec(colored, opts, index);
+    return sfsDistributionSpec(colored, opts, index);
   });
 }
 
-bcDistributionFamilyDomain = (type, opts = {}) => {
+sfsDistributionFamilyDomain = (type, opts = {}) => {
   const explicit = opts.xDomain || opts.domain;
   if (explicit && explicit.length >= 2) return explicit.map(Number);
   if (type === "f") return [0, 8];
   return [-3, 3];
 }
 
-bcDistributionFamilyEase = (progress, opts = {}) => {
-  const t = bcDistributionClamp(progress, 0, 1);
-  const key = bcDistributionNormalizeKey(opts.ease || opts.easing || (opts.spring === true ? "spring" : "cubic"));
+sfsDistributionFamilyEase = (progress, opts = {}) => {
+  const t = sfsDistributionClamp(progress, 0, 1);
+  const key = sfsDistributionNormalizeKey(opts.ease || opts.easing || (opts.spring === true ? "spring" : "cubic"));
 
   if (["linear", "none"].includes(key)) return t;
   if (["sine", "sine-out"].includes(key)) return d3.easeSinOut(t);
@@ -1352,39 +1352,39 @@ bcDistributionFamilyEase = (progress, opts = {}) => {
   return 1 - Math.exp(-6 * t) * Math.cos(10 * t);
 }
 
-bcDistributionFamilyAnimationMode = (opts = {}) => {
-  const raw = bcDistributionValueOr(
+sfsDistributionFamilyAnimationMode = (opts = {}) => {
+  const raw = sfsDistributionValueOr(
     opts.animationMode,
-    bcDistributionValueOr(opts.effect, bcDistributionValueOr(opts.reveal, opts.animation))
+    sfsDistributionValueOr(opts.effect, sfsDistributionValueOr(opts.reveal, opts.animation))
   );
-  const key = bcDistributionNormalizeKey(raw || "rise");
+  const key = sfsDistributionNormalizeKey(raw || "rise");
 
   if (["draw", "draw-on", "drawon", "reveal", "left-to-right", "lefttoright", "wipe"].includes(key)) return "draw";
   if (["both", "draw-rise", "rise-draw", "draw-and-rise", "rise-and-draw"].includes(key)) return "both";
   return "rise";
 }
 
-bcDistributionFamilyDelay = (index, count, opts = {}) => {
-  const stagger = bcDistributionValueOr(opts.stagger, "sqrt");
-  if (stagger === false || stagger === 0 || bcDistributionNormalizeKey(stagger) === "none") return 0;
+sfsDistributionFamilyDelay = (index, count, opts = {}) => {
+  const stagger = sfsDistributionValueOr(opts.stagger, "sqrt");
+  if (stagger === false || stagger === 0 || sfsDistributionNormalizeKey(stagger) === "none") return 0;
   if (typeof stagger === "number") return index * Math.max(0, stagger);
 
-  const key = bcDistributionNormalizeKey(stagger);
+  const key = sfsDistributionNormalizeKey(stagger);
   if (["sqrt", "root"].includes(key)) {
-    const scale = bcDistributionPositiveNumber(opts.delayScale || opts.staggerScale, 18000);
+    const scale = sfsDistributionPositiveNumber(opts.delayScale || opts.staggerScale, 18000);
     return Math.sqrt(index * scale);
   }
 
   if (["spread", "even"].includes(key)) {
-    const spread = bcDistributionPositiveNumber(opts.delaySpread || opts.staggerSpread, 1350);
+    const spread = sfsDistributionPositiveNumber(opts.delaySpread || opts.staggerSpread, 1350);
     return count > 1 ? (index / (count - 1)) * spread : 0;
   }
 
-  const delay = bcDistributionPositiveNumber(opts.delay || opts.lineDelay, 22);
+  const delay = sfsDistributionPositiveNumber(opts.delay || opts.lineDelay, 22);
   return index * delay;
 }
 
-bcDistributionFamilyFrameStats = (frameGaps) => {
+sfsDistributionFamilyFrameStats = (frameGaps) => {
   if (!frameGaps.length) {
     return {
       frameCount: 1,
@@ -1408,7 +1408,7 @@ bcDistributionFamilyFrameStats = (frameGaps) => {
   };
 }
 
-bcDistributionRgba = (color, opacity = 1) => {
+sfsDistributionRgba = (color, opacity = 1) => {
   const parsed = d3.color(color);
   if (!parsed) return [0, 0, 0, opacity];
   const parsedOpacity = parsed.opacity === undefined || parsed.opacity === null ? 1 : parsed.opacity;
@@ -1422,7 +1422,7 @@ bcDistributionRgba = (color, opacity = 1) => {
 
 makeDistributionFamilySvgCover = (opts = {}) => {
   const setupStart = performance.now();
-  bcDistributionEnsureStyles();
+  sfsDistributionEnsureStyles();
 
   const localOpts = Object.assign({
     style: "minimal",
@@ -1431,20 +1431,20 @@ makeDistributionFamilySvgCover = (opts = {}) => {
     points: 240,
     animate: true
   }, opts);
-  const type = bcDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
-  const display = bcDistributionDisplay(localOpts);
-  const dimensions = bcDistributionDimensions(localOpts);
+  const type = sfsDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
+  const display = sfsDistributionDisplay(localOpts);
+  const dimensions = sfsDistributionDimensions(localOpts);
   const { width, height } = dimensions;
-  const margin = bcDistributionMargin(Object.assign({
+  const margin = sfsDistributionMargin(Object.assign({
     margin: { top: 8, right: 8, bottom: 8, left: 8 }
   }, localOpts), display);
-  const distributions = bcDistributionFamilySpecs(localOpts);
-  const domain = bcDistributionFamilyDomain(type, localOpts);
-  const points = Math.max(12, Math.round(bcDistributionPositiveNumber(localOpts.points, 240)));
-  const densityCap = bcDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
+  const distributions = sfsDistributionFamilySpecs(localOpts);
+  const domain = sfsDistributionFamilyDomain(type, localOpts);
+  const points = Math.max(12, Math.round(sfsDistributionPositiveNumber(localOpts.points, 240)));
+  const densityCap = sfsDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
   const rawCurveData = distributions.map((dist) => ({
     distribution: dist,
-    data: bcDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
+    data: sfsDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
       y: densityCap ? Math.min(point.y, densityCap) : point.y
     }))
   }));
@@ -1456,29 +1456,29 @@ makeDistributionFamilySvgCover = (opts = {}) => {
   const y = d3.scaleLinear()
     .domain(yDomain)
     .range([height - margin.bottom, margin.top]);
-  const curve = bcDistributionCurveFactory(localOpts);
+  const curve = sfsDistributionCurveFactory(localOpts);
   const line = d3.line()
     .defined((d) => Number.isFinite(d.x) && Number.isFinite(d.y))
     .curve(curve)
     .x((d) => x(d.x))
     .y((d) => y(d.y));
   const baselineY = y(0);
-  const animationMode = bcDistributionFamilyAnimationMode(localOpts);
+  const animationMode = sfsDistributionFamilyAnimationMode(localOpts);
   const clipId = `dfc-clip-${Math.round(setupStart * 1000)}-${Math.round(Math.random() * 1e6)}`;
-  const performanceEnabled = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.performance, bcDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
+  const performanceEnabled = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.performance, sfsDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
     false
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const svg = wrap.append("svg")
-    .attr("class", "dfc-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dfc-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", localOpts.ariaLabel || "Animated family of distribution curves");
@@ -1509,12 +1509,12 @@ makeDistributionFamilySvgCover = (opts = {}) => {
     .attr("stroke-linecap", "round")
     .attr("d", (d) => line(d.data));
   // Same clip-rect wipe as the single-curve figures — see
-  // bcDistributionRevealClips for why a dashoffset reveal misbehaves here. The
+  // sfsDistributionRevealClips for why a dashoffset reveal misbehaves here. The
   // group already carries a plot-area clip; a second clip on the path itself is
   // applied independently, and only its x edges matter, so the group's vertical
   // scale transform doesn't disturb it.
   const revealClips = (animationMode === "draw" || animationMode === "both")
-    ? bcDistributionRevealClips(svg, linePaths, {
+    ? sfsDistributionRevealClips(svg, linePaths, {
       left: margin.left,
       width: Math.max(0, width - margin.left - margin.right),
       height
@@ -1524,12 +1524,12 @@ makeDistributionFamilySvgCover = (opts = {}) => {
   const setRevealProgress = (index, progress) => {
     if (!revealClips || !revealClips[index]) return;
     const clip = revealClips[index];
-    clip.rect.attr("width", clip.width * bcDistributionClamp(progress, 0, 1));
+    clip.rect.attr("width", clip.width * sfsDistributionClamp(progress, 0, 1));
   };
 
   const timings = rawCurveData.map((d, index) => ({
-    delay: bcDistributionFamilyDelay(index, rawCurveData.length, localOpts),
-    duration: bcDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
+    delay: sfsDistributionFamilyDelay(index, rawCurveData.length, localOpts),
+    duration: sfsDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
   }));
   const totalDuration = d3.max(timings, (timing) => timing.delay + timing.duration) || 0;
   const setupMs = performance.now() - setupStart;
@@ -1537,7 +1537,7 @@ makeDistributionFamilySvgCover = (opts = {}) => {
   let runCounter = 0;
 
   function transformFor(progress) {
-    const p = bcDistributionClamp(Number.isFinite(progress) ? progress : 1, 0, 1);
+    const p = sfsDistributionClamp(Number.isFinite(progress) ? progress : 1, 0, 1);
     return `translate(0,${baselineY}) scale(1,${p}) translate(0,${-baselineY})`;
   }
 
@@ -1557,14 +1557,14 @@ makeDistributionFamilySvgCover = (opts = {}) => {
   }
 
   function finishPerformanceStats(stats, frameGaps, elapsed) {
-    const frameStats = bcDistributionFamilyFrameStats(frameGaps);
+    const frameStats = sfsDistributionFamilyFrameStats(frameGaps);
     const next = Object.assign(stats, frameStats, {
       elapsedMs: Number(elapsed.toFixed(2))
     });
     rootNode.value.performance = next;
     if (typeof localOpts.onPerformance === "function") localOpts.onPerformance(next, rootNode);
     if (performanceEnabled && typeof console !== "undefined" && typeof console.info === "function") {
-      console.info("[bcDistributionFamilyCover]", next);
+      console.info("[sfsDistributionFamilyCover]", next);
     }
   }
 
@@ -1597,12 +1597,12 @@ makeDistributionFamilySvgCover = (opts = {}) => {
       curveGroups.attr("transform", (d, index) => {
         const timing = timings[index];
         const raw = (elapsed - timing.delay) / timing.duration;
-        return transformFor(riseProgress(bcDistributionFamilyEase(raw, localOpts)));
+        return transformFor(riseProgress(sfsDistributionFamilyEase(raw, localOpts)));
       });
       rawCurveData.forEach((d, index) => {
         const timing = timings[index];
         const raw = (elapsed - timing.delay) / timing.duration;
-        setRevealProgress(index, revealProgress(bcDistributionFamilyEase(raw, localOpts)));
+        setRevealProgress(index, revealProgress(sfsDistributionFamilyEase(raw, localOpts)));
       });
 
       if (elapsed < totalDuration) {
@@ -1619,10 +1619,10 @@ makeDistributionFamilySvgCover = (opts = {}) => {
     animationFrame = requestAnimationFrame(step);
   }
 
-  const shouldAnimate = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.animate, localOpts.animation),
+  const shouldAnimate = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.animate, localOpts.animation),
     true
-  ) && !bcDistributionPrefersReducedMotion();
+  ) && !sfsDistributionPrefersReducedMotion();
 
   rootNode.value = {
     distribution: type,
@@ -1647,10 +1647,10 @@ makeDistributionFamilySvgCover = (opts = {}) => {
 
   if (shouldAnimate) {
     setProgress(0);
-    const trigger = bcDistributionAnimationTrigger(localOpts);
-    const threshold = bcDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
+    const trigger = sfsDistributionAnimationTrigger(localOpts);
+    const threshold = sfsDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
     if (trigger === "visible") {
-      bcDistributionOnVisible(rootNode, run, threshold);
+      sfsDistributionOnVisible(rootNode, run, threshold);
     } else if (trigger !== "manual") {
       requestAnimationFrame(run);
     }
@@ -1664,7 +1664,7 @@ makeDistributionFamilySvgCover = (opts = {}) => {
 
 makeDistributionFamilyCanvasCover = (opts = {}) => {
   const setupStart = performance.now();
-  bcDistributionEnsureStyles();
+  sfsDistributionEnsureStyles();
 
   const localOpts = Object.assign({
     style: "minimal",
@@ -1673,20 +1673,20 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
     points: 240,
     animate: true
   }, opts);
-  const type = bcDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
-  const display = bcDistributionDisplay(localOpts);
-  const dimensions = bcDistributionDimensions(localOpts);
+  const type = sfsDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
+  const display = sfsDistributionDisplay(localOpts);
+  const dimensions = sfsDistributionDimensions(localOpts);
   const { width, height } = dimensions;
-  const margin = bcDistributionMargin(Object.assign({
+  const margin = sfsDistributionMargin(Object.assign({
     margin: { top: 8, right: 8, bottom: 8, left: 8 }
   }, localOpts), display);
-  const distributions = bcDistributionFamilySpecs(localOpts);
-  const domain = bcDistributionFamilyDomain(type, localOpts);
-  const points = Math.max(12, Math.round(bcDistributionPositiveNumber(localOpts.points, 240)));
-  const densityCap = bcDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
+  const distributions = sfsDistributionFamilySpecs(localOpts);
+  const domain = sfsDistributionFamilyDomain(type, localOpts);
+  const points = Math.max(12, Math.round(sfsDistributionPositiveNumber(localOpts.points, 240)));
+  const densityCap = sfsDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
   const rawCurveData = distributions.map((dist) => ({
     distribution: dist,
-    data: bcDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
+    data: sfsDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
       y: densityCap ? Math.min(point.y, densityCap) : point.y
     }))
   }));
@@ -1700,20 +1700,20 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
     .range([height - margin.bottom, margin.top]);
   const baselineY = y(0);
   const deviceScale = Math.max(1, window.devicePixelRatio || 1);
-  const canvasMode = bcDistributionNormalizeKey(localOpts.canvasMode || localOpts.animationMode || "transform");
-  const animationMode = bcDistributionFamilyAnimationMode(localOpts);
-  const performanceEnabled = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.performance, bcDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
+  const canvasMode = sfsDistributionNormalizeKey(localOpts.canvasMode || localOpts.animationMode || "transform");
+  const animationMode = sfsDistributionFamilyAnimationMode(localOpts);
+  const performanceEnabled = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.performance, sfsDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
     false
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const canvas = wrap.append("canvas")
     .attr("class", "dfc-canvas")
     .attr("width", Math.round(width * deviceScale))
@@ -1747,8 +1747,8 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
     };
   });
   const timings = screenCurves.map((d, index) => ({
-    delay: bcDistributionFamilyDelay(index, screenCurves.length, localOpts),
-    duration: bcDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
+    delay: sfsDistributionFamilyDelay(index, screenCurves.length, localOpts),
+    duration: sfsDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
   }));
   const totalDuration = d3.max(timings, (timing) => timing.delay + timing.duration) || 0;
   const setupMs = performance.now() - setupStart;
@@ -1763,7 +1763,7 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
 
     for (let index = 0; index < screenCurves.length; index += 1) {
       const series = screenCurves[index];
-      const progress = bcDistributionClamp(progressForCurve(index), 0, 1);
+      const progress = sfsDistributionClamp(progressForCurve(index), 0, 1);
       const drawProgress = animationMode === "rise" ? 1 : progress;
       const riseProgress = animationMode === "draw" ? 1 : progress;
       if (drawProgress <= 0 || !series.length) continue;
@@ -1803,14 +1803,14 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
   }
 
   function finishPerformanceStats(stats, frameGaps, elapsed) {
-    const frameStats = bcDistributionFamilyFrameStats(frameGaps);
+    const frameStats = sfsDistributionFamilyFrameStats(frameGaps);
     const next = Object.assign(stats, frameStats, {
       elapsedMs: Number(elapsed.toFixed(2))
     });
     rootNode.value.performance = next;
     if (typeof localOpts.onPerformance === "function") localOpts.onPerformance(next, rootNode);
     if (performanceEnabled && typeof console !== "undefined" && typeof console.info === "function") {
-      console.info("[bcDistributionFamilyCover]", next);
+      console.info("[sfsDistributionFamilyCover]", next);
     }
   }
 
@@ -1845,7 +1845,7 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
       draw((index) => {
         const timing = timings[index];
         const raw = (elapsed - timing.delay) / timing.duration;
-        return bcDistributionFamilyEase(raw, localOpts);
+        return sfsDistributionFamilyEase(raw, localOpts);
       });
 
       if (elapsed < totalDuration) {
@@ -1862,10 +1862,10 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
     animationFrame = requestAnimationFrame(step);
   }
 
-  const shouldAnimate = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.animate, localOpts.animation),
+  const shouldAnimate = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.animate, localOpts.animation),
     true
-  ) && !bcDistributionPrefersReducedMotion();
+  ) && !sfsDistributionPrefersReducedMotion();
 
   rootNode.value = {
     distribution: type,
@@ -1892,10 +1892,10 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
 
   if (shouldAnimate) {
     draw(() => 0);
-    const trigger = bcDistributionAnimationTrigger(localOpts);
-    const threshold = bcDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
+    const trigger = sfsDistributionAnimationTrigger(localOpts);
+    const threshold = sfsDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
     if (trigger === "visible") {
-      bcDistributionOnVisible(rootNode, run, threshold);
+      sfsDistributionOnVisible(rootNode, run, threshold);
     } else if (trigger !== "manual") {
       requestAnimationFrame(run);
     }
@@ -1909,7 +1909,7 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
 
 makeDistributionFamilyWebglCover = (opts = {}) => {
   const setupStart = performance.now();
-  bcDistributionEnsureStyles();
+  sfsDistributionEnsureStyles();
 
   const localOpts = Object.assign({
     style: "minimal",
@@ -1918,20 +1918,20 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
     points: 240,
     animate: true
   }, opts);
-  const type = bcDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
-  const display = bcDistributionDisplay(localOpts);
-  const dimensions = bcDistributionDimensions(localOpts);
+  const type = sfsDistributionNormalizeType(localOpts.distribution || localOpts.type || "t");
+  const display = sfsDistributionDisplay(localOpts);
+  const dimensions = sfsDistributionDimensions(localOpts);
   const { width, height } = dimensions;
-  const margin = bcDistributionMargin(Object.assign({
+  const margin = sfsDistributionMargin(Object.assign({
     margin: { top: 8, right: 8, bottom: 8, left: 8 }
   }, localOpts), display);
-  const distributions = bcDistributionFamilySpecs(localOpts);
-  const domain = bcDistributionFamilyDomain(type, localOpts);
-  const points = Math.max(12, Math.round(bcDistributionPositiveNumber(localOpts.points, 240)));
-  const densityCap = bcDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
+  const distributions = sfsDistributionFamilySpecs(localOpts);
+  const domain = sfsDistributionFamilyDomain(type, localOpts);
+  const points = Math.max(12, Math.round(sfsDistributionPositiveNumber(localOpts.points, 240)));
+  const densityCap = sfsDistributionPositiveNumber(localOpts.densityCap || localOpts.yCap || localOpts.maxDensity);
   const rawCurveData = distributions.map((dist) => ({
     distribution: dist,
-    data: bcDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
+    data: sfsDistributionCurveData(dist, domain, points).map((point) => Object.assign({}, point, {
       y: densityCap ? Math.min(point.y, densityCap) : point.y
     }))
   }));
@@ -1945,19 +1945,19 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
     .range([height - margin.bottom, margin.top]);
   const baselineY = y(0);
   const deviceScale = Math.max(1, window.devicePixelRatio || 1);
-  const animationMode = bcDistributionFamilyAnimationMode(localOpts);
-  const performanceEnabled = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.performance, bcDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
+  const animationMode = sfsDistributionFamilyAnimationMode(localOpts);
+  const performanceEnabled = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.performance, sfsDistributionValueOr(localOpts.performanceLog, localOpts.debug)),
     false
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const canvas = wrap.append("canvas")
     .attr("class", "dfc-canvas")
     .attr("width", Math.round(width * deviceScale))
@@ -2072,7 +2072,7 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
     });
     curveMeta.push({
       distribution: series.distribution,
-      rgba: bcDistributionRgba(series.distribution.stroke, series.distribution.opacity),
+      rgba: sfsDistributionRgba(series.distribution.stroke, series.distribution.opacity),
       offset,
       length: finitePoints.length
     });
@@ -2092,8 +2092,8 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
   const uColor = gl.getUniformLocation(program, "u_color");
   const lineWidthRange = gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE) || [1, 1];
   const timings = curveMeta.map((d, index) => ({
-    delay: bcDistributionFamilyDelay(index, curveMeta.length, localOpts),
-    duration: bcDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
+    delay: sfsDistributionFamilyDelay(index, curveMeta.length, localOpts),
+    duration: sfsDistributionPositiveNumber(localOpts.duration || localOpts.lineDuration || localOpts.animationDuration, 1300)
   }));
   const totalDuration = d3.max(timings, (timing) => timing.delay + timing.duration) || 0;
   const setupMs = performance.now() - setupStart;
@@ -2122,7 +2122,7 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
     gl.useProgram(program);
 
     curveMeta.forEach((series, index) => {
-      const progress = bcDistributionClamp(progressForCurve(index), 0, 1);
+      const progress = sfsDistributionClamp(progressForCurve(index), 0, 1);
       const drawProgress = animationMode === "rise" ? 1 : progress;
       const riseProgress = animationMode === "draw" ? 1 : progress;
       if (drawProgress <= 0 || !series.length) return;
@@ -2138,14 +2138,14 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
   }
 
   function finishPerformanceStats(stats, frameGaps, elapsed) {
-    const frameStats = bcDistributionFamilyFrameStats(frameGaps);
+    const frameStats = sfsDistributionFamilyFrameStats(frameGaps);
     const next = Object.assign(stats, frameStats, {
       elapsedMs: Number(elapsed.toFixed(2))
     });
     rootNode.value.performance = next;
     if (typeof localOpts.onPerformance === "function") localOpts.onPerformance(next, rootNode);
     if (performanceEnabled && typeof console !== "undefined" && typeof console.info === "function") {
-      console.info("[bcDistributionFamilyCover]", next);
+      console.info("[sfsDistributionFamilyCover]", next);
     }
   }
 
@@ -2180,7 +2180,7 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
       draw((index) => {
         const timing = timings[index];
         const raw = (elapsed - timing.delay) / timing.duration;
-        return bcDistributionFamilyEase(raw, localOpts);
+        return sfsDistributionFamilyEase(raw, localOpts);
       });
 
       if (elapsed < totalDuration) {
@@ -2197,10 +2197,10 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
     animationFrame = requestAnimationFrame(step);
   }
 
-  const shouldAnimate = bcDistributionBoolean(
-    bcDistributionValueOr(localOpts.animate, localOpts.animation),
+  const shouldAnimate = sfsDistributionBoolean(
+    sfsDistributionValueOr(localOpts.animate, localOpts.animation),
     true
-  ) && !bcDistributionPrefersReducedMotion();
+  ) && !sfsDistributionPrefersReducedMotion();
 
   rootNode.value = {
     distribution: type,
@@ -2227,10 +2227,10 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
 
   if (shouldAnimate) {
     draw(() => 0);
-    const trigger = bcDistributionAnimationTrigger(localOpts);
-    const threshold = bcDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
+    const trigger = sfsDistributionAnimationTrigger(localOpts);
+    const threshold = sfsDistributionFiniteNumber(localOpts.visibilityThreshold, 0.2);
     if (trigger === "visible") {
-      bcDistributionOnVisible(rootNode, run, threshold);
+      sfsDistributionOnVisible(rootNode, run, threshold);
     } else if (trigger !== "manual") {
       requestAnimationFrame(run);
     }
@@ -2243,31 +2243,31 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
 }
 
 makeDistributionFamilyCover = (opts = {}) => {
-  const renderer = bcDistributionNormalizeKey(opts.renderer || opts.render || "svg-transform");
+  const renderer = sfsDistributionNormalizeKey(opts.renderer || opts.render || "svg-transform");
   if (["webgl", "gl", "gpu", "line-strip"].includes(renderer)) return makeDistributionFamilyWebglCover(opts);
   if (["canvas", "2d", "context2d"].includes(renderer)) return makeDistributionFamilyCanvasCover(opts);
   return makeDistributionFamilySvgCover(opts);
 }
 
-bcDistributionRenderGraph = (opts = {}) => {
-  bcDistributionEnsureStyles();
+sfsDistributionRenderGraph = (opts = {}) => {
+  sfsDistributionEnsureStyles();
 
-  const distributions = bcDistributionSpecs(opts);
-  const display = bcDistributionDisplay(opts);
-  const dimensions = bcDistributionDimensions(opts);
+  const distributions = sfsDistributionSpecs(opts);
+  const display = sfsDistributionDisplay(opts);
+  const dimensions = sfsDistributionDimensions(opts);
   const { width, height } = dimensions;
-  const margin = bcDistributionMargin(opts, display);
-  const domain = bcDistributionResolveDomain(distributions, opts);
-  const points = bcDistributionPositiveNumber(opts.points, 360);
+  const margin = sfsDistributionMargin(opts, display);
+  const domain = sfsDistributionResolveDomain(distributions, opts);
+  const points = sfsDistributionPositiveNumber(opts.points, 360);
   const curveData = distributions.map((dist) => ({
     distribution: dist,
-    data: bcDistributionCurveData(dist, domain, points)
+    data: sfsDistributionCurveData(dist, domain, points)
   }));
-  const shadeItems = bcDistributionShadeItems(opts, distributions, domain);
-  const markerItems = bcDistributionMarkerItems(opts, distributions, domain);
-  const intervalItems = bcDistributionIntervalItems(opts, distributions, domain);
+  const shadeItems = sfsDistributionShadeItems(opts, distributions, domain);
+  const markerItems = sfsDistributionMarkerItems(opts, distributions, domain);
+  const intervalItems = sfsDistributionIntervalItems(opts, distributions, domain);
   const shadeGrow = ["grow", "grow-center", "center-out", "outward"].includes(
-    bcDistributionNormalizeKey(opts.shadeAnimation || opts.shadeEffect)
+    sfsDistributionNormalizeKey(opts.shadeAnimation || opts.shadeEffect)
   );
   const yMax = d3.max(curveData, (series) => d3.max(series.data, (d) => d.y)) || 1;
   const yDomain = opts.yDomain || [0, yMax * 1.12];
@@ -2275,16 +2275,16 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   const rootNode = opts.rootNode || document.createElement("div");
   const root = d3.select(rootNode)
-    .attr("class", "distribution-graph bc-figure")
+    .attr("class", "distribution-graph sfs-figure")
     .style("--dg-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   root.selectAll("*").remove();
 
   const wrap = root.append("div")
-    .attr("class", "dg-chart-wrap bc-chart-wrap");
+    .attr("class", "dg-chart-wrap sfs-chart-wrap");
 
   const svg = wrap.append("svg")
-    .attr("class", "dg-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dg-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", ariaLabel);
@@ -2297,7 +2297,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .domain(yDomain)
     .nice()
     .range([height - margin.bottom, margin.top]);
-  const curve = bcDistributionCurveFactory(opts);
+  const curve = sfsDistributionCurveFactory(opts);
   const line = d3.line()
     .defined((d) => Number.isFinite(d.x) && Number.isFinite(d.y))
     .curve(curve)
@@ -2325,8 +2325,8 @@ bcDistributionRenderGraph = (opts = {}) => {
       .data(curveData.filter((series) => conceptualDistributions.includes(series.distribution)))
       .join("path")
         .attr("class", "dg-conceptual-fill")
-        .attr("fill", opts.conceptualFill || "var(--bc-neutral-color, #7b818a)")
-        .style("fill-opacity", bcDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16))
+        .attr("fill", opts.conceptualFill || "var(--sfs-neutral-color, #7b818a)")
+        .style("fill-opacity", sfsDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16))
         .attr("d", (d) => area(d.data));
 
     const hatchDefs = svg.append("defs");
@@ -2340,14 +2340,14 @@ bcDistributionRenderGraph = (opts = {}) => {
           side: "lower",
           color: lowerColor,
           patternId: `${hatchIdBase}-${itemIndex}-lower`,
-          data: bcDistributionSegmentData(item.distribution, domain[0], item.x, domain, points)
+          data: sfsDistributionSegmentData(item.distribution, domain[0], item.x, domain, points)
         },
         {
           marker: item,
           side: "upper",
           color: upperColor,
           patternId: `${hatchIdBase}-${itemIndex}-upper`,
-          data: bcDistributionSegmentData(item.distribution, item.x, domain[1], domain, points)
+          data: sfsDistributionSegmentData(item.distribution, item.x, domain[1], domain, points)
         }
       ];
     }).filter((item) => item.data.length > 1);
@@ -2393,7 +2393,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     conceptualMedianLabels = conceptualLayer.selectAll("text.dg-median-half-label")
       .data(labeledMedianAreas)
       .join("text")
-        .attr("class", "dg-median-half-label bc-graph-label")
+        .attr("class", "dg-median-half-label sfs-graph-label")
         .attr("x", (d) => d.labelX)
         .attr("y", (d) => d.labelY)
         .attr("text-anchor", "middle")
@@ -2409,10 +2409,10 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   if (opts.grid) {
     svg.append("g")
-      .attr("class", "dg-grid bc-graph-grid")
+      .attr("class", "dg-grid sfs-graph-grid")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y)
-        .ticks(bcDistributionValueOr(opts.yTicks, 5))
+        .ticks(sfsDistributionValueOr(opts.yTicks, 5))
         .tickSize(-(width - margin.left - margin.right))
         .tickFormat(""))
       .call((g) => g.select(".domain").remove());
@@ -2423,7 +2423,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("path")
     .data(shadeItems)
     .join("path")
-      .attr("class", (d) => `dg-shade bc-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
+      .attr("class", (d) => `dg-shade sfs-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
       .attr("fill", (d) => d.color)
       .style("fill-opacity", (d) => d.opacity)
       .attr("d", (d) => area(d.data));
@@ -2436,9 +2436,9 @@ bcDistributionRenderGraph = (opts = {}) => {
     shadePaths.each(function(d, i) {
       const xLo = x(d.data[0].x);
       const xHi = x(d.data[d.data.length - 1].x);
-      const growFrom = bcDistributionFiniteNumber(d.spec && d.spec.growFrom);
+      const growFrom = sfsDistributionFiniteNumber(d.spec && d.spec.growFrom);
       const xCenter = Number.isFinite(growFrom)
-        ? bcDistributionClamp(x(growFrom), xLo, xHi)
+        ? sfsDistributionClamp(x(growFrom), xLo, xHi)
         : (xLo + xHi) / 2;
       const clipId = `${growIdBase}-${i}`;
       const rect = defs.append("clipPath")
@@ -2481,16 +2481,16 @@ bcDistributionRenderGraph = (opts = {}) => {
   const conceptualModeGroups = markerGroups.filter((d) => d.presentation === "mode");
   conceptualModeGroups.append("line")
     .attr("class", "dg-mode-cap")
-    .attr("x1", (d) => Math.max(margin.left, x(d.x) - bcDistributionPositiveNumber(d.spec.capWidth, 17)))
-    .attr("x2", (d) => Math.min(width - margin.right, x(d.x) + bcDistributionPositiveNumber(d.spec.capWidth, 17)))
+    .attr("x1", (d) => Math.max(margin.left, x(d.x) - sfsDistributionPositiveNumber(d.spec.capWidth, 17)))
+    .attr("x2", (d) => Math.min(width - margin.right, x(d.x) + sfsDistributionPositiveNumber(d.spec.capWidth, 17)))
     .attr("y1", (d) => y(d.y) - 3)
     .attr("y2", (d) => y(d.y) - 3)
     .attr("stroke", (d) => d.color)
-    .attr("stroke-width", (d) => bcDistributionPositiveNumber(d.spec.strokeWidth, 3));
+    .attr("stroke-width", (d) => sfsDistributionPositiveNumber(d.spec.strokeWidth, 3));
 
   conceptualModeGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-mode-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mode-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
       .attr("y", (d) => y(d.y) - 11 + d.labelDy)
       .attr("text-anchor", "middle")
@@ -2499,7 +2499,7 @@ bcDistributionRenderGraph = (opts = {}) => {
         else d3.select(this).text(d.label);
       });
 
-  const medianTopY = (d) => Math.min(y(d.y), y(0) - bcDistributionPositiveNumber(d.spec.minHeight, 42));
+  const medianTopY = (d) => Math.min(y(d.y), y(0) - sfsDistributionPositiveNumber(d.spec.minHeight, 42));
   const conceptualMedianGroups = markerGroups.filter((d) => d.presentation === "median");
   conceptualMedianGroups.append("line")
     .attr("class", "dg-median-divider")
@@ -2508,11 +2508,11 @@ bcDistributionRenderGraph = (opts = {}) => {
     .attr("y1", y(0))
     .attr("y2", medianTopY)
     .attr("stroke", (d) => d.color)
-    .attr("stroke-width", (d) => bcDistributionPositiveNumber(d.spec.strokeWidth, 2.5));
+    .attr("stroke-width", (d) => sfsDistributionPositiveNumber(d.spec.strokeWidth, 2.5));
 
   conceptualMedianGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-median-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-median-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + (x(d.x) > (margin.left + width - margin.right) / 2 ? -6 : 6) + d.labelDx)
       .attr("y", (d) => (y(0) + medianTopY(d)) / 2 + 4 + d.labelDy)
       .attr("text-anchor", (d) => x(d.x) > (margin.left + width - margin.right) / 2 ? "end" : "start")
@@ -2526,17 +2526,17 @@ bcDistributionRenderGraph = (opts = {}) => {
     .attr("class", "dg-mean-fulcrum")
     .attr("points", (d) => {
       const center = x(d.x);
-      const halfWidth = bcDistributionPositiveNumber(d.spec.fulcrumWidth, 10);
-      const fulcrumHeight = bcDistributionPositiveNumber(d.spec.fulcrumHeight, 11);
+      const halfWidth = sfsDistributionPositiveNumber(d.spec.fulcrumWidth, 10);
+      const fulcrumHeight = sfsDistributionPositiveNumber(d.spec.fulcrumHeight, 11);
       return `${center},${y(0) + 1} ${center + halfWidth},${y(0) + fulcrumHeight} ${center - halfWidth},${y(0) + fulcrumHeight}`;
     })
     .attr("fill", (d) => d.color);
 
   conceptualMeanGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-mean-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mean-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
-      .attr("y", (d) => y(0) + bcDistributionPositiveNumber(d.spec.fulcrumHeight, 11) + 15 + d.labelDy)
+      .attr("y", (d) => y(0) + sfsDistributionPositiveNumber(d.spec.fulcrumHeight, 11) + 15 + d.labelDy)
       .attr("text-anchor", "middle")
       .each(function(d) {
         if (d.labelHtml !== undefined) d3.select(this).html(d.labelHtml);
@@ -2544,11 +2544,11 @@ bcDistributionRenderGraph = (opts = {}) => {
       });
 
   const lineMarkerItems = markerItems.filter((item) => item.presentation === "line");
-  const markerLegend = bcDistributionAddMarkerLegend(svg, lineMarkerItems, opts, width, margin);
+  const markerLegend = sfsDistributionAddMarkerLegend(svg, lineMarkerItems, opts, width, margin);
 
   markerGroups.filter((d) => d.presentation === "line" && (d.label !== undefined || d.labelHtml !== undefined) && !markerLegend)
     .append("text")
-      .attr("class", "dg-marker-label bc-graph-label")
+      .attr("class", "dg-marker-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
       .attr("y", (d) => markerTopY(d) - 7 + d.labelDy)
       .attr("text-anchor", (d) => d.labelAnchor)
@@ -2570,8 +2570,8 @@ bcDistributionRenderGraph = (opts = {}) => {
   const intervalY = (d) => {
     if (d.height === "curve") {
       const limitPdf = Math.min(
-        bcDistributionFinitePdf(d.distribution, d.from),
-        bcDistributionFinitePdf(d.distribution, d.to)
+        sfsDistributionFinitePdf(d.distribution, d.from),
+        sfsDistributionFinitePdf(d.distribution, d.to)
       );
       return (y(0) + y(limitPdf)) / 2;
     }
@@ -2607,7 +2607,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   intervalGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-interval-label bc-graph-label")
+      .attr("class", "dg-interval-label sfs-graph-label")
       .attr("x", (d) => (x(d.from) + x(d.to)) / 2 + d.labelDx)
       .attr("y", (d) => intervalY(d) - 8 + d.labelDy)
       .attr("text-anchor", "middle")
@@ -2622,7 +2622,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("path")
     .data(curveData)
     .join("path")
-      .attr("class", "dg-curve bc-graph-line")
+      .attr("class", "dg-curve sfs-graph-line")
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
@@ -2656,7 +2656,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("text")
     .data(labeledShadeItems)
     .join("text")
-      .attr("class", "dg-shade-label bc-graph-label")
+      .attr("class", "dg-shade-label sfs-graph-label")
       .attr("data-fade-opacity", 1)
       .attr("x", (d) => d.labelX)
       .attr("y", (d) => d.labelYPx)
@@ -2675,9 +2675,9 @@ bcDistributionRenderGraph = (opts = {}) => {
       .attr("class", "dg-x-axis")
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x)
-        .ticks(bcDistributionValueOr(opts.xTicks, 7))
+        .ticks(sfsDistributionValueOr(opts.xTicks, 7))
         .tickFormat(opts.xTickFormat || opts.tickFormat || d3.format("~g")));
-    bcDistributionStyleAxis(xAxis, display);
+    sfsDistributionStyleAxis(xAxis, display);
   }
 
   if (display.showYAxis) {
@@ -2685,17 +2685,17 @@ bcDistributionRenderGraph = (opts = {}) => {
       .attr("class", "dg-y-axis")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y)
-        .ticks(bcDistributionValueOr(opts.yTicks, 5))
+        .ticks(sfsDistributionValueOr(opts.yTicks, 5))
         .tickFormat(opts.yTickFormat || opts.yFormat || d3.format("~g")));
-    bcDistributionStyleAxis(yAxis, display);
+    sfsDistributionStyleAxis(yAxis, display);
   }
 
-  bcDistributionAddLabels(svg, opts, display, margin, width, height);
-  bcDistributionAddLegend(svg, distributions, opts, width, margin);
+  sfsDistributionAddLabels(svg, opts, display, margin, width, height);
+  sfsDistributionAddLegend(svg, distributions, opts, width, margin);
   // Geometry, not clips: a clip rect starts at zero width, so it must only be
   // attached when the reveal is actually going to run. Hand the bounds over and
   // let the animator build them after its own opt-out checks.
-  const animationRunner = bcDistributionAnimate(
+  const animationRunner = sfsDistributionAnimate(
     linePaths,
     shadePaths,
     opts,
@@ -2739,19 +2739,19 @@ bcDistributionRenderGraph = (opts = {}) => {
     })),
     stats: distributions.map((dist) => ({
       distribution: dist.key,
-      mean: bcDistributionMeanValue(dist),
-      median: bcDistributionQuantile(dist, 0.5),
-      modes: bcDistributionModes(dist, domain)
+      mean: sfsDistributionMeanValue(dist),
+      median: sfsDistributionQuantile(dist, 0.5),
+      modes: sfsDistributionModes(dist, domain)
     }))
   };
 
   return rootNode;
 }
 
-bcDistributionParsePixels = (value) => {
-  if (typeof value === "number") return bcDistributionPositiveNumber(value);
+sfsDistributionParsePixels = (value) => {
+  if (typeof value === "number") return sfsDistributionPositiveNumber(value);
   const match = /^\s*([\d.]+)px\s*$/.exec(String(value === undefined ? "" : value));
-  return match ? bcDistributionPositiveNumber(Number(match[1])) : undefined;
+  return match ? sfsDistributionPositiveNumber(Number(match[1])) : undefined;
 }
 
 // Match the responsive contract used by graph-generator.js: draw once at the
@@ -2759,7 +2759,7 @@ bcDistributionParsePixels = (value) => {
 // it actually occupies. Keeping the viewBox in step with the rendered width is
 // what lets the shared rem-based tick, label, and annotation sizes remain real
 // screen sizes instead of shrinking along with a fixed 640-unit chart.
-bcDistributionObserveWidth = (rootNode, opts, redraw) => {
+sfsDistributionObserveWidth = (rootNode, opts, redraw) => {
   const api = window.interactiveFigure;
   if (!api || typeof api.observeResponsiveLayout !== "function") return;
 
@@ -2767,13 +2767,13 @@ bcDistributionObserveWidth = (rootNode, opts, redraw) => {
   if (!svgNode) return;
   const viewBox = svgNode.viewBox && svgNode.viewBox.baseVal;
   const drawn = {
-    width: (viewBox && viewBox.width) || bcDistributionPositiveNumber(opts.width, 640),
-    height: (viewBox && viewBox.height) || bcDistributionPositiveNumber(opts.height, 640 / 2.2)
+    width: (viewBox && viewBox.width) || sfsDistributionPositiveNumber(opts.width, 640),
+    height: (viewBox && viewBox.height) || sfsDistributionPositiveNumber(opts.height, 640 / 2.2)
   };
-  const cssCap = bcDistributionParsePixels(opts.maxWidth);
+  const cssCap = sfsDistributionParsePixels(opts.maxWidth);
   const maximumWidth = Math.max(
     240,
-    cssCap || bcDistributionPositiveNumber(opts.maximumWidth, 1600)
+    cssCap || sfsDistributionPositiveNumber(opts.maximumWidth, 1600)
   );
   let drawnWidth = drawn.width;
   let firstLayout = true;
@@ -2807,16 +2807,16 @@ bcDistributionObserveWidth = (rootNode, opts, redraw) => {
 }
 
 makeDistributionGraph = (opts = {}) => {
-  const rootNode = bcDistributionRenderGraph(opts);
+  const rootNode = sfsDistributionRenderGraph(opts);
   if (opts.responsive === false || !rootNode) return rootNode;
-  bcDistributionObserveWidth(rootNode, opts, bcDistributionRenderGraph);
+  sfsDistributionObserveWidth(rootNode, opts, sfsDistributionRenderGraph);
   return rootNode;
 }
 
-bcDistributionClamp = (value, min, max) =>
+sfsDistributionClamp = (value, min, max) =>
   Math.max(min, Math.min(max, value))
 
-bcDistributionLerp = (from, to, amount) =>
+sfsDistributionLerp = (from, to, amount) =>
   from + (to - from) * amount
 
 // Two independent parameters: skew (-1..1) controls asymmetry, and bimodal
@@ -2825,14 +2825,14 @@ bcDistributionLerp = (from, to, amount) =>
 // distribution has two identically-skewed peaks. At bimodal = 0 the second
 // component's weight is zero, so skew alone produces one skew-normal peak;
 // at bimodal = 1 the two components have equal weight at symmetric offsets.
-bcCentralTendencyMorphSpec = (skew = 0, bimodal = 0) => {
-  const skewValue = bcDistributionClamp(bcDistributionFiniteNumber(skew, 0), -1, 1);
-  const bimodalValue = bcDistributionClamp(bcDistributionFiniteNumber(bimodal, 0), 0, 1);
+sfsCentralTendencyMorphSpec = (skew = 0, bimodal = 0) => {
+  const skewValue = sfsDistributionClamp(sfsDistributionFiniteNumber(skew, 0), -1, 1);
+  const bimodalValue = sfsDistributionClamp(sfsDistributionFiniteNumber(bimodal, 0), 0, 1);
   const maxAlpha = 6.5;
   const alpha = skewValue * maxAlpha;
   const separation = 2.6 * bimodalValue;
   const weight2 = 0.5 * bimodalValue;
-  const scale = bcDistributionLerp(1, 0.8, bimodalValue);
+  const scale = sfsDistributionLerp(1, 0.8, bimodalValue);
 
   const first = {
     type: "skew-normal",
@@ -2849,7 +2849,7 @@ bcCentralTendencyMorphSpec = (skew = 0, bimodal = 0) => {
     weight: weight2
   };
 
-  return bcDistributionSpec({
+  return sfsDistributionSpec({
     distribution: "mixture",
     key: "central-tendency-morph",
     components: [first, second],
@@ -2862,7 +2862,7 @@ bcCentralTendencyMorphSpec = (skew = 0, bimodal = 0) => {
 // so the on-screen readout reflects whatever relationship currently holds,
 // including transient states mid-animation where skew and bimodal both
 // have partial values and the analytic textbook cases don't cleanly apply.
-bcCentralTendencyMorphComparisonLabel = (modes, median, mean, domain) => {
+sfsCentralTendencyMorphComparisonLabel = (modes, median, mean, domain) => {
   const span = Math.abs((domain && domain[1] - domain[0]) || 0) || 1;
   const epsilon = span * 0.010;
 
@@ -2884,9 +2884,9 @@ bcCentralTendencyMorphComparisonLabel = (modes, median, mean, domain) => {
   return groups.map((group) => group.labels.join(" = ")).join(" < ");
 }
 
-bcCentralTendencyMorphLabel = (skew = 0, bimodal = 0) => {
-  const skewValue = bcDistributionClamp(bcDistributionFiniteNumber(skew, 0), -1, 1);
-  const bimodalValue = bcDistributionClamp(bcDistributionFiniteNumber(bimodal, 0), 0, 1);
+sfsCentralTendencyMorphLabel = (skew = 0, bimodal = 0) => {
+  const skewValue = sfsDistributionClamp(sfsDistributionFiniteNumber(skew, 0), -1, 1);
+  const bimodalValue = sfsDistributionClamp(sfsDistributionFiniteNumber(bimodal, 0), 0, 1);
   const skewMagnitude = Math.abs(skewValue);
 
   if (bimodalValue >= 0.94) return "Symmetrical, two peaks";
@@ -2897,11 +2897,11 @@ bcCentralTendencyMorphLabel = (skew = 0, bimodal = 0) => {
 }
 
 makeCentralTendencyMorph = (opts = {}) => {
-  bcDistributionEnsureStyles();
+  sfsDistributionEnsureStyles();
 
-  const preferredWidth = bcDistributionPositiveNumber(opts.width, 720);
+  const preferredWidth = sfsDistributionPositiveNumber(opts.width, 720);
   let width = preferredWidth;
-  const height = bcDistributionPositiveNumber(opts.height, 338);
+  const height = sfsDistributionPositiveNumber(opts.height, 338);
   const margin = Object.assign({ top: 34, right: 24, bottom: 52, left: 24 }, opts.margin || {});
   const explicitDomain = Array.isArray(opts.xDomain) && opts.xDomain.length >= 2
     ? opts.xDomain.map(Number)
@@ -2909,20 +2909,20 @@ makeCentralTendencyMorph = (opts = {}) => {
   const explicitYDomain = Array.isArray(opts.yDomain) && opts.yDomain.length >= 2
     ? opts.yDomain.map(Number)
     : null;
-  const domainPadding = bcDistributionPositiveNumber(opts.domainPadding, 0.15);
-  const yHeadroom = bcDistributionPositiveNumber(opts.yHeadroom, 1.12);
-  const points = Math.max(160, Math.round(bcDistributionPositiveNumber(opts.points, 420)));
-  const transitionDuration = bcDistributionPositiveNumber(
-    bcDistributionValueOr(opts.transitionDuration, opts.duration),
+  const domainPadding = sfsDistributionPositiveNumber(opts.domainPadding, 0.15);
+  const yHeadroom = sfsDistributionPositiveNumber(opts.yHeadroom, 1.12);
+  const points = Math.max(160, Math.round(sfsDistributionPositiveNumber(opts.points, 420)));
+  const transitionDuration = sfsDistributionPositiveNumber(
+    sfsDistributionValueOr(opts.transitionDuration, opts.duration),
     1100
   );
-  const modeColor = opts.modeColor || bcDistributionConceptualMarkerDefaults.mode.color;
-  const medianColor = opts.medianColor || bcDistributionConceptualMarkerDefaults.median.color;
-  const meanColor = opts.meanColor || bcDistributionConceptualMarkerDefaults.mean.color;
+  const modeColor = opts.modeColor || sfsDistributionConceptualMarkerDefaults.mode.color;
+  const medianColor = opts.medianColor || sfsDistributionConceptualMarkerDefaults.median.color;
+  const meanColor = opts.meanColor || sfsDistributionConceptualMarkerDefaults.mean.color;
   const lowerColor = opts.medianLowerColor || "var(--graph-series-7, #f0e442)";
   const upperColor = opts.medianUpperColor || "var(--graph-series-6, #56b4e9)";
-  const initialSkew = bcDistributionClamp(bcDistributionFiniteNumber(opts.skew, 0), -1, 1);
-  const initialBimodal = bcDistributionClamp(bcDistributionFiniteNumber(opts.bimodal, 0), 0, 1);
+  const initialSkew = sfsDistributionClamp(sfsDistributionFiniteNumber(opts.skew, 0), -1, 1);
+  const initialBimodal = sfsDistributionClamp(sfsDistributionFiniteNumber(opts.bimodal, 0), 0, 1);
   let targetSkew = initialSkew;
   let targetBimodal = initialBimodal;
   let renderedSkew = initialSkew;
@@ -2930,22 +2930,22 @@ makeCentralTendencyMorph = (opts = {}) => {
   let activeTween = null;
 
   const root = d3.create("div")
-    .attr("class", "central-tendency-morph distribution-graph bc-figure")
+    .attr("class", "central-tendency-morph distribution-graph sfs-figure")
     .style("--ctm-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "ctm-controls bc-control-grid");
+    .attr("class", "ctm-controls sfs-control-grid");
   const controlsPanel = controls.append("section")
-    .attr("class", "ctm-panel bc-control-panel bc-if-control-panel");
+    .attr("class", "ctm-panel sfs-control-panel sfs-if-control-panel");
   controlsPanel.append("p")
-    .attr("class", "bc-control-title")
+    .attr("class", "sfs-control-title")
     .text(opts.controlsTitle || "Change the distribution");
 
   function addControlRow(labelText, ariaLabelText, min, max, initialValue) {
     const row = controlsPanel.append("label")
-      .attr("class", "ctm-control-row bc-control-row");
+      .attr("class", "ctm-control-row sfs-control-row");
     row.append("span").text(labelText);
     return row.append("input")
       .attr("type", "range")
@@ -2972,9 +2972,9 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("aria-live", "polite");
 
   const chartWrap = root.append("div")
-    .attr("class", "ctm-chart-wrap bc-chart-wrap");
+    .attr("class", "ctm-chart-wrap sfs-chart-wrap");
   const svg = chartWrap.append("svg")
-    .attr("class", "ctm-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "ctm-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img");
   const title = svg.append("title");
@@ -2985,7 +2985,7 @@ makeCentralTendencyMorph = (opts = {}) => {
     .range([height - margin.bottom, margin.top]);
   // Reassigned every render as the domain rescales to fit the current peak.
   let baselineY = height - margin.bottom;
-  const curve = bcDistributionCurveFactory(opts);
+  const curve = sfsDistributionCurveFactory(opts);
   const line = d3.line()
     .defined((d) => Number.isFinite(d.x) && Number.isFinite(d.y))
     .curve(curve)
@@ -3023,8 +3023,8 @@ makeCentralTendencyMorph = (opts = {}) => {
   const areaLayer = svg.append("g").attr("class", "ctm-areas dg-conceptual-areas");
   const baseArea = areaLayer.append("path")
     .attr("class", "ctm-base-area dg-conceptual-fill")
-    .attr("fill", opts.conceptualFill || "var(--bc-neutral-color, #7b818a)")
-    .style("fill-opacity", bcDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16));
+    .attr("fill", opts.conceptualFill || "var(--sfs-neutral-color, #7b818a)")
+    .style("fill-opacity", sfsDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16));
   const lowerArea = areaLayer.append("path")
     .attr("class", "ctm-median-half dg-median-half dg-median-lower")
     .attr("fill", `url(#${hatchIdBase}-lower)`);
@@ -3032,19 +3032,19 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("class", "ctm-median-half dg-median-half dg-median-upper")
     .attr("fill", `url(#${hatchIdBase}-upper)`);
   const lowerHalfLabel = areaLayer.append("text")
-    .attr("class", "dg-median-half-label bc-graph-label")
+    .attr("class", "dg-median-half-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("50%");
   const upperHalfLabel = areaLayer.append("text")
-    .attr("class", "dg-median-half-label bc-graph-label")
+    .attr("class", "dg-median-half-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("50%");
 
   const curvePath = svg.append("path")
-    .attr("class", "ctm-curve dg-curve bc-graph-line")
+    .attr("class", "ctm-curve dg-curve sfs-graph-line")
     .attr("fill", "none")
     .attr("stroke", opts.color || "var(--graph-series-1, var(--graph-line-color, #0072b2))")
-    .attr("stroke-width", bcDistributionPositiveNumber(opts.strokeWidth, 2.8));
+    .attr("stroke-width", sfsDistributionPositiveNumber(opts.strokeWidth, 2.8));
   const baselineLine = svg.append("line")
     .attr("class", "dg-conceptual-baseline")
     .attr("x1", margin.left)
@@ -3059,18 +3059,18 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("stroke", medianColor)
     .attr("stroke-width", 2.5);
   const medianLabel = medianLayer.append("text")
-    .attr("class", "dg-conceptual-label dg-median-label bc-graph-label")
+    .attr("class", "dg-conceptual-label dg-median-label sfs-graph-label")
     .text("median");
   const meanLayer = svg.append("g").attr("class", "ctm-mean");
   const meanFulcrum = meanLayer.append("polygon")
     .attr("class", "dg-mean-fulcrum")
     .attr("fill", meanColor);
   const meanLabel = meanLayer.append("text")
-    .attr("class", "dg-conceptual-label dg-mean-label bc-graph-label")
+    .attr("class", "dg-conceptual-label dg-mean-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("mean");
   const stateLabel = svg.append("text")
-    .attr("class", "ctm-state-label bc-graph-label")
+    .attr("class", "ctm-state-label sfs-graph-label")
     .attr("x", width - margin.right)
     .attr("y", 20)
     .attr("text-anchor", "end");
@@ -3093,8 +3093,8 @@ makeCentralTendencyMorph = (opts = {}) => {
   // instead of wasting space around a narrow peak or clipping a wide one.
   function computeDomain(distribution) {
     if (explicitDomain) return explicitDomain;
-    let lower = bcDistributionQuantile(distribution, 0.002);
-    let upper = bcDistributionQuantile(distribution, 0.998);
+    let lower = sfsDistributionQuantile(distribution, 0.002);
+    let upper = sfsDistributionQuantile(distribution, 0.998);
     if (!Number.isFinite(lower) || !Number.isFinite(upper) || upper <= lower) {
       lower = -4;
       upper = 4;
@@ -3105,7 +3105,7 @@ makeCentralTendencyMorph = (opts = {}) => {
   }
 
   function ariaDescription(skewValue, bimodalValue, modes, median, mean) {
-    const label = bcCentralTendencyMorphLabel(skewValue, bimodalValue);
+    const label = sfsCentralTendencyMorphLabel(skewValue, bimodalValue);
     if (modes.length > 1) {
       return `${label}. A mode marks each peak; the median is at ${median.toFixed(2)} and the mean at ${mean.toFixed(2)}.`;
     }
@@ -3116,26 +3116,26 @@ makeCentralTendencyMorph = (opts = {}) => {
   }
 
   function render(skewValue, bimodalValue, options = {}) {
-    const skew = bcDistributionClamp(bcDistributionFiniteNumber(skewValue, 0), -1, 1);
-    const bimodal = bcDistributionClamp(bcDistributionFiniteNumber(bimodalValue, 0), 0, 1);
-    const distribution = bcCentralTendencyMorphSpec(skew, bimodal);
+    const skew = sfsDistributionClamp(sfsDistributionFiniteNumber(skewValue, 0), -1, 1);
+    const bimodal = sfsDistributionClamp(sfsDistributionFiniteNumber(bimodalValue, 0), 0, 1);
+    const distribution = sfsCentralTendencyMorphSpec(skew, bimodal);
     const domain = computeDomain(distribution);
     x.domain(domain);
-    const curveData = bcDistributionCurveData(distribution, domain, points);
+    const curveData = sfsDistributionCurveData(distribution, domain, points);
     const yMax = d3.max(curveData, (d) => d.y) || 0.1;
     const yDomain = explicitYDomain || [0, yMax * yHeadroom];
     y.domain(yDomain);
     baselineY = y(0);
     baselineLine.attr("y1", baselineY).attr("y2", baselineY);
-    const median = bcDistributionQuantile(distribution, 0.5);
-    const mean = bcDistributionMeanValue(distribution);
-    const modes = bcDistributionModes(distribution, domain);
-    const lowerData = bcDistributionSegmentData(distribution, domain[0], median, domain, points);
-    const upperData = bcDistributionSegmentData(distribution, median, domain[1], domain, points);
+    const median = sfsDistributionQuantile(distribution, 0.5);
+    const mean = sfsDistributionMeanValue(distribution);
+    const modes = sfsDistributionModes(distribution, domain);
+    const lowerData = sfsDistributionSegmentData(distribution, domain[0], median, domain, points);
+    const upperData = sfsDistributionSegmentData(distribution, median, domain[1], domain, points);
     const lowerPosition = halfLabelPosition(lowerData);
     const upperPosition = halfLabelPosition(upperData);
-    const shapeLabel = bcCentralTendencyMorphLabel(skew, bimodal);
-    const comparisonLabel = bcCentralTendencyMorphComparisonLabel(modes, median, mean, domain);
+    const shapeLabel = sfsCentralTendencyMorphLabel(skew, bimodal);
+    const comparisonLabel = sfsCentralTendencyMorphComparisonLabel(modes, median, mean, domain);
 
     baseArea.attr("d", area(curveData));
     lowerArea.attr("d", area(lowerData));
@@ -3147,7 +3147,7 @@ makeCentralTendencyMorph = (opts = {}) => {
     const modeData = modes.map((position, index) => ({
       key: `mode-${index}`,
       x: position,
-      y: bcDistributionFinitePdf(distribution, position)
+      y: sfsDistributionFinitePdf(distribution, position)
     }));
     const modeGroups = modeLayer.selectAll("g.ctm-mode-marker")
       .data(modeData, (item) => item.key);
@@ -3160,7 +3160,7 @@ makeCentralTendencyMorph = (opts = {}) => {
       .attr("stroke", modeColor)
       .attr("stroke-width", 3);
     modeEnter.append("text")
-      .attr("class", "dg-conceptual-label dg-mode-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mode-label sfs-graph-label")
       .attr("text-anchor", "middle")
       .text("mode");
     const modeMerged = modeGroups.merge(modeEnter).style("opacity", 1);
@@ -3174,7 +3174,7 @@ makeCentralTendencyMorph = (opts = {}) => {
       .attr("y", (item) => y(item.y) - 11);
     modeGroups.exit().remove();
 
-    const medianTopY = Math.min(y(bcDistributionFinitePdf(distribution, median)), baselineY - 42);
+    const medianTopY = Math.min(y(sfsDistributionFinitePdf(distribution, median)), baselineY - 42);
     const medianOnRightHalf = x(median) > (margin.left + width - margin.right) / 2;
     medianLine
       .attr("x1", x(median))
@@ -3187,8 +3187,8 @@ makeCentralTendencyMorph = (opts = {}) => {
       .attr("text-anchor", medianOnRightHalf ? "end" : "start");
 
     const meanX = x(mean);
-    const fulcrumWidth = bcDistributionPositiveNumber(opts.meanFulcrumWidth, 15);
-    const fulcrumHeight = bcDistributionPositiveNumber(opts.meanFulcrumHeight, 14);
+    const fulcrumWidth = sfsDistributionPositiveNumber(opts.meanFulcrumWidth, 15);
+    const fulcrumHeight = sfsDistributionPositiveNumber(opts.meanFulcrumHeight, 14);
     meanFulcrum.attr(
       "points",
       `${meanX},${baselineY + 1} ${meanX + fulcrumWidth},${baselineY + fulcrumHeight} ${meanX - fulcrumWidth},${baselineY + fulcrumHeight}`
@@ -3236,11 +3236,11 @@ makeCentralTendencyMorph = (opts = {}) => {
   }
 
   function setValues(nextSkew, nextBimodal, options = {}) {
-    targetSkew = bcDistributionClamp(bcDistributionFiniteNumber(nextSkew, targetSkew), -1, 1);
-    targetBimodal = bcDistributionClamp(bcDistributionFiniteNumber(nextBimodal, targetBimodal), 0, 1);
+    targetSkew = sfsDistributionClamp(sfsDistributionFiniteNumber(nextSkew, targetSkew), -1, 1);
+    targetBimodal = sfsDistributionClamp(sfsDistributionFiniteNumber(nextBimodal, targetBimodal), 0, 1);
     stopTween();
-    const animate = options.animate === true && !bcDistributionPrefersReducedMotion();
-    const duration = bcDistributionPositiveNumber(options.duration, transitionDuration);
+    const animate = options.animate === true && !sfsDistributionPrefersReducedMotion();
+    const duration = sfsDistributionPositiveNumber(options.duration, transitionDuration);
 
     if (!animate || duration <= 0) {
       renderedSkew = targetSkew;
@@ -3257,8 +3257,8 @@ makeCentralTendencyMorph = (opts = {}) => {
     activeTween = d3.timer((elapsed) => {
       const rawProgress = Math.min(1, elapsed / duration);
       const eased = d3.easeCubicInOut(rawProgress);
-      renderedSkew = bcDistributionLerp(startSkew, targetSkew, eased);
-      renderedBimodal = bcDistributionLerp(startBimodal, targetBimodal, eased);
+      renderedSkew = sfsDistributionLerp(startSkew, targetSkew, eased);
+      renderedBimodal = sfsDistributionLerp(startBimodal, targetBimodal, eased);
       render(renderedSkew, renderedBimodal, { syncInput: false });
 
       if (rawProgress >= 1) {
@@ -3283,13 +3283,13 @@ makeCentralTendencyMorph = (opts = {}) => {
 
   function applyTutorialAction(action, context) {
     if (!action) return;
-    const animate = action.animate === undefined ? true : bcDistributionBoolean(action.animate, true);
-    const controlsOpen = bcDistributionValueOr(
+    const animate = action.animate === undefined ? true : sfsDistributionBoolean(action.animate, true);
+    const controlsOpen = sfsDistributionValueOr(
       action["controls-open"],
-      bcDistributionValueOr(action.controls, action["show-controls"])
+      sfsDistributionValueOr(action.controls, action["show-controls"])
     );
     if (controlsOpen !== undefined && context && typeof context.setControlsOpen === "function") {
-      context.setControlsOpen(bcDistributionBoolean(controlsOpen, true), animate);
+      context.setControlsOpen(sfsDistributionBoolean(controlsOpen, true), animate);
     }
     const hasSkew = action.skew !== undefined;
     const hasBimodal = action.bimodal !== undefined;
@@ -3309,7 +3309,7 @@ makeCentralTendencyMorph = (opts = {}) => {
   function applyResponsiveLayout(layout) {
     width = Math.max(240, Math.min(
       preferredWidth,
-      bcDistributionPositiveNumber(layout && layout.width, preferredWidth)
+      sfsDistributionPositiveNumber(layout && layout.width, preferredWidth)
     ));
     x.range([margin.left, width - margin.right]);
     svg.attr("viewBox", [0, 0, width, height]);
@@ -3346,8 +3346,8 @@ makeCentralTendencyMorph = (opts = {}) => {
 }
 
 
-bcDistributionParameterKey = (value) => {
-  const key = bcDistributionNormalizeKey(value);
+sfsDistributionParameterKey = (value) => {
+  const key = sfsDistributionNormalizeKey(value);
   if (["df", "degrees-of-freedom", "degreesoffreedom", "nu"].includes(key)) return "df";
   if (["df1", "df-1", "numerator-df", "numeratordf", "between-df", "between-groups-df"].includes(key)) return "df1";
   if (["df2", "df-2", "denominator-df", "denominatordf", "within-df", "within-groups-df", "error-df"].includes(key)) return "df2";
@@ -3358,7 +3358,7 @@ bcDistributionParameterKey = (value) => {
   return key;
 }
 
-bcDistributionDefaultParameterValue = (key, type) => {
+sfsDistributionDefaultParameterValue = (key, type) => {
   if (key === "df") return 1;
   if (key === "df1") return 3;
   if (key === "df2") return 20;
@@ -3367,7 +3367,7 @@ bcDistributionDefaultParameterValue = (key, type) => {
   return type === "f" ? 5 : 1;
 }
 
-bcDistributionDefaultParameterBounds = (key, type) => {
+sfsDistributionDefaultParameterBounds = (key, type) => {
   if (key === "df") return { min: 1, max: 30, step: 1 };
   if (key === "df1" || key === "df2") return { min: 1, max: 30, step: 1 };
   if (key === "sd" || key === "scale") return { min: 0.1, max: 5, step: 0.1 };
@@ -3375,7 +3375,7 @@ bcDistributionDefaultParameterBounds = (key, type) => {
   return { min: type === "f" ? 1 : 0, max: 30, step: 1 };
 }
 
-bcDistributionParameterLabel = (key) => {
+sfsDistributionParameterLabel = (key) => {
   if (key === "df") return "<i>df</i> =";
   if (key === "df1") return "<i>df</i><sub>1</sub> =";
   if (key === "df2") return "<i>df</i><sub>2</sub> =";
@@ -3386,22 +3386,22 @@ bcDistributionParameterLabel = (key) => {
   return `${key} =`;
 }
 
-bcDistributionParameterSpec = (source = {}, opts = {}, dist = {}) => {
-  const key = bcDistributionParameterKey(source.key || source.parameter || source.name || source.id);
-  const type = dist.type || bcDistributionNormalizeType(opts.distribution || opts.type);
-  const bounds = bcDistributionDefaultParameterBounds(key, type);
-  const min = bcDistributionFiniteNumber(source.min, bounds.min);
-  const max = Math.max(min, bcDistributionFiniteNumber(source.max, bounds.max));
-  const step = bcDistributionPositiveNumber(source.step, bounds.step);
-  const rawValue = bcDistributionValueOr(
+sfsDistributionParameterSpec = (source = {}, opts = {}, dist = {}) => {
+  const key = sfsDistributionParameterKey(source.key || source.parameter || source.name || source.id);
+  const type = dist.type || sfsDistributionNormalizeType(opts.distribution || opts.type);
+  const bounds = sfsDistributionDefaultParameterBounds(key, type);
+  const min = sfsDistributionFiniteNumber(source.min, bounds.min);
+  const max = Math.max(min, sfsDistributionFiniteNumber(source.max, bounds.max));
+  const step = sfsDistributionPositiveNumber(source.step, bounds.step);
+  const rawValue = sfsDistributionValueOr(
     source.value,
-    bcDistributionValueOr(opts[key], bcDistributionValueOr(dist[key], bcDistributionDefaultParameterValue(key, type)))
+    sfsDistributionValueOr(opts[key], sfsDistributionValueOr(dist[key], sfsDistributionDefaultParameterValue(key, type)))
   );
-  const value = bcDistributionClamp(bcDistributionFiniteNumber(rawValue, bcDistributionDefaultParameterValue(key, type)), min, max);
+  const value = sfsDistributionClamp(sfsDistributionFiniteNumber(rawValue, sfsDistributionDefaultParameterValue(key, type)), min, max);
 
   return {
     key,
-    label: source.label || source.labelHtml || bcDistributionParameterLabel(key),
+    label: source.label || source.labelHtml || sfsDistributionParameterLabel(key),
     min,
     max,
     step,
@@ -3411,22 +3411,22 @@ bcDistributionParameterSpec = (source = {}, opts = {}, dist = {}) => {
   };
 }
 
-bcDistributionParameterSpecs = (opts = {}, dist = {}) => {
+sfsDistributionParameterSpecs = (opts = {}, dist = {}) => {
   const raw = opts.parameters || opts.parameterControls || opts.sliders;
-  const type = dist.type || bcDistributionNormalizeType(opts.distribution || opts.type || "t");
+  const type = dist.type || sfsDistributionNormalizeType(opts.distribution || opts.type || "t");
   const defaults = type === "f"
     ? [{ key: "df1" }, { key: "df2" }]
     : type === "t"
       ? [{ key: "df" }]
       : [];
 
-  return bcDistributionAsArray(raw || defaults)
+  return sfsDistributionAsArray(raw || defaults)
     .map((source) => typeof source === "string" ? { key: source } : source)
-    .map((source) => bcDistributionParameterSpec(source, opts, dist))
+    .map((source) => sfsDistributionParameterSpec(source, opts, dist))
     .filter((spec) => spec.key);
 }
 
-bcDistributionExplorerParameterFormat = (parameter, opts = {}) => {
+sfsDistributionExplorerParameterFormat = (parameter, opts = {}) => {
   if (typeof parameter.format === "function") return parameter.format;
   if (typeof opts.formatParameter === "function") return (value) => opts.formatParameter(value, parameter);
   if (typeof opts.parameterFormat === "function") return opts.parameterFormat;
@@ -3436,16 +3436,16 @@ bcDistributionExplorerParameterFormat = (parameter, opts = {}) => {
   return d3.format(".2~f");
 }
 
-bcDistributionExplorerLabel = (dist, opts = {}) => {
+sfsDistributionExplorerLabel = (dist, opts = {}) => {
   if (typeof opts.distributionLabel === "function") return opts.distributionLabel(dist);
   if (dist.type === "t") return `t(df = ${d3.format(".2~f")(dist.df)})`;
   if (dist.type === "f") return `F(${d3.format(".2~f")(dist.df1)}, ${d3.format(".2~f")(dist.df2)})`;
-  return bcDistributionDistributionLabel(dist);
+  return sfsDistributionDistributionLabel(dist);
 }
 
-bcDistributionExplorerReferenceSpecs = (opts = {}, type = "t") => {
+sfsDistributionExplorerReferenceSpecs = (opts = {}, type = "t") => {
   const explicit = opts.references || opts.referenceDistributions;
-  if (explicit) return bcDistributionAsArray(explicit);
+  if (explicit) return sfsDistributionAsArray(explicit);
   if (opts.reference === false || opts.showReference === false) return [];
 
   if (type === "t" || opts.reference === true || opts.showNormalReference) {
@@ -3454,8 +3454,8 @@ bcDistributionExplorerReferenceSpecs = (opts = {}, type = "t") => {
       type: "normal",
       key: "normal-reference",
       name: "Normal",
-      color: "var(--bc-neutral-color, #7b818a)",
-      stroke: "var(--bc-neutral-color, #7b818a)",
+      color: "var(--sfs-neutral-color, #7b818a)",
+      stroke: "var(--sfs-neutral-color, #7b818a)",
       strokeWidth: 2,
       strokeDasharray: "7 5",
       opacity: 0.95
@@ -3465,7 +3465,7 @@ bcDistributionExplorerReferenceSpecs = (opts = {}, type = "t") => {
   return [];
 }
 
-bcDistributionExplorerDomain = (type, opts = {}) => {
+sfsDistributionExplorerDomain = (type, opts = {}) => {
   const explicit = opts.xDomain || opts.domain;
   if (explicit && explicit.length >= 2) return explicit.map(Number);
   if (type === "t" || type === "normal") return [-5, 5];
@@ -3473,17 +3473,17 @@ bcDistributionExplorerDomain = (type, opts = {}) => {
   return null;
 }
 
-bcDistributionExplorerYDomain = (type, opts = {}) => {
+sfsDistributionExplorerYDomain = (type, opts = {}) => {
   if (opts.yDomain) return opts.yDomain.slice();
   if (type === "t" || type === "normal") return [0, 0.45];
   return null;
 }
 
 makeDistributionParameterExplorer = function(opts = {}) {
-  bcDistributionEnsureStyles();
+  sfsDistributionEnsureStyles();
 
   const controlledSource = Object.assign({}, opts.distributionSpec || opts.controlledDistribution || {});
-  const type = bcDistributionNormalizeType(
+  const type = sfsDistributionNormalizeType(
     controlledSource.distribution || controlledSource.type || opts.distribution || opts.type || "t"
   );
   const controlledKey = controlledSource.key || controlledSource.id || "controlled-distribution";
@@ -3495,10 +3495,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
     name: controlledName,
     color: controlledSource.color || controlledSource.stroke || opts.color || "var(--graph-series-1, var(--graph-line-color, #0072b2))",
     stroke: controlledSource.stroke || controlledSource.color || opts.stroke || opts.color || "var(--graph-series-1, var(--graph-line-color, #0072b2))",
-    strokeWidth: bcDistributionPositiveNumber(controlledSource.strokeWidth, bcDistributionPositiveNumber(opts.strokeWidth, 2.8))
+    strokeWidth: sfsDistributionPositiveNumber(controlledSource.strokeWidth, sfsDistributionPositiveNumber(opts.strokeWidth, 2.8))
   });
-  const baseDist = bcDistributionSpec(controlledBase, opts, 0);
-  const parameters = bcDistributionParameterSpecs(opts, baseDist);
+  const baseDist = sfsDistributionSpec(controlledBase, opts, 0);
+  const parameters = sfsDistributionParameterSpecs(opts, baseDist);
   const parameterByKey = new Map(parameters.map((parameter) => [parameter.key, parameter]));
   const state = {};
   const renderedState = {};
@@ -3507,41 +3507,41 @@ makeDistributionParameterExplorer = function(opts = {}) {
     renderedState[parameter.key] = parameter.value;
   });
 
-  const width = bcDistributionPositiveNumber(opts.width, 640);
-  const aspectRatio = bcDistributionPositiveNumber(opts.aspectRatio, 2.2);
-  const height = bcDistributionPositiveNumber(opts.height, width / aspectRatio);
-  const display = bcDistributionDisplay(opts);
-  const margin = bcDistributionMargin(opts, display);
-  const points = Math.max(80, Math.round(bcDistributionPositiveNumber(opts.points, 360)));
-  const transitionDuration = bcDistributionPositiveNumber(bcDistributionValueOr(opts.transitionDuration, opts.duration), 650);
-  const curve = bcDistributionCurveFactory(opts);
-  const valueFormats = new Map(parameters.map((parameter) => [parameter.key, bcDistributionExplorerParameterFormat(parameter, opts)]));
+  const width = sfsDistributionPositiveNumber(opts.width, 640);
+  const aspectRatio = sfsDistributionPositiveNumber(opts.aspectRatio, 2.2);
+  const height = sfsDistributionPositiveNumber(opts.height, width / aspectRatio);
+  const display = sfsDistributionDisplay(opts);
+  const margin = sfsDistributionMargin(opts, display);
+  const points = Math.max(80, Math.round(sfsDistributionPositiveNumber(opts.points, 360)));
+  const transitionDuration = sfsDistributionPositiveNumber(sfsDistributionValueOr(opts.transitionDuration, opts.duration), 650);
+  const curve = sfsDistributionCurveFactory(opts);
+  const valueFormats = new Map(parameters.map((parameter) => [parameter.key, sfsDistributionExplorerParameterFormat(parameter, opts)]));
   let activeTween = null;
   let lastRender = null;
 
   const root = d3.create("div")
-    .attr("class", "distribution-explorer bc-figure")
+    .attr("class", "distribution-explorer sfs-figure")
     .style("--dpe-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "dpe-controls bc-control-grid");
+    .attr("class", "dpe-controls sfs-control-grid");
 
   const controlsPanel = controls.append("section")
-    .attr("class", "dpe-panel bc-control-panel bc-if-control-panel");
+    .attr("class", "dpe-panel sfs-control-panel sfs-if-control-panel");
   controlsPanel.append("p")
-    .attr("class", "bc-control-title")
+    .attr("class", "sfs-control-title")
     .text(opts.controlsTitle || "Distribution");
 
   const controlsByKey = new Map();
 
   function addSlider(parameter) {
     const row = controlsPanel.append("label")
-      .attr("class", "dpe-control-row bc-control-row");
+      .attr("class", "dpe-control-row sfs-control-row");
     row.append("span").html(parameter.label);
     const valueNode = row.append("span")
-      .attr("class", "dpe-value bc-readout-value");
+      .attr("class", "dpe-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", parameter.min)
@@ -3555,10 +3555,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
   parameters.forEach(addSlider);
 
   const chartWrap = root.append("div")
-    .attr("class", "dpe-chart-wrap bc-chart-wrap");
+    .attr("class", "dpe-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "dpe-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dpe-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel || "Interactive distribution comparison");
@@ -3579,7 +3579,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .y1((d) => y(d.y));
 
   const gridLayer = svg.append("g")
-    .attr("class", "dpe-grid bc-graph-grid");
+    .attr("class", "dpe-grid sfs-graph-grid");
   const shadeLayer = svg.append("g")
     .attr("class", "dpe-shades");
   const curveLayer = svg.append("g")
@@ -3593,10 +3593,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const labelLayer = svg.append("g")
     .attr("class", "dpe-label-layer");
   const legendLayer = svg.append("g")
-    .attr("class", "dpe-legend bc-graph-legend")
+    .attr("class", "dpe-legend sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
 
-  bcDistributionAddLabels(labelLayer, opts, display, margin, width, height);
+  sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
 
   function parameterState(source = state) {
     const next = {};
@@ -3620,17 +3620,17 @@ makeDistributionParameterExplorer = function(opts = {}) {
   }
 
   function buildDistributions(source = state) {
-    const references = bcDistributionExplorerReferenceSpecs(opts, type)
+    const references = sfsDistributionExplorerReferenceSpecs(opts, type)
       .map((reference, index) => {
-        const dist = bcDistributionSpec(reference, opts, index);
+        const dist = sfsDistributionSpec(reference, opts, index);
         dist.role = "reference";
-        dist.label = dist.name || bcDistributionDistributionLabel(dist);
+        dist.label = dist.name || sfsDistributionDistributionLabel(dist);
         return dist;
       });
 
-    const controlled = bcDistributionSpec(distributionSourceFor(source), opts, references.length);
+    const controlled = sfsDistributionSpec(distributionSourceFor(source), opts, references.length);
     controlled.role = "controlled";
-    controlled.name = controlledBase.name || bcDistributionExplorerLabel(controlled, opts);
+    controlled.name = controlledBase.name || sfsDistributionExplorerLabel(controlled, opts);
     controlled.label = controlled.name;
 
     return references.concat(controlled);
@@ -3638,14 +3638,14 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function plotData(source = state) {
     const distributions = buildDistributions(source);
-    const explicitDomain = bcDistributionExplorerDomain(type, opts);
-    const domain = explicitDomain || bcDistributionResolveDomain(distributions, opts);
+    const explicitDomain = sfsDistributionExplorerDomain(type, opts);
+    const domain = explicitDomain || sfsDistributionResolveDomain(distributions, opts);
     const curveData = distributions.map((dist) => ({
       distribution: dist,
-      data: bcDistributionCurveData(dist, domain, points)
+      data: sfsDistributionCurveData(dist, domain, points)
     }));
-    const shadeItems = bcDistributionShadeItems(opts, distributions, domain);
-    const explicitY = bcDistributionExplorerYDomain(type, opts);
+    const shadeItems = sfsDistributionShadeItems(opts, distributions, domain);
+    const explicitY = sfsDistributionExplorerYDomain(type, opts);
     const yMax = d3.max(curveData, (series) => d3.max(series.data, (d) => d.y)) || 1;
     const yDomain = explicitY || [0, yMax * 1.12];
 
@@ -3680,8 +3680,8 @@ makeDistributionParameterExplorer = function(opts = {}) {
     parameters.forEach((parameter) => {
       const control = controlsByKey.get(parameter.key);
       if (!control) return;
-      state[parameter.key] = bcDistributionClamp(
-        bcDistributionFiniteNumber(control.input.value, state[parameter.key]),
+      state[parameter.key] = sfsDistributionClamp(
+        sfsDistributionFiniteNumber(control.input.value, state[parameter.key]),
         parameter.min,
         parameter.max
       );
@@ -3711,7 +3711,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       gridLayer
         .attr("transform", `translate(${margin.left},0)`)
         .call(d3.axisLeft(y)
-          .ticks(bcDistributionValueOr(opts.yTicks, 5))
+          .ticks(sfsDistributionValueOr(opts.yTicks, 5))
           .tickSize(-(width - margin.left - margin.right))
           .tickFormat(""))
         .call((g) => g.select(".domain").remove());
@@ -3723,18 +3723,18 @@ makeDistributionParameterExplorer = function(opts = {}) {
     if (display.showXAxis) {
       xAxisLayer
         .call(d3.axisBottom(x)
-          .ticks(bcDistributionValueOr(opts.xTicks, 7))
+          .ticks(sfsDistributionValueOr(opts.xTicks, 7))
           .tickFormat(opts.xTickFormat || opts.tickFormat || d3.format("~g")));
-      bcDistributionStyleAxis(xAxisLayer, display);
+      sfsDistributionStyleAxis(xAxisLayer, display);
     }
 
     yAxisLayer.style("display", display.showYAxis ? null : "none");
     if (display.showYAxis) {
       yAxisLayer
         .call(d3.axisLeft(y)
-          .ticks(bcDistributionValueOr(opts.yTicks, 5))
+          .ticks(sfsDistributionValueOr(opts.yTicks, 5))
           .tickFormat(opts.yTickFormat || opts.yFormat || d3.format("~g")));
-      bcDistributionStyleAxis(yAxisLayer, display);
+      sfsDistributionStyleAxis(yAxisLayer, display);
     }
   }
 
@@ -3779,8 +3779,8 @@ makeDistributionParameterExplorer = function(opts = {}) {
     const xDomainChanged = !lastRender || !sameDomain(lastRender.domain, plot.domain);
     const yDomainChanged = !lastRender || !sameDomain(lastRender.yDomain, plot.yDomain);
     const axisChanged = xDomainChanged || yDomainChanged || !lastRender;
-    const animate = options.animate === true && !bcDistributionPrefersReducedMotion();
-    const duration = bcDistributionPositiveNumber(options.duration, transitionDuration);
+    const animate = options.animate === true && !sfsDistributionPrefersReducedMotion();
+    const duration = sfsDistributionPositiveNumber(options.duration, transitionDuration);
 
     x.domain(plot.domain);
     y.domain(plot.yDomain).nice();
@@ -3792,7 +3792,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     shadePaths.enter()
       .append("path")
-      .attr("class", (d) => `dg-shade bc-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
+      .attr("class", (d) => `dg-shade sfs-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
       .attr("fill", (d) => d.color)
       .style("fill-opacity", (d) => d.opacity)
       .merge(shadePaths)
@@ -3804,7 +3804,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     const pathsEnter = paths.enter()
       .append("path")
-      .attr("class", (d) => `dpe-curve dg-curve bc-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
+      .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
       .attr("fill", "none")
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
@@ -3813,7 +3813,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       .attr("d", (d) => line(d.data));
 
     const pathsMerged = paths.merge(pathsEnter)
-      .attr("class", (d) => `dpe-curve dg-curve bc-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
+      .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
@@ -3849,11 +3849,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function tweenToTarget(target, notify, options = {}) {
     stopTween();
-    const duration = bcDistributionPositiveNumber(options.duration, transitionDuration);
+    const duration = sfsDistributionPositiveNumber(options.duration, transitionDuration);
     const start = parameterState(renderedState);
     const end = parameterState(target);
 
-    if (duration <= 0 || bcDistributionPrefersReducedMotion()) {
+    if (duration <= 0 || sfsDistributionPrefersReducedMotion()) {
       parameters.forEach((parameter) => {
         renderedState[parameter.key] = end[parameter.key];
       });
@@ -3886,7 +3886,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     stopTween();
     readState();
     const target = parameterState(state);
-    const animate = options.animate === true && !bcDistributionPrefersReducedMotion();
+    const animate = options.animate === true && !sfsDistributionPrefersReducedMotion();
 
     if (animate) {
       syncInputValues();
@@ -3902,13 +3902,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
   }
 
   function setParameterValue(key, value) {
-    const parameterKey = bcDistributionParameterKey(key);
+    const parameterKey = sfsDistributionParameterKey(key);
     const control = controlsByKey.get(parameterKey);
     const parameter = parameterByKey.get(parameterKey);
     if (!control || !parameter) return false;
-    const number = bcDistributionFiniteNumber(value, NaN);
+    const number = sfsDistributionFiniteNumber(value, NaN);
     if (!Number.isFinite(number)) return false;
-    const next = bcDistributionClamp(number, parameter.min, parameter.max);
+    const next = sfsDistributionClamp(number, parameter.min, parameter.max);
     control.input.value = String(next);
     return true;
   }
@@ -3916,14 +3916,14 @@ makeDistributionParameterExplorer = function(opts = {}) {
   function applyActionEntries(action) {
     let changed = false;
     Object.entries(action || {}).forEach(([key, value]) => {
-      const actionKey = bcDistributionNormalizeKey(key);
+      const actionKey = sfsDistributionNormalizeKey(key);
       if (["animate", "duration", "controls", "controls-open", "show-controls"].includes(actionKey)) return;
       if (actionKey === "parameters" && value && typeof value === "object") {
         changed = applyActionEntries(value) || changed;
         return;
       }
       if (actionKey === "n" && controlsByKey.has("df") && !controlsByKey.has("n")) {
-        changed = setParameterValue("df", bcDistributionFiniteNumber(value, NaN) - 1) || changed;
+        changed = setParameterValue("df", sfsDistributionFiniteNumber(value, NaN) - 1) || changed;
         return;
       }
       changed = setParameterValue(key, value) || changed;
@@ -3933,12 +3933,12 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function applyTutorialAction(action, context) {
     if (!action) return;
-    const animate = action.animate === undefined ? true : bcDistributionBoolean(action.animate, true);
+    const animate = action.animate === undefined ? true : sfsDistributionBoolean(action.animate, true);
     const duration = action.duration;
 
     if (context && typeof context.setControlsOpen === "function") {
-      const controlsOpen = bcDistributionValueOr(action["controls-open"], bcDistributionValueOr(action.controls, action["show-controls"]));
-      if (controlsOpen !== undefined) context.setControlsOpen(bcDistributionBoolean(controlsOpen, true), animate);
+      const controlsOpen = sfsDistributionValueOr(action["controls-open"], sfsDistributionValueOr(action.controls, action["show-controls"]));
+      if (controlsOpen !== undefined) context.setControlsOpen(sfsDistributionBoolean(controlsOpen, true), animate);
     }
 
     if (applyActionEntries(action)) update(true, { animate, duration });
@@ -3971,7 +3971,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 makeDistributionExplorer = makeDistributionParameterExplorer
 
 makeTDistributionDfExplorer = (opts = {}) => {
-  const initialDf = bcDistributionValueOr(opts.df, 1);
+  const initialDf = sfsDistributionValueOr(opts.df, 1);
   return makeDistributionParameterExplorer(Object.assign({
     distribution: "t",
     reference: true,
@@ -3991,8 +3991,8 @@ makeTDistributionDfExplorer = (opts = {}) => {
 makeTDistributionExplorer = makeTDistributionDfExplorer
 
 makeFDistributionDfExplorer = (opts = {}) => {
-  const initialDf1 = bcDistributionValueOr(opts.df1, 3);
-  const initialDf2 = bcDistributionValueOr(opts.df2, 20);
+  const initialDf1 = sfsDistributionValueOr(opts.df1, 3);
+  const initialDf2 = sfsDistributionValueOr(opts.df2, 20);
   return makeDistributionParameterExplorer(Object.assign({
     distribution: "f",
     title: "How F changes with degrees of freedom",

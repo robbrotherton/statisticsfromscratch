@@ -1,7 +1,7 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
+  const sampling = global.sfsSampling;
 
   // A single constant "gravity" governs every falling mean-box, so a box always
   // drops at the speed physics dictates for its height — the same acceleration
@@ -15,62 +15,62 @@
   }
 
   function ensureStyles() {
-    if (document.getElementById("bc-sampling-visuals-styles")) return;
+    if (document.getElementById("sfs-sampling-visuals-styles")) return;
     const style = document.createElement("style");
-    style.id = "bc-sampling-visuals-styles";
+    style.id = "sfs-sampling-visuals-styles";
     style.textContent = `
-      .bc-sampling-figure {
+      .sfs-sampling-figure {
         --bcs-sample: var(--graph-series-2, #e69f00);
-        --bcs-current: var(--bc-current-color, #d1495b);
+        --bcs-current: var(--sfs-current-color, #d1495b);
         --bcs-density: var(--graph-block-fill, var(--graph-data-color, #0072b2));
-        --bcs-reference: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-        --bc-figure-max-width: 48rem;
-        --bc-viz-title-size: var(--bc-figure-title-size, 1rem);
-        --bc-viz-label-size: var(--bc-figure-label-size, 0.875rem);
-        --bc-viz-note-size: var(--bc-figure-note-size, 0.8125rem);
-        --bc-viz-tick-size: var(--bc-figure-tick-size, 0.8125rem);
-        --bc-viz-small-size: var(--bc-figure-small-size, 0.75rem);
+        --bcs-reference: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+        --sfs-figure-max-width: 48rem;
+        --sfs-viz-title-size: var(--sfs-figure-title-size, 1rem);
+        --sfs-viz-label-size: var(--sfs-figure-label-size, 0.875rem);
+        --sfs-viz-note-size: var(--sfs-figure-note-size, 0.8125rem);
+        --sfs-viz-tick-size: var(--sfs-figure-tick-size, 0.8125rem);
+        --sfs-viz-small-size: var(--sfs-figure-small-size, 0.75rem);
       }
 
-      .bc-sampling-figure .bcs-panel-label {
-        fill: var(--bc-text, currentColor);
-        font-size: var(--bc-viz-title-size);
+      .sfs-sampling-figure .bcs-panel-label {
+        fill: var(--sfs-text, currentColor);
+        font-size: var(--sfs-viz-title-size);
         font-weight: 700;
       }
 
-      .bc-sampling-figure .bcs-panel-note,
-      .bc-sampling-figure .bcs-axis text {
-        fill: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-        font-size: var(--bc-viz-tick-size);
+      .sfs-sampling-figure .bcs-panel-note,
+      .sfs-sampling-figure .bcs-axis text {
+        fill: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+        font-size: var(--sfs-viz-tick-size);
       }
 
-      .bc-sampling-figure .bcs-panel-note {
-        font-size: var(--bc-viz-note-size);
+      .sfs-sampling-figure .bcs-panel-note {
+        font-size: var(--sfs-viz-note-size);
       }
 
-      .bc-sampling-figure .bcs-axis path,
-      .bc-sampling-figure .bcs-axis line {
+      .sfs-sampling-figure .bcs-axis path,
+      .sfs-sampling-figure .bcs-axis line {
         stroke: var(--graph-axis-color, currentColor);
       }
 
-      .bc-sampling-figure .bcs-pop-dot,
-      .bc-sampling-figure .bcs-sample-dot {
-        stroke: var(--graph-point-stroke, var(--bc-bg, white));
+      .sfs-sampling-figure .bcs-pop-dot,
+      .sfs-sampling-figure .bcs-sample-dot {
+        stroke: var(--graph-point-stroke, var(--sfs-bg, white));
         stroke-width: 0.7;
         transition: opacity 280ms ease, stroke 280ms ease, stroke-width 280ms ease;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-mean-ghost {
+      .sfs-sampling-figure .bcs-mean-ghost {
         opacity: 0.68;
         pointer-events: none;
-        stroke: var(--graph-point-stroke, var(--bc-bg, white));
+        stroke: var(--graph-point-stroke, var(--sfs-bg, white));
         stroke-width: 0.9;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-pop-dot { opacity: 0.92; }
-      .bc-sampling-figure .bcs-pop-dot.is-source {
+      .sfs-sampling-figure .bcs-pop-dot { opacity: 0.92; }
+      .sfs-sampling-figure .bcs-pop-dot.is-source {
         stroke: var(--bcs-current);
         stroke-width: 1.35;
       }
@@ -108,65 +108,65 @@
         transition: opacity 280ms ease;
       }
 
-      .bc-sampling-figure .bcs-mu-line {
-        stroke: var(--bc-text, currentColor);
+      .sfs-sampling-figure .bcs-mu-line {
+        stroke: var(--sfs-text, currentColor);
         stroke-width: 1.25;
         stroke-dasharray: 4 4;
         opacity: 0.48;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-mean-block {
+      .sfs-sampling-figure .bcs-mean-block {
         fill: var(--graph-data-color, var(--graph-block-fill, #0072b2));
-        stroke: var(--graph-bar-stroke, var(--bc-text, currentColor));
+        stroke: var(--graph-bar-stroke, var(--sfs-text, currentColor));
         stroke-width: 0.7;
         shape-rendering: crispEdges;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-mean-line {
+      .sfs-sampling-figure .bcs-mean-line {
         stroke: var(--bcs-current);
         stroke-width: 2;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-mean-label {
+      .sfs-sampling-figure .bcs-mean-label {
         fill: var(--bcs-current);
-        font-size: var(--bc-viz-label-size);
+        font-size: var(--sfs-viz-label-size);
         font-weight: 700;
       }
 
-      .bc-sampling-figure .bcs-panel-note.is-mean {
+      .sfs-sampling-figure .bcs-panel-note.is-mean {
         fill: var(--graph-data-color, var(--graph-block-fill, #0072b2));
         font-weight: 700;
       }
 
-      .bc-sampling-figure .bcs-block {
-        fill: var(--graph-block-fill, var(--bc-text, currentColor));
-        stroke: var(--graph-block-stroke, var(--bc-bg, white));
+      .sfs-sampling-figure .bcs-block {
+        fill: var(--graph-block-fill, var(--sfs-text, currentColor));
+        stroke: var(--graph-block-stroke, var(--sfs-bg, white));
         stroke-width: 0.55;
         opacity: 0.86;
         shape-rendering: crispEdges;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-block.is-current {
+      .sfs-sampling-figure .bcs-block.is-current {
         fill: var(--bcs-current);
         opacity: 1;
       }
 
-      .bc-sampling-figure .bcs-block.is-in-flight {
+      .sfs-sampling-figure .bcs-block.is-in-flight {
         opacity: 1;
       }
 
-      .bc-sampling-figure .bcs-histogram-bar {
+      .sfs-sampling-figure .bcs-histogram-bar {
         fill: var(--bcs-density);
-        stroke: color-mix(in srgb, var(--bcs-density) 72%, var(--bc-bg, white));
+        stroke: color-mix(in srgb, var(--bcs-density) 72%, var(--sfs-bg, white));
         stroke-width: 0.35;
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-reference-line {
+      .sfs-sampling-figure .bcs-reference-line {
         fill: none;
         stroke: var(--bcs-reference);
         stroke-width: 1.8;
@@ -174,21 +174,21 @@
         vector-effect: non-scaling-stroke;
       }
 
-      .bc-sampling-figure .bcs-reference-label {
+      .sfs-sampling-figure .bcs-reference-label {
         fill: var(--bcs-reference);
-        font-size: var(--bc-viz-note-size);
+        font-size: var(--sfs-viz-note-size);
         font-weight: 650;
       }
 
-      .bc-sampling-figure .bcs-scale-tag {
-        fill: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-        font-size: var(--bc-viz-small-size);
+      .sfs-sampling-figure .bcs-scale-tag {
+        fill: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+        font-size: var(--sfs-viz-small-size);
         font-weight: 650;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .bc-sampling-figure .bcs-pop-dot,
-        .bc-sampling-figure .bcs-sample-dot,
+        .sfs-sampling-figure .bcs-pop-dot,
+        .sfs-sampling-figure .bcs-sample-dot,
         .sampling-pathway .bcs-sample-layer > .bcs-panel-label,
         .sampling-pathway .bcs-sample-layer > .bcs-panel-note,
         .sampling-pathway .bcs-sample-layer > .bcs-axis,
@@ -197,8 +197,8 @@
         }
       }
 
-      html[data-motion="reduced"] .bc-sampling-figure .bcs-pop-dot,
-      html[data-motion="reduced"] .bc-sampling-figure .bcs-sample-dot,
+      html[data-motion="reduced"] .sfs-sampling-figure .bcs-pop-dot,
+      html[data-motion="reduced"] .sfs-sampling-figure .bcs-sample-dot,
       html[data-motion="reduced"] .sampling-pathway .bcs-sample-layer > .bcs-panel-label,
       html[data-motion="reduced"] .sampling-pathway .bcs-sample-layer > .bcs-panel-note,
       html[data-motion="reduced"] .sampling-pathway .bcs-sample-layer > .bcs-axis,
@@ -210,7 +210,7 @@
   }
 
   function reducedMotion() {
-    return Boolean(global.bcReducedMotion) || Boolean(global.matchMedia &&
+    return Boolean(global.sfsReducedMotion) || Boolean(global.matchMedia &&
       global.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
@@ -325,7 +325,7 @@
     const plotLeft = opts.plotLeft;
     const plotRight = opts.plotRight;
     const individualColors = resolveIndividualPalette(opts.individualPalette);
-    const layer = svg.append("g").attr("class", "bcs-population-layer bc-if-reveal");
+    const layer = svg.append("g").attr("class", "bcs-population-layer sfs-if-reveal");
     layer.append("text")
       .attr("class", "bcs-panel-label")
       .attr("x", plotLeft).attr("y", opts.labelY)
@@ -338,7 +338,7 @@
       .attr("y1", opts.noteY + 8).attr("y2", axisY + 5);
     const dotsLayer = layer.append("g").attr("class", "bcs-population-dots");
     const axis = layer.append("g")
-      .attr("class", "bcs-axis bc-axis")
+      .attr("class", "bcs-axis sfs-axis")
       .attr("transform", `translate(0,${axisY})`);
     const axisLabel = layer.append("text")
       .attr("class", "bcs-panel-note")
@@ -382,7 +382,7 @@
         .data(markerLayout, (item) => item.id)
         .join(
           (enter) => enter.append("circle")
-            .attr("class", "bcs-pop-dot bc-graph-point")
+            .attr("class", "bcs-pop-dot sfs-graph-point")
             .attr("r", radius),
           (updateSelection) => updateSelection,
           (exit) => exit.remove()
@@ -565,7 +565,7 @@
       "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉"
     };
     const subscriptNumber = (value) => String(value).replace(/\d/g, (digit) => subscriptDigits[digit]);
-    const layer = svg.append("g").attr("class", "bcs-sample-layer bc-if-reveal");
+    const layer = svg.append("g").attr("class", "bcs-sample-layer sfs-if-reveal");
     layer.append("text")
       .attr("class", "bcs-panel-label")
       .attr("x", opts.plotLeft).attr("y", opts.labelY)
@@ -578,7 +578,7 @@
       .attr("class", "bcs-mean-ghost-layer")
       .attr("aria-hidden", "true");
     const axis = layer.append("g")
-      .attr("class", "bcs-axis bc-axis")
+      .attr("class", "bcs-axis sfs-axis")
       .attr("transform", `translate(0,${opts.axisY})`);
     const axisLabel = layer.append("text")
       .attr("class", "bcs-panel-note bcs-axis-label")
@@ -587,7 +587,7 @@
       .attr("text-anchor", "end")
       .text(opts.axisLabel || "Sample score");
     const meanGroup = layer.append("g")
-      .attr("class", "bcs-mean-group bc-if-reveal")
+      .attr("class", "bcs-mean-group sfs-if-reveal")
       .attr("data-style", opts.meanStyle === "block" ? "block" : "line");
     const meanLine = meanGroup.append("line")
       .attr("class", "bcs-mean-line")
@@ -648,7 +648,7 @@
         .data(data, (item) => item.sampleIndex)
         .join(
           (enter) => enter.append("circle")
-            .attr("class", "bcs-sample-dot bc-graph-point")
+            .attr("class", "bcs-sample-dot sfs-graph-point")
             .attr("r", opts.radius),
           (updateSelection) => updateSelection,
           (exit) => exit.remove()
@@ -709,7 +709,7 @@
         const ghosts = meanGhostLayer.selectAll("circle")
           .data(data, (item) => item.sampleIndex)
           .join("circle")
-          .attr("class", "bcs-mean-ghost bc-graph-point")
+          .attr("class", "bcs-mean-ghost sfs-graph-point")
           .attr("r", opts.radius)
           .attr("cx", (item) => item.source.x)
           .attr("cy", (item) => opts.baseY - item.row * pitch)
@@ -779,7 +779,7 @@
   function createBlockHistogram(svg, options) {
     const opts = options || {};
     const x = opts.x;
-    const layer = svg.append("g").attr("class", "bcs-block-histogram-layer bc-if-reveal");
+    const layer = svg.append("g").attr("class", "bcs-block-histogram-layer sfs-if-reveal");
     layer.append("text")
       .attr("class", "bcs-panel-label")
       .attr("x", opts.plotLeft).attr("y", opts.labelY)
@@ -792,7 +792,7 @@
       .attr("y1", opts.noteY + 10).attr("y2", opts.baseY + 5);
     const blocksLayer = layer.append("g");
     const axis = layer.append("g")
-      .attr("class", "bcs-axis bc-axis")
+      .attr("class", "bcs-axis sfs-axis")
       .attr("transform", `translate(0,${opts.baseY})`);
     const axisLabel = layer.append("text")
       .attr("class", "bcs-panel-note")
@@ -829,7 +829,7 @@
         .join(
           (enter) => {
             enteredBlocks = enter.append("rect")
-              .attr("class", "bcs-block bc-graph-block")
+              .attr("class", "bcs-block sfs-graph-block")
               .attr("width", cellW).attr("height", cellH);
             return enteredBlocks;
           },
@@ -909,7 +909,7 @@
 
   function createDenseHistogram(svg, options) {
     const opts = options || {};
-    const layer = svg.append("g").attr("class", "bcs-dense-histogram-layer bc-if-reveal");
+    const layer = svg.append("g").attr("class", "bcs-dense-histogram-layer sfs-if-reveal");
     layer.append("text")
       .attr("class", "bcs-panel-label")
       .attr("x", opts.plotLeft).attr("y", opts.labelY)
@@ -930,12 +930,12 @@
       .attr("class", "bcs-reference-label")
       .text("Predicted normal");
     const axis = layer.append("g")
-      .attr("class", "bcs-axis bc-axis")
+      .attr("class", "bcs-axis sfs-axis")
       .attr("transform", `translate(0,${opts.baseY})`);
     const y = d3.scaleLinear().range([opts.baseY, opts.topY]);
     const normalData = d3.range(241).map((index) => {
       const z = -3 + index * 6 / 240;
-      return { z, density: global.bcStats.normalPdf(z, 0, 1) };
+      return { z, density: global.sfsStats.normalPdf(z, 0, 1) };
     });
     let normalWasVisible = false;
 
@@ -987,7 +987,7 @@
         .data(histogramData, (item) => item.index)
         .join(
           (enter) => enter.append("rect")
-            .attr("class", "bcs-histogram-bar bc-graph-bar")
+            .attr("class", "bcs-histogram-bar sfs-graph-bar")
             .attr("y", opts.baseY).attr("height", 0),
           (updateSelection) => updateSelection,
           (exit) => exit.remove()
@@ -1011,7 +1011,7 @@
       referenceLabel.interrupt()
         .attr("text-anchor", state.compact ? "end" : "start")
         .attr("x", state.compact ? opts.plotRight - 2 : mapX(1.55))
-        .attr("y", y(global.bcStats.normalPdf(1.55, 0, 1)) - 8);
+        .attr("y", y(global.sfsStats.normalPdf(1.55, 0, 1)) - 8);
       if (showNormal && state.animateNormal && !normalWasVisible && !reducedMotion()) {
         reference.attr("display", null).style("opacity", 0)
           .transition().duration(520).ease(d3.easeCubicOut)
@@ -1046,7 +1046,7 @@
   }
 
   ensureStyles();
-  global.bcSamplingVisuals = Object.freeze({
+  global.sfsSamplingVisuals = Object.freeze({
     colorForProbability,
     colorForIndex,
     createBlockHistogram,

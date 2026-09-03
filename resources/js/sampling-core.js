@@ -1,7 +1,7 @@
 (function(global) {
   "use strict";
 
-  const stats = global.bcStats || {};
+  const stats = global.sfsStats || {};
   const normalPdf = stats.normalPdf;
   const normalCdf = stats.normalCdf;
   const normalInv = stats.normalInv;
@@ -704,7 +704,7 @@
     return histogram;
   }
 
-  global.bcSampling = Object.freeze({
+  global.sfsSampling = Object.freeze({
     actionKey,
     addSimulatedMeans,
     bimodalModel,

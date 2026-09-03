@@ -1,8 +1,8 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
-  const visuals = global.bcSamplingVisuals;
+  const sampling = global.sfsSampling;
+  const visuals = global.sfsSamplingVisuals;
 
   function ensureStyles() {
     if (document.getElementById("sampling-pathway-styles")) return;
@@ -18,22 +18,22 @@
 
       .spp-controls .spp-status {
         min-width: 6.8rem;
-        color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+        color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
         font-size: 0.9rem;
         font-variant-numeric: tabular-nums;
       }
 
-      .sampling-pathway[data-bc-layout="compact"] .spp-controls .spp-actions .bc-button {
+      .sampling-pathway[data-sfs-layout="compact"] .spp-controls .spp-actions .sfs-button {
           flex: 1 1 8rem;
           min-height: 44px;
       }
-      .sampling-pathway[data-bc-layout="compact"] .spp-controls .spp-status {
+      .sampling-pathway[data-sfs-layout="compact"] .spp-controls .spp-status {
         flex: 1 1 100%;
       }
 
       .sampling-pathway[data-mode="categorical"] .spp-category-proportion {
-        fill: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-        font-size: var(--bc-viz-small-size, 0.75rem);
+        fill: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+        font-size: var(--sfs-viz-small-size, 0.75rem);
         font-weight: 650;
         font-variant-numeric: tabular-nums;
       }
@@ -42,7 +42,7 @@
         opacity: 0.72;
       }
 
-      .sampling-pathway[data-mode="categorical"][data-bc-layout="compact"]
+      .sampling-pathway[data-mode="categorical"][data-sfs-layout="compact"]
         .spp-category-proportion {
         font-size: 0.625rem;
       }
@@ -72,8 +72,8 @@
         .sampling-pathway[data-mode="categorical"] {
           --spp-unknown-population: color-mix(
             in srgb,
-            var(--bc-muted, #6c757d) 72%,
-            var(--bc-bg, white)
+            var(--sfs-muted, #6c757d) 72%,
+            var(--sfs-bg, white)
           );
         }
       }
@@ -94,7 +94,7 @@
       .sampling-pathway[data-mode="categorical"][data-population-known="false"]
         .bcs-pop-dot.is-source {
         opacity: 0.78;
-        stroke: var(--graph-point-stroke, var(--bc-bg, white));
+        stroke: var(--graph-point-stroke, var(--sfs-bg, white));
         stroke-width: 0.7;
       }
 
@@ -147,7 +147,7 @@
   function makeButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "bc-button")
+      .attr("class", "sfs-button")
       .attr("aria-label", label)
       .attr("title", label)
       .attr("data-prevent-swipe", "")
@@ -254,15 +254,15 @@
     let currentSample = sampleForDraw(state.drawIndex);
 
     const root = d3.create("div")
-      .attr("class", "sampling-pathway bc-sampling-figure bc-figure")
+      .attr("class", "sampling-pathway sfs-sampling-figure sfs-figure")
       .attr("data-mode", "categorical")
-      .style("--bc-figure-max-width", opts.maxWidth || "48rem");
+      .style("--sfs-figure-max-width", opts.maxWidth || "48rem");
     const rootNode = root.node();
-    const controls = root.append("div").attr("class", "spp-controls bc-control-grid");
+    const controls = root.append("div").attr("class", "spp-controls sfs-control-grid");
     const actionsPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
-    actionsPanel.append("p").attr("class", "bc-control-title").text("Sampling");
-    const actions = actionsPanel.append("div").attr("class", "spp-actions bc-action-row");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
+    actionsPanel.append("p").attr("class", "sfs-control-title").text("Sampling");
+    const actions = actionsPanel.append("div").attr("class", "spp-actions sfs-action-row");
     const reset = makeButton(actions, "arrow-counterclockwise", "Reset");
     const next = makeButton(actions, "arrow-down-circle", "Next sample");
     const status = actions.append("span")
@@ -270,10 +270,10 @@
       .attr("aria-live", "polite")
       .node();
     const announcement = root.append("p")
-      .attr("class", "visually-hidden bc-if-fit-ignore")
+      .attr("class", "visually-hidden sfs-if-fit-ignore")
       .attr("aria-live", "polite")
       .node();
-    const chartWrap = root.append("div").attr("class", "bc-chart-wrap");
+    const chartWrap = root.append("div").attr("class", "sfs-chart-wrap");
 
     let svg = null;
     let title = null;
@@ -460,7 +460,7 @@
       const dots = sampleDotsLayer.selectAll("circle")
         .data(visibleSample, (item) => `${state.drawIndex}-${item.id}`)
         .join("circle")
-        .attr("class", "bcs-sample-dot bc-graph-point")
+        .attr("class", "bcs-sample-dot sfs-graph-point")
         .attr("r", (item) => sourcePosition.get(item.id).radius)
         .style("fill", (item) => colors[item.category]);
       if (animateSample) {
@@ -530,7 +530,7 @@
 
       chartWrap.selectAll("*").remove();
       svg = chartWrap.append("svg")
-        .attr("class", "bc-svg bc-graph")
+        .attr("class", "sfs-svg sfs-graph")
         .attr("viewBox", [0, 0, width, height])
         .attr("preserveAspectRatio", "xMidYMid meet")
         .attr("role", "img");
@@ -546,7 +546,7 @@
         .selectAll("circle")
         .data(population, (item) => item.id)
         .join("circle")
-        .attr("class", "bcs-pop-dot bc-graph-point")
+        .attr("class", "bcs-pop-dot sfs-graph-point")
         .attr("r", dotRadius)
         .attr("cx", (item) => plotLeft + (item.column + 0.5) * cellSize)
         .attr("cy", (item) => populationTop + (item.row + 0.5) * cellSize)
@@ -722,7 +722,7 @@
     };
 
     const initialCompact = preferredWidth < compactBelow;
-    rootNode.dataset.bcLayout = initialCompact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = initialCompact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact: initialCompact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({
@@ -840,14 +840,14 @@
     let lastTutorialIndex = null;
 
     const root = d3.create("div")
-      .attr("class", "sampling-pathway bc-sampling-figure bc-figure")
-      .style("--bc-figure-max-width", opts.maxWidth || "48rem");
+      .attr("class", "sampling-pathway sfs-sampling-figure sfs-figure")
+      .style("--sfs-figure-max-width", opts.maxWidth || "48rem");
     const rootNode = root.node();
-    const controls = root.append("div").attr("class", "spp-controls bc-control-grid");
+    const controls = root.append("div").attr("class", "spp-controls sfs-control-grid");
     const actionsPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
-    actionsPanel.append("p").attr("class", "bc-control-title").text("Sampling");
-    const actions = actionsPanel.append("div").attr("class", "spp-actions bc-action-row");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
+    actionsPanel.append("p").attr("class", "sfs-control-title").text("Sampling");
+    const actions = actionsPanel.append("div").attr("class", "spp-actions sfs-action-row");
     const reset = makeButton(actions, "arrow-counterclockwise", "Reset");
     const next = makeButton(actions, "arrow-down-circle", "Next sample");
     const run = makeButton(actions, "play-fill", "Run");
@@ -856,7 +856,7 @@
       .attr("aria-live", "polite")
       .node();
 
-    const chartWrap = root.append("div").attr("class", "bc-chart-wrap");
+    const chartWrap = root.append("div").attr("class", "sfs-chart-wrap");
     let compact = false;
     let width = preferredWidth;
     let height = sampling.finite(opts.height, 500);
@@ -960,7 +960,7 @@
 
       chartWrap.selectAll("*").remove();
       svg = chartWrap.append("svg")
-        .attr("class", "bc-svg bc-graph")
+        .attr("class", "sfs-svg sfs-graph")
         .attr("viewBox", [0, 0, width, height])
         .attr("preserveAspectRatio", "xMidYMid meet")
         .attr("role", "img");
@@ -1448,7 +1448,7 @@
     };
 
     const initialCompact = preferredWidth < compactBelow;
-    rootNode.dataset.bcLayout = initialCompact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = initialCompact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact: initialCompact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({
@@ -1476,5 +1476,5 @@
   }
 
   global.makeSamplingPathway = makeSamplingPathway;
-  global.bcSamplingPathway = makeSamplingPathway;
+  global.sfsSamplingPathway = makeSamplingPathway;
 }(window));

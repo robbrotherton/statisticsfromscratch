@@ -1,4 +1,4 @@
-heightVariabilityStats = window.bcStats || {}
+heightVariabilityStats = window.sfsStats || {}
 heightVariabilityErf = heightVariabilityStats.erf || ((x) => {
   const sign = x < 0 ? -1 : 1;
   const ax = Math.abs(x);
@@ -14,10 +14,10 @@ heightVariabilityFiniteNumber = heightVariabilityStats.finiteNumber || ((value, 
 })
 
 heightVariabilityReducedMotion = () =>
-  Boolean(window.bcReducedMotion) ||
+  Boolean(window.sfsReducedMotion) ||
   Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
 
-bcInlineMath = function() {
+sfsInlineMath = function() {
   return window.interactiveFigure.inlineMath.apply(window.interactiveFigure, arguments);
 }
 
@@ -30,18 +30,20 @@ heightVariabilityEnsureStyles = () => {
   style.id = "height-variability-demo-styles";
   style.textContent = `
     .height-variability-demo {
-      --hv-population-color: var(--graph-block-fill, var(--bc-text, var(--bs-body-color, #212529)));
+      --hv-population-color: var(--sfs-text, var(--bs-body-color, #212529));
       --hv-sample-color: var(--graph-series-2, #e69f00);
-      --hv-selected-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --hv-biased-color: var(--bc-danger-color, #c63f3f);
-      --hv-muted-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --hv-title-size: var(--bc-figure-title-size, 1rem);
-      --hv-label-size: var(--bc-figure-label-size, 0.875rem);
-      --hv-note-size: var(--bc-figure-note-size, 0.8125rem);
-      --hv-tick-size: var(--bc-figure-tick-size, 0.8125rem);
-      --hv-small-size: var(--bc-figure-small-size, 0.75rem);
-      --bc-figure-max-width: 48rem;
-      --bc-figure-margin: 1.25rem 0;
+      --hv-fixed-center-color: var(--sfs-comparison-color, #2f6f9f);
+      --hv-selected-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --hv-biased-color: var(--sfs-danger-color, #c63f3f);
+      --hv-corrected-color: var(--graph-series-3, #009e73);
+      --hv-muted-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --hv-title-size: var(--sfs-figure-title-size, 1rem);
+      --hv-label-size: var(--sfs-figure-label-size, 0.875rem);
+      --hv-note-size: var(--sfs-figure-note-size, 0.8125rem);
+      --hv-tick-size: var(--sfs-figure-tick-size, 0.8125rem);
+      --hv-small-size: var(--sfs-figure-small-size, 0.75rem);
+      --sfs-figure-max-width: 48rem;
+      --sfs-figure-margin: 1.25rem 0;
     }
 
     .height-variability-demo .hv-group-title {
@@ -161,7 +163,7 @@ heightVariabilityEnsureStyles = () => {
 
     .height-variability-demo .hv-population-dot,
     .height-variability-demo .hv-sample-dot {
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -172,7 +174,8 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .height-variability-demo .hv-pop-line,
-    .height-variability-demo .hv-sample-line {
+    .height-variability-demo .hv-sample-line,
+    .height-variability-demo .hv-fixed-center-line {
       fill: none;
       stroke-width: 2.2;
       stroke-linecap: round;
@@ -187,9 +190,18 @@ heightVariabilityEnsureStyles = () => {
       stroke: var(--hv-biased-color);
     }
 
+    .height-variability-demo .hv-fixed-center-line {
+      stroke: var(--hv-fixed-center-color);
+      stroke-dasharray: 6 4;
+    }
+
+    .height-variability-demo .hv-fixed-center-label {
+      fill: var(--hv-fixed-center-color);
+    }
+
     .height-variability-demo .hv-corrected-line {
       fill: none;
-      stroke: var(--bt-corrected, var(--hv-sample-color));
+      stroke: var(--hv-corrected-color);
       stroke-width: 2.2;
       stroke-linecap: round;
       vector-effect: non-scaling-stroke;
@@ -201,7 +213,11 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .height-variability-demo .hv-corrected-label {
-      fill: var(--bt-corrected, var(--hv-sample-color));
+      fill: var(--hv-corrected-color);
+    }
+
+    .height-variability-demo .sfs-if-reveal.hv-sequence-after-fall {
+      transition-delay: var(--hv-sequence-delay, 0ms);
     }
 
     .height-variability-demo .hv-mean-line {
@@ -216,25 +232,25 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .hv-population-mean-line {
-      stroke: var(--bc-text, var(--bs-body-color, currentColor));
+      stroke: var(--sfs-text, var(--bs-body-color, currentColor));
       opacity: 0.72;
     }
 
     .bias-tracking-demo .hv-population-mean-label {
-      fill: var(--bc-text, var(--bs-body-color, currentColor));
+      fill: var(--sfs-text, var(--bs-body-color, currentColor));
     }
 
     .height-variability-demo .hv-sample-mean-line {
-      stroke: var(--bt-corrected, var(--hv-sample-color));
+      stroke: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
     }
 
     .height-variability-demo .hv-sample-mean-label {
-      fill: var(--bt-corrected, var(--hv-sample-color));
+      fill: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
     }
 
     .height-variability-demo .hv-sample-mean-axis-mark {
-      fill: var(--bt-corrected, var(--hv-sample-color));
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      fill: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -245,20 +261,43 @@ heightVariabilityEnsureStyles = () => {
       vector-effect: non-scaling-stroke;
     }
 
-    .height-variability-demo .hv-sample-center-mark {
-      fill: var(--hv-biased-color);
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+    .height-variability-demo .hv-sample-center-mark,
+    .height-variability-demo .hv-corrected-center-mark {
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1.4;
       vector-effect: non-scaling-stroke;
     }
 
+    .height-variability-demo .hv-sample-center-mark {
+      fill: var(--hv-biased-color);
+    }
+
+    .height-variability-demo .hv-corrected-center-mark {
+      fill: var(--hv-corrected-color);
+    }
+
+    .height-variability-demo .hv-center-mark {
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
+      stroke-width: 1.2;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .height-variability-demo .hv-population-center-mark {
+      fill: var(--hv-population-color);
+    }
+
+    .height-variability-demo .hv-fixed-center-mark {
+      fill: var(--hv-fixed-center-color);
+    }
+
     .bias-tracking-demo {
-      --bt-biased: var(--bc-danger-color, #c63f3f);
-      --bt-corrected: var(--bc-comparison-color, #2f6f9f);
-      --bt-muted: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      --bt-biased: var(--sfs-danger-color, #c63f3f);
+      --bt-corrected: var(--graph-series-3, #009e73);
+      --bt-mean: var(--sfs-comparison-color, #2f6f9f);
+      --bt-muted: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       --bt-grid: var(--graph-grid-color, color-mix(in srgb, currentColor 12%, transparent));
-      --bc-figure-max-width: 48rem;
-      --bc-figure-margin: 1.25rem 0;
+      --sfs-figure-max-width: 48rem;
+      --sfs-figure-margin: 1.25rem 0;
     }
 
     .bias-tracking-demo .bt-control-row {
@@ -288,9 +327,9 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-mode-button[aria-pressed="true"] {
-      border-color: var(--bc-accent, var(--bs-primary, #0d6efd));
-      background: var(--bc-highlight-bg, color-mix(in srgb, currentColor 10%, transparent));
-      color: var(--bc-accent, var(--bs-primary, #0d6efd));
+      border-color: var(--sfs-accent, var(--bs-primary, #0d6efd));
+      background: var(--sfs-highlight-bg, color-mix(in srgb, currentColor 10%, transparent));
+      color: var(--sfs-accent, var(--bs-primary, #0d6efd));
       font-weight: 700;
     }
 
@@ -298,7 +337,7 @@ heightVariabilityEnsureStyles = () => {
       margin-bottom: 0.8rem;
       padding: 0.45rem 0.55rem 0.28rem;
       border-radius: 7px;
-      background: color-mix(in srgb, var(--bc-text, #212529) 3%, transparent);
+      background: color-mix(in srgb, var(--sfs-text, #212529) 3%, transparent);
     }
 
     .bias-tracking-demo .hv-overview-wrap {
@@ -314,6 +353,14 @@ heightVariabilityEnsureStyles = () => {
       width: 100%;
       height: 100%;
       overflow: hidden;
+    }
+
+    .bias-tracking-demo .hv-population-context {
+      --sfs-if-reveal-duration: 680ms;
+    }
+
+    .bias-tracking-demo .bt-reveal-after-source.is-visible {
+      transition-delay: var(--bt-reveal-delay, 680ms);
     }
 
     .bias-tracking-demo .hv-chart-wrap {
@@ -336,7 +383,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-panel-title {
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
       font-size: var(--hv-title-size);
       font-weight: 700;
     }
@@ -362,7 +409,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-zero-line {
-      stroke: var(--bc-text, currentColor);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 1.3;
       vector-effect: non-scaling-stroke;
     }
@@ -380,6 +427,14 @@ heightVariabilityEnsureStyles = () => {
     .bias-tracking-demo .bt-corrected-mark {
       fill: var(--bt-corrected);
       stroke: var(--bt-corrected);
+    }
+
+    .bias-tracking-demo.is-mean-mode .bt-corrected-mark {
+      stroke: var(--bt-mean);
+    }
+
+    .bias-tracking-demo.is-mean-mode .bt-corrected-mark:not(.bt-history-line) {
+      fill: var(--bt-mean);
     }
 
     .bias-tracking-demo .bt-error-link {
@@ -408,7 +463,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-sample-dot {
-      stroke: var(--graph-point-stroke, var(--bc-bg, white));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, white));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -419,7 +474,7 @@ heightVariabilityEnsureStyles = () => {
 
     .bias-tracking-demo .bt-pop-dot.is-sampled {
       opacity: 1;
-      stroke: var(--bc-text, currentColor);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 2;
       vector-effect: non-scaling-stroke;
     }
@@ -444,7 +499,7 @@ heightVariabilityEnsureStyles = () => {
       gap: 0.16rem;
     }
 
-    .bias-tracking-demo[data-bc-layout="compact"] .bt-legend {
+    .bias-tracking-demo[data-sfs-layout="compact"] .bt-legend {
       font-size: calc(var(--hv-note-size) * 0.94);
     }
 
@@ -495,10 +550,14 @@ heightVariabilitySeededRng = (seed, drawIndex = 1) =>
 heightVariabilityMean = (values) =>
   values.length ? d3.sum(values) / values.length : NaN
 
+heightVariabilityMeanSquaredDeviation = (values, center, denominator = values.length) => {
+  const ss = d3.sum(values, (value) => (value - center) * (value - center));
+  return denominator > 0 ? ss / denominator : NaN;
+}
+
 heightVariabilityVariance = (values, denominator) => {
   const mean = heightVariabilityMean(values);
-  const ss = d3.sum(values, (value) => (value - mean) * (value - mean));
-  return denominator > 0 ? ss / denominator : NaN;
+  return heightVariabilityMeanSquaredDeviation(values, mean, denominator);
 }
 
 heightVariabilityPalette = () =>
@@ -647,6 +706,72 @@ heightVariabilityBoolean = (value, fallback = false) => {
 heightVariabilityActionKey = (key) =>
   String(key).trim().toLowerCase().replace(/[\s_]+/g, "-")
 
+heightVariabilityBiasHistoryCounts = (state, mode) => {
+  const drawCount = Math.max(1, Math.round(heightVariabilityFiniteNumber(state.drawIndex, 1)));
+  const heldCount = Math.max(1, Math.round(heightVariabilityFiniteNumber(
+    state.uncorrectedHistorySamples,
+    drawCount
+  )));
+  return {
+    uncorrected: mode === "variance" && state.holdUncorrectedHistory
+      ? heldCount
+      : drawCount,
+    corrected: drawCount
+  };
+}
+
+heightVariabilityTrackingLayout = (config) => {
+  const sampleViewTop = Math.max(0,
+    heightVariabilityFiniteNumber(config.sampleViewTop, 0));
+  const sampleViewBottom = Math.max(sampleViewTop + 1,
+    heightVariabilityFiniteNumber(config.sampleViewBottom, sampleViewTop + 1));
+  const populationViewBottom = Math.max(1,
+    heightVariabilityFiniteNumber(config.populationViewBottom, sampleViewBottom));
+  const dynamicHeight = Math.max(populationViewBottom,
+    heightVariabilityFiniteNumber(config.dynamicHeight, populationViewBottom));
+  const trackerGap = Math.max(0,
+    heightVariabilityFiniteNumber(config.trackerGap, 12));
+  const trackerFootprint = Math.max(0,
+    heightVariabilityFiniteNumber(config.trackerFootprint, 0));
+  const focusedHeight = sampleViewBottom - sampleViewTop;
+  const stageHeight = Math.ceil(Math.max(
+    dynamicHeight,
+    focusedHeight + trackerGap + trackerFootprint
+  ));
+  const focused = config.sourceView === "sample";
+  const fullViewBottom = config.showMeans
+    ? (config.showSample ? sampleViewBottom : populationViewBottom)
+    : dynamicHeight;
+  const viewTop = focused ? sampleViewTop : 0;
+  const viewBottom = focused ? sampleViewBottom : fullViewBottom;
+  const viewHeight = Math.max(1, viewBottom - viewTop);
+
+  return {
+    viewTop,
+    viewHeight,
+    stageHeight,
+    overviewTop: focused ? 0 : Math.max(0, (stageHeight - viewHeight) / 2),
+    trackerTop: focusedHeight + trackerGap
+  };
+}
+
+heightVariabilityBiasScaleExtents = (history, mode, populationSd) => {
+  const isMean = mode === "mean";
+  const rawKeys = isMean
+    ? ["meanError"]
+    : ["biasedRelativeError", "correctedRelativeError"];
+  const averageKeys = isMean
+    ? ["meanAverage"]
+    : ["biasedRelativeAverage", "correctedRelativeAverage"];
+  const maximumAbsolute = (keys) => d3.max(history, (row) =>
+    d3.max(keys, (key) => Math.abs(heightVariabilityFiniteNumber(row[key], 0)))) || 0;
+
+  return {
+    rawAbs: Math.max(isMean ? populationSd * 1.35 : 1.25, maximumAbsolute(rawKeys)),
+    averageAbs: Math.max(isMean ? populationSd * 0.45 : 0.34, maximumAbsolute(averageKeys))
+  };
+}
+
 heightVariabilityAttachBiasTracker = function(config) {
   const {
     opts, root, rootNode, chartWrap, buttonRow, addButton, group,
@@ -662,10 +787,11 @@ heightVariabilityAttachBiasTracker = function(config) {
   const animationFrameInterval = 1000 / animationFps;
   let mode = String(opts.estimator || "mean").toLowerCase() === "variance" ? "variance" : "mean";
   let animationFrame = null;
+  let animationKind = null;
   let animationToken = 0;
   let historyCacheKey = null;
   let historyCache = [];
-  let chartDomainMax = Math.max(25, state.drawIndex);
+  let chartDomainMax = Math.max(10, state.trackerAxisMaximum, state.drawIndex);
   let renderedLegendMode = null;
   let renderedScaleKey = null;
   let renderedX = null;
@@ -677,13 +803,14 @@ heightVariabilityAttachBiasTracker = function(config) {
   let renderedErrorTracker = null;
   let renderedAverageTracker = null;
   let renderedLegendVisible = null;
+  let renderedSourceView = state.sourceView;
   const rawPointCache = new Map();
 
   root.classed("bias-tracking-demo", true);
   const twentyFiveButton = addButton(buttonRow, "fast-forward", "Take 25");
   const hundredButton = addButton(buttonRow, "chevron-double-right", "Take 100");
   const modeControls = group("Track");
-  const modeRow = modeControls.append("div").attr("class", "bt-mode-row bc-action-row");
+  const modeRow = modeControls.append("div").attr("class", "bt-mode-row sfs-action-row");
   const meanButton = addButton(modeRow, "bar-chart-line", "Mean");
   const varianceButton = addButton(modeRow, "bounding-box", "Variance");
   d3.select(meanButton).classed("bt-mode-button", true);
@@ -699,7 +826,7 @@ heightVariabilityAttachBiasTracker = function(config) {
   const bottomY1 = height - margin.bottom;
   const panels = chartWrap.append("div").attr("class", "bt-panels");
   const svg = panels.append("svg")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", "Sample-by-sample variance errors and their cumulative average");
@@ -717,9 +844,9 @@ heightVariabilityAttachBiasTracker = function(config) {
     .attr("x", margin.left).attr("y", bottomY0).attr("width", innerWidth).attr("height", bottomY1 - bottomY0);
 
   const topPanel = svg.append("g")
-    .attr("class", "bt-panel bt-error-panel bc-if-reveal");
+    .attr("class", "bt-panel bt-error-panel sfs-if-reveal");
   const bottomPanel = svg.append("g")
-    .attr("class", "bt-panel bt-average-panel bc-if-reveal");
+    .attr("class", "bt-panel bt-average-panel sfs-if-reveal");
 
   const topTitle = topPanel.append("text").attr("class", "bt-panel-title")
     .attr("x", margin.left).attr("y", 15);
@@ -754,7 +881,7 @@ heightVariabilityAttachBiasTracker = function(config) {
     .attr("text-anchor", "middle").text("Number of samples");
 
   const legend = panels.append("div")
-    .attr("class", "bt-legend bc-if-reveal")
+    .attr("class", "bt-legend sfs-if-reveal")
     .attr("aria-label", "Variance estimator legend")
     .style("top", "20.5px");
 
@@ -816,14 +943,21 @@ heightVariabilityAttachBiasTracker = function(config) {
 
   function update(animate = true) {
     const completeHistory = allHistory();
-    const history = completeHistory.slice(0, state.drawIndex);
-    const current = history[history.length - 1];
     const isMean = mode === "mean";
-    const expectedBias = isMean ? 0 : -1 / state.n;
+    const current = completeHistory[Math.max(0, state.drawIndex - 1)];
+    const historyCounts = heightVariabilityBiasHistoryCounts(state, mode);
+    const uncorrectedHistoryCount = historyCounts.uncorrected;
+    const correctedHistoryCount = historyCounts.corrected;
+    const uncorrectedCurrent = completeHistory[Math.max(0, uncorrectedHistoryCount - 1)];
+    const correctedCurrent = completeHistory[Math.max(0, correctedHistoryCount - 1)];
+    const expectedBias = isMean || (!state.showUncorrectedTracker && state.showCorrectedTracker)
+      ? 0
+      : -1 / state.n;
     const renderSeries = [
       {
         key: "biased",
-        active: !isMean,
+        active: !isMean && state.showUncorrectedTracker,
+        historyCount: uncorrectedHistoryCount,
         error: "biasedRelativeError",
         average: "biasedRelativeAverage",
         className: "bt-biased-mark",
@@ -831,7 +965,8 @@ heightVariabilityAttachBiasTracker = function(config) {
       },
       {
         key: "corrected",
-        active: true,
+        active: isMean || state.showCorrectedTracker,
+        historyCount: isMean ? state.drawIndex : correctedHistoryCount,
         error: isMean ? "meanError" : "correctedRelativeError",
         average: isMean ? "meanAverage" : "correctedRelativeAverage",
         className: "bt-corrected-mark",
@@ -840,11 +975,15 @@ heightVariabilityAttachBiasTracker = function(config) {
     ];
     const series = renderSeries.filter((item) => item.active);
 
+    root
+      .classed("is-mean-mode", isMean)
+      .classed("is-variance-mode", !isMean);
+
     meanButton.setAttribute("aria-pressed", String(isMean));
     varianceButton.setAttribute("aria-pressed", String(!isMean));
 
     topTitle.text(isMean ? "Individual sample means" : "Individual variance estimates");
-    topSubtitle.text(isMean ? "Error = M − μ (inches)" : "Relative error");
+    topSubtitle.text(isMean ? "Error = M − μ" : "Relative error");
     bottomTitle.text("Cumulative average error");
     bottomSubtitle.text("");
     svg.attr("aria-label", isMean
@@ -854,34 +993,48 @@ heightVariabilityAttachBiasTracker = function(config) {
       ? "Mean estimation error across repeated samples"
       : "Variance estimation error across repeated samples");
 
-    if (renderedLegendMode !== mode) {
-      renderedLegendMode = mode;
+    const legendMode = `${mode}:${state.showUncorrectedTracker}:${state.showCorrectedTracker}`;
+    if (renderedLegendMode !== legendMode) {
+      renderedLegendMode = legendMode;
       legend.selectAll("*").remove();
-      const legendRows = isMean
-        ? []
-        : [
-            ["is-biased", "is-triangle", "Biased (n)", "Biased variance, dividing by n"],
-            ["is-corrected", "is-triangle", "Unbiased (n − 1)", "Unbiased variance, dividing by n minus 1"]
-          ];
+      const legendRows = [];
+      if (!isMean && state.showUncorrectedTracker) {
+        legendRows.push([
+          "is-biased", "is-square", "Uncorrected (n)",
+          "Uncorrected variance, dividing by n"
+        ]);
+      }
+      if (!isMean && state.showCorrectedTracker) {
+        legendRows.push([
+          "is-corrected", "is-square", "Corrected (n − 1)",
+          "Corrected variance, dividing by n minus 1"
+        ]);
+      }
       legendRows.forEach(([colorClass, shapeClass, label, accessibleLabel]) => {
         const item = legend.append("span")
           .attr("class", "bt-legend-item")
           .attr("aria-label", accessibleLabel);
         item.append("span")
           .attr("class", `bt-swatch ${colorClass} ${shapeClass}`)
-          .attr("data-marker-shape", isMean ? "square" : "triangle");
+          .attr("data-marker-shape", "square");
         item.append("span").text(label);
       });
     }
 
     const showErrorTracker = Boolean(state.showErrorTracker);
     const showAverageTracker = showErrorTracker && Boolean(state.showAverageTracker);
-    const showLegend = showErrorTracker && !isMean;
+    const showLegend = showErrorTracker && !isMean && series.length > 0;
     const errorTrackerChanged = renderedErrorTracker !== showErrorTracker;
     const averageTrackerChanged = renderedAverageTracker !== showAverageTracker;
     const legendChanged = renderedLegendVisible !== showLegend;
-    const slideErrorTracker = errorTrackerChanged && showErrorTracker &&
-      state.sourceView === "sample" && state.drawIndex === 1 && !showAverageTracker;
+    const sourceDocking = renderedSourceView === "full" && state.sourceView === "sample";
+    const trackerRevealDelay = animate && sourceDocking && errorTrackerChanged &&
+      showErrorTracker && !heightVariabilityReducedMotion()
+      ? 680
+      : 0;
+    [topPanel, legend].forEach((target) => target
+      .classed("bt-reveal-after-source", trackerRevealDelay > 0)
+      .style("--bt-reveal-delay", `${trackerRevealDelay}ms`));
     if ((errorTrackerChanged || averageTrackerChanged || legendChanged) &&
         window.interactiveFigure && window.interactiveFigure.setRevealVisible) {
       renderedErrorTracker = showErrorTracker;
@@ -889,7 +1042,7 @@ heightVariabilityAttachBiasTracker = function(config) {
       renderedLegendVisible = showLegend;
       window.interactiveFigure.setRevealVisible(topPanel, showErrorTracker, {
         root: rootNode,
-        animate: animate && !slideErrorTracker
+        animate
       });
       window.interactiveFigure.setRevealVisible(bottomPanel, showAverageTracker, {
         root: rootNode,
@@ -897,16 +1050,17 @@ heightVariabilityAttachBiasTracker = function(config) {
       });
       window.interactiveFigure.setRevealVisible(legend, showLegend, {
         root: rootNode,
-        animate: animate && !slideErrorTracker
+        animate
       });
       if (animate) {
-        if (errorTrackerChanged && showErrorTracker && !slideErrorTracker) {
+        if (errorTrackerChanged && showErrorTracker && trackerRevealDelay === 0) {
           fadeTrackerIn([topPanel, legend]);
         }
         if (averageTrackerChanged && showAverageTracker) fadeTrackerIn([bottomPanel]);
         if (legendChanged && showLegend) fadeTrackerIn([legend]);
       }
     }
+    renderedSourceView = state.sourceView;
     legend.interrupt()
       .style("top", `${compact ? 21 : 20.5}px`)
       .style("left", `${margin.left + 78}px`)
@@ -918,22 +1072,32 @@ heightVariabilityAttachBiasTracker = function(config) {
       estimator: mode,
       samples: state.drawIndex,
       sampleAxisMaximum: chartDomainMax,
-      isAnimatingSamples: animationFrame !== null,
+      isAnimatingSamples: animationFrame !== null && animationKind === "samples",
+      isAnimatingAxis: animationFrame !== null && animationKind === "axis",
       showErrorTracker,
       showAverageTracker,
       showExpectedBias: false,
+      showUncorrectedTracker: state.showUncorrectedTracker,
+      showCorrectedTracker: state.showCorrectedTracker,
+      uncorrectedTrackerSamples: uncorrectedHistoryCount,
+      correctedTrackerSamples: correctedHistoryCount,
       expectedEstimatorError: isMean ? 0 : -population.varianceN / state.n,
       expectedRelativeEstimatorError: expectedBias,
       expectedBiasedError: -population.varianceN / state.n,
       averageMeanError: current ? current.meanAverage : null,
-      averageBiasedError: current ? current.biasedAverage : null,
-      averageCorrectedError: current ? current.correctedAverage : null,
-      averageRelativeBiasedError: current ? current.biasedRelativeAverage : null,
-      averageRelativeCorrectedError: current ? current.correctedRelativeAverage : null
+      averageBiasedError: uncorrectedCurrent ? uncorrectedCurrent.biasedAverage : null,
+      averageCorrectedError: correctedCurrent ? correctedCurrent.correctedAverage : null,
+      averageRelativeBiasedError: uncorrectedCurrent
+        ? uncorrectedCurrent.biasedRelativeAverage
+        : null,
+      averageRelativeCorrectedError: correctedCurrent
+        ? correctedCurrent.correctedRelativeAverage
+        : null
     });
 
-    if (animationFrame === null && state.drawIndex > chartDomainMax) {
-      chartDomainMax = state.drawIndex;
+    const visibleHistoryMaximum = d3.max(series, (item) => item.historyCount) || state.drawIndex;
+    if (animationFrame === null && visibleHistoryMaximum > chartDomainMax) {
+      chartDomainMax = visibleHistoryMaximum;
     }
     const scaleKey = `${mode}:${state.seed}:${state.n}:${chartDomainMax}:${width}`;
     const scaleChanged = renderedScaleKey !== scaleKey;
@@ -942,36 +1106,26 @@ heightVariabilityAttachBiasTracker = function(config) {
       renderedX = d3.scaleLinear()
         .domain([1, chartDomainMax])
         .range([margin.left + sampleAxisPadding, width - margin.right - sampleAxisPadding]);
-      const rawObserved = d3.max(completeHistory, (row) =>
-        d3.max(series, (item) => Math.abs(row[item.error]))) || 0;
-      const rawAbs = Math.max(
-        isMean ? population.sdN * 1.35 : 1.25,
-        rawObserved
+      const scaleExtents = heightVariabilityBiasScaleExtents(
+        completeHistory,
+        mode,
+        population.sdN
       );
+      const rawAbs = scaleExtents.rawAbs;
       renderedRawY = d3.scaleLinear().domain([-rawAbs, rawAbs]).nice(5).range([topY1, topY0]);
-      const averageObserved = d3.max(completeHistory, (row) =>
-        d3.max(series, (item) => Math.abs(row[item.average]))) || 0;
-      const averageAbs = Math.max(
-        isMean ? population.sdN * 0.45 : 0.34,
-        averageObserved
-      );
+      const averageAbs = scaleExtents.averageAbs;
       renderedAverageY = d3.scaleSymlog().constant(isMean ? 0.15 : 0.04)
         .domain([-averageAbs, averageAbs]).range([bottomY1, bottomY0]);
 
       const semanticTickFormat = (value) => value < 0 ? "under" : value > 0 ? "over" : "0";
       const rawAxis = d3.axisLeft(renderedRawY).tickSize(-innerWidth).tickSizeOuter(0);
       const averageAxis = d3.axisLeft(renderedAverageY).tickSize(-innerWidth).tickSizeOuter(0);
-      if (isMean) {
-        rawAxis.ticks(5);
-        averageAxis.ticks(5).tickFormat(d3.format("~g"));
-      } else {
-        rawAxis
-          .tickValues([renderedRawY.domain()[0], 0, renderedRawY.domain()[1]])
-          .tickFormat(semanticTickFormat);
-        averageAxis
-          .tickValues([renderedAverageY.domain()[0], 0, renderedAverageY.domain()[1]])
-          .tickFormat(semanticTickFormat);
-      }
+      rawAxis
+        .tickValues([renderedRawY.domain()[0], 0, renderedRawY.domain()[1]])
+        .tickFormat(semanticTickFormat);
+      averageAxis
+        .tickValues([renderedAverageY.domain()[0], 0, renderedAverageY.domain()[1]])
+        .tickFormat(semanticTickFormat);
       topGrid.attr("transform", `translate(${margin.left}, 0)`)
         .call(rawAxis);
       topXAxis.attr("transform", `translate(0, ${topY1})`)
@@ -991,31 +1145,32 @@ heightVariabilityAttachBiasTracker = function(config) {
     const rawY = renderedRawY;
     const averageY = renderedAverageY;
 
-    if (isMean) {
+    const pairedHistoryCount = Math.min(uncorrectedHistoryCount, correctedHistoryCount);
+    if (isMean || !state.showUncorrectedTracker || !state.showCorrectedTracker) {
       errorLinksPath.attr("display", "none");
       errorLinkScaleKey = null;
       errorLinkCount = 0;
       errorLinkD = "";
     } else {
       errorLinksPath.attr("display", null);
-      if (scaleChanged || errorLinkScaleKey !== scaleKey || history.length < errorLinkCount) {
+      if (scaleChanged || errorLinkScaleKey !== scaleKey || pairedHistoryCount < errorLinkCount) {
         errorLinkD = "";
         errorLinkCount = 0;
         errorLinkScaleKey = scaleKey;
       }
-      if (history.length > errorLinkCount) {
-        for (let index = errorLinkCount; index < history.length; index += 1) {
-          const row = history[index];
+      if (pairedHistoryCount > errorLinkCount) {
+        for (let index = errorLinkCount; index < pairedHistoryCount; index += 1) {
+          const row = completeHistory[index];
           const linkX = x(row.index);
           errorLinkD += `M${linkX},${rawY(row.biasedRelativeError)}V${rawY(row.correctedRelativeError)}`;
         }
-        errorLinkCount = history.length;
+        errorLinkCount = pairedHistoryCount;
         errorLinksPath.attr("d", errorLinkD);
       }
     }
 
     const rounded = (value) => Math.round(value * 100) / 100;
-    const markerShape = isMean ? "square" : "triangle";
+    const markerShape = "square";
     renderSeries.forEach((item) => {
       const pointPath = rawPointPaths[item.key];
       if (!item.active) {
@@ -1023,31 +1178,28 @@ heightVariabilityAttachBiasTracker = function(config) {
         return;
       }
       pointPath.attr("display", null).attr("data-marker-shape", markerShape);
+      const seriesHistory = completeHistory.slice(0, item.historyCount);
       let cache = rawPointCache.get(item.key);
-      if (!cache || scaleChanged || cache.scaleKey !== scaleKey || history.length < cache.count) {
+      if (!cache || scaleChanged || cache.scaleKey !== scaleKey || seriesHistory.length < cache.count) {
         cache = { scaleKey, count: 0, d: "" };
       }
-      if (history.length > cache.count) {
-        for (let index = cache.count; index < history.length; index += 1) {
-          const row = history[index];
+      if (seriesHistory.length > cache.count) {
+        for (let index = cache.count; index < seriesHistory.length; index += 1) {
+          const row = seriesHistory[index];
           const pointX = rounded(x(row.index) + item.offset);
           const pointY = rounded(rawY(row[item.error]));
-          if (isMean) {
-            const half = 2.15;
-            cache.d += `M${rounded(pointX - half)},${rounded(pointY - half)}h4.3v4.3h-4.3Z`;
-          } else {
-            const radius = 2.65;
-            cache.d += `M${pointX},${rounded(pointY - radius)}L${rounded(pointX + radius)},${rounded(pointY + radius * 0.72)}L${rounded(pointX - radius)},${rounded(pointY + radius * 0.72)}Z`;
-          }
+          const half = 2.15;
+          cache.d += `M${rounded(pointX - half)},${rounded(pointY - half)}h4.3v4.3h-4.3Z`;
         }
-        cache.count = history.length;
+        cache.count = seriesHistory.length;
         pointPath.attr("d", cache.d);
       }
       rawPointCache.set(item.key, cache);
     });
     const line = (key) => d3.line().x((row) => x(row.index)).y((row) => averageY(row[key]));
     renderSeries.forEach((item) => {
-      const activeHistory = item.active && history.length ? [history] : [];
+      const seriesHistory = completeHistory.slice(0, item.historyCount);
+      const activeHistory = item.active && seriesHistory.length ? [seriesHistory] : [];
       historyLayer.selectAll(`path.bt-history-line.${item.className}`)
         .data(activeHistory)
         .join("path")
@@ -1058,10 +1210,10 @@ heightVariabilityAttachBiasTracker = function(config) {
 
   function setMode(value) {
     mode = String(value).toLowerCase() === "variance" ? "variance" : "mean";
-    chartDomainMax = Math.max(25, state.drawIndex);
     state.showMeans = mode === "mean";
     state.showPopulationSd = mode === "variance";
     state.showSampleSd = mode === "variance";
+    resetChartDomain();
     syncControls();
   }
 
@@ -1069,19 +1221,45 @@ heightVariabilityAttachBiasTracker = function(config) {
     animationToken += 1;
     if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
     animationFrame = null;
-    root.classed("is-sampling", false);
+    animationKind = null;
+    root.classed("is-sampling", false).classed("is-expanding-axis", false);
+  }
+
+  function normalizeAxisMaximum(value) {
+    return Math.max(10, Math.min(maxSamples, Math.round(
+      heightVariabilityFiniteNumber(value, 10)
+    )));
+  }
+
+  function axisDomainFloor() {
+    return normalizeAxisMaximum(state.trackerAxisMaximum);
+  }
+
+  function setAxisMaximum(value) {
+    state.trackerAxisMaximum = normalizeAxisMaximum(value);
   }
 
   function resetChartDomain() {
-    chartDomainMax = Math.max(25, state.drawIndex);
+    const historyCounts = heightVariabilityBiasHistoryCounts(state, mode);
+    const uncorrectedSamples = mode === "variance" && state.showUncorrectedTracker
+      ? historyCounts.uncorrected
+      : 0;
+    chartDomainMax = Math.max(axisDomainFloor(), state.drawIndex, uncorrectedSamples);
     renderedScaleKey = null;
   }
 
   function animateTo(target, animationOptions = {}) {
     const finalCount = Math.max(1, Math.min(maxSamples, Math.round(target)));
     cancelAnimation();
-    const startDomain = Math.max(25, chartDomainMax);
-    const finalDomain = Math.max(25, finalCount);
+    const startDomain = Math.max(10, chartDomainMax);
+    const finalHistoryCounts = heightVariabilityBiasHistoryCounts(
+      Object.assign({}, state, { drawIndex: finalCount }),
+      mode
+    );
+    const uncorrectedSamples = mode === "variance" && state.showUncorrectedTracker
+      ? finalHistoryCounts.uncorrected
+      : 0;
+    const finalDomain = Math.max(axisDomainFloor(), finalCount, uncorrectedSamples);
 
     if (finalCount <= state.drawIndex || heightVariabilityReducedMotion()) {
       chartDomainMax = finalDomain;
@@ -1093,22 +1271,27 @@ heightVariabilityAttachBiasTracker = function(config) {
 
     const startCount = state.drawIndex;
     const total = finalCount - startCount;
+    const requestedDuration = heightVariabilityFiniteNumber(animationOptions.durationMs, 0);
     const requestedInterval = heightVariabilityFiniteNumber(animationOptions.intervalMs, 0);
     const intervalMs = requestedInterval > 0
       ? Math.max(80, Math.min(2000, requestedInterval))
       : null;
-    const duration = intervalMs === null
-      ? Math.min(3200, 550 + total * 18)
-      : total * intervalMs;
+    const duration = requestedDuration > 0
+      ? Math.max(600, Math.min(30000, requestedDuration))
+      : (intervalMs === null
+          ? Math.min(3200, 550 + total * 18)
+          : total * intervalMs);
     const startedAt = performance.now();
     let lastRenderedAt = startedAt - animationFrameInterval;
     const token = animationToken;
+    animationKind = "samples";
     root.classed("is-sampling", true);
 
     function frame(timestamp) {
       if (token !== animationToken) return;
       if (heightVariabilityReducedMotion() || document.hidden) {
         animationFrame = null;
+        animationKind = null;
         root.classed("is-sampling", false);
         chartDomainMax = finalDomain;
         renderedScaleKey = null;
@@ -1118,9 +1301,8 @@ heightVariabilityAttachBiasTracker = function(config) {
       }
 
       const progress = Math.min(1, Math.max(0, (timestamp - startedAt) / duration));
-      const easedProgress = d3.easeCubicInOut(progress);
       const nextCount = intervalMs === null
-        ? Math.min(finalCount, startCount + Math.max(1, Math.floor(total * easedProgress)))
+        ? Math.min(finalCount, startCount + Math.max(1, Math.floor(total * progress)))
         : Math.min(finalCount, startCount + Math.floor((timestamp - startedAt) / intervalMs));
       const done = progress >= 1;
       if (!done && timestamp - lastRenderedAt < animationFrameInterval) {
@@ -1130,9 +1312,10 @@ heightVariabilityAttachBiasTracker = function(config) {
       lastRenderedAt = timestamp;
       chartDomainMax = done
         ? finalDomain
-        : startDomain + (finalDomain - startDomain) * easedProgress;
+        : startDomain + (finalDomain - startDomain) * progress;
       if (done) {
         animationFrame = null;
+        animationKind = null;
         root.classed("is-sampling", false);
       }
       if (nextCount !== state.drawIndex || finalDomain !== startDomain) {
@@ -1142,6 +1325,68 @@ heightVariabilityAttachBiasTracker = function(config) {
         // the completed state is still announced and dispatched normally.
         requestUpdate(false, done);
       }
+      if (!done) animationFrame = window.requestAnimationFrame(frame);
+    }
+
+    animationFrame = window.requestAnimationFrame(frame);
+  }
+
+  function animateAxisTo(target, animationOptions = {}) {
+    const finalAxisMaximum = normalizeAxisMaximum(target);
+    const startDomain = Math.max(10, chartDomainMax);
+    setAxisMaximum(finalAxisMaximum);
+    const historyCounts = heightVariabilityBiasHistoryCounts(state, mode);
+    const uncorrectedSamples = mode === "variance" && state.showUncorrectedTracker
+      ? historyCounts.uncorrected
+      : 0;
+    const finalDomain = Math.max(finalAxisMaximum, state.drawIndex, uncorrectedSamples);
+    cancelAnimation();
+
+    if (finalDomain === startDomain || heightVariabilityReducedMotion()) {
+      chartDomainMax = finalDomain;
+      renderedScaleKey = null;
+      requestUpdate(false);
+      return;
+    }
+
+    const requestedDuration = heightVariabilityFiniteNumber(animationOptions.durationMs, 0);
+    const duration = requestedDuration > 0
+      ? Math.max(400, Math.min(5000, requestedDuration))
+      : 1400;
+    const startedAt = performance.now();
+    let lastRenderedAt = startedAt - animationFrameInterval;
+    const token = animationToken;
+    animationKind = "axis";
+    root.classed("is-expanding-axis", true);
+
+    function frame(timestamp) {
+      if (token !== animationToken) return;
+      if (heightVariabilityReducedMotion() || document.hidden) {
+        animationFrame = null;
+        animationKind = null;
+        root.classed("is-expanding-axis", false);
+        chartDomainMax = finalDomain;
+        renderedScaleKey = null;
+        requestUpdate(false, true);
+        return;
+      }
+
+      const progress = Math.min(1, Math.max(0, (timestamp - startedAt) / duration));
+      const done = progress >= 1;
+      if (!done && timestamp - lastRenderedAt < animationFrameInterval) {
+        animationFrame = window.requestAnimationFrame(frame);
+        return;
+      }
+      lastRenderedAt = timestamp;
+      chartDomainMax = done
+        ? finalDomain
+        : startDomain + (finalDomain - startDomain) * progress;
+      if (done) {
+        animationFrame = null;
+        animationKind = null;
+        root.classed("is-expanding-axis", false);
+      }
+      requestUpdate(false, done);
       if (!done) animationFrame = window.requestAnimationFrame(frame);
     }
 
@@ -1166,6 +1411,10 @@ heightVariabilityAttachBiasTracker = function(config) {
     // tracker's subtitle line, so neither estimator needs extra room below.
     if (!state.showErrorTracker) return 0;
     if (!state.showAverageTracker) return topY1 + 34;
+    return height + 8;
+  }
+
+  function getMaximumFootprint() {
     return height + 8;
   }
 
@@ -1211,7 +1460,7 @@ heightVariabilityAttachBiasTracker = function(config) {
   }
 
   setMode(mode);
-  rootNode.dataset.bcLayout = compact ? "compact" : "wide";
+  rootNode.dataset.sfsLayout = compact ? "compact" : "wide";
   if (window.interactiveFigure &&
       typeof window.interactiveFigure.observeResponsiveLayout === "function") {
     window.interactiveFigure.observeResponsiveLayout({
@@ -1230,10 +1479,14 @@ heightVariabilityAttachBiasTracker = function(config) {
     setMode,
     getMode: () => mode,
     animateTo,
+    animateAxisTo,
     cancelAnimation,
     resetChartDomain,
+    setAxisMaximum,
+    getAxisMaximum: () => axisDomainFloor(),
     setTop,
     getFootprint,
+    getMaximumFootprint,
     isAnimating: () => animationFrame !== null
   };
 }
@@ -1245,8 +1498,18 @@ makeHeightVariabilityDemo = function(opts) {
   const trackingEnabled = Boolean(opts.tracking || opts.trackBias);
   const width = heightVariabilityFiniteNumber(opts.width, 760);
   const compactBelow = Math.max(320, heightVariabilityFiniteNumber(opts.compactBelow, 560));
+  const centerOnlyAxis = ["center", "mean", "mu"].includes(
+    String(opts.axisMode || "values").trim().toLowerCase()
+  );
+  const overviewAxisLabel = opts.axisLabel === false
+    ? ""
+    : (opts.axisLabel === undefined ? "Height (inches)" : String(opts.axisLabel));
+  const unitLabel = opts.unitLabel === undefined ? "in" : String(opts.unitLabel).trim();
   const margin = { top: 28, right: 28, bottom: 22, left: 58 };
   const population = heightVariabilityBuildPopulation(opts);
+  const usePopulationSdScale = !trackingEnabled &&
+    String(opts.sdScale || "raw").trim().toLowerCase() === "population";
+  const displaySd = (value) => usePopulationSdScale ? value / population.sdN : value;
   const xDomain = [population.min - population.binWidth / 2, population.max + population.binWidth / 2];
   const x = d3.scaleLinear()
     .domain(xDomain);
@@ -1261,7 +1524,7 @@ makeHeightVariabilityDemo = function(opts) {
   function overviewGeometry(diameter, compact, layoutWidth, reserveMeanHeader) {
     // Type stays at the shared CSS size. Only the surrounding whitespace gets
     // denser as the measured chart width narrows, with floors that still leave
-    // room for tick labels and the two-line comparison annotations.
+    // room for tick labels and the comparison annotations.
     const compactProgress = Math.max(0, Math.min(1,
       (layoutWidth - 240) / Math.max(1, compactBelow - 240)));
     const spacingScale = compact ? 0.74 + compactProgress * 0.16 : 1;
@@ -1287,7 +1550,13 @@ makeHeightVariabilityDemo = function(opts) {
     const stack = topInset + populationHeadroom;
     const populationBase = stack + Math.max(0, population.maxCount - 1) * diameter;
     const axis = populationBase + radius + axisGap;
-    const axisLabel = axis + Math.max(spacing.axisLabel, diameter * 1.7);
+    const hasAxisTitle = Boolean(overviewAxisLabel);
+    const axisLabel = axis + (hasAxisTitle
+      ? Math.max(spacing.axisLabel, diameter * 1.7)
+      : Math.max(20, diameter * 0.9));
+    const comparisonGap = hasAxisTitle
+      ? spacing.comparison
+      : Math.max(24, spacing.comparison * 0.7);
     let comparisonFirst;
     let comparisonLast;
     let simpleComparisonLast;
@@ -1303,15 +1572,17 @@ makeHeightVariabilityDemo = function(opts) {
       sample = axisLabel + Math.max(spacing.sample, diameter * 1.65);
       sampleBottom = sample + (stackLanes - 1) * sampleStep + radius;
       sampleAxis = sampleBottom + Math.max(3, diameter * 0.18);
-      sampleAxisLabel = sampleAxis + Math.max(36, diameter * 1.5);
-      comparisonFirst = sampleAxisLabel + spacing.comparison;
+      sampleAxisLabel = sampleAxis + (hasAxisTitle
+        ? Math.max(36, diameter * 1.5)
+        : Math.max(22, diameter));
+      comparisonFirst = sampleAxisLabel + comparisonGap;
       comparisonLast = comparisonFirst + spacing.row * 2;
       simpleComparisonLast = comparisonFirst + spacing.row;
     } else {
-      comparisonFirst = axisLabel + spacing.comparison;
+      comparisonFirst = axisLabel + comparisonGap;
       comparisonLast = comparisonFirst + spacing.row * 2;
       simpleComparisonLast = comparisonFirst + spacing.row;
-      sample = simpleComparisonLast + Math.max(spacing.sample, diameter * 1.65);
+      sample = comparisonLast + Math.max(spacing.sample, diameter * 1.65);
       sampleBottom = sample + (stackLanes - 1) * sampleStep + radius;
       sampleAxis = sampleBottom;
       sampleAxisLabel = sampleBottom;
@@ -1327,7 +1598,7 @@ makeHeightVariabilityDemo = function(opts) {
       axisY: axis,
       axisLabelY: axisLabel,
       comparisonFirstY: comparisonFirst,
-      comparisonRowGap: overviewSpacing.row,
+      comparisonRowGap: spacing.row,
       simpleComparisonLastY: simpleComparisonLast,
       comparisonLastY: comparisonLast,
       sampleY: sample,
@@ -1397,11 +1668,24 @@ makeHeightVariabilityDemo = function(opts) {
   const repetitions = Math.max(10, Math.round(heightVariabilityFiniteNumber(opts.repeatedSamples ?? opts.reps, 1000)));
   const maxSampleSize = Math.max(2, Math.min(50, population.size));
   const f0 = d3.format(".0f");
-  // Variance is not a length, even though these spans are drawn on the height
+  const f2 = d3.format(".2f");
+  const formatMeasure = (value) => {
+    const displayedValue = displaySd(value);
+    return unitLabel ? `${f2(displayedValue)} ${unitLabel}` : f2(displayedValue);
+  };
+  const speakMeasure = (value) => {
+    const displayedValue = displaySd(value);
+    if (!unitLabel) return f2(displayedValue);
+    if (unitLabel === "in") return `${f2(displayedValue)} inches`;
+    return `${f2(displayedValue)} ${unitLabel}`;
+  };
+  // Variance is not a length, even though these spans are drawn on the data
   // axis. Treat the population as a fixed visual reference and scale sample
   // spans by estimate / parameter so width encodes variance directly.
   const varianceReferenceWidth = Math.max(1,
     heightVariabilityFiniteNumber(opts.varianceReferenceWidth, 7));
+  const populationVarianceLift = Math.max(0,
+    heightVariabilityFiniteNumber(opts.populationVarianceLift, 6));
 
   const state = {
     seed: defaultSeed,
@@ -1412,16 +1696,40 @@ makeHeightVariabilityDemo = function(opts) {
     showSample: opts.showSample === undefined ? true : Boolean(opts.showSample),
     showPopulationSd: opts.showPopulationSd === undefined ? true : Boolean(opts.showPopulationSd),
     showSampleSd: opts.showSampleSd === undefined ? true : Boolean(opts.showSampleSd),
+    showFixedCenterRms: opts.showFixedCenterRms === undefined
+      ? true
+      : Boolean(opts.showFixedCenterRms),
+    focusSample: Boolean(opts.focusSample),
     sampleSpanCenter: String(opts.sampleSpanCenter || "sample").toLowerCase() === "population"
       ? "population"
       : "sample",
     showMeans: Boolean(opts.showMeans),
-    sourceView: String(opts.sourceView || "full").toLowerCase() === "sample"
-      ? "sample"
-      : "full",
+    sourceView: ["sample", "samples", "compact"].includes(
+      String(opts.sourceView || "full").trim().toLowerCase()
+    ) ? "sample" : "full",
+    sampleOpacity: Math.max(0, Math.min(1,
+      heightVariabilityFiniteNumber(opts.sampleOpacity, 1))),
     showErrorTracker: Boolean(opts.showErrorTracker),
     showAverageTracker: Boolean(opts.showAverageTracker),
     showExpectedBias: Boolean(opts.showExpectedBias),
+    trackerAxisMaximum: Math.max(10, Math.round(heightVariabilityFiniteNumber(
+      opts.trackerAxisMaximum ?? opts.sampleAxisMaximum,
+      10
+    ))),
+    varianceIndicator: ["uncorrected", "corrected"].includes(
+      String(opts.varianceIndicator || "both").trim().toLowerCase()
+    ) ? String(opts.varianceIndicator).trim().toLowerCase() : "both",
+    showUncorrectedTracker: opts.showUncorrectedTracker === undefined
+      ? true
+      : Boolean(opts.showUncorrectedTracker),
+    showCorrectedTracker: opts.showCorrectedTracker === undefined
+      ? true
+      : Boolean(opts.showCorrectedTracker),
+    holdUncorrectedHistory: Boolean(opts.holdUncorrectedHistory),
+    uncorrectedHistorySamples: Math.max(1, Math.round(heightVariabilityFiniteNumber(
+      opts.uncorrectedHistorySamples,
+      trackingEnabled ? (opts.initialSamples ?? 1) : (opts.draw ?? opts.drawIndex ?? 1)
+    ))),
     showSummary: Boolean(opts.showSummary)
   };
   setOverviewGeometry(width, overviewCompact);
@@ -1429,25 +1737,25 @@ makeHeightVariabilityDemo = function(opts) {
   let summaryCache = null;
 
   const root = d3.create("div")
-    .attr("class", "height-variability-demo bc-figure")
-    .style("--bc-if-reveal-duration", opts.revealDuration || "420ms");
+    .attr("class", "height-variability-demo sfs-figure")
+    .style("--sfs-if-reveal-duration", opts.revealDuration || "420ms");
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "hv-controls bc-control-grid");
+    .attr("class", "hv-controls sfs-control-grid");
 
   function group(title) {
     const section = controls.append("section")
-      .attr("class", "hv-group bc-control-panel bc-if-control-panel");
+      .attr("class", "hv-group sfs-control-panel sfs-if-control-panel");
     section.append("p")
-      .attr("class", "hv-group-title bc-control-title")
+      .attr("class", "hv-group-title sfs-control-title")
       .text(title);
     return section;
   }
 
   function addText(parent, label, value) {
     const row = parent.append("label")
-      .attr("class", "hv-row hv-row-compact bc-control-row");
+      .attr("class", "hv-row hv-row-compact sfs-control-row");
     row.append("span").text(label);
     return row.append("input")
       .attr("type", "text")
@@ -1457,10 +1765,10 @@ makeHeightVariabilityDemo = function(opts) {
 
   function addSlider(parent, label, value, min, max, step) {
     const row = parent.append("label")
-      .attr("class", "hv-row bc-control-row");
+      .attr("class", "hv-row sfs-control-row");
     row.append("span").text(label);
     const valueNode = row.append("span")
-      .attr("class", "hv-value bc-readout-value");
+      .attr("class", "hv-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", min)
@@ -1474,7 +1782,7 @@ makeHeightVariabilityDemo = function(opts) {
 
   function addCheckbox(parent, label, checked) {
     const row = parent.append("label")
-      .attr("class", "hv-check-row bc-check-row");
+      .attr("class", "hv-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked)
@@ -1486,7 +1794,7 @@ makeHeightVariabilityDemo = function(opts) {
   function addButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "hv-button bc-button")
+      .attr("class", "hv-button sfs-button")
       .attr("aria-label", label)
       .attr("title", label);
     button.append("i")
@@ -1500,18 +1808,23 @@ makeHeightVariabilityDemo = function(opts) {
   const seedInput = addText(sampleControls, "Seed", state.seed);
   const nControl = addSlider(sampleControls, "n", state.n, 2, maxSampleSize, 1);
   const buttonRow = sampleControls.append("div")
-    .attr("class", "hv-button-row bc-action-row");
+    .attr("class", "hv-button-row sfs-action-row");
   const newSampleButton = addButton(buttonRow, "arrow-repeat", "New sample");
   const replayButton = addButton(buttonRow, "skip-backward", "Replay seed");
 
   const displayControls = group("Show");
   const showSampleInput = addCheckbox(displayControls, "Selected sample", state.showSample);
   const showPopulationSdInput = addCheckbox(displayControls, "Population SD", state.showPopulationSd);
-  const showSampleSdInput = addCheckbox(displayControls, "Sample SD", state.showSampleSd);
+  const showFixedCenterRmsInput = addCheckbox(
+    displayControls,
+    "Sample SD around μ",
+    state.showFixedCenterRms
+  );
+  const showSampleSdInput = addCheckbox(displayControls, "Sample SD around M", state.showSampleSd);
   if (trackingEnabled) displayControls.style("display", "none");
 
   const chartWrap = root.append("div")
-    .attr("class", "hv-chart-wrap bc-chart-wrap");
+    .attr("class", "hv-chart-wrap sfs-chart-wrap");
 
   const overviewWrap = trackingEnabled
     ? chartWrap.append("div").attr("class", "hv-overview-wrap")
@@ -1537,60 +1850,67 @@ makeHeightVariabilityDemo = function(opts) {
   const svg = overviewWrap.append("svg")
     .attr("viewBox", [0, 0, renderWidth, height])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img")
-    .attr("aria-label", "Dot histogram of a fixed height population and selected sample observations");
+    .attr("aria-label", centerOnlyAxis
+      ? "Dot histogram of a fixed population and selected sample observations"
+      : "Dot histogram of a fixed height population and selected sample observations");
 
   const xAxis = svg.append("g")
-    .attr("class", "hv-axis bc-axis bc-graph-axis")
+    .attr("class", "hv-axis hv-population-context sfs-axis sfs-graph-axis")
     .attr("transform", `translate(0, ${axisY})`);
 
   const sampleXAxis = trackingEnabled
     ? svg.append("g")
-      .attr("class", "hv-axis hv-sample-axis bc-axis bc-graph-axis")
+      .attr("class", "hv-axis hv-sample-axis sfs-axis sfs-graph-axis")
       .attr("transform", `translate(0, ${sampleAxisY})`)
     : null;
   const sampleXAxisLabel = trackingEnabled
     ? svg.append("text")
-      .attr("class", "hv-axis-label hv-sample-axis-label bc-axis-label bc-graph-label")
+      .attr("class", "hv-axis-label hv-sample-axis-label sfs-axis-label sfs-graph-label")
       .attr("x", (margin.left + renderWidth - margin.right) / 2)
       .attr("y", sampleAxisLabelY)
       .attr("text-anchor", "middle")
-      .text("Height (inches)")
+      .text(overviewAxisLabel)
     : null;
 
   const populationLayer = svg.append("g")
-    .attr("class", "hv-population-layer");
+    .attr("class", "hv-population-layer hv-population-context");
   const popSdLayer = svg.append("g")
-    .attr("class", "hv-pop-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-pop-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const sampleLayer = svg.append("g")
-    .attr("class", "hv-sample-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-sample-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
+  const fixedCenterLayer = svg.append("g")
+    .attr("class", "hv-fixed-center-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const biasedLayer = svg.append("g")
-    .attr("class", "hv-biased-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-biased-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const varianceComparisonLayer = svg.append("g")
-    .attr("class", "hv-variance-comparison-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-variance-comparison-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const meanLayer = svg.append("g")
-    .attr("class", "hv-mean-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-mean-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
 
   const populationMeanLine = meanLayer.append("line")
     .attr("class", "hv-mean-line hv-population-mean-line");
   const populationMeanLabel = meanLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-population-mean-label")
+    .attr("class", "hv-label sfs-tick-label hv-population-mean-label")
     .attr("text-anchor", "middle");
-  const sampleMeanLine = meanLayer.append("line")
+  const sampleMeanLayer = meanLayer.append("g")
+    .attr("class", "hv-sample-mean-layer sfs-if-reveal");
+  const sampleMeanLine = sampleMeanLayer.append("line")
     .attr("class", "hv-mean-line hv-sample-mean-line");
-  const sampleMeanLabel = meanLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-sample-mean-label")
+  const sampleMeanLabel = sampleMeanLayer.append("text")
+    .attr("class", "hv-label sfs-tick-label hv-sample-mean-label")
     .attr("text-anchor", "middle");
   const sampleMeanAxisSize = 10;
   const sampleMeanAxisMark = trackingEnabled
-    ? meanLayer.append("rect")
-      .attr("class", "hv-sample-mean-axis-mark bc-if-reveal")
+    ? sampleMeanLayer.append("rect")
+      .attr("class", "hv-sample-mean-axis-mark")
       .attr("width", sampleMeanAxisSize)
       .attr("height", sampleMeanAxisSize)
     : null;
@@ -1600,11 +1920,29 @@ makeHeightVariabilityDemo = function(opts) {
   popLine.append("line");
   popLine.append("line").attr("class", "hv-bracket-cap");
   popLine.append("line").attr("class", "hv-bracket-cap");
+  const centerTrianglePath = d3.symbol().type(d3.symbolTriangle).size(42)();
+  const populationCenterMark = popSdLayer.append("path")
+    .attr("class", "hv-center-mark hv-population-center-mark")
+    .attr("d", centerTrianglePath)
+    .attr("aria-hidden", "true");
   const popLabel = popSdLayer.append("text")
-    .attr("class", "hv-label bc-tick-label")
+    .attr("class", "hv-label sfs-tick-label")
     .attr("text-anchor", "middle");
 
   const samplePoints = sampleLayer.append("g");
+
+  const fixedCenterComparisonLine = fixedCenterLayer.append("g")
+    .attr("class", "hv-fixed-center-line");
+  fixedCenterComparisonLine.append("line");
+  fixedCenterComparisonLine.append("line").attr("class", "hv-bracket-cap");
+  fixedCenterComparisonLine.append("line").attr("class", "hv-bracket-cap");
+  const fixedCenterMark = fixedCenterLayer.append("path")
+    .attr("class", "hv-center-mark hv-fixed-center-mark")
+    .attr("d", centerTrianglePath)
+    .attr("aria-hidden", "true");
+  const fixedCenterComparisonLabel = fixedCenterLayer.append("text")
+    .attr("class", "hv-label sfs-tick-label hv-fixed-center-label")
+    .attr("text-anchor", "middle");
 
   const sampleComparisonLine = biasedLayer.append("g")
     .attr("class", "hv-sample-line");
@@ -1617,31 +1955,51 @@ makeHeightVariabilityDemo = function(opts) {
     .attr("width", sampleCenterSize)
     .attr("height", sampleCenterSize);
   const sampleComparisonLabel = biasedLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-biased")
+    .attr("class", "hv-label sfs-tick-label hv-biased")
     .attr("text-anchor", "middle");
 
-  function addVarianceComparison(className, labelClassName) {
-    const line = varianceComparisonLayer.append("g")
+  function addVarianceComparison(className, labelClassName, markerShape, markerClassName) {
+    const comparison = varianceComparisonLayer.append("g")
+      .attr("class", "hv-variance-comparison sfs-if-reveal")
+      .style("--sfs-if-reveal-opacity", 1);
+    const line = comparison.append("g")
       .attr("class", `${className} hv-comparison-line`);
     line.append("line");
     line.append("line").attr("class", "hv-bracket-cap");
     line.append("line").attr("class", "hv-bracket-cap");
-    const label = varianceComparisonLayer.append("text")
-      .attr("class", `hv-label hv-comparison-label bc-tick-label ${labelClassName || ""}`.trim())
+    const label = comparison.append("text")
+      .attr("class", `hv-label hv-comparison-label sfs-tick-label ${labelClassName || ""}`.trim())
       .attr("text-anchor", "middle");
-    return { line, label };
+    const marker = markerShape === "square"
+      ? comparison.append("rect")
+          .attr("class", markerClassName)
+          .attr("width", sampleCenterSize)
+          .attr("height", sampleCenterSize)
+          .attr("aria-hidden", "true")
+      : comparison.append("path")
+          .attr("class", markerClassName)
+          .attr("d", centerTrianglePath)
+          .attr("aria-hidden", "true");
+    return { comparison, line, label, marker, markerShape };
   }
 
-  const populationVarianceComparison = addVarianceComparison("hv-pop-line", "");
-  const biasedVarianceComparison = addVarianceComparison("hv-sample-line", "hv-biased");
-  const correctedVarianceComparison = addVarianceComparison("hv-corrected-line", "hv-corrected-label");
+  const populationVarianceComparison = addVarianceComparison(
+    "hv-pop-line", "", "triangle", "hv-center-mark hv-population-center-mark"
+  );
+  const correctedVarianceComparison = addVarianceComparison(
+    "hv-corrected-line", "hv-corrected-label", "square", "hv-corrected-center-mark"
+  );
+  const biasedVarianceComparison = addVarianceComparison(
+    "hv-sample-line", "hv-biased", "square", "hv-sample-center-mark"
+  );
 
   const axisLabel = svg.append("text")
-    .attr("class", "hv-axis-label bc-axis-label bc-graph-label")
+    .attr("class", "hv-axis-label hv-population-context sfs-axis-label sfs-graph-label")
     .attr("x", (margin.left + renderWidth - margin.right) / 2)
     .attr("y", axisLabelY)
     .attr("text-anchor", "middle")
-    .text("Height (inches)");
+    .text(overviewAxisLabel)
+    .style("display", overviewAxisLabel ? null : "none");
 
   function readState() {
     state.seed = String(seedInput.value || defaultSeed);
@@ -1649,6 +2007,7 @@ makeHeightVariabilityDemo = function(opts) {
     state.showSample = showSampleInput.checked;
     state.showPopulationSd = showPopulationSdInput.checked;
     state.showSampleSd = showSampleSdInput.checked;
+    state.showFixedCenterRms = showFixedCenterRmsInput.checked;
   }
 
   function syncControls() {
@@ -1657,12 +2016,18 @@ makeHeightVariabilityDemo = function(opts) {
     showSampleInput.checked = state.showSample;
     showPopulationSdInput.checked = state.showPopulationSd;
     showSampleSdInput.checked = state.showSampleSd;
+    showFixedCenterRmsInput.checked = state.showFixedCenterRms;
   }
 
   function compute() {
     const sampleDots = heightVariabilitySampleFromPopulation(population, state.seed, state.drawIndex, state.n);
     const sampleValues = sampleDots.map((dot) => dot.value);
     const varianceN = heightVariabilityVariance(sampleValues, sampleValues.length);
+    const meanSquaredDeviationFromPopulationMean = heightVariabilityMeanSquaredDeviation(
+      sampleValues,
+      population.mean,
+      sampleValues.length
+    );
     let summary = null;
     if (!trackingEnabled) {
       const key = `${state.seed}:${state.n}:${repetitions}`;
@@ -1679,6 +2044,8 @@ makeHeightVariabilityDemo = function(opts) {
       sampleMean: heightVariabilityMean(sampleValues),
       sampleVarianceN: varianceN,
       sampleSdN: Math.sqrt(varianceN),
+      sampleMeanSquaredDeviationFromPopulationMean: meanSquaredDeviationFromPopulationMean,
+      sampleRmsDeviationFromPopulationMean: Math.sqrt(meanSquaredDeviationFromPopulationMean),
       sampleMin: d3.min(sampleValues),
       sampleMax: d3.max(sampleValues),
       summary
@@ -1696,6 +2063,7 @@ makeHeightVariabilityDemo = function(opts) {
       populationSize: population.size,
       populationMean: population.mean,
       populationSd: population.sdN,
+      displayPopulationSd: displaySd(population.sdN),
       populationVariance: population.varianceN,
       populationBins: population.bins.map((bin) => ({
         center: bin.center,
@@ -1713,17 +2081,30 @@ makeHeightVariabilityDemo = function(opts) {
       sampleVarianceN: values.sampleVarianceN,
       sampleVarianceCorrected: values.sampleVarianceN * state.n / (state.n - 1),
       sampleSdN: values.sampleSdN,
+      displaySampleSdFromM: displaySd(values.sampleSdN),
+      sampleMeanSquaredDeviationFromPopulationMean:
+        values.sampleMeanSquaredDeviationFromPopulationMean,
+      sampleRmsDeviationFromPopulationMean: values.sampleRmsDeviationFromPopulationMean,
+      displaySampleSdFromMu: displaySd(values.sampleRmsDeviationFromPopulationMean),
       repeatedSamples: values.summary ? values.summary.reps : state.drawIndex,
       meanSampleSd: values.summary ? values.summary.sampleSd : null,
       showSample: state.showSample,
       showPopulationSd: state.showPopulationSd,
       showSampleSd: state.showSampleSd,
+      showFixedCenterRms: state.showFixedCenterRms,
+      focusSample: state.focusSample,
+      sampleOpacity: state.sampleOpacity,
       sampleSpanCenter: state.sampleSpanCenter,
       showMeans: state.showMeans,
       sourceView: state.sourceView,
       showErrorTracker: state.showErrorTracker,
       showAverageTracker: state.showAverageTracker,
       showExpectedBias: state.showExpectedBias,
+      varianceIndicator: state.varianceIndicator,
+      showUncorrectedTracker: state.showUncorrectedTracker,
+      showCorrectedTracker: state.showCorrectedTracker,
+      holdUncorrectedHistory: state.holdUncorrectedHistory,
+      uncorrectedHistorySamples: state.uncorrectedHistorySamples,
       showSummary: state.showSummary
     };
   }
@@ -1754,21 +2135,77 @@ makeHeightVariabilityDemo = function(opts) {
       .attr("y2", lineY + capHeight / 2);
   }
 
-  function positionSampleSpan(center, values, label, shouldAnimate = false, delay = 0) {
+  const spanGrowDuration = 460;
+  const spanShiftDuration = 560;
+  const spanShiftPause = 100;
+
+  function growLineWithCaps(group, centerX, x1, x2, lineY, capHeight, delay = 0) {
+    const main = group.select("line:not(.hv-bracket-cap)")
+      .interrupt()
+      .attr("x1", centerX)
+      .attr("x2", centerX)
+      .attr("y1", lineY)
+      .attr("y2", lineY);
+    const caps = group.selectAll(".hv-bracket-cap")
+      .interrupt()
+      .attr("x1", centerX)
+      .attr("x2", centerX)
+      .attr("y1", lineY - capHeight / 2)
+      .attr("y2", lineY + capHeight / 2);
+
+    const mainGrowth = main.transition()
+      .delay(delay)
+      .duration(spanGrowDuration)
+      .ease(d3.easeCubicOut)
+      .attr("x1", x1)
+      .attr("x2", x2);
+    caps.transition()
+      .delay(delay)
+      .duration(spanGrowDuration)
+      .ease(d3.easeCubicOut)
+      .attr("x1", (_, index) => index === 0 ? x1 : x2)
+      .attr("x2", (_, index) => index === 0 ? x1 : x2);
+    return mainGrowth;
+  }
+
+  function positionSampleSpan(
+    center,
+    values,
+    label,
+    shouldAnimate = false,
+    delay = 0,
+    growFromCenter = false
+  ) {
     const transition = shouldAnimate && !trackingEnabled && !heightVariabilityReducedMotion();
-    setLineWithCaps(
-      sampleComparisonLine,
-      x(center - values.sampleSdN),
-      x(center + values.sampleSdN),
-      simpleComparisonLastY,
-      14,
-      transition,
-      delay
-    );
+    const centerX = x(center);
+    const x1 = x(center - values.sampleSdN);
+    const x2 = x(center + values.sampleSdN);
+    let lineTransition = null;
+    if (transition && growFromCenter) {
+      lineTransition = growLineWithCaps(
+        sampleComparisonLine,
+        centerX,
+        x1,
+        x2,
+        comparisonLastY,
+        14,
+        delay
+      );
+    } else {
+      setLineWithCaps(
+        sampleComparisonLine,
+        x1,
+        x2,
+        comparisonLastY,
+        14,
+        transition,
+        delay
+      );
+    }
 
     let movingCenterMark = sampleCenterMark.interrupt();
     let movingSampleLabel = sampleComparisonLabel.interrupt();
-    if (transition) {
+    if (transition && !growFromCenter) {
       movingCenterMark = movingCenterMark.transition()
         .delay(delay)
         .duration(620)
@@ -1779,34 +2216,153 @@ makeHeightVariabilityDemo = function(opts) {
         .ease(d3.easeCubicInOut);
     }
     movingCenterMark
-      .attr("x", x(center) - sampleCenterSize / 2)
-      .attr("y", simpleComparisonLastY - sampleCenterSize / 2);
+      .attr("x", centerX - sampleCenterSize / 2)
+      .attr("y", comparisonLastY - sampleCenterSize / 2);
     movingSampleLabel
-      .attr("x", x(center))
-      .attr("y", simpleComparisonLastY - 8)
+      .attr("x", centerX)
+      .attr("y", comparisonLastY - 8)
       .text(label);
-    return transition ? movingCenterMark : null;
+    return transition ? (lineTransition || movingCenterMark) : null;
+  }
+
+  function growThenShiftSampleSpan(values, label, growDelay = 0) {
+    const fittedCenterX = x(values.sampleMean);
+    const populationCenterX = x(population.mean);
+    const fittedEndpoints = [
+      x(values.sampleMean - values.sampleSdN),
+      x(values.sampleMean + values.sampleSdN)
+    ];
+    const alignedEndpoints = [
+      x(population.mean - values.sampleSdN),
+      x(population.mean + values.sampleSdN)
+    ];
+    const lineY = comparisonLastY;
+    const capHeight = 14;
+
+    const main = sampleComparisonLine.select("line:not(.hv-bracket-cap)")
+      .interrupt()
+      .attr("x1", fittedCenterX)
+      .attr("x2", fittedCenterX)
+      .attr("y1", lineY)
+      .attr("y2", lineY);
+    const caps = sampleComparisonLine.selectAll(".hv-bracket-cap")
+      .interrupt()
+      .attr("x1", fittedCenterX)
+      .attr("x2", fittedCenterX)
+      .attr("y1", lineY - capHeight / 2)
+      .attr("y2", lineY + capHeight / 2);
+
+    const growingMain = main.transition()
+      .delay(growDelay)
+      .duration(spanGrowDuration)
+      .ease(d3.easeCubicOut)
+      .attr("x1", fittedEndpoints[0])
+      .attr("x2", fittedEndpoints[1]);
+    growingMain.transition()
+      .delay(spanShiftPause)
+      .duration(spanShiftDuration)
+      .ease(d3.easeCubicInOut)
+      .attr("x1", alignedEndpoints[0])
+      .attr("x2", alignedEndpoints[1]);
+
+    const growingCaps = caps.transition()
+      .delay(growDelay)
+      .duration(spanGrowDuration)
+      .ease(d3.easeCubicOut)
+      .attr("x1", (_, index) => fittedEndpoints[index])
+      .attr("x2", (_, index) => fittedEndpoints[index]);
+    growingCaps.transition()
+      .delay(spanShiftPause)
+      .duration(spanShiftDuration)
+      .ease(d3.easeCubicInOut)
+      .attr("x1", (_, index) => alignedEndpoints[index])
+      .attr("x2", (_, index) => alignedEndpoints[index]);
+
+    sampleCenterMark.interrupt()
+      .attr("x", fittedCenterX - sampleCenterSize / 2)
+      .attr("y", lineY - sampleCenterSize / 2);
+    sampleComparisonLabel.interrupt()
+      .attr("x", fittedCenterX)
+      .attr("y", lineY - 8)
+      .text(label);
+
+    const shiftDelay = growDelay + spanGrowDuration + spanShiftPause;
+    const movingCenterMark = sampleCenterMark.transition()
+      .delay(shiftDelay)
+      .duration(spanShiftDuration)
+      .ease(d3.easeCubicInOut)
+      .attr("x", populationCenterX - sampleCenterSize / 2);
+    sampleComparisonLabel.transition()
+      .delay(shiftDelay)
+      .duration(spanShiftDuration)
+      .ease(d3.easeCubicInOut)
+      .attr("x", populationCenterX);
+    return movingCenterMark;
+  }
+
+  function populationSpanLabel() {
+    return `population: SD = ${usePopulationSdScale
+      ? "1"
+      : formatMeasure(population.sdN)}`;
+  }
+
+  function fixedCenterSpanLabel(values) {
+    return `deviations from μ: SD = ${formatMeasure(
+      values.sampleRmsDeviationFromPopulationMean
+    )}`;
+  }
+
+  function fittedCenterSpanLabel(values) {
+    return `deviations from M: SD = ${formatMeasure(values.sampleSdN)}`;
+  }
+
+  function simpleAriaLabel(values, centerSampleSpanOnPopulation) {
+    const parts = [centerOnlyAxis ? "Fixed population." : "Height population."];
+    if (state.showPopulationSd) {
+      parts.push(`Its standard deviation is ${speakMeasure(population.sdN)}.`);
+    }
+    if (state.showSample) {
+      parts.push(`A sample of ${state.n} observations is shown.`);
+    }
+    if (state.focusSample) {
+      parts.push("Unselected population observations are dimmed.");
+    }
+    if (state.showSampleSd) {
+      parts.push(
+        `The sample SD around fitted M is ${speakMeasure(values.sampleSdN)}; its span is ${
+          centerSampleSpanOnPopulation ? "aligned at mu for comparison" : "centered on M"
+        }.`
+      );
+    }
+    if (state.showFixedCenterRms) {
+      parts.push(
+        `The same sample's SD calculated around fixed mu is ${speakMeasure(
+          values.sampleRmsDeviationFromPopulationMean
+        )}.`
+      );
+    }
+    if (state.showSampleSd && state.showFixedCenterRms && centerSampleSpanOnPopulation) {
+      parts.push("The M-based span is no wider than the mu-based span.");
+    }
+    return parts.join(" ");
   }
 
   function updateTrackingLayout(animate) {
     if (!trackingEnabled) return;
 
-    const sampleViewTop = Math.max(0, sampleY - Math.max(26, dotDiameter * 1.28));
+    const sampleViewTop = Math.max(0, sampleY - Math.max(64, dotDiameter * 1.28));
     const sampleViewBottom = sampleAxisLabelY + 6;
-    const meanViewBottom = sampleViewBottom;
-    const fullViewBottom = state.showMeans ? meanViewBottom : dynamicHeight;
-    const focused = state.sourceView === "sample";
-    const viewTop = focused ? sampleViewTop : 0;
-    const viewBottom = focused ? sampleViewBottom : fullViewBottom;
-    const viewHeight = Math.max(1, viewBottom - viewTop);
-    const trackerGap = 12;
-    const trackerFootprint = biasTracker ? biasTracker.getFootprint() : 362;
-    const maximumFocusedHeight = sampleViewBottom - sampleViewTop;
-    const fullRequirement = focused ? maximumFocusedHeight : fullViewBottom;
-    const stageHeight = Math.ceil(Math.max(
-      fullRequirement,
-      maximumFocusedHeight + trackerGap + trackerFootprint
-    ));
+    const layout = heightVariabilityTrackingLayout({
+      sourceView: state.sourceView,
+      showMeans: state.showMeans,
+      showSample: state.showSample,
+      sampleViewTop,
+      sampleViewBottom,
+      populationViewBottom: axisLabelY + 6,
+      dynamicHeight,
+      trackerGap: 12,
+      trackerFootprint: biasTracker ? biasTracker.getMaximumFootprint() : 334
+    });
 
     let movingWrap = overviewWrap.interrupt();
     let movingSvg = svg.interrupt();
@@ -1814,20 +2370,33 @@ makeHeightVariabilityDemo = function(opts) {
       movingWrap = movingWrap.transition().duration(680).ease(d3.easeCubicInOut);
       movingSvg = movingSvg.transition().duration(680).ease(d3.easeCubicInOut);
     }
-    movingWrap.style("height", `${viewHeight}px`);
-    movingSvg.attr("viewBox", [0, viewTop, renderWidth, viewHeight]);
+    movingWrap
+      .style("top", `${layout.overviewTop}px`)
+      .style("height", `${layout.viewHeight}px`);
+    movingSvg.attr("viewBox", [0, layout.viewTop, renderWidth, layout.viewHeight]);
 
-    let movingChartWrap = chartWrap.interrupt();
-    if (animate && !heightVariabilityReducedMotion()) {
-      movingChartWrap = movingChartWrap.transition().duration(680).ease(d3.easeCubicInOut);
-    }
-    movingChartWrap
-      .style("height", `${stageHeight}px`)
+    chartWrap.interrupt()
+      .style("height", `${layout.stageHeight}px`)
       .attr("data-source-view", state.sourceView);
-    if (biasTracker) biasTracker.setTop(viewHeight + trackerGap, animate);
+    if (biasTracker) biasTracker.setTop(layout.trackerTop, animate);
   }
 
+  let previousOverviewSampleKey = null;
+  let previousShowFixedCenterRms = false;
+  let previousShowSampleSd = false;
+  let previousShowMeans = state.showMeans;
+  let previousVarianceIndicator = state.varianceIndicator;
+
   function updateChart(values, animate, animateSample = animate, recenterSampleSpan = false) {
+    const overviewSampleKey = `${state.seed}:${state.drawIndex}:${state.n}`;
+    const sampleChanged = previousOverviewSampleKey !== null &&
+      previousOverviewSampleKey !== overviewSampleKey;
+    const spanMotionEnabled = animate && !trackingEnabled && !heightVariabilityReducedMotion();
+    const growFixedCenterSpan = spanMotionEnabled && state.showFixedCenterRms &&
+      (sampleChanged || !previousShowFixedCenterRms);
+    const growSampleSpan = spanMotionEnabled && state.showSampleSd &&
+      (sampleChanged || !previousShowSampleSd);
+    const spanGrowthDelay = sampleChanged && animateSample ? 680 : 0;
     const desiredTickCount = overviewCompact ? 5 : 10;
     const tickStep = Math.max(
       population.binWidth,
@@ -1838,8 +2407,8 @@ makeHeightVariabilityDemo = function(opts) {
 
     xAxis.attr("transform", `translate(0, ${axisY})`);
     xAxis.call(d3.axisBottom(x)
-      .tickValues(tickValues)
-      .tickFormat((value) => f0(value)));
+      .tickValues(centerOnlyAxis ? [population.mean] : tickValues)
+      .tickFormat(centerOnlyAxis ? (() => "μ") : ((value) => f0(value))));
     xAxis.selectAll("text").attr("dy", "1em");
     axisLabel
       .attr("x", (margin.left + renderWidth - margin.right) / 2)
@@ -1848,8 +2417,8 @@ makeHeightVariabilityDemo = function(opts) {
     if (sampleXAxis && sampleXAxisLabel) {
       sampleXAxis.attr("transform", `translate(0, ${sampleAxisY})`);
       sampleXAxis.call(d3.axisBottom(x)
-        .tickValues(tickValues)
-        .tickFormat((value) => f0(value)));
+        .tickValues(centerOnlyAxis ? [population.mean] : tickValues)
+        .tickFormat(centerOnlyAxis ? (() => "μ") : ((value) => f0(value))));
       sampleXAxis.selectAll("text").attr("dy", "1em");
       sampleXAxisLabel
         .attr("x", (margin.left + renderWidth - margin.right) / 2)
@@ -1865,16 +2434,21 @@ makeHeightVariabilityDemo = function(opts) {
       return x(dot.value) + direction * magnitude * jitterStep;
     }
 
-    const sampleDotY = (dot) => sampleY + (dot.sampleRow % sampleStackLanes) * sampleDotStep;
+    const sampleDotRadius = dotRadius + 0.6;
+    const sampleDotY = (dot) => sampleAxisY - sampleDotRadius -
+      (dot.sampleRow % sampleStackLanes) * sampleDotStep;
 
     const selectedIds = new Set(state.showSample ? values.sampleDots.map((dot) => dot.id) : []);
     populationLayer.selectAll("circle")
       .data(population.dots, (dot) => dot.id)
       .join("circle")
-        .attr("class", "hv-population-dot bc-graph-point")
+        .attr("class", "hv-population-dot sfs-graph-point")
         .classed("is-sampled", (dot) => selectedIds.has(dot.id))
         .attr("r", dotRadius)
-        .style("fill", (dot) => dot.color)
+        .style("fill", (dot) => state.focusSample && !selectedIds.has(dot.id)
+          ? "var(--hv-muted-color)"
+          : dot.color)
+        .attr("opacity", (dot) => state.focusSample && !selectedIds.has(dot.id) ? 0.24 : 1)
         .attr("cx", (dot) => x(dot.binCenter))
         .attr("cy", (dot) => populationBaseY - dot.row * dotStep);
     populationLayer.selectAll(".hv-population-dot.is-sampled").raise();
@@ -1889,31 +2463,90 @@ makeHeightVariabilityDemo = function(opts) {
     popLabel
       .attr("x", x(population.mean))
       .attr("y", comparisonFirstY - 8)
-      .text("population: μ ± σ");
+      .text(populationSpanLabel());
+    populationCenterMark
+      .attr("transform", `translate(${x(population.mean)}, ${comparisonFirstY})`);
+
+    const fixedCenterX1 = x(population.mean - values.sampleRmsDeviationFromPopulationMean);
+    const fixedCenterX2 = x(population.mean + values.sampleRmsDeviationFromPopulationMean);
+    if (growFixedCenterSpan) {
+      growLineWithCaps(
+        fixedCenterComparisonLine,
+        x(population.mean),
+        fixedCenterX1,
+        fixedCenterX2,
+        simpleComparisonLastY,
+        14,
+        spanGrowthDelay
+      );
+    } else {
+      setLineWithCaps(
+        fixedCenterComparisonLine,
+        fixedCenterX1,
+        fixedCenterX2,
+        simpleComparisonLastY,
+        14,
+        animate
+      );
+    }
+    fixedCenterComparisonLabel
+      .attr("x", x(population.mean))
+      .attr("y", simpleComparisonLastY - 8)
+      .text(fixedCenterSpanLabel(values));
+    fixedCenterMark
+      .attr("transform", `translate(${x(population.mean)}, ${simpleComparisonLastY})`);
 
     const animateFall = animateSample && !heightVariabilityReducedMotion();
-    samplePoints.selectAll("circle").interrupt().remove();
+    const sampleFallDuration = 620;
+    const sampleFallStartDelay = 35;
+    const sampleFallStagger = 24;
+    const sampleLandingDelay = animateFall
+      ? sampleFallStartDelay + Math.max(0, values.sampleDots.length - 1) * sampleFallStagger +
+        sampleFallDuration
+      : 0;
+    const sequenceMeanAfterFall = trackingEnabled && state.showMeans && animateFall;
+    const sequenceVarianceAfterFall = trackingEnabled && !state.showMeans && animateFall;
+    const showUncorrectedVariance = ["uncorrected", "both"].includes(state.varianceIndicator);
+    const showCorrectedVariance = ["corrected", "both"].includes(state.varianceIndicator);
+    const showBothVarianceIndicators = showUncorrectedVariance && showCorrectedVariance;
+    const previouslyShowedUncorrectedVariance = ["uncorrected", "both"].includes(
+      previousVarianceIndicator
+    );
+    const previouslyShowedCorrectedVariance = ["corrected", "both"].includes(
+      previousVarianceIndicator
+    );
     samplePoints.selectAll("circle")
+      .interrupt("sample-fall")
+      .interrupt("sample-dim")
+      .remove();
+    const renderedSamplePoints = samplePoints.selectAll("circle")
       .data(values.sampleDots, (dot) => dot.sampleIndex)
       .enter()
       .append("circle")
-        .attr("class", "hv-sample-dot bc-graph-point")
-        .attr("r", dotRadius + 0.6)
+        .attr("class", "hv-sample-dot sfs-graph-point")
+        .attr("r", sampleDotRadius)
         .style("fill", (dot) => dot.color)
         .attr("cx", (dot) => sampleDotX(dot))
         .attr("cy", (dot) => animateFall
           ? populationBaseY - dot.row * dotStep
           : sampleDotY(dot))
-        .attr("opacity", 1)
+        .attr("opacity", animateFall && state.sampleOpacity < 1 ? 1 : state.sampleOpacity)
         .call((selection) => {
           if (!animateFall) return;
-          selection.transition()
-            .duration(620)
-            .delay((dot) => 35 + dot.sampleIndex * 24)
+          selection.transition("sample-fall")
+            .duration(sampleFallDuration)
+            .delay((dot) => sampleFallStartDelay + dot.sampleIndex * sampleFallStagger)
             .ease(d3.easeBounceOut)
             .attr("cx", (dot) => sampleDotX(dot))
             .attr("cy", (dot) => sampleDotY(dot));
         });
+    if (animateFall && state.sampleOpacity < 1) {
+      renderedSamplePoints.transition("sample-dim")
+        .delay(sampleLandingDelay)
+        .duration(420)
+        .ease(d3.easeCubicOut)
+        .attr("opacity", state.sampleOpacity);
+    }
 
     const centerSampleSpanOnPopulation = state.sampleSpanCenter === "population";
     const sequenceSampleCenter = Boolean(
@@ -1926,87 +2559,131 @@ makeHeightVariabilityDemo = function(opts) {
     let sampleCenterTransition = null;
     if (sequenceSampleCenter) {
       // Each fresh sample gets a fresh fitted center. Establish that state first,
-      // then move the unchanged span to the fixed population mean. The delay lets
-      // the sample dots finish falling before the teaching movement begins.
-      positionSampleSpan(
-        values.sampleMean,
-        values,
-        "uncorrected SD: centered on M",
-        false
-      );
-      sampleCenterTransition = positionSampleSpan(
-        population.mean,
-        values,
-        "same SD, shifted to μ",
-        true,
-        animateSample ? 920 : 260
-      );
+      // grow the newly calculated span there, then move that unchanged width to
+      // the fixed population mean. The delay lets the new sample arrive first.
+      if (growSampleSpan) {
+        sampleCenterTransition = growThenShiftSampleSpan(
+          values,
+          fittedCenterSpanLabel(values),
+          spanGrowthDelay
+        );
+      } else {
+        positionSampleSpan(
+          values.sampleMean,
+          values,
+          fittedCenterSpanLabel(values),
+          false
+        );
+        sampleCenterTransition = positionSampleSpan(
+          population.mean,
+          values,
+          fittedCenterSpanLabel(values),
+          true,
+          animateSample ? 920 : 260
+        );
+      }
     } else {
       const sampleSpanCenter = centerSampleSpanOnPopulation ? population.mean : values.sampleMean;
       positionSampleSpan(
         sampleSpanCenter,
         values,
-        centerSampleSpanOnPopulation
-          ? "same SD, shifted to μ"
-          : "uncorrected SD: centered on M",
-        animate
+        fittedCenterSpanLabel(values),
+        animate,
+        growSampleSpan ? spanGrowthDelay : 0,
+        growSampleSpan
       );
     }
 
     const correctedVariance = values.sampleVarianceN * state.n / (state.n - 1);
+    const varianceComparisonGap = trackingEnabled ? Math.min(24, comparisonRowGap) : comparisonRowGap;
+    const varianceComparisonLastY = trackingEnabled
+      ? sampleAxisY - Math.max(7, sampleDotRadius + 1)
+      : comparisonLastY;
+    const varianceComparisonFirstY = trackingEnabled
+      ? varianceComparisonLastY - varianceComparisonGap * (showBothVarianceIndicators ? 2 : 1)
+      : comparisonFirstY;
     const varianceComparisons = [
       {
         target: populationVarianceComparison,
         ratio: 1,
-        y: comparisonFirstY,
-        label: "population variance (reference)"
-      },
-      {
-        target: biasedVarianceComparison,
-        ratio: values.sampleVarianceN / population.varianceN,
-        y: comparisonFirstY + comparisonRowGap,
-        label: "sample variance (divide by n)"
+        y: varianceComparisonFirstY - (trackingEnabled ? populationVarianceLift : 0),
+        capHeight: 16,
+        grow: sequenceVarianceAfterFall && previousShowMeans,
+        label: "population variance"
       },
       {
         target: correctedVarianceComparison,
         ratio: correctedVariance / population.varianceN,
-        y: comparisonLastY,
+        y: showBothVarianceIndicators
+          ? varianceComparisonFirstY + varianceComparisonGap
+          : varianceComparisonLastY,
+        capHeight: 14,
+        grow: sequenceVarianceAfterFall && showCorrectedVariance &&
+          (previousShowMeans || !previouslyShowedCorrectedVariance),
         label: "corrected variance (divide by n − 1)"
+      },
+      {
+        target: biasedVarianceComparison,
+        ratio: values.sampleVarianceN / population.varianceN,
+        y: varianceComparisonLastY,
+        capHeight: 14,
+        grow: sequenceVarianceAfterFall && showUncorrectedVariance &&
+          (previousShowMeans || !previouslyShowedUncorrectedVariance),
+        label: "uncorrected variance (divide by n)"
       }
     ];
     varianceComparisons.forEach((item) => {
       const spread = varianceReferenceWidth * Math.max(0, item.ratio) / 2;
-      setLineWithCaps(
-        item.target.line,
-        x(population.mean - spread),
-        x(population.mean + spread),
-        item.y,
-        13
-      );
+      const x1 = x(population.mean - spread);
+      const x2 = x(population.mean + spread);
+      if (item.grow) {
+        growLineWithCaps(
+          item.target.line,
+          x(population.mean),
+          x1,
+          x2,
+          item.y,
+          item.capHeight,
+          sampleLandingDelay
+        );
+      } else {
+        setLineWithCaps(item.target.line, x1, x2, item.y, item.capHeight);
+      }
       item.target.label
         .attr("x", x(population.mean))
         .attr("y", item.y - 8)
         .text(item.label);
+      if (item.target.markerShape === "square") {
+        item.target.marker
+          .attr("x", x(population.mean) - sampleCenterSize / 2)
+          .attr("y", item.y - sampleCenterSize / 2);
+      } else {
+        item.target.marker
+          .attr("transform", `translate(${x(population.mean)}, ${item.y})`);
+      }
     });
 
     populationMeanLine
       .attr("x1", x(population.mean))
       .attr("x2", x(population.mean))
       .attr("y1", stackTop - 10)
-      .attr("y2", trackingEnabled ? sampleAreaBottom : populationBaseY + dotRadius);
+      .attr("y2", trackingEnabled && state.showSample
+        ? sampleAreaBottom
+        : populationBaseY + dotRadius);
     populationMeanLabel
       .attr("x", x(population.mean))
       .attr("y", stackTop - 16)
-      .text(`population μ = ${d3.format(".2f")(population.mean)}`);
+      .text(centerOnlyAxis ? "" : `population μ = ${d3.format(".2f")(population.mean)}`)
+      .style("display", centerOnlyAxis ? "none" : null);
     sampleMeanLine
       .attr("x1", x(values.sampleMean))
       .attr("x2", x(values.sampleMean))
-      .attr("y1", sampleY - 8)
-      .attr("y2", sampleAreaBottom);
+      .attr("y1", sampleY - 4)
+      .attr("y2", sampleAxisY);
     sampleMeanLabel
       .attr("x", x(values.sampleMean))
-      .attr("y", sampleY - 14)
-      .text(`sample M = ${d3.format(".2f")(values.sampleMean)}`);
+      .attr("y", sampleY - 10)
+      .text(centerOnlyAxis ? "M" : `sample M = ${d3.format(".2f")(values.sampleMean)}`);
     if (sampleMeanAxisMark) {
       sampleMeanAxisMark
         .attr("x", x(values.sampleMean) - sampleMeanAxisSize / 2)
@@ -2014,26 +2691,67 @@ makeHeightVariabilityDemo = function(opts) {
     }
 
     if (window.interactiveFigure && window.interactiveFigure.setRevealVisible) {
+      const showSourceSample = state.showSample;
+      window.interactiveFigure.setRevealVisible(
+        [populationLayer.node(), xAxis.node(), axisLabel.node()],
+        !trackingEnabled || state.sourceView === "full",
+        { root: rootNode, animate }
+      );
       window.interactiveFigure.setRevealVisible(popSdLayer, !trackingEnabled && state.showPopulationSd, { root: rootNode, animate });
-      window.interactiveFigure.setRevealVisible(sampleLayer, state.showSample, { root: rootNode, animate });
-      window.interactiveFigure.setRevealVisible(biasedLayer, !trackingEnabled && state.showSampleSd, { root: rootNode, animate });
+      window.interactiveFigure.setRevealVisible(sampleLayer, showSourceSample, { root: rootNode, animate });
+      window.interactiveFigure.setRevealVisible(
+        fixedCenterLayer,
+        !trackingEnabled && state.showFixedCenterRms,
+        { root: rootNode, animate: animate && !growFixedCenterSpan }
+      );
+      window.interactiveFigure.setRevealVisible(
+        biasedLayer,
+        !trackingEnabled && state.showSampleSd,
+        { root: rootNode, animate: animate && !growSampleSpan }
+      );
+      varianceComparisonLayer
+        .classed("hv-sequence-after-fall", sequenceVarianceAfterFall)
+        .style("--hv-sequence-delay", `${sampleLandingDelay}ms`);
+      [
+        [populationVarianceComparison, sequenceVarianceAfterFall && previousShowMeans],
+        [correctedVarianceComparison, sequenceVarianceAfterFall && showCorrectedVariance],
+        [biasedVarianceComparison, sequenceVarianceAfterFall && showUncorrectedVariance]
+      ].forEach(([item, delayReveal]) => item.comparison
+        .classed("hv-sequence-after-fall", delayReveal)
+        .style("--hv-sequence-delay", `${sampleLandingDelay}ms`));
       window.interactiveFigure.setRevealVisible(
         varianceComparisonLayer,
         trackingEnabled && !state.showMeans,
         { root: rootNode, animate }
       );
+      window.interactiveFigure.setRevealVisible(
+        populationVarianceComparison.comparison,
+        trackingEnabled && !state.showMeans,
+        { root: rootNode, animate }
+      );
+      window.interactiveFigure.setRevealVisible(
+        biasedVarianceComparison.comparison,
+        trackingEnabled && !state.showMeans && showUncorrectedVariance,
+        { root: rootNode, animate }
+      );
+      window.interactiveFigure.setRevealVisible(
+        correctedVarianceComparison.comparison,
+        trackingEnabled && !state.showMeans && showCorrectedVariance,
+        { root: rootNode, animate }
+      );
       window.interactiveFigure.setRevealVisible(meanLayer, state.showMeans, { root: rootNode, animate });
-      if (sampleMeanAxisMark) {
-        window.interactiveFigure.setRevealVisible(
-          sampleMeanAxisMark,
-          state.showMeans,
-          { root: rootNode, animate }
-        );
-      }
+      sampleMeanLayer
+        .classed("hv-sequence-after-fall", sequenceMeanAfterFall)
+        .style("--hv-sequence-delay", `${sampleLandingDelay}ms`);
+      window.interactiveFigure.setRevealVisible(
+        sampleMeanLayer,
+        state.showMeans && state.showSample,
+        { root: rootNode, animate }
+      );
       if (sampleXAxis && sampleXAxisLabel) {
         window.interactiveFigure.setRevealVisible(
           [sampleXAxis.node(), sampleXAxisLabel.node()],
-          true,
+          showSourceSample && state.showMeans,
           { root: rootNode, animate }
         );
       }
@@ -2042,30 +2760,44 @@ makeHeightVariabilityDemo = function(opts) {
     if (trackingEnabled) {
       updateTrackingLayout(animate);
       if (state.sourceView === "sample") {
+        const varianceIndicatorDescription = showUncorrectedVariance && showCorrectedVariance
+          ? "red uncorrected and green corrected variance spans"
+          : (showCorrectedVariance
+              ? "a green corrected variance span"
+              : "a red uncorrected variance span");
         svg.attr("aria-label", state.showMeans
-          ? "Current sample of heights with markers comparing its mean to the fixed population mean"
-          : "Current sample of heights used to calculate the two variance estimates shown in the trackers");
+          ? "Current sample with markers comparing its mean M to the fixed population mean mu"
+          : `Current sample with a black population variance reference and ${varianceIndicatorDescription}; sample variance spans use square center marks because they are calculated around sample mean M`);
       } else {
-        svg.attr("aria-label", state.showMeans
-          ? "Fixed population and selected sample of heights with markers comparing their means"
-          : "Fixed population and selected sample of heights with variance estimates compared with the population variance");
+        svg.attr("aria-label", state.showSample
+          ? (state.showMeans
+              ? "Fixed population and selected sample with markers comparing their means"
+              : "Fixed population and selected sample with variance estimates compared with the population variance")
+          : "Fixed population with its mean marked mu");
       }
     } else if (sequenceSampleCenter && sampleCenterTransition) {
-      svg.attr("aria-label", "Height population and a new sample, with its uncorrected SD span initially centered on the fitted sample mean");
+      svg.attr(
+        "aria-label",
+        `${simpleAriaLabel(values, false)} The fitted span begins centered on M.`
+      );
       sampleCenterTransition
         .on("start.aria", () => svg.attr(
           "aria-label",
-          "Height population and sample while the unchanged sample SD span shifts from the fitted sample mean to the fixed population mean"
+          "The unchanged span calculated around M is shifting to the fixed population mean so it can be compared directly with the wider span calculated around mu"
         ))
         .on("end.aria", () => svg.attr(
           "aria-label",
-          "Height population and sample with the unchanged sample SD span aligned on the fixed population mean for comparison"
+          simpleAriaLabel(values, true)
         ));
     } else {
-      svg.attr("aria-label", centerSampleSpanOnPopulation
-        ? "Height population and sample with the unchanged sample SD span aligned on the fixed population mean for comparison"
-        : "Height population and sample with the uncorrected sample SD span centered on the fitted sample mean");
+      svg.attr("aria-label", simpleAriaLabel(values, centerSampleSpanOnPopulation));
     }
+
+    previousOverviewSampleKey = overviewSampleKey;
+    previousShowFixedCenterRms = state.showFixedCenterRms;
+    previousShowSampleSd = state.showSampleSd;
+    previousShowMeans = state.showMeans;
+    previousVarianceIndicator = state.varianceIndicator;
   }
 
   function applyOverviewResponsiveLayout(layout) {
@@ -2126,6 +2858,10 @@ makeHeightVariabilityDemo = function(opts) {
     let changed = false;
     let sampleTarget = null;
     let sampleInterval = null;
+    let sampleDuration = null;
+    let axisTarget = null;
+    let axisDuration = null;
+    let recenterSampleSpanOverride = null;
     const animate = !action || action.animate !== false;
     let fall = trackingEnabled ? false : animate;
     const previousSampleKey = `${state.seed}:${state.drawIndex}:${state.n}`;
@@ -2138,6 +2874,10 @@ makeHeightVariabilityDemo = function(opts) {
         case "fall":
         case "animate-fall":
           fall = heightVariabilityBoolean(value, fall);
+          break;
+        case "recenter-sample-span":
+        case "recenter-span":
+          recenterSampleSpanOverride = heightVariabilityBoolean(value, true);
           break;
         case "seed":
           state.seed = String(value);
@@ -2184,6 +2924,29 @@ makeHeightVariabilityDemo = function(opts) {
             sampleInterval = Math.max(80, Math.min(2000, number));
           });
           break;
+        case "sample-duration":
+        case "sample-duration-ms":
+          setNumeric(value, (number) => {
+            sampleDuration = Math.max(600, Math.min(30000, number));
+          });
+          break;
+        case "tracker-axis-maximum":
+        case "tracker-axis-max":
+        case "sample-axis-maximum":
+        case "sample-axis-max":
+          changed = setNumeric(value, (number) => {
+            const limit = biasTracker ? biasTracker.maxSamples : Number.MAX_SAFE_INTEGER;
+            axisTarget = Math.max(10, Math.min(limit, Math.round(number)));
+          }) || changed;
+          break;
+        case "tracker-axis-duration":
+        case "tracker-axis-duration-ms":
+        case "sample-axis-duration":
+        case "sample-axis-duration-ms":
+          setNumeric(value, (number) => {
+            axisDuration = Math.max(400, Math.min(5000, number));
+          });
+          break;
         case "new-sample":
           if (heightVariabilityBoolean(value, true)) {
             state.drawIndex += 1;
@@ -2217,6 +2980,18 @@ makeHeightVariabilityDemo = function(opts) {
           state.showSample = heightVariabilityBoolean(value, state.showSample);
           changed = true;
           break;
+        case "focus-sample":
+        case "sample-focus":
+        case "dim-population":
+          state.focusSample = heightVariabilityBoolean(value, state.focusSample);
+          changed = true;
+          break;
+        case "sample-opacity":
+        case "points-opacity":
+          changed = setNumeric(value, (number) => {
+            state.sampleOpacity = Math.max(0, Math.min(1, number));
+          }) || changed;
+          break;
         case "show-population-sd":
         case "population-sd":
           state.showPopulationSd = heightVariabilityBoolean(value, state.showPopulationSd);
@@ -2227,6 +3002,13 @@ makeHeightVariabilityDemo = function(opts) {
         case "show-biased-sd":
         case "biased-sd":
           state.showSampleSd = heightVariabilityBoolean(value, state.showSampleSd);
+          changed = true;
+          break;
+        case "show-fixed-center-rms":
+        case "fixed-center-rms":
+        case "show-mu-rms":
+        case "mu-rms":
+          state.showFixedCenterRms = heightVariabilityBoolean(value, state.showFixedCenterRms);
           changed = true;
           break;
         case "sample-span-center":
@@ -2269,6 +3051,49 @@ makeHeightVariabilityDemo = function(opts) {
           state.showAverageTracker = heightVariabilityBoolean(value, state.showAverageTracker);
           changed = true;
           break;
+        case "variance-indicator":
+        case "sample-variance-indicator": {
+          const indicator = String(value).trim().toLowerCase();
+          state.varianceIndicator = ["uncorrected", "corrected"].includes(indicator)
+            ? indicator
+            : "both";
+          changed = true;
+          break;
+        }
+        case "show-uncorrected-tracker":
+        case "uncorrected-tracker":
+          state.showUncorrectedTracker = heightVariabilityBoolean(
+            value,
+            state.showUncorrectedTracker
+          );
+          changed = true;
+          break;
+        case "show-corrected-tracker":
+        case "corrected-tracker":
+          state.showCorrectedTracker = heightVariabilityBoolean(
+            value,
+            state.showCorrectedTracker
+          );
+          changed = true;
+          break;
+        case "hold-uncorrected-history":
+        case "preserve-uncorrected-history":
+          state.holdUncorrectedHistory = heightVariabilityBoolean(
+            value,
+            state.holdUncorrectedHistory
+          );
+          changed = true;
+          break;
+        case "uncorrected-history-samples":
+        case "uncorrected-samples":
+          changed = setNumeric(value, (number) => {
+            const limit = biasTracker ? biasTracker.maxSamples : Number.MAX_SAFE_INTEGER;
+            state.uncorrectedHistorySamples = Math.max(
+              1,
+              Math.min(limit, Math.round(number))
+            );
+          }) || changed;
+          break;
         case "show-expected-bias":
         case "expected-bias":
           state.showExpectedBias = heightVariabilityBoolean(value, state.showExpectedBias);
@@ -2285,25 +3110,44 @@ makeHeightVariabilityDemo = function(opts) {
       }
     });
 
+    const axisChanged = axisTarget !== null && biasTracker &&
+      axisTarget !== biasTracker.getAxisMaximum();
+    if (axisTarget !== null && biasTracker) biasTracker.setAxisMaximum(axisTarget);
+
     if (sampleTarget !== null && biasTracker) {
       syncControls();
       if (sampleTarget <= state.drawIndex) {
         biasTracker.cancelAnimation();
         state.drawIndex = sampleTarget;
-        biasTracker.resetChartDomain();
-        update(true, { animate, fall: false });
+        if (axisChanged && animate && !heightVariabilityReducedMotion()) {
+          update(true, { animate, fall });
+          biasTracker.animateAxisTo(axisTarget, { durationMs: axisDuration });
+        } else {
+          biasTracker.resetChartDomain();
+          update(true, { animate, fall });
+        }
       } else {
         if (changed) update(true, { animate, fall: false });
-        biasTracker.animateTo(sampleTarget, { intervalMs: sampleInterval });
+        biasTracker.animateTo(sampleTarget, {
+          intervalMs: sampleInterval,
+          durationMs: sampleDuration
+        });
       }
+    } else if (axisChanged && biasTracker && animate && !heightVariabilityReducedMotion()) {
+      syncControls();
+      update(true, { animate, fall });
+      biasTracker.animateAxisTo(axisTarget, { durationMs: axisDuration });
     } else if (changed) {
+      if (axisTarget !== null && biasTracker) biasTracker.resetChartDomain();
       syncControls();
       const nextSampleKey = `${state.seed}:${state.drawIndex}:${state.n}`;
       update(true, {
         animate,
         fall,
-        recenterSampleSpan: previousSampleKey !== nextSampleKey &&
-          state.sampleSpanCenter === "population"
+        recenterSampleSpan: state.sampleSpanCenter === "population" &&
+          (recenterSampleSpanOverride === null
+            ? previousSampleKey !== nextSampleKey
+            : recenterSampleSpanOverride)
       });
     }
   }
@@ -2333,7 +3177,8 @@ makeHeightVariabilityDemo = function(opts) {
     nControl.input,
     showSampleInput,
     showPopulationSdInput,
-    showSampleSdInput
+    showSampleSdInput,
+    showFixedCenterRmsInput
   ].forEach((input) => input.addEventListener("input", (event) => {
     event.stopPropagation();
     if (biasTracker) biasTracker.cancelAnimation();
@@ -2378,7 +3223,7 @@ makeHeightVariabilityDemo = function(opts) {
   if (window.interactiveFigure) {
     if (!trackingEnabled &&
         typeof window.interactiveFigure.observeResponsiveLayout === "function") {
-      rootNode.dataset.bcLayout = overviewCompact ? "compact" : "wide";
+      rootNode.dataset.sfsLayout = overviewCompact ? "compact" : "wide";
       window.interactiveFigure.observeResponsiveLayout({
         root: rootNode,
         container: chartWrap.node(),

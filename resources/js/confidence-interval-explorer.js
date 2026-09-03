@@ -1,4 +1,4 @@
-cieStats = window.bcStats
+cieStats = window.sfsStats
 cieTInv = cieStats.tInv
 cieFiniteNumber = cieStats.finiteNumber
 
@@ -9,17 +9,17 @@ cieEnsureStyles = () => {
   style.id = "confidence-interval-explorer-styles";
   style.textContent = `
     .confidence-interval-explorer {
-      --cie-hit: var(--bc-comparison-color, #2f6f9f);
-      --cie-miss: var(--bc-danger-color, #c63f3f);
-      --cie-neutral: var(--bc-neutral-color, #7b818a);
-      --bc-figure-max-width: var(--cie-max-width, 46rem);
+      --cie-hit: var(--sfs-comparison-color, #2f6f9f);
+      --cie-miss: var(--sfs-danger-color, #c63f3f);
+      --cie-neutral: var(--sfs-neutral-color, #7b818a);
+      --sfs-figure-max-width: var(--cie-max-width, 46rem);
     }
 
     .confidence-interval-explorer .cie-value {
       justify-self: end;
       min-width: 2.6rem;
       font-variant-numeric: tabular-nums;
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
     }
 
     .confidence-interval-explorer .cie-control-row {
@@ -43,7 +43,7 @@ cieEnsureStyles = () => {
 
     .confidence-interval-explorer .cie-count {
       min-width: 6.4rem;
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       font-variant-numeric: tabular-nums;
       font-size: 0.9rem;
       line-height: 1.2;
@@ -155,7 +155,7 @@ cieEnsureStyles = () => {
     }
 
     .confidence-interval-explorer .cie-verdict.is-unknown {
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       background: color-mix(in srgb, currentColor 12%, transparent);
     }
 
@@ -168,7 +168,7 @@ cieEnsureStyles = () => {
 
     .confidence-interval-explorer .cie-interval circle {
       fill: var(--cie-hit);
-      stroke: var(--bc-bg, var(--bs-body-bg, #fff));
+      stroke: var(--sfs-bg, var(--bs-body-bg, #fff));
       stroke-width: 1;
       transition: fill 300ms ease;
     }
@@ -200,7 +200,7 @@ cieEnsureStyles = () => {
       font-size: 15px;
       font-weight: 600;
       paint-order: stroke;
-      stroke: var(--bc-bg, var(--bs-body-bg, #fff));
+      stroke: var(--sfs-bg, var(--bs-body-bg, #fff));
       stroke-width: 5px;
       stroke-linejoin: round;
     }
@@ -237,7 +237,7 @@ cieEnsureStyles = () => {
       text-align: center;
       font-size: 0.9rem;
       font-variant-numeric: tabular-nums;
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
     }
 
     .confidence-interval-explorer.cie-no-animation .cie-card,
@@ -406,25 +406,25 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   const root = d3.create("div")
-    .attr("class", "confidence-interval-explorer bc-figure")
+    .attr("class", "confidence-interval-explorer sfs-figure")
     .style("--cie-max-width", opts.maxWidth || "46rem");
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "cie-controls bc-control-grid");
+    .attr("class", "cie-controls sfs-control-grid");
 
   function controlGroup(title) {
     const group = controls.append("section")
-      .attr("class", "cie-group bc-control-panel bc-if-control-panel");
+      .attr("class", "cie-group sfs-control-panel sfs-if-control-panel");
     group.append("p")
-      .attr("class", "cie-group-title bc-control-title")
+      .attr("class", "cie-group-title sfs-control-title")
       .text(title);
     return group;
   }
 
   const sampleControls = controlGroup("Sample");
   const sizeRow = sampleControls.append("label")
-    .attr("class", "cie-control-row bc-control-row");
+    .attr("class", "cie-control-row sfs-control-row");
   sizeRow.append("span").text("Cards per sample");
   const sizeInput = sizeRow.append("select")
     .attr("aria-label", "Number of cards per sample")
@@ -445,10 +445,10 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   const confidenceRow = sampleControls.append("label")
-    .attr("class", "cie-control-row bc-control-row");
+    .attr("class", "cie-control-row sfs-control-row");
   confidenceRow.append("span").text("Confidence");
   const confidenceValue = confidenceRow.append("span")
-    .attr("class", "cie-value bc-readout-value");
+    .attr("class", "cie-value sfs-readout-value");
   const confidenceInput = confidenceRow.append("input")
     .attr("type", "range")
     .attr("min", 50)
@@ -466,7 +466,7 @@ makeConfidenceIntervalExplorer = function(opts) {
 
   const actionControls = controlGroup("Draw samples");
   const actionRow = actionControls.append("div")
-    .attr("class", "cie-action-row bc-action-row");
+    .attr("class", "cie-action-row sfs-action-row");
   const reset = addButton(actionRow, "arrow-counterclockwise", "Reset");
   const draw = addButton(actionRow, "suit-spade-fill", "Draw");
   const play = addButton(actionRow, "play-fill", "Run");
@@ -494,11 +494,11 @@ makeConfidenceIntervalExplorer = function(opts) {
     .node();
 
   const chartWrap = root.append("div")
-    .attr("class", "cie-chart-wrap bc-chart-wrap");
+    .attr("class", "cie-chart-wrap sfs-chart-wrap");
   const svg = chartWrap.append("svg")
     .attr("viewBox", [0, 0, width, height])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel ||
       "Confidence intervals from repeated samples of playing cards, plotted against the true population mean of 7");
@@ -522,7 +522,7 @@ makeConfidenceIntervalExplorer = function(opts) {
     .attr("clip-path", "url(#" + clipId + ")");
 
   const muLayer = svg.append("g")
-    .attr("class", "cie-mu bc-if-reveal");
+    .attr("class", "cie-mu sfs-if-reveal");
   const muLine = muLayer.append("line")
     .attr("class", "cie-mu-line")
     .attr("x1", margin.left)
@@ -536,14 +536,14 @@ makeConfidenceIntervalExplorer = function(opts) {
     .attr("text-anchor", "end");
 
   const yAxisLayer = svg.append("g")
-    .attr("class", "cie-axis bc-axis bc-graph-axis")
+    .attr("class", "cie-axis sfs-axis sfs-graph-axis")
     .attr("transform", "translate(" + margin.left + ",0)");
   yAxisLayer.call(
     d3.axisLeft(y).tickValues([1, 3, 5, 7, 9, 11, 13]).tickFormat(f0).tickSizeOuter(0)
   );
 
   svg.append("text")
-    .attr("class", "cie-axis-label bc-axis-label")
+    .attr("class", "cie-axis-label sfs-axis-label")
     .attr("transform", "rotate(-90)")
     .attr("x", -(margin.top + (height - margin.top - margin.bottom) / 2))
     .attr("y", 14)
@@ -551,11 +551,11 @@ makeConfidenceIntervalExplorer = function(opts) {
     .text("Card value");
 
   const xAxisLayer = svg.append("g")
-    .attr("class", "cie-axis bc-axis bc-graph-axis")
+    .attr("class", "cie-axis sfs-axis sfs-graph-axis")
     .attr("transform", "translate(0," + (height - margin.bottom) + ")");
 
   svg.append("text")
-    .attr("class", "cie-axis-label bc-axis-label")
+    .attr("class", "cie-axis-label sfs-axis-label")
     .attr("x", margin.left + (width - margin.left - margin.right) / 2)
     .attr("y", height - 8)
     .attr("text-anchor", "middle")
@@ -576,7 +576,7 @@ makeConfidenceIntervalExplorer = function(opts) {
 
   function addCheckbox(parent, label, checked) {
     const row = parent.append("label")
-      .attr("class", "cie-check-row bc-check-row");
+      .attr("class", "cie-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked)
@@ -588,7 +588,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   function addButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "cie-button bc-button")
+      .attr("class", "cie-button sfs-button")
       .attr("aria-label", label)
       .attr("title", label)
       .attr("data-prevent-swipe", "")

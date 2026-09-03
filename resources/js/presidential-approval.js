@@ -208,23 +208,23 @@ presidentialApprovalLayoutLabels = (labelRows, margin, height, opts = {}) => {
 }
 
 presidentialApprovalEnsureStyles = () => {
-  if (document.getElementById("bc-presidential-approval-styles")) return;
+  if (document.getElementById("sfs-presidential-approval-styles")) return;
   const style = document.createElement("style");
-  style.id = "bc-presidential-approval-styles";
+  style.id = "sfs-presidential-approval-styles";
   style.textContent = `
       .presidential-approval-label {
-        font-size: var(--bc-figure-small-size, 0.75rem);
+        font-size: var(--sfs-figure-small-size, 0.75rem);
         font-weight: 700;
         paint-order: stroke fill;
-        stroke: var(--bc-bg, #fff);
+        stroke: var(--sfs-bg, #fff);
         stroke-width: 4;
         stroke-linejoin: round;
       }
 
       /* Axis furniture holds its size at every width; this annotation layer is
-         the documented exception (see --bc-figure-micro-size). */
-      .presidential-approval-chart[data-bc-layout="compact"] .presidential-approval-label {
-        font-size: var(--bc-figure-micro-size, 0.6875rem);
+         the documented exception (see --sfs-figure-micro-size). */
+      .presidential-approval-chart[data-sfs-layout="compact"] .presidential-approval-label {
+        font-size: var(--sfs-figure-micro-size, 0.6875rem);
         stroke-width: 3;
       }
   `;
@@ -261,18 +261,18 @@ presidentialApprovalCreateStatus = (message) => {
   const status = document.createElement("p");
   status.className = "presidential-approval-status";
   status.style.margin = "0";
-  status.style.color = "var(--bc-muted)";
+  status.style.color = "var(--sfs-muted)";
   status.textContent = message;
   return status;
 }
 
 presidentialApprovalStyleAxis = (axis) => {
   axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} bc-axis`;
+      return `${this.getAttribute("class") || ""} sfs-axis`;
     })
-    .call((g) => g.selectAll("text").attr("class", "bc-tick-label"))
-    .call((g) => g.selectAll("line").attr("class", "bc-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "bc-graph-domain"));
+    .call((g) => g.selectAll("text").attr("class", "sfs-tick-label"))
+    .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
+    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
 }
 
 presidentialApprovalRenderChart = (rawRows, opts = {}, geometry) => {
@@ -325,7 +325,7 @@ presidentialApprovalRenderChart = (rawRows, opts = {}, geometry) => {
       "aria-label",
       `Line chart of presidential job approval from ${rows[0].president} in ${rows[0].date.getUTCFullYear()} through ${rows[rows.length - 1].president} in ${rows[rows.length - 1].date.getUTCFullYear()}`
     )
-    .attr("class", "bc-graph presidential-approval-svg")
+    .attr("class", "sfs-graph presidential-approval-svg")
     .style("width", "100%")
     .style("max-width", "100%")
     .style("height", "auto")
@@ -334,13 +334,13 @@ presidentialApprovalRenderChart = (rawRows, opts = {}, geometry) => {
   svg.append("title").text("Presidential job approval over time");
 
   svg.append("text")
-    .attr("class", "bc-graph-title")
+    .attr("class", "sfs-graph-title")
     .attr("x", margin.left)
     .attr("y", 20)
     .text(title);
 
   svg.append("g")
-    .attr("class", "bc-graph-grid")
+    .attr("class", "sfs-graph-grid")
     .attr("transform", `translate(${margin.left},0)`)
     .call(d3.axisLeft(y)
       .tickValues(yTicks)
@@ -362,14 +362,14 @@ presidentialApprovalRenderChart = (rawRows, opts = {}, geometry) => {
     .call(presidentialApprovalStyleAxis);
 
   svg.append("text")
-    .attr("class", "bc-axis-label")
+    .attr("class", "sfs-axis-label")
     .attr("x", margin.left + innerWidth / 2)
     .attr("y", height - 16)
     .attr("text-anchor", "middle")
     .text("Year");
 
   svg.append("text")
-    .attr("class", "bc-axis-label")
+    .attr("class", "sfs-axis-label")
     .attr("x", -margin.top - innerHeight / 2)
     .attr("y", 18)
     .attr("transform", "rotate(-90)")
@@ -388,7 +388,7 @@ presidentialApprovalRenderChart = (rawRows, opts = {}, geometry) => {
     .selectAll("path")
     .data(segments)
     .join("path")
-      .attr("class", "bc-graph-line presidential-approval-line")
+      .attr("class", "sfs-graph-line presidential-approval-line")
       .attr("fill", "none")
       .attr("stroke-width", 2.2)
       .attr("stroke-opacity", 0.92)
@@ -467,10 +467,10 @@ makePresidentialApprovalChart = function(opts = {}) {
   presidentialApprovalEnsureStyles();
 
   const root = document.createElement("div");
-  root.className = "bc-figure presidential-approval-chart";
+  root.className = "sfs-figure presidential-approval-chart";
 
   const chartWrap = document.createElement("div");
-  chartWrap.className = "bc-chart-wrap";
+  chartWrap.className = "sfs-chart-wrap";
   chartWrap.appendChild(presidentialApprovalCreateStatus("Loading presidential approval data..."));
   root.appendChild(chartWrap);
 
@@ -480,7 +480,7 @@ makePresidentialApprovalChart = function(opts = {}) {
   function build(availableWidth) {
     if (!loadedRows) return;
     const geometry = presidentialApprovalGeometry(opts, availableWidth);
-    root.dataset.bcLayout = geometry.compact ? "compact" : "wide";
+    root.dataset.sfsLayout = geometry.compact ? "compact" : "wide";
     chartWrap.replaceChildren(presidentialApprovalRenderChart(loadedRows, opts, geometry));
   }
 

@@ -83,7 +83,7 @@
 
       const callout = rootNode.closest(".callout");
       const footer = callout ? callout.querySelector(".callout-footer") : null;
-      if (!footer || footer.dataset.bcIfTutorial === "true") return;
+      if (!footer || footer.dataset.sfsIfTutorial === "true") return;
 
       const steps = Array.from(footer.children).filter(function(child) {
         return child.classList && child.classList.contains("tutorial-step");
@@ -214,14 +214,14 @@
     }
 
     const rootNode = document.createElement("div");
-    rootNode.className = "median-tutorial bc-figure bc-if-root";
+    rootNode.className = "median-tutorial sfs-figure sfs-if-root";
     if (staticVariant) rootNode.classList.add("median-cards-static");
     if (revealOnVisible) rootNode.classList.add("is-reveal-pending");
     rootNode.style.setProperty("--mt-count", String(examples.odd.values.length));
-    rootNode.style.setProperty("--bc-figure-max-width", opts.maxWidth || "40rem");
+    rootNode.style.setProperty("--sfs-figure-max-width", opts.maxWidth || "40rem");
 
     const chartWrap = document.createElement("div");
-    chartWrap.className = "mt-chart-wrap bc-chart-wrap";
+    chartWrap.className = "mt-chart-wrap sfs-chart-wrap";
     chartWrap.tabIndex = 0;
     chartWrap.setAttribute("role", "region");
     chartWrap.setAttribute("aria-label", "Median example with all observations shown in one row.");
@@ -258,7 +258,7 @@
     markerGrid.setAttribute("aria-hidden", "true");
 
     const marker = document.createElement("div");
-    marker.className = "mt-marker bc-if-reveal";
+    marker.className = "mt-marker sfs-if-reveal";
 
     const markerLabel = document.createElement("strong");
     markerLabel.className = "mt-marker-label";
@@ -310,7 +310,7 @@
       pendingMotion = Promise.resolve();
     }
 
-    rootNode.addEventListener("bc-if:cancel-transitions", cancelMotion);
+    rootNode.addEventListener("sfs-if:cancel-transitions", cancelMotion);
 
     function orderFor(summary, order) {
       return order === "ascending" || order === "sorted"
@@ -758,7 +758,7 @@
         whenReady: function() { return pendingMotion; },
         cancelMotion,
         dispose: function() {
-          rootNode.removeEventListener("bc-if:cancel-transitions", cancelMotion);
+          rootNode.removeEventListener("sfs-if:cancel-transitions", cancelMotion);
           cleanupVisibleReveal();
           cancelMotion();
         }

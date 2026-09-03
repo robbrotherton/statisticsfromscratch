@@ -138,7 +138,7 @@
     if (window.location.hash) scheduleHash(window.location.hash);
   }
 
-  window.bcAnchorNavigation = {
+  window.sfsAnchorNavigation = {
     findHashTarget,
     scrollTarget,
     scrollHash,

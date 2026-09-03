@@ -25,7 +25,7 @@ makeLikert = (opts = {}) => {
     : 0;
 
   const container = d3.create("div")
-    .attr("class", `bc-figure likert-card${isMultiple ? " likert-multiple" : ""}${questionLines > 1 ? " likert-align-responses" : ""}`)
+    .attr("class", `sfs-figure likert-card${isMultiple ? " likert-multiple" : ""}${questionLines > 1 ? " likert-align-responses" : ""}`)
     .attr("data-likert-count", prompts.length);
 
   if (questionLines > 1) {

@@ -1,0 +1,127 @@
+/* Content that would otherwise overflow the text column: long display
+   equations, unbreakable bibliography URLs, and the data and frequency
+   tables, including the dice and modal-row variants.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Long display equations scroll sideways, like responsive tables. Overflow
+   that widens the layout viewport past the visual viewport detaches the
+   fixed-position navigation on mobile browsers. */
+mjx-container[display="true"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.15rem;
+}
+
+/* Last-resort guard for the same failure: the value propagates to the
+   viewport, so stray wide content clips instead of expanding the page. */
+body {
+  overflow-x: hidden;
+}
+
+/* Bibliography DOI/URL strings are unbreakable by default and widen the
+   page on narrow screens. */
+.csl-entry {
+  overflow-wrap: anywhere;
+}
+
+main table,
+main table.table,
+.sfs-data-table,
+.sfs-frequency-table {
+  width: auto;
+  max-width: 100%;
+  margin: 1rem auto;
+  font-variant-numeric: tabular-nums;
+  /* font-family: MathJax; */
+}
+
+main table caption,
+.sfs-data-table caption,
+.sfs-frequency-table caption {
+  caption-side: top;
+  color: var(--sfs-text);
+  font-weight: 700;
+  text-align: left;
+}
+
+main table,
+main table.table,
+.sfs-data-table,
+.sfs-frequency-table {
+  border-collapse: collapse;
+  border-top: 2px solid var(--sfs-table-rule-color);
+  border-bottom: 2px solid var(--sfs-table-rule-color);
+}
+
+main table th,
+main table td,
+.sfs-data-table th,
+.sfs-data-table td,
+.sfs-frequency-table th,
+.sfs-frequency-table td {
+  border: 0;
+  vertical-align: middle;
+}
+
+main table thead,
+main table.table thead,
+.sfs-data-table thead,
+.sfs-frequency-table thead {
+  border-bottom: 2px solid var(--sfs-table-rule-color);
+}
+
+main table.table > :not(caption) > * > *,
+.sfs-data-table.table > :not(caption) > * > *,
+.sfs-frequency-table.table > :not(caption) > * > * {
+  border-width: 0;
+}
+
+main table th,
+.sfs-data-table th {
+  font-weight: 700;
+}
+
+.sfs-table-summary-row td {
+  color: var(--sfs-muted);
+}
+
+/* Match the row and column dice in Chapter 6. These are the same red and blue
+   used by the first two dice on the chapter cover. */
+#tbl-dice-sums {
+  --sfs-die-red-text: rgb(209 64 79);
+  --sfs-die-blue-text: rgb(51 120 176);
+}
+
+#tbl-dice-sums thead th:not(:first-child) {
+  color: var(--sfs-die-blue-text);
+}
+
+#tbl-dice-sums tbody td:first-child {
+  color: var(--sfs-die-red-text);
+}
+
+body.quarto-dark #tbl-dice-sums {
+  --sfs-die-red-text: color-mix(in srgb, rgb(209 64 79) 72%, white);
+  --sfs-die-blue-text: color-mix(in srgb, rgb(51 120 176) 72%, white);
+}
+
+/* Mark a modal row in static frequency tables without coupling the styling
+   to a particular row number. Mixing yellow with the current page background
+   gives the highlight enough contrast in either theme without becoming an
+   opaque stripe. The heavier type keeps the cue from relying on color alone. */
+.sfs-mode-table {
+  --sfs-mode-highlight-bg: color-mix(
+    in srgb,
+    var(--graph-series-7, #f0e442) 32%,
+    var(--sfs-bg)
+  );
+}
+
+.sfs-mode-table tbody tr:has(.sfs-mode-marker) > * {
+  background: var(--sfs-mode-highlight-bg);
+  font-weight: 700;
+}
+

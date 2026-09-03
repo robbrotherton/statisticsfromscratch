@@ -1,0 +1,989 @@
+/* Tutorials: the median tutorial's own layout, then the shared step-through
+   chrome that every interactive callout uses -- stepper, footer controls,
+   and the side-arrow navigation with its first-encounter hint.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Median tutorial ------------------------------------------------------- */
+
+.median-tutorial {
+  --mt-accent: var(--graph-series-3, var(--sfs-accent));
+  --mt-below: var(--graph-series-1, #0072b2);
+  --mt-above: var(--graph-series-4, #d55e00);
+  margin: 1.1rem auto;
+}
+
+.median-tutorial .mt-chart-wrap {
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  width: 100%;
+  scrollbar-gutter: stable;
+}
+
+.median-tutorial .mt-stage {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 13rem;
+  padding: 1rem clamp(0.35rem, 2vw, 1rem) 0.4rem;
+}
+
+.median-tutorial .mt-stage-label {
+  margin: 0 0 0.8rem;
+  color: var(--sfs-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.median-tutorial .mt-values,
+.median-tutorial .mt-marker-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--mt-count), minmax(0, 1fr));
+  gap: clamp(0.125rem, 1vw, 0.65rem);
+  width: min(100%, 34rem);
+  margin-inline: auto;
+}
+
+.median-tutorial .mt-values {
+  position: relative;
+}
+
+.median-tutorial .mt-score.mt-score-ghost {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  pointer-events: none;
+}
+
+.median-tutorial .mt-score {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: clamp(2.2rem, 11vw, 2.75rem);
+  border: 1px solid var(--sfs-border);
+  border-radius: var(--sfs-radius-sm, 4px);
+  background: var(--sfs-bg);
+  color: var(--sfs-text);
+  font-size: clamp(0.8rem, 4vw, 1.25rem);
+  font-variant-numeric: tabular-nums;
+  transition:
+    opacity 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    background-color 240ms ease;
+}
+
+/* Keep long rows of cards visible together on phone-sized screens. The
+   zero-minimum grid tracks above let the row use the width it actually has;
+   these tighter insets leave that width for the cards rather than creating a
+   barely perceptible horizontal overflow. */
+@media (max-width: 480px) {
+  .median-tutorial .mt-stage {
+    padding-right: 0.125rem;
+    padding-left: 0.125rem;
+  }
+
+  .median-tutorial .mt-values,
+  .median-tutorial .mt-marker-grid {
+    gap: 0.125rem;
+    width: 100%;
+  }
+}
+
+.median-tutorial.is-dense .mt-values,
+.median-tutorial.is-dense .mt-marker-grid {
+  gap: clamp(0.125rem, 0.6vw, 0.35rem);
+  width: min(100%, 44rem);
+}
+
+.median-tutorial.is-dense .mt-score {
+  min-height: clamp(1.9rem, 8vw, 2.4rem);
+  font-size: clamp(0.72rem, 3.2vw, 1rem);
+}
+
+.median-tutorial .mt-score::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 560ms ease;
+}
+
+.median-tutorial .mt-score-value {
+  position: relative;
+  z-index: 1;
+}
+
+.median-tutorial .mt-score.is-middle {
+  border: 2px solid var(--mt-accent);
+  background: color-mix(in srgb, var(--mt-accent) 10%, var(--sfs-bg));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mt-accent) 13%, transparent);
+  font-weight: 700;
+}
+
+.median-tutorial .mt-score.is-muted {
+  opacity: 0.3;
+}
+
+.median-tutorial .mt-score.is-below {
+  border-color: color-mix(in srgb, var(--mt-below) 62%, var(--sfs-border));
+}
+
+.median-tutorial .mt-score.is-below::before {
+  background: color-mix(in srgb, var(--mt-below) 14%, var(--sfs-bg));
+  opacity: 1;
+}
+
+.median-tutorial .mt-score.is-above {
+  border-color: color-mix(in srgb, var(--mt-above) 62%, var(--sfs-border));
+}
+
+.median-tutorial .mt-score.is-above::before {
+  background: color-mix(in srgb, var(--mt-above) 14%, var(--sfs-bg));
+  opacity: 1;
+}
+
+.median-tutorial .mt-score.is-equal::before {
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--mt-below) 17%, var(--sfs-bg)) 0 0.42rem,
+    color-mix(in srgb, var(--mt-above) 17%, var(--sfs-bg)) 0.42rem 0.84rem
+  );
+  opacity: 1;
+}
+
+.median-tutorial .mt-score.is-equal {
+  border: 2px solid var(--mt-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--mt-accent) 11%, transparent);
+  font-weight: 700;
+}
+
+.median-tutorial.median-cards-static .mt-stage {
+  min-height: 9.9rem;
+}
+
+.median-tutorial.median-cards-static.is-reveal-pending .mt-score::before {
+  opacity: 0;
+}
+
+.median-tutorial .mt-marker-grid {
+  min-height: 4.35rem;
+  margin-top: 0.55rem;
+}
+
+.median-tutorial .mt-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.9rem;
+  color: var(--sfs-text);
+  text-align: center;
+}
+
+.median-tutorial .mt-marker::before {
+  position: absolute;
+  top: 0;
+  right: 0.35rem;
+  left: 0.35rem;
+  border-top: 2px solid var(--mt-accent);
+  content: "";
+}
+
+.median-tutorial .mt-marker::after {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 0.55rem;
+  border-left: 2px solid var(--mt-accent);
+  content: "";
+}
+
+.median-tutorial .mt-marker-label,
+.median-tutorial .mt-marker-detail {
+  display: block;
+  line-height: 1.2;
+}
+
+.median-tutorial .mt-marker-label {
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+
+.median-tutorial .mt-marker-detail {
+  margin-top: 0.15rem;
+  color: var(--sfs-muted);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.median-tutorial .mt-marker.is-median .mt-marker-label {
+  font-size: 1.05rem;
+}
+
+.median-tutorial .mt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.35rem 1rem;
+  width: min(100%, 36rem);
+  margin: 0.35rem auto 0;
+  color: var(--sfs-muted);
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.median-tutorial .mt-legend[hidden] {
+  display: none;
+}
+
+.median-tutorial .mt-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.median-tutorial .mt-legend-item[hidden] {
+  display: none;
+}
+
+.median-tutorial .mt-legend-swatch {
+  display: inline-block;
+  width: 1.4rem;
+  height: 0.85rem;
+  border: 1px solid var(--sfs-border);
+  border-radius: 2px;
+}
+
+.median-tutorial .mt-legend-swatch.is-below {
+  border-color: color-mix(in srgb, var(--mt-below) 62%, var(--sfs-border));
+  background: color-mix(in srgb, var(--mt-below) 14%, var(--sfs-bg));
+}
+
+.median-tutorial .mt-legend-swatch.is-above {
+  border-color: color-mix(in srgb, var(--mt-above) 62%, var(--sfs-border));
+  background: color-mix(in srgb, var(--mt-above) 14%, var(--sfs-bg));
+}
+
+.median-tutorial .mt-legend-swatch.is-equal {
+  border-color: var(--mt-accent);
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--mt-below) 17%, var(--sfs-bg)) 0 0.25rem,
+    color-mix(in srgb, var(--mt-above) 17%, var(--sfs-bg)) 0.25rem 0.5rem
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .median-tutorial .mt-score,
+  .median-tutorial .mt-score::before {
+    transition: none !important;
+  }
+}
+
+html[data-motion="reduced"] .median-tutorial .mt-score,
+html[data-motion="reduced"] .median-tutorial .mt-score::before {
+  transition: none !important;
+}
+
+.sfs-highlight {
+  background: var(--sfs-highlight-bg);
+  border-radius: 3px;
+}
+
+.sfs-frequency-table th,
+.sfs-frequency-table td {
+  padding-right: 1rem;
+  text-align: right;
+}
+
+.sfs-frequency-table th:first-child,
+.sfs-frequency-table td:first-child {
+  text-align: left;
+}
+
+.callout {
+  --sfs-callout-border-color: var(--bs-secondary);
+}
+
+.callout.callout-note {
+  --sfs-callout-border-color: var(--quarto-scss-export-callout-color-note, var(--bs-primary));
+}
+
+.callout.callout-tip {
+  --sfs-callout-border-color: var(--quarto-scss-export-callout-color-tip, var(--bs-success));
+}
+
+.callout.callout-warning {
+  --sfs-callout-border-color: var(--quarto-scss-export-callout-color-warning, var(--bs-warning));
+}
+
+.callout.callout-caution {
+  --sfs-callout-border-color: var(--quarto-scss-export-callout-color-caution, var(--bs-orange, #fd7e14));
+}
+
+.callout.callout-important {
+  --sfs-callout-border-color: var(--quarto-scss-export-callout-color-important, var(--bs-danger));
+}
+
+.callout.callout-style-default,
+.callout.callout-style-simple {
+  border: 1px solid var(--sfs-callout-border-color);
+}
+
+.callout.interactive {
+  --interactive-callout-color: var(--quarto-scss-export-callout-color-tip, var(--bs-success));
+  --sfs-callout-border-color: var(--interactive-callout-color);
+  --interactive-callout-bg: color-mix(in srgb, var(--interactive-callout-color) 14%, transparent);
+}
+
+.callout.interactive.callout-style-default > .callout-header {
+  background-color: var(--interactive-callout-bg);
+}
+
+.callout.interactive.callout-style-default > .callout-body-container.callout-body > .callout-footer,
+.callout.interactive.callout-style-default > .callout-body-container.callout-body > p:last-child {
+  margin: 0em -0.5em;
+  padding-top: 0.2rem;
+  padding-right: 0.5em;
+  padding-bottom: 0.2rem;
+  padding-left: 0.5em;
+  background-color: var(--interactive-callout-bg);
+  color: var(--bs-body-color);
+  line-height: 1.35;
+}
+
+.callout.interactive.callout-style-default > .callout-body-container.callout-body > .callout-footer > :first-child {
+  margin-top: 0;
+}
+
+.callout.interactive.callout-style-default > .callout-body-container.callout-body > .callout-footer > :last-child {
+  margin-bottom: 0;
+}
+
+/* Inside interactive callouts the controls panel sits flush against the
+   header and callout edges: cancel the figure-mount padding (0.5rem), the
+   sfs-figure top margin (1.25rem), and the callout body side padding, minus
+   the 0.2em the header overlaps the body. */
+.callout.interactive .sfs-if-controls {
+  margin: calc(0.2em - 1.75rem) -0.5em 0.75rem;
+  border-radius: 0;
+}
+
+/* The flush drawer above must span the callout no matter how narrow the
+   figure is, so inside interactive callouts the width cap moves off the
+   figure root and onto the chart alone. The top margin is pinned to the
+   standard 1.25rem the drawer offset assumes, so module-level
+   --sfs-figure-margin overrides (e.g. statistical-power's 1.5rem) can't
+   open a gap under the callout header. */
+.callout.interactive .sfs-if-root.sfs-figure {
+  max-width: none;
+  margin-top: 1.25rem;
+}
+
+.callout.interactive .sfs-if-root.sfs-figure .sfs-chart-wrap {
+  max-width: var(--sfs-figure-max-width);
+  margin-inline: auto;
+}
+
+.callout-footer.sfs-if-tutorial > .tutorial-step[hidden] {
+  display: none !important;
+}
+
+/* Two lines' worth of floor on the step prose. The nav sits above it, so its
+   position is already fixed; this only stops the page below the callout from
+   twitching as steps alternate between one and two lines. Deliberately not
+   tall enough to reserve room for the longest step---that would leave short
+   steps sitting in a mostly empty box. */
+.callout-footer.sfs-if-tutorial > .tutorial-step {
+  min-height: 2.7em;
+}
+
+.callout-footer.sfs-if-tutorial > .tutorial-step > :first-child {
+  margin-top: 0;
+}
+
+.callout-footer.sfs-if-tutorial > .tutorial-step > :last-child {
+  margin-bottom: 0;
+}
+
+/* Shared by both arrangements: in side mode the arrows live outside the nav,
+   so the accent tokens cannot hang off .sfs-if-tutorial-nav alone. */
+.sfs-if-tutorial-nav,
+.sfs-if-side-nav {
+  --sfs-if-step-accent: var(--interactive-callout-color, var(--sfs-accent));
+  --sfs-if-step-idle: color-mix(in srgb, var(--sfs-muted) 55%, transparent);
+  --sfs-if-step-track: color-mix(in srgb, var(--sfs-border) 90%, var(--sfs-text));
+  --sfs-if-step-on-accent: #fff;
+}
+
+.sfs-if-tutorial-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Inline arrangement: the bar sits above the step prose, so its rule reads as
+   a header separator. */
+.sfs-if-tutorial-nav[data-mode="inline"] {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid var(--sfs-border);
+}
+
+/* Compact (narrow screens): a one-line readout replaces the rail, so the bar
+   is button-height instead of rail-height and the step text stays near the viz. */
+.sfs-if-step-readout {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--sfs-muted);
+  font-size: 0.82rem;
+  line-height: 1.2;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sfs-if-step-readout-title {
+  color: var(--sfs-text);
+  font-weight: 600;
+}
+
+/* Both of these sit below the prose: the rail (side arrangement) and the
+   compact bar, which lands at the foot of the callout within thumb reach. */
+.sfs-if-tutorial-nav[data-mode="rail"],
+.sfs-if-tutorial-nav[data-mode="compact"] {
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--sfs-border);
+}
+
+/* Matching bottom padding, so the row sits exactly centred in its band. Needs
+   this much specificity to beat Quarto's own
+   `.callout.callout-titled .callout-body > div > :last-child` rule, which
+   applies padding-bottom: .5rem to whatever ends the footer -- now this bar. */
+.callout.interactive .callout-footer.sfs-if-tutorial > .sfs-if-tutorial-nav[data-mode="rail"],
+.callout.interactive .callout-footer.sfs-if-tutorial > .sfs-if-tutorial-nav[data-mode="compact"] {
+  padding-bottom: 0.3rem;
+}
+
+.sfs-if-stepper {
+  flex: 1 1 auto;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.sfs-if-substep {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 0.55rem;
+  height: 0.55rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.sfs-if-stepper-step[data-state="upcoming"] .sfs-if-substep {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--sfs-muted) 30%, transparent);
+  background: color-mix(in srgb, var(--sfs-muted) 30%, transparent);
+}
+
+.sfs-if-stepper-step[data-state="complete"] .sfs-if-substep {
+  opacity: 1;
+  border-color: var(--sfs-if-step-accent);
+  background: var(--sfs-if-step-accent);
+}
+
+.sfs-if-stepper-step[data-state="current"] .sfs-if-substep {
+  opacity: 1;
+  border: 2px solid var(--sfs-if-step-accent);
+  background: var(--sfs-if-step-on-accent);
+  transform: scale(1.08);
+}
+
+.sfs-if-stepper-step[data-state="upcoming"] .sfs-if-substep:focus-visible {
+  opacity: 1;
+  border-color: var(--sfs-if-step-idle);
+  background: var(--sfs-if-step-idle);
+}
+
+.sfs-if-substep:hover,
+.sfs-if-substep:focus-visible {
+  border-color: var(--sfs-if-step-accent);
+  transform: scale(1.18);
+}
+
+.sfs-if-substep:focus-visible {
+  outline: 2px solid var(--sfs-focus);
+  outline-offset: 2px;
+}
+
+.sfs-if-stepper-step {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.sfs-if-stepper[data-grouped="true"] {
+  min-height: 2.65rem;
+}
+
+.sfs-if-stepper[data-grouped="true"] .sfs-if-stepper-step--minor {
+  box-sizing: border-box;
+  padding-top: 0.575rem;
+}
+
+.sfs-if-stepper-step + .sfs-if-stepper-step::before {
+  content: "";
+  position: absolute;
+  top: 0.85rem;
+  left: calc(-50% + 0.85rem);
+  right: calc(50% + 0.85rem);
+  height: 2px;
+  border-radius: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--sfs-if-step-accent) 50%,
+    var(--sfs-if-step-track) 50%
+  );
+  background-size: 205% 100%;
+  background-position: 100% 0;
+  transition: background-position 320ms ease;
+}
+
+.sfs-if-stepper-step[data-filled="true"]::before {
+  background-position: 0 0;
+}
+
+.sfs-if-stepper[data-grouped="true"] .sfs-if-stepper-step + .sfs-if-stepper-step::before {
+  top: calc(0.85rem - 1px);
+  left: calc(-50% + 0.275rem);
+  right: calc(50% + 0.275rem);
+}
+
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major + .sfs-if-stepper-step::before {
+  left: calc(-50% + 0.7rem);
+}
+
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step + .sfs-if-stepper-step--major::before {
+  right: calc(50% + 0.7rem);
+}
+
+.sfs-if-stepper-node {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  min-width: 0;
+  padding: 0.15rem 0.25rem 0.1rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.sfs-if-stepper-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 1.4rem;
+  height: 1.4rem;
+  border: 0 solid var(--sfs-if-step-accent);
+  border-radius: 50%;
+  background: var(--sfs-if-step-accent);
+  transition:
+    transform 240ms ease,
+    border-width 240ms ease,
+    background-color 240ms ease;
+}
+
+.sfs-if-stepper-dot .bi {
+  color: var(--sfs-if-step-on-accent);
+  font-size: 0.95rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.sfs-if-stepper-step[data-state="complete"] .sfs-if-stepper-dot .bi {
+  opacity: 1;
+}
+
+.sfs-if-stepper-step[data-state="current"] .sfs-if-stepper-dot {
+  border-width: 0.42rem;
+  background: transparent;
+}
+
+.sfs-if-stepper-step[data-state="upcoming"] .sfs-if-stepper-dot {
+  transform: scale(0.4);
+  background: var(--sfs-if-step-idle);
+}
+
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major[data-state="upcoming"] .sfs-if-stepper-dot {
+  transform: scale(0.62);
+}
+
+.sfs-if-stepper-node:hover .sfs-if-stepper-dot,
+.sfs-if-stepper-node:focus-visible .sfs-if-stepper-dot {
+  transform: scale(1.12);
+}
+
+.sfs-if-stepper-step[data-state="upcoming"] .sfs-if-stepper-node:hover .sfs-if-stepper-dot,
+.sfs-if-stepper-step[data-state="upcoming"] .sfs-if-stepper-node:focus-visible .sfs-if-stepper-dot {
+  transform: scale(0.6);
+  background: var(--sfs-muted);
+}
+
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major[data-state="upcoming"] .sfs-if-stepper-node:hover .sfs-if-stepper-dot,
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major[data-state="upcoming"] .sfs-if-stepper-node:focus-visible .sfs-if-stepper-dot {
+  transform: scale(0.74);
+}
+
+.sfs-if-stepper-node:focus-visible {
+  outline: none;
+}
+
+.sfs-if-stepper-node:focus-visible .sfs-if-stepper-dot {
+  outline: 2px solid var(--sfs-focus);
+  outline-offset: 2px;
+}
+
+.sfs-if-stepper-label {
+  max-width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-align: center;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--sfs-muted);
+  transition: color 200ms ease;
+}
+
+.sfs-if-stepper-step[data-state="current"] .sfs-if-stepper-label {
+  color: var(--sfs-if-step-accent);
+}
+
+.sfs-if-stepper-step[data-section-current="true"] .sfs-if-stepper-label {
+  color: var(--sfs-if-step-accent);
+}
+
+.sfs-if-stepper[data-grouped="true"] .sfs-if-stepper-label {
+  position: absolute;
+  top: 1.85rem;
+  left: 50%;
+  width: auto;
+  max-width: none;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major:first-child .sfs-if-stepper-label,
+.sfs-if-stepper[data-grouped="true"]
+  .sfs-if-stepper-step--major:first-child +
+  .sfs-if-stepper-step--major .sfs-if-stepper-label {
+  font-size: 0.65rem;
+}
+
+.sfs-if-stepper-node:hover .sfs-if-stepper-label {
+  color: var(--sfs-text);
+}
+
+.sfs-if-stepper-step[data-state="current"] .sfs-if-stepper-node:hover .sfs-if-stepper-label {
+  color: var(--sfs-if-step-accent);
+}
+
+.sfs-if-tutorial-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-block: 0.2rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sfs-if-tutorial-button .bi {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.sfs-if-tutorial-button:hover:not(:disabled),
+.sfs-if-tutorial-button:focus-visible:not(:disabled) {
+  border-color: var(--sfs-if-step-accent, var(--sfs-focus));
+  color: var(--sfs-if-step-accent, var(--sfs-focus));
+}
+
+.sfs-if-tutorial-next:not(:disabled) {
+  border-color: transparent;
+  background: var(--sfs-if-step-accent);
+  color: var(--sfs-if-step-on-accent);
+}
+
+.sfs-if-tutorial-next:hover:not(:disabled),
+.sfs-if-tutorial-next:focus-visible:not(:disabled) {
+  border-color: transparent;
+  background: color-mix(in srgb, var(--sfs-if-step-accent) 82%, var(--sfs-text));
+  color: var(--sfs-if-step-on-accent);
+}
+
+/* --- Side-arrow tutorial navigation ---------------------------------- */
+
+.callout.interactive[data-tutorial-nav-mode="side"] {
+  position: relative;
+}
+
+/* Reserve the gutters by insetting the viz rather than overlaying the arrows
+   on it. The callout is a fixed ~749px and most chart wraps fill it to within
+   9px, so an overlay would sit on live content. The controls drawer is
+   excluded: it is deliberately flush to the callout edges. */
+.callout.interactive[data-tutorial-nav-mode="side"] .sfs-if-tutorial-viz > *:not(.sfs-if-controls) {
+  padding-inline: var(--sfs-if-side-gutter, 3.25rem);
+}
+
+/* Authored-only figures (every tutorial by default, plus anything marked
+   .no-controls): the drawer and its toggle are gone for good, so nothing is
+   left to reveal or reserve space for. The JS adds .sfs-if-controls-suppressed
+   to the figure root once it has resolved which case applies. */
+.sfs-if-controls-suppressed > .sfs-if-controls,
+.sfs-if-controls-suppressed > .sfs-if-toolbar,
+.callout.no-controls .sfs-if-toggle {
+  display: none !important;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-button {
+  position: absolute;
+  top: var(--sfs-if-arrow-top, 50%);
+  z-index: 3;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--sfs-text) 16%, transparent);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-prev {
+  left: 0.5rem;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-next {
+  right: 0.5rem;
+}
+
+/* The chevron carries the meaning at this size; the word would not fit. */
+.sfs-if-side-nav .sfs-if-tutorial-button-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-button .bi {
+  font-size: 1.05rem;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-button:hover:not(:disabled) {
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--sfs-text) 24%, transparent);
+}
+
+/* Kept discoverable rather than hidden at the ends of the tutorial: a missing
+   button would shift attention, and the greyed state also communicates
+   "you are at the start / the end". */
+.sfs-if-side-nav .sfs-if-tutorial-button:disabled {
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+/* First-encounter hint. In side mode the Next control is a bare chevron out in
+   the gutter with no label, so to a reader meeting their first tutorial there
+   is nothing saying it is a control rather than an ornament. Three beats when
+   it first scrolls fully into view, each one a swell of the button, a ring
+   shed outward, and a nudge of the chevron itself -- then a long rest.
+   The chevron nudge carries most of the meaning: it is the only part of this
+   that says "forward" rather than merely "look here". The ring stays small
+   because the gutter is small (see the cap below), and the accent fill is left
+   alone throughout, since colour here encodes state, not decoration.
+   interactive-figure.js decides when to arm and when to stop. */
+.sfs-if-side-nav .sfs-if-tutorial-next.is-hinting {
+  animation: sfs-if-next-beat 2400ms cubic-bezier(0.34, 0, 0.28, 1) 900ms 3 both;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-next.is-hinting .bi {
+  animation: sfs-if-next-nudge 2400ms cubic-bezier(0.34, 0, 0.28, 1) 900ms 3 both;
+}
+
+.sfs-if-side-nav .sfs-if-tutorial-next.is-hinting::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--sfs-if-step-accent);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  animation: sfs-if-next-ping 2400ms ease-out 900ms 3 both;
+}
+
+/* The base rule translates the button onto the arrow centre line, so every
+   frame has to carry that translate or the beat would fling it half its own
+   height down the gutter. */
+@keyframes sfs-if-next-beat {
+  0%, 40%, 100% {
+    transform: translateY(-50%) scale(1);
+    box-shadow: 0 1px 4px color-mix(in srgb, var(--sfs-text) 16%, transparent);
+  }
+  14% {
+    transform: translateY(-50%) scale(1.07);
+    box-shadow: 0 3px 11px color-mix(in srgb, var(--sfs-if-step-accent) 48%, transparent);
+  }
+}
+
+@keyframes sfs-if-next-nudge {
+  0%, 40%, 100% { transform: translateX(0); }
+  16% { transform: translateX(2px); }
+}
+
+/* Standing invitation, shown on a tutorial's opening step until the reader
+   starts it. The pulse above answers "is this a control"; this answers "is
+   this worth starting", which is a live question only at step 0 -- once a
+   reader is stepping through, the unfilled dots on the progress rail already
+   say there is more, and they say it without moving. Motion is for "act now",
+   a static indicator is for "there is more", and using motion for both would
+   spend the louder signal on the weaker need.
+
+   So: the nudge alone, no swell and no ring, on a long cycle that is mostly
+   stillness -- roughly a second of movement, then nearly four of quiet. It is
+   also gated on the arrow being fully on screen and capped at twelve beats, so
+   it cannot become the permanent background flicker that a reader stops seeing
+   and starts being annoyed by. */
+.sfs-if-side-nav .sfs-if-tutorial-next.is-inviting .bi {
+  animation: sfs-if-next-invite 4600ms cubic-bezier(0.34, 0, 0.28, 1) 700ms 12 both;
+}
+
+/* Slightly further than the pulse's nudge: there is no swell or ring carrying
+   it here, so it has to read on its own. */
+@keyframes sfs-if-next-invite {
+  0%, 20%, 100% { transform: translateX(0); }
+  8% { transform: translateX(3px); }
+}
+
+/* Capped at 1.34x. The arrow sits 0.5rem from the callout border with only
+   0.4rem of clearance to the viz on its other side, so a wider ring would
+   cross one or the other; what the ring cannot do in reach it does in dwell,
+   holding most of its opacity through the first half of the throw. */
+@keyframes sfs-if-next-ping {
+  0% { opacity: 0; transform: scale(0.98); }
+  10% { opacity: 0.55; }
+  22% { opacity: 0.45; }
+  46%, 100% { opacity: 0; transform: scale(1.34); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfs-if-side-nav .sfs-if-tutorial-button {
+    transition: none;
+  }
+
+  .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting,
+  .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting .bi,
+  .sfs-if-side-nav .sfs-if-tutorial-next.is-inviting .bi {
+    animation: none;
+  }
+
+  .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting::after {
+    content: none;
+  }
+}
+
+html[data-motion="reduced"] .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting,
+html[data-motion="reduced"] .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting .bi,
+html[data-motion="reduced"] .sfs-if-side-nav .sfs-if-tutorial-next.is-inviting .bi {
+  animation: none;
+}
+
+html[data-motion="reduced"] .sfs-if-side-nav .sfs-if-tutorial-next.is-hinting::after {
+  content: none;
+}
+
+@media (max-width: 680px) {
+  .sfs-if-stepper[data-grouped="true"]
+    .sfs-if-stepper-step--major:not([data-section-current="true"]) .sfs-if-stepper-label {
+    visibility: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .sfs-if-tutorial-nav {
+    gap: 0.35rem;
+  }
+
+  .sfs-if-stepper-step:not([data-state="current"]) .sfs-if-stepper-label {
+    visibility: hidden;
+  }
+
+  .sfs-if-stepper[data-grouped="true"]
+    .sfs-if-stepper-step--major[data-section-current="true"] .sfs-if-stepper-label {
+    visibility: visible;
+  }
+
+  .sfs-if-tutorial-button .sfs-if-tutorial-button-text {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfs-if-stepper-step + .sfs-if-stepper-step::before,
+  .sfs-if-stepper-dot,
+  .sfs-if-stepper-dot .bi,
+  .sfs-if-stepper-label,
+  .sfs-if-substep {
+    transition: none !important;
+  }
+}
+

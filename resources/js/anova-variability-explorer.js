@@ -68,13 +68,13 @@
     style.id = "anova-variability-explorer-styles";
     style.textContent = `
       .anova-variability-explorer {
-        --ave-total: var(--bc-muted, #68727d);
-        --ave-within: var(--bc-current-color, #d1495b);
-        --ave-between: var(--bc-comparison-color, #2f6f9f);
+        --ave-total: var(--sfs-muted, #68727d);
+        --ave-within: var(--sfs-current-color, #d1495b);
+        --ave-between: var(--sfs-comparison-color, #2f6f9f);
         width: 100%;
         max-width: var(--ave-max-width, 58rem);
         margin: 0 auto 0.75rem;
-        color: var(--bc-text, currentColor);
+        color: var(--sfs-text, currentColor);
       }
       .anova-variability-explorer .ave-svg {
         display: block;
@@ -84,15 +84,15 @@
       }
       .anova-variability-explorer .ave-axis path,
       .anova-variability-explorer .ave-axis line {
-        stroke: var(--bc-border, #c8cdd2);
+        stroke: var(--sfs-border, #c8cdd2);
       }
       .anova-variability-explorer .ave-axis text,
       .anova-variability-explorer .ave-muted {
-        fill: var(--bc-muted, #68727d);
+        fill: var(--sfs-muted, #68727d);
       }
       .anova-variability-explorer .ave-axis text { font-size: 13px; }
       .anova-variability-explorer .ave-lane {
-        stroke: color-mix(in srgb, var(--bc-border, #c8cdd2) 70%, transparent);
+        stroke: color-mix(in srgb, var(--sfs-border, #c8cdd2) 70%, transparent);
         stroke-width: 1;
       }
       .anova-variability-explorer .ave-pop-area { opacity: 0.1; }
@@ -124,24 +124,24 @@
         stroke-width: 1.25;
       }
       .anova-variability-explorer .ave-panel {
-        fill: color-mix(in srgb, var(--bc-control-bg, #f1f3f5) 62%, transparent);
-        stroke: var(--bc-border, #c8cdd2);
+        fill: color-mix(in srgb, var(--sfs-control-bg, #f1f3f5) 62%, transparent);
+        stroke: var(--sfs-border, #c8cdd2);
       }
       .anova-variability-explorer .ave-panel-title { font-size: 15px; font-weight: 750; }
-      .anova-variability-explorer .ave-panel-subtitle { font-size: 12px; fill: var(--bc-muted, #68727d); }
+      .anova-variability-explorer .ave-panel-subtitle { font-size: 12px; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-square { stroke-width: 1.25; }
       .anova-variability-explorer .ave-ss-label { font-size: 14px; font-weight: 720; }
-      .anova-variability-explorer .ave-ss-value { font-size: 12px; fill: var(--bc-muted, #68727d); }
+      .anova-variability-explorer .ave-ss-value { font-size: 12px; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-summary-label { font-size: 15px; font-weight: 720; }
-      .anova-variability-explorer .ave-summary-note { font-size: 13px; fill: var(--bc-muted, #68727d); }
+      .anova-variability-explorer .ave-summary-note { font-size: 13px; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-summary-bar { rx: 5; ry: 5; }
       .anova-variability-explorer .ave-equation { font-size: 17px; font-weight: 700; }
       .anova-variability-explorer .ave-calculation-box {
         margin-top: 0.45rem;
         padding: 0.65rem 0.8rem;
-        border: 1px solid var(--bc-border, #c8cdd2);
+        border: 1px solid var(--sfs-border, #c8cdd2);
         border-radius: 0.45rem;
-        background: color-mix(in srgb, var(--bc-control-bg, #f1f3f5) 55%, transparent);
+        background: color-mix(in srgb, var(--sfs-control-bg, #f1f3f5) 55%, transparent);
         font-variant-numeric: tabular-nums;
         font-size: 0.9rem;
       }
@@ -228,7 +228,7 @@
     };
 
     const root = d3.create("div")
-      .attr("class", "anova-variability-explorer bc-figure")
+      .attr("class", "anova-variability-explorer sfs-figure")
       .style("--ave-max-width", opts.maxWidth || null);
     const rootNode = root.node();
     const controls = root.append("div").attr("class", "ave-controls");

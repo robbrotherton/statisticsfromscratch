@@ -328,8 +328,8 @@
     return Number.isFinite(n) ? n : fallback;
   }
 
-  const previous = global.bcStats || {};
-  global.bcStats = Object.assign({}, previous, {
+  const previous = global.sfsStats || {};
+  global.sfsStats = Object.assign({}, previous, {
     erf,
     normalPdf,
     normalCdf,

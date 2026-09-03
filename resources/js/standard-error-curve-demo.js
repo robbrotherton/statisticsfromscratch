@@ -28,8 +28,8 @@ seCurveEnsureStyles = () => {
   style.id = "standard-error-curve-demo-styles";
   style.textContent = `
     .standard-error-curve-demo {
-      --bc-figure-max-width: var(--se-curve-max-width, 48rem);
-      --se-population-color: var(--bc-neutral-color, #7b818a);
+      --sfs-figure-max-width: var(--se-curve-max-width, 48rem);
+      --se-population-color: var(--sfs-neutral-color, #7b818a);
       --se-sampling-color: var(--graph-series-1, var(--graph-line-color, #0072b2));
     }
 
@@ -58,7 +58,7 @@ seCurveEnsureStyles = () => {
     .standard-error-curve-demo .se-value {
       justify-self: end;
       min-width: 3.2rem;
-      color: var(--bc-muted);
+      color: var(--sfs-muted);
       font-variant-numeric: tabular-nums;
     }
 
@@ -128,22 +128,22 @@ makeStandardErrorCurveDemo = function(opts) {
   const nTweenFormat = opts.nTweenFormat || d3.format(".1f");
 
   const root = d3.create("div")
-    .attr("class", "standard-error-curve-demo bc-figure")
+    .attr("class", "standard-error-curve-demo sfs-figure")
     .style("--se-curve-max-width", opts.maxWidth || null);
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "se-controls bc-control-grid");
+    .attr("class", "se-controls sfs-control-grid");
 
   const controlsPanel = controls.append("section")
-    .attr("class", "se-panel bc-control-panel bc-if-control-panel");
+    .attr("class", "se-panel sfs-control-panel sfs-if-control-panel");
   controlsPanel.append("p")
-    .attr("class", "bc-control-title")
+    .attr("class", "sfs-control-title")
     .text("Sampling distribution");
 
   function addNumber(labelHtml, value, min, step) {
     const row = controlsPanel.append("label")
-      .attr("class", "se-control-row se-number-row bc-control-row");
+      .attr("class", "se-control-row se-number-row sfs-control-row");
     row.append("span").html(labelHtml);
     const input = row.append("input")
       .attr("type", "number")
@@ -155,10 +155,10 @@ makeStandardErrorCurveDemo = function(opts) {
 
   function addSlider(labelHtml, value, min, max, step) {
     const row = controlsPanel.append("label")
-      .attr("class", "se-control-row se-slider-row bc-control-row");
+      .attr("class", "se-control-row se-slider-row sfs-control-row");
     row.append("span").html(labelHtml);
     const valueNode = row.append("span")
-      .attr("class", "se-value bc-readout-value")
+      .attr("class", "se-value sfs-readout-value")
       .text(formatter(value));
     const input = row.append("input")
       .attr("type", "range")
@@ -175,18 +175,18 @@ makeStandardErrorCurveDemo = function(opts) {
   const nControl = addSlider("<i>n</i> =", state.n, nMin, nMax, nStep);
 
   const chartWrap = root.append("div")
-    .attr("class", "se-chart-wrap bc-chart-wrap");
+    .attr("class", "se-chart-wrap sfs-chart-wrap");
 
   const readout = chartWrap.append("div")
-    .attr("class", "se-readout bc-readout");
+    .attr("class", "se-readout sfs-readout");
   readout.append("span")
-    .attr("class", "bc-readout-label")
+    .attr("class", "sfs-readout-label")
     .html("<i>&sigma;<sub>M</sub></i> = ");
   const seValue = readout.append("span")
-    .attr("class", "bc-readout-value");
+    .attr("class", "sfs-readout-value");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel || "Sampling distribution standard error curve");
@@ -194,26 +194,26 @@ makeStandardErrorCurveDemo = function(opts) {
   const x = d3.scaleLinear().range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().range([plotBottom, margin.top]);
   const line = d3.line()
-    .curve(bcDistributionCurveFactory(opts))
+    .curve(sfsDistributionCurveFactory(opts))
     .x((d) => x(d.x))
     .y((d) => y(d.y));
 
   const curveLayer = svg.append("g")
     .attr("class", "se-curve-layer");
   const populationCurve = curveLayer.append("path")
-    .attr("class", "se-population-curve bc-graph-line")
+    .attr("class", "se-population-curve sfs-graph-line")
     .attr("fill", "none")
     .attr("stroke-width", seCurvePositiveNumber(opts.populationStrokeWidth, 2));
   const samplingCurve = curveLayer.append("path")
-    .attr("class", "se-sampling-curve bc-graph-line")
+    .attr("class", "se-sampling-curve sfs-graph-line")
     .attr("fill", "none")
     .attr("stroke-width", seCurvePositiveNumber(opts.strokeWidth, 2.6));
 
   const axisLayer = svg.append("g")
-    .attr("class", "se-axis bc-axis bc-graph-axis")
+    .attr("class", "se-axis sfs-axis sfs-graph-axis")
     .attr("transform", `translate(0,${plotBottom})`);
   const axisLabel = svg.append("text")
-    .attr("class", "bc-graph-label bc-axis-label")
+    .attr("class", "sfs-graph-label sfs-axis-label")
     .attr("x", (margin.left + width - margin.right) / 2)
     .attr("y", height - 12)
     .attr("text-anchor", "middle")
@@ -249,7 +249,7 @@ makeStandardErrorCurveDemo = function(opts) {
     if (fixed) {
       const maxN = Math.max(source.n, nMax);
       const smallestSd = Math.min(source.sd, standardErrorForN(maxN, source));
-      return [0, bcDistributionStats.normalPdf(source.mean, source.mean, smallestSd) * 1.12];
+      return [0, sfsDistributionStats.normalPdf(source.mean, source.mean, smallestSd) * 1.12];
     }
 
     const yMax = d3.max(currentCurves, (d) => d.y) || 1;
@@ -271,7 +271,7 @@ makeStandardErrorCurveDemo = function(opts) {
     const step = (domain[1] - domain[0]) / (points - 1);
     return d3.range(points).map((index) => {
       const value = domain[0] + index * step;
-      return { x: value, y: bcDistributionStats.normalPdf(value, source.mean, sd) };
+      return { x: value, y: sfsDistributionStats.normalPdf(value, source.mean, sd) };
     });
   }
 
@@ -419,7 +419,7 @@ makeStandardErrorCurveDemo = function(opts) {
     const start = parameterState(renderedState);
     const end = parameterState(target);
 
-    if (duration <= 0 || bcDistributionPrefersReducedMotion()) {
+    if (duration <= 0 || sfsDistributionPrefersReducedMotion()) {
       renderedState = end;
       renderPlot(renderedState);
       if (notify) notifyValueChange();
@@ -449,7 +449,7 @@ makeStandardErrorCurveDemo = function(opts) {
     options = options || {};
     stopTween();
     readState();
-    const animate = options.animate !== false && !bcDistributionPrefersReducedMotion();
+    const animate = options.animate !== false && !sfsDistributionPrefersReducedMotion();
     const target = parameterState(state);
     if (animate) {
       syncInputValues();

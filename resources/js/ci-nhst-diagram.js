@@ -1,4 +1,4 @@
-cnStats = window.bcStats
+cnStats = window.sfsStats
 cnNormalPdf = cnStats.normalPdf
 cnNormalCdf = cnStats.normalCdf
 cnNormalInv = cnStats.normalInv
@@ -26,15 +26,15 @@ makeCiNhstDiagram = function(opts) {
   };
 
   const root = d3.create("div")
-    .attr("class", "ci-nhst-diagram bc-figure")
-    .style("--bc-if-reveal-duration", opts.revealDuration || "980ms");
+    .attr("class", "ci-nhst-diagram sfs-figure")
+    .style("--sfs-if-reveal-duration", opts.revealDuration || "980ms");
   const rootNode = root.node();
 
   root.append("style").text(`
     .ci-nhst-diagram {
-      --cn-null-color: var(--bc-danger-color, #c63f3f);
-      --cn-ci-color: var(--bc-comparison-color, #2f6f9f);
-      --bc-figure-margin: 1.5rem 0;
+      --cn-null-color: var(--sfs-danger-color, #c63f3f);
+      --cn-ci-color: var(--sfs-comparison-color, #2f6f9f);
+      --sfs-figure-margin: 1.5rem 0;
     }
 
     .ci-nhst-diagram .cn-group {
@@ -70,7 +70,7 @@ makeCiNhstDiagram = function(opts) {
       justify-self: end;
       min-width: 3.2rem;
       font-variant-numeric: tabular-nums;
-      color: var(--bc-muted, var(--bs-secondary-color));
+      color: var(--sfs-muted, var(--bs-secondary-color));
     }
 
     .ci-nhst-diagram input[type="range"] {
@@ -109,7 +109,7 @@ makeCiNhstDiagram = function(opts) {
       row-gap: 0.1rem;
       padding: 0.35rem 0.45rem;
       border-radius: 6px;
-      background: color-mix(in srgb, var(--bc-bg, var(--bs-body-bg)) 88%, transparent);
+      background: color-mix(in srgb, var(--sfs-bg, var(--bs-body-bg)) 88%, transparent);
       font-size: 1rem;
       font-variant-numeric: tabular-nums;
       pointer-events: none;
@@ -121,7 +121,7 @@ makeCiNhstDiagram = function(opts) {
     }
 
     .ci-nhst-diagram .cn-axis {
-      color: var(--bc-text, var(--bs-body-color));
+      color: var(--sfs-text, var(--bs-body-color));
     }
 
     .ci-nhst-diagram .cn-axis text {
@@ -146,23 +146,23 @@ makeCiNhstDiagram = function(opts) {
   `);
 
   const controls = root.append("div")
-    .attr("class", "cn-controls bc-control-grid");
+    .attr("class", "cn-controls sfs-control-grid");
 
   function group(title) {
     const section = controls.append("section")
-      .attr("class", "cn-group bc-control-panel bc-if-control-panel");
+      .attr("class", "cn-group sfs-control-panel sfs-if-control-panel");
     section.append("p")
-      .attr("class", "cn-group-title bc-control-title")
+      .attr("class", "cn-group-title sfs-control-title")
       .text(title);
     return section;
   }
 
   function addSlider(parent, labelHtml, value, min, max, step) {
     const row = parent.append("label")
-      .attr("class", "cn-row bc-control-row");
+      .attr("class", "cn-row sfs-control-row");
     row.append("span").html(labelHtml);
     const valueNode = row.append("span")
-      .attr("class", "cn-value bc-readout-value");
+      .attr("class", "cn-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", min)
@@ -175,7 +175,7 @@ makeCiNhstDiagram = function(opts) {
 
   function addCheckbox(parent, labelHtml, checked) {
     const row = parent.append("label")
-      .attr("class", "cn-check-row bc-check-row");
+      .attr("class", "cn-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked);
@@ -194,10 +194,10 @@ makeCiNhstDiagram = function(opts) {
   const showDistancesInput = addCheckbox(displayControls, "Mean-to-limit distances", state.showDistances);
 
   const chartWrap = root.append("div")
-    .attr("class", "cn-chart-wrap bc-chart-wrap");
+    .attr("class", "cn-chart-wrap sfs-chart-wrap");
 
   const readout = chartWrap.append("div")
-    .attr("class", "cn-readout bc-readout");
+    .attr("class", "cn-readout sfs-readout");
   readout.append("span").html("<i>p</i> =");
   const pValueNode = readout.append("span")
     .attr("class", "cn-p-value");
@@ -205,7 +205,7 @@ makeCiNhstDiagram = function(opts) {
   const svg = chartWrap.append("svg")
     .attr("viewBox", [0, 0, width, height])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img")
     .attr("aria-label", "Correspondence between the null-hypothesis critical region and the confidence interval");
 
@@ -220,11 +220,11 @@ makeCiNhstDiagram = function(opts) {
     .y1((d) => y(d.density));
 
   const nullLayer = svg.append("g")
-    .attr("class", "cn-null-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "cn-null-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const ciLayer = svg.append("g")
-    .attr("class", "cn-ci-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "cn-ci-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const distanceLayer = svg.append("g")
     .attr("class", "cn-distance-layer");
   const axisLayer = svg.append("g");
@@ -274,8 +274,8 @@ makeCiNhstDiagram = function(opts) {
   // mean to its confidence limit, drawn at staggered heights for comparison.
   function makeDistanceArrow(color) {
     const arrowGroup = distanceLayer.append("g")
-      .attr("class", "bc-if-reveal")
-      .style("--bc-if-reveal-opacity", 1);
+      .attr("class", "sfs-if-reveal")
+      .style("--sfs-if-reveal-opacity", 1);
     const lineNode = arrowGroup.append("line")
       .style("stroke", color)
       .attr("stroke-width", 2.4)
@@ -292,26 +292,26 @@ makeCiNhstDiagram = function(opts) {
   const ciDistance = makeDistanceArrow("var(--cn-ci-color)");
 
   const rawAxis = axisLayer.append("g")
-    .attr("class", "cn-axis bc-axis bc-graph-axis")
+    .attr("class", "cn-axis sfs-axis sfs-graph-axis")
     .attr("transform", `translate(0, ${plotBottom})`);
   axisLayer.append("text")
-    .attr("class", "bc-axis-label bc-graph-label")
+    .attr("class", "sfs-axis-label sfs-graph-label")
     .attr("x", (margin.left + width - margin.right) / 2)
     .attr("y", height - 14)
     .attr("text-anchor", "middle")
     .attr("font-size", 15)
-    .style("fill", "var(--bc-text, currentColor)")
+    .style("fill", "var(--sfs-text, currentColor)")
     .text(opts.xLabel || "Sample mean reaction time (ms)");
 
   const nullDot = dotLayer.append("circle")
     .attr("r", 6.5)
     .style("fill", "var(--cn-null-color)")
-    .style("stroke", "var(--bc-bg, #fff)")
+    .style("stroke", "var(--sfs-bg, #fff)")
     .attr("stroke-width", 1.5);
   const sampleDot = dotLayer.append("circle")
     .attr("r", 6.5)
     .style("fill", "var(--cn-ci-color)")
-    .style("stroke", "var(--bc-bg, #fff)")
+    .style("stroke", "var(--sfs-bg, #fff)")
     .attr("stroke-width", 1.5);
 
   function readState() {

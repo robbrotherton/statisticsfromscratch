@@ -1,9 +1,9 @@
-bcGraphNormalPdf = (x, mean = 0, sd = 1) => {
+sfsGraphNormalPdf = (x, mean = 0, sd = 1) => {
   const z = (x - mean) / sd;
   return Math.exp(-0.5 * z * z) / (sd * Math.sqrt(2 * Math.PI));
 }
 
-bcGraphDefaultColors = [
+sfsGraphDefaultColors = [
   "var(--graph-series-1, var(--graph-line-color, #0072b2))",
   "var(--graph-series-2, #e69f00)",
   "var(--graph-series-3, #009e73)",
@@ -13,43 +13,43 @@ bcGraphDefaultColors = [
   "var(--graph-series-7, #f0e442)"
 ]
 
-bcGraphMedalFills = ({
+sfsGraphMedalFills = ({
   Gold: "var(--graph-medal-gold, #d4af37)",
   Silver: "var(--graph-medal-silver, #b8bcc2)",
   Bronze: "var(--graph-medal-bronze, #b08d57)"
 })
 
-bcGraphValueOr = (value, fallback) =>
+sfsGraphValueOr = (value, fallback) =>
   value === undefined || value === null ? fallback : value
 
-bcGraphFiniteNumber = (value) => {
+sfsGraphFiniteNumber = (value) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : undefined;
 }
 
-bcGraphPositiveNumber = (value) => {
-  const number = bcGraphFiniteNumber(value);
+sfsGraphPositiveNumber = (value) => {
+  const number = sfsGraphFiniteNumber(value);
   return number > 0 ? number : undefined;
 }
 
-bcGraphParseAspectRatio = (raw) => {
+sfsGraphParseAspectRatio = (raw) => {
   if (raw === false || raw === "auto") return undefined;
 
   if (Array.isArray(raw) && raw.length >= 2) {
-    const width = bcGraphPositiveNumber(raw[0]);
-    const height = bcGraphPositiveNumber(raw[1]);
+    const width = sfsGraphPositiveNumber(raw[0]);
+    const height = sfsGraphPositiveNumber(raw[1]);
     return width && height ? width / height : undefined;
   }
 
   if (typeof raw === "string") {
-    const parts = raw.trim().split(/[:/]/).map((part) => bcGraphPositiveNumber(part));
+    const parts = raw.trim().split(/[:/]/).map((part) => sfsGraphPositiveNumber(part));
     if (parts.length >= 2 && parts[0] && parts[1]) return parts[0] / parts[1];
   }
 
-  return bcGraphPositiveNumber(raw);
+  return sfsGraphPositiveNumber(raw);
 }
 
-bcGraphResolveScaleAspectRatio = (opts = {}, type = "histogram") => {
+sfsGraphResolveScaleAspectRatio = (opts = {}, type = "histogram") => {
   const hasAspectRatio = opts.scaleRatio !== undefined ||
     opts.scaleAspectRatio !== undefined ||
     opts.coordinateAspectRatio !== undefined ||
@@ -60,25 +60,25 @@ bcGraphResolveScaleAspectRatio = (opts = {}, type = "histogram") => {
   if (opts.equalScales === false) return undefined;
   if (!hasAspectRatio) return type === "block" ? 1 : undefined;
 
-  const raw = bcGraphValueOr(
+  const raw = sfsGraphValueOr(
     opts.scaleRatio,
-    bcGraphValueOr(opts.scaleAspectRatio, bcGraphValueOr(opts.coordinateAspectRatio, opts.coordRatio))
+    sfsGraphValueOr(opts.scaleAspectRatio, sfsGraphValueOr(opts.coordinateAspectRatio, opts.coordRatio))
   );
-  return bcGraphParseAspectRatio(raw);
+  return sfsGraphParseAspectRatio(raw);
 }
 
-bcGraphResolveSvgAspectRatio = (opts = {}) => {
-  const raw = bcGraphValueOr(
+sfsGraphResolveSvgAspectRatio = (opts = {}) => {
+  const raw = sfsGraphValueOr(
     opts.aspectRatio,
-    bcGraphValueOr(opts.svgAspectRatio, bcGraphValueOr(opts.imageAspectRatio, opts.figureAspectRatio))
+    sfsGraphValueOr(opts.svgAspectRatio, sfsGraphValueOr(opts.imageAspectRatio, opts.figureAspectRatio))
   );
-  return bcGraphParseAspectRatio(raw);
+  return sfsGraphParseAspectRatio(raw);
 }
 
-bcGraphDimensions = (opts = {}, type = "histogram") => {
-  const widthValue = bcGraphPositiveNumber(opts.width);
-  const heightValue = bcGraphPositiveNumber(opts.height);
-  const aspectRatio = bcGraphResolveSvgAspectRatio(opts);
+sfsGraphDimensions = (opts = {}, type = "histogram") => {
+  const widthValue = sfsGraphPositiveNumber(opts.width);
+  const heightValue = sfsGraphPositiveNumber(opts.height);
+  const aspectRatio = sfsGraphResolveSvgAspectRatio(opts);
   const hasWidth = widthValue !== undefined;
   const hasHeight = heightValue !== undefined;
   const width = widthValue || 640;
@@ -89,20 +89,20 @@ bcGraphDimensions = (opts = {}, type = "histogram") => {
   return { width, height: width / aspectRatio, aspectRatio };
 }
 
-bcGraphDomainSpan = (domain) => {
+sfsGraphDomainSpan = (domain) => {
   const start = domain ? Number(domain[0]) : NaN;
   const end = domain ? Number(domain[1]) : NaN;
   const span = Math.abs(end - start);
   return Number.isFinite(span) && span > 0 ? span : undefined;
 }
 
-bcGraphDimensionsForLinearScales = (opts = {}, type = "histogram", xDomain, yDomain, margin) => {
-  const dimensions = bcGraphDimensions(opts, type);
-  const aspectRatio = bcGraphResolveScaleAspectRatio(opts, type);
-  const xSpan = bcGraphDomainSpan(xDomain);
-  const ySpan = bcGraphDomainSpan(yDomain);
-  const widthValue = bcGraphPositiveNumber(opts.width);
-  const heightValue = bcGraphPositiveNumber(opts.height);
+sfsGraphDimensionsForLinearScales = (opts = {}, type = "histogram", xDomain, yDomain, margin) => {
+  const dimensions = sfsGraphDimensions(opts, type);
+  const aspectRatio = sfsGraphResolveScaleAspectRatio(opts, type);
+  const xSpan = sfsGraphDomainSpan(xDomain);
+  const ySpan = sfsGraphDomainSpan(yDomain);
+  const widthValue = sfsGraphPositiveNumber(opts.width);
+  const heightValue = sfsGraphPositiveNumber(opts.height);
   const hasWidth = widthValue !== undefined;
   const hasHeight = heightValue !== undefined;
 
@@ -126,8 +126,8 @@ bcGraphDimensionsForLinearScales = (opts = {}, type = "histogram", xDomain, yDom
   });
 }
 
-bcGraphAsArray = (data, fallback = []) => {
-  const source = bcGraphValueOr(data, fallback);
+sfsGraphAsArray = (data, fallback = []) => {
+  const source = sfsGraphValueOr(data, fallback);
   if (Array.isArray(source)) return source.slice();
   if (source instanceof Map) {
     return Array.from(source, ([x, frequency]) => ({ x, frequency }));
@@ -138,7 +138,7 @@ bcGraphAsArray = (data, fallback = []) => {
   return [];
 }
 
-bcGraphAccessor = (accessor, fallbackKeys = []) => {
+sfsGraphAccessor = (accessor, fallbackKeys = []) => {
   if (typeof accessor === "function") return accessor;
   if (typeof accessor === "string") return (d) => d == null ? undefined : d[accessor];
   return (d) => {
@@ -151,7 +151,7 @@ bcGraphAccessor = (accessor, fallbackKeys = []) => {
   };
 }
 
-bcGraphFirstDefined = (row, keys) => {
+sfsGraphFirstDefined = (row, keys) => {
   if (row == null || typeof row !== "object") return undefined;
   for (const key of keys) {
     if (Object.prototype.hasOwnProperty.call(row, key) && row[key] !== undefined && row[key] !== null) {
@@ -161,7 +161,7 @@ bcGraphFirstDefined = (row, keys) => {
   return undefined;
 }
 
-bcGraphNormalizeType = (type) => {
+sfsGraphNormalizeType = (type) => {
   const value = String(type || "histogram").toLowerCase().replace(/[_ ]+/g, "-");
   if (["hist", "histogram"].includes(value)) return "histogram";
   if (["block", "blocks", "block-hist", "block-histogram", "block-histograph"].includes(value)) return "block";
@@ -171,8 +171,8 @@ bcGraphNormalizeType = (type) => {
   return value;
 }
 
-bcGraphCurveFactory = (opts = {}) => {
-  const curve = bcGraphValueOr(opts.interpolation, bcGraphValueOr(opts.curveFactory, opts.curve));
+sfsGraphCurveFactory = (opts = {}) => {
+  const curve = sfsGraphValueOr(opts.interpolation, sfsGraphValueOr(opts.curveFactory, opts.curve));
   if (typeof curve === "function") return curve;
   if (curve === undefined || curve === null) return d3.curveBasis;
 
@@ -191,24 +191,24 @@ bcGraphCurveFactory = (opts = {}) => {
   return curves[name] || d3.curveBasis;
 }
 
-bcGraphDefaultYLabel = (type, scale) => {
+sfsGraphDefaultYLabel = (type, scale) => {
   if (scale === "percent") return "Percent";
   if (scale === "proportion") return "Proportion";
   return type === "curve" ? "Proportion" : "Frequency";
 }
 
-bcGraphFormatInterval = (lower, upper, formatter) =>
+sfsGraphFormatInterval = (lower, upper, formatter) =>
   `${formatter(lower)}-${formatter(upper)}`
 
-bcGraphIntervalLabel = (row, formatter = (d) => d) => {
+sfsGraphIntervalLabel = (row, formatter = (d) => d) => {
   if (row.label !== undefined && row.label !== null) return String(row.label);
   if (row.lower !== undefined && row.upper !== undefined) {
-    return bcGraphFormatInterval(row.lower, row.upper, formatter);
+    return sfsGraphFormatInterval(row.lower, row.upper, formatter);
   }
   return String(row.x);
 }
 
-bcGraphLooksSummarized = (rows, opts = {}) => {
+sfsGraphLooksSummarized = (rows, opts = {}) => {
   if (opts.summarized === true) return true;
   if (opts.frequency !== undefined || opts.count !== undefined) return true;
   const first = rows.find((row) => row != null && typeof row === "object");
@@ -217,7 +217,7 @@ bcGraphLooksSummarized = (rows, opts = {}) => {
   );
 }
 
-bcGraphFinalizeRows = (rows) => {
+sfsGraphFinalizeRows = (rows) => {
   const total = d3.sum(rows, (row) => row.frequency);
   let cumulativeFrequency = 0;
   return rows.map((row) => {
@@ -235,17 +235,17 @@ bcGraphFinalizeRows = (rows) => {
   });
 }
 
-bcGraphNormalizeSummaryRows = (rows, opts = {}) => {
-  const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category"]);
-  const getFrequency = bcGraphAccessor(opts.frequency || opts.count, ["frequency", "freq", "count", "n", "f"]);
-  const getLabel = bcGraphAccessor(opts.label, ["label", "category", "x", "value", "score"]);
+sfsGraphNormalizeSummaryRows = (rows, opts = {}) => {
+  const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category"]);
+  const getFrequency = sfsGraphAccessor(opts.frequency || opts.count, ["frequency", "freq", "count", "n", "f"]);
+  const getLabel = sfsGraphAccessor(opts.label, ["label", "category", "x", "value", "score"]);
 
   const normalized = rows.map((row, index) => {
-    const lower = bcGraphFirstDefined(row, ["lower", "x0", "min", "start"]);
-    const upper = bcGraphFirstDefined(row, ["upper", "x1", "max", "end"]);
+    const lower = sfsGraphFirstDefined(row, ["lower", "x0", "min", "start"]);
+    const upper = sfsGraphFirstDefined(row, ["upper", "x1", "max", "end"]);
     const label = getLabel(row);
-    const x = bcGraphValueOr(getX(row), lower !== undefined && upper !== undefined ? (Number(lower) + Number(upper)) / 2 : bcGraphValueOr(label, index));
-    const frequency = bcGraphFiniteNumber(getFrequency(row)) || 0;
+    const x = sfsGraphValueOr(getX(row), lower !== undefined && upper !== undefined ? (Number(lower) + Number(upper)) / 2 : sfsGraphValueOr(label, index));
+    const frequency = sfsGraphFiniteNumber(getFrequency(row)) || 0;
     return {
       x,
       key: String(x),
@@ -257,34 +257,34 @@ bcGraphNormalizeSummaryRows = (rows, opts = {}) => {
     };
   });
 
-  return bcGraphFinalizeRows(normalized);
+  return sfsGraphFinalizeRows(normalized);
 }
 
-bcGraphAllNumeric = (values) =>
+sfsGraphAllNumeric = (values) =>
   values.length > 0 && values.every((value) => Number.isFinite(Number(value)))
 
-bcGraphInferStep = (values) => {
+sfsGraphInferStep = (values) => {
   const numbers = Array.from(new Set(values.map(Number))).sort(d3.ascending);
   const diffs = numbers.slice(1).map((value, index) => value - numbers[index]).filter((value) => value > 0);
   return diffs.length ? d3.min(diffs) : 1;
 }
 
-bcGraphScoreWidth = (values, opts = {}) => {
-  const explicit = bcGraphPositiveNumber(bcGraphValueOr(opts.scoreWidth, opts.scorewidth));
+sfsGraphScoreWidth = (values, opts = {}) => {
+  const explicit = sfsGraphPositiveNumber(sfsGraphValueOr(opts.scoreWidth, opts.scorewidth));
   if (explicit) return explicit;
 
-  const type = bcGraphNormalizeType(opts.type || opts.graphType);
+  const type = sfsGraphNormalizeType(opts.type || opts.graphType);
   const numbers = values.map(Number).filter(Number.isFinite);
   if (type !== "bar" && numbers.length && numbers.every(Number.isInteger)) return 1;
 
-  return bcGraphInferStep(values);
+  return sfsGraphInferStep(values);
 }
 
-bcGraphCountValues = (rows, opts = {}) => {
-  const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category", "label"]);
+sfsGraphCountValues = (rows, opts = {}) => {
+  const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category", "label"]);
   const values = rows.map(getX).filter((value) => value !== undefined && value !== null && value !== "");
   const categories = opts.categories ? opts.categories.slice() : Array.from(new Set(values));
-  const numeric = bcGraphAllNumeric(categories);
+  const numeric = sfsGraphAllNumeric(categories);
   const orderedCategories = opts.categories ? categories : categories.slice().sort(numeric ? (a, b) => Number(a) - Number(b) : d3.ascending);
   const counts = new Map(orderedCategories.map((value) => [value, 0]));
   const firstSourceByValue = new Map();
@@ -297,7 +297,7 @@ bcGraphCountValues = (rows, opts = {}) => {
     counts.set(value, counts.get(value) + 1);
   });
 
-  const step = numeric ? bcGraphScoreWidth(orderedCategories, opts) : undefined;
+  const step = numeric ? sfsGraphScoreWidth(orderedCategories, opts) : undefined;
   const counted = Array.from(counts, ([value, frequency]) => {
     const x = numeric ? Number(value) : value;
     const row = {
@@ -319,10 +319,10 @@ bcGraphCountValues = (rows, opts = {}) => {
     return row;
   });
 
-  return bcGraphFinalizeRows(counted);
+  return sfsGraphFinalizeRows(counted);
 }
 
-bcGraphResolveCuts = (values, opts = {}) => {
+sfsGraphResolveCuts = (values, opts = {}) => {
   if (opts.cuts) return opts.cuts.map(Number).sort(d3.ascending);
 
   const numbers = values.map(Number).filter(Number.isFinite);
@@ -331,12 +331,12 @@ bcGraphResolveCuts = (values, opts = {}) => {
   const extent = d3.extent(numbers);
   const min = extent[0];
   const max = extent[1];
-  const binWidth = bcGraphFiniteNumber(opts.binWidth || opts.binwidth || opts.intervalWidth);
+  const binWidth = sfsGraphFiniteNumber(opts.binWidth || opts.binwidth || opts.intervalWidth);
 
   if (binWidth) {
     const allIntegers = numbers.every(Number.isInteger);
-    const explicitStart = bcGraphFiniteNumber(opts.binStart || opts.start);
-    const explicitStop = bcGraphFiniteNumber(opts.binStop || opts.stop);
+    const explicitStart = sfsGraphFiniteNumber(opts.binStart || opts.start);
+    const explicitStop = sfsGraphFiniteNumber(opts.binStop || opts.stop);
     const start = explicitStart !== undefined
       ? explicitStart
       : allIntegers && binWidth === 1
@@ -351,7 +351,7 @@ bcGraphResolveCuts = (values, opts = {}) => {
     return d3.range(start, stop + binWidth * 0.5, binWidth);
   }
 
-  const bins = bcGraphFiniteNumber(opts.bins);
+  const bins = sfsGraphFiniteNumber(opts.bins);
   if (bins) {
     const nice = d3.scaleLinear().domain([min, max]).nice(bins).domain();
     const thresholds = d3.ticks(nice[0], nice[1], bins);
@@ -362,11 +362,11 @@ bcGraphResolveCuts = (values, opts = {}) => {
   return [];
 }
 
-bcGraphBinValues = (rows, opts = {}) => {
-  const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
+sfsGraphBinValues = (rows, opts = {}) => {
+  const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
   const values = rows.map(getX).map(Number).filter(Number.isFinite);
-  const cuts = bcGraphResolveCuts(values, opts);
-  if (cuts.length < 2) return bcGraphCountValues(rows, opts);
+  const cuts = sfsGraphResolveCuts(values, opts);
+  if (cuts.length < 2) return sfsGraphCountValues(rows, opts);
 
   const bins = d3.pairs(cuts).map(([lower, upper], index) => ({
     x: (lower + upper) / 2,
@@ -384,128 +384,128 @@ bcGraphBinValues = (rows, opts = {}) => {
     if (index >= 0) bins[index].frequency += 1;
   });
 
-  return bcGraphFinalizeRows(bins);
+  return sfsGraphFinalizeRows(bins);
 }
 
-bcGraphFrequencyRows = (data, opts = {}) => {
-  const type = bcGraphNormalizeType(opts.type || opts.graphType);
-  const rows = bcGraphAsArray(data);
-  if (bcGraphLooksSummarized(rows, opts)) return bcGraphNormalizeSummaryRows(rows, opts);
+sfsGraphFrequencyRows = (data, opts = {}) => {
+  const type = sfsGraphNormalizeType(opts.type || opts.graphType);
+  const rows = sfsGraphAsArray(data);
+  if (sfsGraphLooksSummarized(rows, opts)) return sfsGraphNormalizeSummaryRows(rows, opts);
 
-  const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category", "label"]);
+  const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score", "category", "label"]);
   const values = rows.map(getX).filter((value) => value !== undefined && value !== null && value !== "");
-  const allNumeric = bcGraphAllNumeric(values);
+  const allNumeric = sfsGraphAllNumeric(values);
   const forceBins = opts.cuts || opts.binWidth || opts.binwidth || opts.intervalWidth || opts.bins;
 
   if (allNumeric && (forceBins || (type !== "bar" && !values.every((value) => Number.isInteger(Number(value)))))) {
-    return bcGraphBinValues(rows, opts);
+    return sfsGraphBinValues(rows, opts);
   }
 
-  return bcGraphCountValues(rows, opts);
+  return sfsGraphCountValues(rows, opts);
 }
 
 frequencyTable = (opts = {}) =>
-  bcGraphFrequencyRows(opts.data, opts)
+  sfsGraphFrequencyRows(opts.data, opts)
 
-bcGraphMeasure = (row, scale = "frequency") => {
+sfsGraphMeasure = (row, scale = "frequency") => {
   if (scale === "percent") return row.percent;
   if (scale === "proportion") return row.proportion;
   return row.frequency;
 }
 
-bcGraphSeriesData = (opts = {}, type = "histogram") => {
+sfsGraphSeriesData = (opts = {}, type = "histogram") => {
   const source = opts.series || opts.data;
-  const data = bcGraphAsArray(source);
+  const data = sfsGraphAsArray(source);
 
   if (opts.series || (data.length > 0 && data.every((row) => row && typeof row === "object" && Array.isArray(row.data)))) {
     return data.map((series, index) => ({
       name: series.name || series.label || `Group ${index + 1}`,
       color: series.color,
-      rows: bcGraphFrequencyRows(series.data, Object.assign({}, opts, series, { type }))
+      rows: sfsGraphFrequencyRows(series.data, Object.assign({}, opts, series, { type }))
     }));
   }
 
   if (opts.group) {
-    const getGroup = bcGraphAccessor(opts.group, ["group", "series", "condition"]);
+    const getGroup = sfsGraphAccessor(opts.group, ["group", "series", "condition"]);
     const groups = d3.group(data, getGroup);
     return Array.from(groups, ([name, rows], index) => ({
       name: name === undefined ? `Group ${index + 1}` : String(name),
-      rows: bcGraphFrequencyRows(rows, Object.assign({}, opts, { type }))
+      rows: sfsGraphFrequencyRows(rows, Object.assign({}, opts, { type }))
     }));
   }
 
   return [{
     name: opts.name || opts.label || "",
     color: opts.color,
-    rows: bcGraphFrequencyRows(opts.data, Object.assign({}, opts, { type }))
+    rows: sfsGraphFrequencyRows(opts.data, Object.assign({}, opts, { type }))
   }];
 }
 
-bcGraphCurveRows = (data, opts = {}) => {
-  const rows = bcGraphAsArray(data);
+sfsGraphCurveRows = (data, opts = {}) => {
+  const rows = sfsGraphAsArray(data);
   const firstObject = rows.find((row) => row && typeof row === "object");
   const yKeys = ["y", "density", "proportion", "frequency", "freq"];
 
   if (firstObject && yKeys.some((key) => Object.prototype.hasOwnProperty.call(firstObject, key))) {
-    const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
-    const getY = bcGraphAccessor(opts.y || opts.density, yKeys);
+    const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
+    const getY = sfsGraphAccessor(opts.y || opts.density, yKeys);
     return rows
       .map((row) => ({ x: Number(getX(row)), y: Number(getY(row)), source: row }))
       .filter((row) => Number.isFinite(row.x) && Number.isFinite(row.y))
       .sort((a, b) => a.x - b.x);
   }
 
-  const getX = bcGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
+  const getX = sfsGraphAccessor(opts.x || opts.value, ["x", "value", "score"]);
   const values = rows.map(getX).map(Number).filter(Number.isFinite);
   if (!values.length) return [];
 
   const extent = opts.xDomain || opts.domain || d3.extent(values);
   const sd = d3.deviation(values) || 1;
-  const bandwidth = bcGraphPositiveNumber(bcGraphValueOr(opts.bandwidth, opts.smoothing)) ||
+  const bandwidth = sfsGraphPositiveNumber(sfsGraphValueOr(opts.bandwidth, opts.smoothing)) ||
     1.06 * sd * Math.pow(values.length, -0.2) ||
     1;
-  const points = bcGraphFiniteNumber(opts.points) || 160;
+  const points = sfsGraphFiniteNumber(opts.points) || 160;
   const step = (extent[1] - extent[0]) / Math.max(1, points - 1);
 
   return d3.range(points).map((index) => {
     const x = extent[0] + index * step;
-    const y = d3.mean(values, (value) => bcGraphNormalPdf(x, value, bandwidth));
+    const y = d3.mean(values, (value) => sfsGraphNormalPdf(x, value, bandwidth));
     return { x, y };
   });
 }
 
-bcGraphCurveSeriesData = (opts = {}) => {
+sfsGraphCurveSeriesData = (opts = {}) => {
   const source = opts.series || opts.data;
-  const data = bcGraphAsArray(source);
+  const data = sfsGraphAsArray(source);
 
   if (opts.series || (data.length > 0 && data.every((row) => row && typeof row === "object" && Array.isArray(row.data)))) {
     return data.map((series, index) => ({
       name: series.name || series.label || `Group ${index + 1}`,
       color: series.color,
-      rows: bcGraphCurveRows(series.data, Object.assign({}, opts, series))
+      rows: sfsGraphCurveRows(series.data, Object.assign({}, opts, series))
     }));
   }
 
   if (opts.group) {
-    const getGroup = bcGraphAccessor(opts.group, ["group", "series", "condition"]);
+    const getGroup = sfsGraphAccessor(opts.group, ["group", "series", "condition"]);
     const groups = d3.group(data, getGroup);
     return Array.from(groups, ([name, rows], index) => ({
       name: name === undefined ? `Group ${index + 1}` : String(name),
-      rows: bcGraphCurveRows(rows, opts)
+      rows: sfsGraphCurveRows(rows, opts)
     }));
   }
 
   return [{
     name: opts.name || opts.label || "",
     color: opts.color,
-    rows: bcGraphCurveRows(opts.data, opts)
+    rows: sfsGraphCurveRows(opts.data, opts)
   }];
 }
 
-bcGraphCreateSvg = (opts = {}, type = "histogram", dimensions = bcGraphDimensions(opts, type)) => {
+sfsGraphCreateSvg = (opts = {}, type = "histogram", dimensions = sfsGraphDimensions(opts, type)) => {
   const { width, height } = dimensions;
   const labels = opts.labels || {};
-  const title = bcGraphValueOr(opts.title, labels.title);
+  const title = sfsGraphValueOr(opts.title, labels.title);
   const ariaLabel = opts.ariaLabel || title || `${type} frequency graph`;
 
   // A responsive redraw re-renders into the node that is already mounted
@@ -523,10 +523,10 @@ bcGraphCreateSvg = (opts = {}, type = "histogram", dimensions = bcGraphDimension
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", ariaLabel)
-    .classed("bc-graph", true)
-    .classed(`bc-graph-${type}`, true)
-    .style("width", bcGraphValueOr(opts.cssWidth, "100%"))
-    .style("max-width", bcGraphValueOr(opts.maxWidth, "100%"))
+    .classed("sfs-graph", true)
+    .classed(`sfs-graph-${type}`, true)
+    .style("width", sfsGraphValueOr(opts.cssWidth, "100%"))
+    .style("max-width", sfsGraphValueOr(opts.maxWidth, "100%"))
     .style("height", "auto")
     .style("display", "block");
 
@@ -536,26 +536,59 @@ bcGraphCreateSvg = (opts = {}, type = "histogram", dimensions = bcGraphDimension
   return svg;
 }
 
-bcGraphResolveMargin = (opts = {}) => {
+// Axis furniture keeps a fixed CSS font size while responsive graphs redraw at
+// their actual width. Give compact charts correspondingly tighter default
+// reserves, then ease back to the established roomy defaults as space returns.
+// Explicit margins remain exact, so unusually wide tick labels can still claim
+// whatever room they need.
+sfsGraphFluidDefault = (width, compact, roomy) => {
+  const compactWidth = 240;
+  const roomyWidth = 480;
+  const progress = Math.max(0, Math.min(1,
+    (Number(width) - compactWidth) / (roomyWidth - compactWidth)
+  ));
+  return Math.round(compact + (roomy - compact) * progress);
+}
+
+sfsGraphDefaultLeftMargin = (opts, width) => {
+  const values = opts.yTickValues !== undefined
+    ? opts.yTickValues
+    : Array.isArray(opts.yTicks) ? opts.yTicks : null;
+  if (!Array.isArray(values) || !values.length) return 64;
+
+  const formatter = typeof (opts.yTickFormat || opts.yFormat) === "function"
+    ? opts.yTickFormat || opts.yFormat
+    : String;
+  const widest = values.reduce((length, value) =>
+    Math.max(length, String(formatter(value)).length), 1);
+  // A one-character tick fits comfortably beside the y title in 48 px. Each
+  // extra character claims roughly one tick-font character of additional room;
+  // longer labels retain the established 64 px reserve even on a narrow chart.
+  const compact = Math.min(64, 48 + (widest - 1) * 7);
+  return sfsGraphFluidDefault(width, compact, 64);
+}
+
+sfsGraphResolveMargin = (opts = {}) => {
   const margin = opts.margin || {};
+  const width = sfsGraphDimensions(opts).width;
   return {
-    top: bcGraphValueOr(margin.top, opts.title || (opts.labels && opts.labels.title) ? 42 : 22),
-    right: bcGraphValueOr(margin.right, 22),
-    bottom: bcGraphValueOr(margin.bottom, 58),
-    left: bcGraphValueOr(margin.left, 64)
+    top: sfsGraphValueOr(margin.top, opts.title || (opts.labels && opts.labels.title) ? 42 : 22),
+    right: sfsGraphValueOr(margin.right, 22),
+    bottom: sfsGraphValueOr(margin.bottom, sfsGraphFluidDefault(width, 48, 58)),
+    left: sfsGraphValueOr(margin.left, sfsGraphDefaultLeftMargin(opts, width))
   };
 }
 
-bcGraphStyleAxis = (axis) => {
+sfsGraphStyleAxis = (axis) => {
   axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} bc-graph-axis`;
+      return `${this.getAttribute("class") || ""} sfs-graph-axis`;
     })
-    .call((g) => g.selectAll("text").attr("class", "bc-graph-tick-label"))
-    .call((g) => g.selectAll("line").attr("class", "bc-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "bc-graph-domain"));
+    .call((g) => g.selectAll("text").attr("class", "sfs-graph-tick-label"))
+    .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
+    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
 }
 
-bcGraphAllIntegers = (values) =>
+sfsGraphAllIntegers = (values) =>
   Array.isArray(values) &&
   values.length > 0 &&
   values.every((value) => Number.isInteger(Number(value)));
@@ -563,7 +596,7 @@ bcGraphAllIntegers = (values) =>
 // Every x value the figure was built from, so the axis can tell a discrete
 // score scale from a continuous measurement. Bin objects contribute their own
 // boundaries; anything non-numeric (a nominal category) disqualifies the set.
-bcGraphXValueSample = (opts = {}) => {
+sfsGraphXValueSample = (opts = {}) => {
   const sources = [];
   if (Array.isArray(opts.series)) {
     opts.series.forEach((series) => {
@@ -579,7 +612,7 @@ bcGraphXValueSample = (opts = {}) => {
       if (entry.lower !== undefined || entry.upper !== undefined) {
         values.push(entry.lower, entry.upper);
       } else {
-        values.push(bcGraphValueOr(entry.x, entry.value));
+        values.push(sfsGraphValueOr(entry.x, entry.value));
       }
     } else {
       values.push(entry);
@@ -589,15 +622,15 @@ bcGraphXValueSample = (opts = {}) => {
   return values.filter((value) => value !== undefined && value !== null);
 }
 
-bcGraphUseIntegerXTicks = (opts = {}) => {
+sfsGraphUseIntegerXTicks = (opts = {}) => {
   if (opts.xTickValues !== undefined || opts.tickValues !== undefined) return false;
-  return Boolean(bcGraphValueOr(
+  return Boolean(sfsGraphValueOr(
     opts.integerXTicks,
-    bcGraphValueOr(opts.xIntegerTicks, bcGraphAllIntegers(bcGraphXValueSample(opts)))
+    sfsGraphValueOr(opts.xIntegerTicks, sfsGraphAllIntegers(sfsGraphXValueSample(opts)))
   ));
 }
 
-bcGraphScaleSpan = (scale) => {
+sfsGraphScaleSpan = (scale) => {
   const range = typeof scale.range === "function" ? scale.range() : null;
   if (!range || range.length < 2) return 0;
   return Math.abs(Number(range[range.length - 1]) - Number(range[0]));
@@ -608,8 +641,8 @@ bcGraphScaleSpan = (scale) => {
 // many ticks as fit and no more: crowding is resolved by thinning the axis, the
 // way the presidential chart drops to 20-year ticks on a phone. An explicit
 // tickValues list is the author's own decision and is left alone.
-bcGraphFitTickCount = (scale, requested, spacing) => {
-  const span = bcGraphScaleSpan(scale);
+sfsGraphFitTickCount = (scale, requested, spacing) => {
+  const span = sfsGraphScaleSpan(scale);
   if (!span || !Number.isFinite(spacing) || spacing <= 0) return requested;
   const budget = Math.max(2, Math.floor(span / spacing));
   return Math.max(2, Math.min(requested, budget));
@@ -617,7 +650,7 @@ bcGraphFitTickCount = (scale, requested, spacing) => {
 
 // Roughly how wide a tick label is, in the shared 13 px tick size: enough for
 // "1" to sit closer to its neighbour than "440" does.
-bcGraphTickLabelSpacing = (scale, count, formatter) => {
+sfsGraphTickLabelSpacing = (scale, count, formatter) => {
   if (typeof scale.ticks !== "function") return 0;
   const values = scale.ticks(count);
   if (!values.length) return 0;
@@ -633,22 +666,22 @@ bcGraphTickLabelSpacing = (scale, count, formatter) => {
 // Whole-number scores get whole-number ticks: "1", not "1.0", and no half-step
 // ticks on a scale where half a point was never a possible value. Continuous
 // measurements keep d3's own ticks and format.
-bcGraphBottomAxis = (scale, opts = {}, fallbackTicks) => {
+sfsGraphBottomAxis = (scale, opts = {}, fallbackTicks) => {
   const axis = d3.axisBottom(scale);
   const tickFormat = opts.xTickFormat || opts.tickFormat;
   const continuousScale = typeof scale.ticks === "function";
-  const requestedCount = bcGraphValueOr(opts.xTicks, fallbackTicks);
+  const requestedCount = sfsGraphValueOr(opts.xTicks, fallbackTicks);
   const tickCount = continuousScale
-    ? bcGraphFitTickCount(
+    ? sfsGraphFitTickCount(
       scale,
-      bcGraphValueOr(requestedCount, 10),
-      bcGraphTickLabelSpacing(scale, bcGraphValueOr(requestedCount, 10), tickFormat)
+      sfsGraphValueOr(requestedCount, 10),
+      sfsGraphTickLabelSpacing(scale, sfsGraphValueOr(requestedCount, 10), tickFormat)
     )
     : requestedCount;
   let tickValues = opts.xTickValues || opts.tickValues;
 
-  if (!tickValues && continuousScale && bcGraphUseIntegerXTicks(opts)) {
-    tickValues = bcGraphIntegerTicks(scale.domain(), tickCount);
+  if (!tickValues && continuousScale && sfsGraphUseIntegerXTicks(opts)) {
+    tickValues = sfsGraphIntegerTicks(scale.domain(), tickCount);
   }
 
   if (tickValues) {
@@ -659,23 +692,23 @@ bcGraphBottomAxis = (scale, opts = {}, fallbackTicks) => {
 
   if (tickFormat) {
     axis.tickFormat(tickFormat);
-  } else if (bcGraphAllIntegers(tickValues)) {
+  } else if (sfsGraphAllIntegers(tickValues)) {
     axis.tickFormat(d3.format("d"));
   } else if (!tickValues && continuousScale &&
-    bcGraphAllIntegers(scale.ticks(bcGraphValueOr(tickCount, 10)))) {
+    sfsGraphAllIntegers(scale.ticks(sfsGraphValueOr(tickCount, 10)))) {
     axis.tickFormat(d3.format("d"));
   }
 
   return axis;
 }
 
-bcGraphIntegerTicks = (domain, tickCount = 5) => {
+sfsGraphIntegerTicks = (domain, tickCount = 5) => {
   const lower = Math.ceil(Math.min(Number(domain[0]), Number(domain[1])));
   const upper = Math.floor(Math.max(Number(domain[0]), Number(domain[1])));
   if (!Number.isFinite(lower) || !Number.isFinite(upper) || upper < lower) return undefined;
   if (upper === lower) return [lower];
 
-  const count = Math.max(1, Math.round(bcGraphPositiveNumber(tickCount) || 5));
+  const count = Math.max(1, Math.round(sfsGraphPositiveNumber(tickCount) || 5));
   const step = Math.max(1, Math.ceil(Math.abs(d3.tickStep(lower, upper, count)) || 1));
   const start = Math.ceil(lower / step) * step;
   const values = d3.range(start, upper + step / 2, step)
@@ -684,58 +717,58 @@ bcGraphIntegerTicks = (domain, tickCount = 5) => {
   return values.length ? values : [lower, upper];
 }
 
-bcGraphUseIntegerYTicks = (opts = {}, scale = "frequency") => {
+sfsGraphUseIntegerYTicks = (opts = {}, scale = "frequency") => {
   if (opts.yTickValues !== undefined || Array.isArray(opts.yTicks)) return false;
-  return bcGraphValueOr(
+  return sfsGraphValueOr(
     opts.integerYTicks,
-    bcGraphValueOr(opts.yIntegerTicks, scale === "frequency")
+    sfsGraphValueOr(opts.yIntegerTicks, scale === "frequency")
   );
 }
 
 // Two lines of tick text need about twice the shared tick size between them.
-bcGraphYTickSpacing = 28;
+sfsGraphYTickSpacing = 28;
 
-bcGraphYTickCount = (y, opts = {}) =>
-  bcGraphFitTickCount(y, bcGraphValueOr(opts.yTicks, 5), bcGraphYTickSpacing);
+sfsGraphYTickCount = (y, opts = {}) =>
+  sfsGraphFitTickCount(y, sfsGraphValueOr(opts.yTicks, 5), sfsGraphYTickSpacing);
 
-bcGraphYTickValues = (y, opts = {}, scale = "frequency") => {
+sfsGraphYTickValues = (y, opts = {}, scale = "frequency") => {
   if (opts.yTickValues !== undefined) return opts.yTickValues;
   if (Array.isArray(opts.yTicks)) return opts.yTicks;
-  return bcGraphUseIntegerYTicks(opts, scale)
-    ? bcGraphIntegerTicks(y.domain(), bcGraphYTickCount(y, opts))
+  return sfsGraphUseIntegerYTicks(opts, scale)
+    ? sfsGraphIntegerTicks(y.domain(), sfsGraphYTickCount(y, opts))
     : undefined;
 }
 
-bcGraphLeftAxis = (y, opts = {}, scale = "frequency") => {
+sfsGraphLeftAxis = (y, opts = {}, scale = "frequency") => {
   const axis = d3.axisLeft(y);
-  const tickValues = bcGraphYTickValues(y, opts, scale);
-  const useIntegerTicks = bcGraphUseIntegerYTicks(opts, scale);
+  const tickValues = sfsGraphYTickValues(y, opts, scale);
+  const useIntegerTicks = sfsGraphUseIntegerYTicks(opts, scale);
   const tickFormat = opts.yTickFormat || opts.yFormat;
 
   if (tickValues !== undefined) {
     axis.tickValues(tickValues);
   } else {
-    axis.ticks(bcGraphYTickCount(y, opts));
+    axis.ticks(sfsGraphYTickCount(y, opts));
   }
 
   if (tickFormat) {
     axis.tickFormat(tickFormat);
-  } else if (useIntegerTicks || bcGraphAllIntegers(tickValues)) {
+  } else if (useIntegerTicks || sfsGraphAllIntegers(tickValues)) {
     axis.tickFormat(d3.format("d"));
   }
 
   return axis;
 }
 
-bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
+sfsGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
   const labels = opts.labels || {};
-  const title = bcGraphValueOr(opts.title, labels.title);
-  const xLabel = bcGraphValueOr(opts.xLabel, labels.x || labels.xLabel || "Scores");
-  const yLabel = bcGraphValueOr(opts.yLabel, labels.y || labels.yLabel || bcGraphDefaultYLabel(type, scale));
+  const title = sfsGraphValueOr(opts.title, labels.title);
+  const xLabel = sfsGraphValueOr(opts.xLabel, labels.x || labels.xLabel || "Scores");
+  const yLabel = sfsGraphValueOr(opts.yLabel, labels.y || labels.yLabel || sfsGraphDefaultYLabel(type, scale));
 
   if (title) {
     svg.append("text")
-      .attr("class", "bc-graph-title")
+      .attr("class", "sfs-graph-title")
       .attr("x", margin.left)
       .attr("y", 18)
       .text(title);
@@ -743,7 +776,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 
   if (xLabel !== false) {
     svg.append("text")
-      .attr("class", "bc-graph-label bc-graph-x-label")
+      .attr("class", "sfs-graph-label sfs-graph-x-label")
       .attr("x", (margin.left + width - margin.right) / 2)
       .attr("y", height - 12)
       .attr("text-anchor", "middle")
@@ -752,7 +785,7 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
 
   if (yLabel !== false) {
     svg.append("text")
-      .attr("class", "bc-graph-label bc-graph-y-label")
+      .attr("class", "sfs-graph-label sfs-graph-y-label")
       .attr("x", -(margin.top + height - margin.bottom) / 2)
       .attr("y", 17)
       .attr("transform", "rotate(-90)")
@@ -761,10 +794,10 @@ bcGraphAddLabels = (svg, opts, type, margin, width, height, scale) => {
   }
 }
 
-bcGraphAddLegend = (svg, series, opts, width, margin) => {
+sfsGraphAddLegend = (svg, series, opts, width, margin) => {
   if (series.length < 2 || opts.legend === false) return;
   const legend = svg.append("g")
-    .attr("class", "bc-graph-legend")
+    .attr("class", "sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 120},${margin.top})`);
 
   const items = legend.selectAll("g")
@@ -777,7 +810,7 @@ bcGraphAddLegend = (svg, series, opts, width, margin) => {
     .attr("x2", 18)
     .attr("y1", 0)
     .attr("y2", 0)
-    .attr("stroke", (d, i) => d.color || bcGraphDefaultColors[i % bcGraphDefaultColors.length])
+    .attr("stroke", (d, i) => d.color || sfsGraphDefaultColors[i % sfsGraphDefaultColors.length])
     .attr("stroke-width", 2);
 
   items.append("text")
@@ -786,8 +819,8 @@ bcGraphAddLegend = (svg, series, opts, width, margin) => {
     .text((d) => d.name);
 }
 
-bcGraphAddReferenceMarkers = (svg, opts, x, margin, height) => {
-  const rawMarkers = bcGraphValueOr(opts.referenceMarkers, opts.referenceLines);
+sfsGraphAddReferenceMarkers = (svg, opts, x, margin, height) => {
+  const rawMarkers = sfsGraphValueOr(opts.referenceMarkers, opts.referenceLines);
   if (rawMarkers === undefined || rawMarkers === null || rawMarkers === false) return;
 
   const domain = x.domain();
@@ -800,31 +833,31 @@ bcGraphAddReferenceMarkers = (svg, opts, x, margin, height) => {
   if (!markerData.length) return;
 
   const markers = svg.append("g")
-    .attr("class", "bc-graph-reference-markers")
+    .attr("class", "sfs-graph-reference-markers")
     .attr("aria-hidden", "true")
     .selectAll("g")
     .data(markerData)
     .join("g")
-      .attr("class", "bc-graph-reference-marker")
+      .attr("class", "sfs-graph-reference-marker")
       .attr("transform", (d) => `translate(${x(d.value)},0)`);
 
   markers.append("line")
     .attr("y1", margin.top)
     .attr("y2", height - margin.bottom)
-    .attr("stroke-dasharray", (d) => bcGraphValueOr(d.dash, "5 4"))
-    .attr("stroke-width", (d) => bcGraphValueOr(d.strokeWidth, 2))
-    .style("stroke", (d) => d.color || "var(--bc-danger-color, #c63f3f)");
+    .attr("stroke-dasharray", (d) => sfsGraphValueOr(d.dash, "5 4"))
+    .attr("stroke-width", (d) => sfsGraphValueOr(d.strokeWidth, 2))
+    .style("stroke", (d) => d.color || "var(--sfs-danger-color, #c63f3f)");
 
   markers.filter((d) => d.label !== undefined && d.label !== null && d.label !== false)
     .append("text")
-      .attr("x", (d) => bcGraphValueOr(d.dx, 6))
-      .attr("y", (d) => margin.top + bcGraphValueOr(d.dy, 16))
-      .attr("text-anchor", (d) => bcGraphValueOr(d.anchor, "start"))
-      .style("fill", (d) => d.color || "var(--bc-danger-color, #c63f3f)")
+      .attr("x", (d) => sfsGraphValueOr(d.dx, 6))
+      .attr("y", (d) => margin.top + sfsGraphValueOr(d.dy, 16))
+      .attr("text-anchor", (d) => sfsGraphValueOr(d.anchor, "start"))
+      .style("fill", (d) => d.color || "var(--sfs-danger-color, #c63f3f)")
       .text((d) => d.label);
 }
 
-bcGraphLinearDomain = (series, opts = {}, type = "histogram") => {
+sfsGraphLinearDomain = (series, opts = {}, type = "histogram") => {
   if (opts.xDomain) return opts.xDomain;
   if (opts.domain) return opts.domain;
 
@@ -840,13 +873,13 @@ bcGraphLinearDomain = (series, opts = {}, type = "histogram") => {
   return extent[0] === extent[1] ? [extent[0] - 1, extent[1] + 1] : extent;
 }
 
-bcGraphYDomain = (series, opts = {}, scale = "frequency") => {
+sfsGraphYDomain = (series, opts = {}, scale = "frequency") => {
   if (opts.yDomain) return opts.yDomain;
-  const maxValue = d3.max(series, (s) => d3.max(s.rows, (row) => bcGraphMeasure(row, scale))) || 0;
+  const maxValue = d3.max(series, (s) => d3.max(s.rows, (row) => sfsGraphMeasure(row, scale))) || 0;
   return [0, maxValue];
 }
 
-bcGraphLookupVisual = (visual, row, datum) => {
+sfsGraphLookupVisual = (visual, row, datum) => {
   if (visual === undefined || visual === null) return undefined;
   if (typeof visual === "function") return visual(row, datum);
   if (Array.isArray(visual)) return visual[datum.rowIndex % visual.length];
@@ -870,30 +903,30 @@ bcGraphLookupVisual = (visual, row, datum) => {
   return undefined;
 }
 
-bcGraphFirstVisual = (values) => {
+sfsGraphFirstVisual = (values) => {
   for (const value of values) {
     if (value !== undefined && value !== null) return value;
   }
   return undefined;
 }
 
-bcGraphRowFill = (datum, opts, fallback) => {
+sfsGraphRowFill = (datum, opts, fallback) => {
   const row = datum.row || datum;
   const source = row.source && typeof row.source === "object" ? row.source : {};
-  return bcGraphFirstVisual([
+  return sfsGraphFirstVisual([
     row.fill,
     row.color,
     source.fill,
     source.color,
-    bcGraphLookupVisual(opts.fills || opts.fill || opts.colors, row, datum),
+    sfsGraphLookupVisual(opts.fills || opts.fill || opts.colors, row, datum),
     fallback
   ]);
 }
 
-bcGraphRowBlockFill = (datum, opts, fallback) => {
+sfsGraphRowBlockFill = (datum, opts, fallback) => {
   const row = datum.row || datum;
   const source = row.source && typeof row.source === "object" ? row.source : {};
-  return bcGraphFirstVisual([
+  return sfsGraphFirstVisual([
     row.blockFill,
     row.blockColor,
     row.fill,
@@ -902,36 +935,36 @@ bcGraphRowBlockFill = (datum, opts, fallback) => {
     source.blockColor,
     source.fill,
     source.color,
-    bcGraphLookupVisual(opts.blockFills || opts.blockFill || opts.blockColors || opts.blockColor, row, datum),
-    bcGraphLookupVisual(opts.fills || opts.fill || opts.colors || opts.color, row, datum),
+    sfsGraphLookupVisual(opts.blockFills || opts.blockFill || opts.blockColors || opts.blockColor, row, datum),
+    sfsGraphLookupVisual(opts.fills || opts.fill || opts.colors || opts.color, row, datum),
     fallback
   ]);
 }
 
-bcGraphRowStroke = (datum, opts, fallback) => {
+sfsGraphRowStroke = (datum, opts, fallback) => {
   const row = datum.row || datum;
   const source = row.source && typeof row.source === "object" ? row.source : {};
-  return bcGraphFirstVisual([
+  return sfsGraphFirstVisual([
     row.stroke,
     source.stroke,
-    bcGraphLookupVisual(opts.barStrokes || opts.barStroke || opts.strokes || opts.stroke, row, datum),
+    sfsGraphLookupVisual(opts.barStrokes || opts.barStroke || opts.strokes || opts.stroke, row, datum),
     fallback
   ]);
 }
 
-bcGraphRowBlockStroke = (datum, opts, fallback) => {
+sfsGraphRowBlockStroke = (datum, opts, fallback) => {
   const row = datum.row || datum;
   const source = row.source && typeof row.source === "object" ? row.source : {};
-  return bcGraphFirstVisual([
+  return sfsGraphFirstVisual([
     row.stroke,
     source.stroke,
-    bcGraphLookupVisual(opts.blockStrokes || opts.blockStroke, row, datum),
-    bcGraphLookupVisual(opts.barStrokes || opts.barStroke || opts.strokes || opts.stroke, row, datum),
+    sfsGraphLookupVisual(opts.blockStrokes || opts.blockStroke, row, datum),
+    sfsGraphLookupVisual(opts.barStrokes || opts.barStroke || opts.strokes || opts.stroke, row, datum),
     fallback
   ]);
 }
 
-bcGraphSeriesStroke = (seriesDatum, opts, index, fallback) => {
+sfsGraphSeriesStroke = (seriesDatum, opts, index, fallback) => {
   const row = {
     label: seriesDatum.name,
     key: seriesDatum.name,
@@ -944,46 +977,46 @@ bcGraphSeriesStroke = (seriesDatum, opts, index, fallback) => {
     seriesIndex: index,
     rowIndex: index
   };
-  return bcGraphFirstVisual([
+  return sfsGraphFirstVisual([
     seriesDatum.stroke,
     seriesDatum.color,
-    bcGraphLookupVisual(opts.strokes || opts.stroke || opts.colors || opts.color, row, datum),
+    sfsGraphLookupVisual(opts.strokes || opts.stroke || opts.colors || opts.color, row, datum),
     fallback
   ]);
 }
 
-bcGraphDrawGrid = (svg, y, opts, margin, width, scale = "frequency") => {
+sfsGraphDrawGrid = (svg, y, opts, margin, width, scale = "frequency") => {
   if (!opts.grid) return;
   svg.append("g")
-    .attr("class", "bc-graph-grid")
+    .attr("class", "sfs-graph-grid")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(bcGraphLeftAxis(y, opts, scale)
+    .call(sfsGraphLeftAxis(y, opts, scale)
       .tickSize(-(width - margin.left - margin.right))
       .tickFormat(""))
     .call((g) => g.select(".domain").remove());
 }
 
-bcGraphHistogramBounds = (row) => ({
+sfsGraphHistogramBounds = (row) => ({
   left: Number.isFinite(row.lower) ? row.lower : Number(row.x) - 0.5,
   right: Number.isFinite(row.upper) ? row.upper : Number(row.x) + 0.5
 })
 
-bcGraphHistogramX = (row, x, overlayOffset, seriesIndex) => {
-  const bounds = bcGraphHistogramBounds(row);
+sfsGraphHistogramX = (row, x, overlayOffset, seriesIndex) => {
+  const bounds = sfsGraphHistogramBounds(row);
   const width = x(bounds.right) - x(bounds.left);
   return x(bounds.left) + width * overlayOffset + seriesIndex * 0.5;
 }
 
-bcGraphHistogramWidth = (row, x, overlayWidth, barGap = 0) => {
-  const bounds = bcGraphHistogramBounds(row);
+sfsGraphHistogramWidth = (row, x, overlayWidth, barGap = 0) => {
+  const bounds = sfsGraphHistogramBounds(row);
   return Math.max(0, (x(bounds.right) - x(bounds.left)) * overlayWidth - barGap);
 }
 
-bcGraphBlockRows = (rowData, scale, opts = {}) => {
-  const unit = bcGraphPositiveNumber(bcGraphValueOr(opts.blockUnit, bcGraphValueOr(opts.blockSize, opts.unit))) || 1;
+sfsGraphBlockRows = (rowData, scale, opts = {}) => {
+  const unit = sfsGraphPositiveNumber(sfsGraphValueOr(opts.blockUnit, sfsGraphValueOr(opts.blockSize, opts.unit))) || 1;
   const epsilon = unit / 1000000;
   return rowData.flatMap((datum) => {
-    const value = Math.max(0, bcGraphMeasure(datum.row, scale));
+    const value = Math.max(0, sfsGraphMeasure(datum.row, scale));
     const blockCount = Math.ceil(Math.max(0, value - epsilon) / unit);
     return d3.range(blockCount)
       .map((blockIndex) => {
@@ -1000,14 +1033,14 @@ bcGraphBlockRows = (rowData, scale, opts = {}) => {
   });
 }
 
-bcGraphPrefersReducedMotion = () =>
+sfsGraphPrefersReducedMotion = () =>
   typeof window !== "undefined" &&
   (window.interactiveRuntime && window.interactiveRuntime.motion
     ? window.interactiveRuntime.motion.isReduced()
     : typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches)
 
-bcGraphEaseFactory = (name, fallback) => {
+sfsGraphEaseFactory = (name, fallback) => {
   if (typeof name === "function") return name;
   const eases = {
     linear: d3.easeLinear,
@@ -1021,22 +1054,22 @@ bcGraphEaseFactory = (name, fallback) => {
   return eases[String(name || "").toLowerCase()] || fallback;
 }
 
-bcGraphEntranceOptions = (opts = {}) => {
+sfsGraphEntranceOptions = (opts = {}) => {
   const requested = opts.animate === true || opts.animate === "visible" || opts.animate === "auto";
-  const duration = bcGraphValueOr(opts.animationDuration, 1000);
+  const duration = sfsGraphValueOr(opts.animationDuration, 1000);
   return {
-    enabled: requested && !bcGraphPrefersReducedMotion(),
+    enabled: requested && !sfsGraphPrefersReducedMotion(),
     duration,
-    delayStep: bcGraphValueOr(opts.animationDelay, 200),
-    seriesDelay: bcGraphValueOr(opts.seriesAnimationDelay, duration * 0.25),
-    threshold: bcGraphValueOr(opts.animationThreshold, 0.95),
+    delayStep: sfsGraphValueOr(opts.animationDelay, 200),
+    seriesDelay: sfsGraphValueOr(opts.seriesAnimationDelay, duration * 0.25),
+    threshold: sfsGraphValueOr(opts.animationThreshold, 0.95),
     ease: opts.animationEase
   };
 }
 
 // Plays once when the SVG scrolls into view, and replays on click so a
 // reader can re-trigger the entrance without reloading the page.
-bcGraphPlayEntrance = (svg, threshold, play, namespace = "") => {
+sfsGraphPlayEntrance = (svg, threshold, play, namespace = "") => {
   const eventName = namespace ? `click.${namespace}` : "click";
   svg.style("cursor", "pointer").on(eventName, play);
   onVisible(svg.node(), play, threshold);
@@ -1057,8 +1090,8 @@ bcGraphPlayEntrance = (svg, threshold, play, namespace = "") => {
 // construction. Every line/curve in this module is monotonic in x (never
 // loops back), so revealing left-to-right in x is visually the same as
 // tracing the line with a pen, without any path-length math at all.
-bcGraphRevealClips = (svg, lineSelection, left, top, width, height) => lineSelection.nodes().map((node) => {
-  const clipId = bcGraphNextClipId("bc-graph-reveal-clip");
+sfsGraphRevealClips = (svg, lineSelection, left, top, width, height) => lineSelection.nodes().map((node) => {
+  const clipId = sfsGraphNextClipId("sfs-graph-reveal-clip");
   const rect = svg.append("clipPath").attr("id", clipId)
     .append("rect")
       .attr("x", left)
@@ -1074,12 +1107,12 @@ bcGraphRevealClips = (svg, lineSelection, left, top, width, height) => lineSelec
 // always loaded together) — a block's fall duration is derived from its own
 // fall distance (distance = ½·g·t²), not a fixed duration, so every block
 // drops at the same physical rate regardless of how far it falls.
-bcGraphFallGravity = 1700 // px per second^2
-bcGraphFallDurationForDistance = (distance) =>
-  Math.sqrt(2 * Math.max(0, distance) / bcGraphFallGravity) * 1000
+sfsGraphFallGravity = 1700 // px per second^2
+sfsGraphFallDurationForDistance = (distance) =>
+  Math.sqrt(2 * Math.max(0, distance) / sfsGraphFallGravity) * 1000
 
-bcGraphHashSeed = (seed) => {
-  const text = String(seed ?? "bc-block-fall-v1");
+sfsGraphHashSeed = (seed) => {
+  const text = String(seed ?? "sfs-block-fall-v1");
   let hash = 2166136261;
   for (let index = 0; index < text.length; index += 1) {
     hash ^= text.charCodeAt(index);
@@ -1088,8 +1121,8 @@ bcGraphHashSeed = (seed) => {
   return hash >>> 0;
 }
 
-bcGraphSeededRandom = (seed) => {
-  let state = bcGraphHashSeed(seed);
+sfsGraphSeededRandom = (seed) => {
+  let state = sfsGraphHashSeed(seed);
   return () => {
     state += 0x6D2B79F5;
     let value = state;
@@ -1099,8 +1132,8 @@ bcGraphSeededRandom = (seed) => {
   };
 }
 
-bcGraphBlockFallRanks = (blockData, opts = {}) => {
-  const order = String(bcGraphValueOr(opts.blockFallOrder, opts.fallOrder) || "sequential")
+sfsGraphBlockFallRanks = (blockData, opts = {}) => {
+  const order = String(sfsGraphValueOr(opts.blockFallOrder, opts.fallOrder) || "sequential")
     .toLowerCase();
   const ranks = new Map();
 
@@ -1109,11 +1142,11 @@ bcGraphBlockFallRanks = (blockData, opts = {}) => {
     return ranks;
   }
 
-  const seed = bcGraphValueOr(
+  const seed = sfsGraphValueOr(
     opts.blockFallSeed,
-    bcGraphValueOr(opts.fallSeed, bcGraphValueOr(opts.seed, "bc-block-fall-v1"))
+    sfsGraphValueOr(opts.fallSeed, sfsGraphValueOr(opts.seed, "sfs-block-fall-v1"))
   );
-  const random = bcGraphSeededRandom(seed);
+  const random = sfsGraphSeededRandom(seed);
   const stacks = Array.from(
     d3.group(blockData, (datum) => `${datum.seriesIndex}:${datum.rowIndex}`).values(),
     (items) => ({
@@ -1145,18 +1178,18 @@ bcGraphBlockFallRanks = (blockData, opts = {}) => {
   return ranks;
 }
 
-bcGraphClipIdCounter = 0
-bcGraphNextClipId = (prefix) => `${prefix}-${++bcGraphClipIdCounter}`
+sfsGraphClipIdCounter = 0
+sfsGraphNextClipId = (prefix) => `${prefix}-${++sfsGraphClipIdCounter}`
 
 // Bars/histogram grow at a constant rate (pixels per second), so a tall bar
 // takes proportionally longer than a short one instead of every bar
 // finishing at the same moment regardless of height — no easing, since a
 // constant rate *is* linear.
-bcGraphGrowthDuration = (heightPx, rate) => (Math.max(0, heightPx) / rate) * 1000
+sfsGraphGrowthDuration = (heightPx, rate) => (Math.max(0, heightPx) / rate) * 1000
 
 // For a relay where item i doesn't start until item i-1 has finished:
 // cumulative sum of each item's own duration.
-bcGraphRelayDelays = (durations) => {
+sfsGraphRelayDelays = (durations) => {
   const delays = [];
   let cumulative = 0;
   durations.forEach((duration) => {
@@ -1166,62 +1199,62 @@ bcGraphRelayDelays = (durations) => {
   return delays;
 }
 
-bcGraphMakeBarGraph = (opts = {}, type = "bar") => {
-  const series = bcGraphSeriesData(opts, type);
-  const scale = bcGraphValueOr(opts.scale, "frequency");
-  const dimensions = bcGraphDimensions(opts, type);
+sfsGraphMakeBarGraph = (opts = {}, type = "bar") => {
+  const series = sfsGraphSeriesData(opts, type);
+  const scale = sfsGraphValueOr(opts.scale, "frequency");
+  const dimensions = sfsGraphDimensions(opts, type);
   const { width, height } = dimensions;
-  const margin = bcGraphResolveMargin(opts);
-  const svg = bcGraphCreateSvg(opts, type, dimensions);
+  const margin = sfsGraphResolveMargin(opts);
+  const svg = sfsGraphCreateSvg(opts, type, dimensions);
   const allRows = series.flatMap((s) => s.rows);
-  const categories = Array.from(new Set(allRows.map((row) => bcGraphIntervalLabel(row))));
+  const categories = Array.from(new Set(allRows.map((row) => sfsGraphIntervalLabel(row))));
   const x = d3.scaleBand()
     .domain(categories)
     .range([margin.left, width - margin.right])
-    .padding(bcGraphValueOr(opts.padding, 0.22));
+    .padding(sfsGraphValueOr(opts.padding, 0.22));
   const xSeries = d3.scaleBand()
     .domain(series.map((s) => s.name))
     .range([0, x.bandwidth()])
     .padding(series.length > 1 ? 0.08 : 0);
   const y = d3.scaleLinear()
-    .domain(bcGraphYDomain(series, opts, scale))
+    .domain(sfsGraphYDomain(series, opts, scale))
     .nice()
     .range([height - margin.bottom, margin.top]);
 
-  bcGraphDrawGrid(svg, y, opts, margin, width, scale);
+  sfsGraphDrawGrid(svg, y, opts, margin, width, scale);
 
   const rowData = series.flatMap((s, seriesIndex) =>
     s.rows.map((row, rowIndex) => ({ row, series: s, seriesIndex, rowIndex }))
   );
-  const entrance = bcGraphEntranceOptions(opts);
+  const entrance = sfsGraphEntranceOptions(opts);
 
   const bars = svg.append("g")
-    .attr("class", "bc-graph-bars")
+    .attr("class", "sfs-graph-bars")
     .selectAll("rect")
     .data(rowData)
     .join("rect")
-      .attr("class", "bc-graph-bar")
-      .attr("x", (d) => x(bcGraphIntervalLabel(d.row)) + xSeries(d.series.name))
-      .attr("y", (d) => entrance.enabled ? y(0) : y(bcGraphMeasure(d.row, scale)))
+      .attr("class", "sfs-graph-bar")
+      .attr("x", (d) => x(sfsGraphIntervalLabel(d.row)) + xSeries(d.series.name))
+      .attr("y", (d) => entrance.enabled ? y(0) : y(sfsGraphMeasure(d.row, scale)))
       .attr("width", xSeries.bandwidth())
-      .attr("height", (d) => entrance.enabled ? 0 : y(0) - y(bcGraphMeasure(d.row, scale)))
-      .style("fill", (d) => bcGraphRowFill(
+      .attr("height", (d) => entrance.enabled ? 0 : y(0) - y(sfsGraphMeasure(d.row, scale)))
+      .style("fill", (d) => sfsGraphRowFill(
         d,
         opts,
-        d.series.color || (series.length > 1 ? bcGraphDefaultColors[d.seriesIndex % bcGraphDefaultColors.length] : "var(--graph-bar-fill, #bdbdbd)")
+        d.series.color || (series.length > 1 ? sfsGraphDefaultColors[d.seriesIndex % sfsGraphDefaultColors.length] : "var(--graph-bar-fill, #bdbdbd)")
       ))
-      .style("stroke", (d) => bcGraphRowStroke(d, opts, "var(--graph-bar-stroke, currentColor)"));
+      .style("stroke", (d) => sfsGraphRowStroke(d, opts, "var(--graph-bar-stroke, currentColor)"));
 
   bars.append("title")
-    .text((d) => `${bcGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
+    .text((d) => `${sfsGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
 
   if (entrance.enabled) {
     // Each bar starts growing the instant the previous one finishes — a
     // relay, not a fixed per-bar delay — so the pacing stays consistent
     // regardless of how many bars there are.
-    const growthRate = bcGraphValueOr(opts.growthRate, 900); // px/sec
-    const durations = rowData.map((d) => bcGraphGrowthDuration(y(0) - y(bcGraphMeasure(d.row, scale)), growthRate));
-    const delays = bcGraphRelayDelays(durations);
+    const growthRate = sfsGraphValueOr(opts.growthRate, 900); // px/sec
+    const durations = rowData.map((d) => sfsGraphGrowthDuration(y(0) - y(sfsGraphMeasure(d.row, scale)), growthRate));
+    const delays = sfsGraphRelayDelays(durations);
     const play = () => {
       bars.interrupt()
         .attr("y", y(0))
@@ -1230,42 +1263,42 @@ bcGraphMakeBarGraph = (opts = {}, type = "bar") => {
         .delay((d, i) => delays[i])
         .duration((d, i) => durations[i])
         .ease(d3.easeLinear)
-        .attr("y", (d) => y(bcGraphMeasure(d.row, scale)))
-        .attr("height", (d) => y(0) - y(bcGraphMeasure(d.row, scale)));
+        .attr("y", (d) => y(sfsGraphMeasure(d.row, scale)))
+        .attr("height", (d) => y(0) - y(sfsGraphMeasure(d.row, scale)));
     };
-    bcGraphPlayEntrance(svg, entrance.threshold, play);
+    sfsGraphPlayEntrance(svg, entrance.threshold, play);
   }
 
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(bcGraphBottomAxis(x, opts));
+    .call(sfsGraphBottomAxis(x, opts));
   const yAxis = svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(bcGraphLeftAxis(y, opts, scale));
-  bcGraphStyleAxis(xAxis);
-  bcGraphStyleAxis(yAxis);
-  if (opts.yAxisLine === false) yAxis.select(".bc-graph-domain").remove();
+    .call(sfsGraphLeftAxis(y, opts, scale));
+  sfsGraphStyleAxis(xAxis);
+  sfsGraphStyleAxis(yAxis);
+  if (opts.yAxisLine === false) yAxis.select(".sfs-graph-domain").remove();
 
-  bcGraphAddLabels(svg, opts, type, margin, width, height, scale);
-  bcGraphAddLegend(svg, series, opts, width, margin);
+  sfsGraphAddLabels(svg, opts, type, margin, width, height, scale);
+  sfsGraphAddLegend(svg, series, opts, width, margin);
   return svg.node();
 }
 
-bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
-  const series = bcGraphSeriesData(opts, type);
-  const scale = bcGraphValueOr(opts.scale, "frequency");
-  const margin = bcGraphResolveMargin(opts);
-  const xDomain = bcGraphLinearDomain(series, opts, type);
+sfsGraphMakeHistogram = (opts = {}, type = "histogram") => {
+  const series = sfsGraphSeriesData(opts, type);
+  const scale = sfsGraphValueOr(opts.scale, "frequency");
+  const margin = sfsGraphResolveMargin(opts);
+  const xDomain = sfsGraphLinearDomain(series, opts, type);
   const finalXDomain = opts.xNiceTicks ?
     d3.scaleLinear().domain(xDomain).nice(opts.xNiceTicks).domain() :
     xDomain;
   const yDomain = d3.scaleLinear()
-    .domain(bcGraphYDomain(series, opts, scale))
+    .domain(sfsGraphYDomain(series, opts, scale))
     .nice()
     .domain();
-  const dimensions = bcGraphDimensionsForLinearScales(opts, type, finalXDomain, yDomain, margin);
+  const dimensions = sfsGraphDimensionsForLinearScales(opts, type, finalXDomain, yDomain, margin);
   const { width, height } = dimensions;
-  const svg = bcGraphCreateSvg(opts, type, dimensions);
+  const svg = sfsGraphCreateSvg(opts, type, dimensions);
   const x = d3.scaleLinear()
     .domain(finalXDomain)
     .range([margin.left, width - margin.right]);
@@ -1273,28 +1306,28 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     .domain(yDomain)
     .range([height - margin.bottom, margin.top]);
 
-  bcGraphDrawGrid(svg, y, opts, margin, width, scale);
+  sfsGraphDrawGrid(svg, y, opts, margin, width, scale);
 
   const rowData = series.flatMap((s, seriesIndex) =>
     s.rows.map((row, rowIndex) => ({ row, series: s, seriesIndex, rowIndex }))
   );
   const overlayWidth = series.length > 1 ? 0.72 : 1;
   const overlayOffset = series.length > 1 ? (1 - overlayWidth) / 2 : 0;
-  const barGap = bcGraphValueOr(opts.barGap, 0);
-  const entrance = bcGraphEntranceOptions(opts);
+  const barGap = sfsGraphValueOr(opts.barGap, 0);
+  const entrance = sfsGraphEntranceOptions(opts);
 
   if (type === "block") {
-    const blockGap = bcGraphValueOr(opts.blockGap, 0);
+    const blockGap = sfsGraphValueOr(opts.blockGap, 0);
     // The default release order follows blockData: one column bottom-to-top,
     // then the next. An opt-in randomized order interleaves columns while
     // preserving bottom-to-top order within each stack, so blocks never land
     // in midair.
-    const blockData = bcGraphBlockRows(rowData, scale, opts);
-    const blockFallRanks = bcGraphBlockFallRanks(blockData, opts);
-    // Same default resolution bcGraphBlockRows uses internally for `unit` —
+    const blockData = sfsGraphBlockRows(rowData, scale, opts);
+    const blockFallRanks = sfsGraphBlockFallRanks(blockData, opts);
+    // Same default resolution sfsGraphBlockRows uses internally for `unit` —
     // duplicated (not returned from that call) since it's a one-liner and
     // changing that function's return shape isn't worth it for this.
-    const blockUnit = bcGraphPositiveNumber(bcGraphValueOr(opts.blockUnit, bcGraphValueOr(opts.blockSize, opts.unit))) || 1;
+    const blockUnit = sfsGraphPositiveNumber(sfsGraphValueOr(opts.blockUnit, sfsGraphValueOr(opts.blockSize, opts.unit))) || 1;
     // The y-scale is linear and every block spans the same `unit`, so every
     // block has the same pixel height regardless of which row/stack it's in
     // (a partial last block is only ever shorter than this, never taller) —
@@ -1302,7 +1335,7 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     const blockPixelHeight = Math.abs(y(0) - y(blockUnit));
     // Blocks fall from a shared ceiling above the plot, like objects dropped
     // from a shelf — same constant-gravity model as sampling-visuals.js's
-    // mean-boxes (see bcGraphFallDurationForDistance). `.bc-graph` sets
+    // mean-boxes (see sfsGraphFallDurationForDistance). `.sfs-graph` sets
     // overflow:visible (so axis labels etc. aren't clipped), so a ceiling
     // above y=0 would otherwise just render as a visible block sitting above
     // the plot rather than staying out of sight — a clipPath scoped to this
@@ -1311,12 +1344,12 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
     // full block's *height*, not just its top edge — a block positioned by
     // its top-left corner still has its bottom edge sticking out below that
     // point, which is what was still visible before this accounted for it.
-    const fallHeadroomRatio = bcGraphValueOr(opts.fallHeadroomRatio, 0.5);
+    const fallHeadroomRatio = sfsGraphValueOr(opts.fallHeadroomRatio, 0.5);
     const ceilingY = -blockPixelHeight * (1 + fallHeadroomRatio);
     const blockTargetX = (datum) =>
-      bcGraphHistogramX(datum.row, x, overlayOffset, datum.seriesIndex);
+      sfsGraphHistogramX(datum.row, x, overlayOffset, datum.seriesIndex);
     const blockWidth = (datum) =>
-      bcGraphHistogramWidth(datum.row, x, overlayWidth, barGap);
+      sfsGraphHistogramWidth(datum.row, x, overlayWidth, barGap);
     const blockOriginX = (datum) => {
       const origin = opts.blockFallOriginX;
       if (origin === undefined || origin === null || origin === false) {
@@ -1334,9 +1367,9 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
         : center - blockWidth(datum) / 2;
     };
 
-    const blocksGroup = svg.append("g").attr("class", "bc-graph-bars bc-graph-blocks");
+    const blocksGroup = svg.append("g").attr("class", "sfs-graph-bars sfs-graph-blocks");
     if (entrance.enabled) {
-      const clipId = bcGraphNextClipId("bc-graph-block-clip");
+      const clipId = sfsGraphNextClipId("sfs-graph-block-clip");
       svg.append("clipPath").attr("id", clipId)
         .append("rect").attr("x", 0).attr("y", 0).attr("width", width).attr("height", height);
       blocksGroup.attr("clip-path", `url(#${clipId})`);
@@ -1346,26 +1379,26 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
       .selectAll("rect")
       .data(blockData)
       .join("rect")
-        .attr("class", "bc-graph-bar bc-graph-block")
+        .attr("class", "sfs-graph-bar sfs-graph-block")
         .attr("x", (d) => entrance.enabled ? blockOriginX(d) : blockTargetX(d))
         .attr("y", (d) => entrance.enabled ? ceilingY : y(d.blockUpper))
         .attr("width", blockWidth)
         .attr("height", (d) => Math.max(0, y(d.blockLower) - y(d.blockUpper) - blockGap))
         .attr("data-block-index", (d) => d.blockIndex)
         .attr("data-fall-rank", (d) => blockFallRanks.get(d))
-        .style("fill", (d) => bcGraphRowBlockFill(
+        .style("fill", (d) => sfsGraphRowBlockFill(
           d,
           opts,
-          d.series.color || (series.length > 1 ? bcGraphDefaultColors[d.seriesIndex % bcGraphDefaultColors.length] : "var(--graph-block-fill, var(--graph-bar-fill, #bdbdbd))")
+          d.series.color || (series.length > 1 ? sfsGraphDefaultColors[d.seriesIndex % sfsGraphDefaultColors.length] : "var(--graph-block-fill, var(--graph-bar-fill, #bdbdbd))")
         ))
-        .style("stroke", (d) => bcGraphRowBlockStroke(d, opts, "var(--graph-block-stroke, var(--bs-body-bg, currentColor))"))
+        .style("stroke", (d) => sfsGraphRowBlockStroke(d, opts, "var(--graph-block-stroke, var(--bs-body-bg, currentColor))"))
         .attr("fill-opacity", series.length > 1 ? 0.45 : null);
 
     blocks.append("title")
-      .text((d) => `${bcGraphIntervalLabel(d.row)} block ${d.blockIndex + 1}: ${d.row.frequency}`);
+      .text((d) => `${sfsGraphIntervalLabel(d.row)} block ${d.blockIndex + 1}: ${d.row.frequency}`);
 
     if (entrance.enabled) {
-      const ease = bcGraphEaseFactory(entrance.ease, d3.easeQuadIn);
+      const ease = sfsGraphEaseFactory(entrance.ease, d3.easeQuadIn);
       // Every block releases one by one at a fixed cadence (not waiting for
       // the previous one to land) — a block released later is always at an
       // earlier point along the very same ceiling-to-target trajectory a
@@ -1381,47 +1414,47 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
       // of a block regardless of how big or small the chart's blocks are,
       // rather than a fixed millisecond count tuned for one particular
       // chart size.
-      const fallGapFraction = bcGraphValueOr(opts.fallGapFraction, 0.25);
-      const stagger = bcGraphValueOr(opts.fallStagger, bcGraphFallDurationForDistance(blockPixelHeight * fallGapFraction));
+      const fallGapFraction = sfsGraphValueOr(opts.fallGapFraction, 0.25);
+      const stagger = sfsGraphValueOr(opts.fallStagger, sfsGraphFallDurationForDistance(blockPixelHeight * fallGapFraction));
       const play = () => {
         blocks.interrupt()
           .attr("x", blockOriginX)
           .attr("y", ceilingY)
           .transition()
           .delay((d) => blockFallRanks.get(d) * stagger)
-          .duration((d) => bcGraphFallDurationForDistance(y(d.blockUpper) - ceilingY))
+          .duration((d) => sfsGraphFallDurationForDistance(y(d.blockUpper) - ceilingY))
           .ease(ease)
           .attr("x", blockTargetX)
           .attr("y", (d) => y(d.blockUpper));
       };
-      bcGraphPlayEntrance(svg, entrance.threshold, play);
+      sfsGraphPlayEntrance(svg, entrance.threshold, play);
     }
   } else {
     const bars = svg.append("g")
-      .attr("class", "bc-graph-bars")
+      .attr("class", "sfs-graph-bars")
       .selectAll("rect")
       .data(rowData)
       .join("rect")
-        .attr("class", "bc-graph-bar")
-        .attr("x", (d) => bcGraphHistogramX(d.row, x, overlayOffset, d.seriesIndex))
-        .attr("y", (d) => entrance.enabled ? y(0) : y(bcGraphMeasure(d.row, scale)))
-        .attr("width", (d) => bcGraphHistogramWidth(d.row, x, overlayWidth, barGap))
-        .attr("height", (d) => entrance.enabled ? 0 : y(0) - y(bcGraphMeasure(d.row, scale)))
-        .style("fill", (d) => bcGraphRowFill(
+        .attr("class", "sfs-graph-bar")
+        .attr("x", (d) => sfsGraphHistogramX(d.row, x, overlayOffset, d.seriesIndex))
+        .attr("y", (d) => entrance.enabled ? y(0) : y(sfsGraphMeasure(d.row, scale)))
+        .attr("width", (d) => sfsGraphHistogramWidth(d.row, x, overlayWidth, barGap))
+        .attr("height", (d) => entrance.enabled ? 0 : y(0) - y(sfsGraphMeasure(d.row, scale)))
+        .style("fill", (d) => sfsGraphRowFill(
           d,
           opts,
-          d.series.color || (series.length > 1 ? bcGraphDefaultColors[d.seriesIndex % bcGraphDefaultColors.length] : "var(--graph-bar-fill, #bdbdbd)")
+          d.series.color || (series.length > 1 ? sfsGraphDefaultColors[d.seriesIndex % sfsGraphDefaultColors.length] : "var(--graph-bar-fill, #bdbdbd)")
         ))
-        .style("stroke", (d) => bcGraphRowStroke(d, opts, "var(--graph-bar-stroke, currentColor)"))
+        .style("stroke", (d) => sfsGraphRowStroke(d, opts, "var(--graph-bar-stroke, currentColor)"))
         .attr("fill-opacity", series.length > 1 ? 0.45 : null);
 
     bars.append("title")
-      .text((d) => `${bcGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
+      .text((d) => `${sfsGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
 
     if (entrance.enabled) {
-      const growthRate = bcGraphValueOr(opts.growthRate, 900); // px/sec
-      const durations = rowData.map((d) => bcGraphGrowthDuration(y(0) - y(bcGraphMeasure(d.row, scale)), growthRate));
-      const delays = bcGraphRelayDelays(durations);
+      const growthRate = sfsGraphValueOr(opts.growthRate, 900); // px/sec
+      const durations = rowData.map((d) => sfsGraphGrowthDuration(y(0) - y(sfsGraphMeasure(d.row, scale)), growthRate));
+      const delays = sfsGraphRelayDelays(durations);
       const play = () => {
         bars.interrupt()
           .attr("y", y(0))
@@ -1430,33 +1463,33 @@ bcGraphMakeHistogram = (opts = {}, type = "histogram") => {
           .delay((d, i) => delays[i])
           .duration((d, i) => durations[i])
           .ease(d3.easeLinear)
-          .attr("y", (d) => y(bcGraphMeasure(d.row, scale)))
-          .attr("height", (d) => y(0) - y(bcGraphMeasure(d.row, scale)));
+          .attr("y", (d) => y(sfsGraphMeasure(d.row, scale)))
+          .attr("height", (d) => y(0) - y(sfsGraphMeasure(d.row, scale)));
       };
-      bcGraphPlayEntrance(svg, entrance.threshold, play);
+      sfsGraphPlayEntrance(svg, entrance.threshold, play);
     }
   }
 
-  bcGraphAddReferenceMarkers(svg, opts, x, margin, height);
+  sfsGraphAddReferenceMarkers(svg, opts, x, margin, height);
 
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(bcGraphBottomAxis(x, opts));
+    .call(sfsGraphBottomAxis(x, opts));
   const yAxis = svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(bcGraphLeftAxis(y, opts, scale));
-  bcGraphStyleAxis(xAxis);
-  bcGraphStyleAxis(yAxis);
-  if (opts.yAxisLine === false) yAxis.select(".bc-graph-domain").remove();
+    .call(sfsGraphLeftAxis(y, opts, scale));
+  sfsGraphStyleAxis(xAxis);
+  sfsGraphStyleAxis(yAxis);
+  if (opts.yAxisLine === false) yAxis.select(".sfs-graph-domain").remove();
 
-  bcGraphAddLabels(svg, opts, type, margin, width, height, scale);
-  bcGraphAddLegend(svg, series, opts, width, margin);
+  sfsGraphAddLabels(svg, opts, type, margin, width, height, scale);
+  sfsGraphAddLegend(svg, series, opts, width, margin);
   return svg.node();
 }
 
-bcGraphPolygonPoints = (rows, scale) => {
+sfsGraphPolygonPoints = (rows, scale) => {
   if (!rows.length) return [];
-  const points = rows.map((row) => ({ x: Number(row.x), y: bcGraphMeasure(row, scale), point: true, row }));
+  const points = rows.map((row) => ({ x: Number(row.x), y: sfsGraphMeasure(row, scale), point: true, row }));
   const first = rows[0];
   const last = rows[rows.length - 1];
   const start = Number.isFinite(first.polygonStart) ? first.polygonStart : Number.isFinite(first.lower) ? first.lower : Number(first.x);
@@ -1464,8 +1497,8 @@ bcGraphPolygonPoints = (rows, scale) => {
   return [{ x: start, y: 0, point: false }].concat(points, [{ x: end, y: 0, point: false }]);
 }
 
-bcGraphPolygonInterpolatedY = (rows, scale, targetX) => {
-  const points = bcGraphPolygonPoints(rows, scale)
+sfsGraphPolygonInterpolatedY = (rows, scale, targetX) => {
+  const points = sfsGraphPolygonPoints(rows, scale)
     .filter((point) => Number.isFinite(point.x) && Number.isFinite(point.y))
     .sort((a, b) => a.x - b.x);
 
@@ -1484,34 +1517,34 @@ bcGraphPolygonInterpolatedY = (rows, scale, targetX) => {
   return undefined;
 }
 
-bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, height) => {
+sfsGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, height) => {
   const rawGuides = opts.interpolationGuides;
   if (rawGuides === undefined || rawGuides === null) return;
 
   const guideSpecs = (Array.isArray(rawGuides) ? rawGuides : [rawGuides])
     .map((guide) => typeof guide === "number" ? { x: guide } : guide)
     .filter((guide) => guide && typeof guide === "object");
-  const color = bcGraphValueOr(
+  const color = sfsGraphValueOr(
     opts.interpolationGuideColor,
-    "color-mix(in srgb, var(--bc-danger-color, #c63f3f) 78%, var(--bc-text, #212529))"
+    "color-mix(in srgb, var(--sfs-danger-color, #c63f3f) 78%, var(--sfs-text, #212529))"
   );
-  const dash = bcGraphValueOr(opts.interpolationGuideDash, "6 4");
-  const strokeWidth = bcGraphValueOr(opts.interpolationGuideStrokeWidth, 1.8);
+  const dash = sfsGraphValueOr(opts.interpolationGuideDash, "6 4");
+  const strokeWidth = sfsGraphValueOr(opts.interpolationGuideStrokeWidth, 1.8);
   const animationRequested = opts.animateInterpolationGuides === true;
-  const animationEnabled = animationRequested && !bcGraphPrefersReducedMotion();
-  const duration = bcGraphValueOr(opts.interpolationGuideAnimationDuration, 650);
-  const pause = bcGraphValueOr(opts.interpolationGuideAnimationPause, 100);
-  const ease = bcGraphEaseFactory(opts.interpolationGuideAnimationEase, d3.easeCubicInOut);
+  const animationEnabled = animationRequested && !sfsGraphPrefersReducedMotion();
+  const duration = sfsGraphValueOr(opts.interpolationGuideAnimationDuration, 650);
+  const pause = sfsGraphValueOr(opts.interpolationGuideAnimationPause, 100);
+  const ease = sfsGraphEaseFactory(opts.interpolationGuideAnimationEase, d3.easeCubicInOut);
   const plotBottom = height - margin.bottom;
   const resolvedGuides = guideSpecs.map((guide) => {
-    const targetX = bcGraphFiniteNumber(guide.x);
+    const targetX = sfsGraphFiniteNumber(guide.x);
     if (!Number.isFinite(targetX)) return null;
 
-    const seriesIndex = Math.max(0, Math.round(bcGraphFiniteNumber(guide.seriesIndex) || 0));
+    const seriesIndex = Math.max(0, Math.round(sfsGraphFiniteNumber(guide.seriesIndex) || 0));
     const targetSeries = series[seriesIndex];
-    const explicitY = bcGraphFiniteNumber(guide.y);
+    const explicitY = sfsGraphFiniteNumber(guide.y);
     const targetY = explicitY === undefined && targetSeries
-      ? bcGraphPolygonInterpolatedY(targetSeries.rows, scale, targetX)
+      ? sfsGraphPolygonInterpolatedY(targetSeries.rows, scale, targetX)
       : explicitY;
 
     if (!Number.isFinite(targetY)) return null;
@@ -1523,7 +1556,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
       targetY,
       xPixel: x(targetX),
       yPixel: y(targetY),
-      xLabel: bcGraphValueOr(guide.xLabel, targetX),
+      xLabel: sfsGraphValueOr(guide.xLabel, targetX),
       label: guide.label
     };
   }).filter(Boolean);
@@ -1531,15 +1564,15 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
   if (!resolvedGuides.length) return;
 
   const guideGroups = svg.append("g")
-    .attr("class", "bc-graph-interpolation-guides")
+    .attr("class", "sfs-graph-interpolation-guides")
     .attr("aria-hidden", "true")
     .selectAll("g")
     .data(resolvedGuides)
     .join("g")
-      .attr("class", "bc-graph-interpolation-guide");
+      .attr("class", "sfs-graph-interpolation-guide");
 
   const verticals = guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-line bc-graph-interpolation-guide-vertical")
+    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-vertical")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => d.xPixel)
     .attr("y1", plotBottom)
@@ -1550,7 +1583,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   const horizontals = guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-line bc-graph-interpolation-guide-horizontal")
+    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-horizontal")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => animationEnabled ? d.xPixel : margin.left)
     .attr("y1", (d) => d.yPixel)
@@ -1561,18 +1594,18 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   const markers = guideGroups.append("circle")
-    .attr("class", "bc-graph-interpolation-guide-marker")
+    .attr("class", "sfs-graph-interpolation-guide-marker")
     .attr("cx", (d) => d.xPixel)
     .attr("cy", (d) => d.yPixel)
-    .attr("r", bcGraphValueOr(opts.interpolationGuidePointRadius, 4))
-    .attr("fill", "var(--bc-bg, #fff)")
+    .attr("r", sfsGraphValueOr(opts.interpolationGuidePointRadius, 4))
+    .attr("fill", "var(--sfs-bg, #fff)")
     .attr("stroke", color)
     .attr("stroke-width", 2)
     .attr("vector-effect", "non-scaling-stroke")
     .style("opacity", animationEnabled ? 0 : 1);
 
   guideGroups.append("line")
-    .attr("class", "bc-graph-interpolation-guide-tick")
+    .attr("class", "sfs-graph-interpolation-guide-tick")
     .attr("x1", (d) => d.xPixel)
     .attr("x2", (d) => d.xPixel)
     .attr("y1", plotBottom)
@@ -1582,7 +1615,7 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
     .attr("vector-effect", "non-scaling-stroke");
 
   guideGroups.append("text")
-    .attr("class", "bc-graph-tick-label bc-graph-interpolation-guide-label")
+    .attr("class", "sfs-graph-tick-label sfs-graph-interpolation-guide-label")
     .attr("x", (d) => d.xPixel)
     .attr("y", plotBottom + 21)
     .attr("text-anchor", "middle")
@@ -1618,27 +1651,27 @@ bcGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin, 
       .attr("x2", margin.left);
   };
 
-  bcGraphPlayEntrance(
+  sfsGraphPlayEntrance(
     svg,
-    bcGraphValueOr(opts.interpolationGuideAnimationThreshold, 0.95),
+    sfsGraphValueOr(opts.interpolationGuideAnimationThreshold, 0.95),
     play,
     "interpolation-guides"
   );
 }
 
-bcGraphMakePolygon = (opts = {}) => {
+sfsGraphMakePolygon = (opts = {}) => {
   const type = "polygon";
-  const series = bcGraphSeriesData(opts, type);
-  const scale = bcGraphValueOr(opts.scale, "frequency");
-  const margin = bcGraphResolveMargin(opts);
-  const xDomain = bcGraphLinearDomain(series, opts, type);
+  const series = sfsGraphSeriesData(opts, type);
+  const scale = sfsGraphValueOr(opts.scale, "frequency");
+  const margin = sfsGraphResolveMargin(opts);
+  const xDomain = sfsGraphLinearDomain(series, opts, type);
   const yDomain = d3.scaleLinear()
-    .domain(bcGraphYDomain(series, opts, scale))
+    .domain(sfsGraphYDomain(series, opts, scale))
     .nice()
     .domain();
-  const dimensions = bcGraphDimensionsForLinearScales(opts, type, xDomain, yDomain, margin);
+  const dimensions = sfsGraphDimensionsForLinearScales(opts, type, xDomain, yDomain, margin);
   const { width, height } = dimensions;
-  const svg = bcGraphCreateSvg(opts, type, dimensions);
+  const svg = sfsGraphCreateSvg(opts, type, dimensions);
   const x = d3.scaleLinear()
     .domain(xDomain)
     .range([margin.left, width - margin.right]);
@@ -1649,35 +1682,35 @@ bcGraphMakePolygon = (opts = {}) => {
     .x((d) => x(d.x))
     .y((d) => y(d.y));
 
-  bcGraphDrawGrid(svg, y, opts, margin, width, scale);
+  sfsGraphDrawGrid(svg, y, opts, margin, width, scale);
 
-  const entrance = bcGraphEntranceOptions(opts);
+  const entrance = sfsGraphEntranceOptions(opts);
 
   const groups = svg.append("g")
-    .attr("class", "bc-graph-polygons")
+    .attr("class", "sfs-graph-polygons")
     .selectAll("g")
     .data(series)
     .join("g")
-      .attr("class", "bc-graph-polygon-series");
+      .attr("class", "sfs-graph-polygon-series");
 
   const lines = groups.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
-    .style("stroke", (d, i) => bcGraphSeriesStroke(d, opts, i, bcGraphDefaultColors[i % bcGraphDefaultColors.length]))
-    .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2))
+    .style("stroke", (d, i) => sfsGraphSeriesStroke(d, opts, i, sfsGraphDefaultColors[i % sfsGraphDefaultColors.length]))
+    .attr("stroke-width", sfsGraphValueOr(opts.strokeWidth, 2))
     .attr("stroke-dasharray", (d, i) => d.dash || (opts.dashed && i > 0 ? "6 4" : null))
-    .attr("d", (d) => line(bcGraphPolygonPoints(d.rows, scale)));
+    .attr("d", (d) => line(sfsGraphPolygonPoints(d.rows, scale)));
 
   // Reveals grow a clip rect left-to-right in plot pixel space rather than
-  // drawing via stroke-dasharray/dashoffset — see bcGraphRevealClips for why.
+  // drawing via stroke-dasharray/dashoffset — see sfsGraphRevealClips for why.
   const revealLeft = margin.left;
   const revealWidth = Math.max(0, width - margin.left - margin.right);
-  const clipRects = entrance.enabled ? bcGraphRevealClips(svg, lines, revealLeft, 0, revealWidth, height) : null;
+  const clipRects = entrance.enabled ? sfsGraphRevealClips(svg, lines, revealLeft, 0, revealWidth, height) : null;
 
   let points = null;
-  if (bcGraphValueOr(opts.points, true)) {
+  if (sfsGraphValueOr(opts.points, true)) {
     points = groups.selectAll("circle")
-      .data((d, i) => bcGraphPolygonPoints(d.rows, scale)
+      .data((d, i) => sfsGraphPolygonPoints(d.rows, scale)
         .filter((point) => point.point)
         .map((point) => Object.assign({}, point, {
           series: d,
@@ -1685,19 +1718,19 @@ bcGraphMakePolygon = (opts = {}) => {
           fraction: revealWidth ? (x(point.x) - revealLeft) / revealWidth : 0
         })))
       .join("circle")
-        .attr("class", "bc-graph-point")
+        .attr("class", "sfs-graph-point")
         .attr("cx", (d) => x(d.x))
         .attr("cy", (d) => y(d.y))
-        .attr("r", bcGraphValueOr(opts.pointRadius, 3))
-        .style("fill", (d) => d.series.color || bcGraphDefaultColors[d.seriesIndex % bcGraphDefaultColors.length])
+        .attr("r", sfsGraphValueOr(opts.pointRadius, 3))
+        .style("fill", (d) => d.series.color || sfsGraphDefaultColors[d.seriesIndex % sfsGraphDefaultColors.length])
         .style("opacity", entrance.enabled ? 0 : null);
 
     points.append("title")
-      .text((d) => `${bcGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
+      .text((d) => `${sfsGraphIntervalLabel(d.row)}: ${d.row.frequency}`);
   }
 
   if (entrance.enabled) {
-    const ease = bcGraphEaseFactory(entrance.ease, d3.easeLinear);
+    const ease = sfsGraphEaseFactory(entrance.ease, d3.easeLinear);
     const play = () => {
       clipRects.forEach((rect, seriesIndex) => {
         rect.interrupt()
@@ -1720,29 +1753,29 @@ bcGraphMakePolygon = (opts = {}) => {
           .style("opacity", 1);
       }
     };
-    bcGraphPlayEntrance(svg, entrance.threshold, play);
+    sfsGraphPlayEntrance(svg, entrance.threshold, play);
   }
 
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(bcGraphBottomAxis(x, opts));
+    .call(sfsGraphBottomAxis(x, opts));
   const yAxis = svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(bcGraphLeftAxis(y, opts, scale));
-  bcGraphStyleAxis(xAxis);
-  bcGraphStyleAxis(yAxis);
+    .call(sfsGraphLeftAxis(y, opts, scale));
+  sfsGraphStyleAxis(xAxis);
+  sfsGraphStyleAxis(yAxis);
 
-  bcGraphAddPolygonInterpolationGuides(svg, opts, series, scale, x, y, margin, height);
+  sfsGraphAddPolygonInterpolationGuides(svg, opts, series, scale, x, y, margin, height);
 
-  bcGraphAddLabels(svg, opts, type, margin, width, height, scale);
-  bcGraphAddLegend(svg, series, opts, width, margin);
+  sfsGraphAddLabels(svg, opts, type, margin, width, height, scale);
+  sfsGraphAddLegend(svg, series, opts, width, margin);
   return svg.node();
 }
 
-bcGraphMakeCurve = (opts = {}) => {
+sfsGraphMakeCurve = (opts = {}) => {
   const type = "curve";
-  const series = bcGraphCurveSeriesData(opts);
-  const margin = bcGraphResolveMargin(opts);
+  const series = sfsGraphCurveSeriesData(opts);
+  const margin = sfsGraphResolveMargin(opts);
   const allRows = series.flatMap((s) => s.rows);
   const xExtent = d3.extent(allRows, (row) => row.x);
   const xDomain = opts.xDomain || opts.domain || (allRows.length ? xExtent : [0, 1]);
@@ -1750,16 +1783,16 @@ bcGraphMakeCurve = (opts = {}) => {
     .domain(opts.yDomain || [0, d3.max(allRows, (row) => row.y) || 1])
     .nice()
     .domain();
-  const dimensions = bcGraphDimensionsForLinearScales(opts, type, xDomain, yDomain, margin);
+  const dimensions = sfsGraphDimensionsForLinearScales(opts, type, xDomain, yDomain, margin);
   const { width, height } = dimensions;
-  const svg = bcGraphCreateSvg(opts, type, dimensions);
+  const svg = sfsGraphCreateSvg(opts, type, dimensions);
   const x = d3.scaleLinear()
     .domain(xDomain)
     .range([margin.left, width - margin.right]);
   const y = d3.scaleLinear()
     .domain(yDomain)
     .range([height - margin.bottom, margin.top]);
-  const curveFactory = bcGraphCurveFactory(opts);
+  const curveFactory = sfsGraphCurveFactory(opts);
   const line = d3.line()
     .curve(curveFactory)
     .x((d) => x(d.x))
@@ -1770,41 +1803,41 @@ bcGraphMakeCurve = (opts = {}) => {
     .y0(y(0))
     .y1((d) => y(d.y));
 
-  bcGraphDrawGrid(svg, y, opts, margin, width, bcGraphValueOr(opts.scale, "proportion"));
+  sfsGraphDrawGrid(svg, y, opts, margin, width, sfsGraphValueOr(opts.scale, "proportion"));
 
-  const entrance = bcGraphEntranceOptions(opts);
+  const entrance = sfsGraphEntranceOptions(opts);
 
   const groups = svg.append("g")
-    .attr("class", "bc-graph-curves")
+    .attr("class", "sfs-graph-curves")
     .selectAll("g")
     .data(series)
     .join("g")
-      .attr("class", "bc-graph-curve-series");
+      .attr("class", "sfs-graph-curve-series");
 
   let areas = null;
-  if (bcGraphValueOr(opts.area, false)) {
+  if (sfsGraphValueOr(opts.area, false)) {
     areas = groups.append("path")
-      .attr("class", "bc-graph-area")
-      .attr("fill", (d, i) => d.color || bcGraphDefaultColors[i % bcGraphDefaultColors.length])
+      .attr("class", "sfs-graph-area")
+      .attr("fill", (d, i) => d.color || sfsGraphDefaultColors[i % sfsGraphDefaultColors.length])
       .attr("d", (d) => area(d.rows))
       .style("opacity", entrance.enabled ? 0 : null);
   }
 
   const lines = groups.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
-    .style("stroke", (d, i) => bcGraphSeriesStroke(d, opts, i, bcGraphDefaultColors[i % bcGraphDefaultColors.length]))
-    .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2))
+    .style("stroke", (d, i) => sfsGraphSeriesStroke(d, opts, i, sfsGraphDefaultColors[i % sfsGraphDefaultColors.length]))
+    .attr("stroke-width", sfsGraphValueOr(opts.strokeWidth, 2))
     .attr("d", (d) => line(d.rows));
 
   // Reveals grow a clip rect left-to-right in plot pixel space rather than
-  // drawing via stroke-dasharray/dashoffset — see bcGraphRevealClips for why.
+  // drawing via stroke-dasharray/dashoffset — see sfsGraphRevealClips for why.
   const revealLeft = margin.left;
   const revealWidth = Math.max(0, width - margin.left - margin.right);
-  const clipRects = entrance.enabled ? bcGraphRevealClips(svg, lines, revealLeft, 0, revealWidth, height) : null;
+  const clipRects = entrance.enabled ? sfsGraphRevealClips(svg, lines, revealLeft, 0, revealWidth, height) : null;
 
   if (entrance.enabled) {
-    const ease = bcGraphEaseFactory(entrance.ease, d3.easeLinear);
+    const ease = sfsGraphEaseFactory(entrance.ease, d3.easeLinear);
     const play = () => {
       clipRects.forEach((rect, seriesIndex) => {
         rect.interrupt()
@@ -1824,35 +1857,35 @@ bcGraphMakeCurve = (opts = {}) => {
           .style("opacity", 1);
       }
     };
-    bcGraphPlayEntrance(svg, entrance.threshold, play);
+    sfsGraphPlayEntrance(svg, entrance.threshold, play);
   }
 
   const xAxis = svg.append("g")
     .attr("transform", `translate(0,${height - margin.bottom})`)
-    .call(bcGraphBottomAxis(x, opts));
+    .call(sfsGraphBottomAxis(x, opts));
   const yAxis = svg.append("g")
     .attr("transform", `translate(${margin.left},0)`)
-    .call(bcGraphLeftAxis(y, opts, bcGraphValueOr(opts.scale, "proportion")));
-  bcGraphStyleAxis(xAxis);
-  bcGraphStyleAxis(yAxis);
+    .call(sfsGraphLeftAxis(y, opts, sfsGraphValueOr(opts.scale, "proportion")));
+  sfsGraphStyleAxis(xAxis);
+  sfsGraphStyleAxis(yAxis);
 
-  bcGraphAddLabels(svg, opts, type, margin, width, height, bcGraphValueOr(opts.scale, "proportion"));
-  bcGraphAddLegend(svg, series, opts, width, margin);
+  sfsGraphAddLabels(svg, opts, type, margin, width, height, sfsGraphValueOr(opts.scale, "proportion"));
+  sfsGraphAddLegend(svg, series, opts, width, margin);
   return svg.node();
 }
 
-bcGraphRender = (opts = {}) => {
-  const type = bcGraphNormalizeType(opts.type || opts.graphType);
-  if (type === "bar") return bcGraphMakeBarGraph(opts, type);
-  if (type === "polygon") return bcGraphMakePolygon(opts);
-  if (type === "curve") return bcGraphMakeCurve(opts);
-  return bcGraphMakeHistogram(opts, type);
+sfsGraphRender = (opts = {}) => {
+  const type = sfsGraphNormalizeType(opts.type || opts.graphType);
+  if (type === "bar") return sfsGraphMakeBarGraph(opts, type);
+  if (type === "polygon") return sfsGraphMakePolygon(opts);
+  if (type === "curve") return sfsGraphMakeCurve(opts);
+  return sfsGraphMakeHistogram(opts, type);
 }
 
-bcGraphParsePixels = (value) => {
-  if (typeof value === "number") return bcGraphPositiveNumber(value);
+sfsGraphParsePixels = (value) => {
+  if (typeof value === "number") return sfsGraphPositiveNumber(value);
   const match = /^\s*([\d.]+)px\s*$/.exec(String(value === undefined ? "" : value));
-  return match ? bcGraphPositiveNumber(Number(match[1])) : undefined;
+  return match ? sfsGraphPositiveNumber(Number(match[1])) : undefined;
 }
 
 // The figure is drawn once at its authored size so it is complete the moment
@@ -1861,29 +1894,29 @@ bcGraphParsePixels = (value) => {
 // labels, and titles at the size the stylesheet asked for on every screen:
 // inside a scaled viewBox, 0.8125rem of tick text renders at 15 px in a wide
 // column and 7 px on a phone. Pass responsive:false to opt a figure out.
-bcGraphObserveWidth = (node, opts, redraw) => {
+sfsGraphObserveWidth = (node, opts, redraw) => {
   const api = window.interactiveFigure;
   if (!api || typeof api.observeResponsiveLayout !== "function") return;
 
-  const type = bcGraphNormalizeType(opts.type || opts.graphType);
+  const type = sfsGraphNormalizeType(opts.type || opts.graphType);
   const viewBox = node.viewBox && node.viewBox.baseVal;
   const drawn = {
-    width: (viewBox && viewBox.width) || bcGraphPositiveNumber(opts.width) || 640,
-    height: (viewBox && viewBox.height) || bcGraphPositiveNumber(opts.height) || 420
+    width: (viewBox && viewBox.width) || sfsGraphPositiveNumber(opts.width) || 640,
+    height: (viewBox && viewBox.height) || sfsGraphPositiveNumber(opts.height) || 420
   };
-  const cssCap = bcGraphParsePixels(opts.maxWidth);
-  const maximumWidth = Math.max(240, cssCap || bcGraphValueOr(opts.maximumWidth, 1600));
+  const cssCap = sfsGraphParsePixels(opts.maxWidth);
+  const maximumWidth = Math.max(240, cssCap || sfsGraphValueOr(opts.maximumWidth, 1600));
   // Height is only passed along when the figure isn't already deriving it: an
   // aspect ratio or an equal-scales rule recomputes height from the new width
   // on its own, and overriding it there would square up what should stay
   // proportional. Everything else keeps the aspect ratio it was drawn with, so
   // narrowing a figure reshapes it exactly as CSS scaling used to — only the
   // text now holds its size instead of shrinking with the box.
-  const bothAuthored = bcGraphPositiveNumber(opts.width) !== undefined &&
-    bcGraphPositiveNumber(opts.height) !== undefined;
+  const bothAuthored = sfsGraphPositiveNumber(opts.width) !== undefined &&
+    sfsGraphPositiveNumber(opts.height) !== undefined;
   const derivesHeight = !bothAuthored && (
-    bcGraphResolveSvgAspectRatio(opts) !== undefined ||
-    bcGraphResolveScaleAspectRatio(opts, type) !== undefined
+    sfsGraphResolveSvgAspectRatio(opts) !== undefined ||
+    sfsGraphResolveScaleAspectRatio(opts, type) !== undefined
   );
   let drawnWidth = drawn.width;
   let firstLayout = true;
@@ -1928,13 +1961,13 @@ bcGraphObserveWidth = (node, opts, redraw) => {
 }
 
 makeGraph = (opts = {}) => {
-  const node = bcGraphRender(opts);
+  const node = sfsGraphRender(opts);
   if (opts.responsive === false || !node || node.tagName !== "svg") return node;
-  bcGraphObserveWidth(node, opts, bcGraphRender);
+  sfsGraphObserveWidth(node, opts, sfsGraphRender);
   return node;
 }
 
-bcToneIdentificationData = [
+sfsToneIdentificationData = [
   { lower: 0.3, upper: 0.3467, frequency: 4 },
   { lower: 0.3467, upper: 0.3933, frequency: 3 },
   { lower: 0.3933, upper: 0.44, frequency: 12 },
@@ -1952,7 +1985,7 @@ bcToneIdentificationData = [
   { lower: 0.9533, upper: 1, frequency: 33 }
 ]
 
-bcToneIdentificationGroupedCenters = (data = bcToneIdentificationData) => {
+sfsToneIdentificationGroupedCenters = (data = sfsToneIdentificationData) => {
   const total = data.reduce((sum, bin) => sum + bin.frequency, 0);
   const mean = data.reduce(
     (sum, bin) => sum + ((bin.lower + bin.upper) / 2) * bin.frequency,
@@ -1976,8 +2009,8 @@ bcToneIdentificationGroupedCenters = (data = bcToneIdentificationData) => {
 
 makeToneIdentificationGraph = (opts = {}) => {
   const showCenters = opts.showCenters === true;
-  const data = Array.isArray(opts.data) ? opts.data : bcToneIdentificationData;
-  const centers = bcToneIdentificationGroupedCenters(data);
+  const data = Array.isArray(opts.data) ? opts.data : sfsToneIdentificationData;
+  const centers = sfsToneIdentificationGroupedCenters(data);
   const defaults = {
     type: "histogram",
     width: 760,
@@ -2015,7 +2048,7 @@ makeToneIdentificationGraph = (opts = {}) => {
       {
         label: `Mean ≈ ${centers.mean.toFixed(2)}`,
         value: centers.mean,
-        color: "var(--bc-danger-color, #c63f3f)",
+        color: "var(--sfs-danger-color, #c63f3f)",
         anchor: "start",
         dx: 6
       }
@@ -2025,7 +2058,7 @@ makeToneIdentificationGraph = (opts = {}) => {
   return makeGraph(config);
 }
 
-bcGraphAppendTableHeader = (cell, value) => {
+sfsGraphAppendTableHeader = (cell, value) => {
   if (value && typeof value.nodeType === "number") {
     cell.appendChild(value);
     return;
@@ -2080,8 +2113,8 @@ makeApprovalBlockHistogram = (opts = {}) => {
     margin: { top: 28, right: 22, bottom: 68, left: 62 },
     barGap: 24,
     blockGap: 0.35,
-    blockStroke: "var(--bc-control-bg)",
-    blockFill: "var(--bc-text)",
+    blockStroke: "var(--sfs-control-bg)",
+    blockFill: "var(--sfs-text)",
     blockFallOrder: "random",
     blockFallSeed: "approval-paper-stacks-v8",
     // blockFallOriginX: "center",
@@ -2124,7 +2157,7 @@ makeFrequencyTable = (opts = {}) => {
   }, opts.headers || {});
 
   const table = d3.create("table")
-    .attr("class", "bc-frequency-table table table-sm");
+    .attr("class", "sfs-frequency-table table table-sm");
 
   if (opts.ariaLabel) table.attr("aria-label", opts.ariaLabel);
   if (opts.caption) table.append("caption").text(opts.caption);
@@ -2137,7 +2170,7 @@ makeFrequencyTable = (opts = {}) => {
       .attr("scope", "col")
       .attr("data-frequency-column", (column) => column)
       .each(function(column) {
-        bcGraphAppendTableHeader(this, headers[column] || column);
+        sfsGraphAppendTableHeader(this, headers[column] || column);
       });
 
   table.append("tbody")
@@ -2150,7 +2183,7 @@ makeFrequencyTable = (opts = {}) => {
     .join("td")
       .attr("data-frequency-column", (d) => d.column)
       .text((d) => {
-        if (d.column === "label") return bcGraphIntervalLabel(d.row, formatter);
+        if (d.column === "label") return sfsGraphIntervalLabel(d.row, formatter);
         if (d.column === "percent" || d.column === "cumulativePercent") return percentFormatter(d.row[d.column]);
         if (d.column === "proportion" || d.column === "cumulativeProportion") return d3.format(".3f")(d.row[d.column]);
         return formatter(d.row[d.column]);
@@ -2162,7 +2195,7 @@ makeFrequencyTable = (opts = {}) => {
   return tableNode;
 }
 
-bcGraphCloneWithComputedStyles = (svgNode) => {
+sfsGraphCloneWithComputedStyles = (svgNode) => {
   const clone = svgNode.cloneNode(true);
   const originalElements = [svgNode].concat(Array.from(svgNode.querySelectorAll("*")));
   const clonedElements = [clone].concat(Array.from(clone.querySelectorAll("*")));
@@ -2199,15 +2232,15 @@ bcGraphCloneWithComputedStyles = (svgNode) => {
 
 graphSvgToDataUrl = async (svgNode, opts = {}) => {
   const serializer = new XMLSerializer();
-  const exportNode = bcGraphCloneWithComputedStyles(svgNode);
+  const exportNode = sfsGraphCloneWithComputedStyles(svgNode);
   const svgText = serializer.serializeToString(exportNode);
   const svgBlob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
   const svgUrl = URL.createObjectURL(svgBlob);
   const image = new Image();
-  const scale = bcGraphValueOr(opts.scale, 2);
+  const scale = sfsGraphValueOr(opts.scale, 2);
   const viewBox = svgNode.viewBox.baseVal;
-  const width = bcGraphValueOr(opts.width, viewBox && viewBox.width ? viewBox.width : svgNode.clientWidth || 640);
-  const height = bcGraphValueOr(opts.height, viewBox && viewBox.height ? viewBox.height : svgNode.clientHeight || 420);
+  const width = sfsGraphValueOr(opts.width, viewBox && viewBox.width ? viewBox.width : svgNode.clientWidth || 640);
+  const height = sfsGraphValueOr(opts.height, viewBox && viewBox.height ? viewBox.height : svgNode.clientHeight || 420);
 
   await new Promise((resolve, reject) => {
     image.onload = resolve;
@@ -2237,7 +2270,7 @@ downloadGraph = async (svgNode, opts = {}) => {
     link.href = await graphSvgToDataUrl(svgNode, opts);
   } else {
     const serializer = new XMLSerializer();
-    const exportNode = opts.inlineStyles === false ? svgNode : bcGraphCloneWithComputedStyles(svgNode);
+    const exportNode = opts.inlineStyles === false ? svgNode : sfsGraphCloneWithComputedStyles(svgNode);
     const svgText = serializer.serializeToString(exportNode);
     const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
     link.href = URL.createObjectURL(blob);
@@ -2249,7 +2282,7 @@ downloadGraph = async (svgNode, opts = {}) => {
   link.remove();
 }
 
-bcGraphApi = (() => {
+sfsGraphApi = (() => {
   const api = {
     makeGraph,
     makeToneIdentificationGraph,
@@ -2258,6 +2291,6 @@ bcGraphApi = (() => {
     graphSvgToDataUrl,
     downloadGraph
   };
-  window.bcGraphs = api;
+  window.sfsGraphs = api;
   return api;
 })()

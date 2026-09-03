@@ -30,7 +30,7 @@
     var menuButton = document.createElement("button");
     menuButton.type = "button";
     menuButton.className =
-      "bc-settings-button quarto-navigation-tool bc-nav-menu-toggle";
+      "sfs-settings-button quarto-navigation-tool sfs-nav-menu-toggle";
     menuButton.setAttribute("data-bs-toggle", "collapse");
     menuButton.setAttribute("data-bs-target", ".quarto-sidebar-collapse-item");
     menuButton.setAttribute("aria-controls", "quarto-sidebar");
@@ -41,13 +41,13 @@
     navbarTools.appendChild(menuButton);
 
     var drawerTools = document.createElement("div");
-    drawerTools.className = "bc-drawer-tools";
+    drawerTools.className = "sfs-drawer-tools";
     sidebar.prepend(drawerTools);
 
     if (document.getElementById("quarto-search")) {
       var searchButton = document.createElement("button");
       searchButton.type = "button";
-      searchButton.className = "bc-settings-button";
+      searchButton.className = "sfs-settings-button";
       searchButton.setAttribute("aria-label", "Search");
       searchButton.title = "Search";
       searchButton.innerHTML =
@@ -61,9 +61,9 @@
     var media = window.matchMedia(MOBILE_QUERY);
 
     function placeSettings() {
-      var settings = document.querySelector(".bc-settings");
+      var settings = document.querySelector(".sfs-settings");
       if (!settings) return false;
-      var button = settings.querySelector(".bc-settings-button");
+      var button = settings.querySelector(".sfs-settings-button");
 
       if (media.matches) {
         if (settings.parentElement !== drawerTools) {

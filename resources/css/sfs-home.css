@@ -1,0 +1,106 @@
+/* The homepage cover: the falling-dot banner, its type, and the one-shot
+   animation that plays behind the title.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Homepage cover: the original Psych Stats falling-dot banner, rebuilt as a
+   1200 × 630 book/social cover with a one-shot CSS animation. */
+body.home-page #title-block-header {
+  display: none;
+}
+
+body.home-page .quarto-secondary-nav {
+  display: none !important;
+}
+
+body.home-page h1.home-page-heading {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.home-dots-hero {
+  --home-dots-accent: var(
+    --quarto-scss-export-callout-color-tip,
+    var(--bs-success)
+  );
+  width: min(100%, 58rem);
+  margin: 0.25rem auto 1.75rem;
+  overflow: hidden;
+  border-radius: var(--sfs-radius-lg);
+  border: 1px solid var(--quarto-scss-export-callout-color-tip, var(--bs-success));
+  /* box-shadow: 0 0.45rem 1.35rem color-mix(in srgb, #000 16%, transparent); */
+}
+
+.home-dots-hero svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+body.quarto-dark .home-dots-hero .home-dots__background-start {
+  stop-color: color-mix(in srgb, var(--home-dots-accent) 18%, transparent);
+}
+
+body.quarto-dark .home-dots-hero .home-dots__background-middle {
+  stop-color: color-mix(in srgb, var(--home-dots-accent) 7%, transparent);
+}
+
+body.quarto-dark .home-dots-hero .home-dots__background-end {
+  stop-color: transparent;
+}
+
+body.quarto-dark .home-dots-hero .home-dots__type {
+  fill: #fff;
+}
+
+.home-dots__marks circle {
+  transform-box: view-box;
+  animation: home-dot-fall 700ms cubic-bezier(0.55, 0, 1, 0.45) backwards;
+  animation-delay: calc(var(--i) * 6ms);
+}
+
+@keyframes home-dot-fall {
+  from { transform: translateY(-28px); }
+  to { transform: translateY(0); }
+}
+
+html[data-motion="reduced"] .home-dots__marks circle {
+  animation-delay: 0s;
+  animation-duration: 0.001ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-dots__marks circle {
+    animation-delay: 0s;
+    animation-duration: 0.001ms;
+  }
+}
+
+.sfs-figure {
+  box-sizing: border-box;
+  margin: var(--sfs-figure-margin);
+  max-width: var(--sfs-figure-max-width);
+  color: var(--sfs-text);
+  font-family: var(--bs-body-font-family);
+}
+
+.sfs-figure *,
+.sfs-figure *::before,
+.sfs-figure *::after {
+  box-sizing: border-box;
+}
+
+.sfs-figure-cover {
+  --sfs-figure-max-width: var(--sfs-cover-max-width);
+  --sfs-figure-margin: 0.65rem auto 1.5rem;
+}
+
