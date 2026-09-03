@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { siteStyles } from "./site-styles.mjs";
+
 const chapter = readFileSync(new URL("../05-z-scores.qmd", import.meta.url), "utf8");
 const source = readFileSync(
   new URL("../resources/js/standardization-ruler.js", import.meta.url),
   "utf8"
 );
-const styles = readFileSync(new URL("../resources/css/site-theme.css", import.meta.url), "utf8");
+const styles = siteStyles;
 const graphSource = readFileSync(
   new URL("../resources/js/graph-generator.js", import.meta.url),
   "utf8"

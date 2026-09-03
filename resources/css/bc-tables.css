@@ -1,0 +1,127 @@
+/* Content that would otherwise overflow the text column: long display
+   equations, unbreakable bibliography URLs, and the data and frequency
+   tables, including the dice and modal-row variants.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Long display equations scroll sideways, like responsive tables. Overflow
+   that widens the layout viewport past the visual viewport detaches the
+   fixed-position navigation on mobile browsers. */
+mjx-container[display="true"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.15rem;
+}
+
+/* Last-resort guard for the same failure: the value propagates to the
+   viewport, so stray wide content clips instead of expanding the page. */
+body {
+  overflow-x: hidden;
+}
+
+/* Bibliography DOI/URL strings are unbreakable by default and widen the
+   page on narrow screens. */
+.csl-entry {
+  overflow-wrap: anywhere;
+}
+
+main table,
+main table.table,
+.bc-data-table,
+.bc-frequency-table {
+  width: auto;
+  max-width: 100%;
+  margin: 1rem auto;
+  font-variant-numeric: tabular-nums;
+  /* font-family: MathJax; */
+}
+
+main table caption,
+.bc-data-table caption,
+.bc-frequency-table caption {
+  caption-side: top;
+  color: var(--bc-text);
+  font-weight: 700;
+  text-align: left;
+}
+
+main table,
+main table.table,
+.bc-data-table,
+.bc-frequency-table {
+  border-collapse: collapse;
+  border-top: 2px solid var(--bc-table-rule-color);
+  border-bottom: 2px solid var(--bc-table-rule-color);
+}
+
+main table th,
+main table td,
+.bc-data-table th,
+.bc-data-table td,
+.bc-frequency-table th,
+.bc-frequency-table td {
+  border: 0;
+  vertical-align: middle;
+}
+
+main table thead,
+main table.table thead,
+.bc-data-table thead,
+.bc-frequency-table thead {
+  border-bottom: 2px solid var(--bc-table-rule-color);
+}
+
+main table.table > :not(caption) > * > *,
+.bc-data-table.table > :not(caption) > * > *,
+.bc-frequency-table.table > :not(caption) > * > * {
+  border-width: 0;
+}
+
+main table th,
+.bc-data-table th {
+  font-weight: 700;
+}
+
+.bc-table-summary-row td {
+  color: var(--bc-muted);
+}
+
+/* Match the row and column dice in Chapter 6. These are the same red and blue
+   used by the first two dice on the chapter cover. */
+#tbl-dice-sums {
+  --bc-die-red-text: rgb(209 64 79);
+  --bc-die-blue-text: rgb(51 120 176);
+}
+
+#tbl-dice-sums thead th:not(:first-child) {
+  color: var(--bc-die-blue-text);
+}
+
+#tbl-dice-sums tbody td:first-child {
+  color: var(--bc-die-red-text);
+}
+
+body.quarto-dark #tbl-dice-sums {
+  --bc-die-red-text: color-mix(in srgb, rgb(209 64 79) 72%, white);
+  --bc-die-blue-text: color-mix(in srgb, rgb(51 120 176) 72%, white);
+}
+
+/* Mark a modal row in static frequency tables without coupling the styling
+   to a particular row number. Mixing yellow with the current page background
+   gives the highlight enough contrast in either theme without becoming an
+   opaque stripe. The heavier type keeps the cue from relying on color alone. */
+.bc-mode-table {
+  --bc-mode-highlight-bg: color-mix(
+    in srgb,
+    var(--graph-series-7, #f0e442) 32%,
+    var(--bc-bg)
+  );
+}
+
+.bc-mode-table tbody tr:has(.bc-mode-marker) > * {
+  background: var(--bc-mode-highlight-bg);
+  font-weight: 700;
+}
+

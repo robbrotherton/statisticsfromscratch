@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const theme = readFileSync(new URL("../resources/css/site-theme.css", import.meta.url), "utf8");
+import { siteStyles } from "./site-styles.mjs";
+
+const theme = siteStyles;
 const expected = [
   "#0072b2",
   "#e69f00",

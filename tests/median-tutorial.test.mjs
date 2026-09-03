@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { siteStyles } from "./site-styles.mjs";
+
 const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.url), "utf8");
 const source = readFileSync(
   new URL("../resources/js/median-tutorial.js", import.meta.url),
@@ -11,10 +13,7 @@ const openingQuiz = readFileSync(
   new URL("../quizzes/03-central-tendency-center-1.qmd", import.meta.url),
   "utf8"
 );
-const styles = readFileSync(
-  new URL("../resources/css/site-theme.css", import.meta.url),
-  "utf8"
-);
+const styles = siteStyles;
 
 const sectionStart = chapter.indexOf("## The median");
 const sectionEnd = chapter.indexOf("## The mean", sectionStart);

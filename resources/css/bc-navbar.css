@@ -1,0 +1,181 @@
+/* Navigation chrome: aligning the desktop navbar with the sidebar-plus-
+   article frame, and the compact single-row header used below 992px.
+
+   Split out of site-theme.css; loaded in order from _quarto.yml. */
+
+/* Align the desktop navbar contents with the centered sidebar-plus-article
+   frame. Quarto switches to its compact full-width header below 992px. */
+@media (min-width: 992px) {
+  #quarto-header .navbar-container {
+    width: calc(100% - 2.25rem);
+    max-width: 1080px;
+    margin-inline: auto;
+  }
+}
+
+/* Below 992px the pinned header is a single navbar row: a menu button
+   (added by mobile-nav.js) opens Quarto's sidebar drawer, which hosts the
+   settings and search tools. */
+#quarto-header .navbar .bc-nav-menu-toggle {
+  display: none;
+}
+
+.bc-drawer-tools {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .quarto-secondary-nav {
+    display: none !important;
+  }
+
+  /* Quarto marks the page title d-none below lg because the secondary nav
+     row normally shows it; with that row gone the title returns in-page. */
+  #title-block-header .quarto-title > h1.title {
+    display: block !important;
+  }
+
+  #quarto-header .navbar #quarto-search {
+    display: none;
+  }
+
+  #quarto-header .navbar .bc-nav-menu-toggle {
+    display: inline-flex;
+    /* The glyph is inset 8px in its 40px button; pulling the button out by
+       that much puts the icon's optical edge on the content margin. */
+    margin-right: -8px;
+  }
+
+  /* Align the navbar row with the article text edges (1.5rem below 768px). */
+  #quarto-header .navbar {
+    padding-inline: 0;
+  }
+
+  #quarto-header .navbar .navbar-container {
+    padding-inline: 1.5rem;
+  }
+
+  /* Quarto's empty logo link still carries a 4px margin. */
+  #quarto-header .navbar .navbar-brand-logo {
+    margin-right: 0;
+  }
+
+  /* Quarto reserves 115px of brand width for navbar tools; on mobile only
+     the 40px menu button remains, so the title gets the freed space. */
+  #quarto-header .navbar .navbar-brand-container {
+    max-width: calc(100% - 3.25rem);
+  }
+
+  /* Quarto's grid widens the content margins in the tablet band. */
+  @media (min-width: 768px) {
+    #quarto-header .navbar .navbar-container {
+      padding-inline: 2.5rem;
+    }
+  }
+
+  .bc-drawer-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 0.5rem 0 0.25rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--bc-border);
+  }
+
+  /* Pull the first (settings) button out by its glyph inset so the icons'
+     optical edge lines up with the menu text below. */
+  .bc-drawer-tools .bc-settings .bc-settings-button {
+    margin-left: -0.55rem;
+  }
+
+  /* Button and menu join the tools row directly so the static dropdown can
+     wrap onto its own full-width line below the icons. */
+  .bc-drawer-tools .bc-settings {
+    display: contents;
+  }
+
+  .bc-drawer-tools .bc-settings-menu {
+    order: 10;
+    position: static;
+    /* flex: 0 0 100% rather than width: 100%: as a flex item the menu would
+       otherwise shrink back onto the icons' line instead of wrapping below. */
+    flex: 0 0 100%;
+    min-width: 0;
+    max-width: none;
+    /* The drawer is sized by its contents, so without inline-size containment
+       the open menu widens the whole navigation panel. Contained, the menu
+       takes the drawer's width and wraps its own content to fit. */
+    contain: inline-size;
+    margin: 0.25rem 0;
+    box-shadow: none;
+  }
+
+  /* The drawer is too narrow for the three theme options side by side. */
+  .bc-drawer-tools .bc-settings-options {
+    flex-direction: column;
+  }
+
+  .bc-drawer-tools .bc-settings-button {
+    width: 2.25rem;
+    min-width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .bc-drawer-tools .bc-settings-button .bi {
+    font-size: 1.15rem;
+  }
+}
+
+#quarto-margin-sidebar {
+  display: none;
+}
+
+#quarto-sidebar .sidebar-page-toc {
+  margin: 0.15rem 0 0.35rem 0.85rem;
+  padding-left: 0.75rem;
+  border-left: 1px solid var(--bs-border-color);
+}
+
+#quarto-sidebar .sidebar-page-toc ul {
+  margin: 0.1rem 0 0.1rem 0.65rem;
+  padding-left: 0.65rem;
+  border-left: 1px solid var(--bs-border-color);
+  list-style: none;
+}
+
+#quarto-sidebar .sidebar-page-toc li {
+  margin: 0;
+}
+
+#quarto-sidebar .sidebar-page-toc a {
+  display: block;
+  padding: 0.16rem 0.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.82rem;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+#quarto-sidebar .sidebar-page-toc a:hover,
+#quarto-sidebar .sidebar-page-toc a.active {
+  color: var(--bs-body-color);
+}
+
+#quarto-sidebar .sidebar-page-toc a.active {
+  font-weight: 700;
+}
+
+#quarto-sidebar .sidebar-page-toc .header-section-number {
+  color: inherit;
+}
+
+#title-block-header {
+  text-align: center;
+}
+#title-block-header .chapter-number::before {
+  content: "Chapter ";
+}
+#title-block-header .chapter-number::after {
+  content: ":";
+}
