@@ -194,7 +194,7 @@ makeStandardErrorCurveDemo = function(opts) {
   const x = d3.scaleLinear().range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().range([plotBottom, margin.top]);
   const line = d3.line()
-    .curve(bcDistributionCurveFactory(opts))
+    .curve(sfsDistributionCurveFactory(opts))
     .x((d) => x(d.x))
     .y((d) => y(d.y));
 
@@ -249,7 +249,7 @@ makeStandardErrorCurveDemo = function(opts) {
     if (fixed) {
       const maxN = Math.max(source.n, nMax);
       const smallestSd = Math.min(source.sd, standardErrorForN(maxN, source));
-      return [0, bcDistributionStats.normalPdf(source.mean, source.mean, smallestSd) * 1.12];
+      return [0, sfsDistributionStats.normalPdf(source.mean, source.mean, smallestSd) * 1.12];
     }
 
     const yMax = d3.max(currentCurves, (d) => d.y) || 1;
@@ -271,7 +271,7 @@ makeStandardErrorCurveDemo = function(opts) {
     const step = (domain[1] - domain[0]) / (points - 1);
     return d3.range(points).map((index) => {
       const value = domain[0] + index * step;
-      return { x: value, y: bcDistributionStats.normalPdf(value, source.mean, sd) };
+      return { x: value, y: sfsDistributionStats.normalPdf(value, source.mean, sd) };
     });
   }
 
@@ -419,7 +419,7 @@ makeStandardErrorCurveDemo = function(opts) {
     const start = parameterState(renderedState);
     const end = parameterState(target);
 
-    if (duration <= 0 || bcDistributionPrefersReducedMotion()) {
+    if (duration <= 0 || sfsDistributionPrefersReducedMotion()) {
       renderedState = end;
       renderPlot(renderedState);
       if (notify) notifyValueChange();
@@ -449,7 +449,7 @@ makeStandardErrorCurveDemo = function(opts) {
     options = options || {};
     stopTween();
     readState();
-    const animate = options.animate !== false && !bcDistributionPrefersReducedMotion();
+    const animate = options.animate !== false && !sfsDistributionPrefersReducedMotion();
     const target = parameterState(state);
     if (animate) {
       syncInputValues();

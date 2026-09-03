@@ -25,7 +25,7 @@ vpdPrefersReducedMotion = () => {
   if (window.interactiveRuntime && window.interactiveRuntime.motion) {
     return window.interactiveRuntime.motion.isReduced();
   }
-  return Boolean(window.bcReducedMotion) || Boolean(window.matchMedia &&
+  return Boolean(window.sfsReducedMotion) || Boolean(window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 
@@ -484,7 +484,7 @@ vpdSetupTutorial = (rootNode, applyAction) => {
       requestAnimationFrame(trySetup);
       return;
     }
-    if (footer.dataset.bcIfTutorial === "true") return;
+    if (footer.dataset.sfsIfTutorial === "true") return;
     const steps = Array.from(footer.children)
       .filter((child) => child.classList && child.classList.contains("tutorial-step"));
     if (!steps.length) return;

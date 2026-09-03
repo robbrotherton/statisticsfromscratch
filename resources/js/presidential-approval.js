@@ -480,7 +480,7 @@ makePresidentialApprovalChart = function(opts = {}) {
   function build(availableWidth) {
     if (!loadedRows) return;
     const geometry = presidentialApprovalGeometry(opts, availableWidth);
-    root.dataset.bcLayout = geometry.compact ? "compact" : "wide";
+    root.dataset.sfsLayout = geometry.compact ? "compact" : "wide";
     chartWrap.replaceChildren(presidentialApprovalRenderChart(loadedRows, opts, geometry));
   }
 

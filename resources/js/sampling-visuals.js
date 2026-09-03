@@ -1,7 +1,7 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
+  const sampling = global.sfsSampling;
 
   // A single constant "gravity" governs every falling mean-box, so a box always
   // drops at the speed physics dictates for its height — the same acceleration
@@ -210,7 +210,7 @@
   }
 
   function reducedMotion() {
-    return Boolean(global.bcReducedMotion) || Boolean(global.matchMedia &&
+    return Boolean(global.sfsReducedMotion) || Boolean(global.matchMedia &&
       global.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
@@ -935,7 +935,7 @@
     const y = d3.scaleLinear().range([opts.baseY, opts.topY]);
     const normalData = d3.range(241).map((index) => {
       const z = -3 + index * 6 / 240;
-      return { z, density: global.bcStats.normalPdf(z, 0, 1) };
+      return { z, density: global.sfsStats.normalPdf(z, 0, 1) };
     });
     let normalWasVisible = false;
 
@@ -1011,7 +1011,7 @@
       referenceLabel.interrupt()
         .attr("text-anchor", state.compact ? "end" : "start")
         .attr("x", state.compact ? opts.plotRight - 2 : mapX(1.55))
-        .attr("y", y(global.bcStats.normalPdf(1.55, 0, 1)) - 8);
+        .attr("y", y(global.sfsStats.normalPdf(1.55, 0, 1)) - 8);
       if (showNormal && state.animateNormal && !normalWasVisible && !reducedMotion()) {
         reference.attr("display", null).style("opacity", 0)
           .transition().duration(520).ease(d3.easeCubicOut)
@@ -1046,7 +1046,7 @@
   }
 
   ensureStyles();
-  global.bcSamplingVisuals = Object.freeze({
+  global.sfsSamplingVisuals = Object.freeze({
     colorForProbability,
     colorForIndex,
     createBlockHistogram,

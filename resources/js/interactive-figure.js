@@ -296,7 +296,7 @@
 
   api.adopt = function(root, contract) {
     if (!root) return null;
-    const previous = root.bcInteractive || {};
+    const previous = root.sfsInteractive || {};
     const next = Object.assign({}, contract || {});
     ["cancelMotion", "dispose"].forEach(function(method) {
       if (typeof previous[method] !== "function" || typeof next[method] !== "function") return;
@@ -307,10 +307,10 @@
         nextMethod();
       };
     });
-    root.bcInteractive = Object.assign({}, previous, next, {
+    root.sfsInteractive = Object.assign({}, previous, next, {
       version: 1
     });
-    return root.bcInteractive;
+    return root.sfsInteractive;
   };
 
   api.observeResponsiveLayout = function(opts) {
@@ -417,7 +417,7 @@
       const previous = currentLayout;
       currentLayout = layout;
       currentKey = nextKey;
-      root.dataset.bcLayout = layout.mode;
+      root.dataset.sfsLayout = layout.mode;
       root.style.setProperty("--sfs-layout-width", layout.width + "px");
       root.style.setProperty("--sfs-layout-available-width", availableWidth + "px");
       onLayout(layout, previous);
@@ -598,7 +598,7 @@
   };
 
   // A callout has exactly one claiming figure: the first figure whose wrap()
-  // reaches the footer sets footer.dataset.bcIfTutorial and receives every
+  // reaches the footer sets footer.dataset.sfsIfTutorial and receives every
   // step through applyAction. Any other figure in the same callout hears the
   // steps here instead. createTutorial dispatches a bubbling
   // sfs-if:tutorial-step-action from the claiming figure's root, so the callout
@@ -747,7 +747,7 @@
     });
 
     footer.classList.add("sfs-if-tutorial");
-    footer.dataset.bcIfTutorial = "true";
+    footer.dataset.sfsIfTutorial = "true";
     footer.dataset.tutorialStep = "0";
     if (tutorialStepIds.length) footer.dataset.tutorialId = tutorialId;
     footer.setAttribute("aria-live", "polite");
@@ -1201,7 +1201,7 @@
       const target = callout || root;
       if (!target || !target.isConnected || typeof window.scrollTo !== "function") return;
 
-      const anchorNavigation = window.bcAnchorNavigation;
+      const anchorNavigation = window.sfsAnchorNavigation;
       if (anchorNavigation && typeof anchorNavigation.scrollTarget === "function") {
         anchorNavigation.scrollTarget(target, { gap: 0 });
         return;
@@ -1650,7 +1650,7 @@
       const callout = root.closest(".callout");
       const footer = callout ? callout.querySelector(".callout-footer") : null;
       if (!footer) return false;
-      if (footer.dataset.bcIfTutorial === "true") return true;
+      if (footer.dataset.sfsIfTutorial === "true") return true;
 
       const steps = Array.from(footer.children)
         .filter((child) => child.classList && child.classList.contains("tutorial-step"));

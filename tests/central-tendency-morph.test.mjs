@@ -77,7 +77,7 @@ test("the morph preserves the three conceptual marker encodings", () => {
   assert.match(distributionSource, /class", "dg-mean-fulcrum"/);
   assert.match(distributionSource, /dg-median-half-label/);
   assert.match(distributionSource, /d3\.easeCubicInOut/);
-  assert.match(distributionSource, /bcDistributionPrefersReducedMotion\(\)/);
+  assert.match(distributionSource, /sfsDistributionPrefersReducedMotion\(\)/);
   assert.match(distributionSource, /action\["controls-open"\]/);
 });
 
@@ -85,12 +85,12 @@ test("the continuous family passes through the intended statistical states", () 
   const context = mathContext();
   const domain = [-4, 6];
   const snapshot = (skew, bimodal = 0) => {
-    const distribution = context.bcCentralTendencyMorphSpec(skew, bimodal);
+    const distribution = context.sfsCentralTendencyMorphSpec(skew, bimodal);
     return {
       distribution,
-      mean: context.bcDistributionMeanValue(distribution),
-      median: context.bcDistributionQuantile(distribution, 0.5),
-      modes: Array.from(context.bcDistributionModes(distribution, domain))
+      mean: context.sfsDistributionMeanValue(distribution),
+      median: context.sfsDistributionQuantile(distribution, 0.5),
+      modes: Array.from(context.sfsDistributionModes(distribution, domain))
     };
   };
 
@@ -119,7 +119,7 @@ test("every sampled intermediate shape remains a normalized mixture", () => {
   ];
 
   shapes.forEach(([skew, bimodal]) => {
-    const distribution = context.bcCentralTendencyMorphSpec(skew, bimodal);
+    const distribution = context.sfsCentralTendencyMorphSpec(skew, bimodal);
     const weights = Array.from(distribution.components, (component) => component.weight);
     assert.ok(weights.every((weight) => weight > 0));
     assert.ok(Math.abs(weights.reduce((sum, weight) => sum + weight, 0) - 1) < 1e-12);
@@ -129,9 +129,9 @@ test("every sampled intermediate shape remains a normalized mixture", () => {
     const steps = 20000;
     const step = (upper - lower) / steps;
     let area = 0;
-    let previous = context.bcDistributionPdf(distribution, lower);
+    let previous = context.sfsDistributionPdf(distribution, lower);
     for (let index = 1; index <= steps; index += 1) {
-      const current = context.bcDistributionPdf(distribution, lower + index * step);
+      const current = context.sfsDistributionPdf(distribution, lower + index * step);
       area += (previous + current) * step / 2;
       previous = current;
     }
@@ -145,10 +145,10 @@ test("the tone-identification comparison uses honest grouped estimates", () => {
   assert.match(chapter, /median and mean estimated from the grouped data/);
 
   const context = graphContext();
-  const centers = context.bcToneIdentificationGroupedCenters();
+  const centers = context.sfsToneIdentificationGroupedCenters();
   assert.equal(centers.total, 275);
   assert.ok(Math.abs(centers.median - 0.6201) < 0.0001);
   assert.ok(Math.abs(centers.mean - 0.6727) < 0.0001);
   assert.ok(centers.mean > centers.median);
-  assert.match(graphSource, /bcGraphAddReferenceMarkers\(svg, opts, x, margin, height\)/);
+  assert.match(graphSource, /sfsGraphAddReferenceMarkers\(svg, opts, x, margin, height\)/);
 });

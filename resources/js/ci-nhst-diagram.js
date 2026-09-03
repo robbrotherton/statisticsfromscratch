@@ -1,4 +1,4 @@
-cnStats = window.bcStats
+cnStats = window.sfsStats
 cnNormalPdf = cnStats.normalPdf
 cnNormalCdf = cnStats.normalCdf
 cnNormalInv = cnStats.normalInv

@@ -127,7 +127,7 @@ test("responsive layouts follow container width and dispose cleanly", () => {
   assert.equal(layouts.length, 1);
   assert.equal(layouts[0].mode, "wide");
   assert.equal(layouts[0].width, 720);
-  assert.equal(loaded.root.dataset.bcLayout, "wide");
+  assert.equal(loaded.root.dataset.sfsLayout, "wide");
 
   loaded.observer().resize(390);
   loaded.flushFrames();

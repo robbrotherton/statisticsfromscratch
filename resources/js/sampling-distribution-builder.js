@@ -1,4 +1,4 @@
-sdbStats = window.bcStats
+sdbStats = window.sfsStats
 sdbNormalInv = sdbStats.normalInv
 sdbFiniteNumber = sdbStats.finiteNumber
 

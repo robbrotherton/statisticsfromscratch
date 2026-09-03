@@ -25,7 +25,7 @@ ipPrefersReducedMotion = () => {
   if (window.interactiveRuntime && window.interactiveRuntime.motion) {
     return window.interactiveRuntime.motion.isReduced();
   }
-  return Boolean(window.bcReducedMotion) || Boolean(window.matchMedia &&
+  return Boolean(window.sfsReducedMotion) || Boolean(window.matchMedia &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 }
 

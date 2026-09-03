@@ -1,10 +1,10 @@
-spStats = window.bcStats
+spStats = window.sfsStats
 spNormalPdf = spStats.normalPdf
 spNormalCdf = spStats.normalCdf
 spNormalInv = spStats.normalInv
 spFiniteNumber = spStats.finiteNumber
 
-bcInlineMath = function() {
+sfsInlineMath = function() {
   return window.interactiveFigure.inlineMath.apply(window.interactiveFigure, arguments);
 }
 

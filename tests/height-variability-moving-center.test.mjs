@@ -33,7 +33,7 @@ function loadMathHelpers() {
     d3,
     document: {},
     window: {
-      bcStats: {},
+      sfsStats: {},
       matchMedia() {
         return { matches: false };
       }

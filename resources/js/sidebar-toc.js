@@ -38,7 +38,7 @@
     });
   }
 
-  const anchorNavigation = window.bcAnchorNavigation;
+  const anchorNavigation = window.sfsAnchorNavigation;
   const findHashTarget = anchorNavigation.findHashTarget;
   const scrollTargetBelowNavbar = anchorNavigation.scrollTarget;
 

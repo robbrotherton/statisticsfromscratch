@@ -12,7 +12,7 @@ const context = vm.createContext({ console, window: {} });
 vm.runInContext(source, context);
 
 function marginAt(width, margin, yTickValues = [0, 2, 4, 6]) {
-  return JSON.parse(JSON.stringify(context.bcGraphResolveMargin({
+  return JSON.parse(JSON.stringify(context.sfsGraphResolveMargin({
     width,
     labels: { title: "Movie" },
     margin,

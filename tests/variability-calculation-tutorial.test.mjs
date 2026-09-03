@@ -72,6 +72,6 @@ test("the table generator defaults to population or sample mean notation consist
 });
 
 test("summary results render each complete equation as inline math", () => {
-  assert.match(source, /bcVariabilityInlineMath\(`\$\{symbol\} = \$\{value\}`\)/);
+  assert.match(source, /sfsVariabilityInlineMath\(`\$\{symbol\} = \$\{value\}`\)/);
   assert.doesNotMatch(source, /createTextNode\(` \$\{value\}`\)/);
 });

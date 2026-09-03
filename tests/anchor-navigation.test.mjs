@@ -189,7 +189,7 @@ test("heading navigation preserves its deliberate one-rem breathing room", () =>
   section.heading = heading;
   dom.run();
 
-  dom.context.window.bcAnchorNavigation.scrollTarget(section);
+  dom.context.window.sfsAnchorNavigation.scrollTarget(section);
 
   assert.equal(dom.scrolls.at(-1).top, 406);
   assert.equal(heading.getBoundingClientRect().top, 94);

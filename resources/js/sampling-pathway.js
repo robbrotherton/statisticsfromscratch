@@ -1,8 +1,8 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
-  const visuals = global.bcSamplingVisuals;
+  const sampling = global.sfsSampling;
+  const visuals = global.sfsSamplingVisuals;
 
   function ensureStyles() {
     if (document.getElementById("sampling-pathway-styles")) return;
@@ -722,7 +722,7 @@
     };
 
     const initialCompact = preferredWidth < compactBelow;
-    rootNode.dataset.bcLayout = initialCompact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = initialCompact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact: initialCompact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({
@@ -1448,7 +1448,7 @@
     };
 
     const initialCompact = preferredWidth < compactBelow;
-    rootNode.dataset.bcLayout = initialCompact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = initialCompact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact: initialCompact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({
@@ -1476,5 +1476,5 @@
   }
 
   global.makeSamplingPathway = makeSamplingPathway;
-  global.bcSamplingPathway = makeSamplingPathway;
+  global.sfsSamplingPathway = makeSamplingPathway;
 }(window));

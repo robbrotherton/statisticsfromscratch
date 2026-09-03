@@ -1,4 +1,4 @@
-bcVariabilityStages = [
+sfsVariabilityStages = [
   { key: "data", label: "Data" },
   { key: "mean", label: "Mean" },
   { key: "deviations", label: "Deviations" },
@@ -8,7 +8,7 @@ bcVariabilityStages = [
   { key: "sd", label: "SD" }
 ]
 
-bcVariabilityStageAliases = ({
+sfsVariabilityStageAliases = ({
   x: "data",
   scores: "data",
   values: "data",
@@ -40,7 +40,7 @@ bcVariabilityStageAliases = ({
   complete: "sd"
 })
 
-bcVariabilityEnsureStyles = () => {
+sfsVariabilityEnsureStyles = () => {
   if (document.getElementById("sfs-variability-table-styles")) return;
 
   if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
@@ -200,12 +200,12 @@ bcVariabilityEnsureStyles = () => {
   document.head.appendChild(style);
 }
 
-bcVariabilityFiniteNumber = (value, fallback = undefined) => {
+sfsVariabilityFiniteNumber = (value, fallback = undefined) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
 
-bcVariabilityBoolean = (value, fallback = false) => {
+sfsVariabilityBoolean = (value, fallback = false) => {
   if (value === undefined || value === null) return fallback;
   if (typeof value === "boolean") return value;
   const normalized = String(value).trim().toLowerCase();
@@ -214,35 +214,35 @@ bcVariabilityBoolean = (value, fallback = false) => {
   return fallback;
 }
 
-bcVariabilityHtmlId = (() => {
+sfsVariabilityHtmlId = (() => {
   let next = 1;
   return (prefix = "variability-table") => `${prefix}-${next++}`;
 })()
 
-bcVariabilityNormalizeStageKey = (stage) => {
+sfsVariabilityNormalizeStageKey = (stage) => {
   if (stage === undefined || stage === null) return null;
   if (typeof stage === "number" && Number.isFinite(stage)) {
-    const index = Math.max(0, Math.min(Math.round(stage), bcVariabilityStages.length - 1));
-    return bcVariabilityStages[index].key;
+    const index = Math.max(0, Math.min(Math.round(stage), sfsVariabilityStages.length - 1));
+    return sfsVariabilityStages[index].key;
   }
 
   const normalized = String(stage).trim().toLowerCase().replace(/[_ ]+/g, "-");
-  return bcVariabilityStageAliases[normalized] || normalized;
+  return sfsVariabilityStageAliases[normalized] || normalized;
 }
 
-bcVariabilityStageIndex = (stage, fallback = 0) => {
-  const key = bcVariabilityNormalizeStageKey(stage);
-  const index = bcVariabilityStages.findIndex((candidate) => candidate.key === key);
+sfsVariabilityStageIndex = (stage, fallback = 0) => {
+  const key = sfsVariabilityNormalizeStageKey(stage);
+  const index = sfsVariabilityStages.findIndex((candidate) => candidate.key === key);
   return index >= 0 ? index : fallback;
 }
 
-bcVariabilityClampStage = (stage) =>
-  Math.max(0, Math.min(bcVariabilityStageIndex(stage, Number(stage) || 0), bcVariabilityStages.length - 1))
+sfsVariabilityClampStage = (stage) =>
+  Math.max(0, Math.min(sfsVariabilityStageIndex(stage, Number(stage) || 0), sfsVariabilityStages.length - 1))
 
-bcVariabilityStageLabel = (index) =>
-  bcVariabilityStages[Math.max(0, Math.min(index, bcVariabilityStages.length - 1))].label
+sfsVariabilityStageLabel = (index) =>
+  sfsVariabilityStages[Math.max(0, Math.min(index, sfsVariabilityStages.length - 1))].label
 
-bcVariabilityAccessor = (accessor, fallbackKeys = []) => {
+sfsVariabilityAccessor = (accessor, fallbackKeys = []) => {
   if (typeof accessor === "function") return accessor;
   if (typeof accessor === "string") return (row) => row == null ? undefined : row[accessor];
   return (row) => {
@@ -255,28 +255,28 @@ bcVariabilityAccessor = (accessor, fallbackKeys = []) => {
   };
 }
 
-bcVariabilityData = (opts = {}) => {
+sfsVariabilityData = (opts = {}) => {
   const source = Array.isArray(opts.data) ? opts.data : [];
-  const value = bcVariabilityAccessor(opts.value || opts.x || opts.score, ["value", "x", "score", "X"]);
+  const value = sfsVariabilityAccessor(opts.value || opts.x || opts.score, ["value", "x", "score", "X"]);
   return source
     .map((row, index) => ({
       index,
       source: row,
-      value: bcVariabilityFiniteNumber(value(row))
+      value: sfsVariabilityFiniteNumber(value(row))
     }))
     .filter((row) => Number.isFinite(row.value));
 }
 
-bcVariabilityStats = (opts = {}) => {
-  const rows = bcVariabilityData(opts);
+sfsVariabilityStats = (opts = {}) => {
+  const rows = sfsVariabilityData(opts);
   const values = rows.map((row) => row.value);
   const n = values.length;
-  const mean = bcVariabilityFiniteNumber(opts.mean, n ? values.reduce((sum, value) => sum + value, 0) / n : NaN);
+  const mean = sfsVariabilityFiniteNumber(opts.mean, n ? values.reduce((sum, value) => sum + value, 0) / n : NaN);
   const deviations = values.map((value) => value - mean);
   const squaredDeviations = deviations.map((value) => value * value);
   const ss = squaredDeviations.reduce((sum, value) => sum + value, 0);
-  const sample = bcVariabilityBoolean(opts.sample, String(opts.type || "").toLowerCase() === "sample");
-  const denominator = bcVariabilityFiniteNumber(opts.denominator, sample ? n - 1 : n);
+  const sample = sfsVariabilityBoolean(opts.sample, String(opts.type || "").toLowerCase() === "sample");
+  const denominator = sfsVariabilityFiniteNumber(opts.denominator, sample ? n - 1 : n);
   const variance = denominator > 0 ? ss / denominator : NaN;
   const sd = variance >= 0 ? Math.sqrt(variance) : NaN;
 
@@ -295,7 +295,7 @@ bcVariabilityStats = (opts = {}) => {
   };
 }
 
-bcVariabilityNumberFormatter = (digits) => {
+sfsVariabilityNumberFormatter = (digits) => {
   if (typeof digits === "function") return digits;
   if (digits === undefined || digits === null || digits === "auto") {
     return (value) => {
@@ -309,18 +309,18 @@ bcVariabilityNumberFormatter = (digits) => {
   return (value) => Number.isFinite(value) ? d3.format(`.${places}f`)(value) : "";
 }
 
-bcVariabilityFormatters = (opts = {}) => {
-  const auto = bcVariabilityNumberFormatter("auto");
+sfsVariabilityFormatters = (opts = {}) => {
+  const auto = sfsVariabilityNumberFormatter("auto");
   return {
-    value: opts.formatValue || bcVariabilityNumberFormatter(opts.valueDigits || opts.digitsValue || "auto"),
-    deviation: opts.formatDeviation || bcVariabilityNumberFormatter(opts.deviationDigits || opts.digitsDeviation || "auto"),
-    squaredDeviation: opts.formatSquaredDeviation || bcVariabilityNumberFormatter(opts.squaredDeviationDigits || opts.digitsSquaredDeviation || "auto"),
-    summary: opts.formatSummary || bcVariabilityNumberFormatter(opts.summaryDigits === undefined ? 2 : opts.summaryDigits),
+    value: opts.formatValue || sfsVariabilityNumberFormatter(opts.valueDigits || opts.digitsValue || "auto"),
+    deviation: opts.formatDeviation || sfsVariabilityNumberFormatter(opts.deviationDigits || opts.digitsDeviation || "auto"),
+    squaredDeviation: opts.formatSquaredDeviation || sfsVariabilityNumberFormatter(opts.squaredDeviationDigits || opts.digitsSquaredDeviation || "auto"),
+    summary: opts.formatSummary || sfsVariabilityNumberFormatter(opts.summaryDigits === undefined ? 2 : opts.summaryDigits),
     auto
   };
 }
 
-bcVariabilityInlineMath = function() {
+sfsVariabilityInlineMath = function() {
   if (window.interactiveFigure && window.interactiveFigure.inlineMath) {
     return window.interactiveFigure.inlineMath.apply(window.interactiveFigure, arguments);
   }
@@ -331,14 +331,14 @@ bcVariabilityInlineMath = function() {
   return span;
 }
 
-bcVariabilitySummaryNode = (symbol, value) => {
+sfsVariabilitySummaryNode = (symbol, value) => {
   const span = document.createElement("span");
   span.className = "vt-summary-value";
-  span.appendChild(bcVariabilityInlineMath(`${symbol} = ${value}`));
+  span.appendChild(sfsVariabilityInlineMath(`${symbol} = ${value}`));
   return span;
 }
 
-bcVariabilityAppendContent = (selection, content) => {
+sfsVariabilityAppendContent = (selection, content) => {
   if (content === null || content === undefined) return;
   const node = selection.node();
 
@@ -356,17 +356,17 @@ bcVariabilityAppendContent = (selection, content) => {
   selection.text(String(content));
 }
 
-bcVariabilityAppendReveal = (selection, stage, content, opts = {}) => {
+sfsVariabilityAppendReveal = (selection, stage, content, opts = {}) => {
   const span = selection.append("span")
     .attr("class", "vt-reveal-target")
-    .attr("data-vt-reveal", bcVariabilityNormalizeStageKey(stage));
+    .attr("data-vt-reveal", sfsVariabilityNormalizeStageKey(stage));
 
   if (opts.highlight) span.classed("vt-highlight sfs-highlight", true);
-  bcVariabilityAppendContent(span, content);
+  sfsVariabilityAppendContent(span, content);
   return span;
 }
 
-bcVariabilitySetRevealVisible = (rootNode, targets, visible, animate) => {
+sfsVariabilitySetRevealVisible = (rootNode, targets, visible, animate) => {
   if (window.interactiveFigure && window.interactiveFigure.setRevealVisible) {
     window.interactiveFigure.setRevealVisible(targets, visible, {
       root: rootNode,
@@ -382,7 +382,7 @@ bcVariabilitySetRevealVisible = (rootNode, targets, visible, animate) => {
   });
 }
 
-bcVariabilityButton = (icon, label, className) => {
+sfsVariabilityButton = (icon, label, className) => {
   const button = document.createElement("button");
   button.type = "button";
   button.className = `vt-reveal-button sfs-icon-button ${className || ""}`.trim();
@@ -396,14 +396,14 @@ bcVariabilityButton = (icon, label, className) => {
 // chapters. Tutorial callouts should set controls: false and let the shared
 // tutorial wrapper handle navigation. Once the remaining standalone consumers
 // have migrated, this control layer and its action handlers can be removed.
-bcVariabilityMakeControls = (handlers) => {
+sfsVariabilityMakeControls = (handlers) => {
   const controls = document.createElement("div");
   controls.className = "vt-reveal-controls sfs-action-row";
 
-  const reset = bcVariabilityButton("arrow-counterclockwise", "Reset table", "vt-reset");
-  const previous = bcVariabilityButton("chevron-left", "Reveal previous value", "vt-previous");
-  const next = bcVariabilityButton("chevron-right", "Reveal next value", "vt-next");
-  const all = bcVariabilityButton("eye", "Reveal all values", "vt-all");
+  const reset = sfsVariabilityButton("arrow-counterclockwise", "Reset table", "vt-reset");
+  const previous = sfsVariabilityButton("chevron-left", "Reveal previous value", "vt-previous");
+  const next = sfsVariabilityButton("chevron-right", "Reveal next value", "vt-next");
+  const all = sfsVariabilityButton("eye", "Reveal all values", "vt-all");
 
   [
     [reset, handlers.reset],
@@ -426,26 +426,26 @@ bcVariabilityMakeControls = (handlers) => {
     update(stage) {
       reset.disabled = stage <= 0;
       previous.disabled = stage <= 0;
-      next.disabled = stage >= bcVariabilityStages.length - 1;
-      all.disabled = stage >= bcVariabilityStages.length - 1;
+      next.disabled = stage >= sfsVariabilityStages.length - 1;
+      all.disabled = stage >= sfsVariabilityStages.length - 1;
     }
   };
 }
 
-bcVariabilityNotify = (rootNode) => {
+sfsVariabilityNotify = (rootNode) => {
   const event = typeof InputEvent === "function"
     ? new InputEvent("input", { bubbles: true })
     : new Event("input", { bubbles: true });
   rootNode.dispatchEvent(event);
 }
 
-bcVariabilitySyncMath = (rootNode) => {
+sfsVariabilitySyncMath = (rootNode) => {
   if (window.MathJax && window.MathJax.typesetPromise) {
     window.MathJax.typesetPromise([rootNode]).catch(() => {});
   }
 }
 
-bcVariabilityApplyStageAction = (action, setStage, context) => {
+sfsVariabilityApplyStageAction = (action, setStage, context) => {
   if (!action || typeof action !== "object") return false;
 
   const directStage = action.stage === undefined ? action.step : action.stage;
@@ -460,26 +460,26 @@ bcVariabilityApplyStageAction = (action, setStage, context) => {
     return true;
   }
 
-  if (bcVariabilityBoolean(action.all || action["show-all"], false)) {
+  if (sfsVariabilityBoolean(action.all || action["show-all"], false)) {
     setStage("sd", { animate: action.animate !== false });
     return true;
   }
 
-  if (bcVariabilityBoolean(action.reset, false)) {
+  if (sfsVariabilityBoolean(action.reset, false)) {
     setStage("data", { animate: action.animate !== false });
     return true;
   }
 
   if ((action.controls !== undefined || action["controls-open"] !== undefined) &&
       context && typeof context.setControlsOpen === "function") {
-    context.setControlsOpen(bcVariabilityBoolean(action.controls ?? action["controls-open"], true));
+    context.setControlsOpen(sfsVariabilityBoolean(action.controls ?? action["controls-open"], true));
   }
 
   let furthest = null;
   Object.entries(action).forEach(([key, value]) => {
-    if (!bcVariabilityBoolean(value, false)) return;
-    const normalized = bcVariabilityNormalizeStageKey(key);
-    const index = bcVariabilityStageIndex(normalized, -1);
+    if (!sfsVariabilityBoolean(value, false)) return;
+    const normalized = sfsVariabilityNormalizeStageKey(key);
+    const index = sfsVariabilityStageIndex(normalized, -1);
     if (index >= 0) furthest = Math.max(furthest === null ? 0 : furthest, index);
   });
 
@@ -491,7 +491,7 @@ bcVariabilityApplyStageAction = (action, setStage, context) => {
   return false;
 }
 
-bcVariabilitySetupTutorial = (rootNode, applyTutorialAction, opts = {}) => {
+sfsVariabilitySetupTutorial = (rootNode, applyTutorialAction, opts = {}) => {
   if (!window.interactiveFigure || !window.interactiveFigure.createTutorial) return;
   if (opts.tutorial === false) return;
 
@@ -505,7 +505,7 @@ bcVariabilitySetupTutorial = (rootNode, applyTutorialAction, opts = {}) => {
 
     const callout = rootNode.closest(".callout");
     const footer = callout ? callout.querySelector(".callout-footer") : null;
-    if (!footer || footer.dataset.bcIfTutorial === "true") return;
+    if (!footer || footer.dataset.sfsIfTutorial === "true") return;
 
     const steps = Array.from(footer.children)
       .filter((child) => child.classList && child.classList.contains("tutorial-step"));
@@ -524,10 +524,10 @@ bcVariabilitySetupTutorial = (rootNode, applyTutorialAction, opts = {}) => {
   requestAnimationFrame(setup);
 }
 
-bcVariabilitySetupFragments = (rootNode, setStage, opts = {}) => {
-  if (!bcVariabilityBoolean(opts.fragments, false)) return [];
+sfsVariabilitySetupFragments = (rootNode, setStage, opts = {}) => {
+  if (!sfsVariabilityBoolean(opts.fragments, false)) return [];
 
-  const anchors = bcVariabilityStages.slice(1).map((stage, index) => {
+  const anchors = sfsVariabilityStages.slice(1).map((stage, index) => {
     const anchor = document.createElement("span");
     anchor.className = "fragment vt-stage-anchor";
     anchor.dataset.vtFragmentStage = stage.key;
@@ -561,19 +561,19 @@ bcVariabilitySetupFragments = (rootNode, setStage, opts = {}) => {
   return anchors;
 }
 
-bcVariabilityTableNode = (opts = {}) => {
-  bcVariabilityEnsureStyles();
+sfsVariabilityTableNode = (opts = {}) => {
+  sfsVariabilityEnsureStyles();
 
-  const stats = bcVariabilityStats(opts);
-  const format = bcVariabilityFormatters(opts);
+  const stats = sfsVariabilityStats(opts);
+  const format = sfsVariabilityFormatters(opts);
   const meanSymbol = opts.meanSymbol || (stats.sample ? "M" : "\\mu");
   const deviationSymbol = opts.deviationSymbol || `X-${meanSymbol}`;
   const squaredDeviationSymbol = opts.squaredDeviationSymbol || `(${deviationSymbol})^2`;
   const varianceSymbol = opts.varianceSymbol || (stats.sample ? "s^2" : "\\sigma^2");
   const sdSymbol = opts.sdSymbol || (stats.sample ? "SD" : "\\sigma");
   const ssSymbol = opts.ssSymbol || "SS";
-  const tableId = opts.id || bcVariabilityHtmlId("variability-table");
-  const initialStage = bcVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
+  const tableId = opts.id || sfsVariabilityHtmlId("variability-table");
+  const initialStage = sfsVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
   const root = d3.create("div")
     .attr("class", "variability-table sfs-figure")
     .attr("id", tableId)
@@ -590,34 +590,34 @@ bcVariabilityTableNode = (opts = {}) => {
   const setValue = () => {
     rootNode.value = {
       stage,
-      stageKey: bcVariabilityStages[stage].key,
+      stageKey: sfsVariabilityStages[stage].key,
       stats
     };
   };
 
   const setStage = (nextStage, options = {}) => {
-    const next = bcVariabilityClampStage(nextStage);
+    const next = sfsVariabilityClampStage(nextStage);
     const changed = next !== stage;
     stage = next;
-    root.attr("data-vt-stage", bcVariabilityStages[stage].key);
+    root.attr("data-vt-stage", sfsVariabilityStages[stage].key);
 
     const targets = Array.from(rootNode.querySelectorAll("[data-vt-reveal]"));
     targets.forEach((target) => {
-      const targetStage = bcVariabilityStageIndex(target.dataset.vtReveal, 0);
-      bcVariabilitySetRevealVisible(rootNode, [target], stage >= targetStage, options.animate !== false);
+      const targetStage = sfsVariabilityStageIndex(target.dataset.vtReveal, 0);
+      sfsVariabilitySetRevealVisible(rootNode, [target], stage >= targetStage, options.animate !== false);
     });
 
     if (controls) controls.update(stage);
     setValue();
 
-    if (options.notify !== false && changed) bcVariabilityNotify(rootNode);
+    if (options.notify !== false && changed) sfsVariabilityNotify(rootNode);
   };
 
   const actionHandlers = {
     reset: () => setStage(0, { animate: true }),
     previous: () => setStage(stage - 1, { animate: true }),
     next: () => setStage(stage + 1, { animate: true }),
-    all: () => setStage(bcVariabilityStages.length - 1, { animate: true })
+    all: () => setStage(sfsVariabilityStages.length - 1, { animate: true })
   };
 
   if (opts.title) {
@@ -626,8 +626,8 @@ bcVariabilityTableNode = (opts = {}) => {
       .text(opts.title);
   }
 
-  if (bcVariabilityBoolean(opts.controls, false)) {
-    controls = bcVariabilityMakeControls(actionHandlers);
+  if (sfsVariabilityBoolean(opts.controls, false)) {
+    controls = sfsVariabilityMakeControls(actionHandlers);
     rootNode.appendChild(controls.node);
   }
 
@@ -643,40 +643,40 @@ bcVariabilityTableNode = (opts = {}) => {
 
   const thead = table.append("thead");
   const header = thead.append("tr");
-  header.append("th").append(() => bcVariabilityInlineMath("X"));
-  bcVariabilityAppendReveal(header.append("th"), "deviations", bcVariabilityInlineMath(deviationSymbol));
-  bcVariabilityAppendReveal(header.append("th"), "squared-deviations", bcVariabilityInlineMath(squaredDeviationSymbol));
+  header.append("th").append(() => sfsVariabilityInlineMath("X"));
+  sfsVariabilityAppendReveal(header.append("th"), "deviations", sfsVariabilityInlineMath(deviationSymbol));
+  sfsVariabilityAppendReveal(header.append("th"), "squared-deviations", sfsVariabilityInlineMath(squaredDeviationSymbol));
 
   const tbody = table.append("tbody");
   stats.rows.forEach((row, index) => {
     const tr = tbody.append("tr")
       .attr("class", index === stats.rows.length - 1 ? "vt-data-last" : null);
     tr.append("td").text(format.value(row.value));
-    bcVariabilityAppendReveal(tr.append("td"), "deviations", format.deviation(stats.deviations[index]));
-    bcVariabilityAppendReveal(tr.append("td"), "squared-deviations", format.squaredDeviation(stats.squaredDeviations[index]));
+    sfsVariabilityAppendReveal(tr.append("td"), "deviations", format.deviation(stats.deviations[index]));
+    sfsVariabilityAppendReveal(tr.append("td"), "squared-deviations", format.squaredDeviation(stats.squaredDeviations[index]));
   });
 
   const summary1 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
-  bcVariabilityAppendReveal(summary1.append("td"), "mean",
-    bcVariabilitySummaryNode(meanSymbol, format.summary(stats.mean)));
+  sfsVariabilityAppendReveal(summary1.append("td"), "mean",
+    sfsVariabilitySummaryNode(meanSymbol, format.summary(stats.mean)));
   summary1.append("td");
-  bcVariabilityAppendReveal(summary1.append("td"), "ss",
-    bcVariabilitySummaryNode(ssSymbol, format.summary(stats.ss)));
+  sfsVariabilityAppendReveal(summary1.append("td"), "ss",
+    sfsVariabilitySummaryNode(ssSymbol, format.summary(stats.ss)));
 
   const summary2 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
   summary2.append("td");
   summary2.append("td");
-  bcVariabilityAppendReveal(summary2.append("td"), "variance",
-    bcVariabilitySummaryNode(varianceSymbol, format.summary(stats.variance)));
+  sfsVariabilityAppendReveal(summary2.append("td"), "variance",
+    sfsVariabilitySummaryNode(varianceSymbol, format.summary(stats.variance)));
 
   const summary3 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
   summary3.append("td");
   summary3.append("td");
-  bcVariabilityAppendReveal(summary3.append("td"), "sd",
-    bcVariabilitySummaryNode(sdSymbol, format.summary(stats.sd)));
+  sfsVariabilityAppendReveal(summary3.append("td"), "sd",
+    sfsVariabilitySummaryNode(sdSymbol, format.summary(stats.sd)));
 
   const applyTutorialAction = (action, context) =>
-    bcVariabilityApplyStageAction(action, setStage, context);
+    sfsVariabilityApplyStageAction(action, setStage, context);
 
   rootNode.variabilityTable = {
     stats,
@@ -689,21 +689,21 @@ bcVariabilityTableNode = (opts = {}) => {
   };
 
   setStage(stage, { animate: false, notify: false });
-  bcVariabilitySyncMath(rootNode);
+  sfsVariabilitySyncMath(rootNode);
 
-  fragmentAnchors = bcVariabilitySetupFragments(rootNode, setStage, opts);
-  bcVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
+  fragmentAnchors = sfsVariabilitySetupFragments(rootNode, setStage, opts);
+  sfsVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
 
   return rootNode;
 }
 
-makeVariabilityTable = (opts = {}) => bcVariabilityTableNode(opts)
+makeVariabilityTable = (opts = {}) => sfsVariabilityTableNode(opts)
 
 makeVariabilityTables = (opts = {}) => {
-  bcVariabilityEnsureStyles();
+  sfsVariabilityEnsureStyles();
 
   const tableSpecs = Array.isArray(opts.tables) ? opts.tables : [];
-  const initialStage = bcVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
+  const initialStage = sfsVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
   const root = d3.create("div")
     .attr("class", "variability-table-set sfs-figure")
     .style("--sfs-figure-max-width", opts.maxWidth || null)
@@ -721,30 +721,30 @@ makeVariabilityTables = (opts = {}) => {
   const setValue = () => {
     rootNode.value = {
       stage,
-      stageKey: bcVariabilityStages[stage].key,
+      stageKey: sfsVariabilityStages[stage].key,
       tables: tableNodes.map((node) => node.value)
     };
   };
 
   const setStage = (nextStage, options = {}) => {
-    const next = bcVariabilityClampStage(nextStage);
+    const next = sfsVariabilityClampStage(nextStage);
     const changed = next !== stage;
     stage = next;
-    root.attr("data-vt-stage", bcVariabilityStages[stage].key);
+    root.attr("data-vt-stage", sfsVariabilityStages[stage].key);
     tableNodes.forEach((node) => node.variabilityTable.setStage(stage, {
       animate: options.animate !== false,
       notify: false
     }));
     if (controls) controls.update(stage);
     setValue();
-    if (options.notify !== false && changed) bcVariabilityNotify(rootNode);
+    if (options.notify !== false && changed) sfsVariabilityNotify(rootNode);
   };
 
   const actionHandlers = {
     reset: () => setStage(0, { animate: true }),
     previous: () => setStage(stage - 1, { animate: true }),
     next: () => setStage(stage + 1, { animate: true }),
-    all: () => setStage(bcVariabilityStages.length - 1, { animate: true })
+    all: () => setStage(sfsVariabilityStages.length - 1, { animate: true })
   };
 
   if (opts.title) {
@@ -753,8 +753,8 @@ makeVariabilityTables = (opts = {}) => {
       .text(opts.title);
   }
 
-  if (bcVariabilityBoolean(opts.controls, true)) {
-    controls = bcVariabilityMakeControls(actionHandlers);
+  if (sfsVariabilityBoolean(opts.controls, true)) {
+    controls = sfsVariabilityMakeControls(actionHandlers);
     rootNode.appendChild(controls.node);
   }
 
@@ -774,7 +774,7 @@ makeVariabilityTables = (opts = {}) => {
   });
 
   const applyTutorialAction = (action, context) =>
-    bcVariabilityApplyStageAction(action, setStage, context);
+    sfsVariabilityApplyStageAction(action, setStage, context);
 
   rootNode.variabilityTables = {
     tables: tableNodes,
@@ -787,8 +787,8 @@ makeVariabilityTables = (opts = {}) => {
   };
 
   setStage(stage, { animate: false, notify: false });
-  bcVariabilitySetupFragments(rootNode, setStage, opts);
-  bcVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
+  sfsVariabilitySetupFragments(rootNode, setStage, opts);
+  sfsVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
 
   return rootNode;
 }

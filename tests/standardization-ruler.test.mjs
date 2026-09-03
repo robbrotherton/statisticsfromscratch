@@ -132,7 +132,7 @@ test("the math examples use corresponding seven-bin histograms", () => {
   assert.match(source, /dash: "6 4"/);
   assert.match(source, /strokeWidth: 2\.6/);
   assert.equal((source.match(/selectedValueMarker\(\{/g) || []).length, 4);
-  assert.match(graphSource, /stroke-width", \(d\) => bcGraphValueOr\(d\.strokeWidth, 2\)/);
+  assert.match(graphSource, /stroke-width", \(d\) => sfsGraphValueOr\(d\.strokeWidth, 2\)/);
   assert.doesNotMatch(styles,
     /\.sfs-graph \.sfs-graph-reference-marker line \{[^}]*stroke-width:/
   );
@@ -263,8 +263,8 @@ test("static examples and the tutorial extend the shared graph and ruler systems
   assert.match(source, /global\.makeDistributionGraph\(graphOpts\)/);
   assert.match(source, /global\.makeGraph\(\{/);
   assert.match(source, /global\.makeDistributionGraph\(\{/);
-  assert.match(source, /global\.bcGraphStyleAxis\(rawAxis\)/);
-  assert.match(source, /global\.bcGraphStyleAxis\(zAxis\)/);
+  assert.match(source, /global\.sfsGraphStyleAxis\(rawAxis\)/);
+  assert.match(source, /global\.sfsGraphStyleAxis\(zAxis\)/);
   assert.match(styles, /sfs-standardization-comparison-row/);
   assert.match(styles, /standardized-score-graph \.ss-z-axis \.sfs-graph-domain/);
   assert.match(styles, /standardized-score-graph \.ss-mean-line/);

@@ -495,7 +495,7 @@ test("incoming hashes restore matching tutorials, reject bad steps, and clean up
   dom.flushFrames();
   assert.equal(tutorial.controller.getStep(), 0);
 
-  tutorial.root.bcInteractive.dispose();
+  tutorial.root.sfsInteractive.dispose();
   dom.navigateHash("#act-median-step-3");
   assert.equal(tutorial.controller.getStep(), 0, "disposed tutorials stop observing URL changes");
 });

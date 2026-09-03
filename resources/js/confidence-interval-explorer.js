@@ -1,4 +1,4 @@
-cieStats = window.bcStats
+cieStats = window.sfsStats
 cieTInv = cieStats.tInv
 cieFiniteNumber = cieStats.finiteNumber
 

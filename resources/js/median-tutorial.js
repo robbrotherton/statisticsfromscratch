@@ -83,7 +83,7 @@
 
       const callout = rootNode.closest(".callout");
       const footer = callout ? callout.querySelector(".callout-footer") : null;
-      if (!footer || footer.dataset.bcIfTutorial === "true") return;
+      if (!footer || footer.dataset.sfsIfTutorial === "true") return;
 
       const steps = Array.from(footer.children).filter(function(child) {
         return child.classList && child.classList.contains("tutorial-step");

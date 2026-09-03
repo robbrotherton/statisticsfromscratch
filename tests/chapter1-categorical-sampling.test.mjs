@@ -117,7 +117,7 @@ test("the categorical chart keeps persistent copy sparse and reports sample prop
 
 test("the seeded tutorial samples support the claims made in the prose", () => {
   const context = {
-    bcStats: {
+    sfsStats: {
       normalPdf: () => 0,
       normalCdf: () => 0.5,
       normalInv: (probability) => probability
@@ -127,7 +127,7 @@ test("the seeded tutorial samples support the claims made in the prose", () => {
   vm.runInNewContext(samplingCoreSource, context);
 
   function categoryCounts(drawIndex) {
-    const rng = context.bcSampling.seededRng(`${options.seed}:${drawIndex}`);
+    const rng = context.sfsSampling.seededRng(`${options.seed}:${drawIndex}`);
     const pool = Array.from({ length: 100 }, (value, index) => index);
     for (let index = 0; index < 10; index += 1) {
       const swapIndex = index + Math.floor(rng() * (pool.length - index));

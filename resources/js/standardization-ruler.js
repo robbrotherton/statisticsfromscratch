@@ -206,7 +206,7 @@
 
       const callout = rootNode.closest(".callout");
       const footer = callout ? callout.querySelector(".callout-footer") : null;
-      if (!footer || footer.dataset.bcIfTutorial === "true") return;
+      if (!footer || footer.dataset.sfsIfTutorial === "true") return;
       const steps = Array.from(footer.children).filter(function(child) {
         return child.classList && child.classList.contains("tutorial-step");
       });
@@ -416,7 +416,7 @@
         .attr("class", "ss-raw-axis")
         .attr("transform", "translate(0," + rawY + ")")
         .call(axis);
-      if (typeof global.bcGraphStyleAxis === "function") global.bcGraphStyleAxis(rawAxis);
+      if (typeof global.sfsGraphStyleAxis === "function") global.sfsGraphStyleAxis(rawAxis);
     }
 
     const zTickValues = finiteNumbers(opts.zTickValues).filter(function(value) {
@@ -440,7 +440,7 @@
           if (zValue === undefined) zValue = (rawValue - mean) / sd;
           return dualScaleNumber(zValue);
         }));
-    if (typeof global.bcGraphStyleAxis === "function") global.bcGraphStyleAxis(zAxis);
+    if (typeof global.sfsGraphStyleAxis === "function") global.sfsGraphStyleAxis(zAxis);
 
     const sideLabelX = width - margin.right + 16;
     d3.select(svg).append("text")
@@ -757,8 +757,8 @@
           .tickValues([0])
           .tickSize(7)
           .tickFormat(function() { return "X"; }));
-      if (typeof global.bcGraphStyleAxis === "function") {
-        global.bcGraphStyleAxis(rawAxis);
+      if (typeof global.sfsGraphStyleAxis === "function") {
+        global.sfsGraphStyleAxis(rawAxis);
       }
       rawAxis.selectAll("text").classed("zsc-math-label", true);
       rawAxis.select(".sfs-graph-domain")
@@ -771,8 +771,8 @@
           .tickValues([0])
           .tickSize(7)
           .tickFormat(function() { return "z"; }));
-      if (typeof global.bcGraphStyleAxis === "function") {
-        global.bcGraphStyleAxis(zAxis);
+      if (typeof global.sfsGraphStyleAxis === "function") {
+        global.sfsGraphStyleAxis(zAxis);
       }
       zAxis.selectAll("text").classed("zsc-math-label", true);
       zAxis.select(".sfs-graph-domain")
@@ -805,8 +805,8 @@
         zAxis
           .attr("transform", "translate(0," + rawY + ")")
           .style("opacity", 0);
-        if (typeof global.bcDistributionOnVisible === "function") {
-          global.bcDistributionOnVisible(figure, playRuler, threshold);
+        if (typeof global.sfsDistributionOnVisible === "function") {
+          global.sfsDistributionOnVisible(figure, playRuler, threshold);
         } else if (typeof global.onVisible === "function") {
           global.onVisible(figure, playRuler, threshold);
         } else {
@@ -1089,8 +1089,8 @@
         .call(d3.axisBottom(scale)
           .tickValues(normalizedTicks)
           .tickFormat(tickLabel));
-      if (typeof global.bcGraphStyleAxis === "function") {
-        global.bcGraphStyleAxis(axis);
+      if (typeof global.sfsGraphStyleAxis === "function") {
+        global.sfsGraphStyleAxis(axis);
       }
     }
 

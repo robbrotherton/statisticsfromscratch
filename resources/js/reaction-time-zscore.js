@@ -121,9 +121,9 @@
 
     function disposeChart() {
       const previous = content.node().querySelector(".standardized-score-graph");
-      if (previous && previous.bcInteractive &&
-          typeof previous.bcInteractive.dispose === "function") {
-        previous.bcInteractive.dispose();
+      if (previous && previous.sfsInteractive &&
+          typeof previous.sfsInteractive.dispose === "function") {
+        previous.sfsInteractive.dispose();
       }
     }
 

@@ -1,4 +1,4 @@
-heightVariabilityStats = window.bcStats || {}
+heightVariabilityStats = window.sfsStats || {}
 heightVariabilityErf = heightVariabilityStats.erf || ((x) => {
   const sign = x < 0 ? -1 : 1;
   const ax = Math.abs(x);
@@ -14,10 +14,10 @@ heightVariabilityFiniteNumber = heightVariabilityStats.finiteNumber || ((value, 
 })
 
 heightVariabilityReducedMotion = () =>
-  Boolean(window.bcReducedMotion) ||
+  Boolean(window.sfsReducedMotion) ||
   Boolean(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches)
 
-bcInlineMath = function() {
+sfsInlineMath = function() {
   return window.interactiveFigure.inlineMath.apply(window.interactiveFigure, arguments);
 }
 
@@ -1460,7 +1460,7 @@ heightVariabilityAttachBiasTracker = function(config) {
   }
 
   setMode(mode);
-  rootNode.dataset.bcLayout = compact ? "compact" : "wide";
+  rootNode.dataset.sfsLayout = compact ? "compact" : "wide";
   if (window.interactiveFigure &&
       typeof window.interactiveFigure.observeResponsiveLayout === "function") {
     window.interactiveFigure.observeResponsiveLayout({
@@ -3223,7 +3223,7 @@ makeHeightVariabilityDemo = function(opts) {
   if (window.interactiveFigure) {
     if (!trackingEnabled &&
         typeof window.interactiveFigure.observeResponsiveLayout === "function") {
-      rootNode.dataset.bcLayout = overviewCompact ? "compact" : "wide";
+      rootNode.dataset.sfsLayout = overviewCompact ? "compact" : "wide";
       window.interactiveFigure.observeResponsiveLayout({
         root: rootNode,
         container: chartWrap.node(),

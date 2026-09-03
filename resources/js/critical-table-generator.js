@@ -1,19 +1,19 @@
-bcCriticalTableStats = window.bcStats || {}
+sfsCriticalTableStats = window.sfsStats || {}
 
-bcCriticalTableValueOr = (value, fallback) =>
+sfsCriticalTableValueOr = (value, fallback) =>
   value === undefined || value === null ? fallback : value
 
-bcCriticalTableFiniteNumber = (value, fallback = undefined) => {
+sfsCriticalTableFiniteNumber = (value, fallback = undefined) => {
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
 
-bcCriticalTablePositiveNumber = (value, fallback = undefined) => {
-  const number = bcCriticalTableFiniteNumber(value);
+sfsCriticalTablePositiveNumber = (value, fallback = undefined) => {
+  const number = sfsCriticalTableFiniteNumber(value);
   return Number.isFinite(number) && number > 0 ? number : fallback;
 }
 
-bcCriticalTableBoolean = (value, fallback = false) => {
+sfsCriticalTableBoolean = (value, fallback = false) => {
   if (value === undefined || value === null) return fallback;
   if (typeof value === "boolean") return value;
   const normalized = String(value).trim().toLowerCase();
@@ -22,35 +22,35 @@ bcCriticalTableBoolean = (value, fallback = false) => {
   return fallback;
 }
 
-bcCriticalTableAsArray = (value, fallback = []) => {
-  const source = bcCriticalTableValueOr(value, fallback);
+sfsCriticalTableAsArray = (value, fallback = []) => {
+  const source = sfsCriticalTableValueOr(value, fallback);
   return Array.isArray(source) ? source.slice() : [source].filter((item) => item !== undefined && item !== null);
 }
 
-bcCriticalTableNormalizeKey = (value) =>
+sfsCriticalTableNormalizeKey = (value) =>
   String(value || "").trim().toLowerCase().replace(/[\s_]+/g, "-")
 
-bcCriticalTableRound = (value, digits = 12) => {
+sfsCriticalTableRound = (value, digits = 12) => {
   if (!Number.isFinite(value)) return value;
   const factor = Math.pow(10, digits);
   return Math.round((value + Number.EPSILON) * factor) / factor;
 }
 
-bcCriticalTableHtmlId = (() => {
+sfsCriticalTableHtmlId = (() => {
   let next = 1;
   return (prefix = "critical-value-table") => `${prefix}-${next++}`;
 })()
 
-bcCriticalTableNormalizeDistribution = (value) => {
-  const key = bcCriticalTableNormalizeKey(value || "normal");
+sfsCriticalTableNormalizeDistribution = (value) => {
+  const key = sfsCriticalTableNormalizeKey(value || "normal");
   if (["normal", "norm", "gaussian", "z", "z-score", "unit-normal"].includes(key)) return "normal";
   if (["t", "student", "student-t", "student-t-distribution"].includes(key)) return "t";
   if (["f", "f-distribution", "variance-ratio"].includes(key)) return "f";
   return key;
 }
 
-bcCriticalTableNormalizeLayout = (value, distribution) => {
-  const key = bcCriticalTableNormalizeKey(value || "");
+sfsCriticalTableNormalizeLayout = (value, distribution) => {
+  const key = sfsCriticalTableNormalizeKey(value || "");
   if (distribution === "normal") {
     if (["lookup", "traditional", "unit-normal", "matrix"].includes(key)) return "lookup";
     return "areas";
@@ -58,8 +58,8 @@ bcCriticalTableNormalizeLayout = (value, distribution) => {
   return key || "critical-values";
 }
 
-bcCriticalTableNormalizeArea = (value) => {
-  const key = bcCriticalTableNormalizeKey(value || "left");
+sfsCriticalTableNormalizeArea = (value) => {
+  const key = sfsCriticalTableNormalizeKey(value || "left");
   if (["left", "lower", "below", "less-than", "less"].includes(key)) return "left";
   if (["right", "upper", "above", "greater-than", "greater"].includes(key)) return "right";
   if (["mean-to-z", "mean-to-score", "between-mean-and-z", "mean", "between"].includes(key)) return "mean-to-z";
@@ -68,53 +68,53 @@ bcCriticalTableNormalizeArea = (value) => {
   return key;
 }
 
-bcCriticalTableNormalizeTail = (value) => {
-  const key = bcCriticalTableNormalizeKey(value || "right");
+sfsCriticalTableNormalizeTail = (value) => {
+  const key = sfsCriticalTableNormalizeKey(value || "right");
   if (["one", "one-tail", "one-tailed", "right", "upper", "greater", "greater-than"].includes(key)) return "right";
   if (["left", "lower", "less", "less-than"].includes(key)) return "left";
   if (["two", "two-tail", "two-tailed", "both", "both-tails"].includes(key)) return "two";
   return key;
 }
 
-bcCriticalTableNumberFrom = (value) => {
+sfsCriticalTableNumberFrom = (value) => {
   if (value === Infinity || value === -Infinity) return value;
   if (typeof value === "string") {
     const key = value.trim().toLowerCase();
     if (["infinity", "+infinity", "inf", "+inf"].includes(key)) return Infinity;
     if (["-infinity", "-inf"].includes(key)) return -Infinity;
   }
-  return bcCriticalTableFiniteNumber(value);
+  return sfsCriticalTableFiniteNumber(value);
 }
 
-bcCriticalTableSequence = (source, fallback = []) => {
+sfsCriticalTableSequence = (source, fallback = []) => {
   if (Array.isArray(source)) {
     return source
-      .map(bcCriticalTableNumberFrom)
+      .map(sfsCriticalTableNumberFrom)
       .filter((value) => Number.isFinite(value) || value === Infinity || value === -Infinity);
   }
 
   if (typeof source === "number" && Number.isFinite(source)) {
-    return bcCriticalTableSequence({ from: 1, to: source, step: 1 }, fallback);
+    return sfsCriticalTableSequence({ from: 1, to: source, step: 1 }, fallback);
   }
 
   if (typeof source === "string") {
     const rangeMatch = source.trim().match(/^(-?\d+(?:\.\d+)?)\s*:\s*(-?\d+(?:\.\d+)?)$/);
     if (rangeMatch) {
-      return bcCriticalTableSequence({ from: Number(rangeMatch[1]), to: Number(rangeMatch[2]), step: 1 }, fallback);
+      return sfsCriticalTableSequence({ from: Number(rangeMatch[1]), to: Number(rangeMatch[2]), step: 1 }, fallback);
     }
   }
 
   if (source && typeof source === "object") {
-    const from = bcCriticalTableFiniteNumber(
-      bcCriticalTableValueOr(source.from, bcCriticalTableValueOr(source.start, source.min)),
+    const from = sfsCriticalTableFiniteNumber(
+      sfsCriticalTableValueOr(source.from, sfsCriticalTableValueOr(source.start, source.min)),
       1
     );
-    const to = bcCriticalTableFiniteNumber(
-      bcCriticalTableValueOr(source.to, bcCriticalTableValueOr(source.end, source.max)),
+    const to = sfsCriticalTableFiniteNumber(
+      sfsCriticalTableValueOr(source.to, sfsCriticalTableValueOr(source.end, source.max)),
       from
     );
-    const rawStep = bcCriticalTablePositiveNumber(
-      bcCriticalTableValueOr(source.step, bcCriticalTableValueOr(source.by, source.increment)),
+    const rawStep = sfsCriticalTablePositiveNumber(
+      sfsCriticalTableValueOr(source.step, sfsCriticalTableValueOr(source.by, source.increment)),
       1
     );
     const direction = to >= from ? 1 : -1;
@@ -124,15 +124,15 @@ bcCriticalTableSequence = (source, fallback = []) => {
 
     if (direction > 0) {
       for (let value = from; value <= to + epsilon; value += step) {
-        values.push(bcCriticalTableRound(value));
+        values.push(sfsCriticalTableRound(value));
       }
     } else {
       for (let value = from; value >= to - epsilon; value += step) {
-        values.push(bcCriticalTableRound(value));
+        values.push(sfsCriticalTableRound(value));
       }
     }
 
-    if (bcCriticalTableBoolean(source.includeInfinity || source.infinity || source.includeInf, false)) {
+    if (sfsCriticalTableBoolean(source.includeInfinity || source.infinity || source.includeInf, false)) {
       values.push(Infinity);
     }
 
@@ -142,7 +142,7 @@ bcCriticalTableSequence = (source, fallback = []) => {
   return fallback.slice();
 }
 
-bcCriticalTableFormatNumber = (value, digits = 3, opts = {}) => {
+sfsCriticalTableFormatNumber = (value, digits = 3, opts = {}) => {
   if (value === Infinity) return "Infinity";
   if (value === -Infinity) return "-Infinity";
   if (!Number.isFinite(value)) return "";
@@ -158,25 +158,25 @@ bcCriticalTableFormatNumber = (value, digits = 3, opts = {}) => {
   return text;
 }
 
-bcCriticalTableDfLabel = (value) =>
-  value === Infinity ? "Infinity" : bcCriticalTableFormatNumber(value, 0, { trim: true })
+sfsCriticalTableDfLabel = (value) =>
+  value === Infinity ? "Infinity" : sfsCriticalTableFormatNumber(value, 0, { trim: true })
 
-bcCriticalTableAlphaLabel = (alpha) =>
-  bcCriticalTableFormatNumber(
+sfsCriticalTableAlphaLabel = (alpha) =>
+  sfsCriticalTableFormatNumber(
     alpha,
     alpha < 0.01 || Math.abs(alpha * 100 - Math.round(alpha * 100)) > 1e-9 ? 3 : 2,
     { trim: true, omitLeadingZero: true }
   )
 
-bcCriticalTablePercentLabel = (value) => {
+sfsCriticalTablePercentLabel = (value) => {
   if (!Number.isFinite(value)) return "";
   const percent = value * 100;
   const digits = Math.abs(percent - Math.round(percent)) < 1e-9 ? 0 : 1;
-  return `${bcCriticalTableFormatNumber(percent, digits, { trim: true })}%`;
+  return `${sfsCriticalTableFormatNumber(percent, digits, { trim: true })}%`;
 }
 
-bcCriticalTableAreaLabel = (area) => {
-  const key = bcCriticalTableNormalizeArea(area);
+sfsCriticalTableAreaLabel = (area) => {
+  const key = sfsCriticalTableNormalizeArea(area);
   if (key === "left") return "Area left of z";
   if (key === "right") return "Area right of z";
   if (key === "mean-to-z") return "Area between mean and z";
@@ -185,26 +185,26 @@ bcCriticalTableAreaLabel = (area) => {
   return String(area);
 }
 
-bcCriticalTableTailLabel = (tail, alpha) => {
-  const key = bcCriticalTableNormalizeTail(tail);
-  const alphaText = bcCriticalTableAlphaLabel(alpha);
+sfsCriticalTableTailLabel = (tail, alpha) => {
+  const key = sfsCriticalTableNormalizeTail(tail);
+  const alphaText = sfsCriticalTableAlphaLabel(alpha);
   if (key === "two") return `two-tailed ${alphaText}`;
   if (key === "left") return `left-tailed ${alphaText}`;
   return `one-tailed ${alphaText}`;
 }
 
-bcCriticalTableNormalArea = (area, z) => {
-  const key = bcCriticalTableNormalizeArea(area);
-  const left = bcCriticalTableStats.normalCdf(z, 0, 1);
+sfsCriticalTableNormalArea = (area, z) => {
+  const key = sfsCriticalTableNormalizeArea(area);
+  const left = sfsCriticalTableStats.normalCdf(z, 0, 1);
   if (key === "right") return 1 - left;
   if (key === "mean-to-z") return Math.abs(left - 0.5);
   if (key === "two-tail") return 2 * Math.min(left, 1 - left);
-  if (key === "central") return bcCriticalTableStats.normalCdf(Math.abs(z), 0, 1) - bcCriticalTableStats.normalCdf(-Math.abs(z), 0, 1);
+  if (key === "central") return sfsCriticalTableStats.normalCdf(Math.abs(z), 0, 1) - sfsCriticalTableStats.normalCdf(-Math.abs(z), 0, 1);
   return left;
 }
 
-bcCriticalTableNormalShade = (area, z) => {
-  const key = bcCriticalTableNormalizeArea(area);
+sfsCriticalTableNormalShade = (area, z) => {
+  const key = sfsCriticalTableNormalizeArea(area);
   if (key === "right") return [{ from: z, to: Infinity }];
   if (key === "mean-to-z") return [{ from: Math.min(0, z), to: Math.max(0, z) }];
   if (key === "two-tail") {
@@ -221,56 +221,56 @@ bcCriticalTableNormalShade = (area, z) => {
   return [{ from: -Infinity, to: z }];
 }
 
-bcCriticalTableTQuantile = (tail, alpha, df) => {
-  const key = bcCriticalTableNormalizeTail(tail);
+sfsCriticalTableTQuantile = (tail, alpha, df) => {
+  const key = sfsCriticalTableNormalizeTail(tail);
   if (df === Infinity) {
-    if (key === "left") return bcCriticalTableStats.normalInv(alpha, 0, 1);
-    if (key === "two") return bcCriticalTableStats.normalInv(1 - alpha / 2, 0, 1);
-    return bcCriticalTableStats.normalInv(1 - alpha, 0, 1);
+    if (key === "left") return sfsCriticalTableStats.normalInv(alpha, 0, 1);
+    if (key === "two") return sfsCriticalTableStats.normalInv(1 - alpha / 2, 0, 1);
+    return sfsCriticalTableStats.normalInv(1 - alpha, 0, 1);
   }
-  if (key === "left") return bcCriticalTableStats.tInv(alpha, df);
-  if (key === "two") return bcCriticalTableStats.tInv(1 - alpha / 2, df);
-  return bcCriticalTableStats.tInv(1 - alpha, df);
+  if (key === "left") return sfsCriticalTableStats.tInv(alpha, df);
+  if (key === "two") return sfsCriticalTableStats.tInv(1 - alpha / 2, df);
+  return sfsCriticalTableStats.tInv(1 - alpha, df);
 }
 
-bcCriticalTableFQuantile = (tail, alpha, df1, df2) => {
-  const key = bcCriticalTableNormalizeTail(tail);
-  if (key === "left") return bcCriticalTableStats.fInv(alpha, df1, df2);
-  return bcCriticalTableStats.fInv(1 - alpha, df1, df2);
+sfsCriticalTableFQuantile = (tail, alpha, df1, df2) => {
+  const key = sfsCriticalTableNormalizeTail(tail);
+  if (key === "left") return sfsCriticalTableStats.fInv(alpha, df1, df2);
+  return sfsCriticalTableStats.fInv(1 - alpha, df1, df2);
 }
 
-bcCriticalTableCriticalShade = (tail, alpha) => {
-  const key = bcCriticalTableNormalizeTail(tail);
+sfsCriticalTableCriticalShade = (tail, alpha) => {
+  const key = sfsCriticalTableNormalizeTail(tail);
   if (key === "left") return { tail: "left", alpha };
   if (key === "two") return { tail: "two", alpha };
   return { tail: "right", alpha };
 }
 
-bcCriticalTableSelectionMatches = (meta, selection) => {
+sfsCriticalTableSelectionMatches = (meta, selection) => {
   if (!selection || typeof selection !== "object") return false;
 
   return Object.entries(selection).every(([key, value]) => {
-    if (["animate", "duration", "controls", "controls-open", "show-controls"].includes(bcCriticalTableNormalizeKey(key))) return true;
-    if (key === "area") return bcCriticalTableNormalizeArea(meta.area) === bcCriticalTableNormalizeArea(value);
-    if (key === "tail") return bcCriticalTableNormalizeTail(meta.tail) === bcCriticalTableNormalizeTail(value);
-    if (key === "distribution") return bcCriticalTableNormalizeDistribution(meta.distribution) === bcCriticalTableNormalizeDistribution(value);
-    if (key === "layout") return bcCriticalTableNormalizeLayout(meta.layout, meta.distribution) === bcCriticalTableNormalizeLayout(value, meta.distribution);
+    if (["animate", "duration", "controls", "controls-open", "show-controls"].includes(sfsCriticalTableNormalizeKey(key))) return true;
+    if (key === "area") return sfsCriticalTableNormalizeArea(meta.area) === sfsCriticalTableNormalizeArea(value);
+    if (key === "tail") return sfsCriticalTableNormalizeTail(meta.tail) === sfsCriticalTableNormalizeTail(value);
+    if (key === "distribution") return sfsCriticalTableNormalizeDistribution(meta.distribution) === sfsCriticalTableNormalizeDistribution(value);
+    if (key === "layout") return sfsCriticalTableNormalizeLayout(meta.layout, meta.distribution) === sfsCriticalTableNormalizeLayout(value, meta.distribution);
 
     const metaValue = meta[key];
-    const targetValue = bcCriticalTableNumberFrom(value);
+    const targetValue = sfsCriticalTableNumberFrom(value);
     if (Number.isFinite(metaValue) && Number.isFinite(targetValue)) return Math.abs(metaValue - targetValue) < 1e-9;
     return String(metaValue) === String(value);
   });
 }
 
-bcCriticalTableNotify = (rootNode) => {
+sfsCriticalTableNotify = (rootNode) => {
   const event = typeof InputEvent === "function"
     ? new InputEvent("input", { bubbles: true })
     : new Event("input", { bubbles: true });
   rootNode.dispatchEvent(event);
 }
 
-bcCriticalTableEnsureStyles = () => {
+sfsCriticalTableEnsureStyles = () => {
   if (document.getElementById("sfs-critical-table-styles")) return;
   if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
@@ -405,7 +405,7 @@ bcCriticalTableEnsureStyles = () => {
   document.head.appendChild(style);
 }
 
-bcCriticalTableWrapNode = (node) => {
+sfsCriticalTableWrapNode = (node) => {
   const api = {
     node() {
       return node;
@@ -413,7 +413,7 @@ bcCriticalTableWrapNode = (node) => {
     append(tagName) {
       const child = document.createElement(tagName);
       node.appendChild(child);
-      return bcCriticalTableWrapNode(child);
+      return sfsCriticalTableWrapNode(child);
     },
     attr(name, value) {
       if (value === undefined || value === null) node.removeAttribute(name);
@@ -442,15 +442,15 @@ bcCriticalTableWrapNode = (node) => {
   return api;
 }
 
-bcCriticalTableCreate = (tagName) =>
-  bcCriticalTableWrapNode(document.createElement(tagName))
+sfsCriticalTableCreate = (tagName) =>
+  sfsCriticalTableWrapNode(document.createElement(tagName))
 
-bcCriticalTableRange = (count) =>
+sfsCriticalTableRange = (count) =>
   Array.from({ length: Math.max(0, Math.round(count)) }, (value, index) => index)
 
-bcCriticalTableBuildRoot = (opts = {}, className = "") => {
-  bcCriticalTableEnsureStyles();
-  const root = bcCriticalTableCreate("div")
+sfsCriticalTableBuildRoot = (opts = {}, className = "") => {
+  sfsCriticalTableEnsureStyles();
+  const root = sfsCriticalTableCreate("div")
     .attr("class", `critical-value-table sfs-figure ${className}`.trim())
     .attr("id", opts.id || null)
     .style("--cvt-max-width", opts.maxWidth || null)
@@ -467,13 +467,13 @@ bcCriticalTableBuildRoot = (opts = {}, className = "") => {
   return root;
 }
 
-bcCriticalTableCssLength = (value) => {
+sfsCriticalTableCssLength = (value) => {
   if (value === undefined || value === null || value === false || value === "") return null;
   if (typeof value === "number" && Number.isFinite(value)) return `${value}px`;
   return String(value);
 }
 
-bcCriticalTableSetupScrollAffordance = (wrap) => {
+sfsCriticalTableSetupScrollAffordance = (wrap) => {
   const node = wrap.node();
 
   const update = () => {
@@ -509,46 +509,46 @@ bcCriticalTableSetupScrollAffordance = (wrap) => {
   });
 }
 
-bcCriticalTableApplyTableWrapOptions = (wrap, opts = {}) => {
-  const maxHeight = bcCriticalTableCssLength(
-    bcCriticalTableValueOr(opts.tableMaxHeight, bcCriticalTableValueOr(opts.maxTableHeight, opts.scrollHeight))
+sfsCriticalTableApplyTableWrapOptions = (wrap, opts = {}) => {
+  const maxHeight = sfsCriticalTableCssLength(
+    sfsCriticalTableValueOr(opts.tableMaxHeight, sfsCriticalTableValueOr(opts.maxTableHeight, opts.scrollHeight))
   );
 
   if (maxHeight) {
     wrap
       .style("max-height", maxHeight)
       .style("overflow-y", "auto");
-    bcCriticalTableSetupScrollAffordance(wrap);
+    sfsCriticalTableSetupScrollAffordance(wrap);
   }
 
   return wrap;
 }
 
-bcCriticalTableAppendNote = (root, opts = {}) => {
+sfsCriticalTableAppendNote = (root, opts = {}) => {
   if (!opts.note) return;
   root.append("p")
     .attr("class", "cvt-note")
     .text(opts.note);
 }
 
-bcCriticalTableIsInteractive = (opts = {}) =>
-  bcCriticalTableBoolean(
-    bcCriticalTableValueOr(opts.interactive, bcCriticalTableValueOr(opts.selectable, opts.clickable)),
+sfsCriticalTableIsInteractive = (opts = {}) =>
+  sfsCriticalTableBoolean(
+    sfsCriticalTableValueOr(opts.interactive, sfsCriticalTableValueOr(opts.selectable, opts.clickable)),
     true
   )
 
-bcCriticalTableFinish = (rootNode, cellMetas, opts = {}) => {
-  if (!bcCriticalTableIsInteractive(opts)) {
+sfsCriticalTableFinish = (rootNode, cellMetas, opts = {}) => {
+  if (!sfsCriticalTableIsInteractive(opts)) {
     rootNode.value = {};
     return rootNode;
   }
 
-  bcCriticalTableInteractiveController(rootNode, cellMetas, opts);
-  bcCriticalTableSetupTutorial(rootNode, opts);
+  sfsCriticalTableInteractiveController(rootNode, cellMetas, opts);
+  sfsCriticalTableSetupTutorial(rootNode, opts);
   return rootNode;
 }
 
-bcCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
+sfsCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
   let selected = null;
 
   const setSelected = (meta, options = {}) => {
@@ -570,12 +570,12 @@ bcCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
       element.classList.toggle("cvt-row-selected", element.dataset.cvtRowKey === meta.rowKey);
     });
 
-    if (changed && options.notify !== false) bcCriticalTableNotify(rootNode);
+    if (changed && options.notify !== false) sfsCriticalTableNotify(rootNode);
     return true;
   };
 
   const select = (selection, options = {}) => {
-    const target = cellMetas.find((meta) => bcCriticalTableSelectionMatches(meta, selection));
+    const target = cellMetas.find((meta) => sfsCriticalTableSelectionMatches(meta, selection));
     return setSelected(target, options);
   };
 
@@ -583,7 +583,7 @@ bcCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
     if (!action || typeof action !== "object") return false;
     if ((action.controls !== undefined || action["controls-open"] !== undefined) &&
         context && typeof context.setControlsOpen === "function") {
-      context.setControlsOpen(bcCriticalTableBoolean(action.controls ?? action["controls-open"], true));
+      context.setControlsOpen(sfsCriticalTableBoolean(action.controls ?? action["controls-open"], true));
     }
     return select(action, { animate: action.animate !== false });
   };
@@ -601,7 +601,7 @@ bcCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
   const initialSelection = opts.selected === undefined ? opts.selection : opts.selected;
   if (initialSelection !== false && initialSelection !== null) {
     const initial = initialSelection
-      ? cellMetas.find((meta) => bcCriticalTableSelectionMatches(meta, initialSelection))
+      ? cellMetas.find((meta) => sfsCriticalTableSelectionMatches(meta, initialSelection))
       : null;
     setSelected(initial || cellMetas[0], { notify: false });
   } else {
@@ -611,7 +611,7 @@ bcCriticalTableInteractiveController = (rootNode, cellMetas, opts = {}) => {
   return rootNode.criticalValueTable;
 }
 
-bcCriticalTableSetupTutorial = (rootNode, opts = {}) => {
+sfsCriticalTableSetupTutorial = (rootNode, opts = {}) => {
   if (!window.interactiveFigure || !window.interactiveFigure.createTutorial) return;
   if (opts.tutorial === false) return;
 
@@ -625,7 +625,7 @@ bcCriticalTableSetupTutorial = (rootNode, opts = {}) => {
 
     const callout = rootNode.closest(".callout");
     const footer = callout ? callout.querySelector(".callout-footer") : null;
-    if (!footer || footer.dataset.bcIfTutorial === "true") return;
+    if (!footer || footer.dataset.sfsIfTutorial === "true") return;
 
     const steps = Array.from(footer.children)
       .filter((child) => child.classList && child.classList.contains("tutorial-step"));
@@ -644,8 +644,8 @@ bcCriticalTableSetupTutorial = (rootNode, opts = {}) => {
   requestAnimationFrame(setup);
 }
 
-bcCriticalTableCellButton = (td, meta, text, opts = {}) => {
-  if (!bcCriticalTableIsInteractive(opts)) {
+sfsCriticalTableCellButton = (td, meta, text, opts = {}) => {
+  if (!sfsCriticalTableIsInteractive(opts)) {
     td.text(text);
     return;
   }
@@ -667,29 +667,29 @@ bcCriticalTableCellButton = (td, meta, text, opts = {}) => {
   });
 }
 
-bcCriticalTableNormalAreaColumns = (opts = {}) =>
-  bcCriticalTableAsArray(opts.areas || opts.columns || ["left", "right", "mean-to-z"])
+sfsCriticalTableNormalAreaColumns = (opts = {}) =>
+  sfsCriticalTableAsArray(opts.areas || opts.columns || ["left", "right", "mean-to-z"])
     .map((source) => {
       const spec = typeof source === "string" ? { area: source } : source || {};
-      const area = bcCriticalTableNormalizeArea(spec.area || spec.type || spec.key);
+      const area = sfsCriticalTableNormalizeArea(spec.area || spec.type || spec.key);
       return {
         area,
-        label: spec.label || bcCriticalTableAreaLabel(area)
+        label: spec.label || sfsCriticalTableAreaLabel(area)
       };
     })
 
-bcCriticalTableNormalAreas = (opts = {}) => {
+sfsCriticalTableNormalAreas = (opts = {}) => {
   const distribution = "normal";
   const layout = "areas";
-  const zValues = bcCriticalTableSequence(opts.z || opts.values || { from: -3, to: 3, step: 0.1 });
-  const columns = bcCriticalTableNormalAreaColumns(opts);
+  const zValues = sfsCriticalTableSequence(opts.z || opts.values || { from: -3, to: 3, step: 0.1 });
+  const columns = sfsCriticalTableNormalAreaColumns(opts);
   const digits = opts.digits === undefined ? 4 : opts.digits;
   const zDigits = opts.zDigits === undefined ? 1 : opts.zDigits;
-  const root = bcCriticalTableBuildRoot(opts, "critical-value-table-normal cvt-normal-areas");
+  const root = sfsCriticalTableBuildRoot(opts, "critical-value-table-normal cvt-normal-areas");
   const rootNode = root.node();
   const cellMetas = [];
 
-  const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
+  const wrap = sfsCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
     .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "Unit normal area table");
@@ -703,10 +703,10 @@ bcCriticalTableNormalAreas = (opts = {}) => {
   zValues.forEach((z) => {
     const rowKey = `z-${z}`;
     const tr = tbody.append("tr").attr("data-cvt-row-key", rowKey);
-    tr.append("th").attr("scope", "row").text(bcCriticalTableFormatNumber(z, zDigits));
+    tr.append("th").attr("scope", "row").text(sfsCriticalTableFormatNumber(z, zDigits));
 
     columns.forEach((column) => {
-      const probability = bcCriticalTableNormalArea(column.area, z);
+      const probability = sfsCriticalTableNormalArea(column.area, z);
       const meta = {
         key: `normal-${layout}-${column.area}-${z}`,
         rowKey,
@@ -716,35 +716,35 @@ bcCriticalTableNormalAreas = (opts = {}) => {
         area: column.area,
         probability,
         value: probability,
-        shade: bcCriticalTableNormalShade(column.area, z)
+        shade: sfsCriticalTableNormalShade(column.area, z)
       };
       cellMetas.push(meta);
-      bcCriticalTableCellButton(tr.append("td"), meta, bcCriticalTableFormatNumber(probability, digits), opts);
+      sfsCriticalTableCellButton(tr.append("td"), meta, sfsCriticalTableFormatNumber(probability, digits), opts);
     });
   });
 
-  bcCriticalTableAppendNote(root, opts);
-  return bcCriticalTableFinish(rootNode, cellMetas, opts);
+  sfsCriticalTableAppendNote(root, opts);
+  return sfsCriticalTableFinish(rootNode, cellMetas, opts);
 }
 
-bcCriticalTableNormalLookup = (opts = {}) => {
+sfsCriticalTableNormalLookup = (opts = {}) => {
   const distribution = "normal";
   const layout = "lookup";
   const zSpec = opts.z || {};
-  const rowStep = bcCriticalTablePositiveNumber(zSpec.rowStep || opts.rowStep, 0.1);
-  const columnStep = bcCriticalTablePositiveNumber(zSpec.columnStep || opts.columnStep, 0.01);
-  const rowFrom = bcCriticalTableFiniteNumber(bcCriticalTableValueOr(zSpec.from, opts.from), 0);
-  const rowTo = bcCriticalTableFiniteNumber(bcCriticalTableValueOr(zSpec.to, opts.to), 3.9);
-  const rows = bcCriticalTableSequence({ from: rowFrom, to: rowTo, step: rowStep });
+  const rowStep = sfsCriticalTablePositiveNumber(zSpec.rowStep || opts.rowStep, 0.1);
+  const columnStep = sfsCriticalTablePositiveNumber(zSpec.columnStep || opts.columnStep, 0.01);
+  const rowFrom = sfsCriticalTableFiniteNumber(sfsCriticalTableValueOr(zSpec.from, opts.from), 0);
+  const rowTo = sfsCriticalTableFiniteNumber(sfsCriticalTableValueOr(zSpec.to, opts.to), 3.9);
+  const rows = sfsCriticalTableSequence({ from: rowFrom, to: rowTo, step: rowStep });
   const columnCount = Math.max(1, Math.round(rowStep / columnStep));
-  const columns = bcCriticalTableRange(columnCount).map((index) => bcCriticalTableRound(index * columnStep));
-  const area = bcCriticalTableNormalizeArea(opts.area || "left");
+  const columns = sfsCriticalTableRange(columnCount).map((index) => sfsCriticalTableRound(index * columnStep));
+  const area = sfsCriticalTableNormalizeArea(opts.area || "left");
   const digits = opts.digits === undefined ? 4 : opts.digits;
-  const root = bcCriticalTableBuildRoot(opts, "critical-value-table-normal cvt-normal-lookup");
+  const root = sfsCriticalTableBuildRoot(opts, "critical-value-table-normal cvt-normal-lookup");
   const rootNode = root.node();
   const cellMetas = [];
 
-  const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
+  const wrap = sfsCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
     .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "Unit normal lookup table");
@@ -753,18 +753,18 @@ bcCriticalTableNormalLookup = (opts = {}) => {
   const header = table.append("thead").append("tr");
   header.append("th").text("z");
   columns.forEach((column) => {
-    header.append("th").text(bcCriticalTableFormatNumber(column, 2).replace(/^0/, ""));
+    header.append("th").text(sfsCriticalTableFormatNumber(column, 2).replace(/^0/, ""));
   });
 
   const tbody = table.append("tbody");
   rows.forEach((rowValue) => {
     const rowKey = `z-base-${rowValue}`;
     const tr = tbody.append("tr").attr("data-cvt-row-key", rowKey);
-    tr.append("th").attr("scope", "row").text(bcCriticalTableFormatNumber(rowValue, 1));
+    tr.append("th").attr("scope", "row").text(sfsCriticalTableFormatNumber(rowValue, 1));
 
     columns.forEach((column) => {
-      const z = bcCriticalTableRound(rowValue + column);
-      const probability = bcCriticalTableNormalArea(area, z);
+      const z = sfsCriticalTableRound(rowValue + column);
+      const probability = sfsCriticalTableNormalArea(area, z);
       const meta = {
         key: `normal-${layout}-${area}-${z}`,
         rowKey,
@@ -774,19 +774,19 @@ bcCriticalTableNormalLookup = (opts = {}) => {
         area,
         probability,
         value: probability,
-        shade: bcCriticalTableNormalShade(area, z)
+        shade: sfsCriticalTableNormalShade(area, z)
       };
       cellMetas.push(meta);
-      bcCriticalTableCellButton(tr.append("td"), meta, bcCriticalTableFormatNumber(probability, digits), opts);
+      sfsCriticalTableCellButton(tr.append("td"), meta, sfsCriticalTableFormatNumber(probability, digits), opts);
     });
   });
 
-  bcCriticalTableAppendNote(root, opts);
-  return bcCriticalTableFinish(rootNode, cellMetas, opts);
+  sfsCriticalTableAppendNote(root, opts);
+  return sfsCriticalTableFinish(rootNode, cellMetas, opts);
 }
 
-bcCriticalTableTColumns = (opts = {}) =>
-  bcCriticalTableAsArray(opts.columns || [
+sfsCriticalTableTColumns = (opts = {}) =>
+  sfsCriticalTableAsArray(opts.columns || [
     { tail: "right", alpha: 0.10 },
     { tail: "right", alpha: 0.05 },
     { tail: "right", alpha: 0.01 },
@@ -797,68 +797,68 @@ bcCriticalTableTColumns = (opts = {}) =>
     const spec = typeof source === "number" ? { alpha: source, tail: opts.tail || "right" } :
       typeof source === "string" ? { alpha: Number(source), tail: opts.tail || "right" } :
       source || {};
-    const alpha = bcCriticalTablePositiveNumber(spec.alpha, 0.05);
-    const tail = bcCriticalTableNormalizeTail(spec.tail || spec.side || opts.tail || "right");
+    const alpha = sfsCriticalTablePositiveNumber(spec.alpha, 0.05);
+    const tail = sfsCriticalTableNormalizeTail(spec.tail || spec.side || opts.tail || "right");
     return {
       alpha,
       tail,
-      label: spec.label || bcCriticalTableTailLabel(tail, alpha)
+      label: spec.label || sfsCriticalTableTailLabel(tail, alpha)
     };
   })
 
-bcCriticalTableTPairedColumns = (opts = {}) =>
-  bcCriticalTableAsArray(opts.alphas || opts.oneTailAlphas || opts.oneTailedAlphas || [0.10, 0.05, 0.025, 0.01, 0.005])
+sfsCriticalTableTPairedColumns = (opts = {}) =>
+  sfsCriticalTableAsArray(opts.alphas || opts.oneTailAlphas || opts.oneTailedAlphas || [0.10, 0.05, 0.025, 0.01, 0.005])
     .map((source) => {
       const spec = typeof source === "number" ? { alpha: source } :
         typeof source === "string" ? { alpha: Number(source) } :
         source || {};
-      const oneTailAlpha = bcCriticalTablePositiveNumber(
-        bcCriticalTableValueOr(spec.oneTailAlpha, bcCriticalTableValueOr(spec.oneTailedAlpha, spec.alpha)),
+      const oneTailAlpha = sfsCriticalTablePositiveNumber(
+        sfsCriticalTableValueOr(spec.oneTailAlpha, sfsCriticalTableValueOr(spec.oneTailedAlpha, spec.alpha)),
         0.05
       );
-      const twoTailAlpha = bcCriticalTablePositiveNumber(
-        bcCriticalTableValueOr(spec.twoTailAlpha, bcCriticalTableValueOr(spec.twoTailedAlpha, spec.alpha2)),
+      const twoTailAlpha = sfsCriticalTablePositiveNumber(
+        sfsCriticalTableValueOr(spec.twoTailAlpha, sfsCriticalTableValueOr(spec.twoTailedAlpha, spec.alpha2)),
         oneTailAlpha * 2
       );
       return {
         oneTailAlpha,
         twoTailAlpha,
-        oneTailLabel: spec.oneTailLabel || bcCriticalTableAlphaLabel(oneTailAlpha),
-        twoTailLabel: spec.twoTailLabel || bcCriticalTableAlphaLabel(twoTailAlpha)
+        oneTailLabel: spec.oneTailLabel || sfsCriticalTableAlphaLabel(oneTailAlpha),
+        twoTailLabel: spec.twoTailLabel || sfsCriticalTableAlphaLabel(twoTailAlpha)
       };
     })
 
-bcCriticalTableTUsesPairedColumns = (opts = {}) => {
-  if (opts.pairedHeaders !== undefined) return bcCriticalTableBoolean(opts.pairedHeaders, true);
-  if (opts.dualHeaders !== undefined) return bcCriticalTableBoolean(opts.dualHeaders, true);
+sfsCriticalTableTUsesPairedColumns = (opts = {}) => {
+  if (opts.pairedHeaders !== undefined) return sfsCriticalTableBoolean(opts.pairedHeaders, true);
+  if (opts.dualHeaders !== undefined) return sfsCriticalTableBoolean(opts.dualHeaders, true);
   return opts.columns === undefined || opts.alphas !== undefined || opts.oneTailAlphas !== undefined || opts.oneTailedAlphas !== undefined;
 }
 
-bcCriticalTableTDefaultPairedTail = (opts = {}) => {
-  const tail = bcCriticalTableNormalizeTail(opts.selectedTail || opts.defaultTail || opts.tail || "two");
+sfsCriticalTableTDefaultPairedTail = (opts = {}) => {
+  const tail = sfsCriticalTableNormalizeTail(opts.selectedTail || opts.defaultTail || opts.tail || "two");
   return tail === "left" ? "right" : tail;
 }
 
-bcCriticalTableTShowConfidence = (opts = {}) =>
-  bcCriticalTableBoolean(
-    bcCriticalTableValueOr(opts.confidence, bcCriticalTableValueOr(opts.confidenceLevel, opts.confidenceLevels)),
+sfsCriticalTableTShowConfidence = (opts = {}) =>
+  sfsCriticalTableBoolean(
+    sfsCriticalTableValueOr(opts.confidence, sfsCriticalTableValueOr(opts.confidenceLevel, opts.confidenceLevels)),
     false
   )
 
-bcCriticalTableT = (opts = {}) => {
+sfsCriticalTableT = (opts = {}) => {
   const distribution = "t";
   const layout = "critical-values";
-  const dfValues = bcCriticalTableSequence(opts.df || opts.degreesOfFreedom || { from: 1, to: 30, step: 1 });
-  const pairedColumns = bcCriticalTableTUsesPairedColumns(opts);
-  const columns = pairedColumns ? bcCriticalTableTPairedColumns(opts) : bcCriticalTableTColumns(opts);
-  const defaultPairedTail = bcCriticalTableTDefaultPairedTail(opts);
-  const showConfidence = bcCriticalTableTShowConfidence(opts);
+  const dfValues = sfsCriticalTableSequence(opts.df || opts.degreesOfFreedom || { from: 1, to: 30, step: 1 });
+  const pairedColumns = sfsCriticalTableTUsesPairedColumns(opts);
+  const columns = pairedColumns ? sfsCriticalTableTPairedColumns(opts) : sfsCriticalTableTColumns(opts);
+  const defaultPairedTail = sfsCriticalTableTDefaultPairedTail(opts);
+  const showConfidence = sfsCriticalTableTShowConfidence(opts);
   const digits = opts.digits === undefined ? 3 : opts.digits;
-  const root = bcCriticalTableBuildRoot(opts, "critical-value-table-t");
+  const root = sfsCriticalTableBuildRoot(opts, "critical-value-table-t");
   const rootNode = root.node();
   const cellMetas = [];
 
-  const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
+  const wrap = sfsCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
     .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "t critical value table");
@@ -886,7 +886,7 @@ bcCriticalTableT = (opts = {}) => {
         .attr("class", "cvt-header-label")
         .attr("scope", "row")
         .text(opts.confidenceLabel || "confidence level");
-      columns.forEach((column) => confidenceHeader.append("th").text(bcCriticalTablePercentLabel(1 - column.twoTailAlpha)));
+      columns.forEach((column) => confidenceHeader.append("th").text(sfsCriticalTablePercentLabel(1 - column.twoTailAlpha)));
     }
   } else {
     const header = thead.append("tr");
@@ -912,11 +912,11 @@ bcCriticalTableT = (opts = {}) => {
   dfValues.forEach((df) => {
     const rowKey = `df-${df}`;
     const tr = tbody.append("tr").attr("data-cvt-row-key", rowKey);
-    tr.append("th").attr("scope", "row").text(bcCriticalTableDfLabel(df));
+    tr.append("th").attr("scope", "row").text(sfsCriticalTableDfLabel(df));
 
     columns.forEach((column) => {
       if (pairedColumns) {
-        const critical = bcCriticalTableTQuantile("right", column.oneTailAlpha, df);
+        const critical = sfsCriticalTableTQuantile("right", column.oneTailAlpha, df);
         const key = `t-${df}-paired-${column.oneTailAlpha}`;
         const baseMeta = {
           key,
@@ -933,21 +933,21 @@ bcCriticalTableT = (opts = {}) => {
         const oneTailMeta = Object.assign({}, baseMeta, {
           alpha: column.oneTailAlpha,
           tail: "right",
-          shade: bcCriticalTableCriticalShade("right", column.oneTailAlpha)
+          shade: sfsCriticalTableCriticalShade("right", column.oneTailAlpha)
         });
         const twoTailMeta = Object.assign({}, baseMeta, {
           alpha: column.twoTailAlpha,
           tail: "two",
-          shade: bcCriticalTableCriticalShade("two", column.twoTailAlpha)
+          shade: sfsCriticalTableCriticalShade("two", column.twoTailAlpha)
         });
         const defaultMeta = defaultPairedTail === "right" ? oneTailMeta : twoTailMeta;
         const alternateMeta = defaultPairedTail === "right" ? twoTailMeta : oneTailMeta;
         cellMetas.push(defaultMeta, alternateMeta);
-        bcCriticalTableCellButton(tr.append("td"), defaultMeta, bcCriticalTableFormatNumber(critical, digits), opts);
+        sfsCriticalTableCellButton(tr.append("td"), defaultMeta, sfsCriticalTableFormatNumber(critical, digits), opts);
         return;
       }
 
-      const critical = bcCriticalTableTQuantile(column.tail, column.alpha, df);
+      const critical = sfsCriticalTableTQuantile(column.tail, column.alpha, df);
       const meta = {
         key: `t-${df}-${column.tail}-${column.alpha}`,
         rowKey,
@@ -958,30 +958,30 @@ bcCriticalTableT = (opts = {}) => {
         tail: column.tail,
         critical,
         value: critical,
-        shade: bcCriticalTableCriticalShade(column.tail, column.alpha)
+        shade: sfsCriticalTableCriticalShade(column.tail, column.alpha)
       };
       cellMetas.push(meta);
-      bcCriticalTableCellButton(tr.append("td"), meta, bcCriticalTableFormatNumber(critical, digits), opts);
+      sfsCriticalTableCellButton(tr.append("td"), meta, sfsCriticalTableFormatNumber(critical, digits), opts);
     });
   });
 
-  bcCriticalTableAppendNote(root, opts);
-  return bcCriticalTableFinish(rootNode, cellMetas, opts);
+  sfsCriticalTableAppendNote(root, opts);
+  return sfsCriticalTableFinish(rootNode, cellMetas, opts);
 }
 
-bcCriticalTableF = (opts = {}) => {
+sfsCriticalTableF = (opts = {}) => {
   const distribution = "f";
   const layout = "critical-values";
-  const alpha = bcCriticalTablePositiveNumber(opts.alpha, 0.05);
-  const tail = bcCriticalTableNormalizeTail(opts.tail || "right");
-  const df1Values = bcCriticalTableSequence(opts.df1 || opts.numeratorDf || { from: 1, to: 10, step: 1 });
-  const df2Values = bcCriticalTableSequence(opts.df2 || opts.denominatorDf || { from: 1, to: 30, step: 1 });
+  const alpha = sfsCriticalTablePositiveNumber(opts.alpha, 0.05);
+  const tail = sfsCriticalTableNormalizeTail(opts.tail || "right");
+  const df1Values = sfsCriticalTableSequence(opts.df1 || opts.numeratorDf || { from: 1, to: 10, step: 1 });
+  const df2Values = sfsCriticalTableSequence(opts.df2 || opts.denominatorDf || { from: 1, to: 30, step: 1 });
   const digits = opts.digits === undefined ? 2 : opts.digits;
-  const root = bcCriticalTableBuildRoot(opts, "critical-value-table-f");
+  const root = sfsCriticalTableBuildRoot(opts, "critical-value-table-f");
   const rootNode = root.node();
   const cellMetas = [];
 
-  const wrap = bcCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
+  const wrap = sfsCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
   const table = wrap.append("table")
     .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.caption || "F critical value table");
@@ -993,14 +993,14 @@ bcCriticalTableF = (opts = {}) => {
     .attr("class", "cvt-header-label")
     .attr("colspan", 2)
     .attr("rowspan", 2)
-    .html(opts.alphaHeader || `&alpha; = ${bcCriticalTableAlphaLabel(alpha)}`);
+    .html(opts.alphaHeader || `&alpha; = ${sfsCriticalTableAlphaLabel(alpha)}`);
   superHeader.append("th")
     .attr("class", "cvt-header-group")
     .attr("scope", "colgroup")
     .attr("colspan", df1Values.length)
     .html(opts.numeratorHeader || opts.df1Header || "<i>df</i><sub>1</sub>");
   const header = thead.append("tr");
-  df1Values.forEach((df1) => header.append("th").text(bcCriticalTableDfLabel(df1)));
+  df1Values.forEach((df1) => header.append("th").text(sfsCriticalTableDfLabel(df1)));
 
   const tbody = table.append("tbody");
   df2Values.forEach((df2, index) => {
@@ -1013,10 +1013,10 @@ bcCriticalTableF = (opts = {}) => {
         .attr("rowspan", df2Values.length)
         .html(opts.denominatorHeader || opts.df2Header || "<i>df</i><sub>2</sub>");
     }
-    tr.append("th").attr("scope", "row").text(bcCriticalTableDfLabel(df2));
+    tr.append("th").attr("scope", "row").text(sfsCriticalTableDfLabel(df2));
 
     df1Values.forEach((df1) => {
-      const critical = bcCriticalTableFQuantile(tail, alpha, df1, df2);
+      const critical = sfsCriticalTableFQuantile(tail, alpha, df1, df2);
       const meta = {
         key: `f-${df1}-${df2}-${tail}-${alpha}`,
         rowKey,
@@ -1030,25 +1030,25 @@ bcCriticalTableF = (opts = {}) => {
         tail,
         critical,
         value: critical,
-        shade: bcCriticalTableCriticalShade(tail, alpha)
+        shade: sfsCriticalTableCriticalShade(tail, alpha)
       };
       cellMetas.push(meta);
-      bcCriticalTableCellButton(tr.append("td"), meta, bcCriticalTableFormatNumber(critical, digits), opts);
+      sfsCriticalTableCellButton(tr.append("td"), meta, sfsCriticalTableFormatNumber(critical, digits), opts);
     });
   });
 
-  bcCriticalTableAppendNote(root, opts);
-  return bcCriticalTableFinish(rootNode, cellMetas, opts);
+  sfsCriticalTableAppendNote(root, opts);
+  return sfsCriticalTableFinish(rootNode, cellMetas, opts);
 }
 
 makeCriticalValueTable = (opts = {}) => {
-  const distribution = bcCriticalTableNormalizeDistribution(opts.distribution || opts.type || opts.statistic);
-  const layout = bcCriticalTableNormalizeLayout(opts.layout, distribution);
+  const distribution = sfsCriticalTableNormalizeDistribution(opts.distribution || opts.type || opts.statistic);
+  const layout = sfsCriticalTableNormalizeLayout(opts.layout, distribution);
 
-  if (distribution === "t") return bcCriticalTableT(opts);
-  if (distribution === "f") return bcCriticalTableF(opts);
-  if (layout === "lookup") return bcCriticalTableNormalLookup(opts);
-  return bcCriticalTableNormalAreas(opts);
+  if (distribution === "t") return sfsCriticalTableT(opts);
+  if (distribution === "f") return sfsCriticalTableF(opts);
+  if (layout === "lookup") return sfsCriticalTableNormalLookup(opts);
+  return sfsCriticalTableNormalAreas(opts);
 }
 
 makeUnitNormalTable = (opts = {}) =>

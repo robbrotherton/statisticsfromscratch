@@ -1,8 +1,8 @@
 (function(global) {
   "use strict";
 
-  const sampling = global.bcSampling;
-  const visuals = global.bcSamplingVisuals;
+  const sampling = global.sfsSampling;
+  const visuals = global.sfsSamplingVisuals;
   const RAW_DOMAIN = [-3, 3];
   const SE_DOMAIN = [-3, 3];
   const MAX_SIMULATIONS = 2000000;
@@ -831,7 +831,7 @@
       stopSampling() { cancelSimulation(true); }
     };
 
-    rootNode.dataset.bcLayout = compact ? "compact" : "wide";
+    rootNode.dataset.sfsLayout = compact ? "compact" : "wide";
     buildChart({ width: preferredWidth, compact });
     if (global.interactiveFigure) {
       global.interactiveFigure.observeResponsiveLayout({

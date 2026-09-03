@@ -126,8 +126,8 @@
     ensureStyles();
 
     var core = window.beeSwarmCore;
-    var stats = window.bcStats;
-    var sampling = window.bcSampling;
+    var stats = window.sfsStats;
+    var sampling = window.sfsSampling;
 
     // ---- state -------------------------------------------------------------
 

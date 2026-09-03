@@ -112,13 +112,13 @@
 
     // Backward compatibility for figures already checking this project-level
     // flag. It always reflects the effective policy, never only one source.
-    global.bcReducedMotion = state.reducedMotion;
+    global.sfsReducedMotion = state.reducedMotion;
 
     if (notify && previous !== state.reducedMotion) {
       const detail = motion.details();
       if (state.reducedMotion) {
         state.figures.forEach(function(figure) {
-          const contract = figure.node && figure.node.bcInteractive;
+          const contract = figure.node && figure.node.sfsInteractive;
           const cancelMotion = contract &&
             (contract.cancelMotion || contract.cancel);
           if (typeof cancelMotion === "function") {
@@ -420,7 +420,7 @@
     const expectedGeneration = renderGeneration === undefined
       ? figure.renderGeneration
       : renderGeneration;
-    const contract = figure.node && figure.node.bcInteractive;
+    const contract = figure.node && figure.node.sfsInteractive;
     if (!contract || Number(contract.version) < 1) {
       if (figure.renderGeneration !== expectedGeneration) return;
       setReadiness(
@@ -475,7 +475,7 @@
       if (!node) return;
 
       const live = liveLayer(figure);
-      const previousContract = figure.node && figure.node.bcInteractive;
+      const previousContract = figure.node && figure.node.sfsInteractive;
       const dispose = previousContract &&
         (previousContract.dispose || previousContract.cancel);
       if (typeof dispose === "function") {
@@ -630,7 +630,7 @@
     if (!figure || !figure.node) {
       throw makeReadinessError({ id: String(id) }, "unknown or unmounted figure id");
     }
-    const contract = figure.node.bcInteractive;
+    const contract = figure.node.sfsInteractive;
     if (!contract || typeof contract.setTutorialStep !== "function") {
       throw makeReadinessError(figure, "tutorial step control is unsupported");
     }

@@ -40,7 +40,7 @@
     [15.83, 9.1, 6.3]  // attractorStrength = 4 (variability high)
   ];
 
-  // Same algorithm as bcSampling.seededRng (FNV-1a + mulberry32), duplicated
+  // Same algorithm as sfsSampling.seededRng (FNV-1a + mulberry32), duplicated
   // so the kernel stays dependency-free and Node-loadable.
   function hashSeed(seed) {
     var text = String(seed == null ? "bee-swarm-v1" : seed);
