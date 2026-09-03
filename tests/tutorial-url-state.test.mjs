@@ -457,9 +457,9 @@ test("reader navigation replaces the URL without creating history entries", () =
   const initialHistoryLength = dom.window.history.length;
   const preservedState = dom.window.history.state;
 
-  tutorial.callout.querySelector(".bc-if-tutorial-next")
+  tutorial.callout.querySelector(".sfs-if-tutorial-next")
     .dispatchEvent(new dom.FakeEvent("click"));
-  tutorial.callout.querySelector(".bc-if-tutorial-next")
+  tutorial.callout.querySelector(".sfs-if-tutorial-next")
     .dispatchEvent(new dom.FakeEvent("click"));
 
   assert.equal(tutorial.controller.getStep(), 2);
@@ -504,7 +504,7 @@ test("an unlabelled tutorial remains fully interactive without claiming URL stat
   const dom = createTutorialDom("#somewhere-else");
   const tutorial = dom.mountTutorial("");
 
-  tutorial.callout.querySelector(".bc-if-tutorial-next")
+  tutorial.callout.querySelector(".sfs-if-tutorial-next")
     .dispatchEvent(new dom.FakeEvent("click"));
 
   assert.equal(tutorial.controller.getStep(), 1);

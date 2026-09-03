@@ -34,10 +34,10 @@ vpdPrefersReducedMotion = () => {
 // 16. Colors are paired with the word labels, never used alone; the neutral
 // gray for chance/error is deliberate (noise reads as gray).
 vpdSourceCatalog = {
-  "treatment": { label: "Treatment effect", color: "var(--bc-comparison-color, #2f6f9f)" },
-  "chance": { label: "Chance", color: "var(--bc-neutral-color, #7b818a)" },
-  "error": { label: "Sampling error", color: "var(--bc-neutral-color, #7b818a)" },
-  "ind-diff": { label: "Individual differences", color: "var(--bc-current-color, #d1495b)" }
+  "treatment": { label: "Treatment effect", color: "var(--sfs-comparison-color, #2f6f9f)" },
+  "chance": { label: "Chance", color: "var(--sfs-neutral-color, #7b818a)" },
+  "error": { label: "Sampling error", color: "var(--sfs-neutral-color, #7b818a)" },
+  "ind-diff": { label: "Individual differences", color: "var(--sfs-current-color, #d1495b)" }
 }
 
 vpdNormalizeSource = (value) => {
@@ -336,10 +336,10 @@ vpdEnsureStyles = () => {
   style.id = "variance-partition-diagram-styles";
   style.textContent = `
     .variance-partition-diagram {
-      --bc-figure-max-width: var(--vpd-max-width, 46rem);
-      --vpd-numerator-fill: color-mix(in srgb, var(--bc-comparison-color, #2f6f9f) 14%, var(--bc-bg, #fff));
-      --vpd-denominator-fill: color-mix(in srgb, var(--bc-neutral-color, #7b818a) 14%, var(--bc-bg, #fff));
-      --vpd-emphasis-bg: color-mix(in srgb, var(--bc-current-color, #d1495b) 16%, transparent);
+      --sfs-figure-max-width: var(--vpd-max-width, 46rem);
+      --vpd-numerator-fill: color-mix(in srgb, var(--sfs-comparison-color, #2f6f9f) 14%, var(--sfs-bg, #fff));
+      --vpd-denominator-fill: color-mix(in srgb, var(--sfs-neutral-color, #7b818a) 14%, var(--sfs-bg, #fff));
+      --vpd-emphasis-bg: color-mix(in srgb, var(--sfs-current-color, #d1495b) 16%, transparent);
     }
 
     @supports not (color: color-mix(in srgb, white, black)) {
@@ -355,13 +355,13 @@ vpdEnsureStyles = () => {
       width: 100%;
       height: auto;
       overflow: visible;
-      color: var(--bc-text, currentColor);
+      color: var(--sfs-text, currentColor);
       font-family: var(--bs-body-font-family, system-ui, sans-serif);
     }
 
     .variance-partition-diagram .vpd-node-shape {
-      fill: var(--bc-bg, #fff);
-      stroke: var(--bc-text, currentColor);
+      fill: var(--sfs-bg, #fff);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 1.6;
       transition: fill 450ms ease;
     }
@@ -375,15 +375,15 @@ vpdEnsureStyles = () => {
     }
 
     .variance-partition-diagram .vpd-node-text {
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
       font-size: 23px;
       font-weight: 600;
       text-anchor: middle;
     }
 
     .variance-partition-diagram .vpd-math {
-      fill: var(--bc-text, currentColor);
-      font-family: var(--bc-math-font-family, "STIX Two Math", "Cambria Math", serif);
+      fill: var(--sfs-text, currentColor);
+      font-family: var(--sfs-math-font-family, "STIX Two Math", "Cambria Math", serif);
       font-size: 25px;
       text-anchor: middle;
     }
@@ -398,7 +398,7 @@ vpdEnsureStyles = () => {
     }
 
     .variance-partition-diagram .vpd-link {
-      stroke: var(--bc-muted, currentColor);
+      stroke: var(--sfs-muted, currentColor);
       stroke-width: 2;
       fill: none;
       stroke-linecap: round;
@@ -409,7 +409,7 @@ vpdEnsureStyles = () => {
     }
 
     .variance-partition-diagram .vpd-source-text {
-      fill: var(--bc-muted, currentColor);
+      fill: var(--sfs-muted, currentColor);
       font-size: 19px;
       font-weight: 550;
       transition: fill 300ms ease, font-weight 300ms ease;
@@ -427,19 +427,19 @@ vpdEnsureStyles = () => {
 
     .variance-partition-diagram .is-emphasized .vpd-source-text,
     .variance-partition-diagram .is-emphasized .vpd-concept-text {
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
       font-weight: 700;
     }
 
     .variance-partition-diagram .vpd-concept-text {
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
       font-size: 20px;
       font-weight: 600;
       transition: fill 300ms ease;
     }
 
     .variance-partition-diagram .vpd-frac-bar {
-      stroke: var(--bc-text, currentColor);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 2;
       stroke-linecap: round;
     }
@@ -581,15 +581,15 @@ makeVariancePartitionDiagram = function(opts) {
   }
 
   const root = d3.create("div")
-    .attr("class", "variance-partition-diagram bc-figure")
+    .attr("class", "variance-partition-diagram sfs-figure")
     .style("--vpd-max-width", opts.maxWidth || null);
   const rootNode = root.node();
 
   const chartWrap = root.append("div")
-    .attr("class", "vpd-chart-wrap bc-chart-wrap");
+    .attr("class", "vpd-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "vpd-svg bc-svg")
+    .attr("class", "vpd-svg sfs-svg")
     .attr("xmlns", "http://www.w3.org/2000/svg")
     .attr("role", "img");
 

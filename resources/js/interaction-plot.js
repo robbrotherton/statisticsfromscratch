@@ -55,8 +55,8 @@ ipEnsureStyles = () => {
   style.id = "interaction-plot-styles";
   style.textContent = `
     .interaction-plot {
-      --bc-figure-max-width: var(--ip-max-width, 42rem);
-      --ip-drag-color: var(--bc-focus, #2780e3);
+      --sfs-figure-max-width: var(--ip-max-width, 42rem);
+      --ip-drag-color: var(--sfs-focus, #2780e3);
     }
 
     /* Factor B is redundantly encoded: line style, color, and point shape. */
@@ -84,7 +84,7 @@ ipEnsureStyles = () => {
 
     .interaction-plot .ip-dot {
       fill: var(--ip-series-color, currentColor);
-      stroke: var(--bc-bg, #fff);
+      stroke: var(--sfs-bg, #fff);
       stroke-width: 1.4;
     }
 
@@ -118,7 +118,7 @@ ipEnsureStyles = () => {
     .interaction-plot .ip-legend-title {
       font-size: 0.85rem;
       font-weight: 600;
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
     }
 
     .interaction-plot .ip-legend-label {
@@ -202,14 +202,14 @@ ipEnsureStyles = () => {
     .interaction-plot .ip-pattern-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--bc-action-gap, 0.4rem);
+      gap: var(--sfs-action-gap, 0.4rem);
     }
 
     .interaction-plot .ip-readout {
       margin: 0.18rem 0;
     }
 
-    .interaction-plot .ip-readout .bc-readout-label {
+    .interaction-plot .ip-readout .sfs-readout-label {
       min-width: 5.6rem;
     }
 
@@ -334,7 +334,7 @@ makeInteractionPlot = function(opts) {
   const plotBottom = height - margin.bottom;
 
   const root = d3.create("div")
-    .attr("class", "interaction-plot bc-figure")
+    .attr("class", "interaction-plot sfs-figure")
     .style("--ip-max-width", opts.maxWidth || null);
   const rootNode = root.node();
 
@@ -347,12 +347,12 @@ makeInteractionPlot = function(opts) {
 
   if (showControls) {
     controls = root.append("div")
-      .attr("class", "ip-controls bc-control-grid");
+      .attr("class", "ip-controls sfs-control-grid");
 
     const meansPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     meansPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Cell means");
     const grid = meansPanel.append("div")
       .attr("class", "ip-means-grid");
@@ -385,9 +385,9 @@ makeInteractionPlot = function(opts) {
     });
 
     const patternPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     patternPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Patterns");
     const buttonRow = patternPanel.append("div")
       .attr("class", "ip-pattern-buttons");
@@ -399,7 +399,7 @@ makeInteractionPlot = function(opts) {
     ].forEach(([pattern, label]) => {
       buttonRow.append("button")
         .attr("type", "button")
-        .attr("class", "bc-button")
+        .attr("class", "sfs-button")
         .text(label)
         .on("click", (event) => {
           event.preventDefault();
@@ -410,18 +410,18 @@ makeInteractionPlot = function(opts) {
     });
 
     const effectsPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     effectsPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Effects");
     function addReadout(label) {
       const row = effectsPanel.append("div")
-        .attr("class", "ip-readout bc-readout-row");
+        .attr("class", "ip-readout sfs-readout-row");
       row.append("span")
-        .attr("class", "bc-readout-label")
+        .attr("class", "sfs-readout-label")
         .text(label);
       return row.append("span")
-        .attr("class", "bc-readout-value");
+        .attr("class", "sfs-readout-value");
     }
     effectValues = {
       a: addReadout(factorA),
@@ -433,10 +433,10 @@ makeInteractionPlot = function(opts) {
   // --- Chart ----------------------------------------------------------------
 
   const chartWrap = root.append("div")
-    .attr("class", "ip-chart-wrap bc-chart-wrap");
+    .attr("class", "ip-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel ||
@@ -452,20 +452,20 @@ makeInteractionPlot = function(opts) {
     .range([plotBottom, margin.top]);
 
   const xAxisLayer = svg.append("g")
-    .attr("class", "ip-axis ip-axis-x bc-axis")
+    .attr("class", "ip-axis ip-axis-x sfs-axis")
     .attr("transform", `translate(0,${plotBottom})`);
   const yAxisLayer = svg.append("g")
-    .attr("class", "ip-axis ip-axis-y bc-axis")
+    .attr("class", "ip-axis ip-axis-y sfs-axis")
     .attr("transform", `translate(${margin.left},0)`);
 
   const xAxisLabel = svg.append("text")
-    .attr("class", "ip-axis-label bc-axis-label")
+    .attr("class", "ip-axis-label sfs-axis-label")
     .attr("x", (margin.left + width - margin.right) / 2)
     .attr("y", height - 12)
     .attr("text-anchor", "middle")
     .text(factorA);
   const yAxisLabel = svg.append("text")
-    .attr("class", "ip-axis-label bc-axis-label")
+    .attr("class", "ip-axis-label sfs-axis-label")
     .attr("transform", `translate(16,${(margin.top + plotBottom) / 2}) rotate(-90)`)
     .attr("text-anchor", "middle")
     .text(yLabel);
@@ -487,7 +487,7 @@ makeInteractionPlot = function(opts) {
     const lineGroup = group.append("g")
       .attr("class", "ip-line-group");
     const line = lineGroup.append("line")
-      .attr("class", "ip-line bc-graph-line")
+      .attr("class", "ip-line sfs-graph-line")
       .attr("data-series", seriesIndex);
 
     const points = [0, 1].map((xIndex) => {
@@ -504,7 +504,7 @@ makeInteractionPlot = function(opts) {
         .attr("cx", x(xIndex))
         .attr("r", 11);
       const dot = point.append("path")
-        .attr("class", "ip-dot bc-graph-point")
+        .attr("class", "ip-dot sfs-graph-point")
         .attr("d", symbolPath(seriesIndex, 130));
       const valueLabel = point.append("text")
         .attr("class", "ip-value-label")

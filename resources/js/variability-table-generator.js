@@ -41,28 +41,28 @@ bcVariabilityStageAliases = ({
 })
 
 bcVariabilityEnsureStyles = () => {
-  if (document.getElementById("bc-variability-table-styles")) return;
+  if (document.getElementById("sfs-variability-table-styles")) return;
 
   if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
   const style = document.createElement("style");
-  style.id = "bc-variability-table-styles";
+  style.id = "sfs-variability-table-styles";
   style.textContent = `
     .variability-table,
     .variability-table-set {
-      --vt-border-color: var(--bc-border, var(--bs-border-color, #dee2e6));
-      --vt-muted-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --vt-accent-color: var(--bc-accent, var(--bs-primary, #2c3e50));
-      --vt-highlight-bg: var(--bc-highlight-bg, color-mix(in srgb, var(--vt-accent-color) 12%, transparent));
+      --vt-border-color: var(--sfs-border, var(--bs-border-color, #dee2e6));
+      --vt-muted-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --vt-accent-color: var(--sfs-accent, var(--bs-primary, #2c3e50));
+      --vt-highlight-bg: var(--sfs-highlight-bg, color-mix(in srgb, var(--vt-accent-color) 12%, transparent));
       --vt-table-min-width: 18rem;
     }
 
     .variability-table {
-      --bc-figure-max-width: var(--vt-max-width, 30rem);
+      --sfs-figure-max-width: var(--vt-max-width, 30rem);
     }
 
     .variability-table-set {
-      --bc-figure-max-width: var(--vt-set-max-width, 58rem);
+      --sfs-figure-max-width: var(--vt-set-max-width, 58rem);
     }
 
     .variability-table-set .vt-table-grid {
@@ -87,18 +87,18 @@ bcVariabilityEnsureStyles = () => {
 
     .variability-table .vt-reveal-button,
     .variability-table-set .vt-reveal-button {
-      --bc-focus: var(--vt-accent-color);
+      --sfs-focus: var(--vt-accent-color);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: var(--bc-button-min-height, 2rem);
-      height: var(--bc-button-min-height, 2rem);
-      min-height: var(--bc-button-min-height, 2rem);
+      width: var(--sfs-button-min-height, 2rem);
+      height: var(--sfs-button-min-height, 2rem);
+      min-height: var(--sfs-button-min-height, 2rem);
       padding: 0;
-      border: 1px solid var(--bc-border, var(--vt-border-color));
-      border-radius: var(--bc-radius-sm, 4px);
-      background: var(--bc-bg, var(--bs-body-bg, #fff));
-      color: var(--bc-text, var(--bs-body-color, #212529));
+      border: 1px solid var(--sfs-border, var(--vt-border-color));
+      border-radius: var(--sfs-radius-sm, 4px);
+      background: var(--sfs-bg, var(--bs-body-bg, #fff));
+      color: var(--sfs-text, var(--bs-body-color, #212529));
       line-height: 1;
       cursor: pointer;
     }
@@ -107,8 +107,8 @@ bcVariabilityEnsureStyles = () => {
     .variability-table .vt-reveal-button:focus-visible:not(:disabled),
     .variability-table-set .vt-reveal-button:hover:not(:disabled),
     .variability-table-set .vt-reveal-button:focus-visible:not(:disabled) {
-      border-color: var(--bc-focus);
-      color: var(--bc-focus);
+      border-color: var(--sfs-focus);
+      color: var(--sfs-focus);
     }
 
     .variability-table .vt-reveal-button:focus-visible,
@@ -144,7 +144,7 @@ bcVariabilityEnsureStyles = () => {
     .variability-table caption {
       caption-side: top;
       padding-bottom: 0.35rem;
-      color: var(--bc-text, var(--bs-body-color, #212529));
+      color: var(--sfs-text, var(--bs-body-color, #212529));
       font-weight: 700;
       text-align: center;
     }
@@ -164,7 +164,7 @@ bcVariabilityEnsureStyles = () => {
     }
 
     .variability-table .vt-data-last td {
-      border-bottom: 2px solid var(--bc-text, var(--bs-body-color, #212529));
+      border-bottom: 2px solid var(--sfs-text, var(--bs-body-color, #212529));
     }
 
     .variability-table .vt-summary-row td {
@@ -178,7 +178,7 @@ bcVariabilityEnsureStyles = () => {
     }
 
     .variability-table .vt-highlight {
-      --bc-highlight-bg: var(--vt-highlight-bg);
+      --sfs-highlight-bg: var(--vt-highlight-bg);
     }
 
     .variability-table .vt-summary-value {
@@ -361,7 +361,7 @@ bcVariabilityAppendReveal = (selection, stage, content, opts = {}) => {
     .attr("class", "vt-reveal-target")
     .attr("data-vt-reveal", bcVariabilityNormalizeStageKey(stage));
 
-  if (opts.highlight) span.classed("vt-highlight bc-highlight", true);
+  if (opts.highlight) span.classed("vt-highlight sfs-highlight", true);
   bcVariabilityAppendContent(span, content);
   return span;
 }
@@ -376,7 +376,7 @@ bcVariabilitySetRevealVisible = (rootNode, targets, visible, animate) => {
   }
 
   targets.forEach((element) => {
-    element.classList.add("bc-if-reveal");
+    element.classList.add("sfs-if-reveal");
     element.classList.toggle("is-visible", Boolean(visible));
     element.setAttribute("aria-hidden", String(!visible));
   });
@@ -385,7 +385,7 @@ bcVariabilitySetRevealVisible = (rootNode, targets, visible, animate) => {
 bcVariabilityButton = (icon, label, className) => {
   const button = document.createElement("button");
   button.type = "button";
-  button.className = `vt-reveal-button bc-icon-button ${className || ""}`.trim();
+  button.className = `vt-reveal-button sfs-icon-button ${className || ""}`.trim();
   button.title = label;
   button.setAttribute("aria-label", label);
   button.innerHTML = `<i class="bi bi-${icon}" aria-hidden="true"></i><span class="visually-hidden">${label}</span>`;
@@ -398,7 +398,7 @@ bcVariabilityButton = (icon, label, className) => {
 // have migrated, this control layer and its action handlers can be removed.
 bcVariabilityMakeControls = (handlers) => {
   const controls = document.createElement("div");
-  controls.className = "vt-reveal-controls bc-action-row";
+  controls.className = "vt-reveal-controls sfs-action-row";
 
   const reset = bcVariabilityButton("arrow-counterclockwise", "Reset table", "vt-reset");
   const previous = bcVariabilityButton("chevron-left", "Reveal previous value", "vt-previous");
@@ -575,9 +575,9 @@ bcVariabilityTableNode = (opts = {}) => {
   const tableId = opts.id || bcVariabilityHtmlId("variability-table");
   const initialStage = bcVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
   const root = d3.create("div")
-    .attr("class", "variability-table bc-figure")
+    .attr("class", "variability-table sfs-figure")
     .attr("id", tableId)
-    .style("--bc-figure-max-width", opts.maxWidth || null)
+    .style("--sfs-figure-max-width", opts.maxWidth || null)
     .style("--vt-max-width", opts.maxWidth || null);
   const rootNode = root.node();
 
@@ -622,7 +622,7 @@ bcVariabilityTableNode = (opts = {}) => {
 
   if (opts.title) {
     root.append("div")
-      .attr("class", "vt-heading bc-control-title")
+      .attr("class", "vt-heading sfs-control-title")
       .text(opts.title);
   }
 
@@ -634,7 +634,7 @@ bcVariabilityTableNode = (opts = {}) => {
   const wrap = root.append("div")
     .attr("class", "vt-table-wrap");
   const table = wrap.append("table")
-    .attr("class", "bc-data-table")
+    .attr("class", "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.title || "Variability calculation table");
 
   if (opts.caption) {
@@ -656,20 +656,20 @@ bcVariabilityTableNode = (opts = {}) => {
     bcVariabilityAppendReveal(tr.append("td"), "squared-deviations", format.squaredDeviation(stats.squaredDeviations[index]));
   });
 
-  const summary1 = tbody.append("tr").attr("class", "vt-summary-row bc-table-summary-row");
+  const summary1 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
   bcVariabilityAppendReveal(summary1.append("td"), "mean",
     bcVariabilitySummaryNode(meanSymbol, format.summary(stats.mean)));
   summary1.append("td");
   bcVariabilityAppendReveal(summary1.append("td"), "ss",
     bcVariabilitySummaryNode(ssSymbol, format.summary(stats.ss)));
 
-  const summary2 = tbody.append("tr").attr("class", "vt-summary-row bc-table-summary-row");
+  const summary2 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
   summary2.append("td");
   summary2.append("td");
   bcVariabilityAppendReveal(summary2.append("td"), "variance",
     bcVariabilitySummaryNode(varianceSymbol, format.summary(stats.variance)));
 
-  const summary3 = tbody.append("tr").attr("class", "vt-summary-row bc-table-summary-row");
+  const summary3 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
   summary3.append("td");
   summary3.append("td");
   bcVariabilityAppendReveal(summary3.append("td"), "sd",
@@ -705,8 +705,8 @@ makeVariabilityTables = (opts = {}) => {
   const tableSpecs = Array.isArray(opts.tables) ? opts.tables : [];
   const initialStage = bcVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
   const root = d3.create("div")
-    .attr("class", "variability-table-set bc-figure")
-    .style("--bc-figure-max-width", opts.maxWidth || null)
+    .attr("class", "variability-table-set sfs-figure")
+    .style("--sfs-figure-max-width", opts.maxWidth || null)
     .style("--vt-set-max-width", opts.maxWidth || null)
     .style("--vt-grid-gap", opts.gap || null)
     .style("--vt-table-min-width", opts.tableMinWidth || null);
@@ -749,7 +749,7 @@ makeVariabilityTables = (opts = {}) => {
 
   if (opts.title) {
     root.append("div")
-      .attr("class", "vt-heading bc-control-title")
+      .attr("class", "vt-heading sfs-control-title")
       .text(opts.title);
   }
 

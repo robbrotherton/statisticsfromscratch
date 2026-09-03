@@ -79,7 +79,7 @@ makeMeanBalanceBeam = function(opts) {
       .attr("class", "mbb-controls");
 
     const displayPanel = controls.append("section")
-      .attr("class", "mbb-control-panel bc-if-control-panel");
+      .attr("class", "mbb-control-panel sfs-if-control-panel");
     displayPanel.append("p")
       .attr("class", "mbb-control-title")
       .text("Display");
@@ -88,7 +88,7 @@ makeMeanBalanceBeam = function(opts) {
     wobbleInput = addCheckbox(displayPanel, "Wobble", wobbleIsEnabled());
 
     const actionPanel = controls.append("section")
-      .attr("class", "mbb-control-panel bc-if-control-panel");
+      .attr("class", "mbb-control-panel sfs-if-control-panel");
     actionPanel.append("p")
       .attr("class", "mbb-control-title")
       .text("Actions");
@@ -99,7 +99,7 @@ makeMeanBalanceBeam = function(opts) {
     pivotButtonControl = addButton(buttonRow, "Pivot to mean");
 
     const summaryPanel = controls.append("section")
-      .attr("class", "mbb-control-panel bc-if-control-panel");
+      .attr("class", "mbb-control-panel sfs-if-control-panel");
     summaryPanel.append("p")
       .attr("class", "mbb-control-title")
       .text("Readout");

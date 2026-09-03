@@ -20,7 +20,7 @@ function loadRuntime({
   themeSentinel = null
 } = {}) {
   const storedValues = new Map([
-    ["bc-reduce-motion", String(stored)]
+    ["sfs-reduce-motion", String(stored)]
   ]);
   if (themeSentinel !== null) {
     storedValues.set("quarto-color-scheme", themeSentinel);
@@ -220,7 +220,7 @@ test("the persisted reader setting forces reduced motion", () => {
 
   loaded.runtime.motion.setUserReduced(false);
   assert.equal(loaded.runtime.motion.isReduced(), false);
-  assert.equal(loaded.storedValues.get("bc-reduce-motion"), "false");
+  assert.equal(loaded.storedValues.get("sfs-reduce-motion"), "false");
   assert.equal(loaded.documentElement.dataset.motion, "full");
 });
 
@@ -288,7 +288,7 @@ function motionSetting(loaded) {
 test("settings initialization builds theme radios and a motion checkbox without blocking figure mounting", () => {
   const loaded = loadRuntime({ withNavbar: true });
   assert.doesNotThrow(() => loaded.runtime.init());
-  assert.equal(loaded.documentElement.classList.contains("bc-settings-ready"), true);
+  assert.equal(loaded.documentElement.classList.contains("sfs-settings-ready"), true);
 
   const theme = themeSetting(loaded);
   assert.deepEqual(theme.radios.map((input) => input.type), ["radio", "radio", "radio"]);
@@ -300,7 +300,7 @@ test("settings initialization builds theme radios and a motion checkbox without 
   const motionField = motionSetting(loaded);
   assert.equal(motionField.input.type, "checkbox");
   assert.equal(motionField.input.checked, false);
-  assert.equal(motionField.help.id, "bc-settings-reduce-motion-help");
+  assert.equal(motionField.help.id, "sfs-settings-reduce-motion-help");
   assert.match(motionField.help.textContent, /Animations may play/);
 });
 

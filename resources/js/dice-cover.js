@@ -13,7 +13,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     style.id = STYLE_ID;
     style.textContent = `
       .dice-cover {
-        --bc-figure-max-width: min(52rem, 100%);
+        --sfs-figure-max-width: min(52rem, 100%);
         position: relative;
       }
 
@@ -21,7 +21,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         position: relative;
         isolation: isolate;
         overflow: hidden;
-        border-radius: var(--bc-radius-lg, 8px);
+        border-radius: var(--sfs-radius-lg, 8px);
       }
 
       .dice-cover .dice-cover-canvas {
@@ -49,9 +49,9 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         gap: 0.45rem;
         margin-top: 0.55rem;
         padding: 0.55rem 0.65rem;
-        border: 1px dashed var(--bc-border);
-        border-radius: var(--bc-radius-lg, 8px);
-        background: color-mix(in srgb, var(--bc-control-bg) 78%, transparent);
+        border: 1px dashed var(--sfs-border);
+        border-radius: var(--sfs-radius-lg, 8px);
+        background: color-mix(in srgb, var(--sfs-control-bg) 78%, transparent);
       }
 
       .dice-cover .dice-cover-seed-row,
@@ -65,7 +65,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       .dice-cover .dice-cover-seed-debug label {
         display: grid;
         gap: 0.15rem;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.75rem;
         font-weight: 700;
       }
@@ -75,13 +75,13 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-cover .dice-cover-dev-section {
-        border-top: 1px solid var(--bc-border);
+        border-top: 1px solid var(--sfs-border);
         padding-top: 0.4rem;
       }
 
       .dice-cover .dice-cover-dev-section > summary {
         cursor: pointer;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.78rem;
         font-weight: 700;
       }
@@ -99,7 +99,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-cover .dice-cover-dev-grid output {
-        color: var(--bc-text);
+        color: var(--sfs-text);
         font-variant-numeric: tabular-nums;
       }
 
@@ -126,7 +126,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
 
       .dice-cover .dice-cover-seed-result {
         margin-left: auto;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.82rem;
         font-variant-numeric: tabular-nums;
       }
@@ -135,8 +135,8 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         display: grid;
         place-items: center;
         min-height: 10rem;
-        border: 1px solid var(--bc-border);
-        background: var(--bc-control-bg);
+        border: 1px solid var(--sfs-border);
+        background: var(--sfs-control-bg);
       }
 
       .dice-cover.dice-cover-no-webgl .dice-cover-canvas {
@@ -153,12 +153,12 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-roller {
-        --bc-figure-max-width: 46rem;
+        --sfs-figure-max-width: 46rem;
         /* The theoretical overlay is an annotation, not a second series, so
            it borrows the text colour rather than a data colour. Full strength
            in both themes: at a million rolls it has to stay legible lying
            along the top edge of a bar. */
-        --dice-expected-color: var(--bc-text);
+        --dice-expected-color: var(--sfs-text);
       }
 
       .dice-roller .dice-roller-stage {
@@ -172,8 +172,8 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         position: absolute;
         z-index: 0;
         inset: 5%;
-        border: 1px solid var(--bc-border);
-        border-radius: var(--bc-radius-lg, 8px);
+        border: 1px solid var(--sfs-border);
+        border-radius: var(--sfs-radius-lg, 8px);
         pointer-events: none;
       }
 
@@ -208,14 +208,14 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-roller .dice-grab-handle:focus-visible {
-        outline: 2px solid var(--bc-accent, #2c7fb8);
+        outline: 2px solid var(--sfs-accent, #2c7fb8);
         outline-offset: 2px;
       }
 
       /* Standalone the controls are a plain visible action row. Inside a
          callout interactiveFigure.wrap() turns this same element into the
          shared drawer, which owns its own spacing. */
-      .dice-roller .dice-roller-controls:not(.bc-if-controls) {
+      .dice-roller .dice-roller-controls:not(.sfs-if-controls) {
         margin-bottom: 0.65rem;
       }
 
@@ -246,15 +246,15 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
 
       .dice-roller .dice-tuning {
         margin: 0 0 0.75rem;
-        border: 1px dashed var(--bc-border);
-        border-radius: var(--bc-radius-lg, 8px);
-        background: color-mix(in srgb, var(--bc-control-bg) 78%, transparent);
+        border: 1px dashed var(--sfs-border);
+        border-radius: var(--sfs-radius-lg, 8px);
+        background: color-mix(in srgb, var(--sfs-control-bg) 78%, transparent);
       }
 
       .dice-roller .dice-tuning > summary {
         padding: 0.5rem 0.7rem;
         cursor: pointer;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.86rem;
         font-weight: 700;
         letter-spacing: 0.02em;
@@ -272,13 +272,13 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         grid-template-columns: 1fr auto;
         gap: 0.18rem 0.5rem;
         align-items: center;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.78rem;
       }
 
       .dice-roller .dice-tuning-control output {
         min-width: 3.2rem;
-        color: var(--bc-text);
+        color: var(--sfs-text);
         font-variant-numeric: tabular-nums;
         text-align: right;
       }
@@ -286,7 +286,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       .dice-roller .dice-tuning-control input {
         grid-column: 1 / -1;
         width: 100%;
-        accent-color: var(--bc-accent, #2c7fb8);
+        accent-color: var(--sfs-accent, #2c7fb8);
       }
 
       .dice-roller .dice-tuning-actions {
@@ -298,7 +298,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-roller .dice-tuning-note {
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.72rem;
       }
 
@@ -308,13 +308,13 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         justify-content: space-between;
         gap: 0.35rem 1rem;
         margin: 0.25rem 0 0.45rem;
-        color: var(--bc-muted);
+        color: var(--sfs-muted);
         font-size: 0.92rem;
         font-variant-numeric: tabular-nums;
       }
 
       .dice-roller .dice-roller-result {
-        color: var(--bc-text);
+        color: var(--sfs-text);
         font-weight: 700;
       }
 
@@ -334,7 +334,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       }
 
       .dice-roller .dice-histogram-bar.is-current {
-        fill: var(--bc-current-color);
+        fill: var(--sfs-current-color);
       }
 
       .dice-roller .dice-histogram-label,
@@ -383,8 +383,8 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
         align-items: center;
         gap: 0.4rem;
         margin: 0.1rem 0 0;
-        color: var(--bc-muted);
-        font-size: var(--bc-figure-note-size, 0.8125rem);
+        color: var(--sfs-muted);
+        font-size: var(--sfs-figure-note-size, 0.8125rem);
         line-height: 1.35;
       }
 
@@ -2264,7 +2264,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
   function createButton(label, className) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = className || "bc-button";
+    button.className = className || "sfs-button";
     button.textContent = label;
     return button;
   }
@@ -2467,7 +2467,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     const maximumSum = diceCount * 6;
     const namespace = "http://www.w3.org/2000/svg";
     const svg = document.createElementNS(namespace, "svg");
-    svg.setAttribute("class", "dice-histogram bc-svg bc-graph");
+    svg.setAttribute("class", "dice-histogram sfs-svg sfs-graph");
     svg.setAttribute("viewBox", "0 0 660 185");
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", "Histogram of the sums rolled with " + diceCount + (diceCount === 1 ? " die." : " dice."));
@@ -2483,7 +2483,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     for (let value = minimumSum; value <= maximumSum; value += 1) {
       const x = 30 + (value - minimumSum) * slotWidth + (slotWidth - barWidth) / 2;
       const bar = document.createElementNS(namespace, "rect");
-      bar.setAttribute("class", "dice-histogram-bar bc-graph-bar");
+      bar.setAttribute("class", "dice-histogram-bar sfs-graph-bar");
       bar.setAttribute("x", String(x));
       bar.setAttribute("y", "154");
       bar.setAttribute("width", String(barWidth));
@@ -2598,9 +2598,9 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     ensureStyles();
 
     const root = document.createElement("div");
-    root.className = "dice-cover bc-figure bc-figure-cover";
+    root.className = "dice-cover sfs-figure sfs-figure-cover";
     const stage = document.createElement("div");
-    stage.className = "dice-cover-stage bc-chart-wrap";
+    stage.className = "dice-cover-stage sfs-chart-wrap";
     const canvas = document.createElement("canvas");
     canvas.className = "dice-cover-canvas";
     canvas.setAttribute("role", "img");
@@ -3121,14 +3121,14 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     const debugValues = Object.assign({}, debugDefaults);
     ensureStyles();
     const root = document.createElement("div");
-    root.className = "dice-roller bc-figure";
+    root.className = "dice-roller sfs-figure";
     const controls = document.createElement("div");
     controls.className = "dice-roller-controls";
     // The buttons live in their own row so the outer element can become the
-    // shared drawer inside a callout: .bc-if-controls paints its vertical
+    // shared drawer inside a callout: .sfs-if-controls paints its vertical
     // padding with block pseudo-rows, which a flex container would collapse.
     const actionRow = document.createElement("div");
-    actionRow.className = "dice-roller-actions bc-action-row";
+    actionRow.className = "dice-roller-actions sfs-action-row";
     controls.append(actionRow);
     const rollButton = createButton("Roll dice");
     const add100Button = createButton("+100 rolls");
@@ -3150,7 +3150,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
     actionRow.append(rollButton, add100Button, add1000Button, diceCountLabel, resetButton);
 
     const stage = document.createElement("div");
-    stage.className = "dice-roller-stage bc-chart-wrap";
+    stage.className = "dice-roller-stage sfs-chart-wrap";
     const canvas = document.createElement("canvas");
     canvas.className = "dice-roller-canvas";
     canvas.setAttribute("role", "img");
@@ -3180,7 +3180,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
 
     let histogram = createHistogram(numberOfDice);
     const histogramWrap = document.createElement("div");
-    histogramWrap.className = "dice-histogram-wrap bc-chart-wrap";
+    histogramWrap.className = "dice-histogram-wrap sfs-chart-wrap";
     histogramWrap.append(histogram.svg);
     // The overlay's key is HTML rather than SVG text so it holds the book's
     // figure-note size on a phone instead of being scaled by the viewBox.
@@ -4022,7 +4022,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       // instead of abandoning them part-way through the batch.
       finishBatchNow();
     }
-    root.addEventListener("bc-if:cancel-transitions", handleCancelTransitions);
+    root.addEventListener("sfs-if:cancel-transitions", handleCancelTransitions);
 
     root.diceApi = {
       roll(options) {
@@ -4133,7 +4133,7 @@ import { Body, Box, ContactMaterial, Material, Plane, Quaternion, SAPBroadphase,
       global.removeEventListener("pointerup", endPointerGrab);
       global.removeEventListener("pointercancel", endPointerGrab);
       document.removeEventListener("visibilitychange", handleBatchVisibility);
-      root.removeEventListener("bc-if:cancel-transitions", handleCancelTransitions);
+      root.removeEventListener("sfs-if:cancel-transitions", handleCancelTransitions);
       if (resizeObserver) resizeObserver.disconnect();
       if (initializeObserver) initializeObserver.disconnect();
       if (animator) animator.destroy();

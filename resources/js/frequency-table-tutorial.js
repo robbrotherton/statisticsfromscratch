@@ -112,15 +112,15 @@ makeFrequencyTableTutorial = (opts = {}) => {
   const allKeys = rows.map((row) => row.key);
 
   const root = d3.create("div")
-    .attr("class", "frequency-table-tutorial bc-figure bc-if-root");
+    .attr("class", "frequency-table-tutorial sfs-figure sfs-if-root");
   const rootNode = root.node();
   if (api && api.adopt) api.adopt(rootNode, {});
 
   const chartWrap = root.append("div")
-    .attr("class", "bc-chart-wrap");
+    .attr("class", "sfs-chart-wrap");
 
   chartWrap.append("div")
-    .attr("class", "bc-control-title center")
+    .attr("class", "sfs-control-title center")
     .text(dataLabel);
 
   const scoreList = chartWrap.append("div")
@@ -336,7 +336,7 @@ makeFrequencyTableTutorial = (opts = {}) => {
     clearRowOrderMotion();
   };
 
-  rootNode.addEventListener("bc-if:cancel-transitions", cancelMotion);
+  rootNode.addEventListener("sfs-if:cancel-transitions", cancelMotion);
 
   const setState = (action = {}, options = {}) => {
     const columnSet = new Set(action.columns === undefined ? state.columns : action.columns);
@@ -399,11 +399,11 @@ makeFrequencyTableTutorial = (opts = {}) => {
     }
 
     scoreNodes.forEach((score) => {
-      score.classList.toggle("bc-highlight", score.dataset.frequencyKey === highlightKey);
+      score.classList.toggle("sfs-highlight", score.dataset.frequencyKey === highlightKey);
     });
     bodyRows.forEach((row) => {
       row.querySelectorAll("th, td").forEach((cell) => {
-        cell.classList.toggle("bc-highlight", row.dataset.frequencyKey === highlightKey);
+        cell.classList.toggle("sfs-highlight", row.dataset.frequencyKey === highlightKey);
       });
     });
 
@@ -505,7 +505,7 @@ makeFrequencyTableTutorial = (opts = {}) => {
       cancelMotion,
       dispose() {
         if (resizeObserver) resizeObserver.disconnect();
-        rootNode.removeEventListener("bc-if:cancel-transitions", cancelMotion);
+        rootNode.removeEventListener("sfs-if:cancel-transitions", cancelMotion);
         cancelMotion();
       }
     });

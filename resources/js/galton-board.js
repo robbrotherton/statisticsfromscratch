@@ -5,7 +5,7 @@ gbEnsureStyles = () => {
   style.id = "galton-board-styles";
   style.textContent = `
     .galton-board {
-      --bc-figure-max-width: var(--gb-max-width, 36rem);
+      --sfs-figure-max-width: var(--gb-max-width, 36rem);
     }
 
     .galton-board .gb-canvas {
@@ -17,7 +17,7 @@ gbEnsureStyles = () => {
 
     .galton-board .gb-count {
       min-width: 6.2rem;
-      color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       font-variant-numeric: tabular-nums;
       font-size: 0.9rem;
       line-height: 1.2;
@@ -327,9 +327,9 @@ makeGaltonBoard = function(opts) {
   }
 
   const root = d3.create("div")
-    .attr("class", "bc-figure galton-board")
+    .attr("class", "sfs-figure galton-board")
     .style("--gb-max-width", opts.maxWidth || "36rem")
-    .style("--bc-figure-max-width", opts.maxWidth || "36rem");
+    .style("--sfs-figure-max-width", opts.maxWidth || "36rem");
   const rootNode = root.node();
 
   let controls = null;
@@ -343,7 +343,7 @@ makeGaltonBoard = function(opts) {
   function addButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "gb-button bc-button")
+      .attr("class", "gb-button sfs-button")
       .attr("aria-label", label)
       .attr("title", label)
       .attr("data-prevent-swipe", "")
@@ -359,15 +359,15 @@ makeGaltonBoard = function(opts) {
 
   if (showControls) {
     controls = root.append("div")
-      .attr("class", "gb-controls bc-control-grid");
+      .attr("class", "gb-controls sfs-control-grid");
 
     const dropPanel = controls.append("section")
-      .attr("class", "gb-group bc-control-panel bc-if-control-panel");
+      .attr("class", "gb-group sfs-control-panel sfs-if-control-panel");
     dropPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Drop balls");
     const actionRow = dropPanel.append("div")
-      .attr("class", "gb-action-row bc-action-row");
+      .attr("class", "gb-action-row sfs-action-row");
     const dropOne = addButton(actionRow, "plus-lg", "+1");
     const dropSome = addButton(actionRow, "plus-lg", "+25");
     const dropMany = addButton(actionRow, "plus-lg", "+100");
@@ -379,7 +379,7 @@ makeGaltonBoard = function(opts) {
       .node();
 
     const runRow = dropPanel.append("label")
-      .attr("class", "bc-control-row gb-run-row");
+      .attr("class", "sfs-control-row gb-run-row");
     runRow.append("span").text("Run #");
     runInput = runRow.append("input")
       .attr("type", "number")
@@ -421,12 +421,12 @@ makeGaltonBoard = function(opts) {
     });
 
     const showPanel = controls.append("section")
-      .attr("class", "gb-group bc-control-panel bc-if-control-panel");
+      .attr("class", "gb-group sfs-control-panel sfs-if-control-panel");
     showPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Show");
     const expectedRow = showPanel.append("label")
-      .attr("class", "bc-check-row");
+      .attr("class", "sfs-check-row");
     expectedInput = expectedRow.append("input")
       .attr("type", "checkbox")
       .property("checked", state.showExpected)
@@ -442,7 +442,7 @@ makeGaltonBoard = function(opts) {
 
     if (showBiasControl) {
       const biasRow = showPanel.append("label")
-        .attr("class", "bc-control-row");
+        .attr("class", "sfs-control-row");
       biasRow.append("span").text("Peg tilt");
       biasInput = biasRow.append("input")
         .attr("type", "range")
@@ -452,7 +452,7 @@ makeGaltonBoard = function(opts) {
         .property("value", state.bias)
         .node();
       biasValueNode = biasRow.append("span")
-        .attr("class", "gb-bias-value bc-readout-value")
+        .attr("class", "gb-bias-value sfs-readout-value")
         .node();
       biasInput.addEventListener("input", (event) => {
         event.stopPropagation();
@@ -462,7 +462,7 @@ makeGaltonBoard = function(opts) {
   }
 
   const chartWrap = root.append("div")
-    .attr("class", "gb-chart-wrap bc-chart-wrap");
+    .attr("class", "gb-chart-wrap sfs-chart-wrap");
   const canvas = chartWrap.append("canvas")
     .attr("class", "gb-canvas")
     .attr("role", "img")
@@ -545,9 +545,9 @@ makeGaltonBoard = function(opts) {
       const value = styles.getPropertyValue(name).trim();
       return value || fallback;
     };
-    const accent = read("--bc-accent", "#2c7fb8");
-    const bg = read("--bc-bg", "#ffffff");
-    const text = read("--bc-text", "#212529");
+    const accent = read("--sfs-accent", "#2c7fb8");
+    const bg = read("--sfs-bg", "#ffffff");
+    const text = read("--sfs-text", "#212529");
 
     // The accent can resolve to a low-contrast color on the current surface
     // (darkly's navy on near-black); blend it toward the text color until
@@ -564,8 +564,8 @@ makeGaltonBoard = function(opts) {
     themeCache = {
       text,
       bg,
-      border: read("--bc-border", "#dee2e6"),
-      muted: read("--bc-muted", "#6c757d"),
+      border: read("--sfs-border", "#dee2e6"),
+      muted: read("--sfs-muted", "#6c757d"),
       accent,
       curve
     };
@@ -1050,8 +1050,8 @@ makeGaltonBoard = function(opts) {
   themeSentinel.setAttribute("aria-hidden", "true");
   themeSentinel.style.cssText =
     "position:absolute;width:1px;height:1px;visibility:hidden;pointer-events:none;" +
-    "color:var(--bc-text,#212529);background-color:var(--bc-bg,#fff);" +
-    "outline-color:var(--bc-accent,#2c7fb8);" +
+    "color:var(--sfs-text,#212529);background-color:var(--sfs-bg,#fff);" +
+    "outline-color:var(--sfs-accent,#2c7fb8);" +
     "transition:color 1ms,background-color 1ms,outline-color 1ms;";
   themeSentinel.addEventListener("transitionend", refreshThemeIfChanged);
   rootNode.appendChild(themeSentinel);

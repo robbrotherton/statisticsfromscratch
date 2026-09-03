@@ -372,7 +372,7 @@ test("the interactive exposes and distinguishes the fixed-center comparison", ()
   assert.match(source, /case "show-corrected-tracker":/);
   assert.match(source, /case "hold-uncorrected-history":/);
   assert.match(source, /case "uncorrected-history-samples":/);
-  assert.match(source, /hv-variance-comparison bc-if-reveal/);
+  assert.match(source, /hv-variance-comparison sfs-if-reveal/);
   assert.match(source, /state\.showUncorrectedTracker/);
   assert.match(source, /state\.showCorrectedTracker/);
   assert.match(source, /showBothVarianceIndicators \? 2 : 1/);
@@ -386,7 +386,7 @@ test("the interactive exposes and distinguishes the fixed-center comparison", ()
   assert.match(source, /populationVarianceLift/);
   assert.match(source, /varianceComparisonFirstY - \(trackingEnabled \? populationVarianceLift : 0\)/);
   assert.match(source, /hv-population-context/);
-  assert.match(source, /--bc-if-reveal-duration: 680ms/);
+  assert.match(source, /--sfs-if-reveal-duration: 680ms/);
   assert.match(source, /biasTracker\.getMaximumFootprint\(\)/);
   assert.match(source, /style\("top", `\$\{layout\.overviewTop\}px`\)/);
   assert.match(source, /style\("height", `\$\{layout\.stageHeight\}px`\)/);

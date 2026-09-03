@@ -33,17 +33,17 @@ makeStatisticalPowerDiagram = function(opts) {
   };
 
   const root = d3.create("div")
-    .attr("class", "statistical-power-diagram bc-figure")
-    .style("--bc-if-reveal-duration", opts.revealDuration || "980ms");
+    .attr("class", "statistical-power-diagram sfs-figure")
+    .style("--sfs-if-reveal-duration", opts.revealDuration || "980ms");
   const rootNode = root.node();
 
   root.append("style").text(`
     .statistical-power-diagram {
-      --sp-null-color: var(--bc-danger-color, #c63f3f);
-      --sp-alt-color: var(--bc-comparison-color, #2f6f9f);
-      --sp-beta-color: var(--bc-neutral-color, #7b818a);
+      --sp-null-color: var(--sfs-danger-color, #c63f3f);
+      --sp-alt-color: var(--sfs-comparison-color, #2f6f9f);
+      --sp-beta-color: var(--sfs-neutral-color, #7b818a);
       --sp-power-color: var(--sp-alt-color);
-      --bc-figure-margin: 1.5rem 0;
+      --sfs-figure-margin: 1.5rem 0;
     }
 
     .statistical-power-diagram .sp-group {
@@ -83,7 +83,7 @@ makeStatisticalPowerDiagram = function(opts) {
       justify-self: end;
       min-width: 2.7rem;
       font-variant-numeric: tabular-nums;
-      color: var(--bc-muted, var(--bs-secondary-color));
+      color: var(--sfs-muted, var(--bs-secondary-color));
     }
 
     .statistical-power-diagram input[type="number"] {
@@ -122,7 +122,7 @@ makeStatisticalPowerDiagram = function(opts) {
       row-gap: 0.1rem;
       padding: 0.35rem 0.45rem;
       border-radius: 6px;
-      background: color-mix(in srgb, var(--bc-bg, var(--bs-body-bg)) 88%, transparent);
+      background: color-mix(in srgb, var(--sfs-bg, var(--bs-body-bg)) 88%, transparent);
       font-size: 1rem;
       font-variant-numeric: tabular-nums;
       pointer-events: none;
@@ -141,7 +141,7 @@ makeStatisticalPowerDiagram = function(opts) {
     }
 
     .statistical-power-diagram .sp-axis {
-      color: var(--bc-text, var(--bs-body-color));
+      color: var(--sfs-text, var(--bs-body-color));
     }
 
     .statistical-power-diagram .sp-axis text {
@@ -184,20 +184,20 @@ makeStatisticalPowerDiagram = function(opts) {
   `);
 
   const controls = root.append("div")
-    .attr("class", "sp-controls bc-control-grid");
+    .attr("class", "sp-controls sfs-control-grid");
 
   function group(title) {
     const section = controls.append("section")
-      .attr("class", "sp-group bc-control-panel bc-if-control-panel");
+      .attr("class", "sp-group sfs-control-panel sfs-if-control-panel");
     section.append("p")
-      .attr("class", "sp-group-title bc-control-title")
+      .attr("class", "sp-group-title sfs-control-title")
       .text(title);
     return section;
   }
 
   function addNumber(parent, labelHtml, value, min, step) {
     const row = parent.append("label")
-      .attr("class", "sp-row sp-row-compact bc-control-row");
+      .attr("class", "sp-row sp-row-compact sfs-control-row");
     row.append("span").html(labelHtml);
     const input = row.append("input")
       .attr("type", "number")
@@ -209,10 +209,10 @@ makeStatisticalPowerDiagram = function(opts) {
 
   function addSlider(parent, labelHtml, value, min, max, step) {
     const row = parent.append("label")
-      .attr("class", "sp-row bc-control-row");
+      .attr("class", "sp-row sfs-control-row");
     row.append("span").html(labelHtml);
     const valueNode = row.append("span")
-      .attr("class", "sp-value bc-readout-value");
+      .attr("class", "sp-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", min)
@@ -225,7 +225,7 @@ makeStatisticalPowerDiagram = function(opts) {
 
   function addCheckbox(parent, labelHtml, checked) {
     const row = parent.append("label")
-      .attr("class", "sp-check-row bc-check-row");
+      .attr("class", "sp-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked);
@@ -243,15 +243,15 @@ makeStatisticalPowerDiagram = function(opts) {
   const alphaControl = addSlider(dataControls, "<i>&alpha;</i>", state.alpha, 0.01, 0.5, 0.01);
   const twoTailedInput = addCheckbox(dataControls, "Two-tailed", state.twoTailed);
   const seRow = dataControls.append("div")
-    .attr("class", "sp-row sp-row-compact bc-control-row");
+    .attr("class", "sp-row sp-row-compact sfs-control-row");
   seRow.append("span").html("<i>&sigma;<sub>M</sub></i>");
   const seValue = seRow.append("span")
-    .attr("class", "sp-value bc-readout-value");
+    .attr("class", "sp-value sfs-readout-value");
 
   const diagramControls = group("Diagram options");
   const showAltInput = addCheckbox(diagramControls, "Show H<sub>1</sub>", state.showAlt);
   diagramControls.append("p")
-    .attr("class", "sp-group-title bc-control-title")
+    .attr("class", "sp-group-title sfs-control-title")
     .style("margin-top", "0.65rem")
     .text("X-axis");
   const axisRawInput = addCheckbox(diagramControls, "Raw scores", state.axisRaw);
@@ -259,10 +259,10 @@ makeStatisticalPowerDiagram = function(opts) {
   const axisZAltInput = addCheckbox(diagramControls, "H<sub>1</sub> z-scores", state.axisZAlt);
 
   const chartWrap = root.append("div")
-    .attr("class", "sp-chart-wrap bc-chart-wrap");
+    .attr("class", "sp-chart-wrap sfs-chart-wrap");
 
   const readout = chartWrap.append("div")
-    .attr("class", "sp-readout bc-readout");
+    .attr("class", "sp-readout sfs-readout");
   readout.append("span").html("&beta; =");
   const betaValue = readout.append("span")
     .attr("class", "sp-beta-value");
@@ -273,7 +273,7 @@ makeStatisticalPowerDiagram = function(opts) {
   const svg = chartWrap.append("svg")
     .attr("viewBox", [0, 0, width, height])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img");
 
   const x = d3.scaleLinear().range([margin.left, width - margin.right]);
@@ -289,8 +289,8 @@ makeStatisticalPowerDiagram = function(opts) {
   const fillLayer = svg.append("g");
   const nullLayer = svg.append("g");
   const altLayer = svg.append("g")
-    .attr("class", "bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const axisLayer = svg.append("g");
 
   const nullRejectLeft = fillLayer.append("path")
@@ -300,17 +300,17 @@ makeStatisticalPowerDiagram = function(opts) {
     .style("fill", "var(--sp-null-color)")
     .attr("opacity", 0.32);
   const altPowerLeft = fillLayer.append("path")
-    .attr("class", "bc-if-reveal")
+    .attr("class", "sfs-if-reveal")
     .style("fill", "var(--sp-power-color)")
-    .style("--bc-if-reveal-opacity", 0.46);
+    .style("--sfs-if-reveal-opacity", 0.46);
   const altPowerRight = fillLayer.append("path")
-    .attr("class", "bc-if-reveal")
+    .attr("class", "sfs-if-reveal")
     .style("fill", "var(--sp-power-color)")
-    .style("--bc-if-reveal-opacity", 0.46);
+    .style("--sfs-if-reveal-opacity", 0.46);
   const altBetaFill = fillLayer.append("path")
-    .attr("class", "bc-if-reveal")
+    .attr("class", "sfs-if-reveal")
     .style("fill", "var(--sp-beta-color)")
-    .style("--bc-if-reveal-opacity", 0.28);
+    .style("--sfs-if-reveal-opacity", 0.28);
 
   const nullCurve = nullLayer.append("path")
     .attr("fill", "none")
@@ -336,29 +336,29 @@ makeStatisticalPowerDiagram = function(opts) {
     .html("H<tspan baseline-shift='sub' font-size='14'>1</tspan>");
 
   const rawAxis = axisLayer.append("g")
-    .attr("class", "sp-axis bc-axis bc-graph-axis")
+    .attr("class", "sp-axis sfs-axis sfs-graph-axis")
     .attr("transform", `translate(0, ${plotBottom})`);
   const h0Axis = axisLayer.append("g")
-    .attr("class", "sp-axis bc-axis bc-graph-axis sp-null-axis")
+    .attr("class", "sp-axis sfs-axis sfs-graph-axis sp-null-axis")
     .attr("transform", `translate(0, ${plotBottom + 38})`);
   const h1Axis = axisLayer.append("g")
-    .attr("class", "sp-axis bc-axis bc-graph-axis sp-alt-axis")
+    .attr("class", "sp-axis sfs-axis sfs-graph-axis sp-alt-axis")
     .attr("transform", `translate(0, ${plotBottom + 76})`);
 
   rawAxis.append("text")
-    .attr("class", "sp-axis-label bc-axis-label")
+    .attr("class", "sp-axis-label sfs-axis-label")
     .attr("x", margin.left - 8)
     .attr("y", 24)
     .attr("text-anchor", "end")
     .text("Raw");
   h0Axis.append("text")
-    .attr("class", "sp-axis-label bc-axis-label")
+    .attr("class", "sp-axis-label sfs-axis-label")
     .attr("x", margin.left - 8)
     .attr("y", 24)
     .attr("text-anchor", "end")
     .text("H0 z");
   h1Axis.append("text")
-    .attr("class", "sp-axis-label bc-axis-label")
+    .attr("class", "sp-axis-label sfs-axis-label")
     .attr("x", margin.left - 8)
     .attr("y", 24)
     .attr("text-anchor", "end")

@@ -9,8 +9,8 @@
   // has already stepped through the first is nagging, not teaching.
   // sessionStorage carries that across chapters but re-arms on a fresh visit,
   // which is about the right half-life for "you know how these work".
-  const HINT_SPENT_KEY = "bc-if-tutorial-hint-spent";
-  const HINT_SPENT_EVENT = "bc-if:tutorial-hint-spent";
+  const HINT_SPENT_KEY = "sfs-if-tutorial-hint-spent";
+  const HINT_SPENT_EVENT = "sfs-if:tutorial-hint-spent";
 
   let hintSpent = false;
   try {
@@ -33,27 +33,27 @@
   }
 
   api.ensureStyles = function() {
-    if (document.getElementById("bc-interactive-figure-styles")) return;
+    if (document.getElementById("sfs-interactive-figure-styles")) return;
 
     const style = document.createElement("style");
-    style.id = "bc-interactive-figure-styles";
+    style.id = "sfs-interactive-figure-styles";
     style.textContent = `
-      .bc-if-root {
+      .sfs-if-root {
         position: relative;
       }
 
-      .bc-if-toolbar {
+      .sfs-if-toolbar {
         display: flex;
         justify-content: flex-end;
         min-height: 2rem;
         margin-bottom: 0.35rem;
       }
 
-      .bc-if-toolbar:empty {
+      .sfs-if-toolbar:empty {
         display: none;
       }
 
-      .bc-if-toggle {
+      .sfs-if-toggle {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -68,41 +68,41 @@
         line-height: 1;
       }
 
-      .bc-if-toggle:hover,
-      .bc-if-toggle:focus-visible {
+      .sfs-if-toggle:hover,
+      .sfs-if-toggle:focus-visible {
         color: var(--bs-primary, currentColor);
         background: transparent;
       }
 
-      .bc-if-toggle:focus-visible {
+      .sfs-if-toggle:focus-visible {
         outline: 2px solid currentColor;
         outline-offset: 2px;
       }
 
-      .bc-if-toggle .bi {
+      .sfs-if-toggle .bi {
         display: block;
         font-size: 1em;
         line-height: 1;
       }
 
-      .bc-if-toggle .bi::before {
+      .sfs-if-toggle .bi::before {
         vertical-align: 0;
       }
 
-      .callout-header .bc-if-toggle {
+      .callout-header .sfs-if-toggle {
         flex: 0 0 auto;
         align-self: center;
         margin-left: 0.5rem;
       }
 
-      .bc-if-controls {
-        --bc-if-controls-bg: var(--bc-control-bg, var(--bs-tertiary-bg, #f1f3f5));
-        --bc-if-controls-padding-block: 0.8rem;
-        --bc-if-controls-padding-inline: 0.85rem;
+      .sfs-if-controls {
+        --sfs-if-controls-bg: var(--sfs-control-bg, var(--bs-tertiary-bg, #f1f3f5));
+        --sfs-if-controls-padding-block: 0.8rem;
+        --sfs-if-controls-padding-inline: 0.85rem;
         margin-bottom: 0.75rem;
-        padding: 0 var(--bc-if-controls-padding-inline);
+        padding: 0 var(--sfs-if-controls-padding-inline);
         border-radius: 8px;
-        background: var(--bc-if-controls-bg);
+        background: var(--sfs-if-controls-bg);
         box-sizing: border-box;
         overflow: hidden;
         transition:
@@ -113,63 +113,63 @@
       /* Vertical padding lives on spacer pseudo-rows, not the box itself:
          a border-box height floors at its own padding, so real padding
          would leave a visible stub when max-height collapses the drawer. */
-      .bc-if-controls::before,
-      .bc-if-controls::after {
+      .sfs-if-controls::before,
+      .sfs-if-controls::after {
         content: "";
         display: block;
-        height: var(--bc-if-controls-padding-block);
+        height: var(--sfs-if-controls-padding-block);
       }
 
-      .bc-if-controls.bc-if-control-grid::before,
-      .bc-if-controls.bc-if-control-grid::after {
+      .sfs-if-controls.sfs-if-control-grid::before,
+      .sfs-if-controls.sfs-if-control-grid::after {
         grid-column: 1 / -1;
-        height: max(0px, calc(var(--bc-if-controls-padding-block) - var(--bc-if-control-gap)));
+        height: max(0px, calc(var(--sfs-if-controls-padding-block) - var(--sfs-if-control-gap)));
       }
 
-      .bc-if-controls[hidden] {
+      .sfs-if-controls[hidden] {
         display: none !important;
       }
 
-      .bc-if-control-grid {
-        --bc-if-control-gap: 0.8rem;
-        --bc-if-divider-color: var(--bc-border, var(--bs-border-color, #dee2e6));
+      .sfs-if-control-grid {
+        --sfs-if-control-gap: 0.8rem;
+        --sfs-if-divider-color: var(--sfs-border, var(--bs-border-color, #dee2e6));
         display: grid;
-        gap: var(--bc-if-control-gap);
+        gap: var(--sfs-if-control-gap);
         align-items: start;
       }
 
-      .bc-if-control-grid[data-layout="quarter-half-quarter"] {
+      .sfs-if-control-grid[data-layout="quarter-half-quarter"] {
         grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
       }
 
-      .bc-if-control-grid[data-layout="equal"] {
+      .sfs-if-control-grid[data-layout="equal"] {
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
       }
 
-      .bc-if-control-panel {
+      .sfs-if-control-panel {
         position: relative;
         min-width: 0;
       }
 
-      .bc-if-control-grid[data-dividers="true"] > .bc-if-control-panel + .bc-if-control-panel::before {
+      .sfs-if-control-grid[data-dividers="true"] > .sfs-if-control-panel + .sfs-if-control-panel::before {
         content: "";
         position: absolute;
         top: 0.15rem;
         bottom: 0.15rem;
-        left: calc(var(--bc-if-control-gap) / -2);
+        left: calc(var(--sfs-if-control-gap) / -2);
         width: 1px;
-        background: var(--bc-if-divider-color);
+        background: var(--sfs-if-divider-color);
         pointer-events: none;
         transform: translateX(-0.5px);
       }
 
       @media (max-width: 760px) {
-        .bc-if-control-grid[data-layout] {
+        .sfs-if-control-grid[data-layout] {
           grid-template-columns: 1fr;
         }
 
-        .bc-if-control-grid[data-dividers="true"] > .bc-if-control-panel + .bc-if-control-panel::before {
-          top: calc(var(--bc-if-control-gap) / -2);
+        .sfs-if-control-grid[data-dividers="true"] > .sfs-if-control-panel + .sfs-if-control-panel::before {
+          top: calc(var(--sfs-if-control-gap) / -2);
           right: 0;
           bottom: auto;
           left: 0;
@@ -180,46 +180,46 @@
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .bc-if-controls {
+        .sfs-if-controls {
           transition: none !important;
         }
       }
 
-      html[data-motion="reduced"] .bc-if-controls {
+      html[data-motion="reduced"] .sfs-if-controls {
         transition: none !important;
       }
 
-      .bc-if-reveal {
+      .sfs-if-reveal {
         opacity: 0;
         pointer-events: none;
         transition:
-          opacity var(--bc-if-reveal-duration, 280ms) ease,
-          visibility 0s linear var(--bc-if-reveal-duration, 280ms);
+          opacity var(--sfs-if-reveal-duration, 280ms) ease,
+          visibility 0s linear var(--sfs-if-reveal-duration, 280ms);
         visibility: hidden;
       }
 
-      .bc-if-reveal.is-visible {
-        opacity: var(--bc-if-reveal-opacity, 1);
+      .sfs-if-reveal.is-visible {
+        opacity: var(--sfs-if-reveal-opacity, 1);
         transition-delay: 0s;
         visibility: visible;
       }
 
-      .bc-if-no-reveal-animation .bc-if-reveal,
-      .bc-if-reveal.bc-if-no-reveal-animation {
+      .sfs-if-no-reveal-animation .sfs-if-reveal,
+      .sfs-if-reveal.sfs-if-no-reveal-animation {
         transition: none !important;
       }
 
-      .bc-if-inline-math {
+      .sfs-if-inline-math {
         white-space: nowrap;
       }
 
       @media (prefers-reduced-motion: reduce) {
-        .bc-if-reveal {
+        .sfs-if-reveal {
           transition: none !important;
         }
       }
 
-      html[data-motion="reduced"] .bc-if-reveal {
+      html[data-motion="reduced"] .sfs-if-reveal {
         transition: none !important;
       }
 
@@ -274,7 +274,7 @@
   api.cancelTransitions = function(root) {
     if (!root) return;
 
-    root.dispatchEvent(new CustomEvent("bc-if:cancel-transitions", {
+    root.dispatchEvent(new CustomEvent("sfs-if:cancel-transitions", {
       bubbles: true
     }));
 
@@ -418,10 +418,10 @@
       currentLayout = layout;
       currentKey = nextKey;
       root.dataset.bcLayout = layout.mode;
-      root.style.setProperty("--bc-layout-width", layout.width + "px");
-      root.style.setProperty("--bc-layout-available-width", availableWidth + "px");
+      root.style.setProperty("--sfs-layout-width", layout.width + "px");
+      root.style.setProperty("--sfs-layout-available-width", availableWidth + "px");
       onLayout(layout, previous);
-      root.dispatchEvent(new CustomEvent("bc-if:responsive-layout", {
+      root.dispatchEvent(new CustomEvent("sfs-if:responsive-layout", {
         bubbles: true,
         detail: { layout, previous }
       }));
@@ -550,7 +550,7 @@
       .join(" ");
 
     const span = document.createElement("span");
-    span.className = "math inline bc-if-inline-math";
+    span.className = "math inline sfs-if-inline-math";
     span.dataset.tex = expression;
     span.textContent = expression;
     queueMathTypeset(span, expression);
@@ -566,11 +566,11 @@
     const animate = motionAllows(opts.animate);
 
     if (root && !animate) {
-      root.classList.add("bc-if-no-reveal-animation");
+      root.classList.add("sfs-if-no-reveal-animation");
     }
 
     elements.forEach(function(element) {
-      element.classList.add("bc-if-reveal");
+      element.classList.add("sfs-if-reveal");
       element.classList.toggle("is-visible", Boolean(visible));
       element.setAttribute("aria-hidden", String(!visible));
     });
@@ -578,7 +578,7 @@
     if (root && !animate) {
       root.getBoundingClientRect();
       window.requestAnimationFrame(function() {
-        root.classList.remove("bc-if-no-reveal-animation");
+        root.classList.remove("sfs-if-no-reveal-animation");
       });
     }
 
@@ -601,7 +601,7 @@
   // reaches the footer sets footer.dataset.bcIfTutorial and receives every
   // step through applyAction. Any other figure in the same callout hears the
   // steps here instead. createTutorial dispatches a bubbling
-  // bc-if:tutorial-step-action from the claiming figure's root, so the callout
+  // sfs-if:tutorial-step-action from the claiming figure's root, so the callout
   // is the nearest node both figures share.
   api.observeTutorialActions = function(target, handler, opts) {
     if (typeof handler !== "function") return function() {};
@@ -629,7 +629,7 @@
       // finds the callout once the node is in the document.
       if (!root.isConnected) return false;
       listenTarget = root.closest(".callout") || root;
-      listenTarget.addEventListener("bc-if:tutorial-step-action", listener);
+      listenTarget.addEventListener("sfs-if:tutorial-step-action", listener);
       return true;
     }
 
@@ -646,7 +646,7 @@
       if (disposed) return;
       disposed = true;
       if (listenTarget) {
-        listenTarget.removeEventListener("bc-if:tutorial-step-action", listener);
+        listenTarget.removeEventListener("sfs-if:tutorial-step-action", listener);
         listenTarget = null;
       }
     };
@@ -746,23 +746,23 @@
       }
     });
 
-    footer.classList.add("bc-if-tutorial");
+    footer.classList.add("sfs-if-tutorial");
     footer.dataset.bcIfTutorial = "true";
     footer.dataset.tutorialStep = "0";
     if (tutorialStepIds.length) footer.dataset.tutorialId = tutorialId;
     footer.setAttribute("aria-live", "polite");
 
     const nav = document.createElement("div");
-    nav.className = "bc-if-tutorial-nav";
+    nav.className = "sfs-if-tutorial-nav";
 
     function makeNavButton(className, label, ariaLabel, iconBefore, iconAfter) {
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "bc-if-tutorial-button bc-button " + className;
+      button.className = "sfs-if-tutorial-button sfs-button " + className;
       button.setAttribute("aria-label", ariaLabel);
 
       const text = document.createElement("span");
-      text.className = "bc-if-tutorial-button-text";
+      text.className = "sfs-if-tutorial-button-text";
       text.textContent = label;
 
       if (iconBefore) button.insertAdjacentHTML("beforeend", iconBefore);
@@ -772,7 +772,7 @@
     }
 
     const prevButton = makeNavButton(
-      "bc-if-tutorial-prev",
+      "sfs-if-tutorial-prev",
       opts.prevLabel || "Back",
       "Previous step",
       '<i class="bi bi-chevron-left" aria-hidden="true"></i>',
@@ -780,7 +780,7 @@
     );
 
     const nextButton = makeNavButton(
-      "bc-if-tutorial-next",
+      "sfs-if-tutorial-next",
       opts.nextLabel || "Next",
       "Next step",
       null,
@@ -788,7 +788,7 @@
     );
 
     const stepper = document.createElement("ol");
-    stepper.className = "bc-if-stepper";
+    stepper.className = "sfs-if-stepper";
     const grouped = steps.some(function(step) { return Boolean(step.dataset.major); });
     stepper.dataset.grouped = String(grouped);
     stepper.setAttribute("aria-label", grouped ? "Tutorial sections" : "Tutorial steps");
@@ -849,30 +849,30 @@
 
     const items = progressEntries.map(function(entry) {
       const item = document.createElement("li");
-      item.className = "bc-if-stepper-step " +
-        (entry.isMajor ? "bc-if-stepper-step--major" : "bc-if-stepper-step--minor");
+      item.className = "sfs-if-stepper-step " +
+        (entry.isMajor ? "sfs-if-stepper-step--major" : "sfs-if-stepper-step--minor");
 
       const node = document.createElement("button");
       node.type = "button";
       if (entry.isMajor) {
-        node.className = "bc-if-stepper-node";
+        node.className = "sfs-if-stepper-node";
         node.setAttribute("aria-label",
           (grouped ? "Section " : "Step ") + (entry.groupIndex + 1) + " of " + groups.length +
           (entry.group.title ? ": " + entry.group.title : ""));
 
         const dot = document.createElement("span");
-        dot.className = "bc-if-stepper-dot";
+        dot.className = "sfs-if-stepper-dot";
         dot.setAttribute("aria-hidden", "true");
         dot.innerHTML = '<i class="bi bi-check"></i>';
 
         const label = document.createElement("span");
-        label.className = "bc-if-stepper-label";
+        label.className = "sfs-if-stepper-label";
         label.setAttribute("aria-hidden", "true");
         label.textContent = entry.group.title || String(entry.groupIndex + 1);
         node.append(dot, label);
       } else {
         const title = steps[entry.stepIndex].dataset.title || "Step " + (entry.minorIndex + 1);
-        node.className = "bc-if-substep";
+        node.className = "sfs-if-substep";
         node.setAttribute("aria-label",
           entry.group.title + ", step " + (entry.minorIndex + 1) + " of " +
           entry.group.steps.length + ": " + title);
@@ -931,12 +931,12 @@
     // than overlaying the arrows on top of it: the callout is a fixed ~749px and
     // most chart wraps fill it, so an overlay would cover live content.
     const sideNav = document.createElement("div");
-    sideNav.className = "bc-if-side-nav";
+    sideNav.className = "sfs-if-side-nav";
 
-    // Not every module's figure root carries .bc-if-root (the table and
+    // Not every module's figure root carries .sfs-if-root (the table and
     // variance-partition builders use their own), so the gutter-reserving CSS
     // is hung off a marker this function applies to whatever root it was given.
-    root.classList.add("bc-if-tutorial-viz");
+    root.classList.add("sfs-if-tutorial-viz");
 
     // Authors can force the inline arrangement for a viz that needs every pixel.
     const sideOptOut = opts.sideNav === false ||
@@ -952,13 +952,13 @@
     // close to the viz. Section jumping is the cost, which is the right trade
     // on a phone where the rail's tap targets were tiny anyway.
     const readout = document.createElement("p");
-    readout.className = "bc-if-step-readout";
+    readout.className = "sfs-if-step-readout";
 
     const readoutPosition = document.createElement("span");
-    readoutPosition.className = "bc-if-step-readout-position";
+    readoutPosition.className = "sfs-if-step-readout-position";
 
     const readoutTitle = document.createElement("span");
-    readoutTitle.className = "bc-if-step-readout-title";
+    readoutTitle.className = "sfs-if-step-readout-title";
 
     readout.append(readoutPosition, readoutTitle);
 
@@ -1013,7 +1013,7 @@
     }
 
     nextButton.addEventListener("animationend", function(event) {
-      if (event.animationName !== "bc-if-next-beat") return;
+      if (event.animationName !== "sfs-if-next-beat") return;
       hintPulseDone = true;
       syncHint();
     });
@@ -1104,7 +1104,7 @@
       // Only discount the drawer when it is genuinely open and sitting inside
       // the figure. A collapsed drawer still has a rect, but modules park it
       // far off-box, so trusting it blindly throws the arrows off-screen.
-      const controls = root.querySelector(".bc-if-controls");
+      const controls = root.querySelector(".sfs-if-controls");
       if (controls) {
         const controlsRect = controls.getBoundingClientRect();
         if (controlsRect.height > 0 &&
@@ -1115,7 +1115,7 @@
       }
 
       const centre = (vizTop + rootRect.bottom) / 2 - callout.getBoundingClientRect().top;
-      callout.style.setProperty("--bc-if-arrow-top", Math.round(centre) + "px");
+      callout.style.setProperty("--sfs-if-arrow-top", Math.round(centre) + "px");
     }
 
     // If reserving the gutters pushes any part of the viz into horizontal
@@ -1134,8 +1134,8 @@
       // intentionally unrelated to whether the visible chart fits.
       const overflows = Array.from(root.children).some(function(child) {
         if (child.classList && (
-          child.classList.contains("bc-if-controls") ||
-          child.classList.contains("bc-if-fit-ignore")
+          child.classList.contains("sfs-if-controls") ||
+          child.classList.contains("sfs-if-fit-ignore")
         )) return false;
         return child.scrollWidth > child.clientWidth + 2;
       });
@@ -1270,7 +1270,7 @@
         });
       }
 
-      root.dispatchEvent(new CustomEvent("bc-if:tutorial-step-action", {
+      root.dispatchEvent(new CustomEvent("sfs-if:tutorial-step-action", {
         bubbles: true,
         detail: {
           action,
@@ -1326,7 +1326,7 @@
       const repeatAction = repeatActions[index];
       const atEnd = index === steps.length - 1;
       nextButton.disabled = atEnd && !repeatAction;
-      const nextText = nextButton.querySelector(".bc-if-tutorial-button-text");
+      const nextText = nextButton.querySelector(".sfs-if-tutorial-button-text");
       const repeatLabel = steps[index].dataset.repeatLabel || opts.repeatLabel || "Next";
       const repeatsAtEnd = Boolean(atEnd && repeatAction);
       if (nextText) nextText.textContent = repeatsAtEnd ? repeatLabel : (opts.nextLabel || "Next");
@@ -1348,7 +1348,7 @@
       scheduleFitCheck();
       if (renderOptions.updateHash) replaceTutorialHash(index);
 
-      root.dispatchEvent(new CustomEvent("bc-if:tutorial-step", {
+      root.dispatchEvent(new CustomEvent("sfs-if:tutorial-step", {
         bubbles: true,
         detail: { index, step: steps[index], ...position }
       }));
@@ -1417,7 +1417,7 @@
       if (!event.detail || !event.detail.reduced) return;
       render(index, { applyAction: true });
     }
-    document.addEventListener("bc-motion:change", handleTutorialMotionChange);
+    document.addEventListener("sfs-motion:change", handleTutorialMotionChange);
 
     api.adopt(root, {
       setTutorialStep(nextIndex) {
@@ -1439,7 +1439,7 @@
           tutorialLoadScrollHandler = null;
         }
         window.removeEventListener("hashchange", handleTutorialHashChange);
-        document.removeEventListener("bc-motion:change", handleTutorialMotionChange);
+        document.removeEventListener("sfs-motion:change", handleTutorialMotionChange);
         document.removeEventListener(HINT_SPENT_EVENT, syncHint);
         api.cancelTransitions(root);
       }
@@ -1456,25 +1456,25 @@
 
     api.ensureStyles();
 
-    const id = controls.id || "bc-if-controls-" + nextId++;
+    const id = controls.id || "sfs-if-controls-" + nextId++;
     api.nextId = nextId;
     controls.id = id;
 
-    root.classList.add("bc-if-root");
-    controls.classList.add("bc-if-controls");
+    root.classList.add("sfs-if-root");
+    controls.classList.add("sfs-if-controls");
     if (opts.layout) {
-      controls.classList.add("bc-if-control-grid");
+      controls.classList.add("sfs-if-control-grid");
       controls.dataset.layout = opts.layout;
       controls.dataset.dividers = String(opts.dividers === undefined ? true : Boolean(opts.dividers));
     }
 
     const toolbar = document.createElement("div");
-    toolbar.className = "bc-if-toolbar";
+    toolbar.className = "sfs-if-toolbar";
     root.insertBefore(toolbar, root.firstChild);
 
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "bc-if-toggle";
+    button.className = "sfs-if-toggle";
     button.setAttribute("aria-controls", id);
     button.innerHTML = '<i class="bi bi-sliders" aria-hidden="true"></i><span class="visually-hidden">Toggle controls</span>';
 
@@ -1487,7 +1487,7 @@
       button.setAttribute("aria-expanded", String(open));
       button.setAttribute("aria-label", (open ? "Hide " : "Show ") + label);
       button.title = (open ? "Hide " : "Show ") + label;
-      root.classList.toggle("bc-if-controls-open", open);
+      root.classList.toggle("sfs-if-controls-open", open);
     }
 
     function setControlsInteractive(value) {
@@ -1543,7 +1543,7 @@
       controlsSuppressed = calloutNode.classList.contains("no-controls") ||
         (isTutorial && !calloutNode.classList.contains("with-controls"));
 
-      if (controlsSuppressed) root.classList.add("bc-if-controls-suppressed");
+      if (controlsSuppressed) root.classList.add("sfs-if-controls-suppressed");
       return controlsSuppressed;
     }
 
@@ -1636,7 +1636,7 @@
     function handleDrawerMotionChange(event) {
       if (event.detail && event.detail.reduced) setOpen(open, false);
     }
-    document.addEventListener("bc-motion:change", handleDrawerMotionChange);
+    document.addEventListener("sfs-motion:change", handleDrawerMotionChange);
 
     toolbar.appendChild(button);
     renderInitial();
@@ -1687,7 +1687,7 @@
       if (header.contains(button)) return true;
 
       header.appendChild(button);
-      root.classList.add("bc-if-toggle-in-callout-header");
+      root.classList.add("sfs-if-toggle-in-callout-header");
       return true;
     }
 
@@ -1729,7 +1729,7 @@
       },
       dispose() {
         clearTransitionCallback();
-        document.removeEventListener("bc-motion:change", handleDrawerMotionChange);
+        document.removeEventListener("sfs-motion:change", handleDrawerMotionChange);
         api.cancelTransitions(root);
       }
     });

@@ -372,7 +372,7 @@ bcDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => {
   return shadeSpecs.flatMap((rawSpec, index) => {
     const spec = typeof rawSpec === "string" ? { tail: rawSpec } : rawSpec || {};
     const kind = bcDistributionNormalizeKey(spec.kind || spec.type);
-    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--bc-neutral-color, #7b818a)" : "var(--bc-danger-color, #c63f3f)");
+    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-danger-color, #c63f3f)");
     const opacity = bcDistributionFiniteNumber(spec.opacity, kind === "overlap" ? 0.32 : 0.28);
 
     if (["overlap", "intersection"].includes(kind)) {
@@ -443,7 +443,7 @@ bcDistributionMarkerDefaults = {
 bcDistributionConceptualMarkerDefaults = {
   mode: { color: "var(--graph-series-2, #e69f00)" },
   median: { color: "var(--graph-series-3, #009e73)" },
-  mean: { color: "var(--bc-danger-color, #c63f3f)" }
+  mean: { color: "var(--sfs-danger-color, #c63f3f)" }
 }
 
 bcDistributionIsCentralTendencyPresentation = (value) => [
@@ -554,7 +554,7 @@ bcDistributionMarkerItems = (opts = {}, distributions = [], domain = [0, 1]) => 
           stat: statKey,
           presentation,
           height,
-          color: spec.color || spec.stroke || defaults.color || "var(--bc-neutral-color, #7b818a)",
+          color: spec.color || spec.stroke || defaults.color || "var(--sfs-neutral-color, #7b818a)",
           dash: bcDistributionValueOr(spec.dash, bcDistributionValueOr(spec.strokeDasharray, defaults.dash || "6 4")),
           strokeWidth: bcDistributionPositiveNumber(spec.strokeWidth, 2),
           opacity: bcDistributionFiniteNumber(spec.opacity, 0.95),
@@ -587,7 +587,7 @@ bcDistributionIntervalItems = (opts = {}, distributions = [], domain = [0, 1]) =
       height: ["curve", "curve-mid", "curve-midpoint", "auto"].includes(heightKey)
         ? "curve"
         : bcDistributionClamp(bcDistributionFiniteNumber(spec.height, 0.42), 0, 1),
-      color: spec.color || spec.stroke || "var(--bc-neutral-color, #7b818a)",
+      color: spec.color || spec.stroke || "var(--sfs-neutral-color, #7b818a)",
       strokeWidth: bcDistributionPositiveNumber(spec.strokeWidth, 2),
       opacity: bcDistributionFiniteNumber(spec.opacity, 0.95),
       arrows: spec.arrows !== false,
@@ -672,11 +672,11 @@ bcDistributionMargin = (opts = {}, display = bcDistributionDisplay(opts)) => {
 
 bcDistributionStyleAxis = (axis, display) => {
   axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} bc-axis bc-graph-axis`;
+      return `${this.getAttribute("class") || ""} sfs-axis sfs-graph-axis`;
     })
-    .call((g) => g.selectAll("text").attr("class", "bc-tick-label bc-graph-tick-label"))
-    .call((g) => g.selectAll("line").attr("class", "bc-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "bc-graph-domain"));
+    .call((g) => g.selectAll("text").attr("class", "sfs-tick-label sfs-graph-tick-label"))
+    .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
+    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
 
   if (!display.showAxisLines) axis.selectAll("path,line").style("display", "none");
   if (!display.showTickLabels) axis.selectAll("text").style("display", "none");
@@ -690,7 +690,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
 
   if (title) {
     svg.append("text")
-      .attr("class", "dg-title bc-graph-title")
+      .attr("class", "dg-title sfs-graph-title")
       .attr("x", margin.left)
       .attr("y", 18)
       .text(title);
@@ -698,7 +698,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
 
   if (display.showXLabel && xLabel !== false) {
     svg.append("text")
-      .attr("class", "dg-x-label bc-graph-label bc-axis-label")
+      .attr("class", "dg-x-label sfs-graph-label sfs-axis-label")
       .attr("x", (margin.left + width - margin.right) / 2)
       .attr("y", height - 12)
       .attr("text-anchor", "middle")
@@ -707,7 +707,7 @@ bcDistributionAddLabels = (svg, opts, display, margin, width, height) => {
 
   if (display.showYLabel && yLabel !== false) {
     svg.append("text")
-      .attr("class", "dg-y-label bc-graph-label bc-axis-label")
+      .attr("class", "dg-y-label sfs-graph-label sfs-axis-label")
       .attr("x", -(margin.top + height - margin.bottom) / 2)
       .attr("y", 17)
       .attr("transform", "rotate(-90)")
@@ -733,7 +733,7 @@ bcDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   const legendX = side === "left" ? margin.left + 12 : width - margin.right - legendWidth;
 
   const legend = svg.append("g")
-    .attr("class", "dg-marker-legend bc-graph-legend")
+    .attr("class", "dg-marker-legend sfs-graph-legend")
     .attr("data-fade-opacity", 1)
     .attr("transform", `translate(${legendX},${margin.top + 6})`);
 
@@ -763,7 +763,7 @@ bcDistributionAddLegend = (svg, distributions, opts, width, margin) => {
   if (distributions.length < 2 || opts.legend === false) return;
 
   const legend = svg.append("g")
-    .attr("class", "dg-legend bc-graph-legend")
+    .attr("class", "dg-legend sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
 
   const items = legend.selectAll("g")
@@ -787,13 +787,13 @@ bcDistributionAddLegend = (svg, distributions, opts, width, margin) => {
 }
 
 bcDistributionEnsureStyles = () => {
-  if (document.getElementById("bc-distribution-generator-styles")) return;
+  if (document.getElementById("sfs-distribution-generator-styles")) return;
 
   const style = document.createElement("style");
-  style.id = "bc-distribution-generator-styles";
+  style.id = "sfs-distribution-generator-styles";
   style.textContent = `
     .distribution-graph {
-      --bc-figure-max-width: var(--dg-max-width, 48rem);
+      --sfs-figure-max-width: var(--dg-max-width, 48rem);
     }
 
     .distribution-graph .dg-shade {
@@ -841,17 +841,17 @@ bcDistributionEnsureStyles = () => {
 
     .distribution-graph .dg-conceptual-label,
     .distribution-graph .dg-median-half-label {
-      fill: var(--bc-text);
+      fill: var(--sfs-text);
       font-size: 0.78rem;
       font-weight: 600;
       paint-order: stroke;
-      stroke: var(--bc-bg);
+      stroke: var(--sfs-bg);
       stroke-linejoin: round;
       stroke-width: 3px;
     }
 
     .distribution-graph .dg-median-half-label {
-      fill: var(--bc-muted);
+      fill: var(--sfs-muted);
       font-size: 0.72rem;
       font-weight: 500;
     }
@@ -869,7 +869,7 @@ bcDistributionEnsureStyles = () => {
     }
 
     .distribution-explorer {
-      --bc-figure-max-width: var(--dpe-max-width, 48rem);
+      --sfs-figure-max-width: var(--dpe-max-width, 48rem);
     }
 
     .distribution-explorer .dpe-chart-wrap {
@@ -888,12 +888,12 @@ bcDistributionEnsureStyles = () => {
     .distribution-explorer .dpe-value {
       justify-self: end;
       min-width: 3.25rem;
-      color: var(--bc-muted);
+      color: var(--sfs-muted);
       font-variant-numeric: tabular-nums;
     }
 
     .distribution-explorer .dpe-reference-curve {
-      stroke: var(--bc-neutral-color, #7b818a);
+      stroke: var(--sfs-neutral-color, #7b818a);
       stroke-dasharray: 7 5;
     }
 
@@ -902,11 +902,11 @@ bcDistributionEnsureStyles = () => {
     }
 
     .central-tendency-morph {
-      --bc-figure-max-width: var(--ctm-max-width, 48rem);
+      --sfs-figure-max-width: var(--ctm-max-width, 48rem);
     }
 
     .central-tendency-morph .ctm-state-label {
-      fill: var(--bc-muted);
+      fill: var(--sfs-muted);
       font-size: 0.78rem;
       font-weight: 600;
     }
@@ -922,7 +922,7 @@ bcDistributionEnsureStyles = () => {
 
     .central-tendency-morph .ctm-shape-readout {
       grid-column: 2;
-      color: var(--bc-muted);
+      color: var(--sfs-muted);
       font-size: 0.85rem;
     }
 
@@ -941,7 +941,7 @@ bcDistributionEnsureStyles = () => {
     }
 
     .distribution-family-cover {
-      --bc-figure-max-width: var(--dfc-max-width, var(--bc-cover-max-width, 46rem));
+      --sfs-figure-max-width: var(--dfc-max-width, var(--sfs-cover-max-width, 46rem));
     }
 
     .distribution-family-cover .dfc-chart-wrap {
@@ -1471,14 +1471,14 @@ makeDistributionFamilySvgCover = (opts = {}) => {
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const svg = wrap.append("svg")
-    .attr("class", "dfc-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dfc-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", localOpts.ariaLabel || "Animated family of distribution curves");
@@ -1708,12 +1708,12 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const canvas = wrap.append("canvas")
     .attr("class", "dfc-canvas")
     .attr("width", Math.round(width * deviceScale))
@@ -1952,12 +1952,12 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
   );
 
   const root = d3.create("div")
-    .attr("class", "distribution-family-cover bc-figure bc-figure-cover")
+    .attr("class", "distribution-family-cover sfs-figure sfs-figure-cover")
     .style("--dfc-max-width", localOpts.maxWidth || null)
-    .style("--bc-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
+    .style("--sfs-figure-margin", localOpts.cssMargin || localOpts.marginCss || null);
   const rootNode = root.node();
   const wrap = root.append("div")
-    .attr("class", "dfc-chart-wrap bc-chart-wrap");
+    .attr("class", "dfc-chart-wrap sfs-chart-wrap");
   const canvas = wrap.append("canvas")
     .attr("class", "dfc-canvas")
     .attr("width", Math.round(width * deviceScale))
@@ -2275,16 +2275,16 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   const rootNode = opts.rootNode || document.createElement("div");
   const root = d3.select(rootNode)
-    .attr("class", "distribution-graph bc-figure")
+    .attr("class", "distribution-graph sfs-figure")
     .style("--dg-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   root.selectAll("*").remove();
 
   const wrap = root.append("div")
-    .attr("class", "dg-chart-wrap bc-chart-wrap");
+    .attr("class", "dg-chart-wrap sfs-chart-wrap");
 
   const svg = wrap.append("svg")
-    .attr("class", "dg-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dg-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", ariaLabel);
@@ -2325,7 +2325,7 @@ bcDistributionRenderGraph = (opts = {}) => {
       .data(curveData.filter((series) => conceptualDistributions.includes(series.distribution)))
       .join("path")
         .attr("class", "dg-conceptual-fill")
-        .attr("fill", opts.conceptualFill || "var(--bc-neutral-color, #7b818a)")
+        .attr("fill", opts.conceptualFill || "var(--sfs-neutral-color, #7b818a)")
         .style("fill-opacity", bcDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16))
         .attr("d", (d) => area(d.data));
 
@@ -2393,7 +2393,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     conceptualMedianLabels = conceptualLayer.selectAll("text.dg-median-half-label")
       .data(labeledMedianAreas)
       .join("text")
-        .attr("class", "dg-median-half-label bc-graph-label")
+        .attr("class", "dg-median-half-label sfs-graph-label")
         .attr("x", (d) => d.labelX)
         .attr("y", (d) => d.labelY)
         .attr("text-anchor", "middle")
@@ -2409,7 +2409,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   if (opts.grid) {
     svg.append("g")
-      .attr("class", "dg-grid bc-graph-grid")
+      .attr("class", "dg-grid sfs-graph-grid")
       .attr("transform", `translate(${margin.left},0)`)
       .call(d3.axisLeft(y)
         .ticks(bcDistributionValueOr(opts.yTicks, 5))
@@ -2423,7 +2423,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("path")
     .data(shadeItems)
     .join("path")
-      .attr("class", (d) => `dg-shade bc-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
+      .attr("class", (d) => `dg-shade sfs-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
       .attr("fill", (d) => d.color)
       .style("fill-opacity", (d) => d.opacity)
       .attr("d", (d) => area(d.data));
@@ -2490,7 +2490,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   conceptualModeGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-mode-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mode-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
       .attr("y", (d) => y(d.y) - 11 + d.labelDy)
       .attr("text-anchor", "middle")
@@ -2512,7 +2512,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   conceptualMedianGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-median-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-median-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + (x(d.x) > (margin.left + width - margin.right) / 2 ? -6 : 6) + d.labelDx)
       .attr("y", (d) => (y(0) + medianTopY(d)) / 2 + 4 + d.labelDy)
       .attr("text-anchor", (d) => x(d.x) > (margin.left + width - margin.right) / 2 ? "end" : "start")
@@ -2534,7 +2534,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   conceptualMeanGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-conceptual-label dg-mean-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mean-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
       .attr("y", (d) => y(0) + bcDistributionPositiveNumber(d.spec.fulcrumHeight, 11) + 15 + d.labelDy)
       .attr("text-anchor", "middle")
@@ -2548,7 +2548,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   markerGroups.filter((d) => d.presentation === "line" && (d.label !== undefined || d.labelHtml !== undefined) && !markerLegend)
     .append("text")
-      .attr("class", "dg-marker-label bc-graph-label")
+      .attr("class", "dg-marker-label sfs-graph-label")
       .attr("x", (d) => x(d.x) + d.labelDx)
       .attr("y", (d) => markerTopY(d) - 7 + d.labelDy)
       .attr("text-anchor", (d) => d.labelAnchor)
@@ -2607,7 +2607,7 @@ bcDistributionRenderGraph = (opts = {}) => {
 
   intervalGroups.filter((d) => d.label !== undefined || d.labelHtml !== undefined)
     .append("text")
-      .attr("class", "dg-interval-label bc-graph-label")
+      .attr("class", "dg-interval-label sfs-graph-label")
       .attr("x", (d) => (x(d.from) + x(d.to)) / 2 + d.labelDx)
       .attr("y", (d) => intervalY(d) - 8 + d.labelDy)
       .attr("text-anchor", "middle")
@@ -2622,7 +2622,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("path")
     .data(curveData)
     .join("path")
-      .attr("class", "dg-curve bc-graph-line")
+      .attr("class", "dg-curve sfs-graph-line")
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
@@ -2656,7 +2656,7 @@ bcDistributionRenderGraph = (opts = {}) => {
     .selectAll("text")
     .data(labeledShadeItems)
     .join("text")
-      .attr("class", "dg-shade-label bc-graph-label")
+      .attr("class", "dg-shade-label sfs-graph-label")
       .attr("data-fade-opacity", 1)
       .attr("x", (d) => d.labelX)
       .attr("y", (d) => d.labelYPx)
@@ -2930,22 +2930,22 @@ makeCentralTendencyMorph = (opts = {}) => {
   let activeTween = null;
 
   const root = d3.create("div")
-    .attr("class", "central-tendency-morph distribution-graph bc-figure")
+    .attr("class", "central-tendency-morph distribution-graph sfs-figure")
     .style("--ctm-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "ctm-controls bc-control-grid");
+    .attr("class", "ctm-controls sfs-control-grid");
   const controlsPanel = controls.append("section")
-    .attr("class", "ctm-panel bc-control-panel bc-if-control-panel");
+    .attr("class", "ctm-panel sfs-control-panel sfs-if-control-panel");
   controlsPanel.append("p")
-    .attr("class", "bc-control-title")
+    .attr("class", "sfs-control-title")
     .text(opts.controlsTitle || "Change the distribution");
 
   function addControlRow(labelText, ariaLabelText, min, max, initialValue) {
     const row = controlsPanel.append("label")
-      .attr("class", "ctm-control-row bc-control-row");
+      .attr("class", "ctm-control-row sfs-control-row");
     row.append("span").text(labelText);
     return row.append("input")
       .attr("type", "range")
@@ -2972,9 +2972,9 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("aria-live", "polite");
 
   const chartWrap = root.append("div")
-    .attr("class", "ctm-chart-wrap bc-chart-wrap");
+    .attr("class", "ctm-chart-wrap sfs-chart-wrap");
   const svg = chartWrap.append("svg")
-    .attr("class", "ctm-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "ctm-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img");
   const title = svg.append("title");
@@ -3023,7 +3023,7 @@ makeCentralTendencyMorph = (opts = {}) => {
   const areaLayer = svg.append("g").attr("class", "ctm-areas dg-conceptual-areas");
   const baseArea = areaLayer.append("path")
     .attr("class", "ctm-base-area dg-conceptual-fill")
-    .attr("fill", opts.conceptualFill || "var(--bc-neutral-color, #7b818a)")
+    .attr("fill", opts.conceptualFill || "var(--sfs-neutral-color, #7b818a)")
     .style("fill-opacity", bcDistributionFiniteNumber(opts.conceptualFillOpacity, 0.16));
   const lowerArea = areaLayer.append("path")
     .attr("class", "ctm-median-half dg-median-half dg-median-lower")
@@ -3032,16 +3032,16 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("class", "ctm-median-half dg-median-half dg-median-upper")
     .attr("fill", `url(#${hatchIdBase}-upper)`);
   const lowerHalfLabel = areaLayer.append("text")
-    .attr("class", "dg-median-half-label bc-graph-label")
+    .attr("class", "dg-median-half-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("50%");
   const upperHalfLabel = areaLayer.append("text")
-    .attr("class", "dg-median-half-label bc-graph-label")
+    .attr("class", "dg-median-half-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("50%");
 
   const curvePath = svg.append("path")
-    .attr("class", "ctm-curve dg-curve bc-graph-line")
+    .attr("class", "ctm-curve dg-curve sfs-graph-line")
     .attr("fill", "none")
     .attr("stroke", opts.color || "var(--graph-series-1, var(--graph-line-color, #0072b2))")
     .attr("stroke-width", bcDistributionPositiveNumber(opts.strokeWidth, 2.8));
@@ -3059,18 +3059,18 @@ makeCentralTendencyMorph = (opts = {}) => {
     .attr("stroke", medianColor)
     .attr("stroke-width", 2.5);
   const medianLabel = medianLayer.append("text")
-    .attr("class", "dg-conceptual-label dg-median-label bc-graph-label")
+    .attr("class", "dg-conceptual-label dg-median-label sfs-graph-label")
     .text("median");
   const meanLayer = svg.append("g").attr("class", "ctm-mean");
   const meanFulcrum = meanLayer.append("polygon")
     .attr("class", "dg-mean-fulcrum")
     .attr("fill", meanColor);
   const meanLabel = meanLayer.append("text")
-    .attr("class", "dg-conceptual-label dg-mean-label bc-graph-label")
+    .attr("class", "dg-conceptual-label dg-mean-label sfs-graph-label")
     .attr("text-anchor", "middle")
     .text("mean");
   const stateLabel = svg.append("text")
-    .attr("class", "ctm-state-label bc-graph-label")
+    .attr("class", "ctm-state-label sfs-graph-label")
     .attr("x", width - margin.right)
     .attr("y", 20)
     .attr("text-anchor", "end");
@@ -3160,7 +3160,7 @@ makeCentralTendencyMorph = (opts = {}) => {
       .attr("stroke", modeColor)
       .attr("stroke-width", 3);
     modeEnter.append("text")
-      .attr("class", "dg-conceptual-label dg-mode-label bc-graph-label")
+      .attr("class", "dg-conceptual-label dg-mode-label sfs-graph-label")
       .attr("text-anchor", "middle")
       .text("mode");
     const modeMerged = modeGroups.merge(modeEnter).style("opacity", 1);
@@ -3454,8 +3454,8 @@ bcDistributionExplorerReferenceSpecs = (opts = {}, type = "t") => {
       type: "normal",
       key: "normal-reference",
       name: "Normal",
-      color: "var(--bc-neutral-color, #7b818a)",
-      stroke: "var(--bc-neutral-color, #7b818a)",
+      color: "var(--sfs-neutral-color, #7b818a)",
+      stroke: "var(--sfs-neutral-color, #7b818a)",
       strokeWidth: 2,
       strokeDasharray: "7 5",
       opacity: 0.95
@@ -3520,28 +3520,28 @@ makeDistributionParameterExplorer = function(opts = {}) {
   let lastRender = null;
 
   const root = d3.create("div")
-    .attr("class", "distribution-explorer bc-figure")
+    .attr("class", "distribution-explorer sfs-figure")
     .style("--dpe-max-width", opts.maxWidth || null)
-    .style("--bc-figure-margin", opts.cssMargin || opts.marginCss || null);
+    .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "dpe-controls bc-control-grid");
+    .attr("class", "dpe-controls sfs-control-grid");
 
   const controlsPanel = controls.append("section")
-    .attr("class", "dpe-panel bc-control-panel bc-if-control-panel");
+    .attr("class", "dpe-panel sfs-control-panel sfs-if-control-panel");
   controlsPanel.append("p")
-    .attr("class", "bc-control-title")
+    .attr("class", "sfs-control-title")
     .text(opts.controlsTitle || "Distribution");
 
   const controlsByKey = new Map();
 
   function addSlider(parameter) {
     const row = controlsPanel.append("label")
-      .attr("class", "dpe-control-row bc-control-row");
+      .attr("class", "dpe-control-row sfs-control-row");
     row.append("span").html(parameter.label);
     const valueNode = row.append("span")
-      .attr("class", "dpe-value bc-readout-value");
+      .attr("class", "dpe-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", parameter.min)
@@ -3555,10 +3555,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
   parameters.forEach(addSlider);
 
   const chartWrap = root.append("div")
-    .attr("class", "dpe-chart-wrap bc-chart-wrap");
+    .attr("class", "dpe-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "dpe-svg bc-svg bc-graph bc-graph-distribution")
+    .attr("class", "dpe-svg sfs-svg sfs-graph sfs-graph-distribution")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel || "Interactive distribution comparison");
@@ -3579,7 +3579,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .y1((d) => y(d.y));
 
   const gridLayer = svg.append("g")
-    .attr("class", "dpe-grid bc-graph-grid");
+    .attr("class", "dpe-grid sfs-graph-grid");
   const shadeLayer = svg.append("g")
     .attr("class", "dpe-shades");
   const curveLayer = svg.append("g")
@@ -3593,7 +3593,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const labelLayer = svg.append("g")
     .attr("class", "dpe-label-layer");
   const legendLayer = svg.append("g")
-    .attr("class", "dpe-legend bc-graph-legend")
+    .attr("class", "dpe-legend sfs-graph-legend")
     .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
 
   bcDistributionAddLabels(labelLayer, opts, display, margin, width, height);
@@ -3792,7 +3792,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     shadePaths.enter()
       .append("path")
-      .attr("class", (d) => `dg-shade bc-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
+      .attr("class", (d) => `dg-shade sfs-graph-area ${d.kind === "overlap" ? "dg-overlap" : "dg-area"}`)
       .attr("fill", (d) => d.color)
       .style("fill-opacity", (d) => d.opacity)
       .merge(shadePaths)
@@ -3804,7 +3804,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     const pathsEnter = paths.enter()
       .append("path")
-      .attr("class", (d) => `dpe-curve dg-curve bc-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
+      .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
       .attr("fill", "none")
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
@@ -3813,7 +3813,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       .attr("d", (d) => line(d.data));
 
     const pathsMerged = paths.merge(pathsEnter)
-      .attr("class", (d) => `dpe-curve dg-curve bc-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
+      .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
       .attr("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)

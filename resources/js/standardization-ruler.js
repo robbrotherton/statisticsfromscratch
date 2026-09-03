@@ -10,7 +10,7 @@
   const SCENE_SLIDE_MS = 1550;
   const RULER_REWRITE_MS = 1500;
   const SELECTED_VALUE_MARKER = Object.freeze({
-    color: "var(--bc-danger-color, #c63f3f)",
+    color: "var(--sfs-danger-color, #c63f3f)",
     dash: "6 4",
     strokeWidth: 2.6
   });
@@ -262,8 +262,8 @@
       ],
       ariaLabel: "Block histogram of scores 0, 2, 2, 3, 5, and 6. The mean is 3 and score 5 is marked."
     });
-    const axes = Array.from(svg.querySelectorAll(".bc-graph-axis"));
-    if (axes[0]) stripPlotAxis(svg, ".bc-graph-axis");
+    const axes = Array.from(svg.querySelectorAll(".sfs-graph-axis"));
+    if (axes[0]) stripPlotAxis(svg, ".sfs-graph-axis");
     axes.slice(1).forEach(function(axis) { axis.remove(); });
     svg.classList.add("sr-shared-plot", "sr-block-plot");
     svg.setAttribute("aria-hidden", "true");
@@ -403,7 +403,7 @@
     const x = d3.scaleLinear()
       .domain(opts.xDomain)
       .range([margin.left, width - margin.right]);
-    const rawAxisNode = svg.querySelector(".dg-x-axis, .bc-graph-axis");
+    const rawAxisNode = svg.querySelector(".dg-x-axis, .sfs-graph-axis");
     const rawAxis = rawAxisNode ? d3.select(rawAxisNode) : null;
     const rawTickValues = finiteNumbers(opts.xTickValues);
 
@@ -444,13 +444,13 @@
 
     const sideLabelX = width - margin.right + 16;
     d3.select(svg).append("text")
-      .attr("class", "ss-axis-side-label ss-raw-axis-side-label bc-graph-label")
+      .attr("class", "ss-axis-side-label ss-raw-axis-side-label sfs-graph-label")
       .attr("x", sideLabelX)
       .attr("y", rawY + 4)
       .attr("text-anchor", "start")
       .text(opts.rawAxisSideLabel || "(X)");
     d3.select(svg).append("text")
-      .attr("class", "ss-axis-side-label ss-z-axis-side-label bc-graph-label")
+      .attr("class", "ss-axis-side-label ss-z-axis-side-label sfs-graph-label")
       .attr("x", sideLabelX)
       .attr("y", zY + 4)
       .attr("text-anchor", "start")
@@ -460,7 +460,7 @@
     // red dashed line past the raw axis to the same position on the z axis.
     d3.select(svg).selectAll(".dg-marker-line")
       .attr("y1", zY);
-    d3.select(svg).selectAll(".bc-graph-reference-marker line")
+    d3.select(svg).selectAll(".sfs-graph-reference-marker line")
       .attr("y2", zY);
 
     const annotationLayer = d3.select(svg)
@@ -490,7 +490,7 @@
       .attr("y1", margin.top + 19)
       .attr("y2", zY);
     guideGroups.append("text")
-      .attr("class", "ss-stat-label ss-guide-label bc-graph-label")
+      .attr("class", "ss-stat-label ss-guide-label sfs-graph-label")
       .attr("x", function(guide) {
         const position = x(guide.value);
         if (position - margin.left < 44) return position + 4;
@@ -656,8 +656,8 @@
     }
 
     const rootNode = document.createElement("div");
-    rootNode.className = "z-score-cover bc-figure bc-figure-cover bc-if-root";
-    rootNode.style.setProperty("--bc-figure-max-width", opts.maxWidth || "46rem");
+    rootNode.className = "z-score-cover sfs-figure sfs-figure-cover sfs-if-root";
+    rootNode.style.setProperty("--sfs-figure-max-width", opts.maxWidth || "46rem");
 
     let layoutController = null;
     let hasRendered = false;
@@ -732,18 +732,18 @@
         blockFallOrder: "random",
         blockFallSeed: "z-score-cover-blocks-v1",
         fallStagger: positiveOption(opts.fallStagger, 42),
-        blockStroke: "var(--bc-bg)",
+        blockStroke: "var(--sfs-bg)",
         ariaLabel
       });
       figure.classList.add("zsc-source-graph");
 
       const svg = figure;
-      const graphAxes = Array.from(svg.querySelectorAll(".bc-graph-axis"));
+      const graphAxes = Array.from(svg.querySelectorAll(".sfs-graph-axis"));
       const rawAxis = d3.select(graphAxes[0]);
       graphAxes.slice(1).forEach(function(axis) { axis.remove(); });
       d3.select(svg).on("click", null).style("cursor", null);
 
-      d3.select(svg).selectAll(".bc-graph-block")
+      d3.select(svg).selectAll(".sfs-graph-block")
         .style("fill", function(datum) {
           const colorIndex = (datum.rowIndex + datum.blockIndex * 2) %
             Z_SCORE_COVER_COLORS.length;
@@ -761,7 +761,7 @@
         global.bcGraphStyleAxis(rawAxis);
       }
       rawAxis.selectAll("text").classed("zsc-math-label", true);
-      rawAxis.select(".bc-graph-domain")
+      rawAxis.select(".sfs-graph-domain")
         .attr("d", "M" + margin.left + ",0H" + (drawWidth - margin.right));
 
       const zAxis = d3.select(svg)
@@ -775,12 +775,12 @@
         global.bcGraphStyleAxis(zAxis);
       }
       zAxis.selectAll("text").classed("zsc-math-label", true);
-      zAxis.select(".bc-graph-domain")
+      zAxis.select(".sfs-graph-domain")
         .attr("d", "M" + margin.left + ",0H" + (drawWidth - margin.right));
 
       function finish() {
         d3.select(figure).selectAll("*").interrupt();
-        d3.select(svg).selectAll(".bc-graph-block")
+        d3.select(svg).selectAll(".sfs-graph-block")
           .attr("y", function(datum) { return y(datum.blockUpper); });
         zAxis
           .interrupt()
@@ -873,8 +873,8 @@
     }
 
     const rootNode = document.createElement("div");
-    rootNode.className = "standardized-score-graph bc-figure bc-if-root";
-    rootNode.style.setProperty("--bc-figure-max-width", opts.maxWidth || "32rem");
+    rootNode.className = "standardized-score-graph sfs-figure sfs-if-root";
+    rootNode.style.setProperty("--sfs-figure-max-width", opts.maxWidth || "32rem");
     let firstDraw = true;
     let layoutController = null;
 
@@ -960,11 +960,11 @@
     if (api && typeof api.ensureStyles === "function") api.ensureStyles();
 
     const rootNode = document.createElement("div");
-    rootNode.className = "standardization-ruler bc-figure bc-if-root";
-    rootNode.style.setProperty("--bc-figure-max-width", opts.maxWidth || "46rem");
+    rootNode.className = "standardization-ruler sfs-figure sfs-if-root";
+    rootNode.style.setProperty("--sfs-figure-max-width", opts.maxWidth || "46rem");
 
     const chartWrap = document.createElement("div");
-    chartWrap.className = "sr-chart-wrap bc-chart-wrap";
+    chartWrap.className = "sr-chart-wrap sfs-chart-wrap";
     rootNode.appendChild(chartWrap);
 
     const plotStage = document.createElement("div");
@@ -978,7 +978,7 @@
     plotStage.append(blockLayer, curveLayer);
 
     const rulerSvg = svgElement("svg", {
-      class: "sr-ruler-svg bc-svg bc-graph",
+      class: "sr-ruler-svg sfs-svg sfs-graph",
       role: "img",
       "aria-label": "Six scores shown above a ruler labeled with their original values."
     });
@@ -1019,7 +1019,7 @@
       pendingMotion = Promise.resolve();
     }
 
-    rootNode.addEventListener("bc-if:cancel-transitions", function(event) {
+    rootNode.addEventListener("sfs-if:cancel-transitions", function(event) {
       if (event.target !== rootNode) return;
       activeAnimations.forEach(function(animation) {
         try { animation.cancel(); } catch (error) { /* already finished */ }
@@ -1058,13 +1058,13 @@
         rx: 4
       });
       const title = svgElement("text", {
-        class: "sr-ruler-title bc-graph-label",
+        class: "sr-ruler-title sfs-graph-label",
         x: geometry.left,
         y: -17
       });
       title.textContent = geometry.compact ? config.compactLabel : config.label;
       const operation = svgElement("text", {
-        class: "sr-ruler-operation bc-graph-label",
+        class: "sr-ruler-operation sfs-graph-label",
         x: geometry.right,
         y: -17,
         "text-anchor": "end",
@@ -1099,7 +1099,7 @@
       const group = rulerNodes.get("testWorking");
       const config = rulerConfig("testWorking", nextMode);
       const title = group.querySelector(".sr-ruler-title");
-      const labels = Array.from(group.querySelectorAll(".sr-ruler-axis .bc-graph-tick-label"));
+      const labels = Array.from(group.querySelectorAll(".sr-ruler-axis .sfs-graph-tick-label"));
       const operation = group.querySelector(".sr-ruler-operation");
       const finalTitle = geometry.compact ? config.compactLabel : config.label;
       renderedWorkingMode = nextMode;

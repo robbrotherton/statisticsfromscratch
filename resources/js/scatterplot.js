@@ -121,17 +121,17 @@ scEnsureStyles = () => {
   style.id = "scatterplot-styles";
   style.textContent = `
     .scatterplot {
-      --bc-figure-max-width: var(--sc-max-width, 42rem);
+      --sfs-figure-max-width: var(--sc-max-width, 42rem);
       --sc-point-color: var(--graph-point-fill, #0072b2);
-      --sc-line-color: var(--bc-accent, #2780e3);
-      --sc-residual-color: var(--bc-current-color, #d1495b);
-      --sc-ellipse-color: var(--bc-comparison-color, #2f6f9f);
-      --sc-drag-color: var(--bc-focus, #2780e3);
+      --sc-line-color: var(--sfs-accent, #2780e3);
+      --sc-residual-color: var(--sfs-current-color, #d1495b);
+      --sc-ellipse-color: var(--sfs-comparison-color, #2f6f9f);
+      --sc-drag-color: var(--sfs-focus, #2780e3);
     }
 
     .scatterplot .sc-dot {
       fill: var(--sc-point-color);
-      stroke: var(--bc-bg, #fff);
+      stroke: var(--sfs-bg, #fff);
       stroke-width: 1.4;
     }
 
@@ -211,11 +211,11 @@ scEnsureStyles = () => {
     }
 
     /* Layers double as reveal targets, so this transition must mirror the
-       shared .bc-if-reveal one (it wins on specificity) or hides would snap. */
+       shared .sfs-if-reveal one (it wins on specificity) or hides would snap. */
     .scatterplot .sc-layer {
       transition:
-        opacity var(--bc-if-reveal-duration, 280ms) ease,
-        visibility 0s linear var(--bc-if-reveal-duration, 280ms);
+        opacity var(--sfs-if-reveal-duration, 280ms) ease,
+        visibility 0s linear var(--sfs-if-reveal-duration, 280ms);
     }
 
     /* The shared reveal class disables pointer events and never restores
@@ -226,7 +226,7 @@ scEnsureStyles = () => {
     }
 
     .scatterplot .sc-layer.is-dimmed {
-      --bc-if-reveal-opacity: 0.18;
+      --sfs-if-reveal-opacity: 0.18;
       opacity: 0.18;
     }
 
@@ -281,7 +281,7 @@ scEnsureStyles = () => {
     .scatterplot .sc-line-buttons {
       display: flex;
       flex-wrap: wrap;
-      gap: var(--bc-action-gap, 0.4rem);
+      gap: var(--sfs-action-gap, 0.4rem);
       margin-bottom: 0.45rem;
     }
 
@@ -289,7 +289,7 @@ scEnsureStyles = () => {
       margin: 0.18rem 0;
     }
 
-    .scatterplot .sc-readout .bc-readout-label {
+    .scatterplot .sc-readout .sfs-readout-label {
       min-width: 6.4rem;
     }
 
@@ -422,7 +422,7 @@ makeScatterplot = function(opts) {
   const plotRight = width - margin.right;
 
   const root = d3.create("div")
-    .attr("class", "scatterplot bc-figure")
+    .attr("class", "scatterplot sfs-figure")
     .style("--sc-max-width", opts.maxWidth || null);
   const rootNode = root.node();
 
@@ -453,12 +453,12 @@ makeScatterplot = function(opts) {
 
   if (showControls) {
     controls = root.append("div")
-      .attr("class", "sc-controls bc-control-grid");
+      .attr("class", "sc-controls sfs-control-grid");
 
     const linePanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     linePanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Line");
     const buttonRow = linePanel.append("div")
       .attr("class", "sc-line-buttons");
@@ -468,7 +468,7 @@ makeScatterplot = function(opts) {
     ].forEach(([mode, label]) => {
       buttonRow.append("button")
         .attr("type", "button")
-        .attr("class", "bc-button")
+        .attr("class", "sfs-button")
         .text(label)
         .on("click", (event) => {
           event.preventDefault();
@@ -503,9 +503,9 @@ makeScatterplot = function(opts) {
     });
 
     const showPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     showPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Show");
     showChecks = {};
     [
@@ -516,7 +516,7 @@ makeScatterplot = function(opts) {
       ["showMeans", "Means"]
     ].forEach(([key, label]) => {
       const row = showPanel.append("label")
-        .attr("class", "bc-check-row");
+        .attr("class", "sfs-check-row");
       const input = row.append("input")
         .attr("type", "checkbox")
         .node();
@@ -531,18 +531,18 @@ makeScatterplot = function(opts) {
     });
 
     const statsPanel = controls.append("section")
-      .attr("class", "bc-control-panel bc-if-control-panel");
+      .attr("class", "sfs-control-panel sfs-if-control-panel");
     statsPanel.append("p")
-      .attr("class", "bc-control-title")
+      .attr("class", "sfs-control-title")
       .text("Statistics");
     function addReadout(label) {
       const row = statsPanel.append("div")
-        .attr("class", "sc-readout bc-readout-row");
+        .attr("class", "sc-readout sfs-readout-row");
       row.append("span")
-        .attr("class", "bc-readout-label")
+        .attr("class", "sfs-readout-label")
         .text(label);
       return row.append("span")
-        .attr("class", "bc-readout-value");
+        .attr("class", "sfs-readout-value");
     }
     readouts = {
       r: addReadout("r"),
@@ -555,10 +555,10 @@ makeScatterplot = function(opts) {
   // --- Chart ----------------------------------------------------------------
 
   const chartWrap = root.append("div")
-    .attr("class", "sc-chart-wrap bc-chart-wrap");
+    .attr("class", "sc-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel ||
@@ -574,20 +574,20 @@ makeScatterplot = function(opts) {
     .attr("height", plotBottom - margin.top);
 
   const xAxisLayer = svg.append("g")
-    .attr("class", "sc-axis sc-axis-x bc-axis")
+    .attr("class", "sc-axis sc-axis-x sfs-axis")
     .attr("transform", `translate(0,${plotBottom})`);
   const yAxisLayer = svg.append("g")
-    .attr("class", "sc-axis sc-axis-y bc-axis")
+    .attr("class", "sc-axis sc-axis-y sfs-axis")
     .attr("transform", `translate(${margin.left},0)`);
 
   const xAxisLabel = svg.append("text")
-    .attr("class", "sc-axis-label bc-axis-label")
+    .attr("class", "sc-axis-label sfs-axis-label")
     .attr("x", (margin.left + plotRight) / 2)
     .attr("y", height - 12)
     .attr("text-anchor", "middle")
     .text(xLabel);
   const yAxisLabel = svg.append("text")
-    .attr("class", "sc-axis-label bc-axis-label")
+    .attr("class", "sc-axis-label sfs-axis-label")
     .attr("transform", `translate(16,${(margin.top + plotBottom) / 2}) rotate(-90)`)
     .attr("text-anchor", "middle")
     .text(yLabel);
@@ -628,7 +628,7 @@ makeScatterplot = function(opts) {
     .attr("class", "sc-layer sc-line-layer")
     .attr("clip-path", `url(#${clipId})`);
   const fitLine = lineLayer.append("line")
-    .attr("class", "sc-fit-line bc-graph-line");
+    .attr("class", "sc-fit-line sfs-graph-line");
 
   const pointsLayer = svg.append("g")
     .attr("class", "sc-layer sc-points-layer");
@@ -913,7 +913,7 @@ makeScatterplot = function(opts) {
           .attr("class", "sc-point");
         group.append("circle").attr("class", "sc-hit").attr("r", 16);
         group.append("circle").attr("class", "sc-ring").attr("r", 10);
-        group.append("circle").attr("class", "sc-dot bc-graph-point").attr("r", 5.5);
+        group.append("circle").attr("class", "sc-dot sfs-graph-point").attr("r", 5.5);
         group.attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`);
         return group;
       })

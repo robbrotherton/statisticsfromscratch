@@ -768,11 +768,11 @@ idgDrawLabel = (parent, lines, x, y, opts = {}) => {
 
 idgDiagramStyleText = `
   .inferential-diagram-svg {
-    --idg-stroke: var(--bc-text, var(--bs-body-color, #222));
-    --idg-muted: var(--bc-muted, #6c757d);
-    --idg-fill: var(--bc-bg, var(--bs-body-bg, #fff));
-    --idg-treated-fill: color-mix(in srgb, var(--bc-comparison-color, #2f6f9f) 18%, var(--bc-bg, #fff));
-    --idg-label-halo: var(--bc-bg, var(--bs-body-bg, #fff));
+    --idg-stroke: var(--sfs-text, var(--bs-body-color, #222));
+    --idg-muted: var(--sfs-muted, #6c757d);
+    --idg-fill: var(--sfs-bg, var(--bs-body-bg, #fff));
+    --idg-treated-fill: color-mix(in srgb, var(--sfs-comparison-color, #2f6f9f) 18%, var(--sfs-bg, #fff));
+    --idg-label-halo: var(--sfs-bg, var(--bs-body-bg, #fff));
     display: block;
     width: 100%;
     height: auto;
@@ -886,19 +886,19 @@ makeInferentialDiagram = (opts = {}) => {
   const svgId = `idg-${Math.random().toString(36).slice(2)}`;
 
   const root = d3.create("div")
-    .attr("class", "inferential-diagram bc-figure")
-    .style("--bc-figure-max-width", idgCssLength(idgValueOr(opts.maxWidth, opts.cssMaxWidth)))
-    .style("--bc-figure-margin", idgValueOr(opts.cssMargin, opts.marginCss) || null)
+    .attr("class", "inferential-diagram sfs-figure")
+    .style("--sfs-figure-max-width", idgCssLength(idgValueOr(opts.maxWidth, opts.cssMaxWidth)))
+    .style("--sfs-figure-margin", idgValueOr(opts.cssMargin, opts.marginCss) || null)
     .style("--idg-font-family", idgValueOr(opts.fontFamily, null))
     .style("--idg-stroke-width", idgCssNumber(opts.strokeWidth))
     .style("--idg-node-stroke-width", idgCssNumber(opts.nodeStrokeWidth))
     .style("--idg-link-stroke-width", idgCssNumber(opts.linkStrokeWidth));
 
   const chartWrap = root.append("div")
-    .attr("class", "idg-chart-wrap bc-chart-wrap");
+    .attr("class", "idg-chart-wrap sfs-chart-wrap");
 
   const svg = chartWrap.append("svg")
-    .attr("class", "inferential-diagram-svg bc-svg")
+    .attr("class", "inferential-diagram-svg sfs-svg")
     .attr("xmlns", "http://www.w3.org/2000/svg")
     .attr("viewBox", [0, 0, width, svgHeight])
     .attr("role", "img")

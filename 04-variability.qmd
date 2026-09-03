@@ -22,8 +22,6 @@ To start with, let's consider a few small sets of scores. Imagine you check the 
 >
 > *The Polarizing Express*: 0,&nbsp;0,&nbsp;1,&nbsp;9,&nbsp;10,&nbsp;10
 
-How might you describe the differences among these sets of ratings? Don't worry about calculating any new statistics yet. Start with the ideas from the previous chapter and think about what they capture or leave out.
-
 ::: {#quiz-variability-differences}
 {{< include quizzes/04-variability-differences.qmd >}}
 :::
@@ -31,7 +29,7 @@ How might you describe the differences among these sets of ratings? Don't worry 
 Using the tools we explored in the previous chapter, we find that the median and mean are 5 for all three movies. The mode is also 5 for the first two. *The Polarizing Express* has two modes, 0 and 10, which already gives us a clue that something different is going on. But none of these measures quantifies just how closely the ratings cluster around the center. Without knowing anything else about the movies, if you were to try to guess how much you will like each one --- what score will you most likely give it? --- 5 would be a sensible prediction in each case. But it seems a more reliable guess in some cases than others. If we plot the ratings as block histograms, we can see why.
 
 :::: {#fig-movie-reviews}
-::: {.bc-figure-row .bc-figure-row-wide}
+::: {.sfs-figure-row .sfs-figure-row-wide}
 {{< interactive-figure variabilityBlocksStandins makeGraph options='{"type":"block","data":[5,5,5,5,5,5],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"Fine, Actually","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for Fine, Actually, all at 5." >}}
 
 {{< interactive-figure variabilityBlocksYou makeGraph options='{"type":"block","data":[0,4,5,5,6,10],"xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"yDomain":[0,6],"yTickValues":[0,2,4,6],"labels":{"title":"The Good, the Bad and the Okay","x":"Rating","y":"Frequency"}}' fallback="Block histogram of ratings for The Good, the Bad and the Okay, mostly clustered around 5 with ratings at 0 and 10." >}}
@@ -78,15 +76,13 @@ In Chapter 3 we introduced *deviations*: the differences between each score and 
 
 Astronomers realized this too. Deviations offered a way to quantify the imprecision of their instruments or observations. For statisticians applying the same ideas to human measurements, they captured a different kind of variation. In Quetelet's measurements of soldiers' chests, a deviation did not necessarily indicate a mistake of the measuring tape; it described how one person's body differed from another's. In either case, if we think of the mean as a prediction, a deviation is the prediction error: how far, and in which direction, the actual score fell from it.
 
-The next step was to find a way to summarize those deviations in a single number. Should be easy, no? If we want a "standard deviation," meaning a typical deviation from the mean, why not just calculate the average of all the deviations?
+The next step was to find a way to summarize those deviations in a single number. Should be easy, no? If we want a "standard deviation," meaning a typical deviation from the mean, an obvious solution would be to calculate the average of all the deviations. Before we go any further, think through what answer that calculation would give us.
 
 ::: {#quiz-average-deviations}
 {{< include quizzes/04-variability-average-deviations.qmd >}}
 :::
 
-The problem is that, precisely because the mean is the balance point, the deviations above and below balance each other out. To find a mean, we first have to add the values up, but the signed deviations always add up to zero. That means averaging the raw deviations cannot give us a useful measure of variability. The answer would always be zero.
-
-So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
+So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative, so they cannot cancel out, and has other mathematical properties that will become useful when we partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
 
 Having squared the deviations, we can continue with one connected chain of calculations. Add the squared deviations to get $SS$, the __sum of squared deviations__ (or "sum of squares" for short). Divide $SS$ by the number of observations to get the population __variance__, the mean squared deviation. Then take its square root to get the __standard deviation__. The square root returns us to the original units, so we can interpret the standard deviation as a *typical deviation* from the mean.^[More precisely, the population standard deviation is the **root-mean-square deviation**: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn't the literal arithmetic mean of the raw deviations or their absolute values. I don't hear social scientists use the term "root-mean-square deviation" very often, so I'm just going to follow the convention of calling it the standard deviation.]
 

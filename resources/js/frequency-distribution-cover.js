@@ -113,22 +113,22 @@ makeFrequencyDistributionCover = (opts = {}) => {
     .selectAll("rect")
     .data(rows)
     .join("rect")
-      .attr("class", "bc-graph-bar")
+      .attr("class", "sfs-graph-bar")
       .attr("x", (d) => x(d.x) - gappedBarWidth(d) / 2)
       .attr("width", (d) => gappedBarWidth(d))
       .attr("y", y(0))
       .attr("height", 0)
       .style("fill", barColor);
-      // No explicit stroke: the shared `.bc-graph .bc-graph-bar` rule in
+      // No explicit stroke: the shared `.sfs-graph .sfs-graph-bar` rule in
       // site-theme.css already applies `--graph-bar-stroke` here (this SVG
-      // carries the `bc-graph` class), matching the real bar/histogram
+      // carries the `sfs-graph` class), matching the real bar/histogram
       // demo figures rather than duplicating that value.
 
   const linear = d3.line().curve(d3.curveLinear).x((d) => x(d.x)).y((d) => y(d.y));
   const polygonPoints = bcGraphPolygonPoints(rows, "frequency");
 
   const line = svg.append("path")
-    .attr("class", "bc-graph-line")
+    .attr("class", "sfs-graph-line")
     .attr("fill", "none")
     .style("stroke", lineColor)
     .attr("stroke-width", bcGraphValueOr(opts.strokeWidth, 2.5))
@@ -140,7 +140,7 @@ makeFrequencyDistributionCover = (opts = {}) => {
     .selectAll("circle")
     .data(polygonPoints.filter((p) => p.point))
     .join("circle")
-      .attr("class", "bc-graph-point")
+      .attr("class", "sfs-graph-point")
       .attr("cx", (d) => x(d.x))
       .attr("cy", (d) => y(d.y))
       .attr("r", bcGraphValueOr(opts.pointRadius, 3.5))

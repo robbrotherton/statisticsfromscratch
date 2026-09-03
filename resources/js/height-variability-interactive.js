@@ -30,20 +30,20 @@ heightVariabilityEnsureStyles = () => {
   style.id = "height-variability-demo-styles";
   style.textContent = `
     .height-variability-demo {
-      --hv-population-color: var(--bc-text, var(--bs-body-color, #212529));
+      --hv-population-color: var(--sfs-text, var(--bs-body-color, #212529));
       --hv-sample-color: var(--graph-series-2, #e69f00);
-      --hv-fixed-center-color: var(--bc-comparison-color, #2f6f9f);
-      --hv-selected-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --hv-biased-color: var(--bc-danger-color, #c63f3f);
+      --hv-fixed-center-color: var(--sfs-comparison-color, #2f6f9f);
+      --hv-selected-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --hv-biased-color: var(--sfs-danger-color, #c63f3f);
       --hv-corrected-color: var(--graph-series-3, #009e73);
-      --hv-muted-color: var(--bc-muted, var(--bs-secondary-color, #6c757d));
-      --hv-title-size: var(--bc-figure-title-size, 1rem);
-      --hv-label-size: var(--bc-figure-label-size, 0.875rem);
-      --hv-note-size: var(--bc-figure-note-size, 0.8125rem);
-      --hv-tick-size: var(--bc-figure-tick-size, 0.8125rem);
-      --hv-small-size: var(--bc-figure-small-size, 0.75rem);
-      --bc-figure-max-width: 48rem;
-      --bc-figure-margin: 1.25rem 0;
+      --hv-muted-color: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
+      --hv-title-size: var(--sfs-figure-title-size, 1rem);
+      --hv-label-size: var(--sfs-figure-label-size, 0.875rem);
+      --hv-note-size: var(--sfs-figure-note-size, 0.8125rem);
+      --hv-tick-size: var(--sfs-figure-tick-size, 0.8125rem);
+      --hv-small-size: var(--sfs-figure-small-size, 0.75rem);
+      --sfs-figure-max-width: 48rem;
+      --sfs-figure-margin: 1.25rem 0;
     }
 
     .height-variability-demo .hv-group-title {
@@ -163,7 +163,7 @@ heightVariabilityEnsureStyles = () => {
 
     .height-variability-demo .hv-population-dot,
     .height-variability-demo .hv-sample-dot {
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -216,7 +216,7 @@ heightVariabilityEnsureStyles = () => {
       fill: var(--hv-corrected-color);
     }
 
-    .height-variability-demo .bc-if-reveal.hv-sequence-after-fall {
+    .height-variability-demo .sfs-if-reveal.hv-sequence-after-fall {
       transition-delay: var(--hv-sequence-delay, 0ms);
     }
 
@@ -232,25 +232,25 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .hv-population-mean-line {
-      stroke: var(--bc-text, var(--bs-body-color, currentColor));
+      stroke: var(--sfs-text, var(--bs-body-color, currentColor));
       opacity: 0.72;
     }
 
     .bias-tracking-demo .hv-population-mean-label {
-      fill: var(--bc-text, var(--bs-body-color, currentColor));
+      fill: var(--sfs-text, var(--bs-body-color, currentColor));
     }
 
     .height-variability-demo .hv-sample-mean-line {
-      stroke: var(--bt-mean, var(--bc-comparison-color, #2f6f9f));
+      stroke: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
     }
 
     .height-variability-demo .hv-sample-mean-label {
-      fill: var(--bt-mean, var(--bc-comparison-color, #2f6f9f));
+      fill: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
     }
 
     .height-variability-demo .hv-sample-mean-axis-mark {
-      fill: var(--bt-mean, var(--bc-comparison-color, #2f6f9f));
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      fill: var(--bt-mean, var(--sfs-comparison-color, #2f6f9f));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -263,7 +263,7 @@ heightVariabilityEnsureStyles = () => {
 
     .height-variability-demo .hv-sample-center-mark,
     .height-variability-demo .hv-corrected-center-mark {
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1.4;
       vector-effect: non-scaling-stroke;
     }
@@ -277,7 +277,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .height-variability-demo .hv-center-mark {
-      stroke: var(--graph-point-stroke, var(--bc-bg, var(--bs-body-bg, #fff)));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, var(--bs-body-bg, #fff)));
       stroke-width: 1.2;
       vector-effect: non-scaling-stroke;
     }
@@ -291,13 +291,13 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo {
-      --bt-biased: var(--bc-danger-color, #c63f3f);
+      --bt-biased: var(--sfs-danger-color, #c63f3f);
       --bt-corrected: var(--graph-series-3, #009e73);
-      --bt-mean: var(--bc-comparison-color, #2f6f9f);
-      --bt-muted: var(--bc-muted, var(--bs-secondary-color, #6c757d));
+      --bt-mean: var(--sfs-comparison-color, #2f6f9f);
+      --bt-muted: var(--sfs-muted, var(--bs-secondary-color, #6c757d));
       --bt-grid: var(--graph-grid-color, color-mix(in srgb, currentColor 12%, transparent));
-      --bc-figure-max-width: 48rem;
-      --bc-figure-margin: 1.25rem 0;
+      --sfs-figure-max-width: 48rem;
+      --sfs-figure-margin: 1.25rem 0;
     }
 
     .bias-tracking-demo .bt-control-row {
@@ -327,9 +327,9 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-mode-button[aria-pressed="true"] {
-      border-color: var(--bc-accent, var(--bs-primary, #0d6efd));
-      background: var(--bc-highlight-bg, color-mix(in srgb, currentColor 10%, transparent));
-      color: var(--bc-accent, var(--bs-primary, #0d6efd));
+      border-color: var(--sfs-accent, var(--bs-primary, #0d6efd));
+      background: var(--sfs-highlight-bg, color-mix(in srgb, currentColor 10%, transparent));
+      color: var(--sfs-accent, var(--bs-primary, #0d6efd));
       font-weight: 700;
     }
 
@@ -337,7 +337,7 @@ heightVariabilityEnsureStyles = () => {
       margin-bottom: 0.8rem;
       padding: 0.45rem 0.55rem 0.28rem;
       border-radius: 7px;
-      background: color-mix(in srgb, var(--bc-text, #212529) 3%, transparent);
+      background: color-mix(in srgb, var(--sfs-text, #212529) 3%, transparent);
     }
 
     .bias-tracking-demo .hv-overview-wrap {
@@ -356,7 +356,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .hv-population-context {
-      --bc-if-reveal-duration: 680ms;
+      --sfs-if-reveal-duration: 680ms;
     }
 
     .bias-tracking-demo .bt-reveal-after-source.is-visible {
@@ -383,7 +383,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-panel-title {
-      fill: var(--bc-text, currentColor);
+      fill: var(--sfs-text, currentColor);
       font-size: var(--hv-title-size);
       font-weight: 700;
     }
@@ -409,7 +409,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-zero-line {
-      stroke: var(--bc-text, currentColor);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 1.3;
       vector-effect: non-scaling-stroke;
     }
@@ -463,7 +463,7 @@ heightVariabilityEnsureStyles = () => {
     }
 
     .bias-tracking-demo .bt-sample-dot {
-      stroke: var(--graph-point-stroke, var(--bc-bg, white));
+      stroke: var(--graph-point-stroke, var(--sfs-bg, white));
       stroke-width: 1;
       vector-effect: non-scaling-stroke;
     }
@@ -474,7 +474,7 @@ heightVariabilityEnsureStyles = () => {
 
     .bias-tracking-demo .bt-pop-dot.is-sampled {
       opacity: 1;
-      stroke: var(--bc-text, currentColor);
+      stroke: var(--sfs-text, currentColor);
       stroke-width: 2;
       vector-effect: non-scaling-stroke;
     }
@@ -499,7 +499,7 @@ heightVariabilityEnsureStyles = () => {
       gap: 0.16rem;
     }
 
-    .bias-tracking-demo[data-bc-layout="compact"] .bt-legend {
+    .bias-tracking-demo[data-sfs-layout="compact"] .bt-legend {
       font-size: calc(var(--hv-note-size) * 0.94);
     }
 
@@ -810,7 +810,7 @@ heightVariabilityAttachBiasTracker = function(config) {
   const twentyFiveButton = addButton(buttonRow, "fast-forward", "Take 25");
   const hundredButton = addButton(buttonRow, "chevron-double-right", "Take 100");
   const modeControls = group("Track");
-  const modeRow = modeControls.append("div").attr("class", "bt-mode-row bc-action-row");
+  const modeRow = modeControls.append("div").attr("class", "bt-mode-row sfs-action-row");
   const meanButton = addButton(modeRow, "bar-chart-line", "Mean");
   const varianceButton = addButton(modeRow, "bounding-box", "Variance");
   d3.select(meanButton).classed("bt-mode-button", true);
@@ -826,7 +826,7 @@ heightVariabilityAttachBiasTracker = function(config) {
   const bottomY1 = height - margin.bottom;
   const panels = chartWrap.append("div").attr("class", "bt-panels");
   const svg = panels.append("svg")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", "Sample-by-sample variance errors and their cumulative average");
@@ -844,9 +844,9 @@ heightVariabilityAttachBiasTracker = function(config) {
     .attr("x", margin.left).attr("y", bottomY0).attr("width", innerWidth).attr("height", bottomY1 - bottomY0);
 
   const topPanel = svg.append("g")
-    .attr("class", "bt-panel bt-error-panel bc-if-reveal");
+    .attr("class", "bt-panel bt-error-panel sfs-if-reveal");
   const bottomPanel = svg.append("g")
-    .attr("class", "bt-panel bt-average-panel bc-if-reveal");
+    .attr("class", "bt-panel bt-average-panel sfs-if-reveal");
 
   const topTitle = topPanel.append("text").attr("class", "bt-panel-title")
     .attr("x", margin.left).attr("y", 15);
@@ -881,7 +881,7 @@ heightVariabilityAttachBiasTracker = function(config) {
     .attr("text-anchor", "middle").text("Number of samples");
 
   const legend = panels.append("div")
-    .attr("class", "bt-legend bc-if-reveal")
+    .attr("class", "bt-legend sfs-if-reveal")
     .attr("aria-label", "Variance estimator legend")
     .style("top", "20.5px");
 
@@ -1737,25 +1737,25 @@ makeHeightVariabilityDemo = function(opts) {
   let summaryCache = null;
 
   const root = d3.create("div")
-    .attr("class", "height-variability-demo bc-figure")
-    .style("--bc-if-reveal-duration", opts.revealDuration || "420ms");
+    .attr("class", "height-variability-demo sfs-figure")
+    .style("--sfs-if-reveal-duration", opts.revealDuration || "420ms");
   const rootNode = root.node();
 
   const controls = root.append("div")
-    .attr("class", "hv-controls bc-control-grid");
+    .attr("class", "hv-controls sfs-control-grid");
 
   function group(title) {
     const section = controls.append("section")
-      .attr("class", "hv-group bc-control-panel bc-if-control-panel");
+      .attr("class", "hv-group sfs-control-panel sfs-if-control-panel");
     section.append("p")
-      .attr("class", "hv-group-title bc-control-title")
+      .attr("class", "hv-group-title sfs-control-title")
       .text(title);
     return section;
   }
 
   function addText(parent, label, value) {
     const row = parent.append("label")
-      .attr("class", "hv-row hv-row-compact bc-control-row");
+      .attr("class", "hv-row hv-row-compact sfs-control-row");
     row.append("span").text(label);
     return row.append("input")
       .attr("type", "text")
@@ -1765,10 +1765,10 @@ makeHeightVariabilityDemo = function(opts) {
 
   function addSlider(parent, label, value, min, max, step) {
     const row = parent.append("label")
-      .attr("class", "hv-row bc-control-row");
+      .attr("class", "hv-row sfs-control-row");
     row.append("span").text(label);
     const valueNode = row.append("span")
-      .attr("class", "hv-value bc-readout-value");
+      .attr("class", "hv-value sfs-readout-value");
     const input = row.append("input")
       .attr("type", "range")
       .attr("min", min)
@@ -1782,7 +1782,7 @@ makeHeightVariabilityDemo = function(opts) {
 
   function addCheckbox(parent, label, checked) {
     const row = parent.append("label")
-      .attr("class", "hv-check-row bc-check-row");
+      .attr("class", "hv-check-row sfs-check-row");
     const input = row.append("input")
       .attr("type", "checkbox")
       .property("checked", checked)
@@ -1794,7 +1794,7 @@ makeHeightVariabilityDemo = function(opts) {
   function addButton(parent, icon, label) {
     const button = parent.append("button")
       .attr("type", "button")
-      .attr("class", "hv-button bc-button")
+      .attr("class", "hv-button sfs-button")
       .attr("aria-label", label)
       .attr("title", label);
     button.append("i")
@@ -1808,7 +1808,7 @@ makeHeightVariabilityDemo = function(opts) {
   const seedInput = addText(sampleControls, "Seed", state.seed);
   const nControl = addSlider(sampleControls, "n", state.n, 2, maxSampleSize, 1);
   const buttonRow = sampleControls.append("div")
-    .attr("class", "hv-button-row bc-action-row");
+    .attr("class", "hv-button-row sfs-action-row");
   const newSampleButton = addButton(buttonRow, "arrow-repeat", "New sample");
   const replayButton = addButton(buttonRow, "skip-backward", "Replay seed");
 
@@ -1824,7 +1824,7 @@ makeHeightVariabilityDemo = function(opts) {
   if (trackingEnabled) displayControls.style("display", "none");
 
   const chartWrap = root.append("div")
-    .attr("class", "hv-chart-wrap bc-chart-wrap");
+    .attr("class", "hv-chart-wrap sfs-chart-wrap");
 
   const overviewWrap = trackingEnabled
     ? chartWrap.append("div").attr("class", "hv-overview-wrap")
@@ -1850,24 +1850,24 @@ makeHeightVariabilityDemo = function(opts) {
   const svg = overviewWrap.append("svg")
     .attr("viewBox", [0, 0, renderWidth, height])
     .attr("preserveAspectRatio", "xMidYMid meet")
-    .attr("class", "bc-svg bc-graph")
+    .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img")
     .attr("aria-label", centerOnlyAxis
       ? "Dot histogram of a fixed population and selected sample observations"
       : "Dot histogram of a fixed height population and selected sample observations");
 
   const xAxis = svg.append("g")
-    .attr("class", "hv-axis hv-population-context bc-axis bc-graph-axis")
+    .attr("class", "hv-axis hv-population-context sfs-axis sfs-graph-axis")
     .attr("transform", `translate(0, ${axisY})`);
 
   const sampleXAxis = trackingEnabled
     ? svg.append("g")
-      .attr("class", "hv-axis hv-sample-axis bc-axis bc-graph-axis")
+      .attr("class", "hv-axis hv-sample-axis sfs-axis sfs-graph-axis")
       .attr("transform", `translate(0, ${sampleAxisY})`)
     : null;
   const sampleXAxisLabel = trackingEnabled
     ? svg.append("text")
-      .attr("class", "hv-axis-label hv-sample-axis-label bc-axis-label bc-graph-label")
+      .attr("class", "hv-axis-label hv-sample-axis-label sfs-axis-label sfs-graph-label")
       .attr("x", (margin.left + renderWidth - margin.right) / 2)
       .attr("y", sampleAxisLabelY)
       .attr("text-anchor", "middle")
@@ -1877,35 +1877,35 @@ makeHeightVariabilityDemo = function(opts) {
   const populationLayer = svg.append("g")
     .attr("class", "hv-population-layer hv-population-context");
   const popSdLayer = svg.append("g")
-    .attr("class", "hv-pop-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-pop-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const sampleLayer = svg.append("g")
-    .attr("class", "hv-sample-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-sample-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const fixedCenterLayer = svg.append("g")
-    .attr("class", "hv-fixed-center-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-fixed-center-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const biasedLayer = svg.append("g")
-    .attr("class", "hv-biased-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-biased-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const varianceComparisonLayer = svg.append("g")
-    .attr("class", "hv-variance-comparison-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-variance-comparison-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
   const meanLayer = svg.append("g")
-    .attr("class", "hv-mean-layer bc-if-reveal")
-    .style("--bc-if-reveal-opacity", 1);
+    .attr("class", "hv-mean-layer sfs-if-reveal")
+    .style("--sfs-if-reveal-opacity", 1);
 
   const populationMeanLine = meanLayer.append("line")
     .attr("class", "hv-mean-line hv-population-mean-line");
   const populationMeanLabel = meanLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-population-mean-label")
+    .attr("class", "hv-label sfs-tick-label hv-population-mean-label")
     .attr("text-anchor", "middle");
   const sampleMeanLayer = meanLayer.append("g")
-    .attr("class", "hv-sample-mean-layer bc-if-reveal");
+    .attr("class", "hv-sample-mean-layer sfs-if-reveal");
   const sampleMeanLine = sampleMeanLayer.append("line")
     .attr("class", "hv-mean-line hv-sample-mean-line");
   const sampleMeanLabel = sampleMeanLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-sample-mean-label")
+    .attr("class", "hv-label sfs-tick-label hv-sample-mean-label")
     .attr("text-anchor", "middle");
   const sampleMeanAxisSize = 10;
   const sampleMeanAxisMark = trackingEnabled
@@ -1926,7 +1926,7 @@ makeHeightVariabilityDemo = function(opts) {
     .attr("d", centerTrianglePath)
     .attr("aria-hidden", "true");
   const popLabel = popSdLayer.append("text")
-    .attr("class", "hv-label bc-tick-label")
+    .attr("class", "hv-label sfs-tick-label")
     .attr("text-anchor", "middle");
 
   const samplePoints = sampleLayer.append("g");
@@ -1941,7 +1941,7 @@ makeHeightVariabilityDemo = function(opts) {
     .attr("d", centerTrianglePath)
     .attr("aria-hidden", "true");
   const fixedCenterComparisonLabel = fixedCenterLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-fixed-center-label")
+    .attr("class", "hv-label sfs-tick-label hv-fixed-center-label")
     .attr("text-anchor", "middle");
 
   const sampleComparisonLine = biasedLayer.append("g")
@@ -1955,20 +1955,20 @@ makeHeightVariabilityDemo = function(opts) {
     .attr("width", sampleCenterSize)
     .attr("height", sampleCenterSize);
   const sampleComparisonLabel = biasedLayer.append("text")
-    .attr("class", "hv-label bc-tick-label hv-biased")
+    .attr("class", "hv-label sfs-tick-label hv-biased")
     .attr("text-anchor", "middle");
 
   function addVarianceComparison(className, labelClassName, markerShape, markerClassName) {
     const comparison = varianceComparisonLayer.append("g")
-      .attr("class", "hv-variance-comparison bc-if-reveal")
-      .style("--bc-if-reveal-opacity", 1);
+      .attr("class", "hv-variance-comparison sfs-if-reveal")
+      .style("--sfs-if-reveal-opacity", 1);
     const line = comparison.append("g")
       .attr("class", `${className} hv-comparison-line`);
     line.append("line");
     line.append("line").attr("class", "hv-bracket-cap");
     line.append("line").attr("class", "hv-bracket-cap");
     const label = comparison.append("text")
-      .attr("class", `hv-label hv-comparison-label bc-tick-label ${labelClassName || ""}`.trim())
+      .attr("class", `hv-label hv-comparison-label sfs-tick-label ${labelClassName || ""}`.trim())
       .attr("text-anchor", "middle");
     const marker = markerShape === "square"
       ? comparison.append("rect")
@@ -1994,7 +1994,7 @@ makeHeightVariabilityDemo = function(opts) {
   );
 
   const axisLabel = svg.append("text")
-    .attr("class", "hv-axis-label hv-population-context bc-axis-label bc-graph-label")
+    .attr("class", "hv-axis-label hv-population-context sfs-axis-label sfs-graph-label")
     .attr("x", (margin.left + renderWidth - margin.right) / 2)
     .attr("y", axisLabelY)
     .attr("text-anchor", "middle")
@@ -2442,7 +2442,7 @@ makeHeightVariabilityDemo = function(opts) {
     populationLayer.selectAll("circle")
       .data(population.dots, (dot) => dot.id)
       .join("circle")
-        .attr("class", "hv-population-dot bc-graph-point")
+        .attr("class", "hv-population-dot sfs-graph-point")
         .classed("is-sampled", (dot) => selectedIds.has(dot.id))
         .attr("r", dotRadius)
         .style("fill", (dot) => state.focusSample && !selectedIds.has(dot.id)
@@ -2523,7 +2523,7 @@ makeHeightVariabilityDemo = function(opts) {
       .data(values.sampleDots, (dot) => dot.sampleIndex)
       .enter()
       .append("circle")
-        .attr("class", "hv-sample-dot bc-graph-point")
+        .attr("class", "hv-sample-dot sfs-graph-point")
         .attr("r", sampleDotRadius)
         .style("fill", (dot) => dot.color)
         .attr("cx", (dot) => sampleDotX(dot))
