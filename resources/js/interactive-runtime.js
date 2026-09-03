@@ -2,9 +2,6 @@
   "use strict";
 
   const MOTION_STORAGE_KEY = "sfs-reduce-motion";
-  // A reader who set this under the old prefix keeps their choice; reduced
-  // motion is an accessibility preference, not worth resetting on a rename.
-  const LEGACY_MOTION_STORAGE_KEY = "bc-reduce-motion";
   const QUARTO_THEME_STORAGE_KEY = "quarto-color-scheme";
   const CAPTURE_SEED = 1101;
   const rootElement = document.documentElement;
@@ -45,9 +42,7 @@
     const storage = safeStorage();
     if (!storage) return false;
     try {
-      const stored = storage.getItem(MOTION_STORAGE_KEY);
-      if (stored !== null) return stored === "true";
-      return storage.getItem(LEGACY_MOTION_STORAGE_KEY) === "true";
+      return storage.getItem(MOTION_STORAGE_KEY) === "true";
     } catch (error) {
       return false;
     }
