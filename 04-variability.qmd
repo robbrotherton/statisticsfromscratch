@@ -5,6 +5,7 @@ interactive-scripts:
   - graph-generator
   - variability-table-generator
   - height-variability-interactive
+  - reveal-on-view
 ---
 
 {{< interactive-figure variabilityCover makeDistributionFamilyCover options='{"renderer":"webgl","distribution":"normal","sd":[2.4,2.2,2,1.8,1.6,1.4,1.2,1,0.8,0.6],"xDomain":[-6,6],"yDomain":[0,0.7],"points":160,"strokeWidth":2.6,"opacity":0.88,"colorCycle":10,"animation":"rise","duration":1700,"ease":"cubic","stagger":"spread","delaySpread":1500,"fallback":{"animate":false},"performance":true,"ariaLabel":"Animated family of normal curves with increasing standard deviations rising from a baseline"}' fallback="Animated family of normal curves showing different standard deviations." >}}
@@ -261,11 +262,9 @@ But wait, why does the correction use exactly $n - 1$? It's not a magic number. 
 
 To illustrate, suppose I put three playing cards face down in front of you and tell you that the mean of their values is $M=5$. I point to the first card and ask you what number you think it is. There is no way for you to know, of course, so you shrug and I show you that it is a three. I point to the second card. You still can't know what it is; I turn it over and reveal a five. Now I point to the last card. Can you tell me its number? You jump up and exclaim, "eureka!" Given the mean and the other two values, there's only one thing this last one can be: it has to be seven.
 
-::: {.center style="font-size: 12em; margin-top: -0.4em; margin-bottom: -0.2em;"}
-🃓 🂵 🂠
-:::
+{{< inline-svg resources/figures/playing-cards.svg >}}
 
-We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ degrees of freedom.
+We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. And we could have more than three cards. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ degrees of freedom.
 
 If $\mu$ were already known and we measured the sample's deviations around that fixed population center, they would not be constrained to sum to zero and we would not lose a degree of freedom by fitting $M$. (Later we'll meet calculations that fit more means and therefore have different degrees of freedom.)
 
@@ -329,5 +328,9 @@ Now we replay the same 1,000 samples. The green corrected squares are added on t
 ::::
 
 :::::
+
+So phew, the mean is an unbiased estimator of the population mean. Sampling error is not an error in the colloquial sense of something we did wrong and could have avoided. It is a natural consequence of taking a sample. Sometimes the error is in the direction of overestimating the mean, sometimes underestimating it, but in the long-run those random errors balance out and the mean is unbiased. Remember the 16 guys lined up to make a rod in the last chapter?
+
+Sample variance can be an unbiased estimator of population variance too, as long as we divide $SS$ by $df$ ($n - 1$ in this situation). Dividing by $n$ makes the errors nonrandom: it's still the case that they will sometimes be too high and sometimes too low, but over the long-run they lean low, as we saw in the cumulative average of 1,000 incorrectly calculated sample variance. The green line, where we divided by $n - 1$ fluctuated along the way but made its way close to 0 in the long run.
 
 {{< include quizzes/04-variability-learning-checks.qmd >}}
