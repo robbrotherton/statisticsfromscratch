@@ -249,69 +249,85 @@ Here is the table of steps and equations again, with a new column applying them 
 | 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{n - 1}$ |
 | 5. Calculate standard deviation | $\sigma = \sqrt{\sigma^2}$ | $s = \sqrt{s^2}$ |
 
+: Summary and notation for calculating population and sample variance and standard deviation. {#tbl-variability-samples}
+
 The adjusted denominator makes sample variance, $s^2$, an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
 
 {{< include quizzes/04-variability-sample-calculation.qmd >}}
 
 ## Degrees of freedom
 
-But wait, why does the correction use exactly $n - 1$? Suppose I have put three playing cards face down in front of you and tell you that their mean is $M=5$. There is no way to know the value of the first card, so I show you that it is a three. There is still no way to know the second; it turns out to be a five. But you can now tell me the value of the third card. Given the mean and the other two values, it has to be seven.
+But wait, why does the correction use exactly $n - 1$? It's not a magic number. It is a result of the constraint imposed by calculating deviations from the sample mean. Doing so costs us one **degree of freedom**.
+
+To illustrate, suppose I put three playing cards face down in front of you and tell you that the mean of their values is $M=5$. I point to the first card and ask you what number you think it is. There is no way for you to know, of course, so you shrug and I show you that it is a three. I point to the second card. You still can't know what it is; I turn it over and reveal a five. Now I point to the last card. Can you tell me its number? You jump up and exclaim, "eureka!" Given the mean and the other two values, there's only one thing this last one can be: it has to be seven.
 
 ::: {.center style="font-size: 12em; margin-top: -0.4em; margin-bottom: -0.2em;"}
 🃓 🂵 🂠
 :::
 
-We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ __degrees of freedom__.
+We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ degrees of freedom.
 
 If $\mu$ were already known and we measured the sample's deviations around that fixed population center, they would not be constrained to sum to zero and we would not lose a degree of freedom by fitting $M$. (Later we'll meet calculations that fit more means and therefore have different degrees of freedom.)
 
-## Visualizing statistical bias
+## Sampling error and statistical bias
 
-The moving-center visualization showed the mechanism within each sample. But bias is a long-run property, so now we need to follow estimates across many samples. There is no contradiction in saying that $M$ is an unbiased estimate of $\mu$ while fitting $M$ creates bias in $SS/n$. Across samples, the errors in $M$ balance around zero. Within each sample, $M$ is the center that minimizes $SS$.
+One last thing. Now that we know about statistical bias, you might be worried that it is throwing off other things we might estimate. What about the mean? We spent most of Chapter 3 talking about it, but never once mentioned bias. It shouldn't get off the hook, right? We ought to check that it is unbiased. And turning back to variance, @act-moving-center illustrated the cause of its bias, but it didn't show the correction. And it only showed one sample at a time. Like we said, bias operates in the aggregate.
 
-@act-tracking-bias tracks both the individual errors and their cumulative average. We will begin with the sample mean, then compare variance calculated using $SS/n$ and $SS/(n - 1)$.
+It would help to be more precise about the term *error*. There are different kinds of error we can run into, but most generally **sampling error** describes the difference between an estimate and the true value of the parameter it is estimating. The error of a single estimate can be high or low, but that doesn't tell us whether the estimator itself is biased. Dividing variance by $n - 1$ makes every estimate accurate; it makes the overestimates and underestimates balance out on average. To check that, we need to look at many estimates and see whether they tend to be too high or too low on average.
+
+So now let's see the long run, and distinguish *sampling error* from *bias*. 
 
 ::::: {#act-tracking-bias .callout-tip .interactive}
 ## Tracking bias across repeated samples
 
-{{< interactive-figure varianceBiasTracker makeHeightVariabilityDemo options='{"tracking":true,"seed":"height-variability-bias-v61","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"initialSamples":1,"maxSamples":1000,"populationSampleScale":0.76,"varianceReferenceWidth":7}' fallback="Interactive charts tracking mean and variance estimates across repeated samples." >}}
+{{< interactive-figure varianceBiasTracker makeHeightVariabilityDemo options='{"tracking":true,"seed":"height-variability-bias-v61","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"initialSamples":1,"maxSamples":1000,"populationSampleScale":0.76,"varianceReferenceWidth":7,"populationVarianceLift":6,"axisMode":"center","axisLabel":false,"unitLabel":""}' fallback="Interactive charts tracking mean and variance estimates across repeated samples." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-major="source" data-major-title="Source" data-title="One sample" data-action='{"estimator":"mean","samples":1,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
-Begin with the sample mean, $M$, as an estimate of the population mean, $\mu$. The colored dots are one sample drawn from this fixed population. This particular sample mean might be too low or too high, but one sample cannot tell us whether the estimator itself is biased.
+::: {.tutorial-step data-major="population" data-major-title="Population" data-title="Meet the population" data-action='{"estimator":"mean","tracker-axis-maximum":10,"show-sample":false,"focus-sample":false,"sample-opacity":1,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true,"fall":false}'}
+Here's our happy little population again. We'll use it to track long-run bias in a couple of statistics. First we'll check whether the sample mean, $M$, is biased or unbiased. Then we'll compare the two calculations we learned, dividing $SS$ either by $n$ or by $n - 1$ to compute sample variance.
 :::
 
-::: {.tutorial-step data-major="source" data-major-title="Source" data-title="Follow the samples" data-action='{"estimator":"mean","samples":1,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
-The population will stay the same while we draw sample after sample. Let's shift it out of the way and collect the individual sample means on the timeline below, using the population mean as our fixed reference.
+::: {.tutorial-step data-major="one-sample" data-major-title="One sample" data-title="Draw a sample" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true,"fall":true}'}
+Here's our first sample. Its mean is a little below the true population mean. But again, bias is not about any one sample over- or underestimating its parameter. We need to track this across a bunch of samples.
 :::
 
-::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="Five means" data-action='{"estimator":"mean","samples":5,"sample-interval":500,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
-Now draw four more samples, one at a time. The five squares are the five sample means we've seen so far. Each square's vertical position is that sample's estimation error, $M-\mu$: below zero is an underestimate and above zero is an overestimate.
+::: {.tutorial-step data-major="one-sample" data-title="Track its error" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
+The population will stay the same while we draw sample after sample, so let's shift it out of the way and collect the individual sample means on the timeline below. Each square's vertical position is that sample's estimation error, $M-\mu$: below zero is an underestimate and above zero is an overestimate. The first sample's mean is a little below the population mean, so it lands just below zero.
 :::
 
-::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="Average error" data-action='{"estimator":"mean","samples":5,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-The second tracker summarizes the first. After each new sample, it averages all the errors collected so far. The line may wander at first because a few samples can land mostly high or mostly low. Bias is the long-run position of this average, not the fact that individual estimates scatter around.
+::: {.tutorial-step data-major="means" data-major-title="Repeated means" data-title="Ten means" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":10,"sample-interval":500,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
+Now we draw nine more samples, one at a time. The ten squares are the ten sample means we've seen so far. We've got some below zero, some above it, and some very close to zero, where the sample mean was very close to $\mu$.
 :::
 
-::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="First 100" data-action='{"estimator":"mean","samples":100,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-Now collect 100 sample means. The individual errors land on both sides of zero while their cumulative average begins to settle down.
+::: {.tutorial-step data-major="means" data-title="Average error" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":10,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+This second tracker summarizes the first. After each new sample, it averages all the errors collected so far. So the end of the line is the average of all ten means' errors so far. Bias is the long-run position of this average, not the fact that individual estimates scatter around. But ten is not much of a long run. Let's make room for a lot more.
 :::
 
-::: {.tutorial-step data-major="mean" data-major-title="Means" data-title="1,000 means" data-action='{"estimator":"mean","samples":1000,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-At 1,000 sample means, the average error is {{< interactive-value varianceBiasTracker.averageMeanError format=".2f" >}} inches. The overestimates and underestimates balance out, so the sample mean is unbiased.
+::: {.tutorial-step data-major="means" data-title="Make room for 1,000" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"tracker-axis-duration":1400,"samples":10,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Now we have space for 1,000 means. Nothing else has changed: these are still the same ten sample means, and the cumulative line still summarizes only those ten errors. When you click next, watch as a whole lot more samples are taken, their means added to the first tracker, and the cumulative average of all the means updates in the second tracker.
 :::
 
-::: {.tutorial-step data-major="variance" data-major-title="Variance" data-title="One variance" data-action='{"estimator":"variance","samples":1,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-Now reset to one sample and use it to estimate population variance. The red triangles show the calculation that divides $SS$ by $n$; the blue triangles show the calculation that divides by $n-1$. Either estimate can miss high or low in one sample, so once again a single result cannot establish bias.
+::: {.tutorial-step data-major="means" data-title="1,000 means" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"samples":1000,"sample-duration":10000,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Once all 1,000 sample means have been collected, the average error is very close to zero. The individual errors on the top tracker scatter evenly above and below the 0 line. The cumulative average error line---the running average of all those means---has meandered up and down, but it has no long-run tendency to stay above or below zero. The sample mean is an unbiased estimator of the population mean. Phew.
 :::
 
-::: {.tutorial-step data-major="variance" data-major-title="Variance" data-title="Bias and correction" data-action='{"estimator":"variance","samples":1000,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-Across many samples, the calculation that divides by $n$ settles below zero. Its errors do not balance out: it systematically underestimates population variance. The corrected estimates that divide by $n-1$ do balance around zero. The correction changes the long-run center of the estimator; it does not eliminate the sample-to-sample scatter.
+::: {.tutorial-step data-major="variance-uncorrected" data-major-title="Uncorrected variance" data-title="One estimate" data-action='{"estimator":"variance","tracker-axis-maximum":1000,"variance-indicator":"uncorrected","show-uncorrected-tracker":true,"show-corrected-tracker":false,"hold-uncorrected-history":false,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true,"fall":true}'}
+Now let's estimate population variance by dividing $SS$ by $n$, without the correction. The black span is the true population variance; the red span is this sample's estimate. I've lined them up at the same center so we can compare their lengths directly (though the sample variance uses deviations from the sample mean). One estimate can miss high or low, so it still cannot establish bias. This one, even though it uses the wrong denominator, happens to be almost exactly right, so sits at 0 on the error tracker.
+:::
+
+::: {.tutorial-step data-major="variance-uncorrected" data-title="1,000 estimates" data-action='{"estimator":"variance","tracker-axis-maximum":1000,"variance-indicator":"uncorrected","show-uncorrected-tracker":true,"show-corrected-tracker":false,"hold-uncorrected-history":false,"samples":1000,"sample-duration":15000,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Now let's repeat that calculation across 1,000 samples. The individual red estimates scatter above and below zero, but their cumulative average settles below it. The errors do not balance out: dividing by $n$ systematically underestimates population variance.
+:::
+
+::: {.tutorial-step data-major="variance-corrected" data-major-title="Corrected variance" data-title="Change the denominator" data-action='{"estimator":"variance","tracker-axis-maximum":1000,"variance-indicator":"corrected","show-uncorrected-tracker":true,"show-corrected-tracker":true,"uncorrected-history-samples":1000,"hold-uncorrected-history":true,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true,"fall":true}'}
+We can go back through those same 1,000 samples and recompute the variance using the corrected $n - 1$ denominator. We'll start again with the first sample. Above the dots, the green corrected span replaces the red uncorrected one. In the trackers, we'll keep all the red results where they are and begin adding the green results. The samples are identical. With the new, correct denominator, this variance happens to overestimate the true value. But again, one sample can't establish bias.
+:::
+
+::: {.tutorial-step data-major="variance-corrected" data-title="Replay 1,000" data-action='{"estimator":"variance","tracker-axis-maximum":1000,"variance-indicator":"corrected","show-uncorrected-tracker":true,"show-corrected-tracker":true,"uncorrected-history-samples":1000,"hold-uncorrected-history":true,"samples":1000,"sample-duration":15000,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
+Now we replay the same 1,000 samples. The green corrected squares are added on top of the existing red estimates, and the green cumulative line is drawn without removing the red one. Dividing by $n - 1$ inflates each estimate just enough, on average, for the green line to settle around zero while the red line remains below it. The correction changes the estimator's long-run center; it does not eliminate the sample-to-sample scatter.
 :::
 ::::
 
 :::::
-
-The two charts distinguish *sampling error* from *bias*. The wide vertical scatter in the upper chart is sampling error: estimates differ from sample to sample. The long-run position of the lower line is bias. Neither using the mean nor dividing variance by $n - 1$ makes every estimate accurate; it makes the overestimates and underestimates balance out on average.
 
 {{< include quizzes/04-variability-learning-checks.qmd >}}
