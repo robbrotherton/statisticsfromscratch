@@ -827,6 +827,61 @@ html[data-motion="reduced"] .home-dots__marks circle {
   font-weight: 700;
 }
 
+/* Chapter 4 degrees of freedom: the three playing cards drawn in
+   resources/figures/playing-cards.svg, inlined into the page by the inline-svg
+   shortcode. The drawing carries its own colour as presentation attributes;
+   only the turn lives here. It cannot live in the file: a style element inside
+   an inline SVG is parsed by the HTML parser, and its rules never reach the
+   copies that <use> makes. */
+.bc-playing-cards .bc-card-turn {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* reveal-on-view adds the class once the figure scrolls into view. Each card
+   squashes to its edge, swaps sides at the halfway point, and opens out face
+   up; the second card waits its turn on --bc-turn-delay. */
+.bc-playing-cards.is-dealt .bc-card-turn,
+.bc-playing-cards.is-dealt .bc-card-turn > g {
+  animation-duration: 620ms;
+  animation-delay: var(--bc-turn-delay, 0ms);
+  animation-fill-mode: both;
+}
+
+.bc-playing-cards.is-dealt .bc-card-turn {
+  animation-name: bc-card-turn;
+  animation-timing-function: ease-in-out;
+}
+
+.bc-playing-cards.is-dealt .bc-card-back,
+.bc-playing-cards.is-dealt .bc-card-front {
+  animation-timing-function: step-end;
+}
+
+.bc-playing-cards.is-dealt .bc-card-back {
+  animation-name: bc-card-conceal;
+}
+
+.bc-playing-cards.is-dealt .bc-card-front {
+  animation-name: bc-card-reveal;
+}
+
+@keyframes bc-card-turn {
+  from { transform: scaleX(1); }
+  50% { transform: scaleX(0.03); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes bc-card-conceal {
+  from { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes bc-card-reveal {
+  from { opacity: 0; }
+  50% { opacity: 1; }
+}
+
 /* Chapter 5 cover: one abstract block distribution, with the original-score
    ruler retained while its aligned z-score ruler emerges beneath it. The
    blocks come from the shared graph generator and use the standard series

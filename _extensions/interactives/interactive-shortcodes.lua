@@ -74,6 +74,35 @@ local function figure_shortcode(args, kwargs, meta, raw_args, context)
   }, { "interactive-figure-mount" }))
 end
 
+local function read_asset(path)
+  local file = io.open(path, "r")
+  if not file and quarto.project and quarto.project.directory then
+    file = io.open(quarto.project.directory .. "/" .. path, "r")
+  end
+  if not file then
+    error("inline-svg could not read " .. path)
+  end
+  local markup = file:read("*a")
+  file:close()
+  return markup
+end
+
+-- Drops an SVG asset into the page rather than sealing it inside an <img>, so
+-- the document's stylesheet and scripts can reach the artwork.
+local function svg_shortcode(args, kwargs, meta, raw_args, context)
+  local normalize = context == "text" and unquote_text_context or text
+  local path = normalize(args[1])
+  if not path then
+    error("inline-svg requires a path to an SVG file")
+  end
+
+  local markup = read_asset(path)
+  if context == "text" then
+    return markup
+  end
+  return pandoc.RawBlock("html", markup)
+end
+
 local function value_shortcode(args, kwargs)
   local path = text(args[1])
   if not path then
@@ -107,6 +136,7 @@ end
 
 return {
   ["interactive-figure"] = figure_shortcode,
+  ["inline-svg"] = svg_shortcode,
   ["interactive-value"] = value_shortcode,
   ["interactive-math"] = math_shortcode
 }

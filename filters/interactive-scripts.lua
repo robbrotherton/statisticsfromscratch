@@ -145,6 +145,10 @@ local manifest = {
   },
   ["visibility-helper"] = {
     file = "resources/js/visibility-helper.js"
+  },
+  ["reveal-on-view"] = {
+    file = "resources/js/reveal-on-view.js",
+    deps = { "visibility-helper" }
   }
 }
 
