@@ -68,7 +68,7 @@ The range captures one important difference: it is zero for *Fine, Actually* bec
 
 This is the main limitation of the range as a measure of variability: it does not consider all the observations. Only the two extremes contribute to its value. As a result, it is not affected by how observations are distributed between them. This characteristic also makes it highly susceptible to outliers. One unusual observation can drastically change the range. It also tends to grow with sample size, simply because larger samples have more opportunities to include extreme values.
 
-That's not to say looking at the range isn't useful for some purposes. Researchers often begin by checking the minimum, maximum, and range to get a quick sense of the values in their data. Sometimes you just don't know what to expect, so it's helpful to see the extremes and how far apart they are. It can also reveal a problem. Suppose we write a new extraversion item that allows responses numbered one to five. A range of three suggests that the item didn't work well. Maybe asking people "Are you the world's most extraverted person?" was a bit too much and restricted the range of responses. A range of ten, on the other hand, tells us to check for misrecorded values.
+That's not to say looking at the range isn't useful for some purposes. Researchers often begin by checking the minimum, maximum, and range to get a quick sense of the values in their data. Sometimes you just don't know what to expect, so it's helpful to see the extremes and how far apart they are. It can also reveal a problem. Suppose we write a new extraversion item that allows responses numbered one to five. A range of three might make us wonder why part of the response scale went unused. Maybe asking people "Are you the world's most extraverted person?" was a bit too much and restricted the range of responses. A range of ten, on the other hand, tells us to check for misrecorded values.
 
 Useful as the range is, we also want a measure of variability that considers every observation, not just the two extremes. For that, we need a more mathematically sophisticated measure.
 
@@ -84,9 +84,9 @@ The next step was to find a way to summarize those deviations in a single number
 {{< include quizzes/04-variability-average-deviations.qmd >}}
 :::
 
-The problem is that, precisely because the mean is the balance point, the deviations above and below balance each other out. To find a mean, we first have to add the values up, but the signed deviations always add up to zero. That means it's not possible to calculate an average deviation this way. The answer would always be zero.
+The problem is that, precisely because the mean is the balance point, the deviations above and below balance each other out. To find a mean, we first have to add the values up, but the signed deviations always add up to zero. That means averaging the raw deviations cannot give us a useful measure of variability. The answer would always be zero.
 
-So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we minimize and partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
+So we need a different strategy. One option would be to take the absolute value of every deviation, dropping the minus sign from the negative ones, and then find the mean absolute deviation. But the strategy we're going to focus on is __squaring each deviation__. Squaring makes all the deviations nonnegative and has other mathematical properties that will become useful when we partition variance later.^[The mean absolute deviation from the mean is a perfectly legitimate measure of variability, and it is less affected by extreme scores because it does not square their distances. But statistics don't invent and apply themselves: we still have to think about which measure makes the most sense for what we're trying to do.]
 
 Having squared the deviations, we can continue with one connected chain of calculations. Add the squared deviations to get $SS$, the __sum of squared deviations__ (or "sum of squares" for short). Divide $SS$ by the number of observations to get the population __variance__, the mean squared deviation. Then take its square root to get the __standard deviation__. The square root returns us to the original units, so we can interpret the standard deviation as a *typical deviation* from the mean.^[More precisely, the population standard deviation is the **root-mean-square deviation**: we square the deviations, find their mean, and take the square root. “Typical deviation” is a useful interpretation, but it isn't the literal arithmetic mean of the raw deviations or their absolute values. I don't hear social scientists use the term "root-mean-square deviation" very often, so I'm just going to follow the convention of calling it the standard deviation.]
 
@@ -191,9 +191,9 @@ We'll stick with the definitional approach for now, but tuck this computational 
 
 So far we've treated the movie ratings as populations. I mentioned that we have to do things a little differently for samples. Don't worry, the difference in the math is tiny, but the reason for it is important.
 
-Like I mentioned in Chapter 1, there's overlap between descriptive and inferential statistics. Here, we want to know our sample's variance, but not because we especially care about the sample itself. Rather, we want to use it as an estimate of the population variance. The trouble is that if we used precisely the calculation above, dividing $SS$ by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a sample's variance can over- or underestimate its population variance. Bias is a long-run tendency. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator still sometimes misses high, sometimes low, but in the long run it systematically leans more in one direction than the other. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the average of all the estimates would be less than the actual population variance; it would underestimate the true value.
+Like I mentioned in Chapter 1, there's overlap between descriptive and inferential statistics. Here, we want to know our sample's variance, but not because we especially care about the sample itself. Rather, we want to use it as an estimate of the population variance. The trouble is that if we used precisely the calculation above, dividing $SS$ by $n$, the estimate would be __biased__. Bias does not mean that any one sample estimate is wrong: a sample's variance can over- or underestimate its population variance. Bias is a long-run tendency. An __unbiased__ estimator is sometimes too high, sometimes too low, but those errors balance out in the long run. A biased estimator systematically leans in one direction. If we repeatedly took samples and calculated variance by dividing $SS$ by $n$, the average of all the estimates would be less than the actual population variance; it would underestimate the true value.
 
-The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimize their sum of squared deviations. As a result, the sum of squared deviations around $M$ can only be smaller than the sum of squared deviations of those same scores around $\mu$, never larger.
+The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. Each sample's $M$ is fitted to the scores in that particular sample, designed to minimize their sum of squared deviations. As a result, the sum of squared deviations around $M$ can never be larger than the sum of squared deviations of those same scores around $\mu$, and will be smaller unless $M = \mu$.
 
 ::::: {#act-moving-center .callout-tip .interactive}
 ## The moving center
@@ -240,6 +240,8 @@ Keep clicking to take as many new samples as you like. Both computed standard de
 
 So now we know what the problem is, here's the solution: divide $SS$ by $n - 1$ rather than $n$. If only all of life's problems were so easily solved.
 
+The adjusted denominator makes sample variance, $s^2$, an unbiased estimator of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
+
 Here is the table of steps and equations again, with a new column applying them to samples. There are differences in notation---the Greek symbols $\mu$ and $\sigma$ and uppercase $N$ for populations; $M$, $s$, and $n$ for samples. But aside from the different denominator in step 4, the process is the same.
 
 | Step | Population | Sample |
@@ -247,18 +249,18 @@ Here is the table of steps and equations again, with a new column applying them 
 | 1. Find the deviation for each score | $X - \mu$ | $X - M$ |
 | 2. Square the deviations | $(X - \mu)^2$ | $(X - M)^2$ |
 | 3. Sum the squared deviations | $SS = \Sigma(X - \mu)^2$ | $SS = \Sigma(X - M)^2$ |
-| 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{n - 1}$ |
+| 4. Calculate variance | $\sigma^2 = \frac{SS}{N}$ | $s^2 = \frac{SS}{df} = \frac{SS}{n - 1}$ |
 | 5. Calculate standard deviation | $\sigma = \sqrt{\sigma^2}$ | $s = \sqrt{s^2}$ |
 
 : Summary and notation for calculating population and sample variance and standard deviation. {#tbl-variability-samples}
-
-The adjusted denominator makes sample variance, $s^2$, an unbiased estimate of population variance. Taking its square root gives the usual sample standard deviation, $s$, often labeled $SD$ when results are reported in psychology.^[Strictly speaking, taking the square root introduces a small downward bias, especially with very small samples. But $s$ is much less biased than an uncorrected standard deviation based on $SS/n$.]
 
 {{< include quizzes/04-variability-sample-calculation.qmd >}}
 
 ## Degrees of freedom
 
-But wait, why does the correction use exactly $n - 1$? It's not a magic number. It is a result of the constraint imposed by calculating deviations from the sample mean. Doing so costs us one **degree of freedom**.
+Well, it's not *quite* as simple as I made it sound there. To fully understand the issue and why this solution works, we need to know about $df$, which I snuck into @tbl-variability-samples. That refers to **degrees of freedom**. For ordinary sample variance, $df = n - 1$. More generally, a variance is a sum of squares divided by the degrees of freedom associated with it, and $df$ is not always $n - 1$ as it is in this case. Later, in ANOVA, we'll split variability into several sums of squares, each with its own $df$.
+
+So why does the correction here use exactly $n - 1$? It is a result of the constraint imposed by calculating deviations from the sample mean. Doing so costs us one degree of freedom.
 
 To illustrate, suppose I put three playing cards face down in front of you and tell you that the mean of their values is $M=5$. I point to the first card and ask you what number you think it is. There is no way for you to know, of course, so you shrug and I show you that it is a three. I point to the second card. You still can't know what it is; I turn it over and reveal a five. Now I point to the last card. Can you tell me its number? You jump up and exclaim, "eureka!" Given the mean and the other two values, there's only one thing this last one can be: it has to be seven.
 
@@ -270,11 +272,11 @@ If $\mu$ were already known and we measured the sample's deviations around that 
 
 ## Sampling error and statistical bias
 
-One last thing. Now that we know about statistical bias, you might be worried that it is throwing off other things we might estimate. What about the mean? We spent most of Chapter 3 talking about it, but never once mentioned bias. It shouldn't get off the hook, right? We ought to check that it is unbiased. And turning back to variance, @act-moving-center illustrated the cause of its bias, but it didn't show the correction. And it only showed one sample at a time. Like we said, bias operates in the aggregate.
+One last thing. Now that we know about statistical bias, you might be worried about other statistics being biased. What about the mean? We spent most of Chapter 3 talking about it, but never mentioned bias. It shouldn't get off the hook, right? We ought to check if it is biased or unbiased. And turning back to variance, @act-moving-center illustrated the cause of its bias, but it didn't show the correction. And it only showed one sample at a time. Like we said, bias operates in the aggregate.
 
-It would help to be more precise about the term *error*. There are different kinds of error we can run into, but most generally **sampling error** describes the difference between an estimate and the true value of the parameter it is estimating. The error of a single estimate can be high or low, but that doesn't tell us whether the estimator itself is biased. Dividing variance by $n - 1$ doesn't make every estimate accurate; it makes the overestimates and underestimates balance out on average. To check that, we need to look at many estimates and see whether they tend to be too high or too low on average.
+It would help to be more precise about the term error. An estimate can differ from the true parameter for different reasons. Sometimes it is thrown off by a genuine mistake or a bad design choice. But even with random samples and error-free measurements, a statistic calculated from one sample will usually differ from the corresponding population parameter. The discrepancy that arises simply because we observed one sample rather than the entire population is **sampling error**.
 
-So now let's see the long run, and distinguish *sampling error* from *bias*.
+**Bias**, by contrast, is a long-run property of the estimator. Across repeated samples, do those errors balance around zero, or do they systematically lean in one direction? Dividing $SS$ by $n - 1$ doesn't make every variance estimate accurate; it makes the overestimates and underestimates balance out on average. To see the difference, we need to look at many estimates.
 
 ::::: {#act-tracking-bias .callout-tip .interactive}
 ## Tracking bias across repeated samples
@@ -303,7 +305,7 @@ This second tracker summarizes the first. After each new sample, it averages all
 :::
 
 ::: {.tutorial-step data-major="means" data-title="Make room for 1,000" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"tracker-axis-duration":1400,"samples":10,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-Now we have space for 1,000 means. Nothing else has changed: these are still the same ten sample means, and the cumulative line still summarizes only those ten errors. When you click next, watch as a whole lot more samples are taken, their means added to the first tracker, and the cumulative average of all the means updates in the second tracker.
+Now we have space for 1,000 means. Nothing else has changed: these are still the same ten sample means, and the cumulative line still summarizes only those ten errors. When you click next, watch as a whole lot more samples are taken, their means added to the first tracker, and the cumulative average error updates in the second tracker.
 :::
 
 ::: {.tutorial-step data-major="means" data-title="1,000 means" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"samples":1000,"sample-duration":10000,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
@@ -329,8 +331,8 @@ Now we replay the same 1,000 samples. The green corrected squares are added on t
 
 :::::
 
-So phew, the mean is an unbiased estimator of the population mean. Sampling error is not an error in the colloquial sense of something we did wrong and could have avoided. It is a natural consequence of taking a sample. Sometimes the error is in the direction of overestimating the mean, sometimes underestimating it, but in the long run those random errors balance out and the mean is unbiased. Remember the 16 guys lined up to make a rod in the last chapter?
+So phew, the mean is an unbiased estimator of the population mean. Sampling error is not an error in the colloquial sense of something we did wrong and could have avoided. It is a natural consequence of taking a sample. Sometimes the error is in the direction of overestimating the mean, sometimes underestimating it, but in the long run those random errors balance out and the mean is unbiased.
 
-Sample variance can be an unbiased estimator of population variance too, as long as we divide $SS$ by $df$ ($n - 1$ in this situation). Dividing by $n$ makes the errors nonrandom: it's still the case that they will sometimes be too high and sometimes too low, but over the long run they lean low, as we saw in the cumulative average of 1,000 incorrectly calculated sample variance. The green line, where we divided by $n - 1$, fluctuated along the way but made its way close to 0 in the long run.
+Sample variance can be an unbiased estimator of population variance too, as long as we divide $SS$ by $df$ ($n - 1$ in this situation). Dividing by $n$ does not stop the estimates from varying randomly; it shifts their long-run center downward. Individual estimates can still be too high or too low, but their errors average below zero, as we saw in the cumulative average of the 1,000 variance estimates calculated with the uncorrected denominator. The green line, where we divided by $n - 1$, fluctuated along the way but made its way close to zero in the long run.
 
 {{< include quizzes/04-variability-learning-checks.qmd >}}
