@@ -34,7 +34,7 @@ Now *you* take each of the tests, and we record how long they each take you. You
 
 {{< include quizzes/05-z-scores-scores-raw.qmd >}}
 
-You sense a problem, right? I'm asking you to compare performances, but the tests are pretty different. There's no reason to expect that your time would be similar; indeed we obviously should expect quite different times. So should we just give up trying to compare at all? Not so fast! We have more information. Remember, we already gave some people these tests. So let's say we know that on average it takes people 10 seconds to complete the first test and 100 seconds to complete the second. Now how do you feel about your performance?
+You sense a problem, right? I'm asking you to compare performances, but the tests are pretty different. There's no reason to expect that your time would be similar; indeed we should expect quite different times. So should we just give up trying to compare at all? Not so fast! We have more information. Remember, we already gave some people these tests. So let's say we know that on average it takes people 10 seconds to complete the first test and 100 seconds to complete the second. Now how do you feel about your performance?
 
 {{< include quizzes/05-z-scores-scores-means.qmd >}}
 
@@ -54,9 +54,7 @@ Woodworth didn't give the resulting number a specific name or symbol, and didn't
 
 > Let the average in each case be counted as $0$, i. e., let the individual's standing be expressed as a deviation above or below the average; and further, let the measure of variability be taken as the unit deviation, and all deviations be expressed as fractions or multiples of this unit.
 
-By the 1930s, the term $z$-score had been attached to this approach. (Note that the "unit deviation" was also deliberately general: Woodworth noted that standard deviation, variance, or even something like quartiles could be used. The modern convention is to use the standard deviation, so that's what we use here.)
-
-So now we can represent the population $z$-score mathematically:
+By the 1930s, the term $z$-score had been attached to this approach.^[Note that the "unit deviation" was also deliberately general: Woodworth noted that standard deviation, variance, or even something like quartiles could be used. The modern convention is to use the standard deviation, so that's what we use here.] So now we can represent the population $z$-score mathematically:
 $$z = \frac{X - \mu}{\sigma}$$ {#eq-z-score-pop}
 
 $X$ refers to a score, $\mu$ to the population mean, and $\sigma$ to the population standard deviation.
@@ -65,27 +63,36 @@ If we're dealing with a sample rather than a population, the calculation is the 
 
 $$z = \frac{X - M}{s}$$ {#eq-z-score-sample}
 
-Here $M$ is the sample mean and $s$ is the sample standard deviation. The numerator in either equation should look familiar: it's a deviation score, like we've encountered in the previous couple of chapters. Dividing a deviation score by the standard deviation expresses that deviation in standard-deviation units.
+Here $M$ is the sample mean and $s$ is the sample standard deviation.
 
-The sign tells us which side of the mean the score falls on. A positive $z$-score is above the mean and a negative $z$-score is below it. (That doesn't necessarily mean good or bad: in our example, a negative $z$-score means a faster completion time.) The absolute magnitude of the $z$-score, written $|z|$, tells us how far the score is from the mean. So if $z = 0$, the score is exactly equal to the mean. As $|z|$ increases, the score is farther from the mean.
+The numerator in either equation should look familiar: it's a deviation score, like we've encountered in the previous couple of chapters. Dividing a deviation score by the standard deviation expresses that deviation in standard-deviation units.The sign tells us which side of the mean the score falls on. A positive $z$-score is above the mean and a negative $z$-score is below it. (That doesn't necessarily mean good or bad: in our example, a negative $z$-score means a faster completion time.) The absolute magnitude of the $z$-score, written $|z|$, tells us how far the score is from the mean. So if $z = 0$, the score is exactly equal to the mean. As $|z|$ increases, the score is farther from the mean.
 
 ## Computing $z$-scores
 
-Let's look at this visually. Here's a histogram of completion times for a sample of 30 earlier test takers. Its sample mean, $M$, is exactly 10 seconds, and its sample standard deviation, $s$, is exactly 1 second. The vertical line marks your time of 8 seconds, down near the lower end of the distribution. Substituting those values into the sample equation gives us:
+Let's look at this visually. @fig-easy-test-histogram shows a histogram of completion times for a sample of 30 people who took the easy math test. Remember, for this distribution $M = 10$ seconds, and the standard deviation is $s = 1$ second. The dashed line marks your time of 8 seconds, down near the lower end of the distribution.
 
+::: {#fig-easy-test-histogram}
 {{< interactive-figure easyMathTimeDistribution makeMathTestHistogram options='{"test":"easy","animate":true}' fallback="Histogram of completion times for a sample of 30 earlier test takers on the easy math test. The sample mean is 10 seconds and the sample standard deviation is 1 second; a vertical line marks a time of 8 seconds." >}}
+:::
 
+Putting those values into the sample equation gives us:
 $$z = \frac{8 - 10}{1} = \frac{-2}{1} = -2$$
 
 Now try the same calculation for the hard test. The mean was 100 seconds, the standard deviation was 15 seconds, and your time was 70 seconds.
 
+::: {#fig-hard-test-histogram}
 {{< interactive-figure hardMathTimeDistribution makeMathTestHistogram options='{"test":"hard","animate":true}' fallback="Histogram of completion times for a sample of 30 earlier test takers on the hard math test. The sample mean is 100 seconds and the sample standard deviation is 15 seconds; a vertical line marks a time of 70 seconds." >}}
+:::
 
 {{< include quizzes/05-z-scores-calculating-z.qmd >}}
 
 ### Converting back to raw scores
 
-We can also work in the other direction, from a $z$-score back to a raw score, if we have the mean and standard deviation. For a sample, if $z = \frac{X - M}{s}$, then $X = M + z \times s$. Here's what that looks like if we want to work backwards from the two $z$-scores to the original completion times.
+We can also work in the other direction, from a $z$-score back to a raw score, if we have the mean and standard deviation. For a sample, if $z = \frac{X - M}{s}$, then 
+
+$$X = M + z \times s$$ {#eq-z-score-rearranged}
+
+Here's what that looks like if we want to work backwards from the two $z$-scores to the original completion times.
 
 $$
 \begin{align}
@@ -96,37 +103,29 @@ $$
 
 ## Standardized distributions
 
-So far, we've converted a couple of individual observations into $z$-scores. But what if we converted every score in a distribution? The result would be a __standardized distribution__.
+So far, we've converted a couple of individual observations into $z$-scores. But what if we converted a whole distribution? The result would be a __standardized distribution__.
 
-A distribution of $z$-scores has a mean of zero because its numerators are deviation scores, and the deviations sum to zero. It has a standard deviation of one because every deviation is divided by the original standard deviation. This works when we use matching conventions throughout: population $\mu$ and $\sigma$ for a population, or sample $M$ and $s$ for a sample.
+A useful way to picture this is as adding a new ruler underneath the distribution. The shape of the distribution doesn't change; the scores keep the same order and relative positions, but the numbers attached to those positions change. 
 
-A useful way to picture this is as changing the ruler underneath the distribution. The scores keep the same order and relative spacing, but the numbers attached to those positions change because we've changed the unit. A distance of two raw-score points, for example, might become a distance of one standard deviation.
+Here are the two math test distributions again, this time with $z$-score rulers underneath their original scales. The original rulers show completion times in seconds, while the new rulers show the corresponding standardized positions. This makes it even clearer how your two times of 8 seconds and 70 seconds occupy the same relative position in their respective distributions. And not only that, but we could compare any $z$-score position between the two distributions. Say we wanted to know how many seconds correspond to $z = 2$ on each test, rather than $z = -2$. The rulers make that easy to see: it would be 12 seconds on the easy test and 130 seconds on the hard test.
 
-Here are the two math test distributions again, this time with $z$-score rulers underneath their original scales. The original rulers show completion times, while the new rulers show the corresponding standardized positions.
-
+:::: {#fig-standardized-math-tests}
 ::: {.sfs-figure-row .sfs-figure-row-wide .sfs-standardization-comparison-row}
 {{< interactive-figure easyMathStandardized makeMathTestHistogram options='{"test":"easy","standardized":true,"animate":false}' fallback="Histogram of easy-test completion times with aligned raw-score and z-score rulers; 8 seconds aligns with z = -2." >}}
 
 {{< interactive-figure hardMathStandardized makeMathTestHistogram options='{"test":"hard","standardized":true,"animate":false}' fallback="Histogram of hard-test completion times with aligned raw-score and z-score rulers; 70 seconds aligns with z = -2." >}}
 :::
 
-Now let's return to the fake movie reviews from the previous chapter. As before, we'll treat the six observed ratings for each movie as a sample, using $M$ and $s$. The added rulers make the effect of their different standard deviations visible.
-
-::: {.sfs-figure-row .sfs-figure-row-wide .sfs-standardization-comparison-row}
-{{< interactive-figure goodBadOkayStandardized makeStandardizedScoreGraph options='{"chart":"block","title":"The Good, the Bad and the Okay","data":[0,4,5,5,6,10],"statConvention":"sample","xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"zTickValues":[-1,0,1],"yDomain":[0,3],"yTickValues":[0,1,2,3],"squareScale":true,"rawAxisSideLabel":"(X)","animate":false}' fallback="Block histogram of sample ratings for The Good, the Bad and the Okay with aligned raw-score and z-score rulers." >}}
-
-{{< interactive-figure polarizingExpressStandardized makeStandardizedScoreGraph options='{"chart":"block","title":"The Polarizing Express","data":[0,0,1,9,10,10],"statConvention":"sample","xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"zTickValues":[-1,0,1],"yDomain":[0,3],"yTickValues":[0,1,2,3],"squareScale":true,"rawAxisSideLabel":"(X)","animate":false}' fallback="Block histogram of sample ratings for The Polarizing Express with aligned raw-score and z-score rulers." >}}
-:::
-
-Notice where $z=-1$ and $z=1$ fall on the two rulers. The more variable ratings need a larger stretch of the original 0-to-10 scale to cover one standard deviation. I have left out *Fine, Actually*, the third movie from the earlier comparison, because all six of its ratings were 5. Its sample standard deviation is zero, so its ratings cannot be converted into $z$-scores.
+Both math test distributions, with a new 'ruler' beneath the original x-axis, showing the corresponding $z$-scores.
+::::
 
 ### Other standard-score scales
 
-Once we've converted scores to $z$-scores, we can rescale them to use a more convenient reporting mean and standard deviation. These are usually called transformed standard scores.
+A distribution of $z$-scores always has a mean of zero and standard deviation of one, because of how the $z$-score formula works. That is a useful standardization, but sometimes its not exactly what we want to deal with. So once we've converted scores to $z$-scores, we can then *rescale* them to use a more convenient mean and standard deviation. These are usually called **transformed standard scores**.
 
-You'll already be familiar with some reporting scales like this. SAT section scores were designed to have a mean of 500 and a standard deviation of approximately 100 in a specified reference cohort; that doesn't mean every later group of test takers will have exactly those values [@collegeboard2017scaling]. Many IQ tests use a mean of 100 and a standard deviation of 15 in their norming groups. One reason for using numbers like these is that $z$-scores, with their mean of zero and standard deviation of one, are just a bit finicky and unintuitive, since they usually entail decimals and negative values. (Imagine telling someone you scored 0.32 on the SATs.) Larger reporting means and standard deviations let us deal mostly in positive whole numbers, which people generally find a little bit easier to talk about.
+You'll already be familiar with some reporting scales like this. SAT section scores were designed to have a mean of 500 and a standard deviation of approximately 100 in a specified reference cohort. (That doesn't mean every later group of test takers will have exactly those values; see @collegeboard2017scaling). Many IQ tests transform scores to use a mean of 100 and a standard deviation of 15. Those values are arbitrary; we could perfectly well just use $z$-scores for the job. But imaginetelling someone you scored $z = -0.32$ on the SATs or that your IQ is 1.03. It wouldn't be *wrong* to give those measurements as $z$-scores, but they are just a bit finicky and unintuitive, since they usually entail decimals and negative values. Transforming the means and standard deviations lets us deal mostly in positive whole numbers, which people generally find a little bit easier to talk about.
 
-The tutorial below follows one score from its original scale to the $z$ scale, then to simplified IQ- and SAT-style reporting scales.
+The procedure to take a standardized distribution of $z$-scores and transform it to a new scale, with whatever mean and standardard devatiation your heart desires, is simple. After standardizing the original scores, multiply the $z$-scores to set a new standard deviation, then add a constant to set a new mean. The tutorial below follows one score from its original scale to the $z$ scale, then to simplified IQ- and SAT-style reporting scales.
 
 ::::: {#act-standardizing-distributions .callout-tip .interactive}
 ## From raw scores to IQ and SAT scales
@@ -169,17 +168,25 @@ Finally, <span class="sfs-data-emphasis">add 500 to every score</span>. The repo
 
 :::::
 
-In each case the procedure is the same: standardize the original scores, multiply the $z$-scores to set a new standard deviation, then add a constant to set a new mean. More generally, we can write the transformation as $Y=A+Bz$, where $A$ is the desired mean and the positive value $B$ is the desired standard deviation.
-
 {{< include quizzes/05-z-scores-standardized-scores.qmd >}}
 
 ## Using $z$-scores to identify unusual scores
 
-Comparing scores from different scales is one use of $z$-scores. Another is asking whether a score seems unusual. But a standardized distance from the mean is not quite the same thing as rarity.
+Comparing scores from different scales is one use of $z$-scores. Another is asking whether a score seems unusual or extreme. As we learned in Chapter 4, the standard deviation quantifies a typical deviation from the mean. So in that general sense, a $z$-score of $1$ or $-1$ would be perfectly typical and expected. More extreme $z$-scores, like $2$ or $-2$ would be less typical (according to the standard deviation's definition of typicality).
 
-We can calculate a $z$-score for a distribution of any shape. But a $z$-score close to zero is merely close to the mean; that doesn't guarantee the score is common. Think back to a symmetrical bimodal distribution, whose mean can sit in the sparsely populated valley between two peaks. A score with $z=0$ could then be relatively unusual, while scores farther from zero cluster around the modes. So the $z$-score gives us a location. Whether that location is common or unusual also depends on the shape of the distribution.
+We need to be cautious here, because the shape of a distribution matters in terms of how unusual a score is too. Remember the fake movie ratings from Chapter 4? @fig-standardized-movie-ratings shows two of them again, with $z$-score rulers added. (The third movie, for which all the ratings were the same, had a standard deviation of zero, so it can't be standardized.)
 
-If scores are modeled as normally distributed, locations more than about two standard deviations from the mean are relatively uncommon. That isn't a universal bright line for identifying unusual scores. In Chapter 6, we'll use areas under the normal curve to say exactly how much of the modeled distribution lies beyond a particular $z$-score.
+:::: {#fig-standardized-movie-ratings}
+::: {.sfs-figure-row .sfs-figure-row-wide .sfs-standardization-comparison-row}
+{{< interactive-figure goodBadOkayStandardized makeStandardizedScoreGraph options='{"chart":"block","title":"The Good, the Bad and the Okay","data":[0,4,5,5,6,10],"statConvention":"sample","xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"zTickValues":[-1,0,1],"yDomain":[0,3],"yTickValues":[0,1,2,3],"squareScale":true,"rawAxisSideLabel":"(X)","animate":false}' fallback="Block histogram of sample ratings for The Good, the Bad and the Okay with aligned raw-score and z-score rulers." >}}
+
+{{< interactive-figure polarizingExpressStandardized makeStandardizedScoreGraph options='{"chart":"block","title":"The Polarizing Express","data":[0,0,1,9,10,10],"statConvention":"sample","xDomain":[-0.5,10.5],"xTickValues":[0,5,10],"zTickValues":[-1,0,1],"yDomain":[0,3],"yTickValues":[0,1,2,3],"squareScale":true,"rawAxisSideLabel":"(X)","animate":false}' fallback="Block histogram of sample ratings for The Polarizing Express with aligned raw-score and z-score rulers." >}}
+:::
+::::
+
+Notice that for *The Good, the Bad and the Okay*, the two extreme scores are beyond $z = |1|$, but for *The Polarizing Express*, *every score* is within one standard devation of the mean, simply because the standard deviation is so large. When every score is far from the mean, they are *all* unusual in that sense, and the $z$-score doesn't help us identify any particular score as unusual.
+
+But that was an unusual case. There are situations in which the standard deviation is a useful measure of typicality, and therefore $z$-scores can help us identify unusual scores. Particularly, if scores are distributed symmetrically around the mean, with most scores close to the mean and fewer scores out toward the extremes.
 
 ### Reaction times and radioactive spiders
 
@@ -193,7 +200,7 @@ First, I'd like you to have a go at testing your reaction times. Head over to [h
 
 Now let's imagine Peter Parker took the same test and averaged 159 milliseconds. That's probably quicker than your time, but is it unusual enough to make us begin entertaining the possibility of superhuman reflexes?
 
-Our interpretation depends on the reference distribution. The [results page for the Human Benchmark reaction-time test](https://humanbenchmark.com/tests/reactiontime/statistics) reports a mean recorded click time of 284 milliseconds.^[That isn't a universal parameter for human reaction time: the website's users are self-selected, and the measurement includes delays from their computers, monitors, and input devices.] The site doesn't give a standard deviation, so for this example we'll use 50 milliseconds. We'll also model the scores as normally distributed even though reaction times are actually somewhat positively skewed. But this is an example about radioactive spider bites, so I don't mind taking a little artistic license with the data.
+Our interpretation depends on the reference distribution. The [results page for the Human Benchmark reaction-time test](https://humanbenchmark.com/tests/reactiontime/statistics) reports a mean recorded click time of 284 milliseconds.^[That isn't a universal parameter for human reaction time: the website's users are self-selected, and the measurement includes delays from their computers, monitors, and input devices.] The site doesn't give a standard deviation, so for this example we'll use 50 milliseconds. We'll also model the scores as normally distributed even though in reality the data are actually somewhat positively skewed. (This is an example about radioactive spider bites, after all, so I don't mind taking a little artistic license with the data.)
 
 {{< interactive-figure reactionTimeDistribution makeDistributionGraph options='{"distribution":"normal","mean":284,"sd":50,"xDomain":[134,434],"xTicks":7,"style":"minimal","xAxis":true,"markers":{"at":159,"label":"X = 159","height":0.5,"color":"var(--sfs-danger-color, #c63f3f)","dash":"6 4","strokeWidth":2.6},"animate":true,"labels":{"x":"Reaction time (ms)"}}' fallback="Normal curve of reaction times centered on 284 ms with standard deviation 50 ms; a vertical line marks Peter Parker's 159 ms far down in the lower tail." >}}
 
