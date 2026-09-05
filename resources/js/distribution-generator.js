@@ -1508,6 +1508,36 @@ makeDistributionFamilySvgCover = (opts = {}) => {
     .attr("stroke-linejoin", "round")
     .attr("stroke-linecap", "round")
     .attr("d", (d) => line(d.data));
+  // Filled comparison covers grow in height at a common center, then separate.
+  // Keep the sampled paths fixed: only the baseline scale and x offset change.
+  if (localOpts.separateFromCenter) {
+    const area = d3.area().curve(curve).x((d) => x(d.x))
+      .y0(baselineY).y1((d) => y(d.y));
+    curveGroups.insert("path", ".dfc-curve")
+      .attr("class", "dfc-area")
+      .attr("fill", (d) => d.distribution.color)
+      .attr("fill-opacity", localOpts.fillOpacity ?? 0.48)
+      .attr("d", (d) => area(d.data));
+    linePaths.attr("stroke-opacity", 0);
+    const growDuration = localOpts.growDuration || 1100;
+    const separateStart = growDuration + 250;
+    const separateDuration = localOpts.separateDuration || 1200;
+    const timeline = interactiveFigure.coverTimeline(rootNode, {
+      duration: separateStart + separateDuration,
+      animate: localOpts.animate !== false,
+      draw(elapsed) {
+        const growth = d3.easeCubicInOut(Math.min(1, elapsed / growDuration));
+        const separation = d3.easeCubicInOut(Math.max(0, Math.min(1,
+          (elapsed - separateStart) / separateDuration)));
+        curveGroups.attr("transform", (d) => {
+          const offset = (x(0) - x(d.distribution.mean)) * (1 - separation);
+          return `translate(${offset},${baselineY}) scale(1,${growth}) translate(0,${-baselineY})`;
+        });
+      }
+    });
+    rootNode.value = { distributions, domain, yDomain, ...timeline };
+    return rootNode;
+  }
   // Same clip-rect wipe as the single-curve figures — see
   // sfsDistributionRevealClips for why a dashoffset reveal misbehaves here. The
   // group already carries a plot-area clip; a second clip on the path itself is
