@@ -1001,10 +1001,10 @@ sfsGraphHistogramBounds = (row) => ({
   right: Number.isFinite(row.upper) ? row.upper : Number(row.x) + 0.5
 })
 
-sfsGraphHistogramX = (row, x, overlayOffset, seriesIndex) => {
+sfsGraphHistogramX = (row, x, overlayOffset, seriesIndex, seriesOffset = 0.5) => {
   const bounds = sfsGraphHistogramBounds(row);
   const width = x(bounds.right) - x(bounds.left);
-  return x(bounds.left) + width * overlayOffset + seriesIndex * 0.5;
+  return x(bounds.left) + width * overlayOffset + seriesIndex * seriesOffset;
 }
 
 sfsGraphHistogramWidth = (row, x, overlayWidth, barGap = 0) => {
@@ -1311,8 +1311,9 @@ sfsGraphMakeHistogram = (opts = {}, type = "histogram") => {
   const rowData = series.flatMap((s, seriesIndex) =>
     s.rows.map((row, rowIndex) => ({ row, series: s, seriesIndex, rowIndex }))
   );
-  const overlayWidth = series.length > 1 ? 0.72 : 1;
-  const overlayOffset = series.length > 1 ? (1 - overlayWidth) / 2 : 0;
+  const overlayWidth = sfsGraphValueOr(opts.overlayWidth, series.length > 1 ? 0.72 : 1);
+  const overlayOffset = (1 - overlayWidth) / 2;
+  const seriesOffset = sfsGraphValueOr(opts.seriesOffset, 0.5);
   const barGap = sfsGraphValueOr(opts.barGap, 0);
   const entrance = sfsGraphEntranceOptions(opts);
 
@@ -1347,7 +1348,7 @@ sfsGraphMakeHistogram = (opts = {}, type = "histogram") => {
     const fallHeadroomRatio = sfsGraphValueOr(opts.fallHeadroomRatio, 0.5);
     const ceilingY = -blockPixelHeight * (1 + fallHeadroomRatio);
     const blockTargetX = (datum) =>
-      sfsGraphHistogramX(datum.row, x, overlayOffset, datum.seriesIndex);
+      sfsGraphHistogramX(datum.row, x, overlayOffset, datum.seriesIndex, seriesOffset);
     const blockWidth = (datum) =>
       sfsGraphHistogramWidth(datum.row, x, overlayWidth, barGap);
     const blockOriginX = (datum) => {
@@ -1436,7 +1437,7 @@ sfsGraphMakeHistogram = (opts = {}, type = "histogram") => {
       .data(rowData)
       .join("rect")
         .attr("class", "sfs-graph-bar")
-        .attr("x", (d) => sfsGraphHistogramX(d.row, x, overlayOffset, d.seriesIndex))
+        .attr("x", (d) => sfsGraphHistogramX(d.row, x, overlayOffset, d.seriesIndex, seriesOffset))
         .attr("y", (d) => entrance.enabled ? y(0) : y(sfsGraphMeasure(d.row, scale)))
         .attr("width", (d) => sfsGraphHistogramWidth(d.row, x, overlayWidth, barGap))
         .attr("height", (d) => entrance.enabled ? 0 : y(0) - y(sfsGraphMeasure(d.row, scale)))
@@ -2294,3 +2295,52 @@ sfsGraphApi = (() => {
   window.sfsGraphs = api;
   return api;
 })()
+
+// Two samples accumulating as blocks, using the histogram's existing geometry.
+makeSampleComparisonCover = (opts = {}) => {
+  const related = opts.related === true;
+  const colors = ["var(--graph-series-1, #0072b2)",
+    related ? "var(--graph-series-6, #56b4e9)" : "var(--graph-series-4, #d55e00)"];
+  const binWidth = 0.12;
+  const series = [-0.48, 0.48].map((mean, index) => {
+    const random = sfsGraphSeededRandom(related ? 137 : 81 + index);
+    const normal = d3.randomNormal.source(random)(0, 1);
+    const bins = d3.bin().domain([-3.6, 3.6]).thresholds(d3.range(-3.6, 3.61, binWidth))(
+      d3.range(350).map(normal));
+    return { color: colors[index], data: bins.map((bin) => ({
+      lower: bin.x0 + mean, upper: bin.x1 + mean, frequency: bin.length
+    })) };
+  });
+  const root = d3.create("div").attr("class", "sfs-figure sfs-figure-cover sample-comparison-cover");
+  const svg = d3.select(makeGraph({
+    type: "block", series, width: 900, responsive: false,
+    // One bin across equals one observation up: square, edge-to-edge blocks.
+    scaleAspectRatio: binWidth, overlayWidth: 1, seriesOffset: 0,
+    xDomain: [-4.2, 4.2], margin: { top: 14, right: 14, bottom: 14, left: 14 },
+    xTickValues: [], yTickValues: [], legend: false, xLabel: false, yLabel: false, blockGap: 0,
+    blockStroke: "var(--sfs-bg, white)", animate: false,
+    ariaLabel: opts.ariaLabel || (related
+      ? "Two overlapping block distributions in distinct shades of blue representing paired samples."
+      : "Two overlapping block distributions in blue and vermilion representing independent samples.")
+  }));
+  svg.selectAll(".sfs-graph-axis, .sfs-graph-grid").remove();
+  root.node().appendChild(svg.node());
+  const blocks = svg.selectAll("rect.sfs-graph-block").style("stroke-width", 0.6);
+  const ranks = sfsGraphBlockFallRanks(blocks.data(), { blockFallOrder: "random", seed: 92 });
+  const orderedBlocks = blocks.nodes().sort((a, b) => ranks.get(a.__data__) - ranks.get(b.__data__));
+  const count = orderedBlocks.length;
+  let visibleCount = count;
+  const timeline = interactiveFigure.coverTimeline(root.node(), {
+    duration: 1900, animate: opts.animate !== false,
+    draw(elapsed) {
+      const shown = Math.floor(count * Math.min(1, elapsed / 1900));
+      // Touch only blocks whose visibility changes, including on replay.
+      for (let i = Math.min(shown, visibleCount); i < Math.max(shown, visibleCount); i += 1) {
+        orderedBlocks[i].setAttribute("opacity", i < shown ? "1" : "0");
+      }
+      visibleCount = shown;
+    }
+  });
+  root.node().value = { related, ...timeline };
+  return root.node();
+}

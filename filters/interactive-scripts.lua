@@ -29,7 +29,7 @@ local manifest = {
   },
   ["graph-generator"] = {
     file = "resources/js/graph-generator.js",
-    deps = { "d3", "visibility-helper" }
+    deps = { "d3", "visibility-helper", "interactive-figure-tools" }
   },
   ["frequency-table-tutorial"] = {
     file = "resources/js/frequency-table-tutorial.js",

@@ -60,3 +60,26 @@ test("authored margins override responsive defaults exactly", () => {
     left: 70
   });
 });
+
+test("full-width histogram bins share edges without shifting overlaid series", () => {
+  const x = value => value * 100;
+  const first = { lower: 0, upper: 0.12 };
+  const next = { lower: 0.12, upper: 0.24 };
+  const width = context.sfsGraphHistogramWidth(first, x, 1, 0);
+  assert.equal(width, 12);
+  for (const series of [0, 1]) {
+    assert.equal(context.sfsGraphHistogramX(first, x, 0, series, 0) + width,
+      context.sfsGraphHistogramX(next, x, 0, series, 0));
+  }
+  // Existing overlay defaults remain available to other figures.
+  assert.equal(context.sfsGraphHistogramX(first, x, 0.14, 1), 2.18);
+});
+
+test("matching scale ratio to bin width makes unit blocks square", () => {
+  const margin = { top: 14, bottom: 14, left: 14, right: 14 };
+  const dimensions = context.sfsGraphDimensionsForLinearScales(
+    { width: 900, scaleAspectRatio: 0.12 }, "block", [-4.2, 4.2], [0, 30], margin);
+  const binPixels = (dimensions.width - 28) / 8.4 * 0.12;
+  const unitPixels = (dimensions.height - 28) / 30;
+  assert.ok(Math.abs(binPixels - unitPixels) < 1e-10);
+});

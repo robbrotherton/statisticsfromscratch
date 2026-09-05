@@ -313,6 +313,119 @@
     return root.sfsInteractive;
   };
 
+  // One-shot abstract covers share visibility, replay, and motion policy.
+  // draw receives elapsed milliseconds; reduced motion always shows the final frame.
+  api.coverTimeline = function(root, { duration, draw, animate = true, startDelay = 200, readyTimeout = 2000 }) {
+    let frame = null;
+    let observer = null;
+    let disposed = false;
+    let started = false;
+    let visible = false;
+    let cancelEntrance = null;
+    const stop = () => {
+      cancelEntrance?.();
+      cancelEntrance = null;
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+    };
+    const finish = () => {
+      stop(); started = true; observer?.disconnect(); draw(duration);
+    };
+    const play = () => {
+      stop();
+      if (disposed) return;
+      started = true;
+      observer?.disconnect();
+      if (!motionAllows(animate)) { finish(); return; }
+      draw(0);
+      let start = null;
+      const tick = (now) => {
+        if (disposed) return;
+        if (!root.isConnected) { stop(); return; }
+        if (!motionAllows(animate)) { finish(); return; }
+        if (start === null) start = now;
+        const elapsed = Math.min(duration, now - start);
+        draw(elapsed);
+        frame = elapsed < duration ? requestAnimationFrame(tick) : null;
+      };
+      frame = requestAnimationFrame(tick);
+    };
+    // Automatic entrance waits for initial loading and font layout, with a
+    // deadline for slow external resources. Replay bypasses this preparation.
+    const prepareEntrance = () => {
+      if (started || disposed || !visible || cancelEntrance) return;
+      let cancelled = false, settled = false;
+      let readyTimer = null, delayTimer = null;
+      const valid = () => !cancelled && !started && !disposed && visible && root.isConnected;
+      const afterReady = () => {
+        if (!valid() || settled) return;
+        settled = true;
+        clearTimeout(readyTimer);
+        window.removeEventListener("load", afterLoad);
+        // Let measurements and paints queued by load/font callbacks settle.
+        frame = requestAnimationFrame(() => {
+          if (!valid()) return;
+          frame = requestAnimationFrame(() => {
+            frame = null;
+            if (!valid()) return;
+            delayTimer = setTimeout(() => { if (valid()) play(); }, startDelay);
+          });
+        });
+      };
+      const afterLoad = () => {
+        Promise.resolve(document.fonts?.ready).then(afterReady, afterReady);
+      };
+      cancelEntrance = () => {
+        cancelled = true;
+        clearTimeout(readyTimer);
+        clearTimeout(delayTimer);
+        window.removeEventListener("load", afterLoad);
+      };
+      readyTimer = setTimeout(afterReady, readyTimeout);
+      if (document.readyState === "complete") afterLoad();
+      else window.addEventListener("load", afterLoad, { once: true });
+    };
+    const keydown = (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); play();
+      }
+    };
+    root.setAttribute("tabindex", "0");
+    root.setAttribute("aria-keyshortcuts", "Enter Space");
+    root.setAttribute("title", "Click or press Enter to replay the cover animation");
+    root.style.cursor = "pointer";
+    root.addEventListener("click", play);
+    root.addEventListener("keydown", keydown);
+    const unsubscribe = window.interactiveRuntime?.motion.onChange((detail) => {
+      if (detail.reduced) finish();
+    });
+    api.adopt(root, {
+      cancelMotion: finish,
+      dispose() {
+        disposed = true; stop(); observer?.disconnect(); unsubscribe?.();
+        root.removeEventListener("click", play);
+        root.removeEventListener("keydown", keydown);
+      }
+    });
+    if (motionAllows(animate)) {
+      draw(0);
+      if (typeof IntersectionObserver === "function") {
+        observer = new IntersectionObserver((entries) => {
+          visible = entries.some((entry) => entry.isIntersecting);
+          if (!started) {
+            if (visible) prepareEntrance();
+            else stop();
+          }
+        }, { threshold: 0.2 });
+        observer.observe(root);
+      } else {
+        visible = true;
+        prepareEntrance();
+      }
+    } else finish();
+    return { replay: play, finish };
+  };
+
   api.observeResponsiveLayout = function(opts) {
     opts = opts || {};
     const root = targetElement(opts.root);

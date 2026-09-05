@@ -1212,3 +1212,119 @@ makeScatterplot = function(opts) {
   rootNode.setPoints = setPoints;
   return rootNode;
 }
+
+// Fixed grid columns reserve a diameter for each dot throughout the morph.
+// Keyframes snap to the radius grid. Animation interpolates between them;
+// distinct columns guarantee no collisions even between those keyframes.
+scAssociationCoverGrid = ({ width = 900, height = 420, radius = 8, count = 48 } = {}) => {
+  const centerX = Math.round(width / 2 / radius) * radius;
+  const centerY = Math.round(height / 2 / radius) * radius;
+  const diameter = 2 * radius;
+  // An even column count puts the center between columns; a half-row offset
+  // keeps the perfect-correlation diagonal on the same radius grid.
+  const rowOffset = count % 2 === 0 ? radius / 2 : 0;
+  const source = scGenerateCloud({ n: count, r: 0, seed: 63,
+    meanX: 0, meanY: 0, sdX: 1, sdY: 1, round: 12 })
+    .sort((a, b) => a[0] - b[0]);
+  const xs = source.map((d, i) => (i - (count - 1) / 2) * diameter);
+  const sdX = Math.sqrt(d3.mean(xs, x => x * x));
+  const standardizedX = xs.map(x => x / sdX);
+  // Re-orthogonalize after assigning columns, so rounding is the only source
+  // of approximation in the requested correlations.
+  const beta = d3.mean(source, (d, i) => d[1] * standardizedX[i]);
+  const errors = source.map((d, i) => d[1] - beta * standardizedX[i]);
+  const meanError = d3.mean(errors);
+  const sdError = Math.sqrt(d3.mean(errors, e => (e - meanError) ** 2));
+  const noise = errors.map(e => (e - meanError) / sdError);
+  const limit = Math.min(centerY, height - centerY) - diameter;
+  return {
+    centerY,
+    pointsAt(r) {
+      const values = standardizedX.map((x, i) => r * x + Math.sqrt(1 - r * r) * noise[i]);
+      // At r=1 the line rises one radius for each diameter across: its points
+      // remain exactly collinear on the grid. Other states use more headroom.
+      const desiredScale = height / 6 + (sdX / 2 - height / 6) * r ** 4;
+      const scale = Math.min(desiredScale, limit / d3.max(values, Math.abs));
+      return values.map((v, i) => ({
+        x: centerX + xs[i],
+        y: Math.round((scale * v + rowOffset) / radius) * radius
+      }));
+    }
+  };
+}
+
+// Placement is discrete; movement between placements is continuous.
+scAssociationCoverInterpolate = (from, to, progress) => from.map((p, i) => ({
+  x: p.x,
+  y: p.y + (to[i].y - p.y) * progress
+}));
+
+makeAssociationCover = (opts = {}) => {
+  const regression = opts.regression === true;
+  const width = 900, height = 420, radius = 8;
+  const grid = scAssociationCoverGrid({ width, height, radius });
+  const initialPoints = grid.pointsAt(0);
+  const alignedPoints = grid.pointsAt(1);
+  const finalPoints = grid.pointsAt(0.6);
+  const fit = scStats(finalPoints);
+  const fittedY = x => fit.fitIntercept + fit.fitSlope * x;
+  const root = d3.create("div").attr("class", "sfs-figure sfs-figure-cover association-cover");
+  const label = regression
+    ? "Multicolored observations with a correlation of about 0.6 pop into view. Their least-squares line draws across the cloud as dot colors change from population colors to green at zero residual through vermilion at the largest absolute residual."
+    : "Multicolored observations pop onto distinct grid positions, align at perfect positive correlation, then move smoothly to a correlation of about 0.6 without overlapping.";
+  const svg = root.append("svg").attr("class", "sfs-svg")
+    .attr("viewBox", [0, 0, width, height]).attr("role", "img").attr("aria-label", label);
+  svg.append("title").text(label);
+  const populationColors = d3.schemeTableau10;
+  const residuals = finalPoints.map(p => Math.abs(p.y - fittedY(p.x)));
+  const maxResidual = d3.max(residuals) || 1;
+  const startingColors = finalPoints.map((p, i) => populationColors[i % populationColors.length]);
+  const residualColors = residuals.map(residual =>
+    `color-mix(in oklch, var(--graph-series-3) ${100 * (1 - residual / maxResidual)}%, var(--graph-series-4))`);
+  const dots = svg.append("g").selectAll("circle").data(finalPoints).join("circle")
+    .attr("cx", d => d.x).attr("r", radius)
+    .attr("fill", (d, i) => startingColors[i])
+    .attr("fill-opacity", 1);
+  const ends = d3.extent(finalPoints, d => d.x);
+  const line = regression ? svg.append("line")
+    .attr("stroke", "var(--graph-series-1, #0072b2)").attr("stroke-width", 2.6)
+    .attr("stroke-linecap", "round") : null;
+  const rng = scMulberry32(42);
+  const reveal = finalPoints.map(() => rng());
+  const lineStart = 1350, lineDuration = 1200, colorDuration = 400;
+  const duration = regression ? lineStart + lineDuration + colorDuration : 3800;
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const timeline = interactiveFigure.coverTimeline(root.node(), {
+    duration, animate: opts.animate !== false,
+    draw(elapsed) {
+      const points = regression ? finalPoints : elapsed < 2400
+        ? scAssociationCoverInterpolate(initialPoints, alignedPoints,
+          d3.easeCubicInOut(clamp((elapsed - 1350) / 850)))
+        : scAssociationCoverInterpolate(alignedPoints, finalPoints,
+          d3.easeCubicInOut(clamp((elapsed - 2650) / 1150)));
+      dots.attr("cy", (d, i) => grid.centerY - points[i].y)
+        .attr("opacity", (d, i) => elapsed > 0 && elapsed >= reveal[i] * 1000 ? 1 : 0);
+      if (line) {
+        const end = ends[0] + (ends[1] - ends[0]) * clamp((elapsed - lineStart) / lineDuration);
+        // Each color transition follows the drawing line as it reaches that
+        // observation. Fill stays fully opaque throughout the color change.
+        dots.attr("fill", (d, i) => {
+          const fraction = (d.x - ends[0]) / (ends[1] - ends[0]);
+          const progress = d3.easeCubicInOut(clamp(
+            (elapsed - lineStart - fraction * lineDuration) / colorDuration));
+          if (progress === 0) return startingColors[i];
+          if (progress === 1) return residualColors[i];
+          return `color-mix(in oklab, ${startingColors[i]} ${100 * (1 - progress)}%, ${residualColors[i]})`;
+        });
+        line.attr("x1", ends[0]).attr("y1", grid.centerY - fittedY(ends[0]))
+          .attr("x2", end).attr("y2", grid.centerY - fittedY(end))
+          .attr("opacity", elapsed > lineStart ? 1 : 0);
+      }
+      root.node().value = Object.assign(root.node().value || {}, {
+        correlation: scStats(points).r, regression, points: points.map(p => [p.x, p.y])
+      });
+    }
+  });
+  root.node().value.replay = timeline.replay;
+  return root.node();
+}
