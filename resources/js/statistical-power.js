@@ -39,8 +39,8 @@ makeStatisticalPowerDiagram = function(opts) {
 
   root.append("style").text(`
     .statistical-power-diagram {
-      --sp-null-color: var(--sfs-danger-color, #c63f3f);
-      --sp-alt-color: var(--sfs-comparison-color, #2f6f9f);
+      --sp-null-color: var(--sfs-critical-color, #c63f3f);
+      --sp-alt-color: var(--sfs-power-color, #7654b5);
       --sp-beta-color: var(--sfs-neutral-color, #7b818a);
       --sp-power-color: var(--sp-alt-color);
       --sfs-figure-margin: 1.5rem 0;
@@ -314,7 +314,7 @@ makeStatisticalPowerDiagram = function(opts) {
 
   const nullCurve = nullLayer.append("path")
     .attr("fill", "none")
-    .attr("stroke", "currentColor")
+    .style("stroke", "var(--sfs-null-color, currentColor)")
     .attr("stroke-width", 2.25);
   const altCurve = altLayer.append("path")
     .attr("fill", "none")

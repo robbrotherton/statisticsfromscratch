@@ -32,8 +32,8 @@ makeCiNhstDiagram = function(opts) {
 
   root.append("style").text(`
     .ci-nhst-diagram {
-      --cn-null-color: var(--sfs-danger-color, #c63f3f);
-      --cn-ci-color: var(--sfs-comparison-color, #2f6f9f);
+      --cn-null-color: var(--sfs-critical-color, #c63f3f);
+      --cn-ci-color: var(--sfs-confidence-color, #2f6f9f);
       --sfs-figure-margin: 1.5rem 0;
     }
 
@@ -238,7 +238,7 @@ makeCiNhstDiagram = function(opts) {
     .attr("opacity", 0.30);
   const nullCurve = nullLayer.append("path")
     .attr("fill", "none")
-    .style("stroke", "var(--cn-null-color)")
+    .style("stroke", "var(--sfs-null-color, currentColor)")
     .attr("stroke-width", 2.25);
   const nullMeanLine = nullLayer.append("line")
     .style("stroke", "var(--cn-null-color)")

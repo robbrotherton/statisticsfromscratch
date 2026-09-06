@@ -372,7 +372,7 @@ sfsDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => 
   return shadeSpecs.flatMap((rawSpec, index) => {
     const spec = typeof rawSpec === "string" ? { tail: rawSpec } : rawSpec || {};
     const kind = sfsDistributionNormalizeKey(spec.kind || spec.type);
-    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-danger-color, #c63f3f)");
+    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-critical-color, #c63f3f)");
     const opacity = sfsDistributionFiniteNumber(spec.opacity, kind === "overlap" ? 0.32 : 0.28);
 
     if (["overlap", "intersection"].includes(kind)) {
@@ -2307,6 +2307,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
   const root = d3.select(rootNode)
     .attr("class", "distribution-graph sfs-figure")
     .style("--dg-max-width", opts.maxWidth || null)
+    .style("--graph-line-color", opts.stroke || opts.color || null)
     .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   root.selectAll("*").remove();
 
@@ -2841,6 +2842,39 @@ makeDistributionGraph = (opts = {}) => {
   if (opts.responsive === false || !rootNode) return rootNode;
   sfsDistributionObserveWidth(rootNode, opts, sfsDistributionRenderGraph);
   return rootNode;
+}
+
+// Abstract inference covers use the figure renderer's curves, quantiles and
+// area paths; the shared cover timeline only sequences their entrance.
+makeInferenceCover = (opts = {}) => {
+  const root = makeDistributionGraph(Object.assign({
+    style: "minimal", width: 900, aspectRatio: 2.4, legend: false,
+    maxWidth: "var(--sfs-cover-max-width, 46rem)"
+  }, opts, { animate: false, responsive: false }));
+  root.classList.add("sfs-figure-cover");
+  const svg = d3.select(root).select("svg");
+  const lines = svg.selectAll(".dg-curve")
+    .style("stroke", (d) => d.distribution.stroke);
+  const shades = svg.selectAll(".dg-shade");
+  const [, , width, height] = svg.attr("viewBox").split(/[ ,]+/).map(Number);
+  const clips = sfsDistributionRevealClips(svg, lines, { left: 0, width, height });
+  const lineDuration = 1150, shadeDuration = 650, shadeDelay = 120;
+  const stageDuration = lineDuration + shadeDelay + shadeDuration + 250;
+  const progress = (elapsed, start, duration) =>
+    d3.easeCubicInOut(Math.max(0, Math.min(1, (elapsed - start) / duration)));
+  const timeline = interactiveFigure.coverTimeline(root, {
+    duration: stageDuration * lines.size() - 250,
+    animate: opts.animate !== false,
+    draw(elapsed) {
+      clips.forEach((clip, index) => clip.rect.attr("width",
+        clip.width * progress(elapsed, index * stageDuration, lineDuration)));
+      shades.style("fill-opacity", (d) => d.opacity * progress(elapsed,
+        (d.distribution?.index || 0) * stageDuration + lineDuration + shadeDelay,
+        shadeDuration));
+    }
+  });
+  Object.assign(root.value, timeline);
+  return root;
 }
 
 sfsDistributionClamp = (value, min, max) =>

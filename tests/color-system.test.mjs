@@ -72,12 +72,8 @@ test("standalone figure fallbacks agree with the central series tokens", () => {
     assert.match(source(name), /--graph-series-2, #e69f00/);
   }
 
-  for (const name of [
-    "bee-swarm.js",
-    "standard-error-curve-demo.js"
-  ]) {
-    assert.match(source(name), /--graph-series-1, [^\n]*#0072b2/);
-  }
+  assert.match(source("standard-error-curve-demo.js"), /--graph-series-1, [^\n]*#0072b2/);
+  assert.match(source("bee-swarm.js"), /--sfs-null-color, currentColor/);
 
   assert.match(source("scatterplot.js"), /--graph-point-fill, #0072b2/);
 });
