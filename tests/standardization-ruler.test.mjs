@@ -79,8 +79,9 @@ test("the chapter opens with the aligned X-to-z ruler cover", () => {
   assert.match(coverSource, /tickFormat\(function\(\) \{ return "z"; \}\)/);
   assert.equal((coverSource.match(/\.attr\("d", "M" \+ margin\.left \+ ",0H"/g) || []).length, 2);
   assert.match(coverSource, /blockDuration \+ rulerPause/);
-  assert.match(coverSource, /attr\("transform", "translate\(0," \+ zY \+ "\)"\)/);
-  assert.match(coverSource, /cancelMotion: function\(\) \{ settleCurrent\(\); \}/);
+  assert.match(coverSource, /zY \+ 24 \* \(1 - progress\)/);
+  assert.match(coverSource, /api\.coverTimeline\(rootNode/);
+  assert.match(coverSource, /drawFrame\(elapsed\)/);
   assert.match(coverSource, /blocks: blockData\.length/);
   assert.equal(
     numericSourceArray("Z_SCORE_COVER_COUNTS").reduce((sum, count) => sum + count, 0),
@@ -212,14 +213,21 @@ test("the tutorial now lives under other scales and owns the IQ and SAT process"
   assert.match(tutorialSection, /standardizationRuler[\s\S]*?makeStandardizationRuler/);
   assert.deepEqual(steps.map((step) => step.title), [
     "Original", "z-scores", "Set the SD", "Set the mean",
-    "Start from z", "Set the SD", "Set the mean"
+    "Use the scale", "Original", "z-scores", "Set the SD", "Set the mean", "Use the scale"
   ]);
   assert.deepEqual(steps.map((step) => step.action.rulerMode), [
-    "z", "z", "iqScaled", "iq", "z", "satScaled", "sat"
+    "z", "z", "iqScaled", "iq", "iq", "z", "z", "satScaled", "sat", "sat"
+  ]);
+  assert.deepEqual(steps.map(({ action }) => [action.primary, action.secondary, action.tertiary]), [
+    ["testRaw", null, null], ["testRaw", "testZ", null],
+    ["testRaw", "testZ", "testWorking"], ["testRaw", "testZ", "testWorking"],
+    ["testWorking", null, null], ["testRaw", null, null], ["testRaw", "testZ", null],
+    ["testRaw", "testZ", "testWorking"], ["testRaw", "testZ", "testWorking"],
+    ["testWorking", null, null]
   ]);
   assert.ok(steps.every((step) => step.action.scene === "curve"));
   assert.doesNotMatch(tutorialSection, /"scene":"blocks"|blockRaw|blockZ/);
-  assert.match(tutorialSection, /multiply every number on the \$z\$ ruler by 15/);
+  assert.match(tutorialSection, /multiply every number on this new ruler by 15/);
   assert.match(tutorialSection, /add 100 to every number/);
   assert.match(tutorialSection, /multiply every \$z\$-score by 100/);
   assert.match(tutorialSection, /add 500 to every score/);
