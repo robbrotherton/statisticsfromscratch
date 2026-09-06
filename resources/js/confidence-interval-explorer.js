@@ -9,8 +9,8 @@ cieEnsureStyles = () => {
   style.id = "confidence-interval-explorer-styles";
   style.textContent = `
     .confidence-interval-explorer {
-      --cie-hit: var(--sfs-comparison-color, #2f6f9f);
-      --cie-miss: var(--sfs-danger-color, #c63f3f);
+      --cie-hit: var(--sfs-confidence-color, #2f6f9f);
+      --cie-miss: var(--sfs-critical-color, #c63f3f);
       --cie-neutral: var(--sfs-neutral-color, #7b818a);
       --sfs-figure-max-width: var(--cie-max-width, 46rem);
     }

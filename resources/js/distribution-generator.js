@@ -372,7 +372,7 @@ sfsDistributionShadeItems = (opts = {}, distributions = [], domain = [0, 1]) => 
   return shadeSpecs.flatMap((rawSpec, index) => {
     const spec = typeof rawSpec === "string" ? { tail: rawSpec } : rawSpec || {};
     const kind = sfsDistributionNormalizeKey(spec.kind || spec.type);
-    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-danger-color, #c63f3f)");
+    const color = spec.color || spec.fill || (kind === "overlap" ? "var(--sfs-neutral-color, #7b818a)" : "var(--sfs-critical-color, #c63f3f)");
     const opacity = sfsDistributionFiniteNumber(spec.opacity, kind === "overlap" ? 0.32 : 0.28);
 
     if (["overlap", "intersection"].includes(kind)) {
@@ -671,12 +671,10 @@ sfsDistributionMargin = (opts = {}, display = sfsDistributionDisplay(opts)) => {
 }
 
 sfsDistributionStyleAxis = (axis, display) => {
-  axis.attr("class", function() {
-      return `${this.getAttribute("class") || ""} sfs-axis sfs-graph-axis`;
-    })
+  axis.classed("sfs-axis sfs-graph-axis", true)
     .call((g) => g.selectAll("text").attr("class", "sfs-tick-label sfs-graph-tick-label"))
     .call((g) => g.selectAll("line").attr("class", "sfs-graph-tick-line"))
-    .call((g) => g.selectAll("path").attr("class", "sfs-graph-domain"));
+    .call((g) => g.selectAll("path").classed("sfs-graph-domain", true));
 
   if (!display.showAxisLines) axis.selectAll("path,line").style("display", "none");
   if (!display.showTickLabels) axis.selectAll("text").style("display", "none");
@@ -1502,7 +1500,7 @@ makeDistributionFamilySvgCover = (opts = {}) => {
 
   const linePaths = curveGroups.append("path")
     .attr("class", "dfc-curve")
-    .attr("stroke", (d) => d.distribution.stroke)
+    .style("stroke", (d) => d.distribution.stroke)
     .attr("stroke-width", (d) => d.distribution.strokeWidth)
     .attr("stroke-opacity", (d) => d.distribution.opacity)
     .attr("stroke-linejoin", "round")
@@ -2307,6 +2305,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
   const root = d3.select(rootNode)
     .attr("class", "distribution-graph sfs-figure")
     .style("--dg-max-width", opts.maxWidth || null)
+    .style("--graph-line-color", opts.stroke || opts.color || null)
     .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   root.selectAll("*").remove();
 
@@ -2653,7 +2652,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
     .data(curveData)
     .join("path")
       .attr("class", "dg-curve sfs-graph-line")
-      .attr("stroke", (d) => d.distribution.stroke)
+      .style("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
       .attr("stroke-dasharray", (d) => d.distribution.strokeDasharray)
@@ -2841,6 +2840,38 @@ makeDistributionGraph = (opts = {}) => {
   if (opts.responsive === false || !rootNode) return rootNode;
   sfsDistributionObserveWidth(rootNode, opts, sfsDistributionRenderGraph);
   return rootNode;
+}
+
+// Abstract inference covers use the figure renderer's curves, quantiles and
+// area paths; the shared cover timeline only sequences their entrance.
+makeInferenceCover = (opts = {}) => {
+  const root = makeDistributionGraph(Object.assign({
+    style: "minimal", width: 900, aspectRatio: 2.4, legend: false,
+    maxWidth: "var(--sfs-cover-max-width, 46rem)"
+  }, opts, { animate: false, responsive: false }));
+  root.classList.add("sfs-figure-cover");
+  const svg = d3.select(root).select("svg");
+  const lines = svg.selectAll(".dg-curve");
+  const shades = svg.selectAll(".dg-shade");
+  const [, , width, height] = svg.attr("viewBox").split(/[ ,]+/).map(Number);
+  const clips = sfsDistributionRevealClips(svg, lines, { left: 0, width, height });
+  const lineDuration = 1150, shadeDuration = 650, shadeDelay = 120;
+  const stageDuration = lineDuration + shadeDelay + shadeDuration + 250;
+  const progress = (elapsed, start, duration) =>
+    d3.easeCubicInOut(Math.max(0, Math.min(1, (elapsed - start) / duration)));
+  const timeline = interactiveFigure.coverTimeline(root, {
+    duration: stageDuration * lines.size() - 250,
+    animate: opts.animate !== false,
+    draw(elapsed) {
+      clips.forEach((clip, index) => clip.rect.attr("width",
+        clip.width * progress(elapsed, index * stageDuration, lineDuration)));
+      shades.style("fill-opacity", (d) => d.opacity * progress(elapsed,
+        (d.distribution?.index || 0) * stageDuration + lineDuration + shadeDelay,
+        shadeDuration));
+    }
+  });
+  Object.assign(root.value, timeline);
+  return root;
 }
 
 sfsDistributionClamp = (value, min, max) =>
@@ -3537,9 +3568,9 @@ makeDistributionParameterExplorer = function(opts = {}) {
     renderedState[parameter.key] = parameter.value;
   });
 
-  const width = sfsDistributionPositiveNumber(opts.width, 640);
+  let width = sfsDistributionPositiveNumber(opts.width, 640);
   const aspectRatio = sfsDistributionPositiveNumber(opts.aspectRatio, 2.2);
-  const height = sfsDistributionPositiveNumber(opts.height, width / aspectRatio);
+  let height = sfsDistributionPositiveNumber(opts.height, width / aspectRatio);
   const display = sfsDistributionDisplay(opts);
   const margin = sfsDistributionMargin(opts, display);
   const points = Math.max(80, Math.round(sfsDistributionPositiveNumber(opts.points, 360)));
@@ -3584,6 +3615,8 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   parameters.forEach(addSlider);
 
+  const intervalReadout = opts.confidenceInterval
+    ? root.append("p").attr("class", "dpe-interval-readout sfs-readout-value") : null;
   const chartWrap = root.append("div")
     .attr("class", "dpe-chart-wrap sfs-chart-wrap");
 
@@ -3627,6 +3660,17 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
 
   sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
+  const intervalLayer = opts.confidenceInterval
+    ? svg.append("g").attr("class", "dpe-confidence-interval") : null;
+  if (intervalLayer) {
+    intervalLayer.append("path").attr("class", "dpe-interval-bracket")
+      .attr("fill", "none").style("stroke", "var(--sfs-confidence-color)")
+      .attr("stroke-width", 2).attr("vector-effect", "non-scaling-stroke");
+    intervalLayer.append("line").attr("class", "dpe-estimate")
+      .style("stroke", "var(--sfs-confidence-color)").attr("stroke-dasharray", "4 4");
+    intervalLayer.selectAll("text").data(["lower", "upper"]).join("text")
+      .attr("class", "sfs-graph-label").attr("text-anchor", "middle");
+  }
 
   function parameterState(source = state) {
     const next = {};
@@ -3646,6 +3690,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     parameters.forEach((parameter) => {
       next[parameter.key] = source[parameter.key];
     });
+    if (opts.confidenceInterval) next.sd = source["population-sd"] / Math.sqrt(source.n);
     return next;
   }
 
@@ -3674,7 +3719,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: dist,
       data: sfsDistributionCurveData(dist, domain, points)
     }));
-    const shadeItems = sfsDistributionShadeItems(opts, distributions, domain);
+    const shadeOptions = opts.confidenceInterval ? Object.assign({}, opts, {
+      shade: { tail: "center", p: source.confidence / 100,
+        color: "var(--sfs-confidence-color, #2f6f9f)", opacity: 0.3 }
+    }) : opts;
+    const shadeItems = sfsDistributionShadeItems(shadeOptions, distributions, domain);
     const explicitY = sfsDistributionExplorerYDomain(type, opts);
     const yMax = d3.max(curveData, (series) => d3.max(series.data, (d) => d.y)) || 1;
     const yDomain = explicitY || [0, yMax * 1.12];
@@ -3690,7 +3739,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function setValue(plot, source = state) {
     const controlled = plot.distributions.find((dist) => dist.role === "controlled") || plot.distributions[plot.distributions.length - 1];
-    rootNode.value = Object.assign({}, source, {
+    const interval = opts.confidenceInterval ? plot.shadeItems[0] : null;
+    rootNode.value = Object.assign({}, source, interval ? {
+      lower: interval.from, upper: interval.to,
+      intervalWidth: interval.to - interval.from, standardError: controlled.sd
+    } : {}, {
       distribution: controlled.type,
       distributions: plot.distributions,
       controlledDistribution: controlled,
@@ -3836,7 +3889,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       .append("path")
       .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
       .attr("fill", "none")
-      .attr("stroke", (d) => d.distribution.stroke)
+      .style("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
       .attr("stroke-dasharray", (d) => d.distribution.strokeDasharray)
@@ -3844,7 +3897,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     const pathsMerged = paths.merge(pathsEnter)
       .attr("class", (d) => `dpe-curve dg-curve sfs-graph-line ${d.distribution.role === "reference" ? "dpe-reference-curve" : "dpe-controlled-curve"}`)
-      .attr("stroke", (d) => d.distribution.stroke)
+      .style("stroke", (d) => d.distribution.stroke)
       .attr("stroke-width", (d) => d.distribution.strokeWidth)
       .attr("stroke-opacity", (d) => d.distribution.opacity)
       .attr("stroke-dasharray", (d) => d.distribution.strokeDasharray);
@@ -3861,6 +3914,23 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     paths.exit().remove();
 
+    if (intervalLayer) {
+      const { from, to } = plot.shadeItems[0];
+      const dist = plot.distributions[0];
+      const baseline = y(0), bracketY = baseline + 34;
+      intervalLayer.select(".dpe-interval-bracket").attr("d",
+        `M${x(from)},${bracketY - 5}V${bracketY + 5}M${x(from)},${bracketY}H${x(to)}M${x(to)},${bracketY - 5}V${bracketY + 5}`);
+      intervalLayer.select(".dpe-estimate")
+        .attr("x1", x(dist.mean)).attr("x2", x(dist.mean))
+        .attr("y1", baseline).attr("y2", y(sfsDistributionPdf(dist, dist.mean)));
+      intervalLayer.selectAll("text")
+        .attr("x", (d, i) => x(i ? to : from)).attr("y", bracketY + 24)
+        .text((d, i) => d3.format(".1f")(i ? to : from));
+      const summary = `${d3.format(".0f")(source.confidence)}% confidence · n = ${d3.format(".0f")(source.n)} · σ = ${d3.format(".0f")(source["population-sd"])} ms`;
+      intervalReadout.text(summary);
+      const description = `${summary}. Mean ${dist.mean.toFixed(2)} ms; standard error ${dist.sd.toFixed(2)} ms. Confidence interval ${from.toFixed(1)} to ${to.toFixed(1)} ms, width ${(to - from).toFixed(1)} ms.`;
+      svg.attr("aria-label", description).select("title").text(description);
+    }
     drawLegend(plot.distributions);
     setValue(plot, source);
     syncControls(source, { syncInputs: options.syncInputs !== false });
@@ -3893,7 +3963,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     }
 
     activeTween = d3.timer((elapsed) => {
-      const rawT = Math.min(1, elapsed / duration);
+      const rawT = sfsDistributionPrefersReducedMotion() ? 1 : Math.min(1, elapsed / duration);
       const eased = d3.easeCubicOut(rawT);
       parameters.forEach((parameter) => {
         const key = parameter.key;
@@ -3995,8 +4065,49 @@ makeDistributionParameterExplorer = function(opts = {}) {
     });
   }
 
+  if (window.interactiveFigure) {
+    window.interactiveFigure.adopt(rootNode, {
+      cancelMotion() {
+        stopTween(); Object.assign(renderedState, state); renderPlot(renderedState);
+      },
+      dispose: stopTween
+    });
+    if (opts.confidenceInterval) window.interactiveFigure.observeResponsiveLayout({
+      root: rootNode, container: chartWrap.node(), minimumWidth: 280, maximumWidth: 1000,
+      onLayout(layout) {
+        width = layout.width;
+        height = Math.max(300, Math.min(360, width * 0.55));
+        svg.attr("viewBox", [0, 0, width, height]);
+        x.range([margin.left, width - margin.right]);
+        y.range([height - margin.bottom, margin.top]);
+        area.y0(y(0));
+        xAxisLayer.attr("transform", `translate(0,${height - margin.bottom})`);
+        labelLayer.selectAll("*").remove();
+        sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
+        lastRender = null;
+        renderPlot(renderedState);
+      }
+    });
+  }
   return rootNode;
 }
+
+// A preset of the parameter explorer: the same density/shading geometry,
+// parameter interpolation, controls, and tutorial navigation as the t explorer.
+makeConfidenceWidthExplorer = (opts = {}) => makeDistributionParameterExplorer(Object.assign({
+  confidenceInterval: true, distribution: "normal", mean: 322.59,
+  reference: false, legend: false, style: "minimal", xAxis: true, axisLabels: true, yLabel: false,
+  xDomain: [280, 365], yDomain: [0, 0.09], xTicks: 5,
+  xLabel: "Reaction time (ms)", color: "var(--sfs-confidence-color, #2f6f9f)",
+  width: 680, height: 360, margin: { top: 16, right: 18, bottom: 104, left: 18 },
+  transitionDuration: 1000, controlsTitle: "Confidence interval",
+  controlsLabel: "confidence interval controls",
+  parameters: [
+    { key: "confidence", label: "Confidence (%)", min: 80, max: 99, step: 1, value: 95 },
+    { key: "n", label: "Sample size", min: 23, max: 100, step: 1, value: 23 },
+    { key: "population-sd", label: "Population SD (ms)", min: 25, max: 50, step: 1, value: 50 }
+  ]
+}, opts));
 
 makeDistributionExplorer = makeDistributionParameterExplorer
 
