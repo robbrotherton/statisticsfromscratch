@@ -4,9 +4,9 @@
   const SVG_NS = "http://www.w3.org/2000/svg";
   const BLOCK_VALUES = [0, 2, 2, 3, 5, 6];
   const PLOT_MARGIN = { top: 42, right: 24, bottom: 12, left: 24 };
-  const RULER_EXIT_MS = 1450;
-  const RULER_MOVE_MS = 1800;
-  const RULER_ENTER_MS = 1550;
+  const RULER_EXIT_MS = 450;
+  const RULER_MOVE_MS = 1100;
+  const RULER_ENTER_MS = 900;
   const SCENE_SLIDE_MS = 1550;
   const RULER_REWRITE_MS = 1500;
   const SELECTED_VALUE_MARKER = Object.freeze({
@@ -65,6 +65,12 @@
       compactLabel: "Test scores · μ 70 · σ 5",
       ticks: [60, 65, 70, 75, 80],
       position: function(value) { return (value - 70) / 5; }
+    },
+    testZ: {
+      label: "z-scores · μ = 0 · σ = 1",
+      compactLabel: "z-scores · μ 0 · σ 1",
+      ticks: [-2, -1, 0, 1, 2],
+      position: function(value) { return value; }
     },
     testWorking: {
       label: "z-scores · μ = 0 · σ = 1",
@@ -228,8 +234,7 @@
   function stripPlotAxis(svg, selector) {
     const axis = svg.querySelector(selector);
     if (!axis) return;
-    axis.classList.add("sr-plot-baseline");
-    axis.querySelectorAll(".tick").forEach(function(tick) { tick.remove(); });
+    axis.remove();
   }
 
   function sharedBlockPlot(width) {
@@ -294,7 +299,7 @@
       markers: [
         {
           at: 70,
-          label: "mean = 70",
+          label: "mean",
           height: "full",
           color: "var(--graph-text-color)",
           dash: "3 4",
@@ -302,7 +307,7 @@
         },
         selectedValueMarker({
           at: 80,
-          label: "X = 80",
+          label: "marked score",
           height: 0.66
         })
       ],
@@ -660,16 +665,21 @@
     rootNode.style.setProperty("--sfs-figure-max-width", opts.maxWidth || "46rem");
 
     let layoutController = null;
-    let hasRendered = false;
-    let settleCurrent = function() {};
+    let drawFrame = function() {};
+    let elapsed = 0;
+    let timeline = null;
 
     function positiveOption(value, fallback) {
       const number = Number(value);
       return Number.isFinite(number) && number > 0 ? number : fallback;
     }
 
+    const blockDuration = positiveOption(opts.blockDuration, 1600);
+    const rulerPauseValue = Number(opts.rulerPause);
+    const rulerPause = Number.isFinite(rulerPauseValue) ? Math.max(0, rulerPauseValue) : 120;
+    const rulerDuration = positiveOption(opts.rulerDuration, 900);
+
     function render(width) {
-      if (hasRendered) settleCurrent();
       const drawWidth = Math.max(280, Math.round(width));
       const compact = drawWidth < 420;
       const margin = {
@@ -694,16 +704,6 @@
       const y = d3.scaleLinear()
         .domain(yDomain)
         .range([rawY, margin.top]);
-      const shouldAnimate = motionAllows(opts.animate !== false && !hasRendered);
-      const blockDuration = positiveOption(opts.blockDuration, 1600);
-      const rulerPauseValue = Number(opts.rulerPause);
-      const rulerPause = Number.isFinite(rulerPauseValue)
-        ? Math.max(0, rulerPauseValue)
-        : 120;
-      const rulerDuration = positiveOption(opts.rulerDuration, 720);
-      const threshold = Number.isFinite(Number(opts.visibilityThreshold))
-        ? Number(opts.visibilityThreshold)
-        : 0.3;
       const ariaLabel = opts.ariaLabel ||
         "A colorful mound of 22 blocks above two aligned rulers. Their shared center " +
         "is labeled X on the original-score ruler and z on the standardized ruler, " +
@@ -727,8 +727,7 @@
         yLabel: false,
         yAxisLine: false,
         responsive: false,
-        animate: shouldAnimate,
-        animationThreshold: threshold,
+        animate: false,
         blockFallOrder: "random",
         blockFallSeed: "z-score-cover-blocks-v1",
         fallStagger: positiveOption(opts.fallStagger, 42),
@@ -778,52 +777,42 @@
       zAxis.select(".sfs-graph-domain")
         .attr("d", "M" + margin.left + ",0H" + (drawWidth - margin.right));
 
-      function finish() {
-        d3.select(figure).selectAll("*").interrupt();
-        d3.select(svg).selectAll(".sfs-graph-block")
-          .attr("y", function(datum) { return y(datum.blockUpper); });
-        zAxis
-          .interrupt()
-          .attr("transform", "translate(0," + zY + ")")
-          .style("opacity", 1);
-      }
-
-      function playRuler() {
-        zAxis
-          .interrupt()
-          .attr("transform", "translate(0," + rawY + ")")
-          .style("opacity", 0)
-          .transition()
-          .delay(blockDuration + rulerPause)
-          .duration(rulerDuration)
-          .ease(d3.easeCubicOut)
-          .attr("transform", "translate(0," + zY + ")")
-          .style("opacity", 1);
-      }
-
-      if (shouldAnimate) {
-        zAxis
-          .attr("transform", "translate(0," + rawY + ")")
-          .style("opacity", 0);
-        if (typeof global.sfsDistributionOnVisible === "function") {
-          global.sfsDistributionOnVisible(figure, playRuler, threshold);
-        } else if (typeof global.onVisible === "function") {
-          global.onVisible(figure, playRuler, threshold);
-        } else {
-          global.requestAnimationFrame(playRuler);
-        }
-      } else {
-        finish();
-      }
-
-      settleCurrent = finish;
+      const blocks = d3.select(svg).selectAll(".sfs-graph-block");
+      const ceilingY = -(y(0) - y(1)) * 1.5;
+      const stagger = positiveOption(opts.fallStagger, 42);
+      const flights = blocks.nodes().map(function(node) {
+        const targetY = y(node.__data__.blockUpper);
+        return {
+          node,
+          targetY,
+          start: Number(node.getAttribute("data-fall-rank")) * stagger,
+          duration: global.sfsGraphFallDurationForDistance(targetY - ceilingY)
+        };
+      });
+      const fallEnd = Math.max.apply(null, flights.map(function(flight) {
+        return flight.start + flight.duration;
+      }));
+      drawFrame = function(time) {
+        const fallTime = time * fallEnd / blockDuration;
+        flights.forEach(function(flight) {
+          const progress = Math.max(0, Math.min(1, (fallTime - flight.start) / flight.duration));
+          flight.node.setAttribute("y", ceilingY +
+            (flight.targetY - ceilingY) * d3.easeQuadIn(progress));
+        });
+        const progress = d3.easeCubicOut(Math.max(0, Math.min(1,
+          (time - (blockDuration + rulerPause)) / rulerDuration)));
+        // The new scale arrives from beneath its final position, as in the tutorial.
+        zAxis.attr("transform", "translate(0," + (zY + 24 * (1 - progress)) + ")")
+          .style("opacity", progress);
+      };
       rootNode.replaceChildren(figure);
-      hasRendered = true;
+      drawFrame(elapsed);
       rootNode.value = {
         rawLabel: "X",
         standardizedLabel: "z",
         center: 0,
-        blocks: blockData.length
+        blocks: blockData.length,
+        ...(timeline || {})
       };
       rootNode.dispatchEvent(new Event("input", { bubbles: true }));
     }
@@ -842,9 +831,18 @@
       render(Number(opts.width) || 720);
     }
 
+    timeline = api.coverTimeline(rootNode, {
+      duration: blockDuration + rulerPause + rulerDuration,
+      animate: opts.animate !== false,
+      draw: function(time) {
+        elapsed = time;
+        drawFrame(time);
+      }
+    });
+    Object.assign(rootNode.value || (rootNode.value = {}), timeline);
+
     if (api && typeof api.adopt === "function") {
       api.adopt(rootNode, {
-        cancelMotion: function() { settleCurrent(); },
         dispose: function() {
           if (layoutController && typeof layoutController.dispose === "function") {
             layoutController.dispose();
@@ -1049,28 +1047,20 @@
     function drawRuler(name, group, requestedMode) {
       group.replaceChildren();
       const config = rulerConfig(name, requestedMode);
-      const board = svgElement("rect", {
-        class: "sr-ruler-board",
-        x: geometry.left - 9,
-        y: -10,
-        width: geometry.plotWidth + 18,
-        height: 38,
-        rx: 4
-      });
       const title = svgElement("text", {
         class: "sr-ruler-title sfs-graph-label",
         x: geometry.left,
-        y: -17
+        y: 43
       });
       title.textContent = geometry.compact ? config.compactLabel : config.label;
       const operation = svgElement("text", {
         class: "sr-ruler-operation sfs-graph-label",
         x: geometry.right,
-        y: -17,
+        y: 43,
         "text-anchor": "end",
         "aria-hidden": "true"
       });
-      group.append(board, title, operation);
+      group.append(title, operation);
 
       const scale = d3.scaleLinear()
         .domain([-2.5, 2.5])
@@ -1094,7 +1084,7 @@
       }
     }
 
-    function rewriteWorkingRuler(previousMode, nextMode, animate) {
+    function rewriteWorkingRuler(previousMode, nextMode, animate, delay) {
       if (previousMode === nextMode) return [];
       const group = rulerNodes.get("testWorking");
       const config = rulerConfig("testWorking", nextMode);
@@ -1143,7 +1133,13 @@
       function advance(time) {
         if (complete) return;
         if (startTime === null) startTime = time;
-        const progress = Math.min(1, Math.max(0, (time - startTime) / RULER_REWRITE_MS));
+        const elapsed = time - startTime - (delay || 0);
+        if (elapsed < 0) {
+          frameRequest = global.requestAnimationFrame(advance);
+          return;
+        }
+        title.textContent = "Transformed scores";
+        const progress = Math.min(1, Math.max(0, elapsed / RULER_REWRITE_MS));
         const frameIndex = Math.min(
           frames.length - 1,
           Math.floor(progress * frames.length)
@@ -1185,19 +1181,22 @@
     function drawGeometry(layout) {
       cancelMotion();
       const width = Math.max(280, Math.round(layout.width));
-      const rulerHeight = layout.compact ? 142 : 148;
+      const rulerHeight = 204;
       geometry = {
         compact: layout.compact,
         width,
         rulerHeight,
         left: PLOT_MARGIN.left,
         right: width - PLOT_MARGIN.right,
-        primaryY: layout.compact ? 35 : 38,
-        secondaryY: layout.compact ? 102 : 107
+        primaryY: 0,
+        secondaryY: 70,
+        tertiaryY: 140
       };
       geometry.plotWidth = geometry.right - geometry.left;
       rebuildSharedPlots(width);
 
+      rulerSvg.style.marginTop = -PLOT_MARGIN.bottom + "px";
+      rulerSvg.style.position = "relative";
       rulerSvg.setAttribute("width", String(width));
       rulerSvg.setAttribute("height", String(rulerHeight));
       rulerSvg.setAttribute("viewBox", "0 0 " + width + " " + rulerHeight);
@@ -1211,127 +1210,62 @@
     function slotFor(name, nextState) {
       if (name === nextState.primary) return "primary";
       if (name === nextState.secondary) return "secondary";
+      if (name === nextState.tertiary) return "tertiary";
       return "hidden";
     }
 
     function targetY(slot, previous) {
       if (slot === "primary") return geometry.primaryY;
       if (slot === "secondary") return geometry.secondaryY;
-      if (previous && previous.slot === "primary") return -46;
-      if (previous && previous.slot === "hidden") return previous.y;
-      return geometry.secondaryY + 52;
+      if (slot === "tertiary") return geometry.tertiaryY;
+      return previous ? previous.y : geometry.tertiaryY + 24;
     }
 
     function accessibleDescription(nextState) {
-      if (nextState.scene === "blocks" && nextState.secondary === null) {
-        return "Block histogram of six scores above an original-score ruler. The mean is 3, the standard deviation is 2, and score 5 is marked.";
-      }
-      if (nextState.scene === "blocks") {
-        return "The same block histogram above two aligned rulers. Original score 3 aligns with z equals 0, and original score 5 aligns with z equals 1.";
-      }
-      if (nextState.focus === "testRaw") {
-        return "A normal test-score curve above its original ruler. The mean is 70, the standard deviation is 5, and score 80 is marked.";
-      }
-      if (nextState.focus === "testWorking" && nextState.rulerMode === "z") {
-        return "The same curve above aligned raw-score and z-score rulers. Score 70 aligns with z equals 0, and score 80 aligns with z equals 2.";
-      }
-      if (nextState.rulerMode === "iqScaled") {
-        return "The same curve above two aligned rulers. The grey raw-score ruler still labels the marked position 80, while the transformed lower ruler labels it 30 after multiplying every z-score by 15.";
-      }
-      if (nextState.rulerMode === "iq") {
-        return "The same curve above two aligned rulers. The grey raw-score ruler still labels the marked position 80, while the IQ ruler labels it 130 after adding 100.";
-      }
-      if (nextState.rulerMode === "satScaled") {
-        return "The same curve above two aligned rulers. The grey raw-score ruler still labels the marked position 80, while the transformed lower ruler labels it 200 after multiplying every z-score by 100.";
-      }
-      return "The same curve above two aligned rulers. The grey raw-score ruler still labels the marked position 80, while the SAT ruler labels it 700 after adding 500.";
+      const names = [nextState.primary, nextState.secondary, nextState.tertiary].filter(Boolean);
+      const descriptions = names.map(function(name) {
+        const config = rulerConfig(name, nextState.rulerMode);
+        const value = name === "testRaw" ? 80 : name === "testZ" ? 2 :
+          name === "testWorking" ? 2 * config.multiplier + config.offset :
+          name === "blockRaw" ? 5 : 1;
+        return config.label + ", marked score " + value;
+      });
+      return "The distribution and marked position stay fixed. Rulers from top to bottom: " +
+        descriptions.join("; ") + ". The first ruler is the x-axis.";
     }
 
     function renderRulers(nextState, previousState, animate) {
-      const sceneChanged = previousState && previousState.scene !== nextState.scene;
-      const sceneDirection = nextState.scene === "curve" ? 1 : -1;
-      const transitions = Array.from(rulerNodes.keys()).map(function(name) {
-        const previous = rulerPositions.get(name) || {
-          slot: "hidden",
-          y: geometry.secondaryY + 52,
-          opacity: 0
-        };
-        const slot = slotFor(name, nextState);
-        return {
-          name,
-          previous,
-          slot,
-          y: targetY(slot, previous),
-          opacity: slot === "hidden" ? 0 : 1
-        };
-      });
-      const fullSwap = transitions.some(function(item) {
-        return item.previous.slot !== "hidden" && item.slot === "hidden";
-      }) && transitions.some(function(item) {
-        return item.previous.slot === "secondary" && item.slot === "primary";
-      }) && transitions.some(function(item) {
-        return item.previous.slot === "hidden" && item.slot === "secondary";
-      });
-      const condensingPair = !sceneChanged && transitions.some(function(item) {
-        return item.previous.slot !== "hidden" && item.slot === "hidden";
-      }) && transitions.some(function(item) {
-        return item.previous.slot === "secondary" && item.slot === "primary";
-      }) && !transitions.some(function(item) {
-        return item.previous.slot === "hidden" && item.slot !== "hidden";
-      });
-
+      const resetting = previousState && previousState.primary === "testWorking" &&
+        nextState.primary === "testRaw" && !nextState.secondary;
+      const promoting = nextState.primary === "testWorking" && previousState &&
+        previousState.tertiary === "testWorking";
       const animations = [];
-      transitions.forEach(function(item) {
-        const group = rulerNodes.get(item.name);
-        const entering = item.previous.slot === "hidden" && item.slot !== "hidden";
-        const exiting = item.previous.slot !== "hidden" && item.slot === "hidden";
-        const moving = item.previous.slot !== "hidden" && item.slot !== "hidden" &&
-          item.previous.slot !== item.slot;
-        const changed = item.previous.y !== item.y || item.previous.opacity !== item.opacity;
-        let from = {
-          transform: "translate(0px, " + item.previous.y + "px)",
-          opacity: String(item.previous.opacity)
+      rulerNodes.forEach(function(group, name) {
+        const previous = rulerPositions.get(name) || { slot: "hidden", y: 0, opacity: 0 };
+        const slot = slotFor(name, nextState);
+        const entering = previous.slot === "hidden" && slot !== "hidden";
+        const exiting = previous.slot !== "hidden" && slot === "hidden";
+        const y = targetY(slot, previous);
+        const opacity = slot === "hidden" ? 0 : name === nextState.focus ? 1 :
+          name === "testZ" ? 0.8 : 0.45;
+        // Each new ruler arrives from just below its destination. Old axes fade
+        // in place before the finished reporting scale rises to the baseline.
+        const from = {
+          transform: "translate(0px, " + (entering ? y + (resetting ? 0 : 24) : previous.y) + "px)",
+          opacity: String(previous.opacity)
         };
-        let to = {
-          transform: "translate(0px, " + item.y + "px)",
-          opacity: String(item.opacity)
+        const to = { transform: "translate(0px, " + y + "px)", opacity: String(opacity) };
+        const timing = {
+          duration: animate ? exiting ? RULER_EXIT_MS : entering ? RULER_ENTER_MS : RULER_MOVE_MS : 0,
+          delay: animate && ((resetting && entering) || (promoting && name === "testWorking"))
+            ? RULER_EXIT_MS : 0
         };
-        let timing = { duration: 0, delay: 0 };
-        if (animate && sceneChanged && exiting) {
-          to = {
-            transform: "translate(" + (-sceneDirection * geometry.width) + "px, " + item.previous.y + "px)",
-            opacity: "0"
-          };
-          timing = { duration: SCENE_SLIDE_MS, delay: 0 };
-        } else if (animate && sceneChanged && entering) {
-          from = {
-            transform: "translate(" + (sceneDirection * geometry.width) + "px, " + item.y + "px)",
-            opacity: "0"
-          };
-          timing = { duration: SCENE_SLIDE_MS, delay: 180 };
-        } else if (animate && changed) {
-          if (entering) {
-            timing = { duration: RULER_ENTER_MS, delay: fullSwap ? 400 : 120 };
-          } else if (exiting) {
-            timing = { duration: RULER_EXIT_MS, delay: 0 };
-          } else if (moving) {
-            timing = { duration: RULER_MOVE_MS, delay: fullSwap ? 150 : condensingPair ? 280 : 0 };
-          } else {
-            timing = { duration: RULER_MOVE_MS, delay: 0 };
-          }
-        }
-        if (!(sceneChanged && exiting)) {
-          group.classList.toggle("is-focus", item.name === nextState.focus);
-          group.classList.toggle("is-reference", item.slot !== "hidden" && item.name !== nextState.focus);
-        }
-        group.setAttribute("aria-hidden", item.slot === "hidden" ? "true" : "false");
+        group.classList.toggle("is-focus", name === nextState.focus);
+        group.classList.toggle("is-reference", slot !== "hidden" && name !== nextState.focus);
+        group.setAttribute("aria-hidden", slot === "hidden" ? "true" : "false");
         const animation = animateStyles(group, from, to, timing);
         if (animation) animations.push(animation);
-        rulerPositions.set(item.name, {
-          slot: item.slot,
-          y: item.y,
-          opacity: item.opacity
-        });
+        rulerPositions.set(name, { slot, y, opacity });
       });
       return animations;
     }
@@ -1396,16 +1330,19 @@
       state = nextState;
       const animations = renderPlot(nextState, previousState, animate)
         .concat(renderRulers(nextState, previousState, animate));
-      const workingWasVisible = previousState &&
-        (previousState.primary === "testWorking" || previousState.secondary === "testWorking");
-      const workingWillBeVisible = nextState.primary === "testWorking" ||
-        nextState.secondary === "testWorking";
-      const sceneChanged = previousState && previousState.scene !== nextState.scene;
-      if (renderedWorkingMode !== nextState.rulerMode && !(sceneChanged && workingWasVisible)) {
+      const workingWasVisible = previousState && slotFor("testWorking", previousState) !== "hidden";
+      const workingWillBeVisible = slotFor("testWorking", nextState) !== "hidden";
+      const enteringWorking = workingWillBeVisible && !workingWasVisible;
+      if (enteringWorking && animate) {
+        drawRuler("testWorking", rulerNodes.get("testWorking"), "z");
+        renderedWorkingMode = "z";
+      }
+      if (workingWillBeVisible && renderedWorkingMode !== nextState.rulerMode) {
         animations.push.apply(animations, rewriteWorkingRuler(
           renderedWorkingMode,
           nextState.rulerMode,
-          animate && workingWasVisible && workingWillBeVisible
+          animate && workingWillBeVisible,
+          enteringWorking ? RULER_ENTER_MS + 350 : 0
         ));
       }
       activeAnimations = animations;
@@ -1416,12 +1353,13 @@
       rootNode.dataset.scene = nextState.scene;
       rootNode.dataset.primaryRuler = nextState.primary;
       rootNode.dataset.secondaryRuler = nextState.secondary || "none";
+      rootNode.dataset.tertiaryRuler = nextState.tertiary || "none";
       rootNode.dataset.focus = nextState.focus;
       rootNode.dataset.rulerMode = nextState.rulerMode;
       rulerSvg.setAttribute("aria-label", accessibleDescription(nextState));
       rootNode.value = {
         scene: nextState.scene,
-        rulers: [nextState.primary, nextState.secondary].filter(Boolean),
+        rulers: [nextState.primary, nextState.secondary, nextState.tertiary].filter(Boolean),
         rulerMode: nextState.rulerMode,
         focus: nextState.focus,
         rawScore: nextState.scene === "blocks" ? 5 : 80,
@@ -1448,7 +1386,8 @@
       const rulerMode = Object.hasOwn(WORKING_RULER_MODES, action.rulerMode)
         ? action.rulerMode
         : "z";
-      return { scene, primary, secondary, focus, rulerMode };
+      const tertiary = Object.hasOwn(RULERS, action.tertiary) ? action.tertiary : null;
+      return { scene, primary, secondary, tertiary, focus, rulerMode };
     }
 
     function applyTutorialAction(action, context) {
