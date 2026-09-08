@@ -95,39 +95,32 @@ test("the chapter names the corner the board maths actually favours", () => {
   assert.deepEqual(numbers, [5, 6, 9]);
   assert.equal(Math.round(bestChance.chance * 36), 13);
 
-  // The prose, the worked addition example, and the tutorial step all quote
-  // this corner. If the board's numbers are edited, these are the sentences
-  // that have to move with them.
+  // Keep the compact worked example consistent with the board.
   assert.match(chapter, /P\(5 \\text\{ or \} 6 \\text\{ or \} 9\) = \\frac\{4 \+ 5 \+ 4\}\{36\} = \\frac\{13\}\{36\} \\approx \.36/);
-  assert.match(chapter, /the 5–6–9 corner up near the top/);
   assert.match(chapter, /where the 5, the 6 and the 9 meet/);
 });
 
-test("the runner-up corners are the eight the tutorial says are tied", () => {
+test("eight runner-up corners tie at 10/36", () => {
   const tied = ratings.filter((entry) => Math.round(entry.chance * 36) === 10);
   assert.equal(tied.length, 8);
   const second = Math.max(...ratings
     .filter((entry) => entry.id !== bestChance.id)
     .map((entry) => Math.round(entry.chance * 36)));
   assert.equal(second, 10, "nothing else on the board gets past 10/36");
-  assert.match(chapter, /Eight corners here are exactly tied on paper/);
-  assert.match(chapter, /nothing else on the board gets past \$10\/36\$/);
 });
 
-test("the illustrative corner in the prose exists on the board", () => {
+test("the board includes the 3–5–9 corner", () => {
   const corner = board.vertices.find(
     (v) => v.distinctNumbers.length === 3 &&
       [3, 5, 9].every((n) => v.distinctNumbers.includes(n))
   );
   assert.ok(corner, "there is a corner touching 3, 5 and 9");
-  assert.match(chapter, /where the 3, the 5 and the 9 meet, down on the left/);
 });
 
 // ------------------------------------ the seed's picture, as the chapter tells it
 
-// The chapter quotes specific percentages from specific run lengths of a
-// specific seed. Replaying the roller's generator here keeps those sentences
-// honest: change the seed and these fail with the numbers to put back.
+// Preserve the seeded comparisons used in the extended classroom demo.
+// The roller is now a separate classroom activity.
 function seededRandom(seed) {
   const text = String(seed);
   let hash = 2166136261;
@@ -146,7 +139,7 @@ function seededRandom(seed) {
 }
 
 function cornerShares(rolls) {
-  const seed = chapter.match(/makeDiceRoller\s+options='\{"seed":"([^"]+)"\}'/)[1];
+  const seed = "probability-dice-v1559";
   const random = seededRandom(seed + "-bulk");
   const counts = new Array(13).fill(0);
   for (let i = 0; i < rolls; i += 1) {
@@ -165,8 +158,6 @@ test("after a game's worth of rolls the tied corners are anything but tied", () 
   const tied = tiedIds.map((id) => shares.get(id));
   assert.equal(Math.round(Math.min(...tied) * 100), 20);
   assert.equal(Math.round(Math.max(...tied) * 100), 50);
-  assert.match(chapter, /after sixty rolls they range from 20% to 50%/);
-  assert.match(chapter, /luck had spread them from 20% to 50%/);
 });
 
 test("after sixty rolls the truly best corner is only fourth", () => {
@@ -175,7 +166,6 @@ test("after sixty rolls the truly best corner is only fourth", () => {
   const place = order.findIndex(([id]) => id === bestChance.id) + 1;
   assert.equal(place, 4);
   assert.ok(order[0][1] > shares.get(bestChance.id), "a worse corner leads");
-  assert.match(chapter, /was sitting in fourth place, behind three corners that are demonstrably worse/);
 });
 
 test("a thousand rolls pulls the tied corners back together", () => {
@@ -185,8 +175,6 @@ test("a thousand rolls pulls the tied corners back together", () => {
   assert.equal(Math.round(Math.max(...tied) * 100), 30);
   const order = [...shares.entries()].sort((a, b) => b[1] - a[1]);
   assert.equal(order[0][0], bestChance.id, "the right corner has climbed to the top");
-  assert.match(chapter, /they now sit between 27% and 30%/);
-  assert.match(chapter, /squeeze them back to between 27% and 30%/);
 });
 
 // ------------------------------------------------------------------ wiring
@@ -195,7 +183,7 @@ test("the module is registered and the chapter asks for it", () => {
   assert.match(manifest, /\["catan-board"\]\s*=\s*\{\s*file\s*=\s*"resources\/js\/catan-board\.js"/);
   assert.match(chapter, /^ {2}- catan-board$/m);
   assert.match(chapter, /interactive-figure catanBoardIntro makeCatanBoard/);
-  assert.match(chapter, /catanBoardVerdict\s+makeCatanBoard/);
+  assert.match(chapter, /"mode":"rated","rating":"theory"/);
 });
 
 test("the opening board hides its houses until a reader reaches for one", () => {

@@ -10,7 +10,7 @@ interactive-scripts:
 
 {{< interactive-figure probabilityDiceCover makeDiceCover options='{"outcomes":[3,4],"throwSeed":144,"shadowMapSize":1080,"throwSettings":{"startDistance":9,"startHeight":3.8,"forwardSpeed":15.9,"lift":0,"lateralSpeed":0.7,"spread":1.5},"gravity":77,"spinStrength":0.5,"camera":[-37.4,32,75],"cameraTarget":[0.1,0.7,-2.6],"fieldOfView":3}' fallback="Two oversized dice rolling into view and settling on a three and a four." >}}
 
-In the previous chapter, we hinted at thinking probabilistically about extreme scores in a distribution. Here, we'll go into that idea in more detail. We'll think about what statisticians mean when they talk about probability and how we go about quantifying it. We'll need to introduce some new terminology, including random sampling and the normal distribution, and then we'll return to $z$ scores and see how a normal distribution lets us attach precise probabilities to regions of scores.
+In the previous chapter, we hinted at thinking probabilistically about extreme scores in a distribution. Here, we'll go into that idea in more detail. We'll think about what statisticians mean when they talk about probability and how we go about quantifying it. We'll need to introduce some new terminology, including probability distributions and independence, and then we'll return to $z$ scores and see how a normal distribution lets us attach precise probabilities to regions of scores.
 
 ## A Brief History of Probability
 
@@ -22,37 +22,40 @@ But *how much* more or less? The idea of representing uncertainty with numbers a
 
 According to the card describing this glass astragal at the Metropolitan Museum of Art in New York, playing with them was so much fun that "knucklebones have been found in tombs where they must have been intended to help the deceased while away endless time." (So I guess, in a way, it *was* a matter of life and death.)
 
-Astragali have four faces stable enough to land on, but the faces aren't the same size or shape, so the four results aren't equally likely. Eventually cubical dice replaced the irregular animal bones. The example below, something like 4,000 years old, even has the convention of opposite sides adding to seven that modern dice follow.
+Astragali have four faces stable enough to land on, but the faces aren't the same size or shape, so the four results aren't equally likely. Eventually cubical dice replaced the irregular animal bones. The example below, something like 4,000 years old, even has the convention of opposite sides adding to seven that modern dice follow. These regularly shaped dice proved appealing to gamblers, and eventually to mathematicians, because it meant they could count outcomes and reason about them in a consistent way.
 
 ![Terracotta die, Mohenjo-daro, c. 2600–1900 BCE. Ashmolean museum, eamd.25. Photograph by Zunkir, cc by-sa 4.0.](resources/figures/mohenjodaro-die.jpg){#fig-old-dice}
 
-These regularly shaped dice proved appealing to gamblers, and eventually to mathematicians, because it meant they could count outcomes and reason about them in a consistent way. No less a mind than Galileo took on a dice puzzle that required exactly the kind of careful counting we're about to do, so we'll come back to him once we have the same problem in front of us [@galileo1898dadi]. (Possibly Galileo took the puzzle on at the urging of a gambling duke hoping to gain an advantage, though in his report, Galileo tactfully omitted the name of the person who commissioned it.)
 
-### Catan 
+### Catan
 
-Let's think about a slightly more recent game, Catan. It's a board game played by rolling a pair of dice (not goat knucklebones, thankfully). The board consists of an arrangement of hexagonal terrain tiles. Each terrain produces a particular resource, such as wood or grain. We'll ignore the different types of resources: all that matters for us is that resources are good, so you want to get as many as possible. How do you get them? Well, most tiles also get a number token. (The tokens have little dots below their numbers, and some are red. I wonder why 😉.) Players place settlements at the corners where tiles meet. Every time the two dice are rolled, if their sum matches the number on a tile neighboring your settlement, you get to collect that resource. So when you decide where to place your settlement, you are choosing which dice totals you want to be paid by for the rest of the game. (I'm simplifying and ignoring other parts of the game so we can focus on this question of pure probability.)
+Let's think about a slightly more recent game, Catan. It's a board game played by rolling a pair of dice (not goat knucklebones, thankfully). The board consists of hexagonal terrain tiles, each producing a resource such as wood or grain. Resources are good, so you want to get as many as possible. For now, we'll ignore the differences between them and the other complications of the game.
 
-Say you put a settlement at the top-left of the board below where the 2, the 10, and the 6 meet. You get resources whenever anyone rolls either 2, 10, or 6, because your settlement touches all three of those tiles.
+Most tiles have a number token. Players place settlements at the corners where tiles meet, and every time the dice are rolled, a settlement gets a resource from each neighboring tile whose number matches the total. So choosing where to settle means choosing which dice totals will pay you for the rest of the game. Suppose you get to go first, and you just want the greatest chance of getting something on each roll. Where would you settle? Why?
 
-So let's assume you get to go first. You have one settlement to place and you just want to maximize your chances of getting paid each time the dice are rolled. Where would you place your settlement? Pick a spot by clicking on the board below. No need to calculate anything; just go with what looks good.
+::::: {#act-catan .callout-tip .interactive}
+## Place a settlement on a simplified Catan board
 
-::: {#fig-catan}
-{{< interactive-figure catanBoardIntro makeCatanBoard options='{"mode":"choose","remember":"sfs-catan-choice"}' fallback="A schematic Settlers of Catan board: nineteen hexagonal tiles in three terrain colors, each except the central desert carrying a number from 2 to 12. Settlements go at the corners where tiles meet." >}}
+{{< interactive-figure catanBoardIntro makeCatanBoard options='{"mode":"choose","remember":"sfs-catan-choice"}' fallback="A simplified Catan board. Settlements go at the corners where numbered tiles meet; a matching dice total makes a tile produce a resource." >}}
 
-A simplified Catan board. Settlements go at the corners where tiles meet, and the roll of two dice determines which tiles produce.
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Choose a corner"}
+Choose a corner on this simplified Catan board to give yourself the best chance of getting resources. For example, the corner at the top-left touching 2, 10, and 6 produces whenever anyone rolls one of those totals. Click a corner to place your settlement. We'll come back to your choice later. No need to calculate anything yet, just go with your gut. The tokens have little dots below their numbers, and some are red. I wonder why 😉.
 :::
+::::
+:::::
 
 {{< include quizzes/06-probability-catan.qmd >}}
 
 ## Defining Probability
 
-Let's lay out some technical terms now, so that we have the precise language we need to reason about whether you picked the best spot when we circle back around to Catan in a few minutes.
+Let's lay out some technical terms now, so that we have the precise language we need to reason about whether you picked the best spot.
 
-First, what exactly do we mean by *probability*? Generally speaking, a probability model assigns probabilities to events according to a consistent set of rules. What rules? Well, there are distinct traditions and intense disagreement among statisticians and philosophers, which I am happy to sidestep for the most part. The approach that we will take is based in the frequentist tradition. It's not the only game in town, and it's not necessarily the best in every way, but it's the one that has dominated the social sciences for most of their history, and so its the one you ought to understand first.
+First, what exactly do we mean by *probability*? Generally speaking, a probability model assigns probabilities to events according to a consistent set of rules. What rules? Well, there are distinct traditions and intense disagreement among statisticians and philosophers, which I am happy to sidestep for the most part. The approach that we will take is based in the frequentist tradition. It's the one that has dominated the social sciences for most of their history, and so it’s the one you ought to understand first.
 
-So a probability, in the frequentist sense, is a number that describes what would happen if we could repeat something many times: the proportion of repetitions in which some event of interest would occur in the long run. It ranges from 0, meaning impossible, to 1, meaning certain. A probability of .5 means that, in the long run, we would expect the event to occur about half the time.
+So a probability, in the frequentist sense, is a number that describes what would happen if we could repeat something many times: the proportion of repetitions in which some event of interest would occur in the long run. Probabilities range from 0 to 1. A probability of .5 means that, in the long run, we would expect the event to occur about half the time.
 
-To nail this down more firmly, let's think about some simple situations in which there are a small number of equally likely outcomes that we can count. (Later, we’ll generalize the same ideas to situations where outcomes are not equally likely, and to continuous variables, where counting individual outcomes no longer works.) We'll need some terms:
+Let's think about some simple situations in which there are a small number of equally-likely outcomes that we can count. (Later, we’ll generalize the same ideas to situations where outcomes are not equally likely, and to continuous variables and models where counting individual outcomes no longer works.) We'll need some terms:
 
 - An **outcome** is one elementary result of a chance process.
 - An **event** is the outcome or collection of outcomes we're actually interested in. 
@@ -74,7 +77,7 @@ Perhaps we're interested in the event of rolling an even number on a single six-
 
 The same logic applies to rolling multiple dice; the sample space just expands, and we have to be careful about how to count things. In fact, this is what puzzled the 17th century gambler who reached out to Galileo to solve the puzzle [@galileo1898dadi]. They noted that some events seem to have the same number of ways of occurring. Like, if you roll a pair of dice, you might get a total of 6 or a total of 7. At first glance, there are three combinations of the numbers 1 through 6 that give a sum of 6: 1 and 5; 2 and 4; 3 and 3. Or you might get a total of 7. There are also three combinations that add up to 7: 1 and 6; 2 and 5; 3 and 4. But gamblers had noticed that 7 actually comes up more often than 6. How can that be, if there are the same number of ways to get each total?^[I'm simplifying history: Galileo was asked a slightly more complicated version of this puzzle involving three dice. But the point is the same.]
 
-Galileo's answer was that those unordered combinations are the wrong things to count. We need to distinguish what each dice does. Did you notice the red and blue dice at the top of the chapter? Red landed on 3 and blue landed on 4, for a sum of 7. But what if red had instead landed on 4 and blue on 3? The total would have been 7 as well. So actually there aren't just 3 ways of getting 7, there are 6:
+Galileo's answer was that those unordered combinations are the wrong things to count. We need to distinguish what each die does. Did you notice the red and blue dice at the top of the chapter? Red landed on 3 and blue landed on 4, for a sum of 7. But what if red had instead landed on 4 and blue on 3? The total would have been 7 as well. So actually there aren't just 3 ways of getting 7, there are 6:
 
 - (1,6)
 - (6,1)
@@ -101,7 +104,9 @@ $$
 P(\text{sum of } 7) = \frac{6}{36} \approx .167
 $$
 
-We can run with the idea and make a table of the sample space for rolling two dice. Each dice can land on 1 through 6. We'll use those values for the blue dice as the columns, and the value of the red dice as rows. So a two on the first die and a five on the second is a different outcome from a five on the first die and a two on the second, even though both produce a total of seven. We have to count every combination.
+We are assuming the dice are fair and **independent**: knowing one die's result doesn't change the probabilities for the other. Each of the six red results can be paired with each of the six blue results, giving $6 \times 6 = 36$ equally likely outcomes.
+
+The table shows the total for every ordered outcome. Rows give the red die's result; columns give the blue die's result.
 
 |  | **1** | **2** | **3** | **4** | **5** | **6** |
 |---:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -114,21 +119,29 @@ We can run with the idea and make a table of the sample space for rolling two di
 
 : The totals associated with all 36 ordered outcomes of rolling two dice. {#tbl-dice-sums}
 
-$$ P(2) = \frac{1}{36} \approx .03 $$
-$$ P(12) = \frac{1}{36} \approx .03 $$
-$$ P(7) = \frac{6}{36} \approx .17 $$
+If we take the 36 sums in the table and draw a bar graph, we're doing something familiar from Chapter 2: counting how often each value appears. A total of 2 appears once, while 7 appears six times. Each bar below counts the entries in the table that give that total.
 
-If we take the 36 sums in the table and draw a bar graph, we can turn the counting we just did into a picture of probability. Rather than plotting the raw frequencies, we'll divide the frequency of each sum by 36. So the bar for 2 has a height of $1/36$, while the bar for 7 has a height of $6/36$.
+::: {#fig-dice-sums-counts}
+{{< interactive-figure diceSumsCounts makeGraph options='{"type":"bar","scale":"frequency","data":[2,3,4,5,6,7,3,4,5,6,7,8,4,5,6,7,8,9,5,6,7,8,9,10,6,7,8,9,10,11,7,8,9,10,11,12],"aspectRatio":2,"labels":{"x":"Sum of two dice","y":"Number of outcomes"},"ariaLabel":"Bar graph of counts among 36 possible ordered dice outcomes. Totals 2 through 12 have counts 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, and 1."}' fallback="Bar graph of counts among 36 possible ordered dice outcomes. Totals 2 through 12 have counts 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, and 1." >}}
 
-::: {#fig-dice-sums-bar-graph}
-{{< interactive-figure diceSumsBarGraph makeGraph options='{"type":"bar","scale":"proportion","data":[2,3,3,4,4,4,5,5,5,5,6,6,6,6,6,7,7,7,7,7,7,8,8,8,8,8,9,9,9,9,10,10,10,11,11,12],"aspectRatio":2,"labels":{"x":"Sum of two dice","y":"Probability"},"ariaLabel":"Bar graph showing the theoretical probability distribution for the sum of two dice. Separate bars for sums 2 through 12 have probabilities 1/36, 2/36, 3/36, 4/36, 5/36, 6/36, 5/36, 4/36, 3/36, 2/36, and 1/36."}' fallback="Bar graph showing the theoretical probability distribution for the sum of two dice, rising from 1/36 for a sum of 2 to 6/36 for a sum of 7, then falling symmetrically to 1/36 for a sum of 12." >}}
-
-The probability distribution for the sum of two dice.
+Counts of the dice totals in the table of 36 possible outcomes.
 :::
 
-We've made a useful move here. The table collects 36 individual outcomes, each equally likely. The graph groups those outcomes by the sum of the dice and divides each frequency by 36, so the height of each bar is the probability of that sum. The possible values of this new variable aren't equally likely: 7 gets six of the 36 outcomes, while 2 gets only one. Taken together, the bars form our first **probability distribution**. They show every possible value of the variable and the probability attached to each one, and their heights add up to 1.
+Now let's make a small mathematical change:
 
-One more thing to note. If we're interested in the probability of one event *or* another, we can add their probabilities together. For example, the probability of rolling a 5 or a 6 is:
+::: {#fig-dice-sums-bar-graph}
+{{< interactive-figure diceSumsBarGraph makeGraph options='{"type":"bar","scale":"proportion","data":[2,3,4,5,6,7,3,4,5,6,7,8,4,5,6,7,8,9,5,6,7,8,9,10,6,7,8,9,10,11,7,8,9,10,11,12],"aspectRatio":2,"labels":{"x":"Sum of two dice","y":"Probability"},"ariaLabel":"Bar graph showing probabilities for the sum of two dice, rising from 1/36 for 2 to 6/36 for 7, then falling symmetrically to 1/36 for 12."}' fallback="Bar graph showing probabilities for the sum of two dice, rising from 1/36 for 2 to 6/36 for 7, then falling symmetrically to 1/36 for 12." >}}
+
+The same dice totals, with each count divided by 36 to give a probability.
+:::
+
+Did you notice the change? We divided each count by the total, 36, to turn frequencies into proportions. The distribution keeps the same shape; only the vertical scale changes.
+
+Its a small mathematical tweak but a bigger conceptual leap. Rather than counting every possible ordered outcome once, as in @fig-dice-sums-counts, each proportion tells us the probability of a total on a roll we *haven't made yet*. these probabilities form a **probability distribution**. It shows every possible value of the variable and the probability attached to each one. The original counts add up to 36; the probabilities add up to 1.
+
+We can use it to predict frequencies: over 360 rolls, for example, we'd expect a total of 7 about $360 \times (6/36)=60$ times. If we *actually* roll the dice 360 times we might not get exactly 60 sevens, but We haven't counted any actual sevens to reach that conclusion. And we aren't promising exactly 60; we're describing what to expect from the chance process.
+
+One more thing to note. If two events cannot happen on the same trial, they are **mutually exclusive**, and we can add their probabilities to find the probability of one *or* the other. For example, the probability of rolling a 5 or a 6 is:
 
 $$ P(5 \text{ or } 6) = P(5) + P(6) = \frac{4}{36} + \frac{5}{36} = \frac{9}{36} \approx .25 $$
 
@@ -136,113 +149,49 @@ $$ P(5 \text{ or } 6) = P(5) + P(6) = \frac{4}{36} + \frac{5}{36} = \frac{9}{36}
 
 ### Back to Catan
 
-Remember in Catan a settlement neighboring three numbers pays out if the total rolled is any one of them.
+Now we can return to your settlement in Catan. Armed with the tools and terms we just outlined, are you still pleased with your choice?
+
+::: {#fig-catan-verdict}
+{{< interactive-figure catanBoardVerdict makeCatanBoard options='{"mode":"rated","rating":"theory","showReadout":false,"remember":"sfs-catan-choice","highlight":["reader","best-chance"]}' fallback="The Catan board with corners rated by their probability of producing at least one resource. The best corner touches 5, 6, and 9, with probability 13/36." >}}
+
+The Catan board, now shaded by the probability that each corner earns at least one resource on a roll: bigger, greener corners have higher probabilities. If you chose a corner earlier, it is circled, and the board's best corner is marked.
+:::
+
+The best corner on this board is where the 5, the 6 and the 9 meet, up near the top. It pays out if the total is *any one* of those numbers. Since those events are mutually exclusive, we can add:
 
 $$ P(5 \text{ or } 6 \text{ or } 9) = \frac{4 + 5 + 4}{36} = \frac{13}{36} \approx .36 $$
 
-All of that was done with a pencil. We counted outcomes we never actually observed, and announced how often things would happen without rolling anything. It's fair to ask whether the world agrees.
+Nothing else on this board gets past $10/36$, or about .28. The board had some clues: the red numbers, the 6s and 8s, are individually the most likely totals (since there's no 7 on this board; in the real game something else happens when 7 is rolled). But a settlement's probability depends on *all* the different totals that pay it. The little dots on the tokens were another clue: they count how many of the 36 outcomes produce that total.
 
-When we repeat a chance process, the proportion of trials on which an event actually happens is its **observed relative frequency**. We can use that relative frequency as an empirical estimate of the event's probability. Any one roll is unpredictable, but repeated rolls tend to settle into the pattern implied by the possible outcomes.
+Of course, just picking the best spot in a statistical sense won't win you the game. Like we pointed out already, the mathematical expected frequency of $.36$ does not guarantee that those three numbers will occur on eaxactly 36 out of 100 real rolls. In a single game of Catan, any given corner might pay out more or less than expected.^[The real game also has a bunch of other considerations that I skipped over here: what resources those tiles produce, what you're trying to build, what the other players have already taken, and what you might be able to trade.] But at least now you can reason about your choice in a precise way.
 
-::::: {.callout-tip .interactive}
-## Does the model survive contact with reality?
-
-{{< interactive-figure
-  probabilityDiceRoller
-  makeDiceRoller
-  options='{"seed":"probability-dice-v1559"}'
-  fallback="Interactive roller for one to five dice with a histogram that accumulates the sums of repeated rolls."
->}}
-
-{{< interactive-figure
-  catanBoardVerdict
-  makeCatanBoard
-  options='{"mode":"rated","rating":"empirical","linkTo":"probabilityDiceRoller","remember":"sfs-catan-choice","showBoard":false}'
-  fallback="The same schematic Catan board, with every corner shaded from blue to green according to how often it produced a resource across the rolls made so far."
->}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="One roll" data-action='{"rolls":1,"dice":2,"show-expected":false,"show-board":false,"animate":true}'}
-Throw the dice. They tumble for a second and settle on something — and nothing we just worked out told you which of the 36 outcomes it was going to be. All that counting tells you what to expect. It can't tell you what you're about to get.
-:::
-
-::: {.tutorial-step data-title="A game" data-action='{"rolls":60,"dice":2,"show-expected":false,"show-board":false,"animate":true}'}
-Now sixty rolls — roughly what a full game of Catan gets through. The broad shape is right: the middle is taller than the ends. But look at the detail. Seven, the most likely total of all, came up four times. Three, which should be scarce, came up ten. Over a game's worth of rolls the model is a rough guide, not a description.
-:::
-
-::: {.tutorial-step data-title="On the board" data-action='{"rolls":60,"dice":2,"show-expected":false,"show-board":true,"rating":"empirical","highlight":"reader","animate":true}'}
-Here's what those sixty rolls would have meant on the board. Every corner is shaded by how often it actually paid out: green for the productive spots, blue for the barren ones. If you picked a corner, it's circled. Eight corners here are exactly tied on paper — each pays on 10 of the 36 outcomes — and after sixty rolls they range from 20% to 50%. Identical probabilities, wildly different results.
-:::
-
-::: {.tutorial-step data-title="A thousand" data-action='{"rolls":1000,"dice":2,"show-expected":false,"show-board":true,"rating":"empirical","highlight":"reader","animate":true}'}
-A thousand rolls — more Catan than anyone plays in a year. The histogram is turning into a clean staircase up to seven and back down. On the board, those eight tied corners have pulled back together: they now sit between 27% and 30%, and the corner that was really best has climbed to the top where it belongs.
-:::
-
-::: {.tutorial-step data-title="A million" data-action='{"rolls":1000000,"dice":2,"show-expected":true,"show-board":true,"rating":"empirical","highlight":"reader","animate":true}'}
-A million simulated rolls, with the theoretical distribution laid over the bars. The observed relative frequencies now sit almost exactly on top of the theoretical probabilities. We calculated that pattern by counting 36 outcomes on paper, without rolling anything, and a million repetitions have made it visible. This is the law of large numbers doing its work.
-:::
-
-::: {.tutorial-step data-title="Your corner" data-action='{"rolls":1000000,"dice":2,"show-expected":true,"show-board":true,"rating":"theory","highlight":["reader","best-chance"],"animate":true}'}
-So we can stop rolling and go back to counting. Every corner is now shaded by the probability we can work out from the table rather than by anything the dice did — and it's the same map. Your corner is circled, and the best one on this board, the 5–6–9 corner up near the top, is marked. It produces something on $13/36 \approx .36$ of rolls, and nothing else on the board gets past $10/36$.
-:::
-
-::::
-
-:::::
-
-### Was Your Settlement a Good Bet?
-
-The best corner on this board is the one where the 5, the 6 and the 9 meet, up near the top. It pays out on 13 of the 36 possible outcomes — that's the $P(5 \text{ or } 6 \text{ or } 9) = 13/36$ we worked out a moment ago, about .36 — and nothing else on the board gets past $10/36$. So if you picked it, nice work.
-
-But the more interesting thing is what it took to know that. Watching one game's worth of rolls wouldn't have told you. After sixty rolls, the 5–6–9 corner was sitting in fourth place, behind three corners with lower theoretical probabilities. Eight corners on this board have *exactly* the same probability as each other, and after sixty rolls one of them had produced on half the rolls and another on a fifth of them. Nothing distinguished those eight except luck, and luck had spread their observed relative frequencies from 20% to 50%. It took a thousand rolls to squeeze them back to between 27% and 30%, and a million before the picture the dice painted was the picture we had already worked out by counting.
-
-That's the whole argument for doing the counting. A run of results is a noisy, misleading guide to the process that produced it, and the shorter the run, the more misleading it gets. The 36 outcomes in that table were there all along, and they were right on the first roll — they just weren't visible in the first roll, or the first sixty. We'll spend the rest of this book in exactly that gap: what you can conclude about a process from a limited number of observations of it.
-
-This tendency for an observed relative frequency to settle toward the underlying probability as the number of trials increases is called the **law of large numbers**. It does not say that a short run must look right, that the fit will improve smoothly with every new roll, or that seven is guaranteed to appear exactly one-sixth of the time. It says that sustained discrepancies become less likely as the same chance process is repeated over and over.
-
-Of course, that doesn't make 5–6–9 the best place to settle in every meaningful sense. In a real game, it matters which resources those tiles produce, what you're trying to build, what the other players have already taken, whether the robber gets in the way, and what you might be able to trade. We defined “best” narrowly as the greatest probability of producing at least one resource on a roll. You can calculate precise probabilities but it won't win every game for you.
-
-## Probability with Marbles
+## Counting marbles
 
 Okay, rolling dice is fun, but every statistics textbook I've ever read has used the idea of picking marbles out of a jar to illustrate ideas of probability, so it would be remiss of me not to.
 
-Actually, the idea has a long and distinguished pedigree. In *The Art of Conjecturing*, published in 1713, Jacob Bernoulli asked his reader to imagine an urn containing 5,000 pebbles, in some unknown ratio of white to black. (This might sound quaint and arbitrary, but apparently urns of pebbles we used to cast votes in elections at the time, so Bernouilli may have been thinking about a very real issue.) If you were to reach in and randomly draw one black pebble, then one white pebble, and so on, you would eventually get a sense of the ratio of black to white pebbles in the urn. Eventually you could infer the hidden composition of the urn from the relative frequencies they observed? Bernoulli proved that, as the number of draws increased, the observed proportion would become increasingly likely to fall close to the true proportion. This was the result we now call the law of large numbers [@bernoulli2006conjecturing].
+Actually, the idea has a long and distinguished pedigree. In *The Art of Conjecturing*, published in 1713, Jacob Bernoulli asked his reader to imagine an urn containing 5,000 pebbles, in some unknown ratio of white to black. By drawing pebbles repeatedly, someone who couldn't see the contents could estimate that ratio from the proportion of white pebbles they observed [@bernoulli2006conjecturing].
 
-So the urn wasn't just a convenient container. It let Bernoulli connect a probability he could calculate by counting the contents with a probability someone could estimate from repeated observations. It also made a seemingly small procedural detail — putting each pebble back — mathematically important. We'll use a slightly less crowded jar to see why.
+That observed proportion is an **observed relative frequency**. Over many independent repetitions of the same chance process, it tends toward the underlying probability: the **law of large numbers**. This connects the probability we can calculate from known contents with something we can estimate when the contents are hidden. But keeping the chance process the same matters. A small procedural detail, putting the pebble back, turns out to make a difference.
 
-The idea is basically the same as the coins or dice. If every marble is equally likely to be selected, we can treat each marble as one outcome. Knowing how many marbles there are in total, and how many of them have a particular color, then allows us to calculate the probability of selecting that color.
+A jar contains 10 white marbles and 40 blue marbles. If each marble is equally likely to be drawn, $P(\text{white})=10/50=.2$. Now suppose we draw a white marble. Does the next draw still have a .2 probability of being white?
 
-So let's say we have a jar which contains 25 white marbles and 25 blue marbles. Say we want to know the probability of reaching in and randomly drawing out a white marble. The probability of selecting a white marble is 25 (since there are 25 white marbles) over 50 (since there are 50 marbles in total), which gives us a probability of $25/50$, which can be simplified to $1/2$, or .5. The useful thing about the jar metaphor is we can change around the numbers of marbles arbitrarily. So say instead we have a jar with 40 blue marbles and 10 white. Now, the probability of randomly selecting a white marble is $10/50$, or $1/5$, or .2.
+That depends on what we do with the first marble. If we **sample with replacement**, we put it back and mix the jar before drawing again. There are still 10 white marbles among 50, so the probability stays .2. The draws are **independent**: knowing the first result doesn't change the probabilities for the second.
 
-### Sampling With and Without Replacement
+If we **sample without replacement**, we leave the first marble out. After drawing white, only 9 white marbles and 49 marbles in total remain. The probability of another white is now $9/49 \approx .184$. The draws are dependent, because knowing the first result changes the probabilities for the second. We can express that with **conditional probability** notation:
 
-Now we want to think about repeated sampling — the probability of drawing certain marbles when we select more than one. Let's say we're going to pick out two marbles. The probability of the first one being white is still $10/50$, or .2. But what is the probability that our second marble will be white?
+$$P(\text{second white}\mid\text{first white})=\frac{9}{49}.$$
+
+The vertical bar means “given that”: the probability of a second white marble *given that* the first was white. With replacement, that conditional probability would simply be .2.
 
 {{< include quizzes/06-probability-marbles.qmd >}}
 
-Sorry for the little trick there. The probability of the second marble being white actually depends on how exactly we're doing our sampling. Specifically, it depends on whether we put the first marble back into the jar before we take the second one. This is the distinction between sampling with and without replacement.
+In social science, independence has the same meaning: knowing one person's score doesn't change the probabilities for another's. That can fail if, for example, people discuss their answers before responding, or if observations come from members of the same household who share relevant influences. One person needn't directly cause another's response for their scores to be related.
 
-If we sample **without replacement** — that is, we get a white marble first and don't put it back before taking a second marble — then the probability of the first marble being white is $10/50$, or .2. But the probability of the second marble being white, **given that** the first was white, is $9/49$, or about .184, because there are now only nine white marbles and 49 marbles in total. This is a **conditional probability**: the probability of one event once we know that another event has happened. We can write it as $P(\text{second white}\mid\text{first white})$. To find the probability that **both** events happen, we multiply the probability of the first by this conditional probability:
-
-$$P(\text{first white and second white}) = \frac{10}{50} \times \frac{9}{49} = \frac{90}{2450} \approx .0367$$
-
-On the other hand, if we sample **with replacement**, we put the first marble back. The jar's composition is unchanged, so the probability of white on the second draw is still $10/50=.2$, regardless of the first result. Two events are **independent** when knowing that one happened does not change the probability of the other. So these two draws are independent, and the probability that both marbles are white is therefore $.2 \times .2 = .04$.
-
-### Random Sampling
-
-Sampling with replacement matters in the marble example because it makes successive draws independent. But replacement and random sampling are not the same thing. A **random sample** is selected by a chance procedure rather than by someone's convenience or judgment. We can take a random sample without replacement — in fact, that's how people are commonly sampled, since we don't usually want to select the same person twice. The selections are still random even though the first one changes the probabilities for the next one.
-
-One common design is a **simple random sample**, in which every possible sample of a given size has the same chance of being selected. An **independent random sample** goes further: each observation is randomly drawn from the same population, and learning which observations were selected earlier does not change the probability of the next one. Sampling with replacement gives us that independence in the jar, but it isn't part of the definition of random sampling.
-
-Social scientists don't usually put people back into the population and risk selecting them again. Strictly speaking, then, sampling without replacement from a finite population makes the selections dependent. But if the population is very large compared with the sample, the dependence is usually negligible. Removing one person from a city of a million barely changes the makeup of the people who remain, just as removing one marble from a jar containing a million would barely change the probability on the next draw. In that situation, treating the observations as approximately independent is a useful simplification.
-
-The size of the population only smooths over the particular bump caused by sampling without replacement. It does not rescue a biased sampling frame, nonresponse, or a sample full of people whose scores are related because they belong to the same family, classroom, or neighborhood. Independence is a claim about how the observations are connected, not just a synonym for “random.”
-
-{{< include quizzes/06-probability-random-sampling-checks.qmd >}}
+A **random sample** is selected by a chance procedure. Random selection and independence are different ideas: both marble procedures use chance, but only replacing and mixing the marble makes successive draws independent. In the next chapter, we'll see why independence matters when combining observations into a sample mean, and how this idealization applies when we sample people.
 
 ## Probability and Distributions of Scores
 
-Moving on from coins and dice and jars, we can also think about probabilities for distributions of scores. With a small, finite set of observed scores, the same counting logic applies. We just need to know the total number of equally likely possibilities and the number of outcomes in the event we're interested in. Then we can calculate the probability of selecting a score equal to a certain value, greater than a certain value, or within a certain range.
+The same logic applies to the scores we study in social science. We can ask for the probability of randomly selecting a score equal to a value, above a value, or within a range.
 
 Take this little distribution of ten scores.
 
@@ -258,23 +207,29 @@ $$ P(X \ge 4) = \frac{3}{10} = .3 $$
 
 $$ P(1 < X < 5) = \frac{5}{10} = .5 $$
 
-Taken together, the probabilities attached to all the possible values of $X$ form a **probability distribution**. It tells us not only which scores are possible but how likely each one is. Because one of the possible values must be selected, the probabilities across the whole distribution add up to 1. Here we obtained those probabilities by dividing the frequency at each score by ten. In other words, the block histogram can do double duty: it shows the distribution of ten observed scores, and, if one of those ten blocks is going to be selected at random, it shows the probability distribution for the value we will get.
+This is the same move we made with the dice: divide each frequency by the total to get a probability distribution. There we divided by 36; here we divide by ten. The block histogram describes scores we've already observed, but those proportions also tell us what to expect when we randomly select one of the blocks. For example, $P(X=1)=.4$ predicts that about 40% of repeated selections, with replacement, would give a score of 1. Once again, we're using a distribution to reason about selections we haven't made yet.
 
 ## The Normal Distribution
 
-What if the distribution isn't a little collection of ten discrete blocks we can count one by one? What if we're interested in a population, for which we don't even know the individual scores? We can't count the values, but we can model its probabilities mathematically.
+What if we're interested in a continuous variable, such as height or reaction time, rather than a little collection of scores we can count? Remember the smooth curves in [Chapter 2](02-frequency-distributions.qmd#smooth-curves). They represented models of how scores were distributed, including scores we hadn't actually observed. We also met one particular model, the symmetric, bell-shaped **normal distribution**. Now we can put that curve to work calculating probabilities.
 
-This is where the normal distribution comes in. French mathematician Abraham de Moivre discovered the normal curve while thinking about the long-run probabilities of simple events with two equally-likely outcomes, like a coin toss. Like we saw earlier, for a fair coin, each outcome (heads or tails) has a probability of $.5$. But what happens when you toss a coin a bunch of times, say 3,600? Will you get precisely half---1,800---come up heads? Probably not. Toss the coin another 3,600 times and you'll get a different answer again. If you had the time to do this again and again, the answers would usually be somewhere close to the expected 1,800; rarely will it be far away. De Moivre realized that we can approximate the distribution that all these outcomes would follow with a simple smooth curve---the bell-shaped curve that we now call the normal distribution.
+French mathematician Abraham de Moivre discovered the normal curve while thinking about the long-run probabilities of simple events with two equally-likely outcomes, like a coin toss. Like we saw earlier, for a fair coin, each outcome (heads or tails) has a probability of $.5$. But what happens when you toss a coin a bunch of times, say 3,600? Will you get precisely half---1,800---come up heads? Probably not. Toss the coin another 3,600 times and you'll get a different answer again. If you had the time to do this again and again, the answers would usually be somewhere close to the expected 1,800; rarely will it be far away. De Moivre realized that we can approximate the distribution that all these outcomes would follow with a simple smooth curve---the bell-shaped curve that we now call the normal distribution.
 
-The usefulness of the normal distribution is that it is a precisely mathematically defined shape. Here is the equation:
+The normal curve is defined by a mathematical equation:
 
 $$Y = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(X-\mu)^2}{2\sigma^2}}$$ {#eq-normal-distribution}
 
 Now, you don't really have to know this equation for the work we're going to do throughout this book, so if it makes you sweat just looking at it, don't worry. But it is worth looking at briefly to get a sense of how it's constructed. It has an $(x-\mu)^2$ in there, which should look familiar from our chapter on variability, and $\sigma$ is part of this too, so variability has something important to do with the shape. The value $Y$ gives the height of the curve (its *density*) at a particular value of $X$. But again, don't worry about remembering the specifics. Just know that the equation defines the curve precisely.
 
-The value of this for us is that we can find the area under the curve between two values, and that area gives us the probability of an outcome falling within that range. This insight sets us up for much of the inferential statistics ahead. If a population can be reasonably modelled by a normal distribution, we can determine the probability associated with any region of scores without recording and counting every individual score.
+Here is the connection to probability. With the dice, dividing by 36 gave us probabilities whose total was 1. For a continuous model, we scale the curve so that its *total area* is 1. The area between two scores then gives the probability of a randomly selected score falling in that interval. If a population can be reasonably modelled by a normal distribution, we can calculate those probabilities without recording and counting every individual score.
 
-A normal distribution is completely specified by its mean and standard deviation. Those can be whatever, but it is often easiest to work with the **standard normal distribution**, also called the **unit normal distribution**. This is a normal distribution with a mean of 0 and a standard deviation of 1. Sound familiar? The $z$ scores we learned to calculate in the previous chapter put scores onto that standard scale, so the same set of areas can be used for any normal distribution.
+This is why we called the height **density** back in Chapter 2. A high part of the curve means scores are concentrated around that value; the height itself isn't a probability. To get a probability, we need a region with some width: the area under the curve across the interval we're interested in. An exact point has no width and therefore no area, so under a continuous model $P(X=x)=0$. Our recorded measurements are rounded, and a recorded value represents a small interval. Including or excluding a single exact endpoint doesn't change a continuous-model probability: $P(X<a)=P(X\le a)$.
+
+A normal distribution is completely specified by its mean and standard deviation. Those can be whatever, but it is often easiest to work with the **standard normal distribution**, also called the **unit normal distribution**. This is a normal distribution with a mean of 0 and a standard deviation of 1. Sound familiar? The $z$ scores we learned to calculate in the previous chapter put scores onto that standard scale:
+
+$$z=\frac{X-\mu}{\sigma}.$$
+
+If $X$ follows a normal distribution, its standardized scores follow the standard normal distribution. Standardizing changes the units, but preserves the proportion of scores in each corresponding region. It does not turn a nonnormal distribution into a normal one. We use capital $Z$ for the standardized variable and lowercase $z$ for a particular value.
 
 The total area under the curve is 1. The proportion of that area in a region is the probability of a randomly selected score falling in that region, according to the model. So, for example, 34.13% of the area of the curve lies between the mean and one standard deviation above the mean. And because it's symmetrical, the same 34.13% lies between the mean and one standard deviation below the mean. Another 13.59% lies between one and two standard deviations from the mean on each side. And 2.28% lies more than two standard deviations above the mean, with another 2.28% more than two standard deviations below it. Together, the two extreme regions contain about 4.56% of the distribution.
 
@@ -306,7 +261,7 @@ The total area under the curve is 1. The proportion of that area in a region is 
 
 ### The Unit Normal Table
 
-Of course, we aren't limited to those particular regions. We can take any $z$ score and determine the probability of a score falling above or below that value under a standard normal model. In the olden days, you would look up something called a $z$ table, a standard normal table, or a unit normal table. These tables vary in how they're arranged. The one below lists $z$ scores along with the areas to their left, to their right, and between the mean and the score. (Computers have made these tables largely obsolete, but it's useful for us to see how they work, because whatever statistical software you might use in practice is applying the same logic and math.)
+Of course, we aren't limited to those particular regions. We can take any $z$ score and determine the probability of a score falling above or below that value under a standard normal model. In the olden days, you would look up something called a $z$ table, a standard normal table, or a unit normal table. These tables vary in how they're arranged. The one below lists nonnegative $z$ scores along with the areas to their left, to their right, and between the mean and the score. (Computers have made these tables largely obsolete, but it's useful for us to see how they work, because whatever statistical software you might use in practice is applying the same logic and math.)
 
 ::: {#tbl-unit-normal}
 {{< interactive-figure unitNormalTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","z":{"from":0,"to":3,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"tableMaxHeight":"18rem","selected":false}' fallback="Unit normal table showing areas to the left, right, and between the mean and z." >}}
@@ -316,7 +271,20 @@ The unit normal table, showing areas to the left, right, and between the mean an
 
 So for a $z$ score of zero, it's exactly half and half; 50 percent of the distribution lies on either side of zero, because zero is the mean and the distribution is symmetrical. In other words, under a normal model there is a 50 percent chance of observing a score greater than the mean and a 50 percent chance of observing a score lower than the mean.
 
-If we take a $z$ score of 1, we look for that row in the table. The area to the left of $z=1$ is about .84, so roughly 84 percent of the distribution lies below it. In percentile language, a score with $z=1$ is at about the 84th percentile. The area to the right is just under .16, and the area between the mean (where $z=0$) and $z=1$ is .3413, just like we saw before. How about a $z$ score of negative one? Standard normal tables don't always list negative $z$ scores, because the symmetry of the distribution means the relevant areas are the same as for a positive $z$ score on the opposite side of the mean. Only the direction flips: the smaller area (0.1578) is to the left of $z = -1$ and the larger area (0.8413) is to its right.
+If we take a $z$ score of 1, we look for that row in the table. The area to the left of $z=1$ is about .84, so roughly 84 percent of the distribution lies below it. In percentile language, a score with $z=1$ is at about the 84th percentile. The area to the right is just under .16, and the area between the mean (where $z=0$) and $z=1$ is .3413, just like we saw before. How about a $z$ score of negative one? Standard normal tables don't always list negative $z$ scores, because the symmetry of the distribution means the relevant areas are the same as for a positive $z$ score on the opposite side of the mean. Only the direction flips: the smaller area (0.1587) is to the left of $z = -1$ and the larger area (0.8413) is to its right.
+
+### Finding the Area You Need
+
+Start with the event, then identify its region on the curve, and only then choose a table entry. For example, suppose scores follow a normal distribution with $\mu=100$ and $\sigma=15$. A score of 115 has $z=(115-100)/15=1$; a score of 130 has $z=2$.
+
+| Question | Standardized event | Area from the table |
+|:--|:--|:--|
+| Below 115? | $P(Z<1)$ | Left of 1: $.8413$ |
+| Above 115? | $P(Z>1)$ | Right of 1: $1-.8413=.1587$ |
+| Between 115 and 130? | $P(1<Z<2)$ | Left of 2 minus left of 1: $.9772-.8413=.1359$ |
+| Between 85 and 115? | $P(-1<Z<1)$ | Twice the mean-to-1 area: $2(.3413)=.6826$ |
+
+Subtracting the two left-hand areas in the third row removes all the scores below 115, leaving only the region between 115 and 130. In the last row, symmetry gives us equal areas on the two sides of the mean. Each calculation is a way of collecting exactly the region named in the question.
 
 {{< include quizzes/06-probability-distribution.qmd >}}
 
@@ -332,7 +300,7 @@ What are the chances that if we randomly selected someone from our reference pop
 A normal distribution curve with a vertical line at $z = -2.5$, representing the position of Peter Parker's reaction time within the standardized population distribution.
 :::
 
-If we look up $-2.5$ in the unit normal table, it tells us that only about .0062 of the distribution is down there in the lower tail, or 0.62%:
+Our table lists positive $z$ scores, so look up $2.5$ and read the area to its right. By symmetry, this is also the area to the left of $-2.5$: about .0062, or 0.62%:
 
 $$P(Z \le -2.5) \approx .0062$$
 
