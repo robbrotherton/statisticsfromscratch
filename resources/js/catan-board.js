@@ -809,6 +809,7 @@
 
     const readout = root.append("div")
       .attr("class", "sfs-readout cb-readout")
+      .style("display", opts.showReadout === false ? "none" : null)
       .attr("aria-live", "polite");
     const readoutPrimary = readout.append("div").attr("class", "sfs-readout-row");
     const readoutPrimaryLabel = readoutPrimary.append("span").attr("class", "sfs-readout-label");
