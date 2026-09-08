@@ -75,38 +75,9 @@ Perhaps we're interested in the event of rolling an even number on a single six-
 
 ### Rolling Two Dice
 
-The same logic applies to rolling multiple dice; the sample space just expands, and we have to be careful about how to count things. In fact, this is what puzzled the 17th century gambler who reached out to Galileo to solve the puzzle [@galileo1898dadi]. They noted that some events seem to have the same number of ways of occurring. Like, if you roll a pair of dice, you might get a total of 6 or a total of 7. At first glance, there are three combinations of the numbers 1 through 6 that give a sum of 6: 1 and 5; 2 and 4; 3 and 3. Or you might get a total of 7. There are also three combinations that add up to 7: 1 and 6; 2 and 5; 3 and 4. But gamblers had noticed that 7 actually comes up more often than 6. How can that be, if there are the same number of ways to get each total?^[I'm simplifying history: Galileo was asked a slightly more complicated version of this puzzle involving three dice. But the point is the same.]
+The same logic applies to rolling multiple dice; the sample space just expands, and we have to be careful about how to count things. Something that tripped up some early gamblers is that we're interested in the sum of the dice, but some sums can be arrived at in multiple ways.^[No less a genuis than Galileo was recruited, possibly by a gambling duke looking to secure a statistical advantage, to investigate a version of this puzzle [@galileo1898dadi].]
 
-Galileo's answer was that those unordered combinations are the wrong things to count. We need to distinguish what each die does. Did you notice the red and blue dice at the top of the chapter? Red landed on 3 and blue landed on 4, for a sum of 7. But what if red had instead landed on 4 and blue on 3? The total would have been 7 as well. So actually there aren't just 3 ways of getting 7, there are 6:
-
-- (1,6)
-- (6,1)
-- (2,5)
-- (5,2)
-- (3,4)
-- (4,3)
-
-What about 6? The subtlety is that there's only one way that 3 + 3 can happen. Both dice have to come up 3. So the outcomes that produce a sum of 6 are:
-
-- (1,5)
-- (5,1)
-- (2,4)
-- (4,2)
-- (3,3)
-
-There are only 5 outcomes that give a sum of 6, and 6 that give a sum of 7! That's why 7 is more likely to come up.
-
-$$
-P(\text{sum of } 6) = \frac{5}{36} \approx .139
-$$
-
-$$
-P(\text{sum of } 7) = \frac{6}{36} \approx .167
-$$
-
-We are assuming the dice are fair and **independent**: knowing one die's result doesn't change the probabilities for the other. Each of the six red results can be paired with each of the six blue results, giving $6 \times 6 = 36$ equally likely outcomes.
-
-The table shows the total for every ordered outcome. Rows give the red die's result; columns give the blue die's result.
+Did you notice the red and blue dice at the top of the chapter? Red landed on 3 and blue landed on 4, for a sum of 7. But what if red had instead landed on 4 and blue on 3? The total would have been 7 as well. We need to count all the different ways each die might land to give the various possible totals. Assuming the dice are fair, each of the six red results can be paired with each of the six blue results, giving $6 \times 6 = 36$ equally likely outcomes. @tbl-dice-sums shows them all: rows give the red die's result; columns give the blue die's result.
 
 |  | **1** | **2** | **3** | **4** | **5** | **6** |
 |---:|:--:|:--:|:--:|:--:|:--:|:--:|
@@ -119,7 +90,7 @@ The table shows the total for every ordered outcome. Rows give the red die's res
 
 : The totals associated with all 36 ordered outcomes of rolling two dice. {#tbl-dice-sums}
 
-If we take the 36 sums in the table and draw a bar graph, we're doing something familiar from Chapter 2: counting how often each value appears. A total of 2 appears once, while 7 appears six times. Each bar below counts the entries in the table that give that total.
+We can take the 36 sums in the table and draw a bar graph counting how often each value appears, like we did in Chapter 2. Each bar in @fig-dice-sums-counts counts the entries in the table that give that total. A total of 2 appears once, while 7 appears six times. 
 
 ::: {#fig-dice-sums-counts}
 {{< interactive-figure diceSumsCounts makeGraph options='{"type":"bar","scale":"frequency","data":[2,3,4,5,6,7,3,4,5,6,7,8,4,5,6,7,8,9,5,6,7,8,9,10,6,7,8,9,10,11,7,8,9,10,11,12],"aspectRatio":2,"labels":{"x":"Sum of two dice","y":"Number of outcomes"},"ariaLabel":"Bar graph of counts among 36 possible ordered dice outcomes. Totals 2 through 12 have counts 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, and 1."}' fallback="Bar graph of counts among 36 possible ordered dice outcomes. Totals 2 through 12 have counts 1, 2, 3, 4, 5, 6, 5, 4, 3, 2, and 1." >}}
@@ -127,7 +98,7 @@ If we take the 36 sums in the table and draw a bar graph, we're doing something 
 Counts of the dice totals in the table of 36 possible outcomes.
 :::
 
-Now let's make a small mathematical change:
+Now let's make a similar version of the graph, with a small mathematical change:
 
 ::: {#fig-dice-sums-bar-graph}
 {{< interactive-figure diceSumsBarGraph makeGraph options='{"type":"bar","scale":"proportion","data":[2,3,4,5,6,7,3,4,5,6,7,8,4,5,6,7,8,9,5,6,7,8,9,10,6,7,8,9,10,11,7,8,9,10,11,12],"aspectRatio":2,"labels":{"x":"Sum of two dice","y":"Probability"},"ariaLabel":"Bar graph showing probabilities for the sum of two dice, rising from 1/36 for 2 to 6/36 for 7, then falling symmetrically to 1/36 for 12."}' fallback="Bar graph showing probabilities for the sum of two dice, rising from 1/36 for 2 to 6/36 for 7, then falling symmetrically to 1/36 for 12." >}}
@@ -135,9 +106,9 @@ Now let's make a small mathematical change:
 The same dice totals, with each count divided by 36 to give a probability.
 :::
 
-Did you notice the change? We divided each count by the total, 36, to turn frequencies into proportions. The distribution keeps the same shape; only the vertical scale changes.
+Did you notice the change? We divided each count by the total, 36, to turn frequencies into proportions. The distribution looks the same; the bars have the same relative heights. Only the vertical scale changes.
 
-Its a small mathematical tweak but a bigger conceptual leap. Rather than counting every possible ordered outcome once, as in @fig-dice-sums-counts, each proportion tells us the probability of a total on a roll we *haven't made yet*. these probabilities form a **probability distribution**. It shows every possible value of the variable and the probability attached to each one. The original counts add up to 36; the probabilities add up to 1.
+Its a small mathematical tweak but a bigger conceptual leap. Rather than counting every outcome in the sample space once, as in @fig-dice-sums-counts, each proportion tells us the probability of a total on a roll we *haven't made yet*. These probabilities form a **probability distribution**. It shows every possible value of the variable and the probability attached to each one. The original counts add up to 36; the probabilities add up to 1.
 
 We can use it to predict frequencies: over 360 rolls, for example, we'd expect a total of 7 about $360 \times (6/36)=60$ times. If we *actually* roll the dice 360 times we might not get exactly 60 sevens, but We haven't counted any actual sevens to reach that conclusion. And we aren't promising exactly 60; we're describing what to expect from the chance process.
 
