@@ -218,10 +218,9 @@ So let's say we have a jar which contains 25 white marbles and 25 blue marbles. 
 
 Now we want to think about repeated sampling — the probability of drawing certain marbles when we select more than one. Let's say we're going to pick out two marbles. The probability of the first one being white is still $10/50$, or .2. But what is the probability that our second marble will be white?
 
-
 {{< include quizzes/06-probability-marbles.qmd >}}
 
-The probability of the second marble being white actually depends on how exactly we're doing our sampling. Specifically, it depends on whether we put the first marble back into the jar before we take the second one. This is the distinction between sampling with and without replacement.
+Sorry for the little trick there. The probability of the second marble being white actually depends on how exactly we're doing our sampling. Specifically, it depends on whether we put the first marble back into the jar before we take the second one. This is the distinction between sampling with and without replacement.
 
 If we sample **without replacement** — that is, we get a white marble first and don't put it back before taking a second marble — then the probability of the first marble being white is $10/50$, or .2. But the probability of the second marble being white, **given that** the first was white, is $9/49$, or about .184, because there are now only nine white marbles and 49 marbles in total. This is a **conditional probability**: the probability of one event once we know that another event has happened. We can write it as $P(\text{second white}\mid\text{first white})$. To find the probability that **both** events happen, we multiply the probability of the first by this conditional probability:
 
@@ -263,23 +262,17 @@ Taken together, the probabilities attached to all the possible values of $X$ for
 
 ## The Normal Distribution
 
-What if the distribution isn't a little collection of ten blocks we can count? This is where the normal distribution makes a key advance possible.
+What if the distribution isn't a little collection of ten discrete blocks we can count one by one? What if we're interested in a population, for which we don't even know the individual scores? We can't count the values, but we can model its probabilities mathematically.
 
-We have already met some of its history. The curve we now call normal emerged from work on games of chance and was developed as a model for the small errors that accumulate when astronomers repeatedly measure the same thing [@stahl2006normal]. Then, in the nineteenth century, Adolphe Quetelet made a more surprising move. As we saw in [Chapter 3](03-central-tendency.qmd), he treated the chest measurements of 5,738 Scottish soldiers as if their deviations from the average soldier followed the same kind of pattern as astronomers' errors. The fit wasn't perfect, but the broader idea stuck: the same probability curve could be used as a model for variation among people, not only variation among repeated measurements [@gallagher2020quetelet].
+This is where the normal distribution comes in. French mathematician Abraham de Moivre discovered the normal curve while thinking about the long-run probabilities of simple events with two equally-likely outcomes, like a coin toss. Like we saw earlier, for a fair coin, each outcome (heads or tails) has a probability of $.5$. But what happens when you toss a coin a bunch of times, say 3,600? Will you get precisely half---1,800---come up heads? Probably not. Toss the coin another 3,600 times and you'll get a different answer again. If you had the time to do this again and again, the answers would usually be somewhere close to the expected 1,800; rarely will it be far away. De Moivre realized that we can approximate the distribution that all these outcomes would follow with a simple smooth curve---the bell-shaped curve that we now call the normal distribution.
 
-Now, here's the insight that sets us up for much of the inferential statistics ahead. For a distribution in general, knowing only the mean and standard deviation isn't enough to determine probabilities. But a normal distribution is completely specified by its mean and standard deviation. If a population can be reasonably modelled by a normal distribution, we can determine the probability associated with any region of scores without recording and counting every individual score.
+The usefulness of the normal distribution is that it is a precisely mathematically defined shape. Here is the equation:
 
-This is a real shift from counting the blocks above. A normal distribution is **continuous**: between any two possible values lie still more possible values. The probability of selecting any one exact value is therefore zero; probabilities belong to intervals, such as scores below a cutoff or between two values. That doesn't mean an exact value is impossible. It means that a single point has no width and therefore no area under a continuous curve.
+$$Y = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(X-\mu)^2}{2\sigma^2}}$$ {#eq-normal-distribution}
 
-As we saw in [Chapter 2](02-frequency-distributions.qmd), the smooth curve is a model for a distribution, not a literal record of observed frequencies. Within a suitably defined population, a variable such as height can often be approximately bell-shaped, with many observations near the middle and progressively fewer toward either extreme.
+Now, you don't really have to know this equation for the work we're going to do throughout this book. So if it makes you sweat just looking at it, don't worry. But it is worth looking at briefly to get a sense of how it's constructed. It has an $(x-\mu)^2$ in there, which should look familiar from our chapter on variability, and $\sigma$ is part of this too, so variability has something important to do with the shape. The value $Y$ gives the height of the curve (its *density*) at a particular value of $X$. But again, don't worry about remembering the specifics. Just know that the equation defines the curve precisely. The value of this for us is that we can find the area under the curve between two values, and that area gives us the probability of an outcome falling within that range.
 
-### The Normal Distribution Equation
-
-The reason why we can describe the proportions of this kind of distribution so precisely is that it isn't just an arbitrary shape. It is a mathematically defined shape.
-
-$$f(x) = \frac{1}{\sqrt{2 \pi \sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}}$$
-
-Now, you don't really have to know this equation for the work we're going to do throughout this book. So if it makes you queasy just looking at it, don't worry. But it is worth looking at briefly to get a sense of how it's constructed. The value $f(x)$ gives the height of the curve at a particular value of $x$. That height is called the **probability density**; it is not itself the probability of observing that exact value. Then we have $x-\mu$ squared, which should look familiar from our chapter on variability, and $\sigma$ is part of this too, so we know variability has something important to do with the shape. But again, don't worry about remembering the specifics. Just know that the equation defines the curve precisely, and areas under the curve will give us probabilities.
+This is the insight that sets us up for much of the inferential statistics ahead. A normal distribution is completely specified by its mean and standard deviation. If a population can be reasonably modelled by a normal distribution, we can determine the probability associated with any region of scores without recording and counting every individual score.
 
 ### Areas Under the Normal Curve
 
