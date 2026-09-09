@@ -195,3 +195,21 @@ test("the opening board hides its houses until a reader reaches for one", () => 
   assert.match(source, /\[data-cb-mode="choose"\] \.cb-vertex\[data-hover="true"\] \.cb-glyph,\s*\.catan-board\[data-cb-mode="choose"\] \.cb-vertex:focus-visible \.cb-glyph \{\s*opacity: 0\.75;/);
   assert.match(source, /\.cb-vertex\[data-selected="true"\] \.cb-glyph[\s\S]{0,200}?opacity: 1;/);
 });
+
+// ------------------------------------------------------------ quiz bridge
+
+test("the board exposes a quizResponse bridge that only understands selection", () => {
+  // The figure-type quiz question drives the board through this path, so a
+  // reader's saved response and the board's own selection stay in sync.
+  assert.match(source, /rootNode\.quizResponse = \{/);
+  assert.match(
+    source,
+    /setValue: function \(path, value\) \{\s*if \(path !== "selection"\) throw new Error\("Unsupported Catan response: " \+ path\);/
+  );
+  // A cleared or missing response, and an id that no longer exists on the
+  // board, both resolve to no settlement rather than throwing.
+  assert.match(
+    source,
+    /const id = value === null \|\| value === undefined \? null : Number\(value\);\s*setSelection\(id !== null && board\.byId\.has\(id\) \? id : null,\s*\{ remember: true, animate: false \}\);/
+  );
+});

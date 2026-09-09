@@ -187,6 +187,28 @@ test("quiz controls can shrink and action rows can wrap at narrow widths", () =>
   assert.match(css, /\.quiz-actions \{[\s\S]*?flex-wrap: wrap;/);
 });
 
+test("a figure question is validated and rendered without grading", () => {
+  assert.match(filter, /\["figure"\] = true/);
+  assert.match(
+    filter,
+    /if is_blank\(question\.responseFrom\) or not tostring\(question\.responseFrom\):match\("\^\[A-Za-z0-9_-\]\+%\.\[A-Za-z0-9_\.-\]\+\$"\) then/
+  );
+  assert.match(filter, /"must name a figure value, such as board\.selection"/);
+  assert.match(filter, /"must contain an interactive figure"/);
+  assert.match(filter, /"figure responses are saved without grading"/);
+  assert.match(filter, /"responseFrom and figure are only available on figure questions"/);
+  assert.match(runtime, /if \(type === QUESTION_TYPES\.figure\) return figureControl\(wrapper, question\);/);
+  assert.match(runtime, /check\.hidden = isFigure;/);
+});
+
+test("promptFrom swaps in a live figure value and only works on free-response questions", () => {
+  assert.match(filter, /"requires a value path, promptTemplate, and fallback prompt"/);
+  assert.match(filter, /if not tostring\(question\.promptTemplate\):find\("\{value\}", 1, true\) then/);
+  assert.match(filter, /"must contain \{value\}"/);
+  assert.match(filter, /"is only available on free-response questions"/);
+  assert.match(runtime, /const text = question\.promptTemplate\.split\("\{value\}"\)\.join\(label\);/);
+});
+
 test("the shared renderer covers every authored question type", () => {
   const types = new Set();
 
@@ -201,4 +223,280 @@ test("the shared renderer covers every authored question type", () => {
     [...types].sort(),
     ["figure", "free-response", "multiple-choice", "numeric", "true-false"]
   );
+});
+
+// --------------------------------------------------- figure question wiring
+//
+// The two tests below actually run quiz.js (via runInNewContext, as in "the
+// quiz initializer..." test above) against a hand-built stand-in for the
+// rendered Catan quiz: a figure question (choose a corner) and a
+// free-response question whose prompt reads the figure's live selection.
+// querySelector/querySelectorAll are exact-string lookups rather than a real
+// CSS engine, matching the fixed markup the Lua filter renders.
+
+function createNode({ dataset = {}, classes = [], select = {}, closestMap = {}, children = [] } = {}) {
+  const classSet = new Set(classes);
+  const listeners = new Map();
+  const node = {
+    dataset,
+    hidden: false,
+    textContent: "",
+    innerHTML: "",
+    value: "",
+    parentNode: null,
+    children,
+    classList: {
+      contains: (name) => classSet.has(name),
+      add: (...names) => names.forEach((name) => classSet.add(name)),
+      remove: (...names) => names.forEach((name) => classSet.delete(name)),
+      toggle: (name, force) => {
+        const next = force === undefined ? !classSet.has(name) : Boolean(force);
+        if (next) classSet.add(name); else classSet.delete(name);
+        return next;
+      },
+    },
+    setAttribute() {},
+    addEventListener(type, fn) {
+      if (!listeners.has(type)) listeners.set(type, new Set());
+      listeners.get(type).add(fn);
+    },
+    dispatchEvent(event) {
+      listeners.get(event.type)?.forEach((fn) => fn.call(node, event));
+      if (event.bubbles && node.parentNode) node.parentNode.dispatchEvent(event);
+      return true;
+    },
+    querySelector(selector) {
+      const found = select[selector];
+      return Array.isArray(found) ? found[0] || null : found || null;
+    },
+    querySelectorAll(selector) {
+      const found = select[selector];
+      return Array.isArray(found) ? found : found ? [found] : [];
+    },
+    closest(selector) {
+      return selector in closestMap ? closestMap[selector] : null;
+    },
+  };
+  return node;
+}
+
+function setupCatanQuiz({ seedLatestResponses } = {}) {
+  const figureStore = { catanBoardIntro: { selection: null, selectionNumbers: null } };
+  function getFigureValue(path) {
+    const [id, ...rest] = path.split(".");
+    let value = figureStore[id];
+    for (const key of rest) {
+      if (value === null || value === undefined) return undefined;
+      value = value[key];
+    }
+    return value;
+  }
+
+  // catan_corner: a figure question whose control is the board itself.
+  const wrapper1 = createNode({ classes: ["quiz-control"] });
+  function applySelection(id) {
+    // Stands in for the board's own setSelection()+notify(): update the
+    // published value, then dispatch the bubbling "input" event the real
+    // board fires from its root node.
+    figureStore.catanBoardIntro = { selection: id, selectionNumbers: id === null ? null : [id] };
+    wrapper1.dispatchEvent({ type: "input", bubbles: true });
+  }
+  const boardCalls = [];
+  const boardNode = {
+    quizResponse: {
+      setValue(path, value) {
+        if (path !== "selection") throw new Error("Unsupported Catan response: " + path);
+        boardCalls.push(value);
+        applySelection(value === null || value === undefined ? null : Number(value));
+      },
+    },
+  };
+  const liveLayer1 = createNode({ classes: ["interactive-figure-live"] });
+  liveLayer1.firstElementChild = boardNode;
+  const mount1 = createNode({
+    dataset: { interactiveFigure: "catanBoardIntro" },
+    select: { ":scope > .interactive-figure-live": liveLayer1 },
+  });
+  wrapper1.querySelectorAll = (selector) => (selector === "[data-interactive-figure]" ? [mount1] : []);
+
+  const check1 = createNode();
+  const clear1 = createNode();
+  const actions1 = createNode({
+    select: {
+      "[data-quiz-action='check']": check1,
+      "[data-quiz-action='hint']": createNode(),
+      "[data-quiz-action='reveal']": createNode(),
+      "[data-quiz-action='clear']": clear1,
+    },
+  });
+  const feedbackLabel1 = createNode();
+  const feedback1 = createNode({ select: { "[data-quiz-feedback-label]": feedbackLabel1 } });
+  const item1 = createNode({
+    dataset: { questionId: "catan_corner" },
+    classes: ["quiz-question"],
+    select: {
+      ":scope > .quiz-control": wrapper1,
+      ":scope > .quiz-actions": actions1,
+      ":scope > .quiz-feedback": feedback1,
+      ":scope > .quiz-hints-panel": createNode(),
+      ":scope > .quiz-explanation-panel": createNode(),
+      ":scope > .quiz-diagnostics": createNode(),
+    },
+  });
+  wrapper1.parentNode = item1;
+
+  // catan_settlement: a free-response question whose prompt reads
+  // catanBoardIntro.selectionNumbers via promptFrom/promptTemplate.
+  const textarea2 = createNode();
+  const wrapper2 = createNode({ classes: ["quiz-control"], select: { textarea: textarea2 } });
+  const actions2 = createNode({
+    select: {
+      "[data-quiz-action='check']": createNode(),
+      "[data-quiz-action='hint']": createNode(),
+      "[data-quiz-action='reveal']": createNode(),
+      "[data-quiz-action='clear']": createNode(),
+    },
+  });
+  const feedback2 = createNode({ select: { "[data-quiz-feedback-label]": createNode() } });
+  const prompt2 = createNode();
+  prompt2.innerHTML = "<p>Place your settlement by clicking a spot on the board above.</p>";
+  const item2 = createNode({
+    dataset: { questionId: "catan_settlement" },
+    classes: ["quiz-question"],
+    select: {
+      ":scope > .quiz-control": wrapper2,
+      ":scope > .quiz-actions": actions2,
+      ":scope > .quiz-feedback": feedback2,
+      ":scope > .quiz-hints-panel": createNode(),
+      ":scope > .quiz-explanation-panel": createNode(),
+      ":scope > .quiz-diagnostics": createNode(),
+      ".quiz-prompt": prompt2,
+    },
+  });
+  wrapper2.parentNode = item2;
+
+  const body = createNode({ children: [item1, item2] });
+  item1.parentNode = body;
+  item2.parentNode = body;
+  const section = createNode({
+    select: { ":scope > .callout-body": body },
+    closestMap: { "figure.quarto-float-quiz": null },
+  });
+  body.parentNode = section;
+
+  const quizData = {
+    id: "06_probability_catan",
+    questions: [
+      { id: "catan_corner", type: "figure", responseFrom: "catanBoardIntro.selection" },
+      {
+        id: "catan_settlement",
+        type: "free-response",
+        checkLabel: "Save response",
+        promptFrom: "catanBoardIntro.selectionNumbers",
+        promptTemplate: "You chose the {value} intersection. What made you go for that?",
+      },
+    ],
+  };
+  const script = createNode({ closestMap: { ".quiz": section } });
+  script.textContent = JSON.stringify(quizData);
+
+  const store = new Map();
+  if (seedLatestResponses) {
+    store.set("statisticsfromscratch.quizResponses", JSON.stringify(seedLatestResponses));
+  }
+  const localStorage = {
+    getItem: (key) => (store.has(key) ? store.get(key) : null),
+    setItem: (key, value) => store.set(key, String(value)),
+  };
+
+  let ready;
+  const documentListeners = new Map();
+  const document = {
+    documentElement: { dataset: {} },
+    addEventListener(type, fn) {
+      if (type === "DOMContentLoaded") { ready = fn; return; }
+      if (!documentListeners.has(type)) documentListeners.set(type, new Set());
+      documentListeners.get(type).add(fn);
+    },
+    dispatchEvent(event) {
+      documentListeners.get(event.type)?.forEach((fn) => fn.call(document, event));
+      return true;
+    },
+    querySelectorAll: (selector) => (selector === "script.quiz-data[type='application/json']" ? [script] : []),
+  };
+  section.parentNode = document; // terminates the bubble chain, like the real DOM
+
+  const window = {
+    localStorage,
+    location: { pathname: "/06-probability.html" },
+    interactiveRuntime: { getValue: getFigureValue, mountWithin() {} },
+  };
+
+  const errors = [];
+  runInNewContext(runtime, {
+    document, window, console: { error: (...args) => errors.push(args), warn() {}, log() {} }, JSON, Set,
+    CustomEvent: function (type, options = {}) {
+      return { type, bubbles: Boolean(options.bubbles), detail: options.detail };
+    },
+  });
+  ready();
+
+  return {
+    errors,
+    item1, check1, clear1, feedback1, feedbackLabel1,
+    item2, textarea2, prompt2,
+    applySelection, boardCalls, store,
+  };
+}
+
+test("a figure question autosaves the reader's board selection and the Clear button routes through the board's quiz bridge", () => {
+  const quiz = setupCatanQuiz();
+  assert.deepEqual(quiz.errors, [], "quiz hydration threw");
+
+  assert.equal(quiz.item1.dataset.quizState, undefined, "no selection yet");
+  assert.equal(quiz.check1.hidden, true, "figure questions never show a check button");
+  assert.equal(quiz.clear1.hidden, true);
+
+  quiz.applySelection(7);
+
+  assert.equal(quiz.item1.dataset.quizState, "neutral");
+  assert.equal(quiz.feedbackLabel1.textContent, "Response saved.");
+  assert.equal(quiz.clear1.hidden, false);
+  const saved = JSON.parse(quiz.store.get("statisticsfromscratch.quizResponses"));
+  assert.equal(saved["06_probability_catan:catan_corner"].response, 7);
+  assert.deepEqual(quiz.boardCalls, [], "a direct board pick does not go through quizResponse");
+
+  quiz.clear1.dispatchEvent({ type: "click" });
+
+  assert.equal(quiz.item1.dataset.quizState, undefined);
+  assert.equal(quiz.feedback1.hidden, true);
+  assert.equal(quiz.clear1.hidden, true);
+  assert.deepEqual(quiz.boardCalls, [null], "Clear asks the board to clear its selection");
+  const clearedSaved = JSON.parse(quiz.store.get("statisticsfromscratch.quizResponses"));
+  assert.equal(clearedSaved["06_probability_catan:catan_corner"], undefined);
+});
+
+test("promptFrom mirrors the board's selection into the free-response prompt and discards a stale saved response", () => {
+  const quiz = setupCatanQuiz({
+    seedLatestResponses: {
+      "06_probability_catan:catan_settlement": {
+        response: "top-left corner", correct: null, context: [9, 9, 9],
+      },
+    },
+  });
+  assert.deepEqual(quiz.errors, [], "quiz hydration threw");
+
+  // The draft is preserved for editing, but a response written against a
+  // different choice cannot count as already answered.
+  assert.equal(quiz.textarea2.value, "top-left corner");
+  assert.equal(quiz.item2.dataset.quizState, undefined);
+  const afterRestore = JSON.parse(quiz.store.get("statisticsfromscratch.quizResponses"));
+  assert.equal(afterRestore["06_probability_catan:catan_settlement"], undefined);
+
+  assert.equal(quiz.prompt2.textContent, "");
+  assert.match(quiz.prompt2.innerHTML, /Place your settlement/);
+
+  quiz.applySelection(7);
+
+  assert.equal(quiz.prompt2.textContent, "You chose the 7 intersection. What made you go for that?");
 });
