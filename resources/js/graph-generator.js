@@ -1815,13 +1815,39 @@ sfsGraphMakeCurve = (opts = {}) => {
     .join("g")
       .attr("class", "sfs-graph-curve-series");
 
+  // Clip the complete area path so the shaded edge follows the same
+  // interpolation as the curve, including at the interval boundaries.
+  const shadeBetween = opts.shade && opts.shade.between;
+  const shadeBounds = Array.isArray(shadeBetween) && shadeBetween.length === 2 &&
+    shadeBetween.every(Number.isFinite)
+    ? [Math.max(xDomain[0], Math.min(...shadeBetween)), Math.min(xDomain[1], Math.max(...shadeBetween))]
+    : null;
+  const hasShade = shadeBounds && shadeBounds[1] > shadeBounds[0];
   let areas = null;
-  if (sfsGraphValueOr(opts.area, false)) {
+  if (sfsGraphValueOr(opts.area, false) || hasShade) {
     areas = groups.append("path")
       .attr("class", "sfs-graph-area")
       .attr("fill", (d, i) => d.color || sfsGraphDefaultColors[i % sfsGraphDefaultColors.length])
       .attr("d", (d) => area(d.rows))
       .style("opacity", entrance.enabled ? 0 : null);
+    if (hasShade) {
+      const clipId = sfsGraphNextClipId("sfs-graph-shade-clip");
+      svg.append("clipPath").attr("id", clipId)
+        .append("rect")
+          .attr("x", x(shadeBounds[0]))
+          .attr("y", margin.top)
+          .attr("width", x(shadeBounds[1]) - x(shadeBounds[0]))
+          .attr("height", height - margin.bottom - margin.top);
+      areas.attr("clip-path", `url(#${clipId})`);
+      if (opts.shade.label) {
+        svg.append("text")
+          .attr("class", "sfs-graph-label")
+          .attr("text-anchor", "middle")
+          .attr("x", x((shadeBounds[0] + shadeBounds[1]) / 2))
+          .attr("y", y(0) - 20)
+          .text(opts.shade.label);
+      }
+    }
   }
 
   const lines = groups.append("path")

@@ -1850,6 +1850,17 @@
       });
     }
 
+    // Quiz controls use the same selection path as published figure values.
+    // Clearing/restoring a response also updates remembered and linked boards.
+    rootNode.quizResponse = {
+      setValue: function (path, value) {
+        if (path !== "selection") throw new Error("Unsupported Catan response: " + path);
+        const id = value === null || value === undefined ? null : Number(value);
+        setSelection(id !== null && board.byId.has(id) ? id : null,
+          { remember: true, animate: false });
+      }
+    };
+
     rootNode.catanApi = {
       applyAction: applyTutorialAction,
       setSelection: function (id, options) {
