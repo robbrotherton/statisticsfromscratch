@@ -9,6 +9,7 @@
     multipleChoice: "multiple-choice",
     trueFalse: "true-false",
     numeric: "numeric",
+    figure: "figure",
   };
 
   const EVENTS = {
@@ -288,10 +289,46 @@
     };
   }
 
+  function figureValue(path) {
+    return window.interactiveRuntime?.getValue(path);
+  }
+
+  function responsePresent(value) {
+    return value !== undefined && value !== null &&
+      !(typeof value === "string" && value.trim() === "") &&
+      !(Array.isArray(value) && value.length === 0);
+  }
+
+  function responseSignature(value) {
+    return JSON.stringify(value ?? null);
+  }
+
+  function figureControl(wrapper, question) {
+    const [figureId, ...parts] = question.responseFrom.split(".");
+    exposeRichContent(wrapper);
+    function setValue(value) {
+      const mount = Array.from(wrapper.querySelectorAll("[data-interactive-figure]"))
+        .find((element) => element.dataset.interactiveFigure === figureId);
+      const node = mount?.querySelector(":scope > .interactive-figure-live")?.firstElementChild;
+      if (!node?.quizResponse?.setValue) {
+        throw new Error(`Figure ${figureId} does not support quiz responses`);
+      }
+      node.quizResponse.setValue(parts.join("."), value);
+    }
+    return {
+      element: wrapper,
+      getValue: () => figureValue(question.responseFrom),
+      setValue,
+      clear: () => setValue(null),
+    };
+  }
+
   function questionControl(item, question) {
     const wrapper = item.querySelector(":scope > .quiz-control");
     const type = questionType(question);
     if (!wrapper) throw new Error(`Missing control for question ${question.id}`);
+
+    if (type === QUESTION_TYPES.figure) return figureControl(wrapper, question);
 
     if (type === QUESTION_TYPES.multipleChoice || type === QUESTION_TYPES.trueFalse) {
       return choiceControl(wrapper);
@@ -379,6 +416,8 @@
     const hasDiagnostics = Array.isArray(question.diagnostics) &&
       question.diagnostics.length > 0;
     const responseKey = `${quiz.id}:${question.id}`;
+    const isFigure = questionType(question) === QUESTION_TYPES.figure;
+    let syncingFigure = false;
     let lastGraded = null;
     let hintsRevealed = 0;
 
@@ -400,7 +439,7 @@
         check.hidden = true;
         return;
       }
-      check.hidden = false;
+      check.hidden = isFigure;
       check.textContent = mode === "retry" ? "Try again" : checkLabel;
       check.classList.toggle("quiz-retry", mode === "retry");
     }
@@ -531,24 +570,62 @@
     function restoreSavedResponse() {
       const saved = loadLatestResponse(responseKey);
       if (!saved) return;
-
+      if (isFigure) {
+        // Prefer a live/remembered selection; otherwise restore the quiz's
+        // response through the figure adapter so all linked views update.
+        if (!responsePresent(control.getValue())) {
+          syncingFigure = true;
+          try { control.setValue(saved.response); }
+          finally { syncingFigure = false; }
+        }
+        return;
+      }
       control.setValue(saved.response);
+      if (question.promptFrom &&
+          responseSignature(saved.context) !== responseSignature(figureValue(question.promptFrom))) {
+        clearLatestResponse(responseKey);
+        return;
+      }
       lastGraded = { response: saved.response, correct: saved.correct };
       applyState(saved.correct);
     }
 
     function handleResponseChange() {
       if (!item.dataset.quizState) return;
-      if (lastGraded && control.getValue() === lastGraded.response) return;
+      if (lastGraded && responseSignature(control.getValue()) === responseSignature(lastGraded.response)) return;
       clearQuestionState();
       clearLatestResponse(responseKey);
     }
 
-    control.element.addEventListener("input", handleResponseChange);
-    control.element.addEventListener("change", handleResponseChange);
+    function syncFigureResponse() {
+      if (syncingFigure) return;
+      const response = control.getValue();
+      if (lastGraded && responseSignature(response) === responseSignature(lastGraded.response)) return;
+      syncingFigure = true;
+      try {
+        clearQuestionState({ markTried: false });
+        if (!responsePresent(response)) {
+          clearLatestResponse(responseKey);
+          return;
+        }
+        const saved = loadLatestResponse(responseKey);
+        lastGraded = { response, correct: null };
+        applyState(null);
+        if (!saved || responseSignature(saved.response) !== responseSignature(response)) {
+          track({ event: EVENTS.submitResponse, quizId: quiz.id,
+            questionId: question.id, type: questionType(question), response, correct: null });
+        }
+      } finally {
+        syncingFigure = false;
+      }
+    }
+
+    control.element.addEventListener("input", isFigure ? syncFigureResponse : handleResponseChange);
+    control.element.addEventListener("change", isFigure ? syncFigureResponse : handleResponseChange);
+    if (isFigure) control.element.addEventListener("sfs-interactive:ready", syncFigureResponse);
 
     control.element.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter") return;
+      if (isFigure || event.key !== "Enter") return;
       if (event.target.tagName === "TEXTAREA" && !(event.metaKey || event.ctrlKey)) return;
       event.preventDefault();
       if (!check.hidden) check.click();
@@ -588,6 +665,7 @@
         response,
         correct: isCorrect,
         answer: plainAnswer(question),
+        ...(question.promptFrom ? { context: figureValue(question.promptFrom) } : {}),
       });
     });
 
@@ -659,7 +737,35 @@
       });
     }
 
+    if (question.promptFrom) {
+      const prompt = item.querySelector(".quiz-prompt");
+      const fallback = prompt.innerHTML;
+      let previousContext = responseSignature(figureValue(question.promptFrom));
+      function updatePrompt() {
+        const value = figureValue(question.promptFrom);
+        const signature = responseSignature(value);
+        if (signature !== previousContext) {
+          // Preserve the draft, but a saved explanation of an earlier choice
+          // needs to be reviewed and saved again for the new one.
+          clearQuestionState({ markTried: false });
+          clearLatestResponse(responseKey);
+          previousContext = signature;
+        }
+        if (responsePresent(value)) {
+          const label = Array.isArray(value) ? value.join("–") : String(value);
+          const text = question.promptTemplate.split("{value}").join(label);
+          if (prompt.textContent !== text) prompt.textContent = text;
+        } else if (prompt.innerHTML !== fallback) {
+          prompt.innerHTML = fallback;
+        }
+      }
+      prompt.setAttribute("aria-live", "polite");
+      document.addEventListener("input", updatePrompt);
+      document.addEventListener("sfs-interactive:ready", updatePrompt);
+      updatePrompt();
+    }
     restoreSavedResponse();
+    if (isFigure) syncFigureResponse();
     return item;
   }
 

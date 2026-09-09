@@ -182,7 +182,9 @@ test("a thousand rolls pulls the tied corners back together", () => {
 test("the module is registered and the chapter asks for it", () => {
   assert.match(manifest, /\["catan-board"\]\s*=\s*\{\s*file\s*=\s*"resources\/js\/catan-board\.js"/);
   assert.match(chapter, /^ {2}- catan-board$/m);
-  assert.match(chapter, /interactive-figure catanBoardIntro makeCatanBoard/);
+  assert.match(chapter, /include quizzes\/06-probability-catan.qmd/);
+  const quiz = readFileSync(new URL("../quizzes/06-probability-catan.qmd", import.meta.url), "utf8");
+  assert.match(quiz, /interactive-figure catanBoardIntro makeCatanBoard/);
   assert.match(chapter, /"mode":"rated","rating":"theory"/);
 });
 

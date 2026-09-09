@@ -199,6 +199,6 @@ test("the shared renderer covers every authored question type", () => {
 
   assert.deepEqual(
     [...types].sort(),
-    ["free-response", "multiple-choice", "numeric", "true-false"]
+    ["figure", "free-response", "multiple-choice", "numeric", "true-false"]
   );
 });

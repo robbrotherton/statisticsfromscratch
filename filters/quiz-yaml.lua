@@ -1,6 +1,7 @@
 local stringify = pandoc.utils.stringify
 
 local QUESTION_TYPES = {
+  ["figure"] = true,
   ["free-response"] = true,
   ["free"] = true,
   ["multiple-choice"] = true,
@@ -297,7 +298,7 @@ local function validate_question(question, path, seen_ids)
   end
 
   if not QUESTION_TYPES[question.type] then
-    validation_error(path .. ".type", "must be free-response, multiple-choice, true-false, or numeric")
+    validation_error(path .. ".type", "must be free-response, multiple-choice, true-false, numeric, or figure")
   end
 
   if question.checkLabel ~= nil and is_blank(question.checkLabel) then
@@ -313,6 +314,32 @@ local function validate_question(question, path, seen_ids)
     end
     if question.answer ~= nil and trim(question.answer) ~= "" then
       validation_error(path .. ".answerFrom", "cannot be combined with answer")
+    end
+  end
+
+  if question.type == "figure" then
+    if is_blank(question.responseFrom) or not tostring(question.responseFrom):match("^[A-Za-z0-9_-]+%.[A-Za-z0-9_.-]+$") then
+      validation_error(path .. ".responseFrom", "must name a figure value, such as board.selection")
+    end
+    if is_blank(question.figureHtml) then
+      validation_error(path .. ".figure", "must contain an interactive figure")
+    end
+    if question.answer ~= nil or question.answerFrom ~= nil then
+      validation_error(path .. ".answer", "figure responses are saved without grading")
+    end
+  elseif question.responseFrom ~= nil or question.figure ~= nil then
+    validation_error(path, "responseFrom and figure are only available on figure questions")
+  end
+
+  if question.promptFrom ~= nil or question.promptTemplate ~= nil then
+    if is_blank(question.promptFrom) or is_blank(question.promptTemplate) or is_blank(question.prompt) then
+      validation_error(path .. ".promptFrom", "requires a value path, promptTemplate, and fallback prompt")
+    end
+    if not tostring(question.promptTemplate):find("{value}", 1, true) then
+      validation_error(path .. ".promptTemplate", "must contain {value}")
+    end
+    if question.type ~= "free-response" then
+      validation_error(path .. ".promptFrom", "is only available on free-response questions")
     end
   end
 
@@ -433,6 +460,11 @@ local function add_question_html(question)
   question.type = field_text(question.type)
   question.checkLabel = field_text(question.checkLabel)
   question.answerFrom = field_text(question.answerFrom)
+  question.responseFrom = field_text(question.responseFrom)
+  question.promptFrom = field_text(question.promptFrom)
+  question.promptTemplate = field_text(question.promptTemplate)
+  question.figureHtml = field_html(question.figure)
+  question.figure = field_text(question.figure)
   question.tolerance = field_text(question.tolerance)
   question.min = field_text(question.min)
   question.max = field_text(question.max)
@@ -527,6 +559,10 @@ local function render_choices(quiz, question, options)
 end
 
 local function render_control(quiz, question)
+  if question.type == "figure" then
+    return question.figureHtml
+  end
+
   if question.type == "multiple-choice" then
     return render_choices(quiz, question, question.options or {})
   end
