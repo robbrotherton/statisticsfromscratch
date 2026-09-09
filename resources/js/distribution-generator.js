@@ -2705,6 +2705,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
       .attr("transform", `translate(0,${height - margin.bottom})`)
       .call(d3.axisBottom(x)
         .ticks(sfsDistributionValueOr(opts.xTicks, 7))
+        .tickValues(opts.xTickValues || null)
         .tickFormat(opts.xTickFormat || opts.tickFormat || d3.format("~g")));
     sfsDistributionStyleAxis(xAxis, display);
   }
@@ -3807,6 +3808,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       xAxisLayer
         .call(d3.axisBottom(x)
           .ticks(sfsDistributionValueOr(opts.xTicks, 7))
+          .tickValues(opts.xTickValues || null)
           .tickFormat(opts.xTickFormat || opts.tickFormat || d3.format("~g")));
       sfsDistributionStyleAxis(xAxisLayer, display);
     }
