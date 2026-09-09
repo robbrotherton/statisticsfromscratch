@@ -85,6 +85,8 @@ Or if a poll is looking at one candidate's lead over another rather than at supp
 
 ### Sampling Error with IQ Scores
 
+For the examples that follow, we'll assume observations are **independent**: knowing one score doesn't change the probabilities for another. We'll return to what that requires in practice near the end of the chapter.
+
 For now, let's just take one more quick example of what we mean by sampling error. Take a population for which we know the population average and standard deviation. Like we mentioned, the distribution of IQ scores is standardized, so that the mean is 100 and the standard deviation is 15.
 
 Now suppose we take a sample of ten people from this population—and again, this isn't real data from any study, but I simulated that in R so this is how a real random sample might look. Now let's take a second sample. And a third sample. What if we keep taking sample after sample of ten people from this population? Here's what it would look like. Each black square here is a sample mean. You can see that they're scattered around quite a bit. Again, every sample has a slightly different mean, but you can also see a pattern emerging. Most of the boxes are close to 100. And as you look farther and farther from 100, the boxes are fewer and fewer. But with these boxes piled up like this, you can see that there is some predictability to the sampling error. This is the delightful paradox of sampling error: it is predictable in its unpredictability.
@@ -146,6 +148,8 @@ Because this probably all sounds quite abstract, let's think about a small examp
 
 If we plot their heights on a histogram, it's pretty simple. Just four scores for the four different heights. The frequency of each is one because there's only one person of each height. So far, so simple.
 
+We'll select two scores at random, each time choosing from all four with equal probability. This is **sampling with replacement**: the first selection remains available for the second, so the same person can appear twice. It keeps the selections independent. We'll examine this procedure more closely when we turn to practical sampling.
+
 ::::: {.callout-tip .interactive}
 ## Build every sample mean
 
@@ -198,7 +202,7 @@ But remember, we're not interested in individuals anymore. We're interested in s
 
 : All 16 possible samples of $n = 2$ (with replacement) from the four heights. {#tbl-height-samples}
 
-Now remember, for this to work, a crucial assumption is that we're using true random independent sampling, and that means we must be sampling with replacement. And so every possible sample will include samples where the same individual shows up twice. The first line here is the 60-inch person twice. Obviously the sample mean there is 60.
+Because we're sampling with replacement, the table includes samples where the same individual shows up twice. The first line here is the 60-inch person twice. Obviously the sample mean there is 60.
 
 <!-- [Note: Original lecture included an interactive element here.] -->
 
@@ -400,11 +404,27 @@ $$\sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{2.24}{\sqrt{2}} = 1.58$$
 
 {{< include quizzes/07-sampling-learning-checks.qmd >}}
 
+## Counting Marbles
+
+We've now seen how the sampling distribution lets us predict the variability of sample means. But those predictions depend on how we collect the observations in each sample. To see why, let's turn to another statistics textbook favorite: picking marbles out of a jar.
+
+In *The Art of Conjecturing*, published in 1713, Jacob Bernoulli asked his reader to imagine an urn containing 5,000 pebbles, in some unknown ratio of white to black. Urns of pebbles were used to cast votes in elections at the time, so Bernoulli may have been thinking about a very real issue, not just a quaint way of illustrating statistical ideas. By drawing pebbles repeatedly, someone who couldn't see the contents could estimate that ratio from the proportion of white pebbles they observed [@bernoulli2006conjecturing].
+
+Let's give ourselves a jar with just 50 marbles, 40 blue and 10 white. If each marble is equally likely to be drawn, $P(\text{white})=10/50=.2$.
+
+Suppose the first marble we draw is white. What is the probability that a second draw will also be white? This raises a small but important procedural detail. Did we put the *first* marble back into the jar, or did we leave it out?
+
+If we **sample with replacement**, we put it back and mix the jar before drawing again. There are still 10 white marbles among 50, so the probability stays .2. The draws are **independent**: knowing the first result doesn't change the probabilities for the second.
+
+If we **sample without replacement**, we leave the first marble out. After drawing white, only 9 white marbles and 49 marbles in total remain. The probability of another white is now $9/49 \approx .184$. The draws are dependent, because knowing the first result changes the probabilities for the second.
+
+{{< include quizzes/07-sampling-marbles.qmd >}}
+
+A **random sample** is selected by a chance procedure. Random selection and independence are different ideas: both marble procedures use chance, but only replacing and mixing the marble makes successive draws independent. Our standard-error formula, $\sigma_M=\sigma/\sqrt{n}$, assumes that each observation contributes independently to the mean. Changing the sampling procedure can change the variability of those means.
+
 ## Sampling People in Practice
 
-The sampling distributions in this chapter assume independent observations drawn from the same population. Remember the marbles in Chapter 6: replacing and mixing each marble kept the next draw's probabilities unchanged. That assumption matters because our standard-error formula, $\sigma_M=\sigma/\sqrt{n}$, treats each observation as an independent contribution to the mean.
-
-How does that apply to people? A **simple random sample** gives every possible sample of a given size the same chance of selection. We usually sample people without replacement, since selecting the same person twice would give us no new response. Strictly speaking, the selections are then dependent: each person selected changes who remains. But when the sample is a small fraction of a large population, that dependence is usually negligible. We can treat the observations as approximately independent for the calculations in this book.
+How does the marble example apply to sampling people? A **simple random sample** gives every possible sample of a given size the same chance of selection. We usually sample people without replacement, since selecting the same person twice would give us no new response. Strictly speaking, the selections are then dependent: each person selected changes who remains. But when the sample is a small fraction of a large population, that dependence is usually negligible. We can treat the observations as approximately independent for the calculations in this book.
 
 Other kinds of dependence need more care. Ten people from one household, or ten measurements of the same person, may share influences that make their scores similar. Treating them as ten independent observations can make a mean look more precise than it is. A large population doesn't remove those connections; the analysis needs to account for them.
 
