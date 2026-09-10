@@ -1525,7 +1525,24 @@ makeMeanBalanceBeam = function(opts) {
     }
   }
 
-  setWobbleMode(state.wobbleMode, false);
+  if (isCover && state.wobbleMode === "once-visible") {
+    window.interactiveFigure.coverTimeline(rootNode, {
+      duration: wobbleDuration,
+      animate: opts.animate !== false,
+      draw(elapsed) {
+        const progress = Math.min(1, elapsed / wobbleDuration);
+        state.wobbleActive = elapsed > 0 && elapsed < wobbleDuration;
+        state.wobbleHasFired = elapsed >= wobbleDuration;
+        const offset = state.wobbleActive
+          ? Math.sin(elapsed / wobbleOncePeriod * Math.PI * 2) * wobbleAmplitude * Math.sin(progress * Math.PI)
+          : 0;
+        renderBeamTransform(baseAngle + offset);
+        setValue();
+      }
+    });
+  } else {
+    setWobbleMode(state.wobbleMode, false);
+  }
 
   if (state.controls && window.interactiveFigure) {
     window.interactiveFigure.wrap({
