@@ -166,19 +166,6 @@ makeFrequencyDistributionCover = (opts = {}) => {
   const endSamples = sampleXs.map((xv) => ({ x: xv, y: Math.max(0, curveYAt(xv)) }));
   const denseLine = d3.line().curve(d3.curveLinear).x((d) => x(d.x)).y((d) => y(d.y));
 
-  const reduced = sfsGraphPrefersReducedMotion();
-
-  if (reduced) {
-    points.remove();
-    bars.attr("x", (d) => x(d.lower))
-      .attr("width", (d) => fullBarWidth(d))
-      .attr("y", (d) => y(d.frequency))
-      .attr("height", (d) => y(0) - y(d.frequency));
-    line.attr("d", denseLine(endSamples))
-      .style("opacity", 1);
-    return svg.node();
-  }
-
   const barDuration = sfsGraphValueOr(opts.barDuration, 750);
   const barStagger = sfsGraphValueOr(opts.barStagger, 75);
   const growDuration = sfsGraphValueOr(opts.growDuration, 650);
@@ -186,7 +173,6 @@ makeFrequencyDistributionCover = (opts = {}) => {
   const polygonDuration = sfsGraphValueOr(opts.polygonDuration, 650);
   const curveDuration = sfsGraphValueOr(opts.curveDuration, 850);
   const fadeDuration = sfsGraphValueOr(opts.fadeDuration, 550);
-  const threshold = sfsGraphValueOr(opts.animationThreshold, 0.5);
 
   const barsPhaseTotal = barDuration + (rows.length - 1) * barStagger + growDuration;
   const polygonPhaseStart = barsPhaseTotal + pause;
@@ -201,59 +187,30 @@ makeFrequencyDistributionCover = (opts = {}) => {
   const revealWidth = Math.max(0, width - margin.left - margin.right);
   const [revealClip] = sfsGraphRevealClips(svg, line, revealLeft, 0, revealWidth, height);
 
-  const play = () => {
-    bars.interrupt()
-      .attr("x", (d) => x(d.x) - gappedBarWidth(d) / 2)
-      .attr("width", (d) => gappedBarWidth(d))
-      .attr("y", y(0))
-      .attr("height", 0)
-      .style("opacity", 1)
-      .transition()
-        .delay((d, i) => i * barStagger)
-        .duration(barDuration)
-        .ease(d3.easeBackOut.overshoot(1.4))
-        .attr("y", (d) => y(d.frequency))
-        .attr("height", (d) => y(0) - y(d.frequency))
-      .transition()
-        .duration(growDuration)
-        .ease(d3.easeCubicInOut)
-        .attr("x", (d) => x(d.lower))
-        .attr("width", (d) => fullBarWidth(d));
-
-    revealClip.interrupt()
-      .attr("width", 0)
-      .transition()
-      .delay(polygonPhaseStart)
-      .duration(polygonDuration)
-      .ease(d3.easeCubicInOut)
-      .attr("width", revealWidth);
-
-    line.interrupt()
-      .attr("d", linear(polygonPoints))
-      .style("opacity", 1)
-      .transition()
-        .delay(polygonPhaseStart + polygonDuration + pause)
-        .duration(curveDuration)
-        .ease(d3.easeCubicInOut)
-        .attrTween("d", () => {
-          const interpolateY = d3.interpolateArray(startSamples.map((p) => p.y), endSamples.map((p) => p.y));
-          return (t) => denseLine(sampleXs.map((xv, i) => ({ x: xv, y: interpolateY(t)[i] })));
-        });
-
-    points.interrupt()
-      .style("opacity", 0)
-      .attr("cy", (d) => y(d.y))
-      .transition()
-        .delay((d, i) => polygonPhaseStart + i * 30)
-        .duration(220)
+  const progress = (elapsed, start, duration) => Math.max(0, Math.min(1, (elapsed - start) / duration));
+  const bounce = d3.easeBackOut.overshoot(1.4);
+  const interpolateY = d3.interpolateArray(startSamples.map((p) => p.y), endSamples.map((p) => p.y));
+  window.interactiveFigure.coverTimeline(svg.node(), {
+    duration: Math.max(curvePhaseStart + curveDuration, curvePhaseStart + fadeDuration,
+      polygonPhaseStart + (polygonPoints.filter((p) => p.point).length - 1) * 30 + 220),
+    animate: opts.animate !== false,
+    draw(elapsed) {
+      const growth = (i) => bounce(progress(elapsed, i * barStagger, barDuration));
+      const widening = (i) => d3.easeCubicInOut(progress(elapsed, i * barStagger + barDuration, growDuration));
+      const barWidth = (d, i) => gappedBarWidth(d) + (fullBarWidth(d) - gappedBarWidth(d)) * widening(i);
+      bars.attr("x", (d, i) => x(d.x) - barWidth(d, i) / 2)
+        .attr("width", barWidth)
+        .attr("y", (d, i) => y(d.frequency * growth(i)))
+        .attr("height", (d, i) => y(0) - y(d.frequency * growth(i)));
+      revealClip.attr("width", revealWidth * d3.easeCubicInOut(progress(elapsed, polygonPhaseStart, polygonDuration)));
+      const morph = d3.easeCubicInOut(progress(elapsed, curvePhaseStart, curveDuration));
+      const ys = interpolateY(morph);
+      line.attr("d", morph === 0 ? linear(polygonPoints) : denseLine(sampleXs.map((xv, i) => ({ x: xv, y: ys[i] }))))
         .style("opacity", 1);
-
-    points.transition()
-      .delay(curvePhaseStart)
-      .duration(fadeDuration)
-      .style("opacity", 0);
-  };
-
-  sfsGraphPlayEntrance(svg, threshold, play);
+      points.style("opacity", (d, i) =>
+        d3.easeCubicInOut(progress(elapsed, polygonPhaseStart + i * 30, 220)) *
+        (1 - d3.easeCubicInOut(progress(elapsed, curvePhaseStart, fadeDuration))));
+    }
+  });
   return svg.node();
 }

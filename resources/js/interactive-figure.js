@@ -390,6 +390,7 @@
         event.preventDefault(); play();
       }
     };
+    root.setAttribute("data-cover-replay", "");
     root.setAttribute("tabindex", "0");
     root.setAttribute("aria-keyshortcuts", "Enter Space");
     root.setAttribute("title", "Click or press Enter to replay the cover animation");

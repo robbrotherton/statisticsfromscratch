@@ -1,4 +1,4 @@
-makeHiddenMessage = function() {
+makeHiddenMessage = function(opts = {}) {
   const word = "STATISTICS";
   const letters = Array.from(word);
   const data = letters.map((letter, index) => ({
@@ -66,14 +66,14 @@ makeHiddenMessage = function() {
       .style("stroke-opacity", 0.3)
       .attr("stroke-width", 1);
 
-  onVisible(svg.node(), () => {
-    const motion = window.interactiveRuntime && window.interactiveRuntime.motion;
-    bars.transition()
-      .ease(d3.easeBackOut)
-      .duration(motion ? motion.duration(700) : 700)
-      .delay((d, i) => motion && motion.isReduced() ? 0 : i * 90)
-      .attr("y", d => y(d.value))
-      .attr("height", d => y(0) - y(d.value));
+  window.interactiveFigure.coverTimeline(svg.node(), {
+    duration: 700 + (data.length - 1) * 90,
+    animate: opts.animate !== false,
+    draw(elapsed) {
+      const progress = (d, i) => d3.easeBackOut(Math.max(0, Math.min(1, (elapsed - i * 90) / 700)));
+      bars.attr("y", (d, i) => y(d.value * progress(d, i)))
+        .attr("height", (d, i) => y(0) - y(d.value * progress(d, i)));
+    }
   });
 
   return svg.node();

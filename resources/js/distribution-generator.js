@@ -1418,6 +1418,39 @@ sfsDistributionRgba = (color, opacity = 1) => {
   ];
 }
 
+// Opt in to the shared cover lifecycle while retaining renderer and timing options.
+sfsDistributionFamilyCoverTimeline = (root, opts, timings, duration, draw) => {
+  let lastElapsed = null;
+  let frameGaps = [];
+  let reported = false;
+  const timeline = window.interactiveFigure.coverTimeline(root, {
+    duration,
+    animate: sfsDistributionBoolean(sfsDistributionValueOr(opts.animate, opts.animation), true),
+    draw(elapsed) {
+      if (elapsed === 0) {
+        lastElapsed = null;
+        frameGaps = [];
+        reported = false;
+      }
+      if (lastElapsed !== null && elapsed > lastElapsed) frameGaps.push(elapsed - lastElapsed);
+      lastElapsed = elapsed;
+      draw((index) => {
+        const timing = timings[index];
+        return sfsDistributionFamilyEase((elapsed - timing.delay) / timing.duration, opts);
+      });
+      if (elapsed >= duration && !reported) {
+        reported = true;
+        const stats = Object.assign(root.value.performance, sfsDistributionFamilyFrameStats(frameGaps), {
+          totalDurationMs: duration, elapsedMs: elapsed
+        });
+        if (typeof opts.onPerformance === "function") opts.onPerformance(stats, root);
+        if (opts.performance || opts.performanceLog || opts.debug) console.info("[sfsDistributionFamilyCover]", stats);
+      }
+    }
+  });
+  Object.assign(root.value, timeline);
+};
+
 makeDistributionFamilySvgCover = (opts = {}) => {
   const setupStart = performance.now();
   sfsDistributionEnsureStyles();
@@ -1673,6 +1706,14 @@ makeDistributionFamilySvgCover = (opts = {}) => {
     }
   };
 
+  if (localOpts.coverTimeline) {
+    sfsDistributionFamilyCoverTimeline(rootNode, localOpts, timings, totalDuration, (progress) => {
+      curveGroups.attr("transform", (d, index) => transformFor(riseProgress(progress(index))));
+      rawCurveData.forEach((d, index) => setRevealProgress(index, revealProgress(progress(index))));
+    });
+    return rootNode;
+  }
+
   if (shouldAnimate) {
     setProgress(0);
     const trigger = sfsDistributionAnimationTrigger(localOpts);
@@ -1917,6 +1958,13 @@ makeDistributionFamilyCanvasCover = (opts = {}) => {
       skippedAnimation: !shouldAnimate
     }
   };
+
+  if (localOpts.coverTimeline) {
+    sfsDistributionFamilyCoverTimeline(rootNode, localOpts, timings, totalDuration, (progress) => {
+      draw(progress);
+    });
+    return rootNode;
+  }
 
   if (shouldAnimate) {
     draw(() => 0);
@@ -2252,6 +2300,13 @@ makeDistributionFamilyWebglCover = (opts = {}) => {
       skippedAnimation: !shouldAnimate
     }
   };
+
+  if (localOpts.coverTimeline) {
+    sfsDistributionFamilyCoverTimeline(rootNode, localOpts, timings, totalDuration, (progress) => {
+      draw(progress);
+    });
+    return rootNode;
+  }
 
   if (shouldAnimate) {
     draw(() => 0);
