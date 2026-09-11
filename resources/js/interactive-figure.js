@@ -868,6 +868,7 @@
 
     const nav = document.createElement("div");
     nav.className = "sfs-if-tutorial-nav";
+    nav.dataset.singleStep = String(steps.length === 1);
 
     function makeNavButton(className, label, ariaLabel, iconBefore, iconAfter) {
       const button = document.createElement("button");
