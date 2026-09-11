@@ -119,11 +119,11 @@ First find the population mean. The ratings add to 30, and there are six of them
 :::
 
 ::: {.tutorial-step data-title="Deviations" data-action='{"stage":"deviations","animate":true}'}
-Now I add a column for the deviations. Subtract the mean from each score: $X-\mu$. The deviations are $-5, -1, 0, 0, 1,$ and $5$. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are. If you simply add up these six values, you get an answer of zero.
+Now add a column for the deviations, $X-\mu$. Subtracting the mean from each score, the deviations are $-5, -1, 0, 0, 1,$ and $5$. The signs tell us which side of the mean the scores fall on, while the sizes tell us how far away they are. If you simply add up these six values, you get an answer of zero.
 :::
 
 ::: {.tutorial-step data-title="Squared" data-action='{"stage":"squared-deviations","animate":true}'}
-Next I add a column for the squared deviations. This gives us $25, 1, 0, 0, 1,$ and $25$. Squaring makes every value nonnegative, so when we add them up in the next step we won't get zero.
+Next add a column for the squared deviations. Taking the values in the deviation column and multiplying each value by itself gives us $25, 1, 0, 0, 1,$ and $25$. Squaring makes the negative values turn positive, so when we add the squared deviation up in the next step we won't get zero.
 :::
 
 ::: {.tutorial-step data-title="SS" data-action='{"stage":"ss","animate":true}'}
@@ -204,7 +204,7 @@ But usually we can't do that: we don't know $\mu$! So instead we find the sample
 :::
 
 ::: {.tutorial-step data-title="Line them up" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
-Now that we've calculated it, let's slide the red span over so all three SD lines are centered on $\mu$ and we can compare them. The red span fits inside the dashed blue one. Computing the sample's SD around $M$ rather than $\mu$ gave a smaller answer.
+Now that we've calculated it, let's slide the red span over so all three SD lines are centered on $\mu$ and we can compare them. The red span fits inside the dashed blue one; computing the sample's SD around $M$ rather than $\mu$ gave a smaller answer.
 :::
 
 ::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
@@ -248,21 +248,21 @@ Well, it's not *quite* as simple as I made it sound there. To fully understand t
 
 So why does the correction here use exactly $n - 1$? It is a result of the constraint imposed by calculating deviations from the sample mean. Doing so costs us one degree of freedom.
 
-To illustrate, suppose I put three playing cards face down in front of you and tell you that the mean of their values is $M=5$. I point to the first card and ask you what number you think it is. There is no way for you to know, of course, so you shrug and I show you that it is a three. I point to the second card. You still can't know what it is; I turn it over and reveal a five. Now I point to the last card. Can you tell me its number? You jump up and exclaim, "eureka!" Given the mean and the other two values, there's only one thing this last one can be: it has to be seven.
+To illustrate, suppose I put a sample of three playing cards face down in front of you and tell you that I already calculated the mean of their values, $M=5$. I point to the first card and ask you what number you think it is. There is no way for you to know, of course, so you shrug and I show you that it is a three. I point to the second card. You still can't know what it is; I turn it over and reveal a five. Now I point to the last card. Can you tell me its number? You jump up and exclaim, "eureka!" Given the mean and the other two values, there's only one thing this last one can be: it has to be seven.
 
 {{< inline-svg resources/figures/playing-cards.svg >}}
 
-We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. And we could have more than three cards. Whatever the last card is, we'll always be able to determine its value without turning it over. Fixing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been fitted, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ degrees of freedom.
+We could shuffle the same three cards and repeat the process; the order the cards are turned over in doesn't matter. And we could have more than three cards. Whatever the last card is, we'll always be able to determine its value without turning it over. Knowing the mean imposes a constraint. Only two of the three values are free to vary. The same applies to deviations around the sample mean: once $M$ has been calculated, the deviations have to sum to zero. Any $n - 1$ deviations can vary, but their values determine the last one. So sample variance has $df = n - 1$ degrees of freedom. (Later we'll meet calculations that fit more means and therefore have different degrees of freedom.)
 
-If $\mu$ were already known and we measured the sample's deviations around that fixed population center, they would not be constrained to sum to zero and we would not lose a degree of freedom by fitting $M$. (Later we'll meet calculations that fit more means and therefore have different degrees of freedom.)
+Note that this problem is specific to the sample mean, $M$. If the population mean, $\mu$, were known and we measured the sample's deviations around that fixed population center, we would not lose a degree of freedom. That known $\mu$ is a constant, not something we estimate from the sample data, and so it does not impose the constraint of deviations summing to zero.
 
 ## Sampling error and statistical bias
 
-One last thing. Now that we know about statistical bias, you might be worried about other statistics being biased. What about the mean? We spent most of Chapter 3 talking about it, but never mentioned bias. It shouldn't get off the hook, right? We ought to check if it is biased or unbiased. And turning back to variance, @act-moving-center illustrated the cause of its bias, but it didn't show the correction. And it only showed one sample at a time. Like we said, bias operates in the aggregate.
+One last thing. Now that you know about statistical bias, you might be worried about other statistics being biased. What about the mean? We spent most of Chapter 3 talking about it, but never mentioned bias. It shouldn't get off the hook, right? We ought to check if it is biased or unbiased. And turning back to variance, @act-moving-center illustrated the *cause* of its bias, but it only showed one sample at a time. Like we said, bias operates in the aggregate.
 
-It would help to be more precise about the term *error*. An estimate can differ from the true parameter for different reasons. Sometimes it is thrown off by a genuine mistake or a bad design choice. But even under ideal circumstances, a statistic calculated from one sample will usually not be exactly equal to the corresponding population parameter. This kind of naturally-occuring discrepancy, inherent to the process of sampling from a population, is **sampling error**.
+It would help to be more precise about the term *error*. An estimate can differ from the true parameter for different reasons. Sometimes it is thrown off by a genuine mistake or a bad design choice. But even under ideal circumstances, a statistic calculated from one sample will usually not be exactly equal to the corresponding population parameter. This kind of naturally-occuring discrepancy between the estimate and the true parameter, is called **sampling error**. It's not an error in the colloquial sense of something we did wrong and could have avoided. It is inherent to the process of sampling from a population.
 
-**Bias**, by contrast, is a long-run property. Across repeated samples, do a statistic's errors balance around zero, or do they systematically lean in one direction? Dividing $SS$ by $n - 1$ doesn't make every variance estimate perfectly accurate; sampling error means each individual estimate can still be too high or too low. But it makes the overestimates and underestimates balance out in the long run. To see the difference between sampling error and bias, we need to look at many estimates.
+**Bias**, by contrast, is a long-run property. Across repeated samples, do a statistic's errors balance around zero, or do they systematically lean in one direction? Being *unbiased* doesn't mean every estimate gets the answer exactly right; sampling error means each individual estimate can still be above or below the true parameter. But it makes the overestimates and underestimates balance out in the long run. To see the difference between sampling error and bias, we need to look at many estimates. Let's check for bias in the mean, as well as in the two variance calculations.
 
 ::::: {#act-tracking-bias .callout-tip .interactive}
 ## Tracking bias across repeated samples
@@ -271,15 +271,15 @@ It would help to be more precise about the term *error*. An estimate can differ 
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="population" data-major-title="Population" data-title="Meet the population" data-action='{"estimator":"mean","tracker-axis-maximum":10,"show-sample":false,"focus-sample":false,"sample-opacity":1,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true,"fall":false}'}
-Here's our happy little population again. We'll use it to track long-run bias in a couple of statistics. First we'll check whether the sample mean, $M$, is biased or unbiased. Then we'll compare the two calculations we learned, dividing $SS$ either by $n$ or by $n - 1$ to compute sample variance.
+Here's our happy little population again. We'll use it to track long-run bias in a couple of statistics. First we'll check whether the sample mean, $M$, is biased or unbiased. Then we'll compare the two variance calculations we learned, dividing $SS$ either by $n$ or by $n - 1$ to compute sample variance.
 :::
 
 ::: {.tutorial-step data-major="one-sample" data-major-title="One sample" data-title="Draw a sample" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"full","show-error-tracker":false,"show-average-tracker":false,"show-expected-bias":false,"animate":true,"fall":true}'}
-Here's our first sample. Its mean is a little below the true population mean. But again, bias is not about any one sample over- or underestimating its parameter. We need to track this across a bunch of samples.
+Here's our first sample. Its mean is a little below the true population mean, because of sampling error. But again, bias is not about any one sample over- or underestimating its parameter. We need to track the errors across a bunch of samples.
 :::
 
 ::: {.tutorial-step data-major="one-sample" data-title="Track its error" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":1,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
-The population will stay the same while we draw sample after sample, so let's shift it out of the way and collect the individual sample means on the timeline below. Each square's vertical position is that sample's estimation error, $M-\mu$: below zero is an underestimate and above zero is an overestimate. The first sample's mean is a little below the population mean, so it lands just below zero.
+The population will stay the same while we draw sample after sample, so let's shift it out of the way and collect the individual errors on the timeline below. Each square's vertical position is that sample's estimation error, $M-\mu$: below zero is an underestimate and above zero is an overestimate. The first sample's mean is a little below the population mean, so it goes just below zero.
 :::
 
 ::: {.tutorial-step data-major="means" data-major-title="Repeated means" data-title="Ten means" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":10,"sample-interval":500,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":false,"show-expected-bias":false,"animate":true}'}
@@ -287,11 +287,11 @@ Now we draw nine more samples, one at a time. The ten squares are the ten sample
 :::
 
 ::: {.tutorial-step data-major="means" data-title="Average error" data-action='{"estimator":"mean","tracker-axis-maximum":10,"samples":10,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-This second tracker summarizes the first. After each new sample, it averages all the errors collected so far. So the end of the line is the average of all ten means' errors so far. Bias is the long-run position of this average, not the fact that individual estimates scatter around. But ten is not much of a long run. Let's make room for a lot more.
+This second tracker summarizes the first. After each sample, it averages *all* the errors collected so far. So the end of the line is the average of all ten means' errors so far. Bias is the long-run position of this average. But ten is not much of a long run. Let's make room for a lot more.
 :::
 
 ::: {.tutorial-step data-major="means" data-title="Make room for 1,000" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"tracker-axis-duration":1400,"samples":10,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
-Now we have space for 1,000 means. Nothing else has changed: these are still the same ten sample means, and the cumulative line still summarizes only those ten errors. When you click next, watch as a whole lot more samples are taken, their means added to the first tracker, and the cumulative average error updates in the second tracker.
+Now we have space for 1,000 samples. (Including the ten we already took, squished over on the left.) When you click next, watch as a whole lot more samples are taken, the errors in their means added to the first tracker, and the cumulative average error updates in the second tracker.
 :::
 
 ::: {.tutorial-step data-major="means" data-title="1,000 means" data-action='{"estimator":"mean","tracker-axis-maximum":1000,"samples":1000,"sample-duration":10000,"show-sample":true,"focus-sample":true,"sample-opacity":0.32,"source-view":"sample","show-error-tracker":true,"show-average-tracker":true,"show-expected-bias":false,"animate":true}'}
@@ -317,7 +317,7 @@ Now we replay the same 1,000 samples. The green corrected squares are added on t
 
 :::::
 
-So phew, the mean is an unbiased estimator of the population mean.^[More precisely, the sample mean is an unbiased estimator of the population mean under the random-sampling setup used here. Bias can be introduced in other ways, but that's an issue for another time.] Sampling error is not an error in the colloquial sense of something we did wrong and could have avoided. It is a natural consequence of taking a sample. Sometimes the error is in the direction of overestimating the mean, sometimes underestimating it, but in the long run those random errors balance out and the mean is unbiased.
+So phew, by taking a whole bunch of samples and aggregating their errors, we can see that the sample mean is an unbiased estimator of the population mean.^[More precisely, the sample mean is an unbiased estimator of the population mean under the random-sampling setup used here. Bias can be introduced in other ways, but that's an issue for another time.] It doesn't always get the answer exactly right. Individual samples can overestimate or underestimate the true population mean, because of ever-present sampling error. But in the long run those random errors balance out and the mean is unbiased.
 
 Sample variance can be an unbiased estimator of population variance too, as long as we divide $SS$ by $df$ ($n - 1$ in this situation). Dividing by $n$ does not stop the estimates from varying randomly; it shifts their long-run center downward. Individual estimates can still be too high or too low, but their errors average below zero, as we saw in the cumulative average of the 1,000 variance estimates calculated with the uncorrected denominator. The green line, where we divided by $n - 1$, fluctuated along the way but made its way close to zero in the long run.
 
