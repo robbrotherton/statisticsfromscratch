@@ -968,7 +968,7 @@ makeGaltonBoard = function(opts) {
           }
           break;
         case "run":
-          setRun(value, { redrop: false });
+          setRun(value === "next" ? state.seedIndex + 2 : value, { redrop: false });
           redraw = true;
           break;
         case "expected":

@@ -14,11 +14,9 @@ interactive-scripts:
 
 In the previous chapter, we used the normal distribution to determine the probability of seeing individual scores within a given range. But researchers aren't usually interested in single scores. They collect data from a sample, and use all the data from that sample to make probabilistic inferences about the population the sample belongs to. So here we'll discover how we can think about sampling and distributions of sample statistics in much the same way as we did within individual scores. The big ideas are sampling error and the central limit theorem.
 
-## The Galton Board
+## The Quincunx
 
-A Galton board, developed by Francis Galton in the 1870s and also called a quincunx or bean machine, is a board with rows of pegs. Balls drop in at the top, and every time a ball hits a peg, it bounces left or right, and on down to the next row, and so on. After bouncing through all the rows, each ball ends up in one of the slots at the bottom.
-
-This is really just our dice logic from the previous chapter taken further. A ball's final slot is determined by how many of its twelve bounces send it right rather than left. To end up in the far-left slot, a ball has to bounce left every single time, and there's only one way for that to happen — just like there's only one way to roll a total of two with two dice. To land in the middle, a ball needs an even mix of lefts and rights, and there are *many* different sequences of bounces that produce that mix — just like there are many ways to roll a total of seven. Any individual ball's path is unpredictable. But the pile that hundreds of balls build up together is, surprisingly, quite predictable.
+Before we proceed, take a moment to enjoy this little toy. (It's a digital version of a real thing you can buy and keep on your desk to turn to in moments of boredom.)
 
 <!-- TODO: possible callback in a later chapter (effect size / hypothesis testing):
      the module supports a `bias` option (P(bounce right) != .5, rendered as
@@ -36,28 +34,38 @@ This is really just our dice logic from the previous chapter taken further. A ba
 >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="One ball" data-action='{"drop":1,"show-expected":false}'}
-Watch a single ball make its way down the board. At every peg it's a 50/50 chance: left or right. There's no way to predict where this particular ball will end up — its final slot depends on how many of those twelve bounces send it right.
-:::
-
-::: {.tutorial-step data-title="A handful" data-action='{"drop":40,"show-expected":false}'}
-With a few dozen balls, the middle slots are starting to collect more than the edges, but the pile is still lumpy and irregular. Chance is messy in small numbers.
-:::
-
-::: {.tutorial-step data-title="Hundreds" data-action='{"drop":400,"show-expected":false}'}
-Keep the balls coming and a roughly symmetrical, bell-shaped pile emerges. No single ball knows where it's going, yet together they produce an increasingly stable pattern.
-:::
-
-::: {.tutorial-step data-title="The pattern" data-action='{"drop":400,"show-expected":true,"controls-open":true}'}
-The curve shows the mathematically expected distribution — the binomial distribution from counting how many paths lead to each slot, which is well approximated by the normal distribution. The middle slot has hundreds of possible paths; the far edges have exactly one each ($1/2^{12}$, or about 1 in 4,000 balls). Try dropping more balls yourself, or click the board.
+::: {.tutorial-step data-title="Let them fall" data-action='{"drop":0,"show-expected":false}' data-repeat-action='{"run":"next","drop":400,"show-expected":false}' data-repeat-label="Replay"}
+Click Replay to start. Try it a couple of times: what changes, and what stays similar?
 :::
 ::::
 
 :::::
 
-Strictly speaking, the Galton board produces a discrete **binomial distribution**, not a continuous normal distribution. But with enough rows, its bell shape is well approximated by a normal curve. If we code each left bounce as zero and each right bounce as one, a ball's final slot records the sum of twelve little random contributions. Dividing that sum by twelve would give their mean, or equivalently the proportion of right bounces. The pile at the bottom is therefore a distribution of one aggregate outcome repeated over and over.
+The real version consists of a little box with a clear front with an arrangement of pegs and lots of little balls (originally lead shot) inside. When set upright, the balls bounce through the pegs as they fall from top to bottom. It's called a Quincunx (meaning five points, as in the arrangement of the pegs), or a Galton board, in honor of Francis Galton who developed it in the 1870s to demonstrate the normal distribution.^[Strictly speaking, it demonstrates the normal approximation of the binomial distribution, just like Abraham De Moivre did in Chapter 6.]
+
+As Galton inscribed on the original device:
+
+> The shot will all drop into the funnel, and running thence through its mouth, will pursue devious courses through the harrow and will accumulate in the vertical compartments at the bottom, there affording a representation of the law of dispersion.
+
+![The original Quincunx, commissioned by Galton and made by scientific instrument manufacturers Tisley & Spiller in 1873. © 2017 University College London, CC BY-NC-SA](resources/figures/quincunx.jpeg)
+
+Galton explained the point of the demonstration in more detail:
+
+> The outline of the columns of shot that accumulate in the successive compartments approximate to the Curve of Frequency ... and is closely of the same shape however often the experiment is repeated. The outline of the columns would become nearly identical with the Normal Curve of Frequency, if the rows of pins were much more numerous, the shot smaller, and the compartments narrower; also if a larger quantity of shot was used.
+
+This is really just our coin-flip and dice-rolling logic from the previous chapter taken further. A ball's final slot is determined by how many of its twelve bounces send it right rather than left. To end up in the far-left slot, a ball has to bounce left every single time, and there's only one way for that to happen, just like there's only one way to roll a total of two with two dice. To land in the middle, a ball needs an even mix of lefts and rights, and there are *many* different sequences of bounces that produce that mix, just like there are many ways to roll a total of seven. Any individual ball's path is unpredictable. But the pile that hundreds of balls build up together is, surprisingly, quite predictable.
 
 This little machine helps explain why the normal distribution is so useful. The normal curve isn't merely a convenient shape that a few variables happen to resemble. All kinds of quantities are influenced by many small, more or less independent contributions pushing them one way or another. There are many ways for those contributions to mostly balance, and fewer ways for them all to push in the same direction. Under suitable conditions, the result is something like the pile on the board: lots of values near the middle, progressively fewer toward the extremes, and a shape that can be modelled remarkably well by the normal distribution.
+
+This chapter is about what happens when we collect a bunch of observations and aggregate them into a single statistic, like the mean. The Quincunx is a nice visual metaphor for that process. Each ball is like a sample mean, and the pile of balls at the bottom is like the distribution of sample means.
+
+An accumulation of chance events. We can think about each ball in the Quincunx as 'collecting' 12 observations as it makes its way through the 12 rows of pegs. Each time it meets a peg, there is a 50/50 chance it will bounce left or right, and each successive encounter is independent.
+
+Let's think about it in the context of political polling. Say that, in reality, support for two candidates is exactly split, 50/50. If we take a sample of 12 people from the population and ask them which candidate they prefer, we might expect to find that half of the people in our sample support each candidate. But because of random sampling error, the proportion in our sample need not be exactly 50/50. In fact, there is a chance that we could randomly end up with 12 people who all support Candidate A. It's relatively unlikely, but not out of the question.
+
+What if we had a sample of 100 people, rather than 12? In this case we'd expect something like 50 people to support each candidate, but it wouldn't be too surprising if we saw something like 60/40. It *would* be surprising if we happened to get 100 people who all support Candidate A, but it could happen. Now what if our sample size was 1,000? Or 1,000,000? Your intuition is probably telling you that the larger the sample, the more surprising an extremely lop-sided result would be.
+
+Why is that, exactly? How can we describe the distribution of potential outcomes when we sample from a population and describe the sample using a statistic? The Quincunx is a nice visual metaphor for that process. Each ball is like a sample mean, and the pile of balls at the bottom is like the distribution of sample means.
 
 We encountered one version of this idea when we discussed astronomers making repeated measurements. One observation might be a little too high and another a little too low because of all the small sources of random error involved: the instrument, the observer, the weather, or any number of other things. If those errors aren't systematically pushing in one direction, they tend to form a distribution around the value being estimated, and averaging several observations allows the positive and negative errors to partly cancel out. The normal distribution turned out to be a useful model for just this kind of scatter. And as we saw with Quetelet, the same model was later applied to natural differences among people. A soldier having a larger-than-average chest wasn't a measurement mistake, but the deviations around the average could still take the same broad shape as an astronomer's errors. One mathematical model could describe very different kinds of variation.
 
