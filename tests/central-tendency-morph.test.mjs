@@ -6,7 +6,7 @@ import vm from "node:vm";
 const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.url), "utf8");
 const statsSource = readFileSync(new URL("../resources/js/stat-helpers.js", import.meta.url), "utf8");
 const distributionSource = readFileSync(new URL("../resources/js/distribution-generator.js", import.meta.url), "utf8");
-const graphSource = readFileSync(new URL("../resources/js/graph-generator.js", import.meta.url), "utf8");
+import { graphSource } from "./helpers/graph-source.mjs";
 
 function comparisonSteps() {
   const start = chapter.indexOf("## Watch the center change");

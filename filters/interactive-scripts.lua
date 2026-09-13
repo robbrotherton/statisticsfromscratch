@@ -27,9 +27,33 @@ local manifest = {
     file = "resources/js/bee-swarm.js",
     deps = { "d3", "stat-helpers", "sampling-core", "interactive-figure-tools", "bee-swarm-core" }
   },
+  ["graph-core"] = {
+    file = "resources/js/graph-core.js",
+    deps = { "d3", "visibility-helper", "interactive-figure-tools" }
+  },
+  ["graph-data"] = {
+    file = "resources/js/graph-data.js",
+    deps = { "graph-core" }
+  },
+  ["graph-frequency"] = {
+    file = "resources/js/graph-frequency.js",
+    deps = { "graph-core", "graph-data" }
+  },
+  ["graph-interval"] = {
+    file = "resources/js/graph-interval.js",
+    deps = { "graph-core", "graph-data" }
+  },
+  ["graph-table-export"] = {
+    file = "resources/js/graph-table-export.js",
+    deps = { "graph-core", "graph-data" }
+  },
+  ["graph-examples"] = {
+    file = "resources/js/graph-examples.js",
+    deps = { "graph-core", "graph-data" }
+  },
   ["graph-generator"] = {
     file = "resources/js/graph-generator.js",
-    deps = { "d3", "visibility-helper", "interactive-figure-tools" }
+    deps = { "graph-core", "graph-data", "graph-frequency", "graph-interval", "graph-table-export", "graph-examples" }
   },
   ["frequency-table-tutorial"] = {
     file = "resources/js/frequency-table-tutorial.js",

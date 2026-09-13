@@ -10,10 +10,7 @@ const source = readFileSync(
   "utf8"
 );
 const styles = siteStyles;
-const graphSource = readFileSync(
-  new URL("../resources/js/graph-generator.js", import.meta.url),
-  "utf8"
-);
+import { graphSource } from "./helpers/graph-source.mjs";
 const reactionSource = readFileSync(
   new URL("../resources/js/reaction-time-zscore.js", import.meta.url),
   "utf8"

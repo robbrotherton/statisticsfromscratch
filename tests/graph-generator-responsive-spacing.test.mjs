@@ -3,10 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 
-const source = await readFile(
-  new URL("../resources/js/graph-generator.js", import.meta.url),
-  "utf8"
-);
+import { graphSource as source } from "./helpers/graph-source.mjs";
 
 const context = vm.createContext({ console, window: {} });
 vm.runInContext(source, context);

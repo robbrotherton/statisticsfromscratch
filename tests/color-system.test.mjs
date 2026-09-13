@@ -52,7 +52,7 @@ test("palette contrast limits are measured explicitly", () => {
 });
 
 test("standalone figure fallbacks agree with the central series tokens", () => {
-  for (const name of ["graph-generator.js", "distribution-generator.js"]) {
+  for (const name of ["graph-core.js", "distribution-generator.js"]) {
     const contents = source(name);
     expected.forEach((color, index) => {
       assert.match(contents, new RegExp(`--graph-series-${index + 1}, [^\\n]*${color}`));

@@ -1,6 +1,7 @@
 ---
 title: "Sampling"
 interactive-scripts:
+  - graph-generator
   - galton-board
   - sampling-distribution-builder
   - sampling-pathway
@@ -53,12 +54,20 @@ Those “devious courses” produce surprisingly consistent results. In our digi
 
 Our purpose in this chapter is to understand how sampling from a population works---how we can quantify our trust in a sample as a fair representation of the population it came from. The Quincunx is a nice visual metaphor for that process. Imagine that each ball is collecting a sample as it falls. Each bounce supplies one observation; the final slot is the sample statistic, summarizing all twelve observations.
 
-Let's make a concrete analogy to political opinion polling. Say two candidates are running for office, candidate Left and candidate Right. In reality, support for the two candidates is exactly split, 50/50. If we select twelve people at random and ask which candidate they prefer, we might expect to find that half of the people in our sample support each candidate. But because of the kind of sampling error we encountered in Chapter 4, the proportion in our sample need not be exactly 50/50. It wouldn't be too surprising if we ended up with seven supporters of Candidate Left and only five of Candidate Right. Or even 8 and 4. In fact, there is a chance that we could randomly end up with 12 people who all support Candidate Left. It's relatively unlikely, but not out of the question. This is like one of the Quincunx balls bouncing left twelve times in a row and ending up in the far-left slot. Repeat the poll over and over, keeping its size at twelve, and the results would form a distribution like the pile on the board. Results near 50% would be common, while results near 0% or 100% would be rare.
+Let's make an analogy to political opinion polling. Say two candidates are running for office, candidate Left and candidate Right. In reality, support for the two candidates is exactly split, 50/50. If we select twelve people at random and ask which candidate they prefer, we might expect to find that half of the people in our sample support each candidate. But because of the kind of sampling error we encountered in Chapter 4, the proportion in our sample need not be exactly 50/50. It wouldn't be too surprising if we ended up with seven supporters of Candidate Left and only five of Candidate Right. Or even 8 and 4. In fact, there is a chance that we could randomly end up with 12 people who all support Candidate Left. It's relatively unlikely, but not out of the question. This is like one of the Quincunx balls bouncing left twelve times in a row and ending up in the far-left slot. Repeat the poll over and over, keeping its size at twelve, and the results would form a distribution like the pile on the board. Results near 50% would be common, while results near 0% or 100% would be rare.
 
 What if we had a sample of 100 people, rather than 12? In this case we'd expect something like 50 people to support each candidate, but it wouldn't be too surprising if we saw something like 60/40. It *would* be surprising if we happened to get 100 people who all support Candidate Left. Now what if our sample size was 1,000? Or 1,000,000? Your intuition is probably telling you that the larger the sample, the more surprising an extremely lop-sided result would be.
 
 This is, in effect, what the error bars on graphs of poll results convey. (The precise math behind the margin of error is something we'll talk more about in Chapter 10.)
 
+
+::: {#fig-election-poll}
+
+{{< interactive-figure electionPoll makeGraph options='{"type":"interval","data":[{"label":"Obama","estimate":47,"lower":45.70917827110559,"upper":48.29082172889441,"color":"var(--graph-series-1, #0072b2)"},{"label":"Romney","estimate":47,"lower":45.70917827110559,"upper":48.29082172889441,"color":"var(--graph-series-4, #d55e00)"}],"scale":"percent","width":640,"height":360,"maxWidth":"640px","labels":{"y":"Support among likely voters"},"animate":false,"ariaLabel":"October 2012 Pew poll: Obama and Romney each had 47% support. Illustrative error bars extend one estimated standard error, about 1.29 percentage points, in each direction, assuming simple random sampling.","orientation":"vertical","yDomain":[42,52]}' fallback="Obama and Romney each at 47% support, with illustrative one-standard-error intervals from 45.7% to 48.3%." >}}
+
+A real poll with an even split: 47% of 1,495 likely voters supported Obama and 47% supported Romney; the remaining 6% chose someone else or were undecided. The points mark the estimates. Each error bar extends one estimated standard deviation of the sampling distribution—one *standard error*—in either direction, assuming simple random sampling. We'll use standard errors to construct confidence intervals in Chapter 10. Source: [Pew Research Center, October 24–28, 2012](https://www.pewresearch.org/politics/2012/10/29/presidential-race-dead-even-romney-maintains-turnout-edge/).^[These illustrative bars use the simple-random-sampling approximation, rather than Pew's published margin of error, which accounts for weighting.]
+
+:::
 
 ### Sampling Error with IQ Scores
 
