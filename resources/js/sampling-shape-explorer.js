@@ -470,10 +470,10 @@
         xRaw,
         xSE,
         compact,
-        showNormal: (options.showNormalOverride ?? state.showNormal) && state.samples > 0,
+        showNormal: state.showNormal,
         noteLines,
         animate: options.animate,
-        animateNormal: options.animateNormal ?? options.animate,
+        animateNormal: false,
         maxDensity: options.maxDensity,
         scaleChanged: options.scaleChanged,
         replaceModel: options.distributionSwap || options.populationSwap,
@@ -582,7 +582,7 @@
       }
       if (remaining <= 0) {
         displayedSamples = target;
-        render({ animate: options.animate !== false, animateNormal: true });
+        render({ animate: options.animate !== false });
         notify();
         return;
       }
@@ -608,7 +608,7 @@
       }));
       render({ animate: true, histogramData: countData(checkpoints[0]),
         displayedSamples: startSamples, observedSummary: checkpoints[0],
-        maxDensity, showNormalOverride: false });
+        maxDensity });
       if (startSamples > 0 && !(await waitFrame(token, 450))) return;
       const startedAt = global.performance.now();
       let progress = 0;
@@ -627,8 +627,7 @@
           displayedSamples,
           observedSummary: checkpoint,
           histogramData: countData(checkpoint),
-          maxDensity,
-          showNormalOverride: false
+          maxDensity
         });
         if (linearProgress >= 1) break;
         if (!(await waitFrame(token, 32))) return;
@@ -638,7 +637,6 @@
       displayedSamples = target;
       render({
         animate: false,
-        animateNormal: state.showNormal,
         maxDensity
       });
       notify();
