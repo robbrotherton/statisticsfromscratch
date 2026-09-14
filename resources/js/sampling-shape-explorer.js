@@ -7,7 +7,7 @@
   const SE_DOMAIN = [-3, 3];
   const MAX_SIMULATIONS = 2000000;
   const DEFAULT_SAMPLING_ANIMATION_MS = 2000;
-  const POPULATION_SWAP_MS = 1500;
+  const POPULATION_SWAP_MS = 700;
 
   // These formations are deliberately fixed rather than regenerated from
   // random draws on every page load. Each entry is the number of dots in one
@@ -168,6 +168,7 @@
       samples: 0,
       scaleMode: ["se", "standard-error", "standardized"].includes(String(opts.scaleMode || opts.scale))
         ? "se" : "raw",
+      showRuler: sampling.boolean(opts.showRuler, false),
       showPopulation: sampling.boolean(opts.showPopulation, true),
       showDistribution: sampling.boolean(opts.showDistribution, true),
       showNormal: sampling.boolean(opts.showNormal ?? opts.normalReference, false)
@@ -256,7 +257,7 @@
 
     const samplingControls = controlGroup("Simulation");
     const buttonRow = samplingControls.append("div").attr("class", "sse-button-row sfs-action-row");
-    const hundredThousand = makeButton(buttonRow, "bar-chart-steps", "Add 100,000");
+    const twoHundred = makeButton(buttonRow, "bar-chart-steps", "Add 200");
     const million = makeButton(buttonRow, "bar-chart-fill", "Add 1,000,000");
     const reset = makeButton(buttonRow, "arrow-counterclockwise", "Reset");
     const status = buttonRow.append("span")
@@ -298,7 +299,7 @@
       const denseNoteY = populationAxisY + 67;
       const denseTopY = populationAxisY + 119;
       const denseBaseY = denseTopY + 165;
-      const fullHeight = denseBaseY + 44;
+      const fullHeight = denseBaseY + 94;
       return {
         populationBinWidth,
         populationRadius,
@@ -424,7 +425,7 @@
       normalInput.checked = state.showNormal;
       normalInput.disabled = state.samples === 0;
       reset.button.disabled = state.samples === 0 || isSimulating;
-      hundredThousand.button.disabled = isSimulating || state.samples >= MAX_SIMULATIONS;
+      twoHundred.button.disabled = isSimulating || state.samples >= MAX_SIMULATIONS;
       million.button.disabled = isSimulating || state.samples >= MAX_SIMULATIONS;
       status.textContent = isSimulating
         ? `Building… ${formatCount(displayedSamples)} means`
@@ -474,7 +475,9 @@
         animate: options.animate,
         animateNormal: options.animateNormal ?? options.animate,
         maxDensity: options.maxDensity,
-        scaleChanged: options.scaleChanged
+        scaleChanged: options.scaleChanged,
+        replaceModel: options.distributionSwap || options.populationSwap,
+        showRuler: state.showRuler
       });
       reveal(populationPlot.layer, state.showPopulation, rootNode, options.animate);
       reveal(densePlot.layer, state.showDistribution, rootNode, options.animate);
@@ -527,17 +530,7 @@
       });
     }
 
-    function interpolateHistogram(fromData, toData, progress) {
-      return toData.map((item, index) => {
-        const from = fromData[index] || { count: 0, density: 0 };
-        return Object.assign({}, item, {
-          count: Math.round(from.count + (item.count - from.count) * progress),
-          density: from.density + (item.density - from.density) * progress
-        });
-      });
-    }
-
-    function generateMomentCheckpoints(startSamples, target, duration) {
+    function generateHistogramCheckpoints(startSamples, target, duration) {
       const remaining = target - startSamples;
       const stepCount = Math.min(
         remaining,
@@ -546,7 +539,8 @@
       const checkpoints = [{
         samples: startSamples,
         meanZ: histogram.mean,
-        sdZ: histogram.sd
+        sdZ: histogram.sd,
+        data: histogram.data()
       }];
       let generatedSamples = startSamples;
       for (let step = 1; step <= stepCount; step += 1) {
@@ -562,7 +556,8 @@
         checkpoints.push({
           samples: generatedSamples,
           meanZ: histogram.mean,
-          sdZ: histogram.sd
+          sdZ: histogram.sd,
+          data: histogram.data()
         });
       }
       return checkpoints;
@@ -576,7 +571,6 @@
       const token = simulationToken;
       const animateProgress = options.animate !== false && !visuals.reducedMotion();
       const startSamples = state.samples;
-      const startData = histogram.data();
       const remaining = target - state.samples;
       if (!animateProgress) {
         sampling.addSimulatedMeans(histogram, model, state.n, rng, remaining);
@@ -602,10 +596,20 @@
         200,
         sampling.finite(options.duration, DEFAULT_SAMPLING_ANIMATION_MS)
       );
-      const momentCheckpoints = generateMomentCheckpoints(startSamples, target, duration);
+      const checkpoints = generateHistogramCheckpoints(startSamples, target, duration);
       state.samples = target;
       const finalData = histogram.data();
       const maxDensity = d3.max(finalData, (item) => item.density) || 0.45;
+      // Fix the vertical count scale for this run. Each frame then adds real
+      // counts; no bin can shrink as more results arrive. When extending an
+      // existing run, first make room for the larger total.
+      const countData = (checkpoint) => checkpoint.data.map((item) => ({
+        ...item, density: item.count / (target * histogram.width)
+      }));
+      render({ animate: true, histogramData: countData(checkpoints[0]),
+        displayedSamples: startSamples, observedSummary: checkpoints[0],
+        maxDensity, showNormalOverride: false });
+      if (startSamples > 0 && !(await waitFrame(token, 450))) return;
       const startedAt = global.performance.now();
       let progress = 0;
       while (progress < 1 && token === simulationToken) {
@@ -613,18 +617,18 @@
           (global.performance.now() - startedAt) / duration, 0, 1
         );
         progress = d3.easeCubicInOut(linearProgress);
-        const checkpoint = momentCheckpoints[Math.min(
-          momentCheckpoints.length - 1,
-          Math.floor(linearProgress * (momentCheckpoints.length - 1))
+        const checkpoint = checkpoints[Math.min(
+          checkpoints.length - 1,
+          Math.floor(linearProgress * (checkpoints.length - 1))
         )];
         displayedSamples = checkpoint.samples;
         render({
           animate: false,
           displayedSamples,
           observedSummary: checkpoint,
-          histogramData: interpolateHistogram(startData, finalData, progress),
+          histogramData: countData(checkpoint),
           maxDensity,
-          showNormalOverride: options.deferNormal ? false : undefined
+          showNormalOverride: false
         });
         if (linearProgress >= 1) break;
         if (!(await waitFrame(token, 32))) return;
@@ -634,7 +638,7 @@
       displayedSamples = target;
       render({
         animate: false,
-        animateNormal: Boolean(options.deferNormal),
+        animateNormal: state.showNormal,
         maxDensity
       });
       notify();
@@ -664,7 +668,6 @@
       const previousShape = state.shape;
       const previousN = state.n;
       const previousScale = state.scaleMode;
-      const previousShowNormal = state.showNormal;
       const previousDistributionVisibility = state.showDistribution;
       let requestedSamples = null;
       let samplingDuration = DEFAULT_SAMPLING_ANIMATION_MS;
@@ -700,6 +703,10 @@
           case "scale-mode":
           case "horizontal-scale":
             state.scaleMode = ["se", "standard-error", "standardized"].includes(String(value)) ? "se" : "raw";
+            changed = true;
+            break;
+          case "show-ruler":
+            state.showRuler = sampling.boolean(value, false);
             changed = true;
             break;
           case "show-normal":
@@ -745,8 +752,9 @@
       const scaleChanged = state.scaleMode !== previousScale;
       if (requestedSamples !== null) {
         render({
-          animate: populationChanged || scaleChanged ? animate : false,
+          animate: populationChanged || nChanged || scaleChanged ? animate : false,
           populationSwap: populationChanged && animate,
+          distributionSwap: nChanged && animate,
           scaleChanged
         });
         if (requestedSamples === state.samples) {
@@ -756,8 +764,7 @@
         simulateToTotal(requestedSamples, {
           animate,
           duration: samplingDuration,
-          deferNormal: state.showNormal && !previousShowNormal,
-          startDelay: populationChanged && animate ? POPULATION_SWAP_MS : 0
+          startDelay: (populationChanged || nChanged) && animate ? POPULATION_SWAP_MS : 0
         });
         return;
       }
@@ -791,9 +798,9 @@
       event.preventDefault();
       setScale("se", true);
     });
-    hundredThousand.button.addEventListener("click", (event) => {
+    twoHundred.button.addEventListener("click", (event) => {
       event.preventDefault();
-      simulateToTotal(state.samples + 100000, { animate: true });
+      simulateToTotal(state.samples + 200, { animate: true });
     });
     million.button.addEventListener("click", (event) => {
       event.preventDefault();
