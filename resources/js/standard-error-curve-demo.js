@@ -95,10 +95,28 @@ seCurveEnsureStyles = () => {
     }
 
     .standard-error-curve-demo .se-inline-slider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
       margin: 0.25rem auto 0;
-      max-width: 28rem;
+      max-width: min(100%, 28rem);
       min-height: 2rem;
       visibility: hidden;
+    }
+
+    .standard-error-curve-demo .se-inline-slider > :first-child {
+      display: none;
+    }
+
+    .standard-error-curve-demo .se-inline-slider .se-value {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+
+    .standard-error-curve-demo .se-inline-slider input[type="range"] {
+      flex: 1 1 16rem;
+      width: auto;
     }
 
     .standard-error-curve-demo .se-axis text {
@@ -385,6 +403,21 @@ makeStandardErrorCurveDemo = function(opts) {
     return Math.abs(value - Math.round(value)) < 0.000001 ? formatter(Math.round(value)) : nTweenFormat(value);
   }
 
+  function syncSampleSizeReadout(value) {
+    const readout = nControl.value.node();
+    const expression = `n = ${displayN(value)}`;
+
+    if (inlineSlider && window.interactiveFigure && typeof window.interactiveFigure.inlineMath === "function") {
+      if (readout.dataset.tex !== expression) {
+        readout.replaceChildren(window.interactiveFigure.inlineMath(expression));
+        readout.dataset.tex = expression;
+      }
+      return;
+    }
+
+    nControl.value.text(displayN(value));
+  }
+
   function syncInputValues() {
     meanControl.input.value = String(state.mean);
     sdControl.input.value = String(state.sd);
@@ -395,7 +428,7 @@ makeStandardErrorCurveDemo = function(opts) {
     if (options.syncInputs !== false) syncInputValues();
     if (meanControl.value) meanControl.value.text(formatter(state.mean));
     if (sdControl.value) sdControl.value.text(formatter(state.sd));
-    nControl.value.text(displayN(source.n));
+    syncSampleSizeReadout(source.n);
     populationSummary.text(`Population: μ = ${formatter(source.mean)}, σ = ${formatter(source.sd)}`);
     samplingSummary
       .text(`Sample means: n = ${displayN(source.n)}, SE = ${seFormatter(plot.se)}`)
