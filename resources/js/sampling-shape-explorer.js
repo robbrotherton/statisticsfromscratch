@@ -476,6 +476,7 @@
         animateNormal: false,
         maxDensity: options.maxDensity,
         scaleChanged: options.scaleChanged,
+        rescale: options.rescale,
         replaceModel: options.distributionSwap || options.populationSwap,
         showRuler: state.showRuler
       });
@@ -590,7 +591,6 @@
       displayedSamples = startSamples;
       syncControls();
       if (!(await waitFrame(token, 16))) return;
-      if (options.startDelay > 0 && !(await waitFrame(token, options.startDelay))) return;
 
       const duration = Math.max(
         200,
@@ -606,10 +606,14 @@
       const countData = (checkpoint) => checkpoint.data.map((item) => ({
         ...item, density: item.count / (target * histogram.width)
       }));
-      render({ animate: true, histogramData: countData(checkpoints[0]),
+      // Generate first so a newly revealed reference uses the final vertical
+      // scale from its very first frame, including during model replacement.
+      render({ ...options.initialRender, animate: true,
+        rescale: startSamples > 0, histogramData: countData(checkpoints[0]),
         displayedSamples: startSamples, observedSummary: checkpoints[0],
         maxDensity });
-      if (startSamples > 0 && !(await waitFrame(token, 450))) return;
+      const preparationDelay = Math.max(options.startDelay || 0, startSamples > 0 ? 450 : 0);
+      if (preparationDelay > 0 && !(await waitFrame(token, preparationDelay))) return;
       const startedAt = global.performance.now();
       let progress = 0;
       while (progress < 1 && token === simulationToken) {
@@ -749,19 +753,21 @@
       }
       const scaleChanged = state.scaleMode !== previousScale;
       if (requestedSamples !== null) {
-        render({
+        const initialRender = {
           animate: populationChanged || nChanged || scaleChanged ? animate : false,
           populationSwap: populationChanged && animate,
           distributionSwap: nChanged && animate,
           scaleChanged
-        });
+        };
         if (requestedSamples === state.samples) {
+          render(initialRender);
           notify();
           return;
         }
         simulateToTotal(requestedSamples, {
           animate,
           duration: samplingDuration,
+          initialRender,
           startDelay: (populationChanged || nChanged) && animate ? POPULATION_SWAP_MS : 0
         });
         return;

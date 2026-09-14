@@ -984,13 +984,15 @@
       const showNormal = Boolean(state.showNormal);
       const previousMapX = currentMapX || mapX;
       currentMapX = mapX;
+      const animateReference = animateScale || (state.animate && state.rescale && !reducedMotion());
+      const referenceDuration = animateScale ? 850 : 420;
       reference.interrupt();
-      if (animateScale) {
-        reference.transition().delay(stretchDelay).duration(850).ease(d3.easeCubicInOut)
+      if (animateReference) {
+        reference.transition().delay(stretchDelay).duration(referenceDuration).ease(d3.easeCubicInOut)
           .attr("d", line(normalData));
       } else reference.attr("d", line(normalData));
-      const labelTarget = animateScale
-        ? referenceLabel.interrupt().transition().delay(stretchDelay).duration(850).ease(d3.easeCubicInOut)
+      const labelTarget = animateReference
+        ? referenceLabel.interrupt().transition().delay(stretchDelay).duration(referenceDuration).ease(d3.easeCubicInOut)
         : referenceLabel.interrupt();
       labelTarget.attr("text-anchor", state.compact ? "end" : "start")
         .attr("x", state.compact ? opts.plotRight - 2 : mapX(1.55))
