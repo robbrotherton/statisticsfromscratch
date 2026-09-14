@@ -8,7 +8,6 @@ interactive-scripts:
   - sampling-shape-explorer
   - distribution-generator
   - standard-error-curve-demo
-  - variability-table-generator
 ---
 
 {{< interactive-figure samplingCover makeSamplingDistributionBuilder options='{"variant":"cover","mean":100,"sd":20,"xlim":[75,125],"sampleCount":300,"binWidth":1,"axisSquare":true}' fallback="Animated sampling distribution cover figure." >}}
@@ -122,20 +121,20 @@ Technically the sampling distribution of the mean is the distribution of sample 
 
 For the IQ distribution, we ended with 200 random samples, not *all* of the possible samples for the population. As you might imagine, for any reasonably large population, there's often a huge number of possible samples; for practical purposes, the number of possible samples might be effectively infinite. We'll return to this problem shortly, but we won't let it stop us from demonstrating the fundamental principles now. 
 
-We just need a small, manageable population, from which we can obtain all possible samples of a given size. Like, very small. Suppose we have a population consisting of just four people. We're interested in is their height. We have one person 60 inches tall, one 62, one 64, and one 66. 
+We just need a small, manageable population, from which we can obtain all possible samples of a given size. Like, very small. Suppose we have a population consisting of just four people. We're interested in their height. We have one person 60 inches tall, one 62, one 64, and one 66.
 
 
 | Height | $f$ |
 |--:|--:|
 | 60 | 1 |
-| 62 | 2 |
-| 64 | 3 |
-| 66 | 4 |
+| 62 | 1 |
+| 64 | 1 |
+| 66 | 1 |
 
 : A frequency table showing the four heights in our population. There's just one person of each height. {#tbl-height-population}
 
 
-But remember, we're not interested in individuals anymore. We're interested in *samples*. So now we're going to list every possible sample where $n = 2$, meaning we have two observations in each sample. All possible samples are shown in this table. $X_1$ is the first score in the sample. $X_2$ is the second score. And $M$ is that sample's mean. Note that for this to work, it is important that we're sampling independently, meaning that the first observation in each sample does not affect the second. For this tiny population that means same person can appear twice. The first row, for example, is the 60-inch person twice. Obviously the sample mean there is 60.
+But remember, we're not interested in individuals anymore. We're interested in *samples*. So now we're going to list every possible sample where $n = 2$, meaning we have two observations in each sample. All possible samples are shown in this table. $X_1$ is the first score in the sample. $X_2$ is the second score. And $M$ is that sample's mean. Note that for this to work, it is important that we're sampling independently, meaning that the first observation in each sample does not affect the second. For this tiny population that means the same person can appear twice. The first row, for example, is the 60-inch person twice. Obviously the sample mean there is 60.
 
 | Sample | $X_1$ | $X_2$ | $M$ |
 |--:|--:|--:|--:|
@@ -175,7 +174,7 @@ The first ordered sample is 60 and 60. Like with the IQ samples, we compute the 
 :::
 
 ::: {.tutorial-step data-title="Sample 2" data-action='{"draw":2,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"none","show-controls":true,"controls-open":false,"highlight-current":false,"fall-observations":true,"fall-mean":true,"converge-mean":true,"animate":true}'}
-The next sample is 62 and 60, giving a <span class="sfs-data-emphasis">sample mean of 61</span>. The new mean block falls lands next to the first one down below.
+The next sample is 62 and 60, giving a <span class="sfs-data-emphasis">sample mean of 61</span>. The new mean block lands next to the first one down below.
 :::
 
 ::: {.tutorial-step data-title="Sample 3" data-action='{"draw":3,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"none","show-controls":true,"controls-open":false,"highlight-current":false,"fall-observations":true,"fall-mean":true,"converge-mean":true,"animate":true}'}
@@ -191,67 +190,58 @@ Now we just continue through the rest of the 16 possible samples. Each pair land
 
 So for this tiny population, we have been able to exhaustively compile every possible sample mean for samples of size $n = 2$---something we could only approximate with the bigger IQ population and the 200 means we collected randomly. But you see the similar pattern? Again, sample means close to the true population mean are relatively common; sample means far from the true population mean are relatively uncommon.
 
-Now you might be wondering what the whole purpose of this quite tedious process was. Well, but going through the process of obtaining every possible sample mean, we now have a new kind of population: the population of sample means. And we can think about that population, and compute its characteristics, the same way we can with any other set of data.
+Now you might be wondering what the whole purpose of this quite tedious process was. Well, by going through the process of obtaining every possible sample mean, we now have a new kind of population: the population of sample means. And we can think about that population, and compute its characteristics, the same way we can with any other set of data.
 
 We can, for example, figure out its mean and standard deviation. The mean should be obvious visually. It's a symmetrical distribution and the peak is right on 63. So that's the mean. You can also calculate it by adding all 16 sample means and dividing by 16, the number of scores. If you care to check, you'll notice that 63 was the mean of the population as well, so the mean of the sampling distribution is equal to $\mu$.
 
-We can calculate the the standard deviation of the 16 means in the same way we did in a previous lecture, by putting all those values in a table, working out columns for deviations, the squared deviations, then using those to get the sum of squared deviations, the variance, and the standard deviation. Note that because we obtained *every* possible sample mean, this set of 16 means is itself a complete population, so we use the population formula, dividing by $N$.
+The mean of the distribution of sample means is __called the expected value of the mean__, $\mu_M$.
 
-Lastly, because we know every possible mean, we can think about the probability of observing certain sample means from this distribution, just like we thought about the probabilities of obtaining certain scores from a regular population. 
+We can calculate the standard deviation of the 16 means in the same way we did in Chapter 4, by putting all those values in a table, working out columns for deviations, the squared deviations, then using those to get the sum of squared deviations, the variance, and the standard deviation. Note that because we obtained *every* possible sample mean, this set of 16 means is itself a complete population, so we use the population formula, dividing by $N$.
 
+| $M$ | $M - \mu_M$ | $(M - \mu_M)^2$ |
+|--:|--:|--:|
+| 60 | -3 | 9 |
+| 61 | -2 | 4 |
+| 62 | -1 | 1 |
+| 63 | 0 | 0 |
+| 61 | -2 | 4 |
+| 62 | -1 | 1 |
+| 63 | 0 | 0 |
+| 64 | 1 | 1 |
+| 62 | -1 | 1 |
+| 63 | 0 | 0 |
+| 64 | 1 | 1 |
+| 65 | 2 | 4 |
+| 63 | 0 | 0 |
+| 64 | 1 | 1 |
+| 65 | 2 | 4 |
+| 66 | 3 | 9 |
 
-::::: {.callout-tip .interactive}
-## Calculate the variability of the sample means
+: Deviations and squared deviations for all 16 sample means. {#tbl-sample-means-deviations}
 
-{{< interactive-figure samplingDistVariabilityTable makeVariabilityTables options='{"tables":[{"title":"All 16 sample means","data":[60,61,62,63,61,62,63,64,62,63,64,65,63,64,65,66]}]}' fallback="Interactive table calculating deviations, sum of squares, variance, and standard deviation for the 16 sample means." >}}
+$$SS = 40, \qquad \sigma_M^2 = \frac{40}{16} = 2.5, \qquad \sigma_M = \sqrt{2.5} \approx 1.58$$
 
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Means" data-action='{"stage":"data","animate":false}'}
-Start with the 16 sample means.
-:::
+The standard deviation of the sample means is also called the __standard error of the mean__. The symbol for this is $\sigma_M$.
 
-::: {.tutorial-step data-title="Mean" data-action='{"stage":"mean","animate":true}'}
-Find their mean — the mean of the sample means.
-:::
+Lastly, because we know every possible mean, we can think about the probability of observing certain sample means from this distribution, just like we thought about the probabilities of obtaining certain scores from a regular population.
 
-::: {.tutorial-step data-title="Deviations" data-action='{"stage":"deviations","animate":true}'}
-Subtract the mean from each sample mean.
-:::
+{{< include quizzes/07-sampling-sampling-distribution.qmd >}}
 
-::: {.tutorial-step data-title="Squared" data-action='{"stage":"squared-deviations","animate":true}'}
-Square each deviation.
-:::
+## The Central Limit Theorem
 
-::: {.tutorial-step data-title="SS" data-action='{"stage":"ss","animate":true}'}
-Add the squared deviations to get the sum of squares.
-:::
+The trouble with distributions of sample means is that it's just not feasible in most realistic situations to obtain every possible sample of a given size for a population. We were able to do it with a population of just four people and samples of two. But imagine computing every possible sample of a given size from a population we'd actually be interested in, like, say, American voters. Even if we had the scores of everyone in the population, which we usually don't, the number of possible samples would be astronomical for any useful sample size. There would just be too many people, too many possible samples.
 
-::: {.tutorial-step data-title="Variance" data-action='{"stage":"variance","animate":true}'}
-Divide by the number of sample means to get the variance.
-:::
+Thankfully, there is a tool that allows us to predict the characterisitcs of the distribution of sample means without having to compile every possible sample. It is called the __Central Limit Theorem__.
 
-::: {.tutorial-step data-title="SD" data-action='{"stage":"sd","animate":true}'}
-Take the square root: the standard deviation of the sample means is about 1.58.
-:::
-::::
-
-:::::
-
-The standard deviation of the sample means is also called the standard error of the mean. The symbol for this is $\sigma_M$.
-
-So this was a fairly long-winded way of working out the mean and standard deviation of this sampling distribution.
-
-{{< include quizzes/07-sampling-variability.qmd >}}
-
-## Center and Variability of the Sampling Distribution
-
-The trouble with distributions of sample means is that it's just not feasible in most realistic situations to obtain every possible sample of a given size for a population. We were able to do it with a population of just four people and samples of two. But imagine computing every possible sample of a given size from a population we'd actually be interested in—like, say, American voters. Even if we had the scores of everyone in the population, which we usually don't, the number of possible samples would be astronomical for any useful sample size. There would just be too many people, too many possible samples. For practical purposes the numbers are basically infinite.
-
-We can predict the sampling distribution's center and variability from the population mean, population variability, and sample size.
+We can predict the sampling distribution's center and variability from the population mean, population variability, and sample size. The central limit theorem adds a prediction about shape; the center and variability formulas below hold without requiring normality.
 
 ### Center: The Expected Value of the Mean
 
-The mean of the distribution of sample means is called the expected value of the mean, $\mu_M$. Under the usual conditions—independent observations drawn in the same way from a population with a finite mean and variance—the average of all the sample means equals the population mean. This is because $M$ is an unbiased statistic. But usually we don't draw sample after sample, and for any one sample, we won't be exactly right every time.
+Under the usual conditions—independent observations drawn in the same way from a population with a finite mean and variance—the average of all the sample means equals the population mean. This is because $M$ is an unbiased statistic.
+
+$$\mu_M = \mu$$ {#eq-expected-value}
+
+Usually we don't draw sample after sample, and for any one sample, we won't be exactly right every time.
 
 ### Variability: The Standard Error of the Mean
 
@@ -262,7 +252,7 @@ $$\sigma_M = \frac{\sigma}{\sqrt{n}}$$ {#eq-s_m-1}
 The numerator is the population standard deviation, $\sigma$. So the larger the variability in the population, the larger the standard error of the mean. The denominator is a function of sample size (its square root). And so the larger our sample size, the smaller the standard error of the mean.
 
 
-There are a couple of algebraically equivalent forms of this equation, which can be useful if you have variance, $\sigma^2$, rather than the standard deviation, $\sigma$. In that case, you can use:
+An algebraically equivalent form is useful if you have variance, $\sigma^2$, rather than the standard deviation, $\sigma$:
 
 $$\sigma_M = \dfrac{\sqrt{\sigma^2}}{\sqrt{n}}$$ {#eq-s_m-2}
 
@@ -272,11 +262,7 @@ We can just figure out the standard error of the mean using the population chara
 
 $$\sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{2.24}{\sqrt{2}} = 1.58$$
 
-### Visualizing Standard Error
-
-Here are a couple of ways of visualizing what we mean here. First, here's a curve representing a population with a standard deviation of 15 and a mean of 100, with $n = 1$. That just means that we're looking at all the individuals of the population, reproducing the characteristics of that population itself.
-
-
+Applying this to the IQ distribution that we sampled from earlier, we can see how the standard error of the mean changes as a function of sample size. Since $n$ is in the denominator of the equation, as $n$ increases, the standard error decreases. 
 
 ::: {.columns}
 
@@ -318,13 +304,13 @@ Increase it again.
 ::::
 :::::
 
-## The Central Limit Theorem
+{{< include quizzes/07-sampling-variability.qmd >}}
+
+### Shape of the Sampling Distribution
 
 The normal curve isn't merely a convenient shape that a few variables happen to resemble. All kinds of quantities are influenced by many small, more or less independent contributions pushing them one way or another. There are many ways for those contributions to mostly balance, and fewer ways for them all to push in the same direction. Under suitable conditions, the result is something like the pile on the board: lots of values near the middle, progressively fewer toward the extremes, and a shape that can be modelled remarkably well by the normal distribution. This doesn't mean that every quantity made from random contributions must be normally distributed.
 
 Under the conditions described above, the theorem tells us how the sampling distribution's standardized shape behaves as sample size grows.
-
-### Shape of the Sampling Distribution
 
 If the population is normally distributed, its distribution of sample means is exactly normal at every sample size. If the population is not normal, averaging increasingly many independent observations usually makes the distribution of means progressively more normal. But this is convergence, not a switch: there is no sample size at which the remaining nonnormality suddenly disappears.
 
