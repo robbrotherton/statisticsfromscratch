@@ -62,13 +62,6 @@ seCurveEnsureStyles = () => {
       font-variant-numeric: tabular-nums;
     }
 
-    .standard-error-curve-demo .se-readout {
-      grid-template-columns: auto auto;
-      width: fit-content;
-      margin: 0 0 0.25rem;
-      column-gap: 0.45rem;
-    }
-
     .standard-error-curve-demo .se-population-curve {
       stroke: var(--se-population-color);
       stroke-dasharray: 7 5;
@@ -78,8 +71,45 @@ seCurveEnsureStyles = () => {
       stroke: var(--se-sampling-color);
     }
 
+    .standard-error-curve-demo .se-summary {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1.25rem;
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+      min-height: 2.8em;
+    }
+
+    .standard-error-curve-demo .se-population-summary::before,
+    .standard-error-curve-demo .se-sampling-summary::before {
+      content: "";
+      display: inline-block;
+      width: 1.2em;
+      margin-right: 0.4em;
+      vertical-align: middle;
+      border-top: 2px dashed var(--se-population-color);
+    }
+
+    .standard-error-curve-demo .se-sampling-summary::before {
+      border-top: 2px solid var(--se-sampling-color);
+    }
+
+    .standard-error-curve-demo .se-inline-slider {
+      margin: 0.25rem auto 0;
+      max-width: 28rem;
+      min-height: 2rem;
+      visibility: hidden;
+    }
+
     .standard-error-curve-demo .se-axis text {
       font-size: 0.82rem;
+    }
+
+    @media (max-width: 600px) {
+      .standard-error-curve-demo .se-axis text,
+      .standard-error-curve-demo .sfs-axis-label {
+        font-size: 20px;
+      }
     }
   `;
   document.head.appendChild(style);
@@ -103,12 +133,15 @@ makeStandardErrorCurveDemo = function(opts) {
     mean: seCurveFiniteNumber(opts.mean ?? opts.mu, 100),
     sd: seCurvePositiveNumber(opts.sd ?? opts.sigma, 15),
     n: Math.max(1, Math.round(seCurvePositiveNumber(opts.n ?? opts.sampleSize, 1))),
+    samplingOpacity: seCurveBoolean(opts.showSampling, true) ? 1 : 0,
+    showSlider: seCurveBoolean(opts.showSlider, false),
     showAxis: seCurveBoolean(opts.axis ?? opts.showAxis, opts.style === "minimal" ? false : true)
   };
   let renderedState = {
     mean: state.mean,
     sd: state.sd,
-    n: state.n
+    n: state.n,
+    samplingOpacity: state.samplingOpacity
   };
   let activeTween = null;
   let curveCache = {
@@ -119,6 +152,7 @@ makeStandardErrorCurveDemo = function(opts) {
   };
   let lastRender = null;
 
+  const inlineSlider = seCurveBoolean(opts.inlineSlider, false);
   const nMin = Math.max(1, Math.round(seCurvePositiveNumber(opts.nMin, 1)));
   const nMax = Math.max(nMin, Math.round(seCurvePositiveNumber(opts.nMax, 100)));
   const meanStep = seCurvePositiveNumber(opts.meanStep, 1);
@@ -177,19 +211,23 @@ makeStandardErrorCurveDemo = function(opts) {
   const chartWrap = root.append("div")
     .attr("class", "se-chart-wrap sfs-chart-wrap");
 
-  const readout = chartWrap.append("div")
-    .attr("class", "se-readout sfs-readout");
-  readout.append("span")
-    .attr("class", "sfs-readout-label")
-    .html("<i>&sigma;<sub>M</sub></i> = ");
-  const seValue = readout.append("span")
-    .attr("class", "sfs-readout-value");
+  const summary = chartWrap.append("div").attr("class", "se-summary");
+  const populationSummary = summary.append("span").attr("class", "se-population-summary");
+  const samplingSummary = summary.append("span").attr("class", "se-sampling-summary");
 
   const svg = chartWrap.append("svg")
     .attr("class", "sfs-svg sfs-graph")
     .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel || "Sampling distribution standard error curve");
+
+  let sliderRow = null;
+  if (inlineSlider) {
+    sliderRow = nControl.input.closest("label");
+    sliderRow.classList.add("se-inline-slider");
+    rootNode.appendChild(sliderRow);
+    nControl.input.setAttribute("aria-label", "Sample size n");
+  }
 
   const x = d3.scaleLinear().range([margin.left, width - margin.right]);
   const y = d3.scaleLinear().range([plotBottom, margin.top]);
@@ -223,7 +261,8 @@ makeStandardErrorCurveDemo = function(opts) {
     return {
       mean: source.mean,
       sd: source.sd,
-      n: source.n
+      n: source.n,
+      samplingOpacity: source.samplingOpacity
     };
   }
 
@@ -322,6 +361,8 @@ makeStandardErrorCurveDemo = function(opts) {
       sampleSize: source.n,
       se: plot.se,
       standardError: plot.se,
+      showSampling: state.samplingOpacity === 1,
+      showSlider: state.showSlider,
       domain: plot.domain.slice(),
       yDomain: plot.yDomain.slice()
     };
@@ -355,7 +396,18 @@ makeStandardErrorCurveDemo = function(opts) {
     if (meanControl.value) meanControl.value.text(formatter(state.mean));
     if (sdControl.value) sdControl.value.text(formatter(state.sd));
     nControl.value.text(displayN(source.n));
-    seValue.text(seFormatter(plot.se));
+    populationSummary.text(`Population: μ = ${formatter(source.mean)}, σ = ${formatter(source.sd)}`);
+    samplingSummary
+      .text(`Sample means: n = ${displayN(source.n)}, SE = ${seFormatter(plot.se)}`)
+      .style("opacity", source.samplingOpacity)
+      .attr("aria-hidden", state.samplingOpacity === 0 ? "true" : null);
+    if (sliderRow) {
+      sliderRow.style.visibility = state.showSlider ? "visible" : "hidden";
+      nControl.input.disabled = !state.showSlider;
+    }
+    svg.attr("aria-label", state.samplingOpacity === 0
+      ? `Normal population, mean ${formatter(source.mean)}, standard deviation ${formatter(source.sd)}. Dashed curve.`
+      : `Dashed population curve: mean ${formatter(source.mean)}, standard deviation ${formatter(source.sd)}. Blue sampling distribution: sample size ${displayN(source.n)}, standard error ${seFormatter(plot.se)}. Fixed axes.`);
   }
 
   function drawAxis() {
@@ -392,6 +444,7 @@ makeStandardErrorCurveDemo = function(opts) {
         .attr("d", line);
     }
 
+    samplingCurve.style("opacity", source.samplingOpacity);
     if (axisChanged) drawAxis();
     setValue(plot, source);
     syncControls(plot, source, { syncInputs: options.syncInputs !== false });
@@ -432,7 +485,8 @@ makeStandardErrorCurveDemo = function(opts) {
       renderedState = {
         mean: interpolatedParameter(start.mean, end.mean, t),
         sd: interpolatedParameter(start.sd, end.sd, t),
-        n: interpolatedParameter(start.n, end.n, t)
+        n: interpolatedParameter(start.n, end.n, t),
+        samplingOpacity: interpolatedParameter(start.samplingOpacity, end.samplingOpacity, t)
       };
       renderPlot(renderedState, { syncInputs: false });
 
@@ -507,6 +561,14 @@ makeStandardErrorCurveDemo = function(opts) {
         case "sample-size":
         case "samplesize":
           changed = setNumericAction(nControl.input, value) || changed;
+          break;
+        case "show-sampling":
+          state.samplingOpacity = actionBoolean(value) ? 1 : 0;
+          changed = true;
+          break;
+        case "show-slider":
+          state.showSlider = actionBoolean(value);
+          changed = true;
           break;
         case "axis":
         case "show-axis":
