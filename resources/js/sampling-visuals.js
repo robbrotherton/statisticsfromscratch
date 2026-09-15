@@ -391,38 +391,7 @@
         .style("fill", (item) => item.color);
     }
 
-    function horizontalFlightDelay(item) {
-      const proportion = sampling.clamp(
-        (item.cx - plotLeft) / Math.max(1, plotRight - plotLeft), 0, 1
-      );
-      return proportion * 220;
-    }
-
-    function individualFlightJitter(item, salt, spread) {
-      // A small deterministic offset stops neighbouring columns moving like a
-      // single flexible sheet, while preserving the clear left-to-right sweep.
-      return Math.abs(Math.imul(item.id + salt, 47)) % Math.max(1, spread);
-    }
-
-    function populationFlightDuration(distance) {
-      // Use the same distance-based fall model as the sample-mean blocks, just
-      // slightly accelerated so a full population replacement stays brisk.
-      return Math.max(140, fallDurationForDistance(distance) * 0.72);
-    }
-
-    function maximumRowsByColumn(items) {
-      const maximums = new Map();
-      items.forEach((item) => {
-        const key = String(item.cx);
-        maximums.set(key, Math.max(maximums.get(key) ?? 0, item.row));
-      });
-      return maximums;
-    }
-
-    // (Re)draw the whole dot layer. For an explicit population replacement,
-    // send the old fixed formation upward before dropping the new one in. This
-    // keeps the two populations visually distinct instead of implying that the
-    // same observations continuously change their values.
+    // Population replacement preserves positions and fades between formations.
     function rebuild(model, markerData, settings) {
       const state = settings || {};
       populationAnimationToken += 1;
@@ -465,40 +434,17 @@
         return;
       }
 
-      const beamY = -radius * 2;
-      const previousLayout = previousDots.data();
-      const previousMaximumRows = maximumRowsByColumn(previousLayout);
-      const dotStagger = 14;
-      const outgoingDelay = (item) => horizontalFlightDelay(item) +
-        (previousMaximumRows.get(String(item.cx)) - item.row) * dotStagger +
-        individualFlightJitter(item, 11, 7);
-      const incomingDelay = (item) => horizontalFlightDelay(item) +
-        item.row * dotStagger + individualFlightJitter(item, 29, 7);
-      const targetY = (item) => baseY - item.row * radius * 2;
-      previousDots
-        .transition()
-        .delay(outgoingDelay)
-        .duration(function() {
-          return populationFlightDuration(Number(this.getAttribute("cy")) - beamY);
-        })
-        .ease(d3.easeQuadOut)
-        .attr("cy", beamY)
-        .end()
-        .then(() => {
+      previousDots.transition().duration(350).style("opacity", 0)
+        .end().then(() => {
           if (animationToken !== populationAnimationToken) return;
           previousDots.remove();
           updateAnnotations(false);
           appendDots(layout)
-            .attr("cy", beamY)
-            .transition()
-            .delay(incomingDelay)
-            .duration((item) => populationFlightDuration(targetY(item) - beamY))
-            .ease(d3.easeQuadIn)
-            .attr("cy", targetY);
-        })
-        .catch(() => {
-          // An interrupted population swap is expected during rapid navigation.
-        });
+            .attr("cx", (item) => item.cx)
+            .attr("cy", (item) => baseY - item.row * radius * 2)
+            .style("opacity", 0)
+            .transition().duration(350).style("opacity", 1);
+        }).catch(() => {}); // Rapid navigation cancels the old fade.
     }
 
     function relayout(settings) {
@@ -921,17 +867,27 @@
       .attr("class", "bcs-scale-tag")
       .attr("x", opts.plotRight).attr("y", opts.noteY)
       .attr("text-anchor", "end");
-    const barsLayer = layer.append("g");
+    const marks = layer.append("g").attr("class", "bcs-dense-marks");
+    const barsLayer = marks.append("g");
     const muLine = layer.append("line")
       .attr("class", "bcs-mu-line")
       .attr("y1", opts.topY).attr("y2", opts.baseY + 5);
-    const reference = layer.append("path").attr("class", "bcs-reference-line");
-    const referenceLabel = layer.append("text")
+    const reference = marks.append("path").attr("class", "bcs-reference-line");
+    const referenceLabel = marks.append("text")
       .attr("class", "bcs-reference-label")
       .text("Predicted normal");
     const axis = layer.append("g")
       .attr("class", "bcs-axis sfs-axis")
       .attr("transform", `translate(0,${opts.baseY})`);
+    const ruler = layer.append("g")
+      .attr("class", "bcs-axis sfs-axis bcs-se-ruler")
+      .attr("transform", `translate(0,${opts.baseY + 43})`);
+    const rulerLabel = layer.append("text").attr("class", "bcs-panel-note")
+      .attr("x", (opts.plotLeft + opts.plotRight) / 2)
+      .attr("y", opts.baseY + 86).attr("text-anchor", "middle")
+      .text("Standard errors from μ");
+    let rulerWasVisible = false;
+    let currentMapX = null;
     const y = d3.scaleLinear().range([opts.baseY, opts.topY]);
     const normalData = d3.range(241).map((index) => {
       const z = -3 + index * 6 / 240;
@@ -962,12 +918,28 @@
       scaleTag.attr("y", opts.noteY);
       muLine.attr("y1", opts.topY).attr("y2", opts.baseY + 5);
       axis.attr("transform", `translate(0,${opts.baseY})`);
+      ruler.attr("transform", `translate(0,${opts.baseY + 43})`);
+      rulerLabel.attr("y", opts.baseY + 86);
       y.range([opts.baseY, opts.topY]);
     }
 
     function update(histogramData, settings) {
       const state = settings || {};
+      // Retain the old marks while the new model fades in at fixed positions.
+      layer.selectAll(".bcs-outgoing-marks").interrupt().remove();
+      marks.interrupt().style("opacity", 1);
+      if (state.replaceModel && state.animate && !reducedMotion()) {
+        const outgoing = d3.select(marks.node().cloneNode(true))
+          .attr("class", "bcs-outgoing-marks");
+        marks.node().parentNode.insertBefore(outgoing.node(), marks.node());
+        outgoing.transition().duration(350).style("opacity", 0).remove();
+        marks.style("opacity", 0).transition().delay(350).duration(350).style("opacity", 1);
+      }
       const standardized = state.scaleMode === "se";
+      const animateScale = state.animate && state.scaleChanged && !reducedMotion();
+      // First retire the score axis (300 ms), then lift the SE ruler (350 ms).
+      // Only after it reaches the baseline do the ruler and marks expand.
+      const stretchDelay = animateScale && standardized ? 650 : 0;
       const x = standardized ? state.xSE : state.xRaw;
       const mapX = standardized
         ? (z) => x(z)
@@ -981,7 +953,10 @@
       scaleTag
         .attr("display", state.compact ? "none" : null)
         .text(standardized ? "Standard-error scale" : "Same score scale");
-      muLine.attr("x1", standardized ? state.xSE(0) : state.xRaw(state.mean))
+      const muTarget = animateScale
+        ? muLine.interrupt().transition().delay(stretchDelay).duration(850).ease(d3.easeCubicInOut)
+        : muLine.interrupt();
+      muTarget.attr("x1", standardized ? state.xSE(0) : state.xRaw(state.mean))
         .attr("x2", standardized ? state.xSE(0) : state.xRaw(state.mean));
       const bars = barsLayer.selectAll("rect")
         .data(histogramData, (item) => item.index)
@@ -994,7 +969,7 @@
         )
         .interrupt();
       const target = state.animate && !reducedMotion()
-        ? bars.transition().duration(state.scaleChanged ? 850 : 420).ease(d3.easeCubicInOut)
+        ? bars.transition().delay(stretchDelay).duration(state.scaleChanged ? 850 : 420).ease(d3.easeCubicInOut)
         : bars;
       target
         .attr("x", (item) => mapX(item.z0))
@@ -1007,9 +982,19 @@
         .y((item) => y(item.density))
         .curve(d3.curveMonotoneX);
       const showNormal = Boolean(state.showNormal);
-      reference.interrupt().attr("d", line(normalData));
-      referenceLabel.interrupt()
-        .attr("text-anchor", state.compact ? "end" : "start")
+      const previousMapX = currentMapX || mapX;
+      currentMapX = mapX;
+      const animateReference = animateScale || (state.animate && state.rescale && !reducedMotion());
+      const referenceDuration = animateScale ? 850 : 420;
+      reference.interrupt();
+      if (animateReference) {
+        reference.transition().delay(stretchDelay).duration(referenceDuration).ease(d3.easeCubicInOut)
+          .attr("d", line(normalData));
+      } else reference.attr("d", line(normalData));
+      const labelTarget = animateReference
+        ? referenceLabel.interrupt().transition().delay(stretchDelay).duration(referenceDuration).ease(d3.easeCubicInOut)
+        : referenceLabel.interrupt();
+      labelTarget.attr("text-anchor", state.compact ? "end" : "start")
         .attr("x", state.compact ? opts.plotRight - 2 : mapX(1.55))
         .attr("y", y(global.sfsStats.normalPdf(1.55, 0, 1)) - 8);
       if (showNormal && state.animateNormal && !normalWasVisible && !reducedMotion()) {
@@ -1027,18 +1012,60 @@
       }
       normalWasVisible = showNormal;
 
-      const generator = standardized
-        ? d3.axisBottom(state.xSE)
-          .tickValues([-3, -2, -1, 0, 1, 2, 3])
-          .tickFormat((value) => value === 0 ? "μ" :
-            `${value > 0 ? "+" : "−"}${Math.abs(value)}${state.compact ? "" : " SE"}`)
-        : d3.axisBottom(state.xRaw).ticks(state.compact ? 5 : 7);
-      generator.tickSizeOuter(0);
-      if (state.animate && state.scaleChanged && !reducedMotion()) {
-        axis.transition().duration(850).ease(d3.easeCubicInOut).call(generator);
+      const generator = d3.axisBottom(state.xRaw)
+        .tickValues(d3.range(-3, 3.01, 1)).tickSizeOuter(0);
+      const sePosition = d3.scaleLinear().domain([-3, 3]).range([mapX(-3), mapX(3)]);
+      const seAxis = (position, expanded = standardized) => d3.axisBottom(position).tickSizeOuter(0)
+        .tickValues(!expanded && Math.abs(position(3) - position(-3)) < 300
+          ? [-3, 0, 3] : [-3, -2, -1, 0, 1, 2, 3])
+        .tickFormat((value) => value === 0 ? "μ" :
+          `${value > 0 ? "+" : "−"}${Math.abs(value)}${state.compact ? "" : " SE"}`);
+      const rulerVisible = state.showRuler || standardized;
+      axis.interrupt();
+      axis.selectAll("*").interrupt();
+      ruler.interrupt().attr("display", rulerVisible ? null : "none");
+      ruler.selectAll("*").interrupt();
+      rulerLabel.interrupt().attr("display", rulerVisible ? null : "none");
+      const rulerY = opts.baseY + (standardized ? 0 : 43);
+      if (animateScale) {
+        if (standardized) {
+          axis.attr("display", null).style("opacity", 1)
+            .transition().duration(300).style("opacity", 0)
+            .on("end", () => axis.attr("display", "none"));
+          const oldPosition = d3.scaleLinear().domain([-3, 3])
+            .range([previousMapX(-3), previousMapX(3)]);
+          ruler.call(seAxis(oldPosition, false)).style("opacity", 1)
+            .transition().delay(300).duration(350).ease(d3.easeCubicInOut)
+            .attr("transform", `translate(0,${rulerY})`)
+            .transition().duration(850).ease(d3.easeCubicInOut).call(seAxis(sePosition));
+          rulerLabel.transition().delay(300).duration(350).ease(d3.easeCubicInOut)
+            .attr("y", rulerY + 43);
+        } else {
+          // Reverse navigation restores both aligned rulers.
+          ruler.style("opacity", 1).transition().duration(850).ease(d3.easeCubicInOut)
+            .attr("transform", `translate(0,${rulerY})`).call(seAxis(sePosition));
+          rulerLabel.transition().duration(850).ease(d3.easeCubicInOut)
+            .attr("y", rulerY + 43);
+          axis.call(generator).attr("display", null).style("opacity", 0)
+            .transition().delay(850).duration(300).style("opacity", 1);
+        }
       } else {
-        axis.call(generator);
+        axis.call(generator).attr("display", standardized ? "none" : null)
+          .style("opacity", standardized ? 0 : 1);
+        ruler.attr("transform", `translate(0,${rulerY})`).call(seAxis(sePosition));
+        rulerLabel.attr("y", rulerY + 43);
+        if (rulerVisible && !rulerWasVisible && state.animate && !reducedMotion()) {
+          ruler.style("opacity", 0).transition().duration(450).style("opacity", 1);
+        } else ruler.style("opacity", 1);
       }
+      if (typeof global.sfsGraphStyleAxis === "function") {
+        global.sfsGraphStyleAxis(axis.classed("sfs-graph-axis", false));
+        global.sfsGraphStyleAxis(ruler.classed("sfs-graph-axis", false));
+        // D3 needs its domain selector when updating an existing axis.
+        axis.selectAll(".sfs-graph-domain").classed("domain", true);
+        ruler.selectAll(".sfs-graph-domain").classed("domain", true);
+      }
+      rulerWasVisible = rulerVisible;
       axis.selectAll("text").attr("dy", "1em");
     }
 
