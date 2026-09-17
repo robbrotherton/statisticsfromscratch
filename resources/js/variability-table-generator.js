@@ -566,8 +566,9 @@ sfsVariabilityTableNode = (opts = {}) => {
 
   const stats = sfsVariabilityStats(opts);
   const format = sfsVariabilityFormatters(opts);
+  const valueSymbol = opts.valueSymbol || "X";
   const meanSymbol = opts.meanSymbol || (stats.sample ? "M" : "\\mu");
-  const deviationSymbol = opts.deviationSymbol || `X-${meanSymbol}`;
+  const deviationSymbol = opts.deviationSymbol || `${valueSymbol}-${meanSymbol}`;
   const squaredDeviationSymbol = opts.squaredDeviationSymbol || `(${deviationSymbol})^2`;
   const varianceSymbol = opts.varianceSymbol || (stats.sample ? "s^2" : "\\sigma^2");
   const sdSymbol = opts.sdSymbol || (stats.sample ? "SD" : "\\sigma");
@@ -643,7 +644,7 @@ sfsVariabilityTableNode = (opts = {}) => {
 
   const thead = table.append("thead");
   const header = thead.append("tr");
-  header.append("th").append(() => sfsVariabilityInlineMath("X"));
+  header.append("th").append(() => sfsVariabilityInlineMath(valueSymbol));
   sfsVariabilityAppendReveal(header.append("th"), "deviations", sfsVariabilityInlineMath(deviationSymbol));
   sfsVariabilityAppendReveal(header.append("th"), "squared-deviations", sfsVariabilityInlineMath(squaredDeviationSymbol));
 
