@@ -1,72 +1,115 @@
 ```{.quiz-yaml}
 id: 07_sampling_learning_checks
-title: >
-  Learning Checks
+title: Learning Checks
 questions:
-  - id: se_decreases
-    type: true-false
-    prompt: >
-      As sample size increases, the value of the standard error always decreases,
-      assuming population variability stays the same.
-    answer: true
-    explanation: >
-      The standard error is sigma divided by the square root of n.
-
-  - id: sample_means_description
+  - id: distribution_entries
     type: multiple-choice
     prompt: >
-      Which description best fits the distribution of sample means?
+      In a sampling distribution of the mean for samples of $n = 10$, what
+      does each entry represent?
     options:
-      - text: >
-          It is a distribution of means from repeated samples of the same size.
+      - text: One individual's score.
+      - text: The mean of one sample of ten scores.
         correct: true
-      - text: >
-          It is the raw-score distribution for one sample.
-      - text: >
-          It is always identical to the original population.
-      - text: >
-          It is a list of every score in the population.
+      - text: The standard deviation of one sample of ten scores.
+      - text: The mean of ten sample means.
     explanation: >
-      The sampling distribution is built from sample statistics, not individual raw
-      scores.
+      Each entry is one sample mean. The sample size tells us how many
+      observations went into that mean, not how many means we have collected.
 
-  - id: sample_mean_equals_mu
-    type: true-false
+  - id: error_or_standard_error
+    type: multiple-choice
     prompt: >
-      The mean of a sample is always equal to the population mean.
-    answer: false
+      A sample has $M = 104$, from a population with $\mu = 100$.
+      What does the difference of 4 tell us?
+    options:
+      - text: This sample's sampling error is 4.
+        correct: true
+      - text: The standard error of the mean is 4.
+      - text: The population standard deviation is 4.
+      - text: The sampling procedure has a bias of 4.
     explanation: >
-      Sample means vary because of sampling error.
+      $M - \mu = 4$ is the error for this particular sample. The standard
+      error describes how widely means vary across repeated samples. One
+      sample's error does not establish systematic bias.
 
-  - id: describe_sampling_distribution
+  - id: unbiased_center
+    type: multiple-choice
+    prompt: >
+      We draw independent observations from a population with $\mu = 40$
+      and $\sigma = 10$. What does it mean to say that the sample mean
+      is unbiased?
+    options:
+      - text: Every sample mean equals 40.
+      - text: The sampling distribution is centered on 40.
+        correct: true
+      - text: Every sample contains equal numbers of scores above and below 40.
+      - text: The standard error approaches 40 as sample size increases.
+    explanation: >
+      $\mu_M = \mu = 40$. Individual means can miss 40, but their errors
+      balance out across the complete sampling distribution. This does not
+      require the population to be normal.
+
+  - id: more_simulated_means
+    type: multiple-choice
+    prompt: >
+      A simulation increases from 200 to one million sample means, keeping
+      $n = 5$ and the population unchanged. What should we expect?
+    options:
+      - text: A closer approximation to the same sampling distribution.
+        correct: true
+      - text: A smaller theoretical standard error of the mean.
+      - text: A sampling distribution with a different expected value.
+      - text: A normal sampling distribution, whatever the population's shape.
+    explanation: >
+      More simulated samples make the histogram's proportions more stable.
+      They do not change the distribution being approximated. Increasing
+      the number of observations within each sample would change it.
+
+  - id: standard_error_from_variance
     type: numeric
     prompt: >
-      Samples of $n = 100$ are selected from a population with $\mu = 40$ and
-      $\sigma = 10$. What is the standard error of the mean for the
-      distribution of sample means?
+      Independent observations are drawn from a population with variance
+      $\sigma^2 = 100$. What is the standard error of the mean for samples
+      of $n = 25$?
     hints:
-      - >
-        The standard error is $\sigma_M = \sigma / \sqrt{n}$.
-      - >
-        What is $\sqrt{100}$?
-    answer: 1
+      - Find the population standard deviation before using $\sigma_M = \sigma/\sqrt{n}$.
+    answer: 2
     tolerance: 0.001
     explanation: >
-      $\sigma_M = \sigma / \sqrt{n} = 10 / \sqrt{100} = 1$. From the information
-      given, we can determine that the distribution is centered on an expected
-      value of $\mu_M = 40$ and has a standard error of 1. Its exact shape also
-      depends on the population, although under the usual finite-variance
-      conditions it will often be close to normal at this sample size.
+      $\sigma = \sqrt{100} = 10$, so $\sigma_M = 10/\sqrt{25} = 2$.
+      The individual scores have a standard deviation of 10; the sample
+      means have a standard deviation of 2.
 
-  - id: always_normal
-    type: true-false
+  - id: halve_standard_error
+    type: numeric
     prompt: >
-      The shape of a distribution of sample means is always normal.
-    answer: false
+      With independent observations from the same population, samples of
+      $n = 25$ give a standard error of 2. What sample size would reduce
+      the standard error to 1?
+    answer: 100
+    tolerance: 0
     explanation: >
-      It is exactly normal at every sample size if the original population is
-      normal. For a nonnormal finite-variance population, it generally becomes
-      progressively closer to normal as sample size increases.
+      Halving $\sigma/\sqrt{n}$ requires doubling $\sqrt{n}$, so we need
+      four times as many observations per sample: $4 \times 25 = 100$.
+      Doubling the sample size would not halve the standard error.
+
+  - id: normal_population_small_sample
+    type: multiple-choice
+    prompt: >
+      We draw samples of five independent observations from a normally
+      distributed population. What is the shape of the theoretical
+      sampling distribution of the mean?
+    options:
+      - text: Exactly normal.
+        correct: true
+      - text: Approximately normal, becoming exactly normal at $n = 30$.
+      - text: Uniform, because observations are selected at random.
+      - text: Impossible to determine without simulating the samples.
+    explanation: >
+      When the population is normal, the distribution of means is normal
+      at every sample size. A histogram of only a few simulated means can
+      still look lumpy.
 
   - id: thirty_is_cutoff
     type: true-false
@@ -77,5 +120,69 @@ questions:
     explanation: >
       Convergence toward normality is gradual. Thirty is sometimes a useful rule
       of thumb, but there is no abrupt cutoff, and the required sample size depends
-      on the population's shape.
+      on the population's shape. Under the chapter's independent-draw,
+      finite-variance conditions, the center and standard-error formulas
+      hold even when the shape is not close to normal.
+
+  - id: lottery_without_replacement
+    type: multiple-choice
+    prompt: >
+      A researcher puts every student's name in a hat, mixes it, and draws
+      20 different names without putting any back. Which description fits
+      the selection of students?
+    options:
+      - text: Random, with independent selections.
+      - text: Random, with dependent selections.
+        correct: true
+      - text: Nonrandom, with independent selections.
+      - text: Nonrandom, with dependent selections.
+    explanation: >
+      This is a simple random sample without replacement. Each selected name
+      changes who remains available, so the selections are dependent.
+      Replacement allows repeat selections in our toy examples; randomness
+      does not require it.
+
+  - id: small_sampling_fraction
+    type: multiple-choice
+    prompt: >
+      For a simple random sample without replacement, when is the
+      independent-draw standard-error formula a useful approximation?
+    options:
+      - text: When the sample includes only a small fraction of the population.
+        correct: true
+      - text: When the sample includes nearly the whole population.
+      - text: Whenever the sample includes at least 30 observations.
+      - text: Only when every selected person can participate twice.
+    explanation: >
+      Removing a small fraction of the population barely changes who remains.
+      If we sample most of the population, sampling without replacement
+      noticeably reduces variability, and $\sigma/\sqrt{n}$ overstates it.
+
+  - id: household_dependence
+    type: true-false
+    prompt: >
+      A poll samples whole households. Because every respondent is a different
+      person, it is reasonable to treat all their responses as independent.
+    answer: false
+    explanation: >
+      People in the same household may share influences. Treating those
+      related responses as independent can underestimate the standard error.
+      Distinct people do not automatically supply independent observations.
+
+  - id: larger_convenience_sample
+    type: multiple-choice
+    prompt: >
+      To estimate all adults' average sleep duration, a researcher recruits
+      volunteers from an Intro Psych class. What would recruiting more
+      students through the same procedure do about selection bias?
+    options:
+      - text: Remove it once the sample reaches 30 students.
+      - text: Remove it once the sample mean has a small standard error.
+      - text: Leave the problem of generalizing beyond those volunteers unresolved.
+        correct: true
+      - text: Make the sample a simple random sample of all adults.
+    explanation: >
+      More observations can make an estimate more precise without making it
+      representative of the intended population. Students who volunteer
+      may differ systematically from the adults we want to learn about.
 ```
