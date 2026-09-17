@@ -8,6 +8,7 @@ interactive-scripts:
   - sampling-shape-explorer
   - distribution-generator
   - standard-error-curve-demo
+  - variability-table-generator
 ---
 
 {{< interactive-figure samplingCover makeSamplingDistributionBuilder options='{"variant":"cover","mean":100,"sd":20,"xlim":[75,125],"sampleCount":300,"binWidth":1,"axisSquare":true}' fallback="Animated sampling distribution cover figure." >}}
@@ -41,42 +42,45 @@ Click Replay to start. Try it a couple of times: what changes, and what stays si
 
 :::::
 
-The real version is a little box with a clear front, rows of pegs, and lots of little balls (originally lead shot). It's called a Quincunx (meaning five points, as in the arrangement of the pegs), or a Galton board, after Francis Galton, who developed it in the 1870s.
+It's called a Galton board, after Francis Galton, who developed it in the 1870s. (Galton also called it the Quincunx, meaning five points, as in the arrangement of goups of pegs). The physical version is a little box with a clear front, rows of pegs, and lots of little balls (originally lead shot, like from shotgun pellets; ammunition manufacturers by this time were able to make the precise, uniform spheres that the demonstration requires). 
 
 As Galton inscribed on the original device, when set upright on a level table, "the shot will all drop into the funnel, and running thence through its mouth, will pursue devious courses through the harrow and will accumulate in the vertical compartments at the bottom, there affording a representation of the law of dispersion."
 
-![The original Quincunx, commissioned by Galton and made by scientific instrument manufacturers Tisley & Spiller in 1873. © 2017 University College London, CC BY-NC-SA](resources/figures/quincunx.jpeg)
+![The original Quincunx, commissioned by Galton and made by scientific instrument manufacturers Tisley & Spiller in 1873. © 2017 University College London, CC BY-NC-SA](resources/figures/quincunx.jpeg){#fig-quincunx}
 
-Those “devious courses” produce surprisingly consistent results. In our digital board, each ball encounters twelve pegs, with an independent 50/50 chance of bouncing left or right at each one. To end up in the far-left slot, it has to bounce left every time. There is only one way for that to happen, just like there's only one way to roll a total of two with two dice. To land in the middle, it needs six lefts and six rights, and there are *many* different sequences that produce that mix, just like there are many ways to roll a seven. We can't predict any one ball's path, but we can describe the pattern of possible landing places.^[The exact distribution is binomial; the normal curve approximates its shape, just as in de Moivre's coin-toss example in Chapter 6.]
+By "law of dispersion," Galton meant the tendency for the balls to end up in a predicatble distribution---the is the same approximation of the normal distribution that Abraham de Moivre had discovered by thinking about a random process like flipping a coin many times. Each individual ball's course is unpredictable, but the aggregate of all those “devious courses” looks roughly the same each time.^[The exact distribution is binomial; the normal curve approximates its shape, just as in de Moivre's coin-toss example in Chapter 6.]
+
+In our digital board, each ball encounters twelve pegs, with an independent 50/50 chance of bouncing left or right at each one. To end up in the far-left slot, it has to bounce left every time. There is only one way for that to happen, just like there's only one way to roll two dice and get a total of two. To land in the middle, a ball needs to take six lefts and six rights, and there are *many* different sequences that produce that mix, just like there are many ways to roll a seven with the pair of dice. We can't predict any one ball's path, but we can describe the pattern of possible landing places.
 
 ## Sampling Error
 
-Our purpose in this chapter is to understand how sampling from a population works---how we can quantify our trust in a sample as a fair representation of the population it came from. The Quincunx is a nice visual metaphor for that process. Imagine that each ball is collecting a sample as it falls. Each bounce supplies one observation; the final slot is the sample statistic, summarizing all twelve observations.
+Our purpose in this chapter is to understand how sampling from a population works---how we can quantify our trust in a sample as a fair representation of the population it came from. The Quincunx is a nice visual analogy for that process. Imagine that each ball is collecting a sample as it falls through the pegs. Each bounce supplies one observation; the final slot is the sample statistic, summarizing all twelve observations.
 
-Let's make an analogy to political opinion polling. Say two candidates are running for office, candidate Left and candidate Right. In reality, support for the two candidates is exactly split, 50/50. If we select twelve people at random and ask which candidate they prefer, we might expect to find that half of the people in our sample support each candidate. But because of the kind of sampling error we encountered in Chapter 4, the proportion in our sample need not be exactly 50/50. It wouldn't be too surprising if we ended up with seven supporters of Candidate Left and only five of Candidate Right. Or even 8 and 4. In fact, there is a chance that we could randomly end up with 12 people who all support Candidate Left. It's relatively unlikely, but not out of the question. This is like one of the Quincunx balls bouncing left twelve times in a row and ending up in the far-left slot. Repeat the poll over and over, keeping its size at twelve, and the results would form a distribution like the pile on the board. Results near 50% would be common, while results near 0% or 100% would be rare.
+Let's make the analogy more concrete by compaing the Quincunx to political opinion polling. Say two candidates are running for office, candidate Left and candidate Right. In the population, support for the two candidates is exactly split, 50/50. If we select twelve people at random and ask which candidate they prefer, we might expect to find that half of the people in our sample support each candidate. But because of the kind of sampling error we encountered in Chapter 4, the proportion in our sample need not be exactly 50/50. It wouldn't be too surprising if we ended up with seven supporters of Candidate Left and only five of Candidate Right. Or even 8 and 4. In fact, there is a chance that we could randomly end up with 12 people who all support Candidate Left. It's relatively unlikely, but not out of the question. This is like one of the Quincunx balls bouncing left twelve times in a row and ending up in the far-left slot. Repeat the poll over and over with different samples of 12 people and the results would form a distribution like the pile on the board. Results near 50% support for Candidate Left would be common, while results near 0% or 100% would be rare.
 
 What if we had a sample of 100 people, rather than 12? In this case we'd expect something like 50 people to support each candidate, but it wouldn't be too surprising if we saw something like 60/40. It *would* be surprising if we happened to get 100 people who all support Candidate Left. Now what if our sample size was 1,000? Or 1,000,000? Your intuition is probably telling you that the larger the sample, the more surprising an extremely lop-sided result would be.
 
-This is, in effect, what the error bars on graphs of poll results convey. (The precise math behind the margin of error is something we'll talk more about in Chapter 10.) @fig-election-poll shows the results of The Pew Research Center’s final pre-election poll of 1,301 likely voters, conducted Nov. 2-5, 2000, with the reported margin of error of ±3 percentage points. The bars show the range of results that would be expected from repeated samples of the same size, assuming that the poll was conducted fairly and that the sample was representative of the population. The bars do not include uncertainty from allocating undecided voters or subsequent changes in voting intentions.
-
+This is, in effect, what the error bars on graphs of opinion poll results convey. (The precise math behind the margin of error is something we'll talk more about in Chapter 10.) @fig-election-poll shows the results of two different polls conducted shortly before the 2000 U.S. presidential election, showing people's support for the two main candidates, George. W. Bush and Al Gore (support for other candidates was also surveyed, but their shares are not shown here). The error bars show the range of results that would be expected from repeated samples of the same size, assuming that the poll was conducted fairly and that the sample was representative of the population.
 
 ::: {#fig-election-poll}
 
-{{< interactive-figure electionPoll makeGraph options='{"type":"interval","data":[{"label":"Bush","estimate":49,"lower":46,"upper":52,"color":"var(--graph-series-4, #d55e00)"},{"label":"Gore","estimate":47,"lower":44,"upper":50,"color":"var(--graph-series-1, #0072b2)"}],"scale":"percent","width":640,"height":260,"maxWidth":"640px","labels":{"x":"Estimated popular vote share"},"animate":false,"orientation":"horizontal","xDomain":[42,54],"ariaLabel":"Pew November 2000 estimates after allocating undecided voters: Bush 49%, Gore 47%. Bars show the reported plus or minus 3 percentage point sampling margin for 1,301 likely voters, not uncertainty from allocating undecided voters."}' fallback="Bush: 49%, with a bar from 46% to 52%; Gore: 47%, with a bar from 44% to 50%. Estimates allocate undecided voters; bars show Pew’s reported sampling margin only." >}}
+{{< interactive-figure electionPoll makeGraph options='{"type":"interval","data":[{"label":"Bush (Pew)","estimate":49,"lower":46,"upper":52,"color":"var(--graph-series-4, #d55e00)"},{"label":"Bush (Reuters/MSNBC)","estimate":46,"lower":43.2,"upper":48.8,"color":"var(--graph-series-4, #d55e00)"},{"label":"Gore (Pew)","estimate":47,"lower":44,"upper":50,"color":"var(--graph-series-1, #0072b2)"},{"label":"Gore (Reuters/MSNBC)","estimate":48,"lower":45.2,"upper":50.8,"color":"var(--graph-series-1, #0072b2)"}],"scale":"percent","width":640,"height":360,"maxWidth":"640px","labels":{"x":"Estimated popular vote share"},"animate":false,"orientation":"horizontal","xDomain":[41,55],"ariaLabel":"Two final pre-election polls from November 2000. Pew (1,301 likely voters): Bush 49%, Gore 47%, plus or minus 3 percentage points. Reuters/MSNBC/Zogby (about 1,200 likely voters): Bush 46%, Gore 48%, plus or minus about 2.8 percentage points."}' fallback="Pew: Bush 49% (46% to 52%), Gore 47% (44% to 50%). Reuters/MSNBC: Bush 46% (43.2% to 48.8%), Gore 48% (45.2% to 50.8%). Bars show each poll’s own sampling margin." >}}
 
-Pew's estimates of the popular vote in November 2000, after allocating undecided voters. The survey included 1,301 likely voters; the bars extend Pew's reported sampling margin of error of ±3 percentage points in each direction (at the 95% confidence level). Only the two leading candidates are shown. Source: [Pew Research Center, November 2–5, 2000](https://www.pewresearch.org/politics/2000/11/06/popular-vote-a-tossup-bush-49-gore-47-nader-4/).^[Before allocating undecided voters, Bush had 45% support, Gore 43%, Nader 4%, Buchanan less than 1%, and 8% were undecided. The headline estimates were Bush 49%, Gore 47%, Nader 4%, and Buchanan less than 1%. The bars use the [published sampling margin](https://www.pewresearch.org/politics/2000/11/06/methodology-169/); they do not include uncertainty from allocating undecided voters or subsequent changes in voting intentions.]
+Two final pre-election polls' estimates of the popular vote in November 2000. Pew's survey of 1,301 likely voters put Bush ahead, 49% to 47%, with a reported sampling margin of ±3 percentage points; Reuters/MSNBC's tracking poll (conducted by Zogby, roughly 1,200 likely voters) put Gore ahead instead, 48% to 46%, with an implied sampling margin of about ±2.8 percentage points. Only the two leading candidates are shown. Sources: [Pew Research Center, November 2–5, 2000](https://www.pewresearch.org/politics/2000/11/06/popular-vote-a-tossup-bush-49-gore-47-nader-4/); Reuters/MSNBC figures as tabulated in @walsh2009lies.^[Before allocating undecided voters, Pew had Bush at 45%, Gore 43%, Nader 4%, Buchanan less than 1%, and 8% undecided; the headline estimates shown here allocate those undecided voters. The Pew bars use the [published sampling margin](https://www.pewresearch.org/politics/2000/11/06/methodology-169/). Reuters/MSNBC did not publish a margin of error alongside this figure; the ±2.8 points shown is calculated from the poll's approximate sample size the same way Pew's is. Neither poll's bars include uncertainty from allocating undecided voters or subsequent changes in voting intentions.]
 
 :::
 
-With 1,301 likely voters, the sampling uncertainty was larger than the gap between the candidates.The Pew report of the result noted that "the contest is so close that we cannot confidently predict the winner of the popular vote." The results of the actual vote, conducted a couple of days later, was 47.9% of the popular vote went to Bush and 48.4% to Gore, both within the margin of error---but Bush won the Electoral College after the Supreme Court halted the Florida recount. As we saw in Chapter 1, real life is messier than our idealized numbers: sampling variability, people changing their minds or withholding opinions, and the workings of electoral systems all complicate what a poll can tell us about what will happen.
+Notice that Bush's error bars across the two separate polls overlap, as do Gore's, meaning that the polls are not in conflict with each other; even though the exact proportions are different, they within the same margin of error. Bush and Gore's error bars also overlap, meaning the sampling uncertainty was larger than the gap between the candidates. The Pew report of the result noted that "the contest is so close that we cannot confidently predict the winner of the popular vote."
+
+The result of the actual vote, conducted a couple of days later, was that 47.9% of the popular vote went to Bush and 48.4% to Gore, both within the margin of error of these polls---but Bush won the Electoral College after the Supreme Court halted the Florida recount. As we've seen, real life is often messier than idealized numbers: sampling variability, people changing their minds or withholding opinions, and the workings of electoral systems all complicate what a poll can tell us about what will happen.
 
 ### Sampling Error with IQ Scores
 
-An opinion poll summarizes categorical responses with a proportion. Now we'll turn to quantitative data. What would happen if we could repeatedly take samples from a population and summarize each sample with a quantitative statistic like the mean?
+The opinion poll results summarize categorical responses with a proportion. Now we'll turn to quantitative data. What would happen if we could repeatedly take samples from a population and summarize each sample with a quantitative statistic like the mean?
 
-For illustration purposes, say we have a population of people with normally distributed IQ scores, with a mean of 100 and a standard deviation of 15 (a kind of transformed distribution we mentioned in Chapter 5). We randomly collecting ten observations and find their mean. Then we draw another ten and repeat. This is effectively the same thing we did in @act-tracking-bias in Chapter 4, but there we focused on bias: as we collected more samples, we tracked their individual errors---the difference between the sample mean and the true population mean---and then averaged all the errors to see how the errors for the unbiased statistics approached zero. This time we'll collect the sample means themselves (not their errors) into a block histogram, so we can see which results occur most often and what their distribution looks like as they pile up.
+Say we have a population of people with normally distributed IQ scores, with a mean of 100 and a standard deviation of 15 (a kind of transformed distribution we mentioned in Chapter 5). We randomly collect ten observations and find their mean. Then we draw another ten and repeat. This is effectively the same thing we did in @act-tracking-bias in Chapter 4, but there we focused on bias: as we collected more samples, we tracked their individual errors---the difference between the sample mean and the true population mean---and then averaged all the errors to see how the errors for the unbiased statistics approached zero. This time we'll collect the sample means themselves (not their errors) into a block histogram, so we can see which means occur most often and what their distribution looks like as they pile up.
 
-::::: {.callout-tip .interactive .no-controls}
+::::: {#act-sampling-iq .callout-tip .interactive .no-controls}
 ## Build the sampling distribution
 
 {{< interactive-figure iqSamplingDistribution makeSamplingPathway options='{"seed":"iq-sampling-distribution-v1","mean":100,"sd":15,"sampleSize":10,"sampleCount":200,"binWidth":1,"xlim":[70,130],"populationMarkers":340,"populationAxisLabel":"IQ score","sampleAxis":true,"sampleMeanStyle":"block","showPopulationAxisLabel":true,"showSampleAxisLabel":false,"showDistributionAxisLabel":false,"fallObservationsOnRepeat":false,"repeatInterval":240,"showControls":false,"controls":false,"showDistribution":false,"showSampleAxis":false,"highlightCurrent":false,"focus":"population"}' fallback="Interactive pathway from an IQ population through samples to a distribution of sample means." >}}
@@ -95,34 +99,33 @@ Next we compute the sample mean; the balance point for this particular set of 10
 :::
 
 ::: {.tutorial-step data-major="one-sample" data-major-title="One sample" data-title="Place mean" data-action='{"draw":1,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"distribution","highlight-current":false,"show-controls":false,"controls-open":false,"fall-observations":false,"fall-mean":true,"delay":0,"animate":true}'}
-We want to keep track of each sample mean we obtain, so now that <span class="sfs-data-emphasis">mean block</span> falls to the lower sample-mean axis.
+We want to keep track of every sample mean we obtain, so now that <span class="sfs-data-emphasis">mean block</span> drops down onto the lower *Distribution of sample means* tracker. As we collect more means, this will become a kind of block histogram.
 :::
 
 ::: {.tutorial-step data-major="two-samples" data-major-title="Two samples" data-title="Two samples" data-action='{"draw":2,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"sample-mean","highlight-current":false,"show-controls":false,"controls-open":false,"fall-observations":false,"fall-mean":true,"converge-mean":true,"animate":true}'}
-Now we can take a second sample. It produces a <span class="sfs-data-emphasis">different mean block</span>, which then falls. The sample means are different even though the population hasn't changed. Each mean's difference from the population mean of 100 is that sample's sampling error.
+Now we can take a second sample. It produces a <span class="sfs-data-emphasis">different mean block</span>, which drops down. The sample means are different even though the population hasn't changed. Each mean's difference from the population mean of 100 is that sample's sampling error.
 :::
 
 ::: {.tutorial-step data-major="thirty" data-major-title="Thirty samples" data-title="Thirty samples" data-action='{"draw":30,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"sample-mean","highlight-current":false,"show-controls":false,"controls-open":false,"fall-observations":false,"fall-mean":true,"converge-mean":true,"animate":true,"delay":440}'}
-Repeat the same transformation: each highlighted sample converges into a <span class="sfs-data-emphasis">blue mean block</span>, which joins the growing pile. After thirty samples, the blocks begin to cluster around the population mean of 100.
+Now we just keep repeating the process. Each sample converges into a <span class="sfs-data-emphasis">blue mean block</span>, which joins the growing pile. After thirty samples, there isn't much of a pattern. But thirty isn't very many in the grand scheme of things: we need more.
 :::
 
 ::: {.tutorial-step data-major="pattern" data-major-title="The pattern" data-title="The pattern" data-action='{"draw":200,"show-population":true,"observations":true,"show-mean":false,"show-sample-axis":true,"show-distribution":true,"axis":true,"focus":"sample-mean","highlight-current":false,"controls-open":false,"fall-observations":false,"fall-mean":true,"converge-mean":false,"animate":true,"delay":75}'}
-We need more samples, so let's speed things up a bit. Each tick we get a new sample of 10 individual scores, from which we compute a new <span class="sfs-data-emphasis">sample mean</span>. After collecting 200 samples, a pattern is becoming evident. The distribution of means piles up around the true population mean in a roughly symmetrical distribution. Most sample means are near 100, and extreme ones are rare. The spread of the distribution of means is less than that of the original population.
+Let's speed things up a bit. Each tick we get a new sample of 10 individual scores, from which we compute a new <span class="sfs-data-emphasis">sample mean</span>. After collecting 200 samples, a pattern is becoming evident. The distribution of means piles up around the true population mean in a roughly symmetrical distribution. Most sample means are near 100, and extreme ones are rare. The spread of the distribution of means is less than that of the original population.
 :::
 ::::
 
 :::::
 
-The name for this kind of distribution is a __distribution of sample means__, or __sampling distribution of the mean__. And the predictability of its shape is the key insight that powers the inferential statistics that researchers use. 
+Notice how similar the final shape of the histogram of sample means in @#act-sampling-iq is to the shape of the balls at the bottom of the Quincunx. The process is different; instead of balls randomly bouncing off pegs, we are randomly selecting members of the population. But the reason for the outcome is similar: when we sample randomly from a population,there are lots of ways for a sample mean to be close to the true population mean, but few ways for it to be very far away. 
+
+The name for the kind of distribution we created is a __distribution of sample means__, or __sampling distribution of the mean__. And the predictability of its shape is the key insight that powers the inferential statistics we'll begin using in the next chapter. 
 
 ## The Distribution of Sample Means
 
-Technically the sampling distribution of the mean is the distribution of sample means obtained by selecting *all possible samples of a given sample size $n$ from a population*.
+Technically the sampling distribution of the mean is the distribution of sample means obtained by selecting *all possible samples of a given sample size $n$ from a population*. For the IQ distribution, we ended with 200 random samples, not *every* possible sample. As you might imagine, for any reasonably large population, there's often a huge number of possible samples; for practical purposes, the number might be effectively infinite. We'll return to this problem shortly, but we won't let it stop us from demonstrating the fundamental principles now. We just need a small, manageable population, from which we can obtain all possible samples of a given size. Like, very small.
 
-For the IQ distribution, we ended with 200 random samples, not *all* of the possible samples for the population. As you might imagine, for any reasonably large population, there's often a huge number of possible samples; for practical purposes, the number of possible samples might be effectively infinite. We'll return to this problem shortly, but we won't let it stop us from demonstrating the fundamental principles now. 
-
-We just need a small, manageable population, from which we can obtain all possible samples of a given size. Like, very small. Suppose we have a population consisting of just four people. We're interested in their height. We have one person 60 inches tall, one 62, one 64, and one 66.
-
+Suppose we have a population consisting of just four people. We're interested in their height. We have one person 60 inches tall, one 62, one 64, and one 66.
 
 | Height | $f$ |
 |--:|--:|
@@ -133,8 +136,9 @@ We just need a small, manageable population, from which we can obtain all possib
 
 : A frequency table showing the four heights in our population. There's just one person of each height. {#tbl-height-population}
 
+We can describe some features of this population. Its mean is $\mu = 63$ inches^[$\mu = \frac{\Sigma X}{N} = \frac{60 + 62 + 64 + 66}{4} = 63$], and its standard deviation is $\sigma = 2.24$ inches.^[$\sigma = \sqrt{\frac{(60-63)^2 + (62-63)^2 + (64-63)^2 + (66-63)^2}{4}} = \sqrt{\frac{9 + 1 + 1 + 9}{4}} = \sqrt{5} \approx 2.24$.]
 
-But remember, we're not interested in individuals anymore. We're interested in *samples*. So now we're going to list every possible sample where $n = 2$, meaning we have two observations in each sample. All possible samples are shown in this table. $X_1$ is the first score in the sample. $X_2$ is the second score. And $M$ is that sample's mean. Note that for this to work, it is important that we're sampling independently, meaning that the first observation in each sample does not affect the second. For this tiny population that means the same person can appear twice. The first row, for example, is the 60-inch person twice. Obviously the sample mean there is 60.
+But remember, we're not interested in individuals anymore. We're interested in *samples*. So now we're going to list every possible sample where $n = 2$, meaning we have two observations in each sample. @tbl-height-samples lists every possible sample. $X_1$ is the first score in the sample. $X_2$ is the second score. And $M$ is that sample's mean. Note that for this to work, it is important that we're sampling independently, meaning that the first observation in each sample does not affect the second. For this tiny population that means the same person can appear twice. The first row, for example, is the 60-inch person twice. Obviously the sample mean there is 60. The next sample consists of the 62-inch person and the 60-inch person, giving a mean of 61. And so on.
 
 | Sample | $X_1$ | $X_2$ | $M$ |
 |--:|--:|--:|--:|
@@ -190,67 +194,69 @@ Now we just continue through the rest of the 16 possible samples. Each pair land
 
 So for this tiny population, we have been able to exhaustively compile every possible sample mean for samples of size $n = 2$---something we could only approximate with the bigger IQ population and the 200 means we collected randomly. But you see the similar pattern? Again, sample means close to the true population mean are relatively common; sample means far from the true population mean are relatively uncommon.
 
-Now you might be wondering what the whole purpose of this quite tedious process was. Well, by going through the process of obtaining every possible sample mean, we now have a new kind of population: the population of sample means. And we can think about that population, and compute its characteristics, the same way we can with any other set of data.
+Now you might be wondering what the whole purpose of this quite tedious process was. Well, by going through the process of obtaining every possible sample mean, we now have the complete distribution of sample means, which is in fact a new kind of population: the population of every possible sample mean. And we can think about that population, and compute its characteristics, the same way we can with any other set of data.
 
-We can, for example, figure out its mean and standard deviation. The mean should be obvious visually. It's a symmetrical distribution and the peak is right on 63. So that's the mean. You can also calculate it by adding all 16 sample means and dividing by 16, the number of scores. If you care to check, you'll notice that 63 was the mean of the population as well, so the mean of the sampling distribution is equal to $\mu$.
+We can, for example, figure out its mean. The mean of the distribution of sample means is __called the expected value of the mean__, $\mu_M$. Its value should be obvious visually. It's a symmetrical distribution and the peak is right on 63 inches, so that's the mean. You can also calculate it by adding all 16 sample means and dividing by 16, the number of scores. Remember, 63 was the mean of the population as well, so the mean of the sampling distribution is equal to $\mu$.
 
-The mean of the distribution of sample means is __called the expected value of the mean__, $\mu_M$.
+We can also calculate the standard deviation of the 16 means. The standard deviation of the sampling distribution is also called the __standard error of the mean__. The symbol for this is $\sigma_M$. We can calculate it in the same way we did in Chapter 4, by putting all those values in a table, working out columns for deviations, the squared deviations, then using those to get the sum of squared deviations, the variance, and the standard deviation. Note that because we're dealing with a population of sample means we use the population formula for variance, dividing $SS$ by $N$ (rather than $n - 1$ for a sample).
 
-We can calculate the standard deviation of the 16 means in the same way we did in Chapter 4, by putting all those values in a table, working out columns for deviations, the squared deviations, then using those to get the sum of squared deviations, the variance, and the standard deviation. Note that because we obtained *every* possible sample mean, this set of 16 means is itself a complete population, so we use the population formula, dividing by $N$.
+::: {#tbl-sampling-deviations}
+{{< interactive-figure sampleMeansDeviationsTable makeVariabilityTable options='{"data":[60,61,62,63,61,62,63,64,62,63,64,65,63,64,65,66],"valueSymbol":"M","meanSymbol":"\\\\mu_M","varianceSymbol":"\\\\sigma_M^2","sdSymbol":"\\\\sigma_M","stage":"standard-deviation","controls":false}' fallback="Table of deviations and squared deviations for all 16 sample means, used to compute SS = 40, variance = 2.5, and standard deviation of about 1.58." >}}
 
-| $M$ | $M - \mu_M$ | $(M - \mu_M)^2$ |
-|--:|--:|--:|
-| 60 | -3 | 9 |
-| 61 | -2 | 4 |
-| 62 | -1 | 1 |
-| 63 | 0 | 0 |
-| 61 | -2 | 4 |
-| 62 | -1 | 1 |
-| 63 | 0 | 0 |
-| 64 | 1 | 1 |
-| 62 | -1 | 1 |
-| 63 | 0 | 0 |
-| 64 | 1 | 1 |
-| 65 | 2 | 4 |
-| 63 | 0 | 0 |
-| 64 | 1 | 1 |
-| 65 | 2 | 4 |
-| 66 | 3 | 9 |
-
-: Deviations and squared deviations for all 16 sample means. {#tbl-sample-means-deviations}
-
-$$SS = 40, \qquad \sigma_M^2 = \frac{40}{16} = 2.5, \qquad \sigma_M = \sqrt{2.5} \approx 1.58$$
-
-The standard deviation of the sample means is also called the __standard error of the mean__. The symbol for this is $\sigma_M$.
+Every sample mean, its deviation from the mean of the sampling distribution, and its squared deviation. The sum of squared deviations is 40, giving a variance of 2.50 and a standard error of about 1.58.
+:::
 
 Lastly, because we know every possible mean, we can think about the probability of observing certain sample means from this distribution, just like we thought about the probabilities of obtaining certain scores from a regular population.
+
+::::: {.columns}
+
+:::: {.column width="50%"}
+::: {#fig-sampling-prob-below-63}
+{{< interactive-figure samplingProbBelow63 makeGraph options='{"type":"block","data":[60,61,62,63,61,62,63,64,62,63,64,65,63,64,65,66],"xDomain":[59,67],"xTickValues":[60,61,62,63,64,65,66],"colors":{"60":"var(--graph-series-4, #d55e00)","61":"var(--graph-series-4, #d55e00)","62":"var(--graph-series-4, #d55e00)"},"labels":{"x":"Sample mean height (inches)","y":"Frequency"},"ariaLabel":"Block histogram of the 16 sample means, with the blocks at 60, 61, and 62 highlighted in orange."}' fallback="Block histogram of the 16 sample means, with the blocks below 63---means of 60, 61, and 62, six blocks in all---highlighted." >}}
+
+The highlighted blocks are every sample mean below 63.
+:::
+
+$$ P(M < 63) = \frac{6}{16} = .375 $$
+::::
+
+:::: {.column width="50%"}
+::: {#fig-sampling-prob-extreme}
+{{< interactive-figure samplingProbExtreme makeGraph options='{"type":"block","data":[60,61,62,63,61,62,63,64,62,63,64,65,63,64,65,66],"xDomain":[59,67],"xTickValues":[60,61,62,63,64,65,66],"colors":{"60":"var(--graph-series-4, #d55e00)","66":"var(--graph-series-4, #d55e00)"},"labels":{"x":"Sample mean height (inches)","y":"Frequency"},"ariaLabel":"Block histogram of the 16 sample means, with the blocks at 60 and 66 highlighted in orange."}' fallback="Block histogram of the 16 sample means, with the two most extreme blocks, 60 and 66, highlighted." >}}
+
+The highlighted blocks are the two most extreme sample means.
+:::
+
+$$ P(M < 61 \text{ or } M > 65) = \frac{2}{16} = .125 $$
+::::
+
+:::::
 
 {{< include quizzes/07-sampling-sampling-distribution.qmd >}}
 
 ## The Central Limit Theorem
 
-The trouble with distributions of sample means is that it's just not feasible in most realistic situations to obtain every possible sample of a given size for a population. We were able to do it with a population of just four people and samples of two. But imagine computing every possible sample of a given size from a population we'd actually be interested in, like, say, American voters. Even if we had the scores of everyone in the population, which we usually don't, the number of possible samples would be astronomical for any useful sample size. There would just be too many people, too many possible samples.
+The trouble with distributions of sample means is that it's just not feasible in most realistic situations to obtain every possible sample of a given size for a population. We were able to do it with a population of just four people and samples of two. But imagine computing every possible sample of a given size from a population we'd actually be interested in, like, say, American voters. Even if we had the scores of everyone in the population, which we usually don't, the number of possible samples would be astronomical for any useful sample size. There would just be too many combinations.
 
 Thankfully, there is a tool that allows us to predict the characterisitcs of the distribution of sample means without having to compile every possible sample. It is called the __Central Limit Theorem__.
 
-We can predict the sampling distribution's center and variability from the population mean, population variability, and sample size. The central limit theorem adds a prediction about shape; the center and variability formulas below hold without requiring normality.
+We can predict the sampling distribution's center and variability from just the population mean, population variability, and sample size. The central limit theorem adds a prediction about shape; the center and variability formulas below hold without requiring normality.
 
 ### Center: The Expected Value of the Mean
 
-Under the usual conditions—independent observations drawn in the same way from a population with a finite mean and variance—the average of all the sample means equals the population mean. This is because $M$ is an unbiased statistic.
+Under the usual conditions—independent observations drawn in the same way from a population with a finite mean and variance—the average of all the sample means equals the population mean. This is because $M$ is an unbiased statistic: some of the sample means are above the true population mean, some are below, and they balance out perfectly. So the expected value of the mean is exactly equal to the population mean:
 
 $$\mu_M = \mu$$ {#eq-expected-value}
 
-Usually we don't draw sample after sample, and for any one sample, we won't be exactly right every time.
+Remember for our little toy population of hour heights, we calculated the population mean as $\mu = 63$. And after listing all 16 possible sample of $n = 2$ for that population, we found that the mean of the sample means was also $\mu_M = 63$. It wasn't a coincidence! The central limit theorem tell us it will always be the case.
 
 ### Variability: The Standard Error of the Mean
 
-The equation for the standard error of the mean is:
+As we demonstrated in Chapter 4, variability is also an unbiased statistic when it is computed appropriately. But unlike its center, the variability of the sampling distribution (its standard error, $\sigma_M$) is not equal to the population variability. Instead it is smaller, as a function of the sample size, $n$. 
 
 $$\sigma_M = \frac{\sigma}{\sqrt{n}}$$ {#eq-s_m-1}
 
-The numerator is the population standard deviation, $\sigma$. So the larger the variability in the population, the larger the standard error of the mean. The denominator is a function of sample size (its square root). And so the larger our sample size, the smaller the standard error of the mean.
-
+The numerator is the population standard deviation, $\sigma$. So the larger the variability in the population, the larger the standard error of the mean. The denominator is the square root of the sample size. And so the larger our sample size, the smaller the standard error of the mean.
 
 An algebraically equivalent form is useful if you have variance, $\sigma^2$, rather than the standard deviation, $\sigma$:
 
@@ -258,13 +264,13 @@ $$\sigma_M = \dfrac{\sqrt{\sigma^2}}{\sqrt{n}}$$ {#eq-s_m-2}
 
 You can see how they are equivalent: $\sigma^2$ is literally just $\sigma$ squared, so $\sqrt{\sigma^2}$ is the same as $\sigma$.
 
-With this equation in hand, we can just figure out the standard error of the mean using just known population characteristics. The standard deviation of the four heights is 2.24. So if we put it into that equation, we get 2.24 for the population variability divided by the square root of two, which is our sample size.
+Returning to our toy population of heights, we can figure out the standard error of the mean using just known population characteristics. Remember, we said the standard diviation of the population of four heights is $\sigma = 2.24$. So if we put it into that equation, we get:
 
 $$\sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{2.24}{\sqrt{2}} = 1.58$$
 
-We get the same answer as when we went through the full rigmarole of compiling all possible samples for that little population and computing their standard deviation manually: 1.58! Plugging two numbers into an equation could have saved us a lot of work there.
+Its the same answer as when we went through the full rigmarole of compiling all possible samples for that little population and computing their standard deviation manually! Plugging two numbers into an equation could have saved us a lot of work there.
 
-Of course, the real value is that we can apply this equation in situations where we couldn't compile all possible samples. Applying this to the IQ distribution that we sampled from earlier, we can see how the standard error of the mean changes as a function of sample size. Since $n$ is in the denominator of the equation, as $n$ increases, the standard error decreases. 
+Of course, the real value is that we can apply this equation in situations where we couldn't compile all possible samples to double-check the answer. Applying this to the IQ distribution that we sampled from earlier, we can see how the standard error of the mean changes as a function of sample size. Since $n$ is in the denominator of the equation, as $n$ increases, the standard error decreases. 
 
 ::::: {.callout-tip .interactive}
 ## See how sample size affects the standard error
@@ -282,7 +288,7 @@ The blue curve shows the distribution of sample means for $n = 10$. Its mean is 
 Reduce the sample size to five. The standard error increases to about 6.71, so the blue curve gets wider and flatter. Means from smaller samples vary more.
 :::
 ::: {.tutorial-step data-title="Samples of 30" data-action='{"n":30,"show-sampling":true,"show-slider":false,"animate":true}'}
-Now increase the sample size to 30. The standard error falls to about 2.74, and the curve gets narrower and taller. The population and the graph's scales haven't changed.
+Now increase the sample size to 30. The standard error falls to about 2.74, and the curve gets narrower and taller.
 :::
 ::: {.tutorial-step data-title="Try it" data-action='{"n":30,"show-sampling":true,"show-slider":true,"animate":false}'}
 Drag the slider to try sample sizes from 2 to 30. Watch how the standard error and the width of the blue curve change together. Its center stays at 100.
@@ -294,94 +300,96 @@ Drag the slider to try sample sizes from 2 to 30. Watch how the standard error a
 
 ### Shape of the Sampling Distribution
 
-The normal curve isn't merely a convenient shape that a few variables happen to resemble. All kinds of quantities are influenced by many small, more or less independent contributions pushing them one way or another. There are many ways for those contributions to mostly balance, and fewer ways for them all to push in the same direction. Under suitable conditions, the result is something like the pile on the board: lots of values near the middle, progressively fewer toward the extremes, and a shape that can be modelled remarkably well by the normal distribution. This doesn't mean that every quantity made from random contributions must be normally distributed.
+It wasn't a coincidence that the distribution of the Quincunx balls, IQ samples, and height sampling distribution all took on the same basic shape: symmetrical, bell-shaped, and unimodal. The Central Limit Theorem tells us that this is a general property of sampling distributions of the mean. Under suitable conditions, the distribution of sample means will be approximately normal, even if the population itself is not normally distributed.
 
-Under the conditions described above, the theorem tells us how the sampling distribution's standardized shape behaves as sample size grows.
+As we pointed out along the way, the ball's devious courses, and the sample means, are affected by randomness. But as long as the randomness is unbiased, unusually extreme values below the average are balanced by unusually extreme values above the avereage, and both extremes are proportionally rare compared to values near the average. The result is the normal distribution.
 
-If the population is normally distributed, its distribution of sample means is exactly normal at every sample size. If the population is not normal, averaging increasingly many independent observations usually makes the distribution of means progressively more normal. But this is convergence, not a switch: there is no sample size at which the remaining nonnormality suddenly disappears.
+What exactly are the *suitable conditions* though? For one, if the population is normally distributed, its distribution of sample means will be exactly normal at every sample size. But even if the population is not normal, the distribution of sample means will still become progressively more normal as the sample size increases. The larger the sample size, the closer the distribution of means will be to normal.
 
-That is why the familiar rule of thumb $n = 30$ needs to be handled carefully. For many moderately nonnormal populations, the remaining difference from normality is small enough by then that it has little practical consequence. For a more severely skewed or heavy-tailed population, 30 may not be enough. And even when the approximation is entirely adequate, that means *negligible for the purpose at hand*, not *mathematically zero*. The visualization below makes that distinction visible.
+There's no mathematical threshold or magic sample size at which the distribution of means suddenly becomes normal. In fact, the distribution of means will never be *exactly* normal for a nonnormal population, no matter how large the sample size. But there does come a point at which its close enough that the difference is negligible for practical purposes. You will sometimes hear $n = 30$ as a rule of thumb for when the distribution of means is "close enough" to normal. But that is just a rough guideline, not an absolute. The convergence is gradual, and the rate of convergence depends on how nonnormal the population is. The more nonnormal the population, the larger the sample size needed for the distribution of means to be approximately normal. @act-clt-normality lets us see that distinction in action.
 
-::::: {.callout-tip .interactive}
+::::: {#act-clt-normality .callout-tip .interactive}
 ## When do sample means look normal?
 
 {{< interactive-figure samplingShapeExplorer makeSamplingShapeExplorer options='{"seed":"sampling-shape-clt-v3","distribution":"normal","sampleSize":5,"samples":0,"scaleMode":"raw","showPopulation":true,"showDistribution":true,"showNormal":false,"controlsOpen":false}' fallback="Interactive comparison of population shape and the resulting distribution of sample means." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Population" data-action='{"distribution":"normal","n":5,"samples":0,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":false,"controls-open":false,"animate":false}' }
-Begin with a normal population on a fixed score scale from $-3$ to $+3$. The lower panel is already in place but remains empty. The earlier figures established how individual samples become sample means; here we will compare the population directly with the long-run distribution of those means.
+We begin again with a normal population. Our scale here is a standardized $z$-score scale ranging from $-3$ to $+3$. In @act-sampling-iq we saw each of the 200 samples of dots as they were selected. Here we're going to take a lot more samples very quickly, so I've hidden the sample dots and we'll just see the histogram of means as it rapidly accumulates, but behind the scenes we're doing exactly the same thing, taking sample after sample and compiling their means into an approximate (not complete) sampling distribution.
 :::
 
 ::: {.tutorial-step data-title="200 means" data-action='{"distribution":"normal","n":5,"samples":200,"sampling-duration":2000,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":false,"animate":true}' }
-Generate 200 independent samples of $n=5$ and plot each sample mean. The bars collect the results in batches, so different columns grow as different means arrive. With only 200 means, the histogram is still lumpy. The predicted normal curve is smooth: because the population itself is normal, its distribution of means is normal at every sample size.
+First we can generate just 200 independent samples of $n=5$ and plot each sample mean. The predicted normal curve is smooth: because the population itself is normal, its distribution of means is normal at every sample size. With only 200 means, the histogram is lumpy, not following exactly the predicted curve. But the observed mean and standard error are very close to the equations' predictions.
 :::
 
 ::: {.tutorial-step data-title="One million" data-action='{"distribution":"normal","n":5,"samples":1000000,"sampling-duration":4000,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":false,"animate":true}' }
-Increase the total to one million sample means. The bars first make room for the larger count, then build up as more means arrive. The random bumps mostly settle down, and the observed mean and standard error come very close to the equations' predictions. More simulations reveal the sampling distribution more precisely; they do not change the distribution being predicted.
+200 is just too small of a number of this kind of thing. Let's increase the total to one million sample means. At a million means, the random bumps mostly settle down, and the observed mean and standard error come very close to the equations' predictions. More simulations reveal the sampling distribution more precisely.
 :::
 
 ::: {.tutorial-step data-title="Right skew" data-action='{"distribution":"skewed","n":5,"samples":0,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":false,"controls-open":false,"animate":true}' }
-Now replace the normal population with a strongly right-skewed one. The old population and its distribution of means fade out, and the new population fades in. Its left-side peak and long sparse tail span the full score scale. The lower panel resets so we can repeat the comparison.
+Now let's replace the normal population with a strongly right-skewed one, and reset the distribution of means. We'll do the same thing again for this skewed population, taking many samples and collecting each sample mean on the distribution tracker.
 :::
 
 ::: {.tutorial-step data-title="One million" data-action='{"distribution":"skewed","n":5,"samples":1000000,"sampling-duration":4000,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":false,"animate":true}' }
-Generate one million independent samples of $n=5$. Averaging five observations makes the distribution of means less skewed and much narrower than the population. Random bumps are now small, but the histogram still doesn't quite match the predicted normal curve. The peak sits a little left of the prediction, and the right tail extends farther.
+Here come a million independent samples of $n=5$. Averaging five observations makes the distribution of means less skewed than the population, but the histogram still doesn't quite match the perfectly normal curve. The peak sits a little left of the prediction, and the right tail extends farther.
 :::
 
 ::: {.tutorial-step data-title="Samples of 30" data-action='{"distribution":"skewed","n":30,"samples":1000000,"sampling-duration":4000,"scale":"raw","show-ruler":false,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":false,"animate":true}' }
-Keep the same skewed population, but increase each sample to $n=30$ and generate one million new means. The distribution is narrower again, and now looks much closer to normal. This time we've changed the number of observations in each sample, not the number of means in the histogram. But has the remaining nonnormality disappeared, or is it just harder to see on this scale?
+Now we'll keep the same skewed population, but increase each sample to $n=30$ and generate one million new means. The distribution is narrower again, and now looks much closer to normal. But it's still not quite perfectly normal.
 :::
 
 ::: {.tutorial-step data-title="Add a ruler" data-action='{"distribution":"skewed","n":30,"samples":1000000,"scale":"raw","show-ruler":true,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":false,"animate":true}' }
-Add a second ruler underneath the scores, like we did in Chapter 5. Its center is $\mu$, and each unit is one standard error, $\sigma/\sqrt{n}$. The means haven't moved. The two rulers simply describe the same positions in different units.
+The difference between the normal curve and the actual distribution is hard to see at this scale, so we can zoom in (without reshaping the data). First I'll add a second ruler underneath the scores, like we did in Chapter 5. Its center is $\mu$, and each unit is one standard error, $\sigma/\sqrt{n}$.
 :::
 
 ::: {.tutorial-step data-title="Stretch the ruler" data-action='{"distribution":"skewed","n":30,"samples":1000000,"scale":"se","show-ruler":true,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":true,"animate":true}' }
-Let the original score ruler fade away, and move the standard-error ruler into its place. Then stretch it to fill the lower panel. The histogram and predicted curve stretch with it, keeping the same values lined up. These are still the same one million means. The fit is much closer now, though a little asymmetry remains. So $n=30$ hasn't flipped a switch that makes the distribution exactly normal. The approximation may be useful, but how much remaining nonnormality matters depends on what we use it for.
+Now we can stretch the ditribution to fill the lower panel, again just changing the scale, not the actual data. The histogram and predicted curve stretch with it, keeping the same values lined up. These are still the same one million means. This allow us to see better that a little asymmetry remains. So increase sample size to $n=30$ hasn't flipped a switch that makes the distribution exactly normal.
 :::
 
 ::: {.tutorial-step data-title="Samples of 100" data-action='{"distribution":"skewed","n":100,"samples":1000000,"sampling-duration":4000,"scale":"se","show-ruler":true,"show-population":true,"show-distribution":true,"show-normal":true,"controls-open":true,"animate":true}' }
-Now increase each sample to $n=100$ and generate one million new means. Keep the standard-error ruler stretched out so we can compare the shapes. The histogram follows the normal curve more closely again. On the original score scale, the means would be packed into a narrower range; here, each unit on the ruler represents the new, smaller standard error. The improvement is gradual, with no special boundary at 30.
+Now let's increase sample size again, to $n=100$, and generate one million new means. We'll keep the standard-error ruler stretched out so we can compare the shapes more easily. The histogram follows the normal curve even more closely than at $n = 30$, but the distribution of means still isn't perfectly normal. The improvement is gradual, with no special boundary at 30 or anywhere else. The approximation may be good enough, but how much remaining nonnormality matters depends on what we use it for.
 :::
 
 ::::
 
 :::::
 
-The two tutorial population formations are fixed, precomputed representations of continuous-model densities; they are not finite rosters of people. Every simulated observation is drawn independently, and all the selectable models have finite variance. Those conditions matter. The ordinary central limit theorem does not promise convergence for every imaginable distribution or sampling process.
-
 {{< include quizzes/07-sampling-learning-checks.qmd >}}
 
 ## Sampling People in Practice
 
-Armed with our knowledge of the sampling distribution and the Central Limit Theorem, we can predict the distribution of sample means. As we'll see, this is the engine that powers the inferential tests we'll begin employing in the next chapter. But it's important to note that those predictions depend on how we collect the observations in each sample. In the demonstrations above, I always sampled with replacement. This was most obvious in the example with the small population of four heights. The 16 set of all 16 possible sample means for $n = 2$ included samples in which the same person appeared twice.
+So now we've seen a few examples of normality and predictability emerging from random sampling. We're almost ready to apply these tools in the context of social science research. But before we do, let's take a moment to consider how the assumptions we've made about sampling might apply to real-world research. The Central Limit Theorm's predictions about sampling distributions can only help us if we are meeting its assumptions about how we collect the observations in each sample. It does not promise such predictability for every imaginable distribution or sampling process.
+
+In the demonstrations above, I always sampled with replacement. This was most obvious in the example with the small population of four heights. The set of all 16 possible sample means for $n = 2$ included samples in which the same person appeared twice.
 
 To see why that mattered, let's turn to another statistics textbook favorite: picking marbles out of a jar. In *The Art of Conjecturing*, published in 1713, Jacob Bernoulli asked his reader to imagine an urn containing 5,000 pebbles, in some unknown ratio of white to black. Urns of pebbles were used to cast votes in elections at the time, so Bernoulli may have been thinking about a very real issue, not just a quaint way of illustrating statistical ideas. By drawing pebbles repeatedly, someone who couldn't see the contents could estimate that ratio from the proportion of white pebbles they observed [@bernoulli2006conjecturing].
 
-Imagine a jar with just 50 marbles, 40 blue and 10 white. If each marble is equally likely to be drawn, $P(\text{white})=10/50=.2$.
+To keep things simple, imagine a jar with just 50 marbles, 40 blue and 10 white. We want to pick out two marbles, one after the other. If each marble is equally likely to be drawn, the probability that we get a white marble on our first draw is $P(\text{white})=10/50=.2$. 
 
-Suppose the first marble we draw is white. What is the probability that a second draw will also be white? This raises a small but important procedural detail. Did we put the *first* marble back into the jar, or did we leave it out?
+So far so simple. But what is the probability that a second draw will also be white? This raises a small but important procedural detail. Did we put the first marble back into the jar, or did we leave it out?
 
 If we **sample with replacement**, we put it back and mix the jar before drawing again. There are still 10 white marbles among 50, so the probability stays .2. The draws are **independent**: knowing the first result doesn't change the probabilities for the second.
 
 If we **sample without replacement**, we leave the first marble out. After drawing white, only 9 white marbles and 49 marbles in total remain. The probability of another white is now $9/49 \approx .184$. The draws are dependent, because knowing the first result changes the probabilities for the second.
 
-{{< include quizzes/07-sampling-marbles.qmd >}}
-
 A **random sample** is selected by a chance procedure. Random selection and independence are different ideas: both marble procedures use chance, but only replacing and mixing the marble makes successive draws independent. Our standard-error formula, $\sigma_M=\sigma/\sqrt{n}$, assumes that each observation contributes independently to the mean. Changing the sampling procedure can change the variability of those means.
 
-But social scientists generally aren't sampling marbles from a jar, or dots from a simulated digital distribution. We're interested in people: we want to see what they get up to, or ask them questions, or measure their physiological responses, or whatever. We can't easily put a person back into the proverbial jar and give them another chance of being selected the next time, because having the same person in the sample twice would give us no new information. The same person taking the same study a second time would explicitly break the assumption of independence. So technically we're sampling without replacement. But doesn't that also break the assumption of independence? Not necessarily. If the sample is a small fraction of the population, the change in probabilities is negligible. For example, if we have a population of 10,000 people and we sample 100, the probability of selecting any one person changes from $1/10,000$ to $1/9,999$ after one draw. That difference is so small that we can treat the draws as approximately independent for practical purposes.
+Do you sense a potential problem here? Social scientists generally aren't sampling marbles from a jar, or dots from a simulated digital distribution. We're interested in *people*: we want to see what they get up to, ask them questions, measure their physiological responses, or whatever. We can't easily put a person back into the proverbial jar and give them another chance of being selected the next time, because having the same person in the sample twice would give us no new information. 
 
-There are problems that just making sure our numbers are large enough can't solve.
+In fact, the same person taking the same study a second time would explicitly break the assumption of independence. Think back to political opinion polling. If we allowed the same people to take the survey twice, they would presumably give the same answer both times. The two responses we got from them would not be independnet.
+
+So usually we're sampling without replacement: we explicitly prevent the same people from participating in a study twice. But doesn't that also break the assumption of independence? Not necessarily. As you see, independence is not the same as sampling with replacement. If the sample is a small fraction of the population, the change in probabilities is negligible. For example, if we have a population of 10,000 people and we sample 100, the probability of selecting any one person changes from $1/10,000$ to $1/9,999$ after one draw. That difference is so small that we can treat the draws as approximately independent for practical purposes.
 
 Other kinds of dependence need more care. Ten people from one household, or ten measurements of the same person, may share influences that make their scores similar. Treating them as ten independent observations can make a mean look more precise than it is.
 
 Random selection also doesn't guarantee that a study represents the population we care about. A list of phone numbers may omit some people, and those who respond may differ from those who don't. Recruiting whoever happens to walk past, or whoever volunteers for course credit, gives us a convenience sample rather than a simple random sample of the general population. Increasing the sample size can reduce random sampling error without correcting those selection biases.
 
-So when applying these ideas, ask how people entered the sample, what population they can reasonably represent, and whether their observations share influences. The formulas describe a sampling process; their usefulness depends on how well that process matches the study.
+There are problems that just making sure our numbers are large enough can't solve.
+
+So when applying these ideas, ask how people entered the sample, what population they can reasonably represent, and whether their observations might share influences. The formulas describe a sampling process; their usefulness depends on how well that process matches the study.
 
 {{< include quizzes/07-sampling-random-sampling-checks.qmd >}}
 
 ## Summary
 
-So to repeat and summarize, under independent sampling from a population with finite mean and variance, the distribution of sample means has an expected value, $\mu_M$, equal to $\mu$. It has a standard deviation, or standard error of the mean, of $\sigma / \sqrt{n}$. Its shape is exactly normal at every $n$ when the population is normal. For a nonnormal population, its standardized shape approaches normality gradually as $n$ increases, at a rate that depends on the population. Thirty is often a useful convention, but it is not a magical cutoff. These insights power much of the inferential statistics that we'll move on to later, because they allow us to reason about the probability of sample statistics rather than only individual scores.
+So to repeat and summarize, assuming we are independently sampling from a population, the distribution of sample means has an expected value, $\mu_M$, equal to $\mu$. It has a standard deviation, or standard error of the mean, of $\sigma / \sqrt{n}$. Its shape is exactly normal at every $n$ when the population is normal. For a nonnormal population, its standardized shape approaches normality gradually as $n$ increases, at a rate that depends on the skew in the population. $n = 30$ is often a useful convention, but it is not a magical cutoff. And we need to design our recruitment and sampling procedures carefully to ensure that the assumptions of independence and random sampling are met. These insights power much of the inferential statistics that we'll move on to later, because they allow us to reason about the probability of sample statistics rather than only individual scores.
