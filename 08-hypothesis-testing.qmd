@@ -3,6 +3,7 @@ title: "Hypothesis Testing"
 interactive-scripts:
   - normal-comparison-tutorials
   - distribution-generator
+  - critical-table-generator
   - make-inferential-diagram
 ---
 
@@ -16,7 +17,7 @@ We'll start this chapter by taking stock of what we've learned so far: $z$-score
 
 ## Putting It All Together
 
-First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. And for normally distributed scores, we can find the probability associated with any given range of scores using the unit normal table or using the `pnorm()` function in R.
+First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. And for normally distributed scores, we can find the probability associated with any given range of scores using the unit normal table.
 
 Next, we learned that we can begin thinking about samples rather than individual scores by looking at a sampling distribution of the mean. That is, we construct a special kind of population which consists of every possible sample mean that a population can produce for a given sample size, like our samples of size $n = 2$ for this population of four people of different heights. Knowing all possible sample means allows us to determine probabilities. For example, the probability of means of 61 or less.
 
@@ -26,7 +27,7 @@ So all this comes together with the insight that now we're prepared to think abo
 
 $$z = \frac{M - \mu_M}{\sigma_M}$$
 
-This $z$-score tells us the position of that particular sample mean relative to all sample means in the sampling distribution, in terms of the standard error of the mean. And since the Central Limit Theorem also tells us that, under the conditions I just mentioned, the distribution of sample means is approximately normal, we can then determine the probability of finding sample means within a specific range, using the same unit normal table or `pnorm()` functions that we used for individual $z$-scores.
+This $z$-score tells us the position of that particular sample mean relative to all sample means in the sampling distribution, in terms of the standard error of the mean. And since the Central Limit Theorem also tells us that, under the conditions I just mentioned, the distribution of sample means is approximately normal, we can then determine the probability of finding sample means within a specific range, using the same unit normal table that we used for individual $z$-scores.
 
 $$z = \frac{M - \mu_M}{\sigma_M}$$
 
@@ -52,7 +53,7 @@ Let's put this in terms of the radioactive spider-bite scenario from Chapter 5. 
 
 But again, real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
 
-![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen }
+![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen}
 
 ### From Individual Scores to Sample Means
 
@@ -64,20 +65,17 @@ $$ z = \frac{X - \mu}{\sigma} = \frac{189 - 284}{50} = -1.9 $$
 
 We can look up $z = 1.9$ in the unit normal table to find a probability of less than .03. Pretty unlikely. $p(z \le -1.9) = .0287$. So if Peter Parker's reaction time really came from the population of unbitten kids, we would only see a score this extreme about three times out of a hundred.
 
+{{< interactive-figure peterZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.86,"to":1.94,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.9,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.86 to 1.94, with the area to the right of z = 1.90, .0287, highlighted." >}}
+
 But now let's calculate the $z$-score based on the idea that the score of $189ms$ came not from one individual, but instead it was the sample mean for a sample of three people all bitten by radioactive spiders.
 
-
-{{< include quizzes/08-hypothesis-testing-sample-z-score.qmd >}}
 $$ z = \frac{M - \mu_M}{\sigma_M} = \frac{189 - 284}{\frac{50}{\sqrt{3}}} = -3.29 $$
 
 Now our score calculation starts with that sample mean. We subtract the mean of the sampling distribution, which we know from the Central Limit Theorem is equal to the population mean, which we know from the website where you did that reaction time test is 284 milliseconds. So actually our numerator here is completely unchanged. It's only the denominator that changes. We divide by the standard error of the mean — the variability of the sampling distribution — rather than the variability of the population. The standard error is $\sigma$ over the square root of sample size. So 50, the population standard deviation, over the square root of 3, our sample size for this example. And now we get a $z$-score of $-3.29$, which is quite a bit lower than it was for Peter Parker alone. That's because you're inherently less likely to get extreme sample means than extreme single scores. The larger the sample, the more uncommon extreme means will be. Remember, the chances of one individual happening to have such an extreme score was less than three percent. The chances of three people all having an average score this extreme is correspondingly less likely.
 
-And if we put that $z$-score into `pnorm()`, we get a much smaller $p$-value.
+And if we look up that $z$-score in the unit normal table, we get a much smaller $p$-value: $p(z \le -3.29) = .0005$.
 
-```r
-pnorm(-3.29)
-#> [1] 0.0005009369
-```
+{{< interactive-figure spidermenZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":3.25,"to":3.33,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":3.29,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 3.25 to 3.33, with the area to the right of z = 3.29, .0005, highlighted." >}}
 
 To show this another way, here's what the sampling distribution looks like and where our sample mean lies in that distribution. Here it's shown in the original units; we could relabel the axis with $z$-scores instead. Remember, the $z$-scores are just a change of label. They don't transform the positions or the variability of the scores. So with the original units, our sample mean is still exactly as far down in that extreme tail of the distribution.
 
@@ -200,7 +198,9 @@ To put it in terms of this diagram again, there is an original untreated populat
 
 So now let's quickly run through the spider example one more time in this formalized step-by-step procedure. We start with our hypotheses. The null ($H_0$) is that radioactive spider bites do not alter reaction times. The alternative ($H_1$) is that they do. Notice here we're just stating this as a non-directional hypothesis, allowing for the possibility that being bitten by a radioactive spider is actually quite bad for your reaction times and probably for your health in general. But if we were more confident in the Spidey sense hypothesis, we could state a directional hypothesis if we wanted to.
 
-But whatever our hypotheses, we next determine our decision criteria. We know that the $z$-test is appropriate here because I'm telling you we know the original population mean and standard deviation. And we know we'll be dealing with a normally distributed sampling distribution, because back when we first did this reaction time test, we said for the sake of argument that everyone's scores form a normally distributed population, which, like I said at the time, isn't strictly true for reaction times. But let's not worry about that. So we can set $\alpha$ at .05 if we like, giving us critical regions of .025, or two and a half percent, at either end of the distribution. Then we can find the corresponding $z$-score cutoffs for the normal distribution using the `qnorm()` function in R, and we find that that corresponds to $z$-scores of $\pm 1.96$.
+But whatever our hypotheses, we next determine our decision criteria. We know that the $z$-test is appropriate here because I'm telling you we know the original population mean and standard deviation. And we know we'll be dealing with a normally distributed sampling distribution, because back when we first did this reaction time test, we said for the sake of argument that everyone's scores form a normally distributed population, which, like I said at the time, isn't strictly true for reaction times. But let's not worry about that. So we can set $\alpha$ at .05 if we like, giving us critical regions of .025, or two and a half percent, at either end of the distribution. Then we can find the corresponding $z$-score cutoffs in the unit normal table, and we find that that corresponds to $z$-scores of $\pm 1.96$.
+
+{{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.92,"to":2.0,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.92 to 2.00, with the area to the right of z = 1.96, .0250, highlighted." >}}
 
 Next, we collect and analyze our data. We already did this earlier. Plugging in all the values to the $z$-score equation, remembering that our denominator now is the standard error of the mean, we got a $z$-score of $-3.29$.
 

@@ -4,6 +4,7 @@ interactive-scripts:
   - likert-helper
   - make-inferential-diagram
   - variability-table-generator
+  - critical-table-generator
   - distribution-generator
   - graph-generator
 ---
@@ -104,7 +105,7 @@ So what is that? Well, you know that $s^2$ usually refers to a variance, and thi
 
 So essentially the pooled variance is just a weighted average of the two samples' variances. And we calculate it by dividing the sum of each sample's sum of squared deviations by the sum of the samples' degrees of freedom. Remember, sum of squares divided by degrees of freedom gives us the average squared deviation for a sample — its variance. So here we're pooling all the sums of squares together and effectively weighting them by sample size, each sample's degrees of freedom, because bigger samples, with higher degrees of freedom, provide more accurate estimates of population parameters.
 
-Another form we could put this equation in is degrees of freedom multiplied by the sample variance for each sample, added together in the numerator, and degrees of freedom in the denominator. That is algebraically equivalent to the simpler looking sums of squares version, because $SS$ is equal to variance multiplied by degrees of freedom. So this version of the equation can just be a bit more useful if we've already calculated the samples' variances and we can't be bothered working out their sums of squares separately. For example, if we're working in R, there's a function to calculate variance, but there isn't one for sums of squares, so it might just be easier to work with this version of the equation.
+Another form we could put this equation in is degrees of freedom multiplied by the sample variance for each sample, added together in the numerator, and degrees of freedom in the denominator. That is algebraically equivalent to the simpler looking sums of squares version, because $SS$ is equal to variance multiplied by degrees of freedom. So this version of the equation can just be a bit more useful if we've already calculated the samples' variances and we can't be bothered working out their sums of squares separately.
 
 ### Putting it all together
 
@@ -130,7 +131,9 @@ To be long-winded about it, the total degrees of freedom for an independent samp
 
 So let's say for our little example here, we're going to have just five people in each group. That means that the degrees of freedom for each sample is four. So four plus four is eight. Or to use the more concise way of thinking about it, we have ten people in our study in total, so the total degrees of freedom is ten minus two, or eight.
 
-So we decide on $\alpha$. For our purposes, we'll use the traditional .05. And we look up the $t$ distribution with eight degrees of freedom in a table or using R, and we find that the critical $t$ score that cuts off the highest and lowest 5% of the distribution is 2.306.
+So we decide on $\alpha$. For our purposes, we'll use the traditional .05. And we look up the $t$ distribution with eight degrees of freedom in the $t$ table, and we find that the critical $t$ score that cuts off the highest and lowest 5% of the distribution is 2.306.
+
+{{< interactive-figure independentTCriticalTable makeTTable options='{"title":"t critical values (excerpt)","df":{"from":6,"to":10},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":false,"selectedTail":"two","selected":{"df":8,"tail":"two","alpha":0.05}}' fallback="Excerpt of the t critical-value table for df 6 to 10, with the two-tailed alpha .05 value for df = 8, 2.306, highlighted." >}}
 
 ### Step 3: Calculate the test statistic
 
@@ -219,8 +222,6 @@ $$df = \frac{(\frac{s_1^2}{n_1}+\frac{s_2^2}{n_2})}
 }$${#eq-df-adjustment}
 
 Now, this is not an equation that you have to know or really to understand, but I like to show it because it has this nice cascading quality — it just looks nice to me. But basically it adjusts the degrees of freedom for the test so that it's no longer $N - 2$ but whatever this equation works out to. This compensates for the inequality of the sample variances, and we won't get any farther into the weeds on this than that.
-
-But you should know that when you run a $t$ test in R using the `t.test` function, it will automatically apply this correction by default. If you want to override that behavior, you'll have to specify `var.equal = TRUE` as an argument within the function to let R know that you are indeed assuming that the homogeneity of variances assumption has been met and that you'd just like to use $N - 2$ as your degrees of freedom. If you forget to specify this argument, or if you specify it as `FALSE`, then the test will still work. You'll just see a different value of degrees of freedom — it'll probably be a strange looking decimal.
 
 ## Confidence Intervals
 

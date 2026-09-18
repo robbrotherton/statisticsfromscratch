@@ -4,6 +4,7 @@ interactive-scripts:
   - normal-comparison-tutorials
   - statistical-power
   - distribution-generator
+  - critical-table-generator
   - graph-generator
   - bee-swarm
 ---
@@ -244,7 +245,9 @@ The gray area under the alternative curve lies between the critical boundaries. 
 
 We'll work through calculating power both visually and mathematically. Visually, here's our null hypothesis distribution with critical regions highlighted red. As you know by now, these critical regions are the regions of the sampling distribution that will cause us to reject the null hypothesis. So to think about statistical power, we need to imagine what the alternative hypothesis distribution with its different mean would look like, and how it overlaps with the null distribution. Specifically, what proportion of sample means for the alternative hypothesis distribution fall within the critical regions of the null distribution and will cause us to reject the null hypothesis? That is the power of the test, the region shaded violet here.
 
-This is slightly complicated to think about. So we'll work through it step by step. First, we focus on the null distribution. We need to determine the critical $z$ scores that define those red critical regions. Since we're dealing with a normal distribution, we know that we can use the `qnorm()` function in R to find those scores. So let's say our $\alpha$ is .05. We'd find critical $z$ scores of $\pm 1.96$.
+This is slightly complicated to think about. So we'll work through it step by step. First, we focus on the null distribution. We need to determine the critical $z$ scores that define those red critical regions. Since we're dealing with a normal distribution, we know that we can use the unit normal table to find those scores. So let's say our $\alpha$ is .05. We'd find critical $z$ scores of $\pm 1.96$.
+
+{{< interactive-figure powerCriticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.92,"to":2.0,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.92 to 2.00, with the area to the right of z = 1.96, .0250, highlighted." >}}
 
 The next step is to determine what original sample means those critical $z$ scores correspond to. That requires knowing the null distribution's mean and variability. So let's say the population mean is 50 with a standard deviation of 10. We know from the central limit theorem that this sampling distribution will also have a mean of 50, and its variability, the standard error of the mean, is found by dividing the standard deviation by the square root of the sample size. So let's say our sample size is 25.
 
@@ -262,7 +265,9 @@ Now we need to work out what $z$ scores correspond to the sample means we just w
 
 {{< include quizzes/09-power-alternative-means.qmd >}}
 
-So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using R, we subtract the cumulative probability at the lower boundary from the cumulative probability at the upper boundary: `pnorm(-0.54) - pnorm(-4.46)`. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.54$ is the same as the area to the right of $z = 0.54$, which the table gives as .2946, and the area to the left of $z = -4.46$ is so far out in the tail that it rounds to .0000: $.2946 - .0000 = .2946$. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+
+{{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.5,"to":0.58,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.54,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.50 to 0.58, with the area to the right of z = 0.54, .2946, highlighted." >}}
 
 And so finally we can work out the statistical power of the test — the chances of correctly rejecting the null hypothesis — by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
 
