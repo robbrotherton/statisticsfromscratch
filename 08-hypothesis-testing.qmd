@@ -1,6 +1,7 @@
 ---
 title: "Hypothesis Testing"
 interactive-scripts:
+  - normal-comparison-tutorials
   - distribution-generator
   - make-inferential-diagram
 ---
@@ -134,21 +135,44 @@ Here, we need to introduce the terminology of $\alpha$ and $p$-values. The Greek
 
 So $\alpha$ is our stated cutoff. It can be any value we like, but by convention, the field of psychology usually uses an alpha level of .05, meaning the most extreme five percent of possible sample statistics. So if our sample's $p$-value is less than $\alpha$, we call it a statistically significant result, and we reject the null hypothesis. So when you see $p < .05$ in a published journal article, this is what they're referring to. What we're doing is dividing the distribution of sample means into two parts: sample means that are likely and sample means that are unlikely, in both cases assuming that the null hypothesis is true.
 
-To show this idea visually, here's a normal curve with the top five percent shaded, illustrating the example of choosing $\alpha = .05$. We talk about this proportion we're defining as unlikely as the "critical region." If we observe a sample mean in the critical region, it's unlikely enough that we'll reject the null hypothesis.
-
-{{< interactive-figure alphaCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"normal","style":"minimal","xAxis":true,"xDomain":[-4,4],"shade":{"tail":"right","alpha":0.05},"animate":true,"labels":{"x":"z"}}' fallback="Normal curve with the top five percent shaded as the critical region." >}}
-
-This is where the percentile language we introduced for the median becomes useful again. In this one-tailed example, the point that cuts off the top five percent is the 95th percentile: 95 percent of the null hypothesis distribution lies below it, and five percent lies above it. Alpha describes the area we've decided to call unlikely. The corresponding percentile identifies the boundary of that area, which we'll call the **critical value**.
+The **critical region** contains the sample statistics that would lead us to reject the null hypothesis. Its boundary is the **critical value**. For an upper-tailed test with $\alpha = .05$, for example, the critical value is the 95th percentile of the null distribution: 95 percent lies below it, and five percent lies above it.
 
 ### One-Tailed and Two-Tailed Tests
 
 We don't have to have just one critical region. If we do, it's called a one-tailed test, because our critical region is in one tail of the distribution. But we can have a two-tailed test where we specify critical regions at both extremes. If we do this, we're dividing our chosen $\alpha$ into two. If $\alpha$ is .05, or five percent, then by having a two-tailed hypothesis test, we're dividing that five percent between the two tails of the distribution, giving two and a half percent at each end that will cause us to reject the null hypothesis.
 
-{{< interactive-figure twoTailedCriticalRegions makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"normal","style":"minimal","xAxis":true,"xDomain":[-4,4],"shade":{"tail":"two","alpha":0.05},"animate":true,"labels":{"x":"z"}}' fallback="Normal curve with 2.5 percent shaded in each tail for a two-tailed test." >}}
-
 In percentile terms, the two critical values are at the 2.5th and 97.5th percentiles. The middle 95 percent of the null hypothesis distribution lies between them, leaving the most extreme five percent outside them.
 
 Whether we want a one- or two-tailed test depends on how we stated our hypotheses in step one. We talk about directional or non-directional hypotheses. With one-tailed or directional hypotheses, the researcher has a specific prediction about the direction of the treatment effect and specifies in advance that they are looking for either an increase or decrease. With non-directional tests, we're just looking for a difference in either direction. Again, the main point of step two is that we're determining up front what kind of sample statistics would look sufficiently unlikely under the null hypothesis that we will reject that null hypothesis.
+
+::::: {#act-alpha-critical-regions .callout-tip .interactive .with-controls}
+## Explore alpha and critical regions
+
+{{< interactive-figure alphaTutorial makeAlphaTutorial fallback="Explore alpha and critical regions. Use the accompanying steps for an explanation." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Two tails" data-action='{"alpha":0.05,"tail":"two","z":-1.8}'}
+The curve shows the sampling distribution of $z$ when the null hypothesis is true. With $\alpha = .05$ split between two tails, the critical values are about $-1.96$ and $1.96$. The shaded regions together contain five percent of the area. Our hypothetical sample has $z = -1.8$, so it falls just short of the lower critical region.
+:::
+
+::: {.tutorial-step data-title="A stricter cutoff" data-action='{"alpha":0.01,"tail":"two","z":-1.8}'}
+Reduce alpha to $.01$. The critical regions shrink, and their boundaries move farther from zero, to about $\pm 2.58$. We now require a more extreme result to reject the null. Notice what hasn't changed: the observed $z$ and its $p$-value. Changing our decision criterion doesn't change the evidence in the sample.
+:::
+
+::: {.tutorial-step data-title="A lower tail" data-action='{"alpha":0.05,"tail":"left","z":-1.8}'}
+Now compare a plan that put all of $\alpha = .05$ in the lower tail. Its critical value is about $-1.64$, so $z = -1.8$ would lead us to reject the null. A lower-tailed test is relevant when the prespecified alternative predicts a decrease, such as faster reaction times. We're comparing possible plans here; we don't choose the direction after seeing the result.
+:::
+
+::: {.tutorial-step data-title="An upper tail" data-action='{"alpha":0.05,"tail":"right","z":-1.8}'}
+An upper-tailed plan puts the same five percent at the other end. Our negative $z$ doesn't support that alternative, and its upper-tailed $p$-value is large. The direction determines which results count as evidence against the null. It changes both the critical region and the calculation of $p$.
+:::
+
+::: {.tutorial-step data-title="Try it" data-action='{"controls-open":true,"alpha":0.05,"tail":"two","z":-1.8}'}
+Try changing alpha while keeping the observed $z$ fixed. Then move $z$ across a critical boundary. Crossing into the shaded region and getting $p < \alpha$ are two ways of reaching the same decision. When the null is true and the test's assumptions hold, alpha is also the long-run probability of rejecting it by mistake. It isn't the probability that this particular conclusion is wrong.
+:::
+
+::::
+:::::
 
 ### Step 3: Collect and Analyze the Data
 

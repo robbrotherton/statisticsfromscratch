@@ -1,6 +1,7 @@
 ---
 title: "Statistical Power"
 interactive-scripts:
+  - normal-comparison-tutorials
   - statistical-power
   - distribution-generator
   - graph-generator
@@ -30,7 +31,7 @@ The trouble is, very small differences might be real, but not very important to 
 
 A common measure of effect size is Cohen's $d$ or difference score. Again, its purpose is to quantify the absolute magnitude of a treatment effect independent of sample size. And it does this by dividing the difference between means by the population standard deviation. 
 
-$$ \text{Cohen's } d = \frac{\text{mean difference}}{\text{standard deviation}} = \frac{M - \mu}{\sigma} $$ {#eq-cohens-d}
+$$ \begin{aligned} d &= \frac{\text{mean difference}}{\text{standard deviation}} \\[6pt] &= \frac{M - \mu}{\sigma} \end{aligned} $$ {#eq-cohens-d}
 
 So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability. The equation comes in slightly different forms for different tests, but for the $z$ test, it is the mean difference over the standard deviation, or our treated sample mean minus the original population mean divided by the population standard deviation $\sigma$. Notice that while the standard error, $\sigma_M$, varies with sample size, the population standard deviation, $\sigma$, does not. It is what it is. So Cohen's $d$ is independent of sample size.
 
@@ -39,9 +40,7 @@ So effect size is fairly easy to calculate. As for how to interpret it, Cohen ou
 For a beautiful interactive visualization of what different values of Cohen's $d$ actually look like, spend some time with [Kristoffer Magnusson's effect-size visualization](https://rpsychologist.com/cohend/).
 
 
-### Cohen's $d$
-
-One of the more straightforward and commonly used measures of effect size is Cohen's $d$. The $d$ stands for "difference". The purpose of Cohen's $d$ is to quantify the absolute magnitude of difference between the two means. And it does this by dividing the difference between means by the population standard deviation. So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability.
+### Effect size and significance
 
 Allow me to demonstrate the difference between significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost children's SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$ test would be an appropriate hypothesis test.
 
@@ -70,66 +69,34 @@ So based on the results of the significance test, we might be tempted to invest 
 
 ### Interpreting Effect Size
 
-Here's a very small effect size. The two curves represent the original and the treated populations. We're saying for the sake of argument that the dashed treated curve really does have a higher population mean than the original population, but it's only a very small difference. And for practical purposes, it might not be very meaningful to us.
+What does a difference of half a standard deviation actually look like? Here, we'll picture two populations of individual scores. For simplicity, both distributions are normal and have the same standard deviation. Moving one mean changes the effect size while leaving the variability within each population alone.
 
-{{< interactive-figure effectSizeSmall makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0,"color":"var(--sfs-null-color, currentColor)"},{"mean":0.2,"color":"var(--sfs-power-color, #7654b5)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.2"}}' fallback="Two nearly overlapping normal curves representing a small effect size of 0.2." >}}
+::::: {#act-cohens-d .callout-tip .interactive .with-controls}
+## Explore Cohen's d
 
-This graph shows a bigger effect size.
+{{< interactive-figure effectSizeTutorial makeEffectSizeTutorial fallback="Explore Cohen's d. Use the accompanying steps for an explanation." >}}
 
-{{< interactive-figure effectSizeMedium makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0,"color":"var(--sfs-null-color, currentColor)"},{"mean":0.5,"color":"var(--sfs-power-color, #7654b5)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.5"}}' fallback="Two normal curves separated by half a standard deviation, a medium effect size." >}}
+:::: {.callout-footer}
+::: {.tutorial-step data-title="A small difference" data-action='{"d":0.2,"overlap":false}'}
+The dashed population has a mean just $0.2$ standard deviations above the solid one. That's the distance Cohen called a small effect. We're picturing a population difference here; the $d$ we calculate from sample data is an estimate of that difference. These curves show individual scores, not the sampling distributions of sample means.
+:::
 
-And this one shows a bigger effect size still.
+::: {.tutorial-step data-title="A larger difference" data-action='{"d":0.5,"overlap":false}'}
+At $d = 0.5$, the means are half a standard deviation apart. The dashed curve has moved, but neither curve has narrowed. That's the idea behind standardizing the difference: we're asking how far apart the means are relative to the variability among individual scores. We haven't changed the sample size or calculated a significance test.
+:::
 
-{{< interactive-figure effectSizeLarge makeDistributionGraph options='{"distribution":"normal","distributions":[{"mean":0,"color":"var(--sfs-null-color, currentColor)"},{"mean":0.8,"color":"var(--sfs-power-color, #7654b5)","dashed":true}],"legend":false,"xDomain":[-3.5,4],"style":"minimal","animate":true,"labels":{"x":"d = 0.8"}}' fallback="Two normal curves separated by 0.8 standard deviations, a large effect size." >}}
+::: {.tutorial-step data-title="Large still overlaps" data-action='{"d":0.8,"overlap":true}'}
+Now set $d = 0.8$, Cohen's rough benchmark for a large effect, and shade the area shared by the two curves. They still overlap by about 69 percent! A substantial difference between means can coexist with a lot of individual variation. Knowing which population a person belongs to wouldn't tell us exactly what their score is.
+:::
 
-You can see how as effect size increases the magnitude of the differences is bigger and probably much more interesting to us.
+::: {.tutorial-step data-title="Explore the overlap" data-action='{"controls-open":true,"d":0.8,"overlap":true}'}
+Move the slider toward zero, then toward larger differences. The shared area shrinks as the means move apart. This percentage describes the area under both curves, relative to the area under either one; it isn't the percentage of people unaffected by a treatment. And it depends on the normal, equal-SD shapes we're using here. An effect size alone doesn't determine the overlap for every possible pair of distributions.
+:::
 
-As for how to interpret Pearson's $r$ as a measure of effect size, you might remember that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, Cohen was also familiar with Pearson's $r$ and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb and they have been called into question. Cohen himself said that these rules of thumb should be used only reluctantly and when no better basis was available. He even told friends that he regretted having suggested them at all.
+::::
+:::::
 
-There's a great recent paper by @funder2019evaluating that looked at what effect sizes are actually typically seen across a wide range of psychological studies, and they suggested these evidence-based alternative interpretive criteria based on actual data. They suggest that an $r$ of .05 indicates an effect that is very small for the explanation of single events, but potentially consequential over time. An effect size $r$ of .1 indicates an effect that is still small at the level of single events, but potentially more ultimately consequential. An effect size $r$ of .2 indicates a medium effect that is of some explanatory and practical use, even in the short run, and therefore even more important. An effect size $r$ of .3 indicates a large effect that is potentially powerful in both the short and the long run. A very large effect size $r$ of .4 or greater, in the context of psychological research, is likely a gross overestimate, the authors argued, that will rarely be found in a large sample or in a replication.
-
-So from this you can see how context-dependent our interpretation of effect size should be. If you're a psych major, I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when your professor tells you about some experimental effect, ask them what was the effect size. If they can't tell you, you should be a little bit skeptical.
-
-For building an intuitive feel for what correlations of different sizes actually look like, spend some time with [Kristoffer Magnusson's interactive correlation visualization](https://rpsychologist.com/correlation/).
-
-
-### $r^2$: Proportion of Variance Explained
-
-Cohen's $d$ is not the only measure of effect size. Another is $r^2$. This is a way of quantifying the proportion of variability in the data attributable to the treatment effect. In other words, this is a way of thinking about different sources of variability in the data. We'll be doing a lot of this in future lectures, so it's worth getting acquainted with the idea now.
-
-One source of variability is the treatment effect. We think that it increased or decreased scores from the original population mean — in other words, the treatment made the scores vary from the expected mean. Another source of variability is just the general messiness in the data: some people scoring a bit higher or lower because of their abilities or mood or whatever — anything that might make scores vary other than the pure treatment effect.
-
-So $r^2$ tries to separate those different sources of variability. It assumes that the treatment adds or subtracts a constant to every score. Like, if we find a treatment effect of one point on a scale of 1 to 5, we know that in reality it might have boosted one person's score by two points and another person's score by one point; another person might not have been affected at all. But for mathematical purposes, we just assume that the treatment added one point to everyone's score, because on average, that's what happened. $r^2$ separates that variability — the one-point treatment effect from the overall natural variability between scores.
-
-### Calculating $r^2$: A Simple Example
-
-Going through a simple example: suppose we're using our five-point happiness scale. We think the population mean should be three because the scale is designed with that as the average. But suppose we record four people's scores — 2, 4, 5, and 5 — and we find this distribution. The sample mean is $M = 4$, one point above the population mean of $\mu = 3$ that the null hypothesis predicts.
-
-{{< interactive-figure rSquaredBlocks makeGraph options='{"type":"block","data":[2,4,5,5],"xDomain":[0.5,5.5],"xTickValues":[1,2,3,4,5],"labels":{"x":"Happiness score","y":"Frequency"}}' fallback="Block histogram of the four scores 2, 4, 5, and 5." >}}
-
-If we want to calculate $r^2$, the first step is to calculate the sum of squared deviations from the sample mean. This is exactly how we calculated sums of squares in the past. Doing this quantifies the variability in the data, excluding any treatment effect. That's because the treatment effect refers specifically to any overall departure from the null hypothesis predicted population mean; by calculating deviations from the sample mean, we're ignoring that expected population mean, and so we're ignoring any treatment effect. So we could call this the sum of squared deviations, or $SS_\text{within treatment}$. For this example, we have deviations of $-2$, $0$, $1$, and $1$. Squaring them and adding them up, we get an answer of six.
-
-Step two is to calculate the total variability in the data, including any treatment effect. We do this by calculating the sum of squared deviations again, but this time as deviations from the null hypothesis mean rather than the sample mean. This way, we are capturing any departure from that predicted mean due to any treatment effect, plus we're still capturing the same standard variability between scores. We can call this the sum of squared deviations, or $SS_\text{total}$. For this example, you can see the deviations are a bit larger on the whole; squaring them and summing them up, we get a total of ten.
-
-<!-- [Possible typo: "time" in original audio was likely "ten"] -->
-
-Step three: we can calculate the sum of squared deviations associated with the treatment effect alone. We don't do this directly from the scores. We find it by subtracting the sum of squares within treatment from the sum of squares total. Whatever is left over must be attributable to the treatment effect. So here we take six from ten, giving an answer of four.
-
-And finally, we can calculate $r^2$ by dividing the sum of squares treatment by the sum of squares total, to get the variability due to the treatment effect as a proportion of the total variability in the data. For this little data set, we get a ratio of four over ten for an answer of 0.4. In other words, 40% of the variability in these scores is attributable to the treatment effect — the overall deviation of scores from our expected population mean of three.
-
-### Computing $r^2$ from $t$
-
-Luckily, we don't necessarily have to go through that whole rigmarole just to calculate $r^2$. If we already calculated the $t$ statistic for the sample, we can compute $r^2$ using this equation:
-
-$$r^2 = \frac{t^2}{t^2 + df}$$
-
-This works for any kind of $t$ statistic, whether it's the single sample $t$ test we're using here or the independent or related sample $t$ tests that we'll move on to in the next lectures.
-
-Like with Cohen's $d$, there are some rules of thumb for interpreting $r^2$. Generally, an $r^2$ of 0.01 (1% of variance) is considered a small effect; 0.09 (9% of variance explained) is considered medium; and 0.25 (25% of the variance being attributable to the treatment) is considered a large effect — though, as with Cohen's $d$, these are rules of thumb and should not be considered appropriate in all circumstances.
-
-
-{{< include quizzes/10-confidence-intervals-cohens-d.qmd >}}
-{{< include quizzes/10-confidence-intervals-r-squared.qmd >}}
+So the labels *small*, *medium*, and *large* need some care. Whether a difference matters depends on what we're measuring, what it costs to produce the change, and what its consequences are. A small difference can matter a great deal when it affects many people or accumulates over time. We'll return to some concrete examples later in this chapter.
 
 ## Errors in Hypothesis Testing
 
@@ -239,25 +206,33 @@ There are two possible outcomes: either we fail to reject the null hypothesis, m
 
 ### Calculating Power
 
-::::: {.callout-tip .interactive}
+::::: {#act-calculating-power .callout-tip .interactive .with-controls}
 ## Explore statistical power
 
-{{< interactive-figure statisticalPower makeStatisticalPowerDiagram fallback="Interactive statistical-power diagram with null and alternative distributions." >}}
+{{< interactive-figure statisticalPower makeStatisticalPowerDiagram options='{"mu":50,"sigma":10,"n":25,"d":0.5,"alpha":0.05,"showAlt":false,"axisZNull":true,"axisRaw":false}' fallback="Explore statistical power. Use the accompanying steps for an explanation." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-action='{"show-H1":true,"H1-z-scores":false,"raw-scores":false,"effect-size":0.5,"animate":false}'}
-Placeholder text. Do not remove.
+::: {.tutorial-step data-title="The null" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":false,"h0-z":true,"h1-z":false}'}
+Start with a null population mean of 50, a population SD of 10, and samples of 25. The standard error is $10 / \sqrt{25} = 2$. This curve shows sample means under the null, labeled in $z$ units. For a two-tailed test with $\alpha = .05$, the critical $z$ values are about $\pm 1.96$.
 :::
 
-::: {.tutorial-step data-action='{"show-H1":true,"raw-scores":false,"H1-z-scores":true,"effect-size":0.5,"animate":true}'}
-Text for step 2. Some params change.
+::: {.tutorial-step data-title="Critical means" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":true,"h0-z":true,"h1-z":false}'}
+On the raw-score ruler, those same boundaries are $50 - 1.96(2) = 46.08$ and $50 + 1.96(2) = 53.92$. Sample means outside these boundaries lead us to reject the null. Keep those raw-score boundaries in mind: we will use the same decision rule when we consider a population where the null is false.
+:::
 
-After step, {{< interactive-math "\\beta =" statisticalPower.beta format=".2f" >}} and power is {{< interactive-math "1 - \\beta =" statisticalPower.power format=".2f" >}}.
+::: {.tutorial-step data-title="A specified alternative" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":false}'}
+Suppose the true population mean is 55 instead. That's a difference of five points, or $d = 0.5$, because the population SD is 10. Samples of 25 from this alternative population have a sampling distribution centered on 55, still with a standard error of 2. The violet areas show the sample means that would cross the null's rejection boundaries.
+:::
 
+::: {.tutorial-step data-title="The alternative ruler" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+Now read the boundaries relative to the alternative mean. The lower one is $(46.08 - 55) / 2 = -4.46$ standard errors below it; the upper one is $(53.92 - 55) / 2 = -0.54$. The boundaries are still at the same raw scores. We've changed the ruler we use to describe them.
+:::
+
+::: {.tutorial-step data-title="Misses and detections" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+The gray area under the alternative curve lies between the critical boundaries. These samples fail to reject a false null: $\beta \approx .295$. The violet area outside the boundaries is power: $1 - \beta \approx .705$. So this design detects this particular effect about 71 percent of the time over repeated studies. Both rejection tails count, though the far-left contribution here is tiny.
 :::
 
 ::::
-
 :::::
 
 We'll work through calculating power both visually and mathematically. Visually, here's our null hypothesis distribution with critical regions highlighted red. As you know by now, these critical regions are the regions of the sampling distribution that will cause us to reject the null hypothesis. So to think about statistical power, we need to imagine what the alternative hypothesis distribution with its different mean would look like, and how it overlaps with the null distribution. Specifically, what proportion of sample means for the alternative hypothesis distribution fall within the critical regions of the null distribution and will cause us to reject the null hypothesis? That is the power of the test, the region shaded violet here.
@@ -280,7 +255,7 @@ Now we need to work out what $z$ scores correspond to the sample means we just w
 
 {{< include quizzes/09-power-alternative-means.qmd >}}
 
-So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using R, we use the `pnorm()` function and subtract the higher $z$ score from the lower one. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using R, we subtract the cumulative probability at the lower boundary from the cumulative probability at the upper boundary: `pnorm(-0.54) - pnorm(-4.46)`. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
 
 And so finally we can work out the statistical power of the test — the chances of correctly rejecting the null hypothesis — by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
 
@@ -339,17 +314,13 @@ Researchers could calculate the power of a study before beginning their research
 
 ### Power in Context: Real-World Examples
 
-Since this probably still sounds quite abstract, it's worth putting it in the context of some real effects. The paper referenced at the bottom of the slide here estimated, based on well-established effect sizes, the number of participants that would be required to reliably detect some real differences if we didn't already know that they were real. @simmons2013life looked at...
+To put these ideas in context, @simmons2013life compared some familiar differences and the sample sizes needed to detect them with 80 percent power.
 
-| Grouping variable | Dependent Variable | Cohen's $d$ | Required $n$ |
-|-------------------|--------------------|---------:|----------:|
-| Gender | Height | 1.85 | 6 |
-| Liberal / Conservative | How important is social equality? | 0.69 | 34 |
-| Do you like eggs? [yes / no] | How often do you eat egg salad? | 0.58 | 48 |
-| Are you a smoker? [yes / no] | What is the likelihood of a smoker dying from a smoking-related illness? | 0.33 | 144 |
-| Do you prefer science or art? | How many planets can you name correctly? | 0.07 | 3,669 |
+These examples compare two groups. We haven't introduced the test for that design yet, but we can still picture the standardized distance between their means. Select a row to see its effect size. The curves are illustrations using normal distributions with equal SDs, not reconstructions of the original data. The comparison mean is placed to the right to show the size of the difference; this doesn't identify which named group scored higher.
 
-: Some required sample sizes to detect real effects with 80% power, based on Cohen's $d$ effect sizes, from @simmons2013life.
+{{< interactive-figure effectSizeExamples makeEffectSizeTutorial options='{"d":1.85,"overlap":true,"examples":[{"group":"Gender","label":"Height","d":1.85,"n":"6"},{"group":"Liberal / Conservative","label":"Importance of social equality","d":0.69,"n":"34"},{"group":"Like eggs / dislike eggs","label":"Frequency of eating egg salad","d":0.58,"n":"48"},{"group":"Smoker / nonsmoker","label":"Estimated risk of smoking-related death","d":0.33,"n":"144"},{"group":"Prefer science / prefer art","label":"Number of planets named correctly","d":0.07,"n":"3,669"}]}' fallback="Selectable effect-size examples, from d = 1.85 for height to d = 0.07 for naming planets." >}}
+
+The effect sizes and sample sizes shown are the examples reported by @simmons2013life for 80 percent power; $n$ is **per group**. The figure displays the effect sizes, not a new power calculation. In particular, these sample sizes don't belong to the one-sample $z$ test we used above.
 
 So, for example, given the real average difference between men and women's heights, you'd need around twelve people, six men and six women, to have sufficient statistical power to detect it. The difference between men and women's heights is very large, with a Cohen's $d$ of around 1.85. So you don't need many participants to reliably detect it.
 

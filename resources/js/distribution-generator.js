@@ -2892,9 +2892,25 @@ sfsDistributionObserveWidth = (rootNode, opts, redraw) => {
 }
 
 makeDistributionGraph = (opts = {}) => {
-  const rootNode = sfsDistributionRenderGraph(opts);
-  if (opts.responsive === false || !rootNode) return rootNode;
-  sfsDistributionObserveWidth(rootNode, opts, sfsDistributionRenderGraph);
+  let current = Object.assign({}, opts);
+  const rootNode = sfsDistributionRenderGraph(current);
+  if (!rootNode) return rootNode;
+
+  // Interactive callers reuse the same renderer and width observer. Keep the
+  // latest options across resizes rather than restoring the initial scene.
+  const redraw = (changes) => {
+    current = Object.assign({}, current, changes, { rootNode });
+    return sfsDistributionRenderGraph(current);
+  };
+  rootNode.update = (changes = {}) => {
+    if (window.interactiveFigure) window.interactiveFigure.cancelTransitions(rootNode);
+    return redraw(Object.assign({ animate: false }, changes));
+  };
+  if (opts.responsive !== false) {
+    sfsDistributionObserveWidth(rootNode, opts, (layout) => redraw({
+      width: layout.width, height: layout.height, animate: layout.animate
+    }));
+  }
   return rootNode;
 }
 

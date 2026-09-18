@@ -79,6 +79,10 @@ local manifest = {
     file = "resources/js/critical-table-generator.js",
     deps = { "stat-helpers", "interactive-figure-tools" }
   },
+  ["normal-comparison-tutorials"] = {
+    file = "resources/js/normal-comparison-tutorials.js",
+    deps = { "distribution-generator" }
+  },
   ["statistical-power"] = {
     file = "resources/js/statistical-power.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }

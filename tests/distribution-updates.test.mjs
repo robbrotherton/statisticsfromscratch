@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import vm from 'node:vm';
+import test from 'node:test';
+const source = await readFile(new URL('../resources/js/distribution-generator.js',import.meta.url),'utf8');
+test('distribution updates preserve current scene and measured size across resize',()=>{
+ const context=vm.createContext({window:{}});vm.runInContext(source,context);
+ let resize,observations=0;const root={};const renders=[];
+ context.sfsDistributionRenderGraph=opts=>{renders.push(opts);return root;};
+ context.sfsDistributionObserveWidth=(_root,_opts,redraw)=>{observations++;resize=redraw;};
+ const graph=context.makeDistributionGraph({width:640,shade:[],animate:false});
+ resize({width:340,height:180,animate:false});
+ graph.update({distributions:[{mean:0},{mean:.8}],shade:{kind:'overlap'},ariaLabel:'Updated comparison'});
+ resize({width:720,height:380,animate:false,shade:[]});
+ assert.equal(observations,1);
+ assert.equal(renders.at(-2).width,340);
+ assert.equal(renders.at(-1).distributions[1].mean,.8);
+ assert.equal(renders.at(-1).shade.kind,'overlap');
+ assert.equal(renders.at(-1).ariaLabel,'Updated comparison');
+ assert.equal(renders.at(-1).width,720);
+ assert.equal(renders.at(-1).rootNode,root);
+});
