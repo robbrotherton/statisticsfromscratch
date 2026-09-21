@@ -19,7 +19,9 @@ We'll start this chapter by revisiting the idea of radioactive spider-bites affe
 
 Back in Chapter 5 we considered the possibility that a radioactive spider bite might have caused a difference in the reaction times of one individual. We supposed that following the bite, Peter Parker had a reaction time of 189 milliseconds on a test for which the general population had a mean of 284 milliseconds and a standard deviation of 50 milliseconds. We calculated his $z$-score to be $-1.9$. Assuming reaction times form a normal distribution, the probability of seeing a score this fast or faster is less than three percent.
 
-In other words, if Peter Parker's reaction time really came from the population of unbitten kids, we would only see a score this fast or faster about three times out of a hundred. People as fast as him are rare in the population, so it's correspondingly unlikely he'd just happen to be that fast by chance. His score gave us some reason to wonder whether the spider bite made a difference.
+In other words, we asked what we would expect if the spider bite had done nothing and Peter's reaction time still came from the population of unbitten kids. We would only see a score this fast or faster about three times out of a hundred. That didn't prove that the spider bite had changed his reaction time. But his score was unusual under the no-change explanation, which gave us some reason to doubt it.
+
+That calculation already contained the basic logic of a hypothesis test: if the spider bite had done nothing, what were the chances of seeing a reaction time this fast or faster?
 
 Still, it isn't entirely obvious that being bitten by a radioactive spider ought to *improve* your reaction time. It might slow you down, or merely give you a nasty bite. For now, let's remain open to a change in either direction. We'll return to why that matters when we distinguish one-tailed and two-tailed tests.
 
@@ -33,31 +35,27 @@ So say we have a sample of three kids, all bitten by radioactive spiders, and we
 
 ### The Logic of Hypothesis Testing
 
-Let's begin with a deliberately skeptical assumption: suppose the spider bites did nothing. More specifically, suppose the population of bitten kids has the same mean reaction time as the population of unbitten kids, 284 milliseconds. If that's true, our three Spider-People should behave like a random sample from a population with that mean. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls. This assumption that nothing changed will become our *null hypothesis*, though we'll introduce the terminology more formally in a moment.
+The move from one Spider-Man to a sample of Spider-People changes the calculation, but not the logic. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we need the sampling distribution to ask what sample means we would commonly see under that same no-change assumption.
 
-What we're doing when we run experiments, theoretically, is taking a sample from one population---the original population---and subjecting that sample to some kind of treatment. So then we produce descriptive statistics to describe the treated sample, and we make inferences about the population that treated sample represents. This is a purely hypothetical population. We're imagining that we could take every member of the original population and subject them all to our treatment. Then we'd have this new treated population. What would its mean be?
+So let's make the assumption explicit: suppose the spider bites did nothing. More specifically, suppose the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. If that's true, our three Spider-People should behave like a random sample from a population with that mean. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls. This assumption that nothing changed will become our *null hypothesis*, though we'll introduce the terminology more formally in a moment.
+
+What we're doing when we run an experiment, theoretically, is applying some treatment to a sample and using the result to make an inference about the population that treated sample represents. That treated population is hypothetical: we're imagining what would happen if we could give the same treatment to everyone. We can't observe its mean directly, so our sample mean is our clue.
 
 {{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
 
-What we're asking is whether the mean of that hypothetical treated population still looks like the original population mean. We put it in these terms---we're comparing population means---because, as usual, the sample itself isn't our ultimate concern. We know it's just one possible sample out of a vast array of possible samples. It's the population that we're interested in. And since we can't give the entire population our treatment, we have to use our one sample to make an inference about the population it represents.
+But here's the rub. Sample means vary due to sampling error, even when the population mean hasn't changed. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. It is the same basic question we asked about Peter: what are the chances of seeing a result this extreme if nothing actually happened?
 
-But here's the rub. If it appears as though the populations have different means, how do we know if the apparent difference is really due to a real treatment effect or if it's just that discrepancy between sample means we would expect due to sampling error alone? This is the crucial question addressed by inferential statistics and the hypothesis testing procedure.
-
-We'll answer that question by putting together everything we've learned so far. Let's walk through the general issues we face, so that we can formalize the procedure.
-
-First, moving from one Spider-Man to a sample of Spider-People brings us back to the problem of *sampling error*. Recall that sample statistics do not perfectly represent their corresponding population parameters. If we draw repeated samples from a population, the samples will all differ slightly from one another.
-
-So the situation facing us with a sample mean is slightly more complicated than the situation we faced with a single score. But only slightly! We have gathered all the tools we need over the last few chapters.
+The situation is slightly more complicated now because we're locating a sample mean among other possible sample means rather than locating one person among other individuals. But only slightly. We have all the tools we need.
 
 ### Putting It All Together
 
-First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. And for normally distributed scores, we can find the probability associated with any given range of scores using the unit normal table.
+First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. For normally distributed scores, we can then use the unit normal table to find how much of the population falls at least that far into the relevant tail. That's how we judged Peter's score against what we would expect if the bite had done nothing.
 
-Next, we learned that we can begin thinking about samples rather than individual scores by looking at a sampling distribution of the mean. That is, we construct a special kind of population which consists of every possible sample mean that a population can produce for a given sample size, like our samples of size $n = 2$ for this population of four people of different heights. Knowing all possible sample means allows us to determine probabilities. For example, the probability of means of 61 or less.
+Next, we learned that we can think about samples rather than individual scores by looking at a sampling distribution of the mean. This is a special kind of distribution consisting of every possible sample mean that a population can produce for a given sample size, like our samples of size $n = 2$ from the population of four people of different heights. It lets us do for a sample mean what the population distribution let us do for Peter's individual score: judge how common or uncommon it would be under our no-change assumption.
 
 And finally, we learned that we don't need to list every possible sample mean. The equations from Chapter 7 tell us the center and standard error of the sampling distribution from the population mean, population standard deviation, and sample size. The Central Limit Theorem tells us about its shape: if the population is normal, the sampling distribution of the mean is normal at any sample size; otherwise, it becomes approximately normal as the sample size increases. There is no magic sample size where that suddenly happens. Because our Spider-People sample contains only three observations, our calculation here relies on the simplifying assumption from Chapter 5 that reaction times follow a normal distribution.
 
-So all this comes together with the insight that now we're prepared to think about the probability of observing particular *sample statistics* when we have a population mean to test and know the population standard deviation. We can find the $z$-score for a sample mean using a modified $z$ equation:
+So now we're prepared to work out the probability of observing particular *sample statistics* when we have a population mean to test and know the population standard deviation. We can find the $z$-score for a sample mean using a modified $z$ equation:
 
 $$z = \frac{M - \mu_M}{\sigma_M}$$
 
@@ -69,7 +67,7 @@ $$z = \frac{M - \mu}{\sigma_M}$$
 
 ### From Individual Scores to Sample Means
 
-Thankfully, armed with the sampling distribution, it's not much of a leap to move from single scores to whole samples.
+Thankfully, armed with the sampling distribution, it's not much of a leap to move from single scores to whole samples. The two calculations ask the same question under the same no-change assumption. They simply locate different things in different distributions.
 
 First, let's put the calculation for Peter Parker's single score in front of us again, for old time's sake. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
 
@@ -101,7 +99,13 @@ Or to put it in terms of the inferential process diagram, we're asking whether t
 
 We've effectively just completed our first hypothesis test. A hypothesis is just something you suspect might be true about the world. We suspected that bitten people may have different reaction times than unbitten people. But we remained open to the possibility that the bites did nothing. We used that skeptical possibility as a working model and asked what it predicted. This is the *null hypothesis*.
 
-That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test. We used our knowledge of sampling distributions and probability to determine what kind of sample means would be common or uncommon if the population mean remained unchanged. Then we compared the $z$-score for our Spider-People's sample mean with that null distribution. The observed result was unusually far out in the tail, so it counted as evidence against the null hypothesis.
+Ronald A. Fisher was a British statistician and geneticist, and one of the central figures in the development of modern statistics. Among many other contributions, he helped develop and popularize significance testing and the use of null hypotheses in experimental research. In his 1935 book *The Design of Experiments*, he put the logic rather neatly:
+
+> “Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis.”
+>
+> ---R. A. Fisher, *The Design of Experiments* [@fisher1935design, p. 16]
+
+“Disproving” is stronger language than we'll usually use. A statistical result cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument. We work out what the null hypothesis predicts, then give the data a chance to contradict it. That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test. We used our knowledge of sampling distributions and probability to determine what kind of sample means would be common or uncommon if the population mean remained unchanged. Then we compared the $z$-score for our Spider-People's sample mean with that null distribution. The observed result was unusually far out in the tail, so it counted as evidence against the null hypothesis.
 
 ## The Four-Step Hypothesis Testing Procedure
 
@@ -113,11 +117,15 @@ Step one of the hypothesis testing procedure is to formally state our hypotheses
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
+Notice that the two hypotheses don't play symmetrical roles in this test. The null gives us a specific population mean: 284 milliseconds. Along with our other assumptions, that value defines a specific sampling distribution. It therefore gives us something we can test directly: if the population mean really is 284, how often would we get a sample mean this far from it or farther?
+
+The alternative hypothesis is less specific. It says that the mean is *not* 284, but that could mean 283, 250, 400, or any other value. It doesn't supply one alternative mean from which we could construct one alternative sampling distribution. So, in the significance test we're doing here, it is the null hypothesis that we test directly. The alternative tells us what counts as a departure from it---in this case, a difference in either direction.
+
+That point can be overstated. We *could* specify a particular alternative, such as $\mu_{\text{bitten}} = 250$. That would give us another sampling distribution to work with, and we'll need just such a specific alternative when we discuss statistical power in the next chapter. But our alternative here, $\mu_{\text{bitten}} \neq 284$, does not make one precise numerical prediction.
+
 The null doesn't have to say that two populations are identical in every imaginable respect. It makes a claim about the particular parameter we're testing---the population mean, in this case. In other statistical tests, the null might state that two treatment conditions have equal population means, or that there is no association between two variables. In broad terms, the null says that the particular effect or relationship we're testing is absent.
 
-The other side of the coin is the alternative hypothesis. For this two-tailed test, it says that the bitten population mean is different from 284 milliseconds, without specifying whether reaction times become faster or slower. We're going to ask how well our data fit the null model. A result that would be very unusual under that model gives us reason to reject it, though it doesn't prove the alternative hypothesis or establish what caused the difference.
-
-These two propositions are logical complements: the bitten population mean is either equal to 284 or it isn't. They can't both be true. Stating the hypotheses precisely ensures that the null model makes a prediction we can compare with data. The test won't reveal either proposition to be true or false with certainty, but it can tell us whether the data provide sufficient evidence to reject the null.
+These two propositions are logical complements: the bitten population mean is either equal to 284 or it isn't. They can't both be true. But that doesn't make the evidence perfectly symmetrical. We're going to ask how well our data fit the null model. A result that would be very unusual under that model gives us reason to reject it, though it doesn't prove any particular alternative or establish what caused the difference. And a result that isn't unusual under the null only means that we fail to reject it; it doesn't prove the null hypothesis true. The test won't reveal either proposition to be true or false with certainty, but it can tell us whether the data provide sufficient evidence to reject the null.
 
 So here are some examples based on some psychological effects we might be interested in. 
 
@@ -138,8 +146,6 @@ Or to take one more example, say we're interested in correlations and we think t
 - General research question: Is there an association between education and income? 🎓🤑
     - $H_0$: There is no association between education and income.
     - $H_1$: There is an association between education and income.
-
-<!-- [Note: Original lecture included an interactive element here.] -->
 
 We won't say much more about *formulating* hypotheses for this class. That's an issue for research methods. We'll focus more on what happens next: the statistical analyses used to test hypotheses. But if you really think about it, this should be by far the most important and effortful step of the entire research process. Formulating new, interesting, sensible, plausible, meaningful hypotheses is a demanding process. Even to begin to come up with reasonable and potentially insightful hypotheses requires familiarity with the existing research and theoretical perspectives on the phenomena you're interested in. But that's something you should go into in more detail in other classes as you address research methods and specialized topics within psychology.
 
@@ -225,8 +231,6 @@ $$\sigma_M = \frac{50}{\sqrt{3}} = 28.87 \qquad z = \frac{189 - 284}{28.87} = -3
 And since that is within our lower critical region, step four is to reject the null hypothesis. For this two-tailed test, we count results at least this far from the null mean in either direction, giving $p \approx .0010$. Since $p < \alpha$, we declare a statistically significant result. In plain language, the sample would be extraordinarily unusual if the population mean really remained 284 milliseconds. That gives us evidence that the mean changed. It does not, by itself, prove that the spider bites caused the change.
 
 ## Practice: CBT for OCD
-
-<!-- [Note: Original lecture included an interactive element here.] -->
 
 We'll end by having you perform your own hypothesis test. We're going back to the cognitive behavioral therapy example from Chapter 5, based on a study using the Dimensional Obsessive-Compulsive Scale to measure symptoms before and after treatment [@abramowitz2010docs].
 
