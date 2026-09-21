@@ -13,9 +13,39 @@ interactive-scripts:
 
 :::::::: {.content-visible when-profile="draft"}
 
-We'll start this chapter by taking stock of what we've learned so far: $z$-scores, the principles of probability, and the Central Limit Theorem. This puts us in a position to make the big leap that we've been working towards, to inferential statistics and hypothesis testing. We'll ask what is a hypothesis test, and we'll work through an example: the $z$-test.
+We'll start this chapter by revisiting the idea of radioactive spider-bites affecting reaction times. This time, though, we'll move beyond one unusually quick kid and consider a whole sample of Spider-People. That will present a problem that we'll solve using the tools we've picked up over the last few chapters: $z$-scores, probability, sampling distributions, and the Central Limit Theorem. By putting this all together, we'll complete our first hypothesis test. This will introduce us to some new ideas and terminology, including null and alternative hypotheses, critical regions, and $p$-values. We'll also introduce a formal four-step procedure for hypothesis testing that we'll use throughout the rest of the course.
 
-## Putting It All Together
+## Spider-Man revisited
+
+Back in Chapter 5 we considered the possibility that a radioactive spider bite might have caused a difference in the reaction times of one individual. We supposed that following the bite, Peter Parker had a reaction time of 189 milliseconds on a test for which the general population had a mean of 284 milliseconds and a standard deviation of 50 milliseconds. We calculated his $z$-score to be $-1.9$. Assuming reaction times form a normal distribution, that score corresponds to a probability of less than three percent.
+
+In other words, if Peter Parker's reaction time really came from the population of unbitten kids, we would only see a score this extreme about three times out of a hundred. People as fast as him are rare in the population, so it's correspondingly unlikely he'd just happen to be that fast by chance. The treatment, the spider bite, seemed to have caused a difference. His score looked a bit unusual, which we could take as evidence that he no longer belonged to that population.
+
+But real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
+
+![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen}
+
+So say we have a sample of three kids, all bitten by radioactive spiders, and we measure their reaction times. The *sample mean* is 189 milliseconds, the same as Peter Parker's individual score. But now we have a sample of three people, not just one. How does that change our analysis? Is it just a surprising as a single score of 189ms? More surprising? Less? Surprising *enough* to conclude that the treatment had an effect?
+
+<!-- put quiz here -->
+
+### The Logic of Hypothesis Testing
+
+What we're doing when we run experiments, theoretically, is taking a sample from one population---the original population---and subjecting that sample to some kind of treatment. So then we produce descriptive statistics to describe the treated sample, and we make inferences about the population that that treated sample likely came from. This is a purely hypothetical population. We're imagining that we could take every member of the original population and subject them all to our treatment. Then we'd have this new treated population. What would its characteristics be?
+
+{{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
+
+What we're asking is, does it look as though this sample came from a population that is different or the same as that original population? Has the treatment caused any difference? We put it in these terms---we're comparing these populations---because, as usual, we don't actually care about the sample. We know it's just one possible sample out of a vast array of possible samples drawn from the actual population. It's the population that we're interested in. And since it's a hypothetical population, because we can't give the entire population our treatment, we have to use our one sample to make an inference about the population it came from.
+
+But here's the rub. If it appears as though the populations have different means, how do we know if the apparent difference is really due to a real treatment effect or if it's just that discrepancy between sample means we would expect due to sampling error alone? This is the crucial question addressed by inferential statistics and the hypothesis testing procedure.
+
+We'll answer that question by putting together everything we've learned so far. Let's walk through the general issues we face, so that we can formalize the procedure.
+
+First, moving from one Spider-Man to a sample of Spider-People brings us back to the problem of *sampling error*. Recall that sample statistics do not perfectly represent their corresponding population parameters. If we draw repeated samples from a population, the samples will all differ slightly from one another.
+
+So the situation facing us with a sample mean is slightly more complicated than the situation we faced with a single score. But only slightly! We have gather all the tools we need over the last few chapters.
+
+### Putting It All Together
 
 First, let's cast our minds back to $z$-scores. We can calculate a $z$-score for any given value in a population using the population characteristics $\mu$ and $\sigma$: $z = \frac{X - \mu}{\sigma}$. See @eq-z-score-pop. This $z$-score describes that score's position in the population relative to the mean, in units of standard deviations. And for normally distributed scores, we can find the probability associated with any given range of scores using the unit normal table.
 
@@ -23,7 +53,7 @@ Next, we learned that we can begin thinking about samples rather than individual
 
 And finally, the Central Limit Theorem shows us that we don't need to know every possible sample mean. We can determine the characteristics of a sampling distribution just by knowing or estimating the population parameters $\mu$, the population mean, and $\sigma$, the population standard deviation. The Central Limit Theorem tells us what the center and variability of the distribution will be, as well as assuring us that it will be normally distributed if either the population itself is normal or our sample size is sufficiently large (by which we mean, for practical purposes, $n \geq 30$).
 
-So all this comes together with the insight that now we're prepared to think about the probability of observing particular *sample statistics* for any population for which we know the mean and standard deviation. We can find the $z$-score for a sample mean using a modified $z$ equation: 
+So all this comes together with the insight that now we're prepared to think about the probability of observing particular *sample statistics* for any population for which we know the mean and standard deviation. We can find the $z$-score for a sample mean using a modified $z$ equation:
 
 $$z = \frac{M - \mu_M}{\sigma_M}$$
 
@@ -34,26 +64,6 @@ $$z = \frac{M - \mu_M}{\sigma_M}$$
 Now, since $\mu_M$, the mean of the sampling distribution, is equal to $\mu$, the population mean, you'll often see this equation written using $\mu$ instead of $\mu_M$. The idea is the same.
 
 $$z = \frac{M - \mu}{\sigma_M}$$
-
-## The Problem of Sampling Error
-
-Before we embark on our first true hypothesis test, one last thing to remember. Recall that sampling error refers to the fact that sample statistics do not perfectly represent their corresponding population parameters. If we draw repeated samples from a stable population, the samples will all differ slightly from one another.
-
-So this brings us to the ultimate problem we need to confront. What we're doing when we run experiments, theoretically, is we're taking a sample from one population---the original population---and we're subjecting that sample to some kind of treatment. So then we produce descriptive statistics to describe the treated sample, and we make inferences about the population that that treated sample likely came from. This is a purely hypothetical population. We're imagining that we could take every member of the original population and subject them all to our treatment. Then we'd have this new treated population. What would its characteristics be?
-
-{{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
-
-What we're asking is, does it look as though this sample came from a population that is different or the same as that original population? Has the treatment caused any difference? We put it in these terms — we're comparing these populations — because, as usual, we don't actually care about the sample. We know it's just one possible sample out of a vast array of possible samples drawn from the actual population. It's the population that we're interested in. And since it's a hypothetical population, because we can't give the entire population our treatment, we have to use our one sample to make an inference about the population it came from.
-
-But here's the rub. If it appears as though the populations have different means, how do we know if the apparent difference is really due to a real treatment effect or if it's just that discrepancy between sample means we would expect due to sampling error alone? This is the crucial question addressed by inferential statistics and the hypothesis testing procedure.
-
-## Spider-Man revisited
-
-Let's put this in terms of the radioactive spider-bite scenario from Chapter 5. Remember, some kid is bitten by a spider, which is theoretically expected to induce unusually fast reaction times. We were able to work out Peter Parker's $z$-score to describe where he fell in the population distribution---the original, untreated population of unbitten kids. His score looked a bit unusual, which we could take as evidence that he no longer belonged to that population. People as fast as him are rare in the population, so it's correspondingly unlikely he'd just happen to be that fast by chance. The treatment, the spider bite, seemed to have caused a difference.
-
-But again, real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
-
-![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen}
 
 ### From Individual Scores to Sample Means
 
