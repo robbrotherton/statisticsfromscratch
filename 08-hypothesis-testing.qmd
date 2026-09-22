@@ -3,6 +3,7 @@ title: "Hypothesis Testing"
 interactive-scripts:
   - normal-comparison-tutorials
   - distribution-generator
+  - standardization-ruler
   - critical-table-generator
   - make-inferential-diagram
 ---
@@ -13,85 +14,94 @@ interactive-scripts:
 
 :::::::: {.content-visible when-profile="draft"}
 
-We'll start this chapter by revisiting the idea of radioactive spider bites affecting reaction times. This time, though, we'll move beyond one unusually quick kid and consider a whole sample of Spider-People. That will present a problem that we'll solve using the tools we've picked up over the last few chapters: $z$-scores, probability, sampling distributions, and the Central Limit Theorem. By putting them together, we'll complete our first hypothesis test.
+We'll start this chapter by revisiting the idea of radioactive spider bites affecting reaction times. This time, though, we'll move beyond one unusually quick kid and consider a whole sample of Spider-People. That will present a problem: how to determine how likely it is that our sample mean reflects a true change in the population mean. We'll solve it using the tools we've picked up over the last few chapters: $z$-scores, probability, sampling distributions, and the Central Limit Theorem. By putting them together, we'll complete our first hypothesis test.
 
 ## Spider-Man revisited
 
-Back in Chapter 5 we considered the possibility that a radioactive spider bite might have improved the reaction times of one individual. We supposed that following the bite, our test subject,Peter Parker, had a reaction time of 189 milliseconds on a test for which the general population had a mean of 284 milliseconds and a standard deviation of 50 milliseconds. We calculated his $z$-score to be $-1.9$. Assuming reaction times form a normal distribution, the probability of seeing a score this fast or faster is less than three percent.
+Back in Chapter 5 we considered the possibility that a radioactive spider bite might have improved the reaction times of one individual. We supposed that following the bite, our test subject, Peter Parker, had a reaction time of 189 milliseconds on a test for which the general population had a mean of 284 milliseconds and a standard deviation of 50 milliseconds. We calculated his $z$-score to be $z = \frac{189 - 284}{50} = -1.9$. Assuming reaction times form a normally distributed population, we could then used the unit normal table to find the proportion of scores as fast or faster than his, which turned out to be less than three percent. We decided his score seemed a bit unusual, and we wondered whether it might be evidence that the spider bite had changed his reaction time.
 
-In other words, we asked what we would expect if the spider bite had done nothing and Peter's reaction time still came from the population of unbitten kids. We would only see a score this fast or faster about three times out of a hundred. That didn't prove that the spider bite had changed his reaction time. But his score was unusual under the no-change explanation, which gave us some reason to doubt it.
+In other words, we asked how probable Parker's reaction time was under the assumption that it came from the population of unbitten kids---that the bite did not affect his reaction time. If we saw a score that was entirely unexceptional, we would have no reason to doubt that assumption. But if we saw a score that was very unusual, we would have reason to question it.
 
-That calculation already contained the basic logic of a hypothesis test: if the spider bite had done nothing, what were the chances of seeing a reaction time this fast or faster?
-
-Still, it isn't entirely obvious that being bitten by a radioactive spider ought to *improve* your reaction time. It might slow you down, or merely give you a nasty bite. For now, let's remain open to a change in either direction. We'll return to why that matters when we distinguish one-tailed and two-tailed tests.
-
-But real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
+That thought process already contained the basic logic of a hypothesis test: if the spider bite had done nothing, what were the chances of seeing a reaction time this fast or faster? But real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
 
 ![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen}
 
-So say we have a sample of three kids, all bitten by radioactive spiders, and we measure their reaction times. The *sample mean* is 189 milliseconds, the same as Peter Parker's individual score. But now we have a sample of three people, not just one. How does that change our analysis? Is it just as surprising as a single score of 189 ms? More surprising? Less? Surprising *enough* to count as evidence that the population mean changed?
+So say we find three kids, all bitten by radioactive spiders, and we measure their reaction times on the same test. Now the *sample mean* is 189 milliseconds. How does that change our analysis? Is it just as surprising as a single score of 189ms? More surprising? Less? Surprising *enough* to count as evidence that the population mean changed?
 
 {{< include quizzes/08-hypothesis-testing-spider-sample-reflection.qmd >}}
 
-### From the example to the terminology
+### Null Hypothesis Significance Testing
 
-The move from one Spider-Man to a sample of Spider-People changes the calculation, but not the general logic. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the sampling distribution to ask what sample means we would commonly see under that same no-change assumption.
+The move from one Spider-Man to a sample of Spider-People changes the calculation, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution*---the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme or more than the one we observed.
 
-Let's attach the main terms to that logic now. The spider bite is the *treatment*: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a *treatment effect*, though a significance test alone cannot establish what caused the change. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
+Let's attach the key terms to that logic. The formal procedure we're about to use is called *Null Hypothesis Significance Testing*, or *NHST*. The spider bite is the *treatment*: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a *treatment effect*, though a significance test alone cannot establish what caused the change. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
 
-The formal procedure we're about to use is called *Null Hypothesis Significance Testing*, or *NHST*. We begin with a skeptical working model: suppose the spider bites did nothing, so the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. This is the *null hypothesis*, $H_0$. The *alternative hypothesis*, $H_1$, says that the population mean changed:
+Under NHST, as the name implies, we begin with a skeptical working model: suppose the spider bites did nothing, so the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. This is the *null hypothesis*, $H_0$. The *alternative hypothesis*, $H_1$, says that the population mean changed.
+
+Changed how exactly? We could specify a __directional__ hypothesis. We were kind of assuming that the bites would make the kids faster, so we could say specifically that our alternative hypothesis is that the mean reaction time decreased.
+
+$$H_0: \mu_{\text{bitten}} \ge 284 \qquad H_1: \mu_{\text{bitten}} < 284$$
+
+But we don't really know what to expect. Maybe radioactive spiderbites actually impair performance for all we know, so we could use a __non-directional__ hypothesis: the mean changed in either direction.
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
-If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls.
+If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. But we know that sample means vary due to sampling error, even when the population mean hasn't changed; the sample's mean probably won't be exactly 284ms. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls.
+
+That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*. We call this *alpha*, and indicate it with the Greek symbol $\alpha$. This alpha is the threshold we set for determining whether our results are statistically significant. Specifically, it is a proportion of the null distribution that we consider to be small and unusual enough that if our sample mean falls within that region we will treat it as evidence that the population that proudced the sample has a different mean from that specified by our null hypothesis. Say we choose $\alpha = .05$. We're deciding that results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to the details shortly. First, let's work out how unusual our sample mean actually is.
 
 {{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
 
-But here's the rub. Sample means vary due to sampling error, even when the population mean hasn't changed. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution.
+## The $z$-test {#sec-spider-test}
 
-And that raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called *alpha* and written $\alpha$. If we choose the conventional $\alpha = .05$, we're deciding that results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to the details shortly. First, let's work out how unusual our sample mean actually is.
+Now we've described the logic of NHST generally, and we're ready to apply it to our Spider-People. There are different kinds of tests we can submit our data to, depending of the nature of the data and the information we have (or assumptions we can make) about the untreated population. The one we'll introduce here is called the $z$-test.
 
-## From individual scores to sample means {#sec-spider-test}
+The $z$-test is appropriate when we know the population standard deviation, and the sampling distribution of the mean is normal or approximately normal. The test statistic is a $z$-score that tells us how far our sample mean is from the null hypothesis mean, in units of the standard error of the mean.
 
-We have all the tools we need. First, let's put the calculation for Peter Parker's single score in front of us again. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
+$$z = \frac{M - \mu_0}{\sigma / \sqrt{n}}$$ {#eq-z-test}
+
+In this case, I told you that we know the original population mean and standard deviation. I also told you we will treat the population as normally distributed. So that makes the $z$-test appropriate. (But note that I just made up the $\sigma = 50$ and I told you I was taking liberties with the shape of the population. In real research, we rarely know the population standard deviation, so the $z$-test is not used very often. But it is a good place to start.)
+
+Now let's apply these tools to the Spider-People. We said we should state the decision criterion, alpha, in advance. So let's use the conventional $\alpha = .05$. That means that if our sample mean is in the most extreme five percent of the null distribution, we will reject the null hypothesis. And let's make the hypotheses non-directional, allowing for a change in either direction. With a non-directional alternative hypothesis, we will split that five percent between the two tails of the distribution, giving 2.5 percent in each tail. We can find the $z$-score that cuts off 2.5% in one tail of the distibution in the unit normal table.
+
+{{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.80 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
+
+Since the standardized normal distribution described by the table is symmetrical, the critical values for a two-tailed test are $z = \pm 1.96$. If our sample mean is more than 1.96 standard errors above or below the null mean, we will reject the null hypothesis.
+
+First, let's quickly run the numbers with Peter Parker's lone score again, so we have that baseline to compare the sample to. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
 
 $$ z = \frac{X - \mu}{\sigma} = \frac{189 - 284}{50} = -1.9 $$
 
-We can look up $z = 1.9$ in the unit normal table to find the lower-tail probability: $P(z \le -1.9) = .0287$. So if Peter Parker's reaction time really came from the population of unbitten kids, we would see a score this fast or faster about three times out of a hundred. This is the directional question we asked in Chapter 5, not yet a formal two-tailed test.
+That value is not within the critical regions of the null distribution; it is less extreme than the cutoff of $\pm 1.96$ that we obtained from the table above. So now we know that Peter's score is a bit unusual, but not quite extreme enough to reject the null hypothesis, according to our stated $\alpha = .05$.
 
-{{< interactive-figure peterZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.86,"to":1.94,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.9,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.86 to 1.94, with the area to the right of z = 1.90, .0287, highlighted." >}}
-
-For the sample of three, we locate the sample mean among all the sample means that the population could produce. The equations from Chapter 7 tell us that this sampling distribution has the same mean as the population and a standard error of $\sigma_M = \sigma / \sqrt{n}$. The Central Limit Theorem tells us about its shape: if the population is normal, the sampling distribution is normal at any sample size; otherwise, it becomes approximately normal as the sample size increases. Because our sample contains only three observations, this calculation relies on our simplifying assumption that reaction times are normally distributed.
-
-The test we're using is called a *one-sample $z$-test*. It tests a hypothesized population mean, written $\mu_0$, when the population standard deviation $\sigma$ is treated as known and the sampling distribution of the mean is normal or sufficiently close to normal. Its test statistic is:
-
-$$z = \frac{M - \mu_0}{\sigma / \sqrt{n}}$$
-
-This test isn't used very often because in real research we rarely know the population standard deviation. Usually we have to estimate it from sample data, which is why we'll need the $t$-test later. But the $z$-test is a good place to start.
-
-For our Spider-People, $\mu_0 = 284$. The Human Benchmark results page supplied that mean; as we admitted in Chapter 5, we invented the population standard deviation of 50 milliseconds for this example. The numerator is therefore the same difference we calculated for Peter alone. It's the denominator that changes: we divide by the standard error of the mean rather than the standard deviation of individual scores.
-
-{{< include quizzes/08-hypothesis-testing-sample-z-score.qmd >}}
+For the sample of three, we locate the sample mean among all the sample means that the population could produce. The equations from Chapter 7 tell us that this sampling distribution has the same mean as the population and a standard error of $\sigma_M = \sigma / \sqrt{n}$. The Central Limit Theorem tells us about its shape: if the population is normal, the sampling distribution is normal at any sample size; otherwise, it becomes approximately normal as the sample size increases. Because our sample contains only three observations, this calculation relies on our simplifying assumption that reaction times are normally distributed; with a large enough sample size, we could still run the $z$-test even if the population were skewed.
 
 Putting the values into the equation gives us a $z$-score of $-3.29$:
-
 $$ z = \frac{M - \mu_0}{\sigma / \sqrt{n}} = \frac{189 - 284}{50 / \sqrt{3}} = -3.29 $$
 
-That's quite a bit lower than $-1.9$ because sample means vary less than individual scores. A sample mean as far from the population mean as this is less common than an individual score that far away.
+The numerator is the same difference we calculated for Peter alone. It's the denominator that changes: we divide by the standard error of the mean rather than the standard deviation of individual scores. 
 
-And if we look up that $z$-score in the unit normal table, we get a much smaller lower-tail probability: $P(z \le -3.29) = .0005$.
+The $z$-score for the sample of $n = 3$ is quite a bit lower than $-1.9$ for the single score, because sample means vary less than individual scores. A sample mean as far from the population mean as this is less common than an individual score that far away.
+
+And now, the $z$-score for the sample is beyond the critical values we stated above, $\pm 1.96$. That puts the sample mean in the lower critical region, so we would reject the null hypothesis at $\alpha = .05$.
+
+We could, if we wanted, look up that precise $z$-score in the unit normal table, to find its precise probability, rahter than just comparing with the critical values. For $z = 3.29$, we get a much smaller lower-tail probability: $P(z \le -3.29) = .0005$.
 
 {{< interactive-figure spidermenZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":3.25,"to":3.33,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":3.29,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 3.25 to 3.33, with the area to the right of z = 3.29, .0005, highlighted." >}}
 
-To show this another way, here's what the sampling distribution looks like and where our sample mean lies in that distribution. Here it's shown in the original units; we could relabel the axis with $z$-scores instead. Remember, the $z$-scores are just a change of label. They don't transform the positions or the variability of the scores. So with the original units, our sample mean is still exactly as far down in that extreme tail of the distribution.
+To show this visually, here's what the sampling distribution looks like and where our sample mean lies in that distribution. I've included axes for both the original units (milliseconds) and the $z$-scores representing the sampling distribution, and shaded the critical regions red. Remember, the $z$-scores are just a change of label. You can see our sample mean pretty far down in the extreme tail of the distribution.
 
-{{< interactive-figure spidermenSamplingDistribution makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"normal","mean":284,"sd":28.87,"xDomain":[165,375],"xTicks":8,"style":"minimal","xAxis":true,"shade":{"to":189},"markers":{"at":189,"label":"M = 189","height":0.45,"color":"var(--sfs-accent, #2c7fb8)"},"animate":true,"labels":{"x":"Sample mean reaction time (ms), n = 3"}}' fallback="Sampling distribution of mean reaction times for samples of three, centered on 284 ms with standard error 28.87 ms; a vertical line marks the sample mean of 189 ms far down in the lower tail." >}}
+{{< interactive-figure spidermenSamplingDistribution makeStandardizedScoreGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"normal","mean":284,"sd":28.87,"xDomain":[165,403],"xTicks":8,"zTickValues":[-4,-3,-2,-1,0,1,2,3,4],"rawAxisSideLabel":"(M, ms)","zAxisSideLabel":"(z)","statGuides":false,"maxWidth":"42rem","shade":{"tail":"two","alpha":0.05},"markers":{"at":189,"label":"M = 189","height":0.45,"color":"var(--sfs-accent, #2c7fb8)"},"animate":true,"ariaLabel":"Sampling distribution of mean reaction times for samples of three, centered on 284 milliseconds with standard error 28.87 milliseconds. The raw-score ruler is aligned above a z-score ruler, the two critical regions beyond z equals plus or minus 1.96 are shaded red, and a vertical line marks the sample mean of 189 milliseconds at z equals negative 3.29."}' fallback="Sampling distribution of mean reaction times for samples of three, centered on 284 ms with standard error 28.87 ms; aligned raw-score and z-score axes show the same positions, the two critical regions beyond z = ±1.96 are shaded red, and a vertical line marks the sample mean of 189 ms at z = −3.29." >}}
 
-In other words, if spider bites leave the population mean at 284 milliseconds, getting a sample of three people with an average of 189 milliseconds is vanishingly unlikely. The observed sample is difficult to reconcile with our starting assumption that the bites did nothing. That doesn't prove what caused the difference, but it gives us evidence against the no-change model.
+In other words, if spider bites leave the population mean at 284 milliseconds, getting a sample of three people with an average of 189 milliseconds is very unlikely. The observed sample is difficult to reconcile with our starting assumption that the bites did nothing. That doesn't prove what caused the difference, but it gives us evidence against the null hypothesis.
 
-## Formalizing the hypothesis test
+{{< include quizzes/08-hypothesis-testing-sample-z-score.qmd >}}
 
-We've effectively just completed our first hypothesis test. We used the null as a working model, calculated what it predicted, and found that our sample mean was very difficult to reconcile with it.
+## Hypothesis tests, step by step
+
+Having worked through the $z$-test, let's extract the NHST procedure into a step-by-step process. In doing so, we can elaborate a little on the logic and choices behind each step. When we learn other variations of hypothesis tests, using different statistics, we'll follow the same general steps. The details of the calculations will change, but the logic will remain the same.
+
+### Step 1: State the hypotheses
 
 Ronald A. Fisher was a British statistician and geneticist, and one of the central figures in the development of modern statistics. Among many other contributions, he helped develop and popularize significance testing and the use of null hypotheses in experimental research. In his 1935 book *The Design of Experiments*, he put the logic rather neatly:
 
@@ -100,12 +110,6 @@ Ronald A. Fisher was a British statistician and geneticist, and one of the centr
 > ---R. A. Fisher, *The Design of Experiments* [@fisher1935design, p. 16]
 
 “Disproving” is stronger language than we'll usually use. A statistical result cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument. We work out what the null hypothesis predicts, then give the data a chance to contradict it. That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test. We used our knowledge of sampling distributions and probability to determine what kind of sample means would be common or uncommon if the population mean remained unchanged. Then we compared the $z$-score for our Spider-People's sample mean with that null distribution. The observed result was unusually far out in the tail, so it counted as evidence against the null hypothesis.
-
-## The four-step hypothesis testing procedure
-
-We can organize the reasoning we just followed into four steps: state the hypotheses, set the decision criteria, collect and analyze the data, and make a decision.
-
-### Step 1: State the hypotheses
 
 We have already stated the hypotheses for our Spider-People. The null says that the population mean reaction time remains 284 milliseconds after a bite. The alternative says that the mean changes:
 
@@ -198,12 +202,11 @@ We'll end by having you perform your own hypothesis test. We're going back to th
 
 And we're going to play the same slightly dishonest teaching trick again. For the moment, pretend that untreated people with OCD form a known reference population with a mean of 30.25 and a standard deviation of 14.89. A treated sample of 40 people has a mean of 15.49. First articulate the null and alternative hypotheses, then set your decision criteria, calculate the test statistic, and make your decision.
 
+I should tell you that, like when I first used this example in Chapter 5, I'm misusing the data here again. As before, the numbers are from the real study, but 30.25 and 14.89 were pre-treatment *sample statistics*, not known population parameters. More importantly, the mean of 15.49 came from the *same 40 people* measured after treatment. That makes this a related-samples design, so this $z$-test is not the analysis we would use for the real study. We'll return to the actual design, and the test it calls for, when we introduce the related-samples $t$-test in Chapter 13.
 
 {{< include quizzes/08-hypothesis-testing-learning-check.qmd >}}
 
-I should tell you that, like when I first used this example in Chapter 5, I'm misusing the data here again. As before, the numbers are from the real study, but 30.25 and 14.89 were pre-treatment *sample statistics*, not known population parameters. More importantly, the mean of 15.49 came from the *same 40 people* measured after treatment. That makes this a related-samples design, so this $z$-test is not the analysis we would use for the real study. We'll return to the actual design, and the test it calls for, when we introduce the related-samples $t$-test in Chapter 13.
-
-## What the test tells us---and what it leaves open
+## Summary
 
 NHST gives us a disciplined way to ask whether a sample result is difficult to explain under a null model. But a statistically significant result needn't be a large or important effect. And a nonsignificant result needn't mean that there is no effect. To understand those possibilities, we need to look more closely at effect size, inferential errors, and statistical power. That's where we'll go next.
 

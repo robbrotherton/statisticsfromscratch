@@ -468,14 +468,10 @@
     d3.select(svg).selectAll(".sfs-graph-reference-marker line")
       .attr("y2", zY);
 
-    const annotationLayer = d3.select(svg)
-      .append("g")
-      .attr("class", "ss-stat-annotations")
-      .attr("aria-hidden", "true");
     const sampleConvention = opts.statConvention === "sample";
     const centerSymbol = sampleConvention ? "M" : "μ";
     const spreadSymbol = sampleConvention ? "s" : "σ";
-    const guideSpecs = [
+    const guideSpecs = opts.statGuides === false || opts.showStatGuides === false ? [] : [
       { value: mean - sd, lineClass: "ss-sd-line", label: centerSymbol + " − " + spreadSymbol },
       { value: mean, lineClass: "ss-mean-line", label: centerSymbol },
       { value: mean + sd, lineClass: "ss-sd-line", label: centerSymbol + " + " + spreadSymbol }
@@ -484,6 +480,10 @@
         guide.value <= Math.max(opts.xDomain[0], opts.xDomain[1]) + 1e-9;
     });
 
+    const annotationLayer = d3.select(svg)
+      .append("g")
+      .attr("class", "ss-stat-annotations")
+      .attr("aria-hidden", "true");
     const guideGroups = annotationLayer.selectAll("g.ss-stat-guide")
       .data(guideSpecs)
       .join("g")
@@ -559,6 +559,7 @@
       distribution: opts.distribution || "normal",
       mean,
       sd,
+      color: opts.color,
       xDomain: opts.xDomain,
       xTicks: opts.xTicks || (Array.isArray(opts.xTickValues) ? opts.xTickValues.length : 7),
       width,
@@ -571,6 +572,7 @@
       axisLabels: false,
       responsive: false,
       animate,
+      shade: opts.shade,
       markers: opts.markers,
       ariaLabel
     };
