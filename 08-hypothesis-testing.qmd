@@ -48,27 +48,29 @@ $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
 If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. But we know that sample means vary due to sampling error, even when the population mean hasn't changed; the sample's mean probably won't be exactly 284ms. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls.
 
-That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*. We call this *alpha*, and indicate it with the Greek symbol $\alpha$. This alpha is the threshold we set for determining whether our results are statistically significant. Specifically, it is a proportion of the null distribution that we consider to be small and unusual enough that if our sample mean falls within that region we will treat it as evidence that the population that proudced the sample has a different mean from that specified by our null hypothesis. Say we choose $\alpha = .05$. We're deciding that results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to the details shortly. First, let's work out how unusual our sample mean actually is.
+That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called *alpha* and written $\alpha$. Say we choose $\alpha = .05$. We're deciding that results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to why we might choose that criterion, and how directionality affects it.
+
+Every hypothesis test follows four broad steps: state the hypotheses, set the decision criteria, collect and analyze the data, and make a decision. We'll take a first pass through those steps with the Spider-People, then look back at the choices and reasoning within each one. First, let's work out how unusual our sample mean actually is.
 
 {{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
 
 ## The $z$-test {#sec-spider-test}
 
-Now we've described the logic of NHST generally, and we're ready to apply it to our Spider-People. There are different kinds of tests we can submit our data to, depending of the nature of the data and the information we have (or assumptions we can make) about the untreated population. The one we'll introduce here is called the $z$-test.
+There are different kinds of tests we can submit our data to, depending on the nature of the data and the information we have (or assumptions we can make) about the untreated population. The one we'll introduce here is called the $z$-test.
 
 The $z$-test is appropriate when we know the population standard deviation, and the sampling distribution of the mean is normal or approximately normal. The test statistic is a $z$-score that tells us how far our sample mean is from the null hypothesis mean, in units of the standard error of the mean.
 
 $$z = \frac{M - \mu_0}{\sigma / \sqrt{n}}$$ {#eq-z-test}
 
-In this case, I told you that we know the original population mean and standard deviation. I also told you we will treat the population as normally distributed. So that makes the $z$-test appropriate. (But note that I just made up the $\sigma = 50$ and I told you I was taking liberties with the shape of the population. In real research, we rarely know the population standard deviation, so the $z$-test is not used very often. But it is a good place to start.)
+In the case of our Spider-People, I told you that we know the original population mean and standard deviation. I also told you we will treat the population as normally distributed. So that makes the $z$-test appropriate here. (But note that I just made up the $\sigma = 50$ and I told you I was taking liberties with the shape of the population. In real research, we rarely know the population standard deviation, so the $z$-test is not used very often. But it is a good place to start.)
 
-Now let's apply these tools to the Spider-People. We said we should state the decision criterion, alpha, in advance. So let's use the conventional $\alpha = .05$. That means that if our sample mean is in the most extreme five percent of the null distribution, we will reject the null hypothesis. And let's make the hypotheses non-directional, allowing for a change in either direction. With a non-directional alternative hypothesis, we will split that five percent between the two tails of the distribution, giving 2.5 percent in each tail. We can find the $z$-score that cuts off 2.5% in one tail of the distibution in the unit normal table.
+Now let's apply the full NHST, $z$-test procedure to our Spider-Sample. We have our hypotheses already: $H_0: \mu = 284$ and $H_1: \mu \ne 284$. We said we should state the decision criterion, alpha, in advance. So let's use the conventional $\alpha = .05$. That means that if our sample mean is in the most extreme five percent of the null distribution, we will reject the null hypothesis. And let's make the hypotheses non-directional, allowing for a change in either direction. With a non-directional alternative hypothesis, we will split that five percent between the two tails of the distribution, giving 2.5 percent in each tail. We can find the $z$-score that cuts off 2.5% in one tail of the distribution in the unit normal table.
 
 {{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.80 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
 
 Since the standardized normal distribution described by the table is symmetrical, the critical values for a two-tailed test are $z = \pm 1.96$. If our sample mean is more than 1.96 standard errors above or below the null mean, we will reject the null hypothesis.
 
-First, let's quickly run the numbers with Peter Parker's lone score again, so we have that baseline to compare the sample to. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
+Next, we take our data and calculate the test statistic. First, let's quickly run the numbers with Peter Parker's lone score again, so we have that baseline to compare the sample to. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
 
 $$ z = \frac{X - \mu}{\sigma} = \frac{189 - 284}{50} = -1.9 $$
 
@@ -85,7 +87,7 @@ The $z$-score for the sample of $n = 3$ is quite a bit lower than $-1.9$ for the
 
 And now, the $z$-score for the sample is beyond the critical values we stated above, $\pm 1.96$. That puts the sample mean in the lower critical region, so we would reject the null hypothesis at $\alpha = .05$.
 
-We could, if we wanted, look up that precise $z$-score in the unit normal table, to find its precise probability, rahter than just comparing with the critical values. For $z = 3.29$, we get a much smaller lower-tail probability: $P(z \le -3.29) = .0005$.
+We could, if we wanted, look up that precise $z$-score in the unit normal table, to find its precise probability, rather than just comparing with the critical values. For $z = 3.29$, we get a much smaller lower-tail probability: $P(z \le -3.29) = .0005$. Because our hypothesis is non-directional, an equally extreme result in the upper tail also counts, giving a two-tailed probability of approximately $.0010$.
 
 {{< interactive-figure spidermenZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":3.25,"to":3.33,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":3.29,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 3.25 to 3.33, with the area to the right of z = 3.29, .0005, highlighted." >}}
 
@@ -99,7 +101,7 @@ In other words, if spider bites leave the population mean at 284 milliseconds, g
 
 ## Hypothesis tests, step by step
 
-Having worked through the $z$-test, let's extract the NHST procedure into a step-by-step process. In doing so, we can elaborate a little on the logic and choices behind each step. When we learn other variations of hypothesis tests, using different statistics, we'll follow the same general steps. The details of the calculations will change, but the logic will remain the same.
+Having worked through the $z$-test, let's look back at what we did and let's extract the NHST procedure into a step-by-step process. In doing so, we can elaborate a little on the logic and choices behind each step. When we learn other variations of hypothesis tests, using different statistics, we'll follow the same general steps. The details of the calculations will change, but the logic will remain the same.
 
 ### Step 1: State the hypotheses
 
@@ -109,21 +111,21 @@ Ronald A. Fisher was a British statistician and geneticist, and one of the centr
 >
 > ---R. A. Fisher, *The Design of Experiments* [@fisher1935design, p. 16]
 
-“Disproving” is stronger language than we'll usually use. A statistical result cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument. We work out what the null hypothesis predicts, then give the data a chance to contradict it. That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test. We used our knowledge of sampling distributions and probability to determine what kind of sample means would be common or uncommon if the population mean remained unchanged. Then we compared the $z$-score for our Spider-People's sample mean with that null distribution. The observed result was unusually far out in the tail, so it counted as evidence against the null hypothesis.
+“Disproving” is stronger language than we'll usually use. A statistical result cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument: we work out what the null hypothesis predicts, then give the data a chance to contradict it. That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test.
 
-We have already stated the hypotheses for our Spider-People. The null says that the population mean reaction time remains 284 milliseconds after a bite. The alternative says that the mean changes:
+In our example, the null says that the population mean reaction time remains 284 milliseconds after a bite. The alternative says that the mean changes:
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
 Notice that the two hypotheses don't play symmetrical roles in this test. The null gives us a specific population mean: 284 milliseconds. Along with our other assumptions, that value defines a specific sampling distribution. It therefore gives us something we can test directly: if the population mean really is 284, how often would we get a sample mean this far from it or farther?
 
-The alternative hypothesis is less specific. It says that the mean is *not* 284, but that could mean 283, 250, 400, or any other value. It doesn't supply one alternative mean from which we could construct one alternative sampling distribution. So, in the significance test we're doing here, it is the null hypothesis that we test directly. The alternative tells us what counts as a departure from it---in this case, a difference in either direction.
+The alternative hypothesis is less specific. It says that the mean is *not* 284, but that could mean 283, 250, 400, or any other value. It doesn't supply one alternative mean from which we could construct one alternative sampling distribution. So it is the null hypothesis that we test directly. The alternative tells us what counts as a departure from it---in this case, a difference in either direction.
 
 That point can be overstated. We *could* specify a particular alternative, such as $\mu_{\text{bitten}} = 250$. That would give us another sampling distribution to work with, and we'll need just such a specific alternative when we discuss statistical power in the next chapter. But our alternative here, $\mu_{\text{bitten}} \neq 284$, does not make one precise numerical prediction.
 
 The null doesn't have to say that two populations are identical in every imaginable respect. It makes a claim about the particular parameter we're testing---the population mean, in this case. In other statistical tests, the null might state that two treatment conditions have equal population means, or that there is no association between two variables. In broad terms, the null says that the particular effect or relationship we're testing is absent.
 
-These two propositions are logical complements: the bitten population mean is either equal to 284 or it isn't. They can't both be true. But that doesn't make the evidence perfectly symmetrical. We're going to ask how well our data fit the null model. A result that would be very unusual under that model gives us reason to reject it, though it doesn't prove any particular alternative or establish what caused the difference. And a result that isn't unusual under the null only means that we fail to reject it; it doesn't prove the null hypothesis true. The test won't reveal either proposition to be true or false with certainty, but it can tell us whether the data provide sufficient evidence to reject the null.
+These two propositions are logical complements: the population mean is either equal to 284 or it isn't. But the evidence isn't perfectly symmetrical. A result that would be very unusual under the null gives us reason to reject it, though it doesn't prove any particular alternative or establish what caused the difference. A result that isn't unusual only means that we fail to reject the null; it doesn't prove the null hypothesis true.
 
 Hypotheses don't have to concern a treatment. Say we're interested in whether there is an association between the number of years of education someone has completed and their lifetime earnings. The null would say that there is no association between education and income. The alternative would say that there is.
 
@@ -137,7 +139,7 @@ If you really think about it, this should be by far the most important and effor
 
 ### Step 2: Set the decision criteria
 
-For step two, we're essentially asking, "if the null hypothesis is true, what sample statistics are we most likely or unlikely to see?" Our statistical model tells us what the null sampling distribution will look like. Exactly how we determine its characteristics depends on the nature of our data and the appropriate test statistic. We'll talk more about that as we go. But in a general sense, we are using our knowledge of probability and sampling to determine what results would be highly unusual under the null hypothesis. If we see one that is sufficiently unusual, we will reject the null.
+For step two, we're asking, "if the null hypothesis is true, what sample statistics are we most likely or unlikely to see?" The answer depends on the data and the appropriate test statistic, but the general aim is to decide in advance what results would be sufficiently unusual to reject the null.
 
 Here, we need to introduce the terminology of $\alpha$ and $p$-values. The Greek symbol, lowercase $\alpha$, is our decision criterion: a cutoff chosen before we analyze the data. The $p$-value is calculated from the observed data. It is the probability, assuming the null model and its other assumptions are correct, of obtaining a test statistic as extreme as or more extreme than the one we observed. What counts as "extreme" depends on whether our alternative hypothesis is one- or two-tailed.
 
@@ -149,11 +151,13 @@ The **critical region** contains the sample statistics that would lead us to rej
 
 ### One-tailed and two-tailed tests
 
-We don't have to have just one critical region. If we do, it's called a one-tailed test, because our critical region is in one tail of the distribution. But we can have a two-tailed test where we specify critical regions at both extremes. If we do this, we're dividing our chosen $\alpha$ into two. If $\alpha$ is .05, or five percent, then by having a two-tailed hypothesis test, we're dividing that five percent between the two tails of the distribution, giving two and a half percent at each end that will cause us to reject the null hypothesis.
+A one-tailed test has one critical region. A two-tailed test has critical regions at both extremes, dividing the chosen $\alpha$ between them. If $\alpha = .05$, a two-tailed test places two and a half percent at each end of the distribution.
 
 In percentile terms, the two critical values are at the 2.5th and 97.5th percentiles. The middle 95 percent of the null hypothesis distribution lies between them, leaving the most extreme five percent outside them.
 
-Whether we want a one- or two-tailed test depends on how we stated our hypotheses in step one. We talk about directional or non-directional hypotheses. With a one-tailed or directional hypothesis, the researcher specifies in advance that they are looking for either an increase or a decrease. With a two-tailed, non-directional test, we're looking for a difference in either direction. Since we don't really know what radioactive spider bites ought to do to a person's reaction time, our formal Spider-People test will be two-tailed. The main point of step two is that we determine up front what kind of results would lead us to reject the null. We don't choose a convenient tail after seeing the data.
+Whether we use a one- or two-tailed test depends on how we stated our hypotheses in step one. With a one-tailed, directional hypothesis, the researcher specifies in advance that they are looking for either an increase or a decrease. With a two-tailed, non-directional test, we're looking for a difference in either direction. The main point is that we determine up front what kind of results would lead us to reject the null. We don't choose a convenient tail after seeing the data.
+
+Unless we have a defensible reason to predict a direction in advance, the two-tailed test is the usual choice: it allows results in either direction to count as evidence against the null.
 
 ::::: {#act-alpha-critical-regions .callout-tip .interactive .with-controls}
 ## Explore alpha and critical regions
@@ -192,9 +196,7 @@ The exact statistic we calculate depends on the nature of the data. We'll encoun
 
 ### Step 4: Make a decision
 
-And now everything is in place for us to make our decision. If the test statistic falls in the critical region---equivalently, if $p < \alpha$---we reject the null hypothesis. Otherwise, we *fail to reject* it. Failing to reject the null isn't the same as accepting it or showing that nothing happened. It means this study did not provide sufficient evidence against it.
-
-For our two-tailed Spider-People test, $\alpha = .05$ gives critical values of $\pm 1.96$. Our $z$ of $-3.29$ falls in the lower critical region. Counting results at least this far from the null mean in either direction gives $p \approx .0010$. Since $p < \alpha$, we reject the null and call the result statistically significant. The sample would be extraordinarily unusual if the population mean really remained 284 milliseconds. That gives us evidence that the mean changed. It does not, by itself, prove that the spider bites caused the change.
+If the test statistic falls in the critical region---equivalently, if $p < \alpha$---we reject the null hypothesis. Otherwise, we *fail to reject* it. Failing to reject the null isn't the same as accepting it or showing that nothing happened. It means this study did not provide sufficient evidence against it. In the Spider-People example, this was the point at which we compared $z = -3.29$ with the critical values and reached the decision reported above.
 
 ## Practice: CBT for OCD
 
