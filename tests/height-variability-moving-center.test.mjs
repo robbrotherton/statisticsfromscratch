@@ -79,10 +79,18 @@ test("the moving-center tutorial compares both centers before lining up the span
   assert.equal(actions[1]["focus-sample"], true);
   assert.equal(actions[1]["show-fixed-center-rms"], false);
   assert.equal(actions[1]["show-sample-sd"], false);
+  assert.equal(actions[1]["deviation-guides"], "none");
   assert.equal(actions[2]["show-fixed-center-rms"], true);
   assert.equal(actions[2]["show-sample-sd"], false);
+  assert.equal(actions[2]["deviation-guides"], "population");
   assert.equal(actions[3]["show-sample-sd"], true);
+  assert.equal(actions[3]["deviation-guides"], "sample");
   assert.equal(actions[3]["sample-span-center"], "sample");
+  assert.equal(actions[4]["deviation-guides"], "none");
+  assert.deepEqual(
+    actions.map((action) => action["deviation-guides"]),
+    ["none", "none", "population", "sample", "none", "none", "none", "none"]
+  );
   assert.equal(actions[4]["sample-span-center"], "population");
   assert.equal(actions[7]["recenter-sample-span"], true);
 
@@ -90,6 +98,7 @@ test("the moving-center tutorial compares both centers before lining up the span
     tutorial.match(/data-repeat-action='([^']+)'/)[1]
   );
   assert.equal(repeatAction["recenter-sample-span"], true);
+  assert.equal(repeatAction["deviation-guides"], "none");
 });
 
 test("the bias tutorial begins with only an abstract population display", () => {
@@ -410,6 +419,11 @@ test("the interactive exposes and distinguishes the fixed-center comparison", ()
   assert.match(source, /attr\("x1", fittedCenterX\)[\s\S]*attr\("x2", fittedCenterX\)/);
   assert.match(source, /growFixedCenterSpan/);
   assert.match(source, /growSampleSpan/);
+  assert.match(source, /hv-population-deviation-guides/);
+  assert.match(source, /hv-sample-deviation-guides/);
+  assert.match(source, /stroke-dasharray: 2 7/);
+  assert.match(source, /function updateDeviationGuides/);
+  assert.match(source, /deviationGuideLeadIn/);
   assert.match(source, /spanMotionEnabled = animate && !trackingEnabled && !heightVariabilityReducedMotion/);
   assert.match(source, /animate: animate && !growFixedCenterSpan/);
   assert.match(source, /animate: animate && !growSampleSpan/);

@@ -187,35 +187,35 @@ The bias comes from using the sample mean, $M$, in place of the unknown $\mu$. E
 {{< interactive-figure heightVariability makeHeightVariabilityDemo options='{"seed":"height-variability-v1","populationMean":65,"populationSd":3,"populationSize":197,"binWidth":0.5,"sampleSize":10,"repeatedSamples":1000,"axisMode":"center","axisLabel":false,"unitLabel":"","sdScale":"population"}' fallback="Interactive sampling diagram comparing the same sample's deviations around its fitted mean and the fixed population mean." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Population" data-action='{"draw":2,"show-sample":false,"focus-sample":false,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"sample-span-center":"sample","show-summary":false,"animate":false,"fall":false}'}
+::: {.tutorial-step data-title="Population" data-action='{"draw":2,"show-sample":false,"focus-sample":false,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"deviation-guides":"none","sample-span-center":"sample","show-summary":false,"animate":false,"fall":false}'}
 Here we have a happy little population, a symmetrical mound of colorful dots. It has a fixed mean, $\mu$, and standard deviation, $\sigma$. The length of the black line underneath shows $\mu \pm \sigma$. We'll use that fixed span as our reference length, so in this picture $\sigma =$ {{< interactive-value heightVariability.displayPopulationSd format=".0f" >}}.
 :::
 
-::: {.tutorial-step data-title="Take a sample" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":true}'}
+::: {.tutorial-step data-title="Take a sample" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":false,"deviation-guides":"none","sample-span-center":"sample","show-summary":false,"animate":true,"fall":true}'}
 Now we draw a sample of {{< interactive-value heightVariability.n format=".0f" >}} dots from the population. We want to compute the variability of the sample, but how?
 :::
 
-::: {.tutorial-step data-title="From μ" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
+::: {.tutorial-step data-title="From μ" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":false,"show-fixed-center-rms":true,"deviation-guides":"population","sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
 Because this is a simulation, we know $\mu$. So we can calculate the sample's squared deviations from $\mu$, divide by $n$ to get variance, and take the square root to get SD. The dashed blue line shows the answer relative to the population SD: {{< interactive-value heightVariability.displaySampleSdFromMu format=".2f" >}}. This is the SD we would get using the fixed population mean.
 :::
 
-::: {.tutorial-step data-title="From M" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
+::: {.tutorial-step data-title="From M" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"sample","sample-span-center":"sample","show-summary":false,"animate":true,"fall":false}'}
 But usually we can't do that: we don't know $\mu$! So instead we find the sample mean, $M$, and calculate the squared deviations around *it*. The solid red line shows that answer, {{< interactive-value heightVariability.displaySampleSdFromM format=".2f" >}}, centered on $M$ because that's how we calculated it.
 :::
 
-::: {.tutorial-step data-title="Line them up" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
+::: {.tutorial-step data-title="Line them up" data-action='{"draw":1,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"none","sample-span-center":"population","show-summary":false,"animate":true,"fall":false}'}
 Now that we've calculated it, let's slide the red span over so all three SD lines are centered on $\mu$ and we can compare them. The red span fits inside the dashed blue one; computing the sample's SD around $M$ rather than $\mu$ gave a smaller answer.
 :::
 
-::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+::: {.tutorial-step data-title="Can be high" data-action='{"draw":12,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"none","sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
 A new sample gives us a different $M$, and different standard deviations computed around $\mu$ or $M$ (the actual population $\sigma$ is fixed and doesn't change). Here the red sample SD is larger than the actual population $\sigma$. An individual sample can still overestimate variability. But the red $M$-based span is still no wider than the dashed $\mu$-based span.
 :::
 
-::: {.tutorial-step data-title="Can be low" data-action='{"draw":5,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
+::: {.tutorial-step data-title="Can be low" data-action='{"draw":5,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"none","sample-span-center":"population","show-summary":false,"animate":true,"fall":true}'}
 For every new sample, the red line will be narrower than the blue one (or they might be the same if the sample mean $M$ happens to be equal to $\mu$).
 :::
 
-::: {.tutorial-step data-title="Keep sampling" data-action='{"draw":6,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-action='{"new-sample":true,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-label="New sample"}
+::: {.tutorial-step data-title="Keep sampling" data-action='{"draw":6,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"none","sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-action='{"new-sample":true,"show-sample":true,"focus-sample":true,"show-population-sd":true,"show-sample-sd":true,"show-fixed-center-rms":true,"deviation-guides":"none","sample-span-center":"population","recenter-sample-span":true,"show-summary":false,"animate":true,"fall":true}' data-repeat-label="New sample"}
 Keep clicking to take as many new samples as you like. Both computed standard deviations will change, and either can land above or below the population SD. But the $M$-based answer can never be larger than the $\mu$-based answer for the same observations, because it is always fitted to the new sample mean---a moving target. That built-in shrinkage is what creates the long-run bias.
 :::
 ::::
