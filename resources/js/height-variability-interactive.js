@@ -199,6 +199,29 @@ heightVariabilityEnsureStyles = () => {
       fill: var(--hv-fixed-center-color);
     }
 
+    .height-variability-demo .hv-deviation-guide {
+      fill: none;
+      stroke-width: 1.15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .height-variability-demo .hv-population-deviation-guides {
+      stroke: var(--hv-fixed-center-color);
+      --sfs-if-reveal-opacity: 0.34;
+    }
+
+    .height-variability-demo .hv-sample-deviation-guides {
+      stroke: var(--hv-biased-color);
+      --sfs-if-reveal-opacity: 0.42;
+    }
+
+    .height-variability-demo .hv-deviation-center-line {
+      stroke-dasharray: 2 7;
+      stroke-width: 1;
+    }
+
     .height-variability-demo .hv-corrected-line {
       fill: none;
       stroke: var(--hv-corrected-color);
@@ -1699,6 +1722,9 @@ makeHeightVariabilityDemo = function(opts) {
     showFixedCenterRms: opts.showFixedCenterRms === undefined
       ? true
       : Boolean(opts.showFixedCenterRms),
+    deviationGuideCenter: ["population", "sample"].includes(
+      String(opts.deviationGuides || "none").trim().toLowerCase()
+    ) ? String(opts.deviationGuides).trim().toLowerCase() : "none",
     focusSample: Boolean(opts.focusSample),
     sampleSpanCenter: String(opts.sampleSpanCenter || "sample").toLowerCase() === "population"
       ? "population"
@@ -1882,6 +1908,12 @@ makeHeightVariabilityDemo = function(opts) {
   const sampleLayer = svg.append("g")
     .attr("class", "hv-sample-layer sfs-if-reveal")
     .style("--sfs-if-reveal-opacity", 1);
+  const deviationGuideLayer = svg.append("g")
+    .attr("class", "hv-deviation-guide-layer");
+  const populationDeviationGuides = deviationGuideLayer.append("g")
+    .attr("class", "hv-deviation-guides hv-population-deviation-guides sfs-if-reveal");
+  const sampleDeviationGuides = deviationGuideLayer.append("g")
+    .attr("class", "hv-deviation-guides hv-sample-deviation-guides sfs-if-reveal");
   const fixedCenterLayer = svg.append("g")
     .attr("class", "hv-fixed-center-layer sfs-if-reveal")
     .style("--sfs-if-reveal-opacity", 1);
@@ -2092,6 +2124,7 @@ makeHeightVariabilityDemo = function(opts) {
       showPopulationSd: state.showPopulationSd,
       showSampleSd: state.showSampleSd,
       showFixedCenterRms: state.showFixedCenterRms,
+      deviationGuideCenter: state.deviationGuideCenter,
       focusSample: state.focusSample,
       sampleOpacity: state.sampleOpacity,
       sampleSpanCenter: state.sampleSpanCenter,
@@ -2341,6 +2374,11 @@ makeHeightVariabilityDemo = function(opts) {
         )}.`
       );
     }
+    if (state.deviationGuideCenter === "population") {
+      parts.push("Guide segments show each observation's deviation from fixed mu.");
+    } else if (state.deviationGuideCenter === "sample") {
+      parts.push("Guide segments show each observation's deviation from fitted M.");
+    }
     if (state.showSampleSd && state.showFixedCenterRms && centerSampleSpanOnPopulation) {
       parts.push("The M-based span is no wider than the mu-based span.");
     }
@@ -2384,6 +2422,7 @@ makeHeightVariabilityDemo = function(opts) {
   let previousOverviewSampleKey = null;
   let previousShowFixedCenterRms = false;
   let previousShowSampleSd = false;
+  let previousDeviationGuideCenter = "none";
   let previousShowMeans = state.showMeans;
   let previousVarianceIndicator = state.varianceIndicator;
 
@@ -2396,7 +2435,15 @@ makeHeightVariabilityDemo = function(opts) {
       (sampleChanged || !previousShowFixedCenterRms);
     const growSampleSpan = spanMotionEnabled && state.showSampleSd &&
       (sampleChanged || !previousShowSampleSd);
-    const spanGrowthDelay = sampleChanged && animateSample ? 680 : 0;
+    const deviationGuidesChanged = state.deviationGuideCenter !== previousDeviationGuideCenter;
+    const deviationGuideLeadIn = spanMotionEnabled && deviationGuidesChanged &&
+      state.deviationGuideCenter !== "none"
+      ? (previousDeviationGuideCenter === "none" ? 520 : 760)
+      : 0;
+    const spanGrowthDelay = Math.max(
+      sampleChanged && animateSample ? 680 : 0,
+      deviationGuideLeadIn
+    );
     const desiredTickCount = overviewCompact ? 5 : 10;
     const tickStep = Math.max(
       population.binWidth,
@@ -2437,6 +2484,46 @@ makeHeightVariabilityDemo = function(opts) {
     const sampleDotRadius = dotRadius + 0.6;
     const sampleDotY = (dot) => sampleAxisY - sampleDotRadius -
       (dot.sampleRow % sampleStackLanes) * sampleDotStep;
+
+    function updateDeviationGuides(group, center) {
+      const centerX = x(center);
+      const orderedDots = values.sampleDots.slice().sort((a, b) =>
+        sampleDotX(a) - sampleDotX(b) || a.sampleIndex - b.sampleIndex
+      );
+      const guideLaneByIndex = new Map(
+        orderedDots.map((dot, index) => [dot.sampleIndex, index])
+      );
+      const guideLaneTop = comparisonLastY + 16;
+      const guideLaneBottom = Math.max(
+        guideLaneTop,
+        sampleAxisY - sampleDotRadius * 2 - 7
+      );
+      const guideLaneStep = orderedDots.length > 1
+        ? (guideLaneBottom - guideLaneTop) / (orderedDots.length - 1)
+        : 0;
+      group.selectAll("line.hv-deviation-center-line")
+        .data([center])
+        .join("line")
+          .attr("class", "hv-deviation-guide hv-deviation-center-line")
+          .attr("x1", centerX)
+          .attr("x2", centerX)
+          .attr("y1", axisY + 2)
+          .attr("y2", sampleAxisY - 2);
+      group.selectAll("path.hv-observation-deviation")
+        .data(values.sampleDots, (dot) => dot.sampleIndex)
+        .join("path")
+          .attr("class", "hv-deviation-guide hv-observation-deviation")
+          .attr("d", (dot) => {
+            const dotX = sampleDotX(dot);
+            const dotY = sampleDotY(dot);
+            const elbowY = guideLaneBottom -
+              guideLaneByIndex.get(dot.sampleIndex) * guideLaneStep;
+            return `M${dotX},${dotY}V${elbowY}H${centerX}`;
+          });
+    }
+
+    updateDeviationGuides(populationDeviationGuides, population.mean);
+    updateDeviationGuides(sampleDeviationGuides, values.sampleMean);
 
     const selectedIds = new Set(state.showSample ? values.sampleDots.map((dot) => dot.id) : []);
     populationLayer.selectAll("circle")
@@ -2700,6 +2787,16 @@ makeHeightVariabilityDemo = function(opts) {
       window.interactiveFigure.setRevealVisible(popSdLayer, !trackingEnabled && state.showPopulationSd, { root: rootNode, animate });
       window.interactiveFigure.setRevealVisible(sampleLayer, showSourceSample, { root: rootNode, animate });
       window.interactiveFigure.setRevealVisible(
+        populationDeviationGuides,
+        !trackingEnabled && state.showSample && state.deviationGuideCenter === "population",
+        { root: rootNode, animate }
+      );
+      window.interactiveFigure.setRevealVisible(
+        sampleDeviationGuides,
+        !trackingEnabled && state.showSample && state.deviationGuideCenter === "sample",
+        { root: rootNode, animate }
+      );
+      window.interactiveFigure.setRevealVisible(
         fixedCenterLayer,
         !trackingEnabled && state.showFixedCenterRms,
         { root: rootNode, animate: animate && !growFixedCenterSpan }
@@ -2796,6 +2893,7 @@ makeHeightVariabilityDemo = function(opts) {
     previousOverviewSampleKey = overviewSampleKey;
     previousShowFixedCenterRms = state.showFixedCenterRms;
     previousShowSampleSd = state.showSampleSd;
+    previousDeviationGuideCenter = state.deviationGuideCenter;
     previousShowMeans = state.showMeans;
     previousVarianceIndicator = state.varianceIndicator;
   }
@@ -3011,6 +3109,15 @@ makeHeightVariabilityDemo = function(opts) {
           state.showFixedCenterRms = heightVariabilityBoolean(value, state.showFixedCenterRms);
           changed = true;
           break;
+        case "deviation-guides":
+        case "deviation-guide-center": {
+          const center = String(value).trim().toLowerCase();
+          state.deviationGuideCenter = ["population", "mu", "μ"].includes(center)
+            ? "population"
+            : (center === "sample" || center === "m" ? "sample" : "none");
+          changed = true;
+          break;
+        }
         case "sample-span-center":
         case "span-center":
           state.sampleSpanCenter = String(value).trim().toLowerCase() === "population"
