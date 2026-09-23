@@ -83,9 +83,7 @@ $$ z = \frac{M - \mu_0}{\sigma / \sqrt{n}} = \frac{189 - 284}{50 / \sqrt{3}} = -
 
 The numerator is the same difference we calculated for Peter alone. It's the denominator that changes: we divide by the standard error of the mean rather than the standard deviation of individual scores. 
 
-The $z$-score for the sample of $n = 3$ is quite a bit lower than $-1.9$ for the single score, because sample means vary less than individual scores. A sample mean as far from the population mean as this is less common than an individual score that far away.
-
-And now, the $z$-score for the sample is beyond the critical values we stated above, $\pm 1.96$. That puts the sample mean in the lower critical region, so we would reject the null hypothesis at $\alpha = .05$.
+The resulting $z = -3.29$ for the sample of $n = 3$ is quite a bit lower than $-1.9$ for the single score, because the distribution of sample means has lower variability than the distribution of individual scores; a sample mean as far from the population mean as this is less common than an individual score that far away. Now the $z$-score for the sample is beyond the critical values we stated above, $\pm 1.96$. That puts the sample mean in the lower critical region, so we would reject the null hypothesis at $\alpha = .05$.
 
 To show this visually, here's what the sampling distribution looks like and where our sample mean lies in that distribution. I've included axes for both the original units (milliseconds) and the $z$-scores representing the sampling distribution, and shaded the critical regions red. Remember, the $z$-scores are just a change of label. You can see our sample mean pretty far down in the extreme tail of the distribution.
 
@@ -97,29 +95,21 @@ In other words, if spider bites leave the population mean at 284 milliseconds, g
 
 ## Hypothesis tests, step by step
 
-Having worked through the $z$-test, let's look back at what we did and let's extract the NHST procedure into a step-by-step process. In doing so, we can elaborate a little on the logic and choices behind each step. When we learn other variations of hypothesis tests, using different statistics, we'll follow the same general steps. The details of the calculations will change, but the logic will remain the same.
+Having worked through the $z$-test, we can scrutinize the step-by-step process we followed, and some of the logic and choices along the way. When we learn other variations of hypothesis tests, using different statistics, we'll follow the same general steps. The details of the calculations will change, but the logic will remain the same.
 
 ### Step 1: State the hypotheses
 
-Ronald A. Fisher was a British statistician and geneticist, and one of the central figures in the development of modern statistics. Among many other contributions, he helped develop and popularize significance testing and the use of null hypotheses in experimental research. In his 1935 book *The Design of Experiments*, he put the logic rather neatly:
+We articulate two complementary hypotheses: the null hypothesis, which we assume to be true for the purpose of the test, and the alternative hypothesis, which we will entertain if the data are inconsistent with the null. The null hypothesis is usually a statement of no effect or no difference. The alternative hypothesis is usually a statement that there is an effect or a difference. The name of our procedure, Null Hypothesis Significance Testing, tells you that the null plays a more important role. Ronald A. Fisher, a British statistician and one of the central figures in the development of modern statistics and significance testing, stated the case bluntly: “Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis.” [@fisher1935design, p. 16]
 
-> “Every experiment may be said to exist only in order to give the facts a chance of disproving the null hypothesis.”
->
-> ---R. A. Fisher, *The Design of Experiments* [@fisher1935design, p. 16]
+“Disproving” is stronger language than we'll usually use. A statistical result can provide quantitative evidence, but cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument: we work out what the null hypothesis predicts, then give the data a chance to contradict it. 
 
-“Disproving” is stronger language than we'll usually use. A statistical result cannot establish with logical certainty that the null hypothesis is false. But Fisher's line captures the direction of the argument: we work out what the null hypothesis predicts, then give the data a chance to contradict it. That doesn't mean we begin by believing that the null hypothesis is true. It gives us a precise model to test.
+The reason for the asymmetry is that the null hypothesis gives us a precise model to test. In our example, the null said that the population mean reaction time remains exactly 284 milliseconds after a bite. Along with our other assumptions, that value defines a specific sampling distribution. It therefore gives us something we can test directly: if the population mean really is 284, how often would we get a sample mean this far from it or farther?
 
-In our example, the null says that the population mean reaction time remains 284 milliseconds after a bite. The alternative says that the mean changes:
+The alternative hypothesis is less specific. If the null says that the population mean is 284, the alternative says that it is *not* 284.
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
-Notice that the two hypotheses don't play symmetrical roles in this test. The null gives us a specific population mean: 284 milliseconds. Along with our other assumptions, that value defines a specific sampling distribution. It therefore gives us something we can test directly: if the population mean really is 284, how often would we get a sample mean this far from it or farther?
-
-The alternative hypothesis is less specific. It says that the mean is *not* 284, but that could mean 283, 250, 400, or any other value. It doesn't supply one alternative mean from which we could construct one alternative sampling distribution. So it is the null hypothesis that we test directly. The alternative tells us what counts as a departure from it---in this case, a difference in either direction.
-
-That point can be overstated. We *could* specify a particular alternative, such as $\mu_{\text{bitten}} = 250$. That would give us another sampling distribution to work with, and we'll need just such a specific alternative when we discuss statistical power in the next chapter. But our alternative here, $\mu_{\text{bitten}} \neq 284$, does not make one precise numerical prediction.
-
-Stating the alternative also means deciding whether it is directional. A directional hypothesis predicts an increase or a decrease; a non-directional hypothesis allows for a difference either way. A directional hypothesis makes sense when we have a defensible reason to predict one direction in advance, and a result in the other direction would not support that prediction. Otherwise, the non-directional hypothesis is the usual choice. Either way, this decision belongs here, before we look at the data. In step two, we'll use it to decide where the critical region---or regions---should go.
+That could mean 283, 250, 400, or any other value. It doesn't supply one alternative mean from which we could construct one alternative sampling distribution. So it is the null hypothesis that we test directly. The alternative hypothesis covers all other possibilities. (We *could* specify a particular alternative, such as $\mu_{\text{bitten}} = 250$. That would give us another sampling distribution to work with, and we'll need just such a specific alternative when we discuss statistical power in the next chapter. But our alternative here, $\mu_{\text{bitten}} \neq 284$, does not make one precise numerical prediction.)
 
 The null doesn't have to say that two populations are identical in every imaginable respect. It makes a claim about the particular parameter we're testing---the population mean, in this case. In other statistical tests, the null might state that two treatment conditions have equal population means, or that there is no association between two variables. In broad terms, the null says that the particular effect or relationship we're testing is absent.
 
@@ -130,6 +120,8 @@ Hypotheses don't have to concern a treatment. Say we're interested in whether th
 - General research question: Is there an association between education and income? 🎓🤑
     - $H_0$: There is no association between education and income.
     - $H_1$: There is an association between education and income.
+
+Stating the alternative also means deciding whether it is directional. A directional hypothesis predicts an increase or a decrease; a non-directional hypothesis allows for a difference either way. A directional hypothesis makes sense when we have a defensible reason to predict one direction in advance, and a result in the other direction would not support that prediction. Otherwise, the non-directional hypothesis is the usual choice. Either way, this decision belongs here, before we look at the data. In step two, we'll use it to decide where the critical region---or regions---should go.
 
 If you really think about it, this should be by far the most important and effortful step of the entire research process. Formulating new, interesting, sensible, plausible, meaningful hypotheses isn't easy. Even to begin to come up with reasonable and potentially insightful hypotheses requires familiarity with the existing research and theoretical perspectives on the phenomena you're interested in, a coherent definition of the construct(s) in question and a good sense of what makes for a good operational definition. We won't say much more about *formulating* hypotheses for this class. We'll focus more on what happens next: the statistical analysis used to test them.
 
