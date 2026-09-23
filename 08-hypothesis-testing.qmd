@@ -22,7 +22,7 @@ Back in Chapter 5 we considered the possibility that a radioactive spider bite m
 
 In other words, we asked how probable Parker's reaction time was under the assumption that it came from the population of unbitten kids---that the bite did not affect his reaction time. If we saw a score that was entirely unexceptional, we would have no reason to doubt that assumption. But if we saw a score that was very unusual, we would have reason to question it.
 
-That thought process already contained the basic logic of a hypothesis test: if the spider bite had done nothing, what were the chances of seeing a reaction time this fast or faster? But real research doesn't usually rely on examining just one individual. We usually want a *sample*---a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
+That thought process already contained the basic logic of a hypothesis test: if the spider bite had done nothing, what were the chances of seeing a reaction time this fast or faster? But real research doesn't usually rely on examining just one individual. We usually want a *sample*. We'd need a bunch of kids who we treated to radioactive spider bites to see if it would alter their reaction times. Obviously in the real world this experiment probably would not make it past the ethics board, but the Spiderverse™️ provides just such a scenario.
 
 ![A sample of my son's toy Spider-People, $n = 3$](resources/figures/3-spidermen.gif){#fig-spidermen}
 
@@ -32,9 +32,9 @@ So say we find three kids, all bitten by radioactive spiders, and we measure the
 
 ### Null Hypothesis Significance Testing
 
-The move from one Spider-Man to a sample of Spider-People changes the calculation, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution*---the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme or more than the one we observed.
+Moving from one Spider-Man to a sample of Spider-People changes the calculations, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution*---the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme or more than the one we observed, again assuming that the spider bites didn't change reaction times. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
 
-Let's attach the key terms to that logic. The formal procedure we're about to use is called **Null Hypothesis Significance Testing**, or **NHST**. The spider bite is the **treatment**: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a **treatment effect**, though a significance test alone cannot establish what caused the change. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
+The formal procedure is called **Null Hypothesis Significance Testing**, or **NHST**. The spider bite is the **treatment**: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a **treatment effect**, though a significance test alone cannot establish what caused the change. 
 
 Under NHST, as the name implies, we begin with a __null hypothesis__. This is a kind of skeptical working model: suppose the spider bites did nothing, so the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. This is the null hypothesis, denoted $H_0$. The **alternative hypothesis**, $H_1$, says that the population mean changed.
 
@@ -42,23 +42,21 @@ Changed how exactly? That's part of stating the alternative hypothesis. We could
 
 $$H_0: \mu_{\text{bitten}} \ge 284 \qquad H_1: \mu_{\text{bitten}} < 284$$
 
-But we don't really know what to expect. For all we know radioactive spider bites might actually impair performance. Since a change in either direction would be worth knowing about, we could instead use a __non-directional__ hypothesis:
+But we don't really know what to expect. Radioactive spider bites might actually impair performance. Since a change in either direction would be worth knowing about, we could instead use a __non-directional__ hypothesis:
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
-That's the version we'll use for our formal test. The direction is part of the hypothesis we state in advance, not something we choose later after seeing which way the sample mean moved.
+The directionality is part of the hypotheses we state in advance, not something we choose later after seeing which way the sample mean moved.
 
-If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. But we know that sample means vary due to sampling error, even when the population mean hasn't changed; the sample's mean probably won't be exactly 284ms. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls.
+If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. But we know that sample means vary due to sampling error, even when the population mean hasn't changed; the sample's mean probably won't be exactly 284ms. So if our treated sample has a different mean, we need to judge whether the difference is more than we would typically expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. This tells us what sample means that population would produce, which would be common and which would be unusual. Then we see where our observed mean of 189 falls.
 
-That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called *alpha* and written $\alpha$. For this first test, we'll use $\alpha = .05$: results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to why we might choose that criterion and how the hypotheses determine where we place it.
+That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called **alpha** and written $\alpha$. For this first test, we'll use $\alpha = .05$: results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to why we might choose that criterion and how the hypotheses determine where we place it.
 
-Every hypothesis test follows four broad steps: state the hypotheses, set the decision criteria, collect and analyze the data, and make a decision. We'll take a first pass through those steps with the Spider-People, then look back at the choices and reasoning within each one. First, let's work out how unusual our sample mean actually is.
+Every hypothesis test follows these four broad steps: state the hypotheses, set the decision criteria, collect and analyze the data, and make a decision. We'll run through those steps with the Spider-People, then look back at the choices and reasoning within each one. There are different kinds of tests we can submit our data to, depending on the nature of the data and the information we have (or assumptions we can make) about the untreated population. The one we'll introduce here is called the $z$-test.
 
 {{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{"preset":"z-test"}' fallback="Inferential process diagram for a z test." >}}
 
 ## The $z$-test {#sec-spider-test}
-
-There are different kinds of tests we can submit our data to, depending on the nature of the data and the information we have (or assumptions we can make) about the untreated population. The one we'll introduce here is called the $z$-test.
 
 The $z$-test is appropriate when we know the population standard deviation, and the sampling distribution of the mean is normal or approximately normal. The test statistic is a $z$-score that tells us how far our sample mean is from the null hypothesis mean, in units of the standard error of the mean.
 
@@ -66,11 +64,11 @@ $$z = \frac{M - \mu_0}{\sigma / \sqrt{n}}$$ {#eq-z-test}
 
 In the case of our Spider-People, I told you that we know the original population mean and standard deviation. I also told you we will treat the population as normally distributed. So that makes the $z$-test appropriate here. (But note that I just made up the $\sigma = 50$ and I told you I was taking liberties with the shape of the population. In real research, we rarely know the population standard deviation, so the $z$-test is not used very often. But it is a good place to start.)
 
-Now let's apply the full NHST, $z$-test procedure to our Spider-Sample. We have our hypotheses already: $H_0: \mu = 284$ and $H_1: \mu \ne 284$. We have also chosen $\alpha = .05$. Our non-directional alternative hypothesis determines what happens next: because a change in either direction would count as evidence against the null, we split that five percent between the two tails of the distribution. We can find the $z$-score that cuts off 2.5% in each tail in the unit normal table.
+Now let's apply the full NHST $z$-test procedure to our Spider-Sample. First, for our formal hypotheses we'll use a non-directional alternative hypothesis: $H_0: \mu = 284$ and $H_1: \mu \ne 284$. For the decision criterion, we'll use $\alpha = .05$. Our non-directional alternative hypothesis states that a change in either direction would count as evidence against the null. Therefore, we split that five percent between the two tails of the distribution. We can find the $z$-score that cuts off 2.5% in each tail in the unit normal table.
 
 {{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.80 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
 
-Since the standardized normal distribution described by the table is symmetrical, the critical values for a two-tailed test are $z = \pm 1.96$. If our sample mean is more than 1.96 standard errors above or below the null mean, we will reject the null hypothesis.
+Since the standardized normal distribution described by the table is symmetrical, the **critical values** for a two-tailed test are $z = \pm 1.96$. If our sample mean is more than 1.96 standard errors above or below the null mean, we will reject the null hypothesis.
 
 Next, we take our data and calculate the test statistic. First, let's quickly run the numbers with Peter Parker's lone score again, so we have that baseline to compare the sample to. We plug his reaction time of 189 milliseconds into the individual-score equation and get $-1.9$.
 
