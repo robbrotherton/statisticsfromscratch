@@ -34,21 +34,23 @@ So say we find three kids, all bitten by radioactive spiders, and we measure the
 
 The move from one Spider-Man to a sample of Spider-People changes the calculation, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution*---the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme or more than the one we observed.
 
-Let's attach the key terms to that logic. The formal procedure we're about to use is called *Null Hypothesis Significance Testing*, or *NHST*. The spider bite is the *treatment*: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a *treatment effect*, though a significance test alone cannot establish what caused the change. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
+Let's attach the key terms to that logic. The formal procedure we're about to use is called **Null Hypothesis Significance Testing**, or **NHST**. The spider bite is the **treatment**: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a **treatment effect**, though a significance test alone cannot establish what caused the change. We observe only one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
 
-Under NHST, as the name implies, we begin with a skeptical working model: suppose the spider bites did nothing, so the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. This is the *null hypothesis*, $H_0$. The *alternative hypothesis*, $H_1$, says that the population mean changed.
+Under NHST, as the name implies, we begin with a __null hypothesis__. This is a kind of skeptical working model: suppose the spider bites did nothing, so the population of bitten kids still has the same mean reaction time as the population of unbitten kids, 284 milliseconds. This is the null hypothesis, denoted $H_0$. The **alternative hypothesis**, $H_1$, says that the population mean changed.
 
-Changed how exactly? We could specify a __directional__ hypothesis. We were kind of assuming that the bites would make the kids faster, so we could say specifically that our alternative hypothesis is that the mean reaction time decreased.
+Changed how exactly? That's part of stating the alternative hypothesis. We could make it __directional__. We were kind of assuming that the bites would make the kids faster, so we could say specifically that the mean reaction time decreased.
 
 $$H_0: \mu_{\text{bitten}} \ge 284 \qquad H_1: \mu_{\text{bitten}} < 284$$
 
-But we don't really know what to expect. Maybe radioactive spiderbites actually impair performance for all we know, so we could use a __non-directional__ hypothesis: the mean changed in either direction.
+But we don't really know what to expect. For all we know radioactive spider bites might actually impair performance. Since a change in either direction would be worth knowing about, we could instead use a __non-directional__ hypothesis:
 
 $$H_0: \mu_{\text{bitten}} = 284 \qquad H_1: \mu_{\text{bitten}} \neq 284$$
 
+That's the version we'll use for our formal test. The direction is part of the hypothesis we state in advance, not something we choose later after seeing which way the sample mean moved.
+
 If the null is true, our three Spider-People should behave like a random sample from a population with a mean of 284. But we know that sample means vary due to sampling error, even when the population mean hasn't changed; the sample's mean probably won't be exactly 284ms. So if our treated sample has a different mean, we need to judge whether the difference is more than we would commonly expect from sampling error alone. We do that by imagining the sampling distribution we would get if the treatment had no effect, then asking how common or uncommon our observed sample mean would be in that distribution. We can work out what sorts of sample means that population would commonly produce, then see where our observed mean of 189 falls.
 
-That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called *alpha* and written $\alpha$. For this first test, we'll use $\alpha = .05$: results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to why we might choose that criterion and how directionality affects it.
+That raises another question: how unlikely is unlikely enough? Before analyzing the data, we choose a *decision criterion*, called *alpha* and written $\alpha$. For this first test, we'll use $\alpha = .05$: results in the most extreme five percent of the null distribution will count as sufficiently unusual to reject the null. We'll return to why we might choose that criterion and how the hypotheses determine where we place it.
 
 Every hypothesis test follows four broad steps: state the hypotheses, set the decision criteria, collect and analyze the data, and make a decision. We'll take a first pass through those steps with the Spider-People, then look back at the choices and reasoning within each one. First, let's work out how unusual our sample mean actually is.
 
@@ -64,7 +66,7 @@ $$z = \frac{M - \mu_0}{\sigma / \sqrt{n}}$$ {#eq-z-test}
 
 In the case of our Spider-People, I told you that we know the original population mean and standard deviation. I also told you we will treat the population as normally distributed. So that makes the $z$-test appropriate here. (But note that I just made up the $\sigma = 50$ and I told you I was taking liberties with the shape of the population. In real research, we rarely know the population standard deviation, so the $z$-test is not used very often. But it is a good place to start.)
 
-Now let's apply the full NHST, $z$-test procedure to our Spider-Sample. We have our hypotheses already: $H_0: \mu = 284$ and $H_1: \mu \ne 284$, and we have chosen $\alpha = .05$. Because our alternative hypothesis is non-directional, allowing for a change in either direction, we split that five percent between the two tails of the distribution. We can find the $z$-score that cuts off 2.5% in each tail in the unit normal table.
+Now let's apply the full NHST, $z$-test procedure to our Spider-Sample. We have our hypotheses already: $H_0: \mu = 284$ and $H_1: \mu \ne 284$. We have also chosen $\alpha = .05$. Our non-directional alternative hypothesis determines what happens next: because a change in either direction would count as evidence against the null, we split that five percent between the two tails of the distribution. We can find the $z$-score that cuts off 2.5% in each tail in the unit normal table.
 
 {{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.80 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
 
@@ -119,6 +121,8 @@ The alternative hypothesis is less specific. It says that the mean is *not* 284,
 
 That point can be overstated. We *could* specify a particular alternative, such as $\mu_{\text{bitten}} = 250$. That would give us another sampling distribution to work with, and we'll need just such a specific alternative when we discuss statistical power in the next chapter. But our alternative here, $\mu_{\text{bitten}} \neq 284$, does not make one precise numerical prediction.
 
+Stating the alternative also means deciding whether it is directional. A directional hypothesis predicts an increase or a decrease; a non-directional hypothesis allows for a difference either way. A directional hypothesis makes sense when we have a defensible reason to predict one direction in advance, and a result in the other direction would not support that prediction. Otherwise, the non-directional hypothesis is the usual choice. Either way, this decision belongs here, before we look at the data. In step two, we'll use it to decide where the critical region---or regions---should go.
+
 The null doesn't have to say that two populations are identical in every imaginable respect. It makes a claim about the particular parameter we're testing---the population mean, in this case. In other statistical tests, the null might state that two treatment conditions have equal population means, or that there is no association between two variables. In broad terms, the null says that the particular effect or relationship we're testing is absent.
 
 These two propositions are logical complements: the population mean is either equal to 284 or it isn't. But the evidence isn't perfectly symmetrical. A result that would be very unusual under the null gives us reason to reject it, though it doesn't prove any particular alternative or establish what caused the difference. A result that isn't unusual only means that we fail to reject the null; it doesn't prove the null hypothesis true.
@@ -135,9 +139,9 @@ If you really think about it, this should be by far the most important and effor
 
 ### Step 2: Set the decision criteria
 
-For step two, we're asking, "if the null hypothesis is true, what sample statistics are we most likely or unlikely to see?" The answer depends on the data and the appropriate test statistic, but the general aim is to decide in advance what results would be sufficiently unusual to reject the null.
+For step two, we're asking, "if the null hypothesis is true, what sample statistics are we most likely or unlikely to see?" We already decided in step one which directions would count as evidence against the null. Now we choose how much of the null distribution will count as sufficiently unusual and put the critical region in the appropriate place.
 
-In our first pass, we used $\alpha$ as a cutoff chosen before analyzing the data. A second quantity now becomes useful: the $p$-value, which we calculate from the observed data. It is the probability, assuming the null model and its other assumptions are correct, of obtaining a test statistic as extreme as or more extreme than the one we observed. What counts as "extreme" depends on whether our alternative hypothesis is one- or two-tailed.
+In our first pass, we used $\alpha$ as a cutoff chosen before analyzing the data. We can also think about a second quantity: the $p$-value, which we calculate from the observed data. It is the probability, assuming the null model and its other assumptions are correct, of obtaining a test statistic as extreme as or more extreme than the one we observed. What counts as "extreme" depends on the direction specified in the alternative hypothesis.
 
 By convention, psychology often uses an alpha level of .05, placing the most extreme five percent of the null distribution in the rejection region. If our sample's $p$-value is less than $\alpha$, we call the result statistically significant and reject the null hypothesis. So when you see $p < .05$ in a published journal article, this is what it means. Neither number is the probability that the null hypothesis is true. When the null is true and the test's assumptions hold, $\alpha$ is the long-run probability that the procedure will reject it by mistake.
 
@@ -145,15 +149,15 @@ Why five percent? There is nothing mathematically special about it. Ronald Fishe
 
 The **critical region** contains the sample statistics that would lead us to reject the null hypothesis. Its boundary is the **critical value**. For an upper-tailed test with $\alpha = .05$, for example, the critical value is the 95th percentile of the null distribution: 95 percent lies below it, and five percent lies above it.
 
-### One-tailed and two-tailed tests
+### One- and two-tailed tests
 
-A one-tailed test has one critical region. A two-tailed test has critical regions at both extremes, dividing the chosen $\alpha$ between them. If $\alpha = .05$, a two-tailed test places two and a half percent at each end of the distribution.
+A directional alternative leads to a one-tailed test, with one critical region in the predicted direction. A non-directional alternative leads to a two-tailed test, with critical regions at both extremes. So if $\alpha = .05$, a two-tailed test divides it between the tails, placing two and a half percent at each end of the distribution.
 
 In percentile terms, the two critical values are at the 2.5th and 97.5th percentiles. The middle 95 percent of the null hypothesis distribution lies between them, leaving the most extreme five percent outside them.
 
-Whether we use a one- or two-tailed test depends on how we stated our hypotheses in step one. With a one-tailed, directional hypothesis, the researcher specifies in advance that they are looking for either an increase or a decrease. With a two-tailed, non-directional test, we're looking for a difference in either direction. The main point is that we determine up front what kind of results would lead us to reject the null. We don't choose a convenient tail after seeing the data.
+Notice that we aren't making a new decision about directionality in step two. We're following through on the hypotheses we stated in step one.
 
-Unless we have a defensible reason to predict a direction in advance, the two-tailed test is the usual choice: it allows results in either direction to count as evidence against the null.
+That "in advance" part matters. Suppose our result falls just short of the critical value for the test we planned. If we then switch to a more convenient tail or relax our alpha until the result becomes significant, we aren't giving the data a fair chance to contradict our expectations. We're drawing the target around wherever the arrow happened to land. With enough choices available, finding *some* rule under which the result is significant becomes much easier, and the original error rate no longer describes the procedure we actually followed.
 
 In our initial analysis, we made the decision by comparing $z = -3.29$ with the critical values. We can now describe the same result using a $p$-value. Looking up the magnitude of that $z$-score in the unit normal table gives an area of $.0005$ to the right of $z = 3.29$. By symmetry, $P(z \le -3.29) = .0005$ as well. Because our hypothesis is non-directional, an equally extreme result in the other tail also counts, giving a two-tailed $p$-value of approximately $.0010$. Since $p < \alpha$, this leads to the same decision as the critical-value comparison.
 
@@ -188,9 +192,15 @@ Try changing alpha while keeping the observed $z$ fixed. Then move $z$ across a 
 ::::
 :::::
 
+{{< include quizzes/08-hypothesis-testing-choose-in-advance.qmd >}}
+
 ### Step 3: Collect and analyze the data
 
-Step three is to conduct the research, gather data, and calculate the appropriate sample statistics. For our purposes, recall that the version of the Central Limit Theorem we're using assumes independent observations drawn from the same population distribution. Random sampling is one way to support those assumptions, though in practice social scientists often collect data in less tidy ways.
+Only once we've stated the hypotheses and set the decision criteria do we collect the data and calculate the appropriate sample statistics. The order matters: we're testing how well the data fit a model specified in advance, rather than forming a model around the data we happened to observe.
+
+This is sometimes called *confirmatory* hypothesis testing. Exploring data for interesting patterns can be valuable too, and those patterns can suggest new hypotheses. But that's a different use of the data. A hypothesis suggested by the results should be treated as exploratory. To test it confirmatorily, we'd need new data.
+
+For our purposes, recall that the version of the Central Limit Theorem we're using assumes independent observations drawn from the same population distribution. Random sampling is one way to support those assumptions, though in practice social scientists often collect data in less tidy ways.
 
 The exact statistic we calculate depends on the nature of the data. We'll encounter several others later, including the $t$-test, analysis of variance (ANOVA), and correlation and regression. They all rely on the same fundamental hypothesis-testing ideas we're outlining here.
 
