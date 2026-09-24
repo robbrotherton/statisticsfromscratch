@@ -48,8 +48,7 @@ test("secondary action labels describe what they reveal or hide", () => {
   for (const label of [
     "Show hint",
     "Hide hint",
-    "Show answer",
-    "Hide answer",
+    "Answer",
     "Show explanation",
     "Hide explanation",
   ]) {
@@ -60,7 +59,11 @@ test("secondary action labels describe what they reveal or hide", () => {
   assert.match(filter, />Show hint<\/button>/);
   assert.match(runtime, /const hasModelAnswer = Boolean/);
   assert.match(runtime, /state === "correct" \|\| !hasModelAnswer/);
-  assert.match(runtime, /hasModelAnswer \? "Show answer" : "Show explanation"/);
+  assert.match(runtime, /hasModelAnswer \? `Show \$\{answerNoun\}` : "Show explanation"/);
+  assert.match(runtime, /: `Hide \$\{answerNoun\}`/);
+  assert.match(runtime, /modelAnswer\.dataset\.answerLabel/);
+  assert.match(filter, /data-answer-label=/);
+  assert.match(filter, /question\.answerLabel ~= nil and is_blank\(question\.answerLabel\)/);
 });
 
 test("quiz layout uses one shared edge and stack spacing token", () => {
