@@ -46,6 +46,8 @@
     }
     let plotOptions = {};
     function plot(options) { plotOptions = options; }
+    // Redraws an in-between animation frame without announcing a new readout.
+    function preview(options) { graph.update(options); }
     function publish(value, text) {
       root.node().value = value; readout.text(text);
       graph.update(Object.assign({}, plotOptions, {ariaLabel: text}));
@@ -54,36 +56,89 @@
     function wrap(action) {
       global.interactiveFigure.wrap({root:root.node(), controls:controls.node(), label:kind === "alpha" ? "alpha and test direction controls" : "effect size controls", placement:"callout", startOpen:true, applyAction:(values,context)=>{if(context && context.setControlsOpen) context.setControlsOpen(Boolean(values["controls-open"])); action(values);}});
     }
-    return {root,controls,plot,legend,slider,publish,wrap};
+    return {root,controls,plot,preview,legend,slider,publish,wrap};
   }
 
   global.makeAlphaTutorial = function() {
     const chart = scaffold("alpha", [-4,4]);
-    let alpha = .05, tail = "two", z = -1.8;
+    let alpha = .05, tail = "two", z = -1.8, showZ = true;
+    // `shown` is the scene currently on screen, which may be mid-tween.
+    let shown = null, tween = null, ready = false;
     const a = chart.slider("Alpha (α)","alpha",alpha,.001,.1,.001,v => {alpha=v;draw();});
     const row = chart.controls.append("label").attr("class", "sfs-check-row"); row.append("span").text("Test direction");
     const select = row.append("select").attr("name","tail");
     [["two","Two-tailed"],["left","Lower tail"],["right","Upper tail"]].forEach(([v,t]) => select.append("option").attr("value",v).text(t));
     select.on("change",function(event){event.stopPropagation();tail=this.value;draw();});
-    const observed = chart.slider("Observed z","z",z,-3.5,3.5,.01,v=>{z=v;draw();});
-    chart.legend.text("Shaded tails: reject H₀. Unshaded region: fail to reject H₀. Dotted line: observed z.");
-    function draw() {
-      const value = decision(alpha,tail,z);
-      chart.plot({
-        shade: { tail, alpha, opacity: .35 },
-        markers: [
-          ...[value.low,value.high].filter(Number.isFinite).map(at => ({
-            at, height: .85, color: "var(--sfs-critical-color, #c63f3f)", dash: ""
-          })),
-          { at: z, height: 1, color: "currentColor", dash: "3 3",
-            label: `z = ${z.toFixed(2)}`, labelAnchor: z < -2.8 ? "start" : z > 2.8 ? "end" : "middle" }
-        ]
-      });
-      a.property("value",alpha); select.property("value",tail); observed.property("value",z);
-      const limits = [value.low,value.high].filter(Number.isFinite).map(v=>v.toFixed(2)).join(" and ");
-      chart.publish(value,`α = ${alpha.toFixed(3)} · Critical z: ${limits}. Observed z = ${z.toFixed(2)}, p = ${value.p.toFixed(4)}: ${value.reject ? "reject" : "fail to reject"} H₀.`);
+    const observed = chart.slider("Observed z","z",z,-3.5,3.5,.01,v=>{z=v;showZ=true;draw();});
+    // The tutorial steps explain the shading, so this figure skips the legend
+    // and needs less reserved space for its shorter readout.
+    chart.legend.remove();
+    chart.root.select(".nc-readout").style("min-height", "3em");
+    // A scene is what the graph shows: the tail, the critical magnitude, the
+    // observed z, and the opacities of the critical regions and the z marker.
+    // Tutorial steps tween between scenes; sliders jump straight to one.
+    function target() {
+      return { tail, crit: stats.normalInv(1 - alpha / (tail === "two" ? 2 : 1)), z, zOpacity: showZ ? 1 : 0, regionOpacity: 1 };
     }
-    draw(); chart.wrap(action => {alpha=clamp(Number(action.alpha ?? alpha),.001,.1); z=clamp(Number(action.z ?? z),-3.5,3.5);tail=["two","left","right"].includes(action.tail)?action.tail:tail;draw();});
+    function sceneOptions(s) {
+      const low = s.tail === "right" ? -Infinity : -s.crit;
+      const high = s.tail === "left" ? Infinity : s.crit;
+      return {
+        shade: [
+          ...(Number.isFinite(low) ? [{ to: low, opacity: .35 * s.regionOpacity }] : []),
+          ...(Number.isFinite(high) ? [{ from: high, opacity: .35 * s.regionOpacity }] : [])
+        ],
+        markers: [
+          ...[low,high].filter(Number.isFinite).map(at => ({
+            at, height: .85, color: "var(--sfs-critical-color, #c63f3f)", dash: "", opacity: .95 * s.regionOpacity
+          })),
+          ...(s.zOpacity > 0 ? [{ at: s.z, height: 1, color: "currentColor", dash: "3 3", opacity: .95 * s.zOpacity,
+            label: `z = ${s.z.toFixed(2)}`, labelAnchor: s.z < -2.8 ? "start" : s.z > 2.8 ? "end" : "middle" }] : [])
+        ]
+      };
+    }
+    function stopTween() { if (tween) { tween.stop(); tween = null; } }
+    function tweenScene(from, to, duration, done) {
+      const lerp = (x, y, t) => x + (y - x) * t;
+      tween = d3.timer(elapsed => {
+        const t = d3.easeCubicInOut(Math.min(1, elapsed / duration));
+        shown = { tail: to.tail, crit: lerp(from.crit, to.crit, t), z: lerp(from.z, to.z, t),
+          zOpacity: lerp(from.zOpacity, to.zOpacity, t), regionOpacity: lerp(from.regionOpacity, to.regionOpacity, t) };
+        chart.preview(sceneOptions(shown));
+        if (elapsed >= duration) { stopTween(); done(); }
+      });
+    }
+    function animateTo() {
+      const next = target();
+      const from = Object.assign({}, shown);
+      // A hidden marker appears (or disappears) in place rather than sliding.
+      if (from.zOpacity === 0) from.z = next.z;
+      const to = Object.assign({}, next, next.zOpacity === 0 ? { z: from.z } : {});
+      a.property("value",alpha); select.property("value",tail); observed.property("value",z);
+      if (from.tail === to.tail) { tweenScene(from, to, 700, draw); return; }
+      // Switching tails: fade the old critical regions out, then the new ones in.
+      tweenScene(from, Object.assign({}, from, { z: to.z, zOpacity: to.zOpacity, regionOpacity: 0 }), 350, () =>
+        tweenScene(Object.assign({}, to, { regionOpacity: 0 }), to, 350, draw));
+    }
+    function draw() {
+      stopTween();
+      const value = decision(alpha,tail,z);
+      shown = target();
+      chart.plot(sceneOptions(shown));
+      a.property("value",alpha); select.property("value",tail); observed.property("value",z);
+      const fmt = v => v.toFixed(2).replace("-", "−");
+      const limits = [value.low,value.high].filter(Number.isFinite).map(fmt).join(" and ");
+      const result = showZ ? ` Observed z = ${fmt(z)}, p = ${value.p.toFixed(4)}: ${value.reject ? "reject" : "fail to reject"} H₀.` : "";
+      chart.publish(value,`α = ${alpha.toFixed(3)} · Critical z: ${limits}.${result}`);
+    }
+    draw(); chart.wrap(action => {
+      stopTween();
+      alpha=clamp(Number(action.alpha ?? alpha),.001,.1); z=clamp(Number(action.z ?? z),-3.5,3.5);tail=["two","left","right"].includes(action.tail)?action.tail:tail;showZ=action.observed !== false;
+      // The first action sets the opening scene, so it never animates. The
+      // runtime already sends animate: false for reduced motion.
+      if (ready && action.animate !== false) animateTo(); else draw();
+      ready = true;
+    });
     return chart.root.node();
   };
 

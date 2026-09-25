@@ -305,6 +305,10 @@ local function validate_question(question, path, seen_ids)
     validation_error(path .. ".checkLabel", "must not be blank")
   end
 
+  if question.answerLabel ~= nil and is_blank(question.answerLabel) then
+    validation_error(path .. ".answerLabel", "must not be blank")
+  end
+
   if question.answerFrom ~= nil then
     if is_blank(question.answerFrom) then
       validation_error(path .. ".answerFrom", "must not be blank")
@@ -459,6 +463,7 @@ local function add_question_html(question)
   question.id = field_text(question.id)
   question.type = field_text(question.type)
   question.checkLabel = field_text(question.checkLabel)
+  question.answerLabel = field_text(question.answerLabel)
   question.answerFrom = field_text(question.answerFrom)
   question.responseFrom = field_text(question.responseFrom)
   question.promptFrom = field_text(question.promptFrom)
@@ -634,9 +639,13 @@ local function render_question(quiz, question, diagnostic, number)
 
   table.insert(parts, '<div class="quiz-explanation-panel" hidden>')
   local model_answer = answer_html(question)
+  -- Open-ended questions can relabel the panel, e.g. "Example answer".
+  local answer_label = question.answerLabel
+  if answer_label == nil or answer_label == "" then answer_label = "Answer" end
   if model_answer ~= "" then
     table.insert(parts,
-      '<div class="quiz-model-answer"><strong>Answer</strong>' .. model_answer .. "</div>")
+      '<div class="quiz-model-answer" data-answer-label="' .. html_escape(answer_label, true) .. '">'
+      .. "<strong>" .. html_escape(answer_label) .. "</strong>" .. model_answer .. "</div>")
   end
   if question.explanationHtml and question.explanationHtml ~= "" then
     table.insert(parts,

@@ -409,9 +409,10 @@
     const hasExplanation = Boolean(
       explanationPanel.querySelector(".quiz-explanation-rendered")
     );
-    const hasModelAnswer = Boolean(
-      explanationPanel.querySelector(".quiz-model-answer")
-    );
+    const modelAnswer = explanationPanel.querySelector(".quiz-model-answer");
+    const hasModelAnswer = Boolean(modelAnswer);
+    // The filter writes the panel's label (default "Answer"); the buttons echo it.
+    const answerNoun = ((modelAnswer && modelAnswer.dataset.answerLabel) || "Answer").toLowerCase();
     const hasAnswerOrExplanation = explanationPanel.children.length > 0;
     const hasDiagnostics = Array.isArray(question.diagnostics) &&
       question.diagnostics.length > 0;
@@ -456,7 +457,7 @@
         reveal.hidden = false;
         reveal.textContent = state === "correct" || !hasModelAnswer
           ? "Hide explanation"
-          : "Hide answer";
+          : `Hide ${answerNoun}`;
         reveal.setAttribute("aria-expanded", "true");
         return;
       }
@@ -467,7 +468,7 @@
         reveal.textContent = "Show explanation";
       } else {
         reveal.hidden = !hasAnswerOrExplanation;
-        reveal.textContent = hasModelAnswer ? "Show answer" : "Show explanation";
+        reveal.textContent = hasModelAnswer ? `Show ${answerNoun}` : "Show explanation";
       }
     }
 
