@@ -32,9 +32,13 @@ So say we find three kids, all bitten by radioactive spiders, and we measure the
 
 ### Null Hypothesis Significance Testing
 
-Moving from one Spider-Man to a sample of Spider-People changes the calculations, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution* we learned about in [Chapter 7](#sec-sampling-distribution). This describes the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme as or more extreme than the one we observed, again assuming that the spider bites didn't change reaction times. We only test one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean.
+Moving from one Spider-Man to a sample of Spider-People changes the calculations, but the general logic is the same. For Peter's individual score, we used the population distribution to ask what reaction times we would commonly see if nothing had changed. For our sample mean, we'll need the *sampling distribution* we learned about in [Chapter 7](#sec-sampling-distribution). This describes the distribution of all possible sample means for that population and sample size. Once we know its characteristics we can ask what proportion of means are as extreme as or more extreme than the one we observed, again assuming that the spider bites didn't change reaction times. We only test one treated sample, but we care about the hypothetical population it represents---what would happen if everyone received the treatment. The sample mean is our clue to that population mean, as @fig-z-test-inference illustrates.
 
+::: {#fig-z-test-inference}
 {{< interactive-figure zTestInferentialDiagram makeInferentialDiagram options='{}' fallback="Inferential process diagram for a z test." >}}
+
+The inferential process for a single-sample hypothesistest, from a treated sample to a conclusion about the population.
+:::
 
 The formal procedure is called **Null Hypothesis Significance Testing**, or **NHST**. The spider bite is the **treatment**: the condition or intervention applied to our sample. A change in reaction times associated with the treatment would be a **treatment effect** (though a significance test alone cannot establish what *caused* the change). 
 
@@ -64,13 +68,17 @@ For this example, we'll treat the three observations as independent and assume t
 
 Applying the full NHST $z$-test procedure to our Spider-Sample, the first step is to state our formal hypotheses. We'll use a non-directional alternative hypothesis: $H_0: \mu = 284$ and $H_1: \mu \ne 284$. For the decision criterion, we'll use $\alpha = .05$. Our non-directional alternative hypothesis states that a change in either direction would count as evidence against the null. Therefore, we split that five percent between the two tails of the distribution, making this a *two-tailed* test. We can find the $z$-score that cuts off 2.5% in each tail in the unit normal table.
 
-{{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.90 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
+::: {#tbl-z-two-tailed-critical}
+{{< interactive-figure criticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","z":{"from":1.90,"to":2.00,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.90 to 2.00, with the area to the right of z = 1.96, .025, highlighted." >}}
+
+An excerpt of the unit normal table from $z = 1.90$ to $z = 2.00$, highlighting the .025 upper-tail area at $z = 1.96$ for a two-tailed test with $\alpha = .05$.
+:::
 
 Since the standardized normal distribution described by the table is symmetrical, the critical values for a two-tailed test are $z = \pm 1.96$. If our sample mean is more than 1.96 standard errors above or below the null mean, we will reject the null hypothesis.
 
 Next, we take our data and calculate the test statistic. For comparison, Peter's individual score gave us $z = -1.9$.
 
-That value is not within the critical regions of the null distribution; it is less extreme than the cutoff of $\pm 1.96$ that we obtained from the table above. So now we know that Peter's score is a bit unusual, but not quite extreme enough to reject the null hypothesis, according to our stated $\alpha = .05$.
+That value is not within the critical regions of the null distribution; it is less extreme than the cutoff of $\pm 1.96$ that we obtained from @tbl-z-two-tailed-critical. So now we know that Peter's score is a bit unusual, but not quite extreme enough to reject the null hypothesis, according to our stated $\alpha = .05$.
 
 For the sample of three, we locate the sample mean among all the sample means that the population could produce. The equations from Chapter 7 tell us that this sampling distribution has the same mean as the population and a standard error of $\sigma_M = \sigma / \sqrt{n}$. The Central Limit Theorem tells us about its shape: if the population is normal, the sampling distribution is normal at any sample size; otherwise, it becomes approximately normal as the sample size increases. Because our sample contains only three observations, this calculation relies on our simplifying assumption that reaction times are normally distributed; with a large enough sample size, we could still run the $z$-test even if the population were skewed.
 
@@ -81,9 +89,13 @@ The numerator is the same difference we calculated for Peter alone. It's the den
 
 The resulting $z = -3.29$ for the sample of $n = 3$ is quite a bit more extreme than $-1.9$ for the single score, because the distribution of sample means has lower variability than the distribution of individual scores; a sample mean as far from the population mean as this is less common than an individual score that far away. Now the $z$-score for the sample is beyond the critical values we stated above, $\pm 1.96$. That puts the sample mean in the lower critical region, so we would reject the null hypothesis. We call this result **statistically significant** at $\alpha = .05$.
 
-Visually, here's what the sampling distribution looks like and where our sample mean falls. I've included axes for both the original units (milliseconds) and the $z$-scores representing the sampling distribution, and shaded the critical regions red. Remember, the $z$-scores are just a change of label. You can see our sample mean pretty far down in the extreme tail of the distribution.
+@fig-spidermen-sampling-distribution shows what the sampling distribution looks like and where our sample mean falls. I've included axes for both the original units (milliseconds) and the $z$-scores representing the sampling distribution, and shaded the critical regions red. Remember, the $z$-scores are just a change of label. You can see our sample mean pretty far down in the extreme tail of the distribution.
 
+::: {#fig-spidermen-sampling-distribution}
 {{< interactive-figure spidermenSamplingDistribution makeStandardizedScoreGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"normal","mean":284,"sd":28.87,"xDomain":[165,403],"xTicks":8,"zTickValues":[-4,-3,-2,-1,0,1,2,3,4],"rawAxisSideLabel":"(M, ms)","zAxisSideLabel":"(z)","statGuides":false,"maxWidth":"42rem","shade":{"tail":"two","alpha":0.05},"markers":{"at":189,"label":"M = 189","height":0.45,"color":"var(--sfs-accent, #2c7fb8)"},"animate":true,"ariaLabel":"Sampling distribution of mean reaction times for samples of three, centered on 284 milliseconds with standard error 28.87 milliseconds. The raw-score ruler is aligned above a z-score ruler, the two critical regions beyond z equals plus or minus 1.96 are shaded red, and a vertical line marks the sample mean of 189 milliseconds at z equals negative 3.29."}' fallback="Sampling distribution of mean reaction times for samples of three, centered on 284 ms with standard error 28.87 ms; aligned raw-score and z-score axes show the same positions, the two critical regions beyond z = ±1.96 are shaded red, and a vertical line marks the sample mean of 189 ms at z = −3.29." >}}
+
+The null sampling distribution for means of $n = 3$ reaction times, with critical regions beyond $z = \pm 1.96$ and the observed mean of 189 ms at $z = -3.29$.
+:::
 
 In other words, if spider bites leave the population mean at 284 milliseconds, getting a sample of three people with an average of 189 milliseconds is very unlikely. The observed sample is difficult to reconcile with our starting assumption that the bites did nothing. That doesn't prove what caused the difference, but it gives us evidence against the null hypothesis.
 
@@ -133,7 +145,7 @@ By convention, psychology often uses an alpha level of .05. Why five percent? Ro
 
 #### One- and two-tailed tests
 
-A directional hypothesis leads to a one-tailed test, with one critical region in the predicted direction. A non-directional hypothesis leads to a two-tailed test, with critical regions at both extremes. So if $\alpha = .05$, a two-tailed test divides it between the tails, placing two and a half percent at each end of the distribution with 95% in the middle. Compare the .
+A directional hypothesis leads to a one-tailed test, with one critical region in the predicted direction. A non-directional hypothesis leads to a two-tailed test, with critical regions at both extremes. So if $\alpha = .05$, a two-tailed test divides it between the tails, placing two and a half percent at each end of the distribution with 95% in the middle. Compare the regions in @fig-one-two-tailed.
 
 :::: {#fig-one-two-tailed}
 ::: {.sfs-figure-row .sfs-figure-row-wide}
@@ -146,9 +158,13 @@ Critical regions for $\alpha = .05$. A one-tailed test puts all five percent in 
 
 The associated critical value(s) can be found in the unit normal table, looking for the column that gives the proportion of the curve beyond a given $z$-score. For a one-tailed test with $\alpha = .05$, we look for an area of about .05 in one tail:
 
-{{< interactive-figure oneTailedZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table: the one-tailed cutoff","z":{"from":1.62,"to":1.67,"step":0.01},"zDigits":2,"digits":4,"areas":["left","right","mean-to-z"],"selected":{"z":1.64,"area":"right"},"maxWidth":"32rem"}' fallback="Unit normal table excerpt: the area to the right is .0526 at z = 1.62, .0516 at 1.63, .0505 at 1.64, .0495 at 1.65, .0485 at 1.66, and .0475 at 1.67. The .0505 entry at z = 1.64 is highlighted." >}}
+::: {#tbl-z-one-tailed-critical}
+{{< interactive-figure oneTailedZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","z":{"from":1.62,"to":1.67,"step":0.01},"zDigits":2,"digits":4,"areas":["left","right","mean-to-z"],"selected":{"z":1.64,"area":"right"},"maxWidth":"32rem"}' fallback="Unit normal table excerpt: the area to the right is .0526 at z = 1.62, .0516 at 1.63, .0505 at 1.64, .0495 at 1.65, .0485 at 1.66, and .0475 at 1.67. The .0505 entry at z = 1.64 is highlighted." >}}
 
-At $z = 1.64$, the area to the right is $.0505$, or about five percent. The exact five-percent cutoff lies between $1.64$ and $1.65$ (about $1.645$), but our table gives $z$-scores to two decimal places. We'll use $1.64$ as the table-based approximation in this chapter and its quizzes. For an upper-tailed test, the cutoff is about $+1.64$; by symmetry, for a lower-tailed test it is about $-1.64$. For a two-tailed test, we look for .025 in each tail, giving the familiar cutoffs of about $\pm 1.96$.
+An excerpt of the unit normal table from $z = 1.62$ to $z = 1.67$, highlighting the .0505 upper-tail area at $z = 1.64$ for a one-tailed test with $\alpha = .05$.
+:::
+
+In @tbl-z-one-tailed-critical, at $z = 1.64$, the area to the right is $.0505$, or about five percent. The exact five-percent cutoff lies between $1.64$ and $1.65$ (about $1.645$), but our table gives $z$-scores to two decimal places. We'll use $1.64$ as the table-based approximation in this chapter and its quizzes. For an upper-tailed test, the cutoff is about $+1.64$; by symmetry, for a lower-tailed test it is about $-1.64$. For a two-tailed test, we look for .025 in each tail, giving the cutoffs of about $\pm 1.96$ (as we found in @tbl-z-two-tailed-critical).
 
 
 Two-tailed tests are the default in the social sciences for the most part, even when researchers do have a direction in mind. Splitting alpha between both tails means that a result in the predicted direction has to be more extreme to reject the null: beyond $-1.96$ rather than $-1.64$ for a one-tailed test. So the two-tailed test is the more cautious choice, and it leaves room for an unexpected result in the other direction (like the possibility that spider bites are bad for your reaction speed, actually).
@@ -173,9 +189,13 @@ There's an equivalent way to reach the same decision, using the **$p$-value**, w
 
 Our Spider-Sample mean of 189ms produced a $z$-score of $-3.29$. We can find the $p$-value associated with that score by looking it up in the unit normal table.
 
-{{< interactive-figure spidermenZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":3.25,"to":3.33,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":3.29,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 3.25 to 3.33, with the area to the right of z = 3.29, .0005, highlighted." >}}
+::: {#tbl-z-spidermen-p-value}
+{{< interactive-figure spidermenZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","z":{"from":3.25,"to":3.33,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":3.29,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 3.25 to 3.33, with the area to the right of z = 3.29, .0005, highlighted." >}}
 
-The table gives an area of $.0005$ to the right of $z = 3.29$. By symmetry, $P(z \le -3.29) = .0005$ as well. Because our hypothesis is non-directional, an equally extreme result in the other tail also counts, giving a two-tailed $p$-value of approximately $.0010$.
+An excerpt of the unit normal table from $z = 3.25$ to $z = 3.33$, highlighting the .0005 upper-tail area at $z = 3.29$ used to find the Spider-People sample's $p$-value.
+:::
+
+@tbl-z-spidermen-p-value gives an area of $.0005$ to the right of $z = 3.29$. By symmetry, $P(z \le -3.29) = .0005$ as well. Because our hypothesis is non-directional, an equally extreme result in the other tail also counts, giving a two-tailed $p$-value of approximately $.0010$.
 
 If $p < \alpha$, this is another way of saying that the test statistic is in the critical region, and we reject the null hypothesis: our result is **statistically significant**. Here $p \approx .001$, well below $\alpha = .05$, so we reach the same decision as the critical-value comparison.
 
@@ -188,11 +208,15 @@ Failing to reject the null isn't the same as accepting it or showing that nothin
 ::::: {#act-alpha-critical-regions .callout-tip .interactive}
 ## Explore alpha and critical regions
 
+::: {#fig-alpha-critical-regions}
 {{< interactive-figure alphaTutorial makeAlphaTutorial fallback="Explore alpha and critical regions. Use the accompanying steps for an explanation." >}}
+
+How the location of the critical region, the observed $z$-score, and $\alpha$ affect the decision to reject the null hypothesis.
+:::
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Critical regions" data-action='{"alpha":0.05,"tail":"two","z":-3.29,"observed":false}'}
-The curve shows the null distribution of $z$: the values we would expect if the null hypothesis is true. With $\alpha = .05$ split between the two tails, the shaded critical regions lie beyond about $\pm 1.96$. A result landing in either shaded region would lead us to reject the null. A result in the unshaded middle would have us fail to reject.
+This curve shows the null distribution of $z$: the values we would expect if the null hypothesis is true. With $\alpha = .05$ split between the two tails, the shaded critical regions lie beyond about $\pm 1.96$. A result landing in either shaded region would lead us to reject the null. A result in the unshaded middle would have us fail to reject.
 :::
 
 ::: {.tutorial-step data-title="Spider-Sample" data-action='{"alpha":0.05,"tail":"two","z":-3.29}'}
