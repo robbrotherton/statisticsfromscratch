@@ -18,7 +18,60 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-In this lecture we'll develop our understanding of hypothesis testing by exploring some related concepts: effect size, inferential errors, and statistical power. These are nuanced ideas, and statistical power in particular can be difficult to get your head around both conceptual and computationally. But they are key to fully understanding the strengths and limitations of hypothesis testing, so we'll take our time with them here before moving on to other ideas and tests.
+In this chapter we'll develop our understanding of hypothesis testing by exploring some related concepts: effect size, inferential errors, and statistical power. These are nuanced ideas, and statistical power in particular can be difficult to get your head around both conceptual and computationally. But they are key to fully understanding the strengths and limitations of hypothesis testing, so we'll take our time with them here before moving on to other ideas and tests.
+
+## NHST logic recap
+
+First, let's recap the ideas we covered in the previous chapter as a way of refining our thinking and preparing for the new aspects we'll examine. We'll do so in a different way than before, not by looking at a single dataset or one boring old curve. Instead we'll use something more dynamic, more charming, more fuzzy and yellow.
+
+::::: {.callout-tip .interactive}
+## Watch chance at work: the bee swarm
+
+{{< interactive-figure beeSwarmAlpha makeBeeSwarm options='{"seed":"bee-swarm-alpha-v24","variability":"medium","n":50,"hiveOffset":0,"playing":false}' fallback="Animated bee swarm illustrating sampling variability and the five percent Type I error rate: bees flock around a fixed hive, each instant's mean position forms one sample mean, and over time about five percent of those means land in the critical regions even though the hive never moves." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="The swarm" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":false}'}
+It's a swarm of bees! Well, a simulated swarm: little yellow circles following a flocking algorithm. But aren't they charming? Watch them buzz this way and that for a moment. They try not to bump into each other. And they always know where their hive is. They venture away, but always return.
+:::
+
+::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="The swarm" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":false}'}
+What does this have to do with null hypothesis significance testing, you may ask. Well, the hive at the center is the population mean, $\mu$. It is the real and unchanging center. The bees buzzing around it are a sample. The sample gives us a clue about the population---where is the hive? But the sample is constantly changing, as if we're drawing repeated samples. 
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="One sample" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+We can freeze time. At this instant, the dashed line marks the average horizontal position of all the bees together: their sample mean, $M$. (We'll only care about horizontal position; the up-and-down motion is just for show.) It's close to the hive, but not exactly on it. That's sampling error.
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="One sample" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Now, what if we didn't know for sure where the hive was? I've hidden it, but it still exists and hasn't changed. We can only see the sample mean, $M$. If we were to use that as our estimate of the population mean, we would be wrong.
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="One sample" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+When we're really testing hypotheses, we don't know the true population mean. We create our null hypothesis as a guess, a model of the world in which the population mean is whatever the null says it is. I've replaced the hive with a dashed outline representing our null hypothesis about the hive's position. It so happens that we're exactly right; the null predicts that the hive is where it really is.
+:::
+
+New step, showing the null curve and critical regions: So now we can describe the sampling distribution of the mean derived from that null hypothesis (its guess about the population center, as well as knowledge of the population variability, sample size, and normality). We set alpha (here .05) and define the critical regions. When a sample mean is in those regions, we would reject the null---wrongly!
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Every instant" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Let's let the swarm get back to work, giving us sixty samples per second. The mean jitters around the hive, occasionally straying quite far away but generally staying close to the hidden hive. Occasionally it is far enough away that we would reject the null. Remember, we know that the null here is true, so those rejections are false alarms. 
+:::
+
+::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Collect" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+Let's keep track of the sample means, building a histogram of their positions over time. The false alarms happen about five percent of the time, which is exactly what we expect with an $\alpha$ of .05.
+:::
+
+::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="Type I errors" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+Every one of those rejections was a false alarm — a type one error. That is what $\alpha = .05$ really means: when nothing is going on, chance alone will still cry wolf about five percent of the time.
+:::
+
+New step: Now, what if the null is wrong. I'm going to show the hive again, and also move it over a bit. So now the null---the dashed outline---is wrong about where the true population center is. This changes our logic a bit. Rather than risking falsely reject a correct null, we need to think about how likely it is we will *correctly* reject this wrong null. And on the other hand, what are the chances we will faile to reject the null, another kind of mistake.
+
+New step: This will depend on a few things. First, how far away is the true population mean from the null? Second, how variable is the population? Third, how many bees are in our sample? And fourth, what alpha level have we set for our test? All of these factors will affect the probability that we will correctly reject the null hypothesis when it is false. This probability is called the statistical power of the test.
+::::
+
+:::::
+
+The last step gives us a few things we need to nail down to flesh out our understanding of hypothesis testing, and an outline for the rest of this chapter. The distance between the null and the actual hive---more generically, the difference between the null and alternative population means---is called the *effect size*. The kinds of correct decisions and mistakes we can make are also important to consider. We can precisely quantify the long-run probability of making each type of decision, given our test assumptions and parameters. This will lead us to the concept of *statistical power*.
 
 ## Effect Size
 
@@ -31,7 +84,6 @@ That difference is part of the $z$ equation, of course. It's right there in the 
 This can be a little confusing because in everyday language, calling something "significant" usually means it is big or important. But that's not what *statistical* significance means. Small, even trivial differences can be statistically significant. In particular, with a large enough sample size, even a tiny difference can be statistically significant. And that's because increasing sample size decreases the standard error of the mean, because sample size is in the denominator of the standard error equation, and a small standard error makes even very small differences quite improbable.
 
 In sum, the significance of the test is only part of the story. Knowing how (im)probable the result was is important, but we also need to know the size of the difference we found. For that, we need a measure of *effect size*: a way of quantifying the absolute magnitude of a treatment effect, independent of sample size and statistical significance.
-
 
 The trouble is, very small differences might be real, but not very important to us. So we need to consider effect size as well. Effect size tells us how big the treatment effect is in absolute terms, independent of sample size or statistical significance. In simple terms, you can think of effect size as the distance between the population means.
 
@@ -50,7 +102,7 @@ For a beautiful interactive visualization of what different values of Cohen's $d
 
 ### Effect size and significance
 
-Allow me to demonstrate the difference between significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost children's SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$ test would be an appropriate hypothesis test.
+Let's demonstrate the difference between significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost children's SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$ test would be an appropriate hypothesis test.
 
 So we administer the banana treatment to a sample of test takers and we find the sample mean to be 501. We want to know if this is statistically significant with an $\alpha$ of .05 two-tailed, giving us critical values of $\pm 1.96$.
 
@@ -128,51 +180,6 @@ The type one error, the false positive, is actually just another name for $\alph
 
 The argument in favor of this is that five percent is sufficiently low that we can live with that risk of a type one false positive error. But there are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a type one error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
 
-::::: {.callout-tip .interactive}
-## Watch chance at work: the bee swarm
-
-{{< interactive-figure beeSwarmAlpha makeBeeSwarm options='{"seed":"bee-swarm-alpha-v24","variability":"medium","n":50,"hiveOffset":0,"playing":false}' fallback="Animated bee swarm illustrating sampling variability and the five percent Type I error rate: bees flock around a fixed hive, each instant's mean position forms one sample mean, and over time about five percent of those means land in the critical regions even though the hive never moves." >}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="The swarm" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":false}'}
-Meet the swarm. The hive at the center is the population mean, $\mu$ — real and fixed. The bees buzzing around it are variability. (We'll only care about horizontal position; the up-and-down motion is just for show.)
-:::
-
-::: {.tutorial-step data-major="swarm" data-major-title="Swarm" data-title="Variability" data-action='{"variability":"high","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":false,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Turn the variability up and the bees range farther from home. The hive hasn't moved — only the spread has changed. Think of this as the population's standard deviation, in bee form.
-:::
-
-::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="One sample" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Freeze time. At this instant, the $n = 50$ bee positions are a sample, and the dashed line marks their mean, $M$. It's close to the hive — but not exactly on it. That's sampling error.
-:::
-
-::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Every instant" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Press play: sixty samples a second. The mean jitters around the hive, occasionally straying surprisingly far but always pulled back. No random number generator is placing that line — it is purely the product of the swarm's flocking.
-:::
-
-::: {.tutorial-step data-major="sampling" data-major-title="Sampling" data-title="Collect" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":false,"show-critical-regions":false,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-Fast-forward through a minute of swarm time and keep every sample mean. The means pile into a familiar shape: most of them near the hive, extreme ones rare.
-:::
-
-::: {.tutorial-step data-major="null" data-major-title="Null dist." data-title="The curve" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":false,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-Overlay a normal curve centered on the hive with standard deviation $\sigma_M$, the standard error. This is the sampling distribution of the mean predicted by the central limit theorem — and it fits the pile.
-:::
-
-::: {.tutorial-step data-major="null" data-major-title="Null dist." data-title="Critical regions" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-Shade the most extreme 5% of that distribution — 2.5% in each tail, beyond $z = \pm 1.96$. A sample mean landing out there would look too unlikely to blame on chance, so we would reject $H_0$.
-:::
-
-::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="By chance" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-But here the null is true — the hive really is sitting at $\mu_0$. Watch the tracker: over time, about 5% of sample means land in the critical regions anyway. So far: {{< interactive-value beeSwarmAlpha.proportionSignificant format=".3f" >}}.
-:::
-
-::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="Type I errors" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":false,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Every one of those rejections was a false alarm — a type one error. That is what $\alpha = .05$ really means: when nothing is going on, chance alone will still cry wolf about five percent of the time.
-:::
-::::
-
-:::::
-
 ### $\beta$ and the Type II Error Rate
 
 The type two error — the false negative, or failing to reject the null hypothesis that is false, or put another way, failing to detect a real effect — is referred to as $\beta$. And you might think that $\beta$ is just the flip side of $\alpha$, but it's a bit more complicated than that. $\beta$ is related to the statistical power of a hypothesis test. We'll cover that in more detail later in this lecture.
@@ -180,7 +187,6 @@ The type two error — the false negative, or failing to reject the null hypothe
 ### Remembering the Difference
 
 Now, it's too bad that "type one" and "type two" are such uninformative names because this is a very important concept. One way to try and remember them is to remember that the villagers in the story of the boy who cried wolf made a type one error and a type two error in that order. At first, there was no wolf, just a mischievous young shepherd who cried wolf. The villagers made a false positive mistake. They thought there was a wolf and there wasn't. And the next time there was a wolf, the boy cried wolf again. But this time, the villagers made a false negative, failing to detect the wolf that really was there.
-
 
 ## Statistical Power
 
