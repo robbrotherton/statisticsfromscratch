@@ -539,7 +539,17 @@ sfsCriticalTableIsInteractive = (opts = {}) =>
 
 sfsCriticalTableFinish = (rootNode, cellMetas, opts = {}) => {
   if (!sfsCriticalTableIsInteractive(opts)) {
-    rootNode.value = {};
+    const selection = opts.selected === undefined ? opts.selection : opts.selected;
+    const selected = selection && cellMetas.find((meta) => sfsCriticalTableSelectionMatches(meta, selection));
+    if (selected) {
+      rootNode.querySelectorAll("[data-cvt-key]").forEach((element) => {
+        element.classList.toggle("cvt-selected", element.dataset.cvtKey === selected.key);
+      });
+      rootNode.querySelectorAll("[data-cvt-row-key]").forEach((element) => {
+        element.classList.toggle("cvt-row-selected", element.dataset.cvtRowKey === selected.rowKey);
+      });
+    }
+    rootNode.value = selected ? Object.assign({}, selected) : {};
     return rootNode;
   }
 
@@ -646,7 +656,7 @@ sfsCriticalTableSetupTutorial = (rootNode, opts = {}) => {
 
 sfsCriticalTableCellButton = (td, meta, text, opts = {}) => {
   if (!sfsCriticalTableIsInteractive(opts)) {
-    td.text(text);
+    td.attr("data-cvt-key", meta.key).text(text);
     return;
   }
 
