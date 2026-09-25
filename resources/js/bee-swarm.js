@@ -79,7 +79,7 @@
       "  position: absolute; left: 0; top: -50%; width: 100%; height: 200%;",
       "  pointer-events: none; z-index: 2;",
       "}",
-      ".bee-swarm .sfs-svg { position: relative; z-index: 1; }",
+      ".bee-swarm .sfs-svg { position: relative; z-index: 1; overflow: hidden; }",
       ".bee-swarm .bs-null-curve { fill: none; stroke: var(--sfs-null-color, currentColor); stroke-width: 1.5; }",
       ".bee-swarm .bs-critical-region { fill: var(--sfs-critical-color, #c63f3f); opacity: 0.35; stroke: none; }",
       ".bee-swarm .bs-hive-marker { fill: " + HIVE_COLOR + "; }",
@@ -107,6 +107,10 @@
       ".bee-swarm .bs-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }",
       ".bee-swarm .bs-row-label { font-size: 0.8rem; min-width: 5.2rem; }",
       ".bee-swarm .bs-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }",
+      ".bee-swarm .bs-readouts.is-visible .bs-tutorial-ff { pointer-events: auto; }",
+      ".bee-swarm .bs-tutorial-actions { flex-direction: column; align-items: center; }",
+      ".bee-swarm .bs-tracker-label { text-align: right; }",
+      ".bee-swarm .bs-tutorial-ff { border: 1.5px solid var(--interactive-callout-color, #21a585); }",
       ".bee-swarm .bs-layer-grid {",
       "  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.25rem 0.9rem;",
       "}",
@@ -125,6 +129,12 @@
     opts = opts || {};
     ensureStyles();
 
+    // Zoom changes only the drawing viewport, never simulation coordinates.
+    var displayScale = Math.max(1, Math.min(2, Number(opts.displayScale) || 1));
+    var viewWidth = W / displayScale;
+    var viewLeft = (W - viewWidth) / 2;
+    var densityMaximum = Number(opts.densityMaximum) > 0 ? Number(opts.densityMaximum) : 0.12;
+    var collectWhenVisible = Boolean(opts.collectWhenVisible);
     var core = window.beeSwarmCore;
     var stats = window.sfsStats;
     var sampling = window.sfsSampling;
@@ -200,11 +210,13 @@
 
     function stepOnce() {
       var observation = sim.tick();
-      hist.add(observation);
+      if (!collectWhenVisible || state.show.histogram) hist.add(observation);
       lastMean = observation;
       lastSignificant = observation < derived.lowerCrit || observation > derived.upperCrit;
-      obs += 1;
-      if (lastSignificant) sigs += 1;
+      if (!collectWhenVisible || state.show.histogram) {
+        obs += 1;
+        if (lastSignificant) sigs += 1;
+      }
     }
 
     // ---- DOM ---------------------------------------------------------------
@@ -221,14 +233,14 @@
 
     var svg = chartWrap.append("svg")
       .attr("class", "sfs-svg sfs-graph")
-      .attr("viewBox", [0, 0, W, H])
+      .attr("viewBox", [viewLeft, 0, viewWidth, H])
       .attr("role", "img")
       .attr("aria-label",
         "Bee swarm simulation: yellow bees flock around a hive; a null " +
         "distribution, critical regions, and a histogram of the swarm's " +
         "mean positions build up below.");
 
-    var yDensity = d3.scaleLinear().domain([0, 0.12]).range([H - 30, H * 0.5]);
+    var yDensity = d3.scaleLinear().domain([0, densityMaximum]).range([H - 30, H * 0.5]);
     var curveLine = d3.line()
       .x(function(point) { return point.x; })
       .y(function(point) { return yDensity(point.y); });
@@ -263,9 +275,13 @@
     var ctx = canvas.getContext("2d");
 
     // Readout row: the significance tracker (donut + elapsed time) is a
-    // toggleable reveal layer; d and SE stay visible whenever it is shown.
+    // toggleable reveal layer; introductory instances can omit d and SE.
     var readouts = root.append("div").attr("class", "bs-readouts sfs-readout sfs-if-reveal");
     var tracker = readouts.append("div").attr("class", "bs-tracker");
+    var trackerLabel = tracker.append("span").attr("class", "bs-readout-label bs-tracker-label");
+    trackerLabel.append("span").text("Proportion");
+    trackerLabel.append("br");
+    trackerLabel.append("span").text("significant");
     var trackerSvg = tracker.append("svg")
       .attr("width", 76).attr("height", 76).attr("viewBox", [-38, -38, 76, 76])
       .attr("aria-hidden", "true");
@@ -275,14 +291,15 @@
       .attr("class", "bs-tracker-value")
       .attr("text-anchor", "middle").attr("dy", "0.34em");
     var trackerStack = tracker.append("div").attr("class", "bs-readout-stack");
-    trackerStack.append("span").attr("class", "bs-readout-label").text("Proportion significant");
     var timeValue = trackerStack.append("span").attr("class", "bs-readout-value");
 
-    var dStack = readouts.append("div").attr("class", "bs-readout-stack");
+    var dStack = readouts.append("div").attr("class", "bs-readout-stack")
+      .style("display", opts.showEffectSize === false ? "none" : null);
     dStack.append("span").attr("class", "bs-readout-label").text("Effect size");
     var dValue = dStack.append("span").attr("class", "bs-readout-value");
 
-    var seStack = readouts.append("div").attr("class", "bs-readout-stack");
+    var seStack = readouts.append("div").attr("class", "bs-readout-stack")
+      .style("display", opts.showStandardError === false ? "none" : null);
     seStack.append("span").attr("class", "bs-readout-label").text("Standard error");
     var seValue = seStack.append("span").attr("class", "bs-readout-value");
 
@@ -299,15 +316,15 @@
       cssWidth = width;
       var dpr = Math.min(2, window.devicePixelRatio || 1);
       canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(width * ((H + 2 * OVERHANG) / W) * dpr);
-      renderScale = canvas.width / W;
+      canvas.height = Math.round(width * ((H + 2 * OVERHANG) / viewWidth) * dpr);
+      renderScale = canvas.width / viewWidth;
       return true;
     }
 
     // Band coordinates (x 0..W, y 0..H) with the canvas extending OVERHANG
     // above and below the band.
     function setBandTransform() {
-      ctx.setTransform(renderScale, 0, 0, renderScale, 0, OVERHANG * renderScale);
+      ctx.setTransform(renderScale, 0, 0, renderScale, -viewLeft * renderScale, OVERHANG * renderScale);
     }
 
     function clearCanvas() {
@@ -318,19 +335,24 @@
     function drawHistogram() {
       if (!state.show.histogram || !hist.total) return;
       var baseline = H - 30;
-      var span = baseline - yDensity(0.12);
+      var span = baseline - yDensity(densityMaximum);
       setBandTransform();
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(viewLeft, 0, viewWidth, H);
+      ctx.clip();
       ctx.beginPath();
       var keys = Object.keys(hist.counts);
       for (var index = 0; index < keys.length; index += 1) {
         var x = Number(keys[index]);
-        var height = (hist.counts[keys[index]] / hist.total) / 0.12 * span;
+        var height = (hist.counts[keys[index]] / hist.total) / densityMaximum * span;
         ctx.rect(x, baseline - height, 1, height);
       }
       ctx.fillStyle = BEE_COLOR;
       ctx.globalAlpha = 0.5;
       ctx.fill();
       ctx.globalAlpha = 1;
+      ctx.restore();
     }
 
     function drawBees() {
@@ -339,7 +361,7 @@
       // center (MU0, H/2), like the prototype's translate(420, 400) on its
       // double-height canvas.
       ctx.setTransform(renderScale, 0, 0, renderScale,
-        MU0 * renderScale, (H * 0.5 + OVERHANG) * renderScale);
+        (MU0 - viewLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
       var bees = sim.swarm.bees;
       ctx.fillStyle = BEE_COLOR;
       ctx.beginPath();
@@ -355,7 +377,7 @@
       clearCanvas();
       drawHistogram();
       ctx.setTransform(renderScale, 0, 0, renderScale,
-        MU0 * renderScale, (H * 0.5 + OVERHANG) * renderScale);
+        (MU0 - viewLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
       if (GHOST_MODE === "cumulative") {
         // Prototype effect: draw every captured frame up to the playback
         // index, alpha fading from ~0.4 (newest) to 0 across a 10-frame tail.
@@ -437,7 +459,7 @@
       trackerArc.attr("d", donutArc({ startAngle: 0, endAngle: angle }));
       trackerRest.attr("d", donutArc({ startAngle: angle, endAngle: Math.PI * 2 }));
       trackerValue.text(proportion.toFixed(3));
-      timeValue.text(formatElapsed());
+      timeValue.text("Time: " + formatElapsed());
       dValue.text("d = " + derived.d.toFixed(2));
       seValue.text("σM = " + derived.se.toFixed(2));
     }
@@ -833,6 +855,14 @@
       afterDiscreteChange();
     });
 
+    var tutorialActions = readouts.append("div").attr("class", "bs-actions bs-tutorial-actions");
+    if (opts.tutorialFastForward) {
+      tutorialActions.node().appendChild(timeValue.node());
+      trackerStack.remove();
+    }
+    var tutorialFF = makeButton(tutorialActions, "fast-forward-fill", "Fast-forward +60s", "bs-tutorial-ff");
+    tutorialFF.button.addEventListener("click", function() { ffButton.button.click(); });
+
     var layersPanel = controls.append("div").attr("class", "sfs-control-panel sfs-if-control-panel");
     var layerGrid = layersPanel.append("div").attr("class", "bs-layer-grid");
 
@@ -894,6 +924,7 @@
       reveal(nullCurveLayer.node(), state.show.nullCurve, { root: rootNode, animate: animate });
       reveal(criticalLayer.node(), state.show.criticalRegions, { root: rootNode, animate: animate });
       reveal(readouts.node(), state.show.sigTracker, { root: rootNode, animate: animate });
+      tutorialActions.style("display", opts.tutorialFastForward && state.show.histogram ? null : "none");
       // Swarm and histogram are canvas layers: plain draw flags, same state
       // path, applied on the next render().
     }
@@ -918,6 +949,10 @@
         normalized[sampling.actionKey(key)] = action[key];
       });
       var animate = normalized.animate !== false;
+      // Moving between steps cancels a user-requested fast-forward, preserving
+      // the observations already collected and preventing a stale replay.
+      if (collectWhenVisible) cancelFastForward();
+      var wasCollecting = state.show.histogram;
 
       if (normalized.variability !== undefined) {
         setVariabilityIndex(variabilityIndexFrom(normalized.variability), { silent: true });
@@ -937,6 +972,7 @@
           state.show[SHOW_KEYS[key]] = Boolean(normalized[key]);
         }
       });
+      if (collectWhenVisible && state.show.histogram && !wasCollecting) resetStats();
       applyReveals({ animate: animate });
 
       if (normalized["controls-open"] !== undefined && context && context.setControlsOpen) {
