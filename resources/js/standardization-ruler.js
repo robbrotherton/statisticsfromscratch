@@ -410,12 +410,14 @@
       .range([margin.left, width - margin.right]);
     const rawAxisNode = svg.querySelector(".dg-x-axis, .sfs-graph-axis");
     const rawAxis = rawAxisNode ? d3.select(rawAxisNode) : null;
-    const rawTickValues = finiteNumbers(opts.xTickValues);
+    const rawTickValues = finiteNumbers(
+      geometry.compact && opts.compactXTickValues ? opts.compactXTickValues : opts.xTickValues
+    );
 
     if (rawAxis) {
       const axis = d3.axisBottom(x);
       if (rawTickValues.length) axis.tickValues(rawTickValues);
-      else axis.ticks(Number(opts.xTicks) || 5);
+      else axis.ticks(Number(geometry.compact && opts.compactXTicks || opts.xTicks) || 5);
       axis.tickFormat(d3.format("~g"));
       rawAxis
         .attr("class", "ss-raw-axis")
@@ -424,7 +426,9 @@
       if (typeof global.sfsGraphStyleAxis === "function") global.sfsGraphStyleAxis(rawAxis);
     }
 
-    const zTickValues = finiteNumbers(opts.zTickValues).filter(function(value) {
+    const zTickValues = finiteNumbers(
+      geometry.compact && opts.compactZTickValues ? opts.compactZTickValues : opts.zTickValues
+    ).filter(function(value) {
       const rawValue = mean + value * sd;
       return rawValue >= Math.min(opts.xDomain[0], opts.xDomain[1]) - 1e-9 &&
         rawValue <= Math.max(opts.xDomain[0], opts.xDomain[1]) + 1e-9;
@@ -878,11 +882,11 @@
     let firstDraw = true;
     let layoutController = null;
 
-    function render(width) {
+    function render(width, compact) {
       const drawWidth = Math.max(260, Math.round(width));
       const margin = {
         top: opts.title ? 44 : 28,
-        right: 58,
+        right: 72,
         bottom: 64,
         left: opts.chart === "block" || opts.chart === "histogram" ? 58 : 24
       };
@@ -908,7 +912,7 @@
       const svg = graph.tagName && graph.tagName.toLowerCase() === "svg"
         ? graph
         : graph.querySelector("svg");
-      addDualScaleAxes(svg, opts, { width: drawWidth, height, margin }, mean, sd);
+      addDualScaleAxes(svg, opts, { width: drawWidth, height, margin, compact }, mean, sd);
       graph.classList.add("ss-source-graph");
       rootNode.replaceChildren(graph);
       firstDraw = false;
@@ -935,7 +939,7 @@
         minimumWidth: 260,
         maximumWidth: 512,
         widthStep: 2,
-        onLayout: function(layout) { render(layout.width); }
+        onLayout: function(layout) { render(layout.width, layout.compact); }
       });
     } else {
       render(Number(opts.width) || 480);
