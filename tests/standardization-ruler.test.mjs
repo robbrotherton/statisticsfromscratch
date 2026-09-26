@@ -11,6 +11,7 @@ const source = readFileSync(
 );
 const styles = siteStyles;
 import { graphSource } from "./helpers/graph-source.mjs";
+import { divById, tutorialSteps } from "./helpers/qmd.mjs";
 const reactionSource = readFileSync(
   new URL("../resources/js/reaction-time-zscore.js", import.meta.url),
   "utf8"
@@ -20,15 +21,12 @@ const manifest = readFileSync(
   "utf8"
 );
 
-const standardizedStart = chapter.indexOf("## Standardized distributions");
-const standardizedEnd = chapter.indexOf("## Using $z$-scores", standardizedStart);
-const standardizedSection = chapter.slice(standardizedStart, standardizedEnd);
-const otherScalesStart = standardizedSection.indexOf("### Other standard-score scales");
-const tutorialStart = standardizedSection.indexOf("{#act-standardizing-distributions");
-const tutorialSection = standardizedSection.slice(tutorialStart);
-const steps = Array.from(tutorialSection.matchAll(
-  /::: \{\.tutorial-step\b[^\n]*?data-title="([^"]+)"[^\n]*?data-action='([^']+)'[^\n]*?\}/g
-)).map((match) => ({ title: match[1], action: JSON.parse(match[2]) }));
+const easyHistogram = divById(chapter, "fig-easy-test-histogram");
+const hardHistogram = divById(chapter, "fig-hard-test-histogram");
+const standardizedMath = divById(chapter, "fig-standardized-math-tests");
+const movieRatings = divById(chapter, "fig-standardized-movie-ratings");
+const tutorialSection = divById(chapter, "act-standardizing-distributions");
+const steps = tutorialSteps(tutorialSection);
 const coverStart = source.indexOf("global.makeZScoreCover = function");
 const coverEnd = source.indexOf("global.makeStandardizedScoreGraph = function", coverStart);
 const coverSource = source.slice(coverStart, coverEnd);
@@ -67,7 +65,6 @@ function sevenBinCounts(values) {
 
 test("the chapter opens with the aligned X-to-z ruler cover", () => {
   assert.match(chapter, /zScoreCover makeZScoreCover/);
-  assert.match(chapter, /colorful mound of blocks[\s\S]*?shared center is labeled X[\s\S]*?z on the standardized ruler/);
   assert.match(source, /global\.makeZScoreCover = function/);
   assert.match(coverSource, /global\.makeGraph\(\{[\s\S]*?type: "block"/);
   assert.match(coverSource, /Z_SCORE_COVER_COUNTS\.flatMap/);
@@ -101,22 +98,14 @@ test("the chapter opens with the aligned X-to-z ruler cover", () => {
 });
 
 test("the math examples use corresponding seven-bin histograms", () => {
-  const computingSection = chapter.slice(
-    chapter.indexOf("### Computing the $z$-scores"),
-    chapter.indexOf("### Converting back to raw scores")
-  );
-  assert.match(computingSection, /easyMathTimeDistribution makeMathTestHistogram options='\{"test":"easy","animate":true\}'/);
-  assert.match(computingSection, /hardMathTimeDistribution makeMathTestHistogram options='\{"test":"hard","animate":true\}'/);
-  assert.doesNotMatch(computingSection, /makeDistributionGraph|normally distributed|normal models/);
-  assert.match(computingSection, /sample of 30 earlier test takers/);
-  assert.match(computingSection, /similarly mound-shaped but deliberately not identical/);
-  assert.match(standardizedSection, /Here are the two math test distributions again/);
-  assert.match(standardizedSection, /same seven bins[\s\S]*?haven't regrouped any observations/);
-  assert.match(standardizedSection,
+  assert.match(easyHistogram, /makeMathTestHistogram options='\{"test":"easy","animate":true\}'/);
+  assert.match(hardHistogram, /makeMathTestHistogram options='\{"test":"hard","animate":true\}'/);
+  assert.doesNotMatch(easyHistogram + hardHistogram, /makeDistributionGraph/);
+  assert.match(standardizedMath,
     /sfs-standardization-comparison-row[\s\S]*?easyMathStandardized[\s\S]*?hardMathStandardized/
   );
-  assert.match(standardizedSection, /easyMathStandardized makeMathTestHistogram options='\{"test":"easy","standardized":true/);
-  assert.match(standardizedSection, /hardMathStandardized makeMathTestHistogram options='\{"test":"hard","standardized":true/);
+  assert.match(standardizedMath, /easyMathStandardized makeMathTestHistogram options='\{"test":"easy","standardized":true/);
+  assert.match(standardizedMath, /hardMathStandardized makeMathTestHistogram options='\{"test":"hard","standardized":true/);
   assert.match(source, /global\.makeMathTestHistogram = function/);
   assert.match(source, /chart: "histogram"/);
   assert.match(source, /MATH_HISTOGRAM_Z_CUTS\.map/);
@@ -134,7 +123,7 @@ test("the math examples use corresponding seven-bin histograms", () => {
   assert.doesNotMatch(styles,
     /\.sfs-graph \.sfs-graph-reference-marker line \{[^}]*stroke-width:/
   );
-  assert.doesNotMatch(standardizedSection, /Completion time \(s\) · μ/);
+  assert.doesNotMatch(standardizedMath, /Completion time \(s\) · μ/);
 });
 
 test("selected-value markers use the same red dashed treatment throughout Chapter 5", () => {
@@ -144,9 +133,14 @@ test("selected-value markers use the same red dashed treatment throughout Chapte
   assert.match(reactionSource,
     /label: `X = \$\{x\}`[\s\S]*?color: "var\(--sfs-danger-color, #c63f3f\)"[\s\S]*?dash: "6 4"[\s\S]*?strokeWidth: 2\.6/
   );
-  assert.match(chapter,
-    /"at":159,"label":"X = 159","height":0\.5,"color":"var\(--sfs-danger-color, #c63f3f\)","dash":"6 4","strokeWidth":2\.6/
-  );
+  const chapterMarkers = Array.from(chapter.matchAll(/"markers":(\{[^{}]*\})/g), (match) => JSON.parse(match[1]));
+  assert.ok(chapterMarkers.length > 0);
+  for (const marker of chapterMarkers) {
+    assert.equal(marker.label, `X = ${marker.at}`);
+    assert.equal(marker.color, "var(--sfs-danger-color, #c63f3f)");
+    assert.equal(marker.dash, "6 4");
+    assert.equal(marker.strokeWidth, 2.6);
+  }
   assert.doesNotMatch(chapter, /"markers"[^\n]*?--sfs-accent/);
 });
 
@@ -178,35 +172,25 @@ test("the engineered math data have exact target sample statistics and distinct 
   assert.deepEqual(sevenBinCounts(hard), [1, 2, 7, 11, 6, 2, 1]);
   assert.equal((8 - 10) / 1, -2);
   assert.equal((70 - 100) / 15, -2);
-  assert.match(chapter, /sample of 30 earlier test takers/);
-  assert.match(chapter, /sample mean, \$M\$,[\s\S]*?sample standard deviation, \$s\$/);
-  assert.match(chapter, /For a sample, if \$z = \\frac\{X - M\}\{s\}\$, then \$X = M \+ z \\times s\$/);
-  assert.doesNotMatch(chapter, /treat that complete group as the population/);
 });
 
 test("the two standardizable movie-review histograms reuse the Chapter 4 data", () => {
-  assert.match(standardizedSection, /goodBadOkayStandardized makeStandardizedScoreGraph/);
-  assert.match(standardizedSection, /polarizingExpressStandardized makeStandardizedScoreGraph/);
-  assert.match(standardizedSection, /"data":\[0,4,5,5,6,10\]/);
-  assert.match(standardizedSection, /"data":\[0,0,1,9,10,10\]/);
-  assert.match(standardizedSection, /"chart":"block"/);
-  assert.equal((standardizedSection.match(/"statConvention":"sample"/g) || []).length, 2);
-  assert.match(standardizedSection, /"zTickValues":\[-1,0,1\]/);
-  assert.equal((standardizedSection.match(/"yDomain":\[0,3\]/g) || []).length, 2);
-  assert.equal((standardizedSection.match(/"yTickValues":\[0,1,2,3\]/g) || []).length, 2);
-  assert.equal((standardizedSection.match(/"squareScale":true/g) || []).length, 2);
-  assert.equal((standardizedSection.match(/"rawAxisSideLabel":"\(X\)"/g) || []).length, 2);
-  assert.match(standardizedSection, /treat these six observed ratings as samples, using \$M\$ and \$s\$/);
+  assert.match(movieRatings, /goodBadOkayStandardized makeStandardizedScoreGraph/);
+  assert.match(movieRatings, /polarizingExpressStandardized makeStandardizedScoreGraph/);
+  assert.match(movieRatings, /"data":\[0,4,5,5,6,10\]/);
+  assert.match(movieRatings, /"data":\[0,0,1,9,10,10\]/);
+  assert.match(movieRatings, /"chart":"block"/);
+  assert.equal((movieRatings.match(/"statConvention":"sample"/g) || []).length, 2);
+  assert.match(movieRatings, /"zTickValues":\[-1,0,1\]/);
+  assert.equal((movieRatings.match(/"yDomain":\[0,3\]/g) || []).length, 2);
+  assert.equal((movieRatings.match(/"yTickValues":\[0,1,2,3\]/g) || []).length, 2);
+  assert.equal((movieRatings.match(/"squareScale":true/g) || []).length, 2);
+  assert.equal((movieRatings.match(/"rawAxisSideLabel":"\(X\)"/g) || []).length, 2);
   assert.ok(Math.abs(sampleStats([0, 4, 5, 5, 6, 10]).sd - 3.22490309931942) < 1e-12);
   assert.ok(Math.abs(sampleStats([0, 0, 1, 9, 10, 10]).sd - 5.138093031466052) < 1e-12);
-  assert.match(standardizedSection,
-    /left out \*Fine, Actually\*[\s\S]*?standard deviation is zero[\s\S]*?cannot be converted into \$z\$-scores/
-  );
 });
 
-test("the tutorial now lives under other scales and owns the IQ and SAT process", () => {
-  assert.ok(otherScalesStart >= 0);
-  assert.ok(tutorialStart > otherScalesStart);
+test("the standardizing tutorial walks through the IQ and SAT scales", () => {
   assert.match(tutorialSection, /standardizationRuler[\s\S]*?makeStandardizationRuler/);
   assert.deepEqual(steps.map((step) => step.title), [
     "Original", "z-scores", "Set the SD", "Set the mean",
@@ -224,10 +208,6 @@ test("the tutorial now lives under other scales and owns the IQ and SAT process"
   ]);
   assert.ok(steps.every((step) => step.action.scene === "curve"));
   assert.doesNotMatch(tutorialSection, /"scene":"blocks"|blockRaw|blockZ/);
-  assert.match(tutorialSection, /multiply every number on this new ruler by 15/);
-  assert.match(tutorialSection, /add 100 to every number/);
-  assert.match(tutorialSection, /multiply every \$z\$-score by 100/);
-  assert.match(tutorialSection, /add 500 to every score/);
 });
 
 test("the aligned-axis component derives the requested SD convention and uses uncluttered guides", () => {

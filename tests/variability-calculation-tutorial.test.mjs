@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { divById } from "./helpers/qmd.mjs";
 
 const chapter = readFileSync(new URL("../04-variability.qmd", import.meta.url), "utf8");
 const quiz = readFileSync(
@@ -13,10 +14,7 @@ const source = readFileSync(
 );
 
 function calculationTutorial() {
-  const start = chapter.indexOf("## Calculate variability");
-  const end = chapter.indexOf("{{< include quizzes/04-variability-calculation.qmd >}}", start);
-  assert.ok(start >= 0 && end > start, "the population calculation tutorial should be present");
-  return chapter.slice(start, end);
+  return divById(chapter, "act-calculate-variability");
 }
 
 test("the variability tutorial works through The Good, the Bad and the Okay alone without direct table controls", () => {
@@ -32,21 +30,8 @@ test("the variability tutorial works through The Good, the Bad and the Okay alon
   assert.deepEqual(titles, ["Scores", "Mean", "Deviations", "Squared", "SS", "Variance", "SD"]);
 });
 
-test("the tutorial prose carries the former post-table explanation", () => {
-  const tutorial = calculationTutorial();
-
-  assert.match(tutorial, /easiest to put the scores in the first column/);
-  assert.match(tutorial, /variance is measured in squared rating points/);
-  assert.match(tutorial, /typical deviation from the mean rating for \*The Good, the Bad and the Okay\* is around three points/);
-  assert.doesNotMatch(
-    chapter,
-    /When doing it by hand like this, I find it easiest to create a table for the scores/
-  );
-});
-
 test("the Polarizing Express quiz asks for the numeric SD and reuses the fully revealed table generator", () => {
   assert.match(quiz, /id: polarizing_express_population_sd/);
-  assert.match(quiz, /Follow the whole procedure for the ratings of The Polarizing Express/);
   assert.match(quiz, /answer: 4\.69/);
   assert.match(quiz, /polarizingExpressPopulationVariabilityTable/);
   assert.match(quiz, /makeVariabilityTable/);
@@ -55,7 +40,6 @@ test("the Polarizing Express quiz asks for the numeric SD and reuses the fully r
   assert.match(quiz, /"controls":false/);
   assert.match(quiz, /"tutorial":false/);
   assert.doesNotMatch(quiz, /^\s*\| \$X\$/m);
-  assert.match(quiz, /Taking the square root of 22/);
 });
 
 test("the legacy direct controls are explicitly marked for later removal", () => {

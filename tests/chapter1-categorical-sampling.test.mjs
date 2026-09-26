@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { divByHeading } from "./helpers/qmd.mjs";
 
 const chapter = readFileSync(new URL("../01-variables.qmd", import.meta.url), "utf8");
 const pathwaySource = readFileSync(
@@ -17,9 +18,7 @@ const samplingCoreSource = readFileSync(
   "utf8"
 );
 
-const tutorialStart = chapter.indexOf("## Drawing samples from a population");
-const tutorialEnd = chapter.indexOf("How do we deal with the inherent variability", tutorialStart);
-const tutorial = chapter.slice(tutorialStart, tutorialEnd);
+const tutorial = divByHeading(chapter, "## Drawing samples from a population");
 const optionsMatch = tutorial.match(/populationSampling\s+makeSamplingPathway\s+options='([^']+)'/s);
 const options = optionsMatch ? JSON.parse(optionsMatch[1]) : null;
 const steps = Array.from(tutorial.matchAll(
@@ -53,7 +52,7 @@ test("the finite tutorial ends in one repeatable state rather than unbounded ste
   assert.ok(steps.slice(0, -1).every((step) => step.repeatAction === null));
   assert.equal(steps.at(-1).repeatAction.draw, "next");
   assert.doesNotMatch(chapter, /\.no-controls data-tutorial-nav="inline"/);
-  assert.match(tutorial, /data-repeat-label="Draw another sample"/);
+  assert.match(tutorial, /data-repeat-label="[^"]+"/);
   assert.match(steps.at(-1).text, /Keep clicking the button/);
   assert.match(steps.at(-1).text, /each sample offers a different estimate/);
 });

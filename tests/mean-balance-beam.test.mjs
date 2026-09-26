@@ -1,16 +1,13 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { divById } from "./helpers/qmd.mjs";
 
 const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.url), "utf8");
 const source = readFileSync(new URL("../resources/js/mean-balance-beam.js", import.meta.url), "utf8");
 
 function balanceTutorialSteps() {
-  const start = chapter.indexOf("## The mean as a balance point");
-  const end = chapter.indexOf("## Comparing the three measures", start);
-  assert.ok(start >= 0 && end > start, "balance tutorial section should be present");
-
-  const section = chapter.slice(start, end);
+  const section = divById(chapter, "act-mean-balance");
   return Array.from(section.matchAll(
     /data-title="([^"]+)" data-action='([^']+)'/g
   )).map((match) => ({

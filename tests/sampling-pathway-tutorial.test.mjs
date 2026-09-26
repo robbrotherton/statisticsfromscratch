@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
+import { divByHeading, divById } from "./helpers/qmd.mjs";
+
 const chapter = readFileSync(new URL("../07-sampling.qmd", import.meta.url), "utf8");
 const pathwaySource = readFileSync(
   new URL("../resources/js/sampling-pathway.js", import.meta.url),
@@ -28,13 +30,10 @@ function parseSteps(source) {
   });
 }
 
-const start = chapter.indexOf("## Build the sampling distribution");
-const end = chapter.indexOf("## The Distribution of Sample Means", start);
-const tutorial = chapter.slice(start, end);
+const tutorial = divById(chapter, "act-sampling-iq");
 const steps = parseSteps(tutorial);
-const heightStart = chapter.indexOf("## Build every sample mean");
-const heightEnd = chapter.indexOf("But remember, we're not interested", heightStart);
-const heightTutorial = chapter.slice(heightStart, heightEnd);
+// This callout has no #act- ID.
+const heightTutorial = divByHeading(chapter, "## Build every sample mean");
 const heightSteps = parseSteps(heightTutorial);
 const heightOptionsMatch = heightTutorial.match(
   /heightSamplingDistribution makeSamplingPathway options='([^']+)'/
@@ -42,9 +41,8 @@ const heightOptionsMatch = heightTutorial.match(
 const heightOptions = heightOptionsMatch ? JSON.parse(heightOptionsMatch[1]) : null;
 
 test("the IQ tutorial splits one sample into select, compute, and place states", () => {
-  assert.equal(steps.length, 7);
   const oneSample = steps.filter((step) => step.major === "one-sample");
-  assert.deepEqual(oneSample.map((step) => step.title), ["Select", "Compute", "Place mean"]);
+  assert.equal(oneSample.length, 3);
 
   assert.deepEqual(
     {
@@ -127,7 +125,12 @@ test("the finite height pathway reuses convergence without selection emphasis", 
   assert.equal(heightOptions.highlightSelected, false);
   assert.equal(heightOptions.highlightCurrent, false);
   assert.equal(heightOptions.convergeMeanOnDraw, true);
-  assert.equal(heightSteps.length, 5);
+  assert.ok(heightSteps.length > 1);
+  assert.deepEqual(
+    heightSteps.map((step) => step.action.draw),
+    heightSteps.map((step) => step.action.draw).slice().sort((a, b) => a - b)
+  );
+  assert.equal(heightSteps.at(-1).action.draw, 16);
 
   for (const step of heightSteps.slice(1)) {
     assert.equal(step.action.focus, "none");

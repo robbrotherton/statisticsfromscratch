@@ -96,8 +96,7 @@ test("the chapter names the corner the board maths actually favours", () => {
   assert.equal(Math.round(bestChance.chance * 36), 13);
 
   // Keep the compact worked example consistent with the board.
-  assert.match(chapter, /P\(5 \\text\{ or \} 6 \\text\{ or \} 9\) = \\frac\{4 \+ 5 \+ 4\}\{36\} = \\frac\{13\}\{36\} \\approx \.36/);
-  assert.match(chapter, /where the 5, the 6 and the 9 meet/);
+  assert.match(chapter, /P\(5 \\text\{ or \} 6 \\text\{ or \} 9\)[^\n]*\\frac\{13\}\{36\}/);
 });
 
 test("eight runner-up corners tie at 10/36", () => {

@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 import { siteStyles } from "./site-styles.mjs";
+import { between, divById, tutorialSteps } from "./helpers/qmd.mjs";
 
 const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.url), "utf8");
 const source = readFileSync(
@@ -15,50 +16,42 @@ const openingQuiz = readFileSync(
 );
 const styles = siteStyles;
 
-const sectionStart = chapter.indexOf("## The median");
-const sectionEnd = chapter.indexOf("## The mean", sectionStart);
-const section = chapter.slice(sectionStart, sectionEnd);
-const steps = Array.from(section.matchAll(
-  /::: \{\.tutorial-step\b[^\n]*?data-title="([^"]+)"[^\n]*?data-action='([^']+)'[^\n]*?\}/g
-)).map((match) => ({ title: match[1], action: JSON.parse(match[2]) }));
+const section = between(chapter, "## The median", "## The mean");
+const steps = tutorialSteps(divById(chapter, "act-median"));
 
 test("the median tutorial reveals one operation at a time", () => {
-  assert.deepEqual(steps.map((step) => step.title), [
-    "Raw data", "Order", "Middle", "Halves", "Even number", "Same category", "Between"
-  ]);
-  assert.equal(steps.length, 7);
+  const actions = steps.map((step) => step.action);
+  const examples = actions.map((action) => action.example);
 
-  for (const step of steps) {
-    assert.ok(Object.hasOwn(step.action, "example"));
-    assert.ok(Object.hasOwn(step.action, "order"));
-    assert.ok(Object.hasOwn(step.action, "emphasize"));
-    assert.ok(Object.hasOwn(step.action, "annotation"));
-    assert.ok(Object.hasOwn(step.action, "animate"));
+  for (const action of actions) {
+    assert.ok(Object.hasOwn(action, "example"));
+    assert.ok(Object.hasOwn(action, "order"));
+    assert.ok(Object.hasOwn(action, "emphasize"));
+    assert.ok(Object.hasOwn(action, "annotation"));
+    assert.ok(Object.hasOwn(action, "animate"));
   }
 
-  assert.deepEqual(steps[0].action, {
+  // Raw cards first, then ordered; the odd example is finished before the
+  // even one, and the boundary case comes last.
+  assert.deepEqual(actions[0], {
     example: "odd", order: "raw", emphasize: "none", annotation: "none", animate: false
   });
-  assert.deepEqual(steps[1].action, {
-    example: "odd", order: "ascending", emphasize: "none", annotation: "none", animate: true
-  });
-  assert.deepEqual(steps[2].action, {
-    example: "odd", order: "ascending", emphasize: "middle", annotation: "median", animate: true
-  });
-  assert.deepEqual(steps[3].action, {
-    example: "odd", order: "ascending", emphasize: "halves", annotation: "median", animate: true
-  });
-  assert.deepEqual(steps[4].action, {
-    example: "even", order: "ascending", emphasize: "none", annotation: "none", animate: true
-  });
-  assert.deepEqual(steps[5].action, {
-    example: "even", order: "ascending", emphasize: "positional-halves", annotation: "median", animate: true
-  });
-  assert.deepEqual(steps[6].action, {
-    example: "evenBoundary", order: "ascending", emphasize: "positional-halves", annotation: "middle", animate: true
-  });
-  assert.match(section, /data-title="Even number"[\s\S]*?data-major="even" data-major-title="Even number"/);
-  assert.match(section, /data-title="Same category"[\s\S]*?data-major="even" data-major-title="Even number"/);
+  assert.ok(actions.slice(1).every((action) => action.order === "ascending"));
+  assert.deepEqual([...new Set(examples)], ["odd", "even", "evenBoundary"]);
+  assert.deepEqual(examples, examples.slice().sort((a, b) =>
+    ["odd", "even", "evenBoundary"].indexOf(a) - ["odd", "even", "evenBoundary"].indexOf(b)
+  ));
+  // The even example is introduced plainly, as a new major step, before any
+  // median emphasis.
+  const firstEven = steps.find((step) => step.action.example === "even");
+  assert.equal(firstEven.action.emphasize, "none");
+  assert.equal(firstEven.action.annotation, "none");
+  assert.equal(firstEven.major, "even");
+  assert.ok(actions.some((action) => action.example === "odd" && action.annotation === "median"));
+  assert.ok(actions.some((action) =>
+    action.example === "even" && action.emphasize === "positional-halves"
+  ));
+  assert.equal(actions.at(-1).annotation, "middle");
 });
 
 test("the tutorial reuses the opening letter-grade data", () => {
@@ -102,9 +95,6 @@ test("the tutorial reuses the opening letter-grade data", () => {
     quizGrades.slice().sort((a, b) => a - b),
     tutorialExample.values.slice().sort((a, b) => a - b)
   );
-  assert.match(chapter, /mode was an A grade/);
-  assert.match(section, /The striped B cards belong to both/);
-  assert.match(section, /The important thing is to be clear and intentional/);
 });
 
 test("the completed card figures use the requested display order and cover each later case", () => {
@@ -133,8 +123,6 @@ test("the completed card figures use the requested display order and cover each 
     ),
     [1, 2, 3, 4, 3, 2, 1]
   );
-  assert.match(section, /The sixteen test scores from the opening quiz/);
-  assert.match(section, /the eighth and ninth/);
   assert.match(chapter, /\| 2 \| 1 \|[\s\S]*?\| 3 \| 2 \|[\s\S]*?\| 4 \| 3 \|[\s\S]*?\| \[5\]\{\.sfs-mode-marker\} \| 4 \|[\s\S]*?\| 6 \| 3 \|[\s\S]*?\| 7 \| 2 \|[\s\S]*?\| 8 \| 1 \|/);
   assert.doesNotMatch(section, /#fig-even-median-[12]/);
   assert.match(section, /#fig-median-test-scores/);

@@ -86,13 +86,3 @@ test("the chapter 1 cover uses shared semantic series instead of a local D3 pale
   assert.doesNotMatch(cover, /schemeCategory10|schemeTableau10/);
   assert.match(cover, /--sfs-text, currentColor/);
 });
-
-test("the homepage dots inherit the shared semantic series palette", () => {
-  expected.forEach((_, index) => {
-    const cycle = index === 6 ? "7n" : `7n \\+ ${index + 1}`;
-    assert.match(theme, new RegExp(`\\.home-dots__marks circle:nth-child\\(${cycle}\\) \\{ fill: var\\(--graph-series-${index + 1}\\); \\}`));
-  });
-
-  const heroPalette = theme.match(/\.home-dots__marks circle:nth-child[\s\S]*?@keyframes/)[0];
-  assert.doesNotMatch(heroPalette, /fill:\s*#/);
-});

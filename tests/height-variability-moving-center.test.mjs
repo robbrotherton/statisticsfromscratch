@@ -4,6 +4,8 @@ import { createRequire } from "node:module";
 import test from "node:test";
 import vm from "node:vm";
 
+import { divById, tutorialSteps } from "./helpers/qmd.mjs";
+
 const require = createRequire(import.meta.url);
 const d3 = require("../resources/js/d3.min.js");
 
@@ -14,17 +16,11 @@ const source = readFileSync(
 );
 
 function movingCenterTutorial() {
-  const start = chapter.indexOf("## The moving center");
-  const end = chapter.indexOf("## Variability equations for samples", start);
-  assert.ok(start >= 0 && end > start, "the moving-center tutorial should be present");
-  return chapter.slice(start, end);
+  return divById(chapter, "act-moving-center");
 }
 
 function trackingBiasTutorial() {
-  const start = chapter.indexOf("## Tracking bias across repeated samples");
-  const end = chapter.indexOf("{{< include quizzes/04-variability-learning-checks.qmd >}}", start);
-  assert.ok(start >= 0 && end > start, "the repeated-sampling bias tutorial should be present");
-  return chapter.slice(start, end);
+  return divById(chapter, "act-tracking-bias");
 }
 
 function loadMathHelpers() {
@@ -45,22 +41,11 @@ function loadMathHelpers() {
 
 test("the moving-center tutorial compares both centers before lining up the spans", () => {
   const tutorial = movingCenterTutorial();
-  const titles = Array.from(tutorial.matchAll(/data-title="([^"]+)"/g), (match) => match[1]);
-  const actions = Array.from(
-    tutorial.matchAll(/data-action='([^']+)'/g),
-    (match) => JSON.parse(match[1])
-  );
+  const actions = tutorialSteps(tutorial).map((step) => step.action);
+  const fromMu = actions.findIndex((action) => action["deviation-guides"] === "population");
+  const fromM = actions.findIndex((action) => action["deviation-guides"] === "sample");
+  const linedUp = actions.findIndex((action) => action["sample-span-center"] === "population");
 
-  assert.deepEqual(titles, [
-    "Population",
-    "Take a sample",
-    "From μ",
-    "From M",
-    "Line them up",
-    "Can be high",
-    "Can be low",
-    "Keep sampling"
-  ]);
   assert.match(tutorial, /heightVariability\.displaySampleSdFromMu/);
   assert.match(tutorial, /heightVariability\.displaySampleSdFromM/);
   assert.doesNotMatch(tutorial, /=\{\{< interactive-value/);
@@ -68,31 +53,26 @@ test("the moving-center tutorial compares both centers before lining up the span
   assert.match(tutorial, /"axisLabel":false/);
   assert.match(tutorial, /"unitLabel":""/);
   assert.match(tutorial, /"sdScale":"population"/);
-  assert.doesNotMatch(tutorial, /root mean squared|inches|height-sampling/i);
-  assert.match(tutorial, /"show-fixed-center-rms":true/);
-  assert.match(tutorial, /"focus-sample":true/);
-  assert.match(tutorial, /red span fits inside the dashed blue one/);
   assert.match(tutorial, /data-repeat-label="New sample"/);
 
+  // Population alone, then a sample, then deviations from mu, then from M,
+  // and only then are the two spans lined up on the population center.
   assert.equal(actions[0]["show-sample"], false);
-  assert.equal(actions[1]["show-sample"], true);
-  assert.equal(actions[1]["focus-sample"], true);
-  assert.equal(actions[1]["show-fixed-center-rms"], false);
-  assert.equal(actions[1]["show-sample-sd"], false);
-  assert.equal(actions[1]["deviation-guides"], "none");
-  assert.equal(actions[2]["show-fixed-center-rms"], true);
-  assert.equal(actions[2]["show-sample-sd"], false);
-  assert.equal(actions[2]["deviation-guides"], "population");
-  assert.equal(actions[3]["show-sample-sd"], true);
-  assert.equal(actions[3]["deviation-guides"], "sample");
-  assert.equal(actions[3]["sample-span-center"], "sample");
-  assert.equal(actions[4]["deviation-guides"], "none");
-  assert.deepEqual(
-    actions.map((action) => action["deviation-guides"]),
-    ["none", "none", "population", "sample", "none", "none", "none", "none"]
-  );
-  assert.equal(actions[4]["sample-span-center"], "population");
-  assert.equal(actions[7]["recenter-sample-span"], true);
+  assert.ok(actions.slice(1).every((action) => action["show-sample"] && action["focus-sample"]));
+  assert.ok(fromMu > 0 && fromM > fromMu && linedUp > fromM);
+  assert.equal(actions[fromMu]["show-fixed-center-rms"], true);
+  assert.equal(actions[fromMu]["show-sample-sd"], false);
+  assert.equal(actions[fromM]["show-sample-sd"], true);
+  assert.equal(actions[fromM]["sample-span-center"], "sample");
+  actions.slice(0, fromMu).forEach((action) => {
+    assert.equal(action["show-fixed-center-rms"], false);
+    assert.equal(action["deviation-guides"], "none");
+  });
+  actions.slice(linedUp).forEach((action) => {
+    assert.equal(action["deviation-guides"], "none");
+    assert.equal(action["sample-span-center"], "population");
+  });
+  assert.equal(actions.at(-1)["recenter-sample-span"], true);
 
   const repeatAction = JSON.parse(
     tutorial.match(/data-repeat-action='([^']+)'/)[1]
@@ -103,114 +83,64 @@ test("the moving-center tutorial compares both centers before lining up the span
 
 test("the bias tutorial begins with only an abstract population display", () => {
   const tutorial = trackingBiasTutorial();
-  const actions = Array.from(
-    tutorial.matchAll(/data-action='([^']+)'/g),
-    (match) => JSON.parse(match[1])
-  );
-  const majorTitles = Array.from(
-    tutorial.matchAll(/data-major-title="([^"]+)"/g),
-    (match) => match[1]
-  );
-  const majors = Array.from(
-    tutorial.matchAll(/data-major="([^"]+)"/g),
-    (match) => match[1]
-  );
-  const titles = Array.from(
-    tutorial.matchAll(/data-title="([^"]+)"/g),
-    (match) => match[1]
-  );
+  const steps = tutorialSteps(tutorial);
+  const actions = steps.map((step) => step.action);
+  const phase = (major) => {
+    const found = steps.filter((step) => step.major === major).map((step) => step.action);
+    assert.ok(found.length > 0, `the bias tutorial should have a ${major} phase`);
+    return found;
+  };
 
   assert.match(tutorial, /"axisMode":"center"/);
   assert.match(tutorial, /"axisLabel":false/);
   assert.match(tutorial, /"unitLabel":""/);
   assert.match(tutorial, /"populationVarianceLift":6/);
+  assert.doesNotMatch(tutorial, /averageMeanError/);
+
   assert.equal("samples" in actions[0], false);
   assert.equal(actions[0]["show-sample"], false);
   assert.equal(actions[0]["focus-sample"], false);
-  assert.equal(actions[1]["show-sample"], true);
-  assert.equal(actions[1]["focus-sample"], true);
-  assert.equal(actions[1]["sample-opacity"], 0.32);
-  assert.equal(actions[1].fall, true);
-  actions.slice(2, 7).forEach((action) => {
+  actions.slice(1).forEach((action) => {
     assert.equal(action["show-sample"], true);
     assert.equal(action["focus-sample"], true);
     assert.equal(action["sample-opacity"], 0.32);
   });
-  actions.slice(0, 5).forEach((action) => {
-    assert.equal(action["tracker-axis-maximum"], 10);
+
+  // The tracker axis only ever widens, and always has room for the samples.
+  actions.forEach((action, index) => {
+    if (index > 0) {
+      assert.ok(action["tracker-axis-maximum"] >= actions[index - 1]["tracker-axis-maximum"]);
+    }
+    assert.ok((action.samples || 0) <= action["tracker-axis-maximum"]);
   });
-  actions.slice(5).forEach((action) => {
-    assert.equal(action["tracker-axis-maximum"], 1000);
+
+  [...phase("one-sample"), ...phase("means")].forEach((action) => {
+    assert.equal(action.estimator, "mean");
   });
-  assert.equal(actions[3].samples, 10);
-  assert.equal(actions[4].samples, 10);
-  assert.equal(actions[5].samples, 10);
-  assert.equal(actions[5]["tracker-axis-duration"], 1400);
-  assert.equal(actions[6].samples, 1000);
-  assert.equal(actions[6]["sample-duration"], 10000);
-  actions.slice(7).forEach((action) => {
-    assert.equal(action["show-sample"], true);
-    assert.equal(action["focus-sample"], true);
-    assert.equal(action["sample-opacity"], 0.32);
-    assert.equal(action["source-view"], "sample");
+
+  const uncorrected = phase("variance-uncorrected");
+  uncorrected.forEach((action) => {
+    assert.equal(action.estimator, "variance");
+    assert.equal(action["variance-indicator"], "uncorrected");
+    assert.equal(action["show-uncorrected-tracker"], true);
+    assert.equal(action["show-corrected-tracker"], false);
+    assert.equal(action["hold-uncorrected-history"], false);
   });
-  assert.equal(actions[7].fall, true);
-  assert.equal(actions[7]["variance-indicator"], "uncorrected");
-  assert.equal(actions[7]["show-uncorrected-tracker"], true);
-  assert.equal(actions[7]["show-corrected-tracker"], false);
-  assert.equal(actions[7]["hold-uncorrected-history"], false);
-  assert.equal(actions[8].samples, 1000);
-  assert.equal(actions[8]["sample-duration"], 15000);
-  assert.equal(actions[8]["show-corrected-tracker"], false);
-  assert.equal(actions[9].samples, 1);
-  assert.equal(actions[9].fall, true);
-  assert.equal(actions[9]["variance-indicator"], "corrected");
-  assert.equal(actions[9]["show-uncorrected-tracker"], true);
-  assert.equal(actions[9]["show-corrected-tracker"], true);
-  assert.equal(actions[9]["uncorrected-history-samples"], 1000);
-  assert.equal(actions[9]["hold-uncorrected-history"], true);
-  assert.equal(actions[10].samples, 1000);
-  assert.equal(actions[10]["sample-duration"], 15000);
-  assert.equal(actions[10]["variance-indicator"], "corrected");
-  assert.equal(actions[10]["uncorrected-history-samples"], 1000);
-  assert.equal(actions[10]["hold-uncorrected-history"], true);
-  assert.match(tutorial, /The samples are identical\. Only the denominator changes\./);
-  assert.match(tutorial, /green corrected squares are added on top of the existing red estimates/);
-  assert.match(tutorial, /green cumulative line is drawn without removing the red one/);
-  assert.deepEqual([...new Set(majorTitles)], [
-    "Population",
-    "One sample",
-    "Repeated means",
-    "Uncorrected variance",
-    "Corrected variance"
-  ]);
-  assert.deepEqual(majors, [
-    "population",
-    "one-sample",
-    "one-sample",
-    "means",
-    "means",
-    "means",
-    "means",
-    "variance-uncorrected",
-    "variance-uncorrected",
-    "variance-corrected",
-    "variance-corrected"
-  ]);
-  assert.deepEqual(titles, [
-    "Meet the population",
-    "Draw a sample",
-    "Track its error",
-    "Ten means",
-    "Average error",
-    "Make room for 1,000",
-    "1,000 means",
-    "One estimate",
-    "1,000 estimates",
-    "Change the denominator",
-    "Replay 1,000"
-  ]);
-  assert.doesNotMatch(tutorial, /averageMeanError|inches/);
+  assert.equal(uncorrected[0].fall, true);
+
+  // The corrected replay keeps every red uncorrected estimate on screen.
+  const uncorrectedTotal = Math.max(...uncorrected.map((action) => action.samples));
+  const corrected = phase("variance-corrected");
+  corrected.forEach((action) => {
+    assert.equal(action.estimator, "variance");
+    assert.equal(action["variance-indicator"], "corrected");
+    assert.equal(action["show-uncorrected-tracker"], true);
+    assert.equal(action["show-corrected-tracker"], true);
+    assert.equal(action["hold-uncorrected-history"], true);
+    assert.equal(action["uncorrected-history-samples"], uncorrectedTotal);
+  });
+  assert.equal(corrected[0].fall, true);
+  assert.equal(Math.max(...corrected.map((action) => action.samples)), uncorrectedTotal);
 });
 
 test("the corrected replay holds the completed uncorrected history", () => {

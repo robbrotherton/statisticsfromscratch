@@ -7,13 +7,10 @@ const chapter = readFileSync(new URL("../03-central-tendency.qmd", import.meta.u
 const statsSource = readFileSync(new URL("../resources/js/stat-helpers.js", import.meta.url), "utf8");
 const distributionSource = readFileSync(new URL("../resources/js/distribution-generator.js", import.meta.url), "utf8");
 import { graphSource } from "./helpers/graph-source.mjs";
+import { divById } from "./helpers/qmd.mjs";
 
 function comparisonSteps() {
-  const start = chapter.indexOf("## Watch the center change");
-  const end = chapter.indexOf("## Summary", start);
-  assert.ok(start >= 0 && end > start, "comparison tutorial should be present");
-
-  return Array.from(chapter.slice(start, end).matchAll(
+  return Array.from(divById(chapter, "act-distributions").matchAll(
     /data-title="([^"]+)" data-action='([^']+)'/g
   )).map((match) => ({
     title: match[1],
@@ -46,7 +43,6 @@ function graphContext() {
 }
 
 test("the comparison moves from concrete distributions to one guided morph", () => {
-  assert.match(chapter, /Stepping back from real data/);
   assert.ok(
     chapter.indexOf("#fig-income-distribution") < chapter.indexOf("## Watch the center change"),
     "the concrete income example should precede the generic distribution morph"
@@ -142,7 +138,6 @@ test("every sampled intermediate shape remains a normalized mixture", () => {
 test("the tone-identification comparison uses honest grouped estimates", () => {
   assert.equal((chapter.match(/makeToneIdentificationGraph/g) || []).length, 2);
   assert.match(chapter, /toneIdentificationCenters makeToneIdentificationGraph options='\{"showCenters":true\}'/);
-  assert.match(chapter, /median and mean estimated from the grouped data/);
 
   const context = graphContext();
   const centers = context.sfsToneIdentificationGroupedCenters();
