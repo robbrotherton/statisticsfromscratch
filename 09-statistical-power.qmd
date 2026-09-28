@@ -211,7 +211,7 @@ Now, it's too bad that "type one" and "type two" are such uninformative names be
 
 ## Statistical Power
 
-Moving on to statistical power, the power of a test is defined as the probability that the test will reject the null hypothesis if the treatment really does have an effect. If a treatment really does have an effect, we're focusing on the right-hand column of the table here, under which $H_0$ is false. 
+Now that we've established the ideas of effect size and type I and type II errors, we have the tools we need to think about *statistical power*. The power of a test is defined as the probability that the test will reject the null hypothesis *if the treatment really does have an effect*. That clause means we're focusing on the right-hand column of the table here, under which $H_0$ is false.
 
 <div class="table-responsive">
 <table id="inf-tab-highlighted" class="sfs-decision-table sfs-decision-highlight-h1">
@@ -237,74 +237,7 @@ Moving on to statistical power, the power of a test is defined as the probabilit
 
 There are two possible outcomes: either we fail to reject the null hypothesis, making a type two false negative error; or we correctly reject the null hypothesis. Because these two complementary outcomes cover the whole probability space, their probabilities must add up to 1. The probability of a type two error is referred to as $\beta$. Therefore, the other outcome, the correct rejection of the null, must have a probability of $1 - \beta$. This quantity, $1 - \beta$, is the statistical power of the test.
 
-
-
-### Calculating Power
-
-::::: {#act-calculating-power .callout-tip .interactive .with-controls}
-## Explore statistical power
-
-{{< interactive-figure statisticalPower makeStatisticalPowerDiagram options='{"mu":50,"sigma":10,"n":25,"d":0.5,"alpha":0.05,"showAlt":false,"axisZNull":true,"axisRaw":false}' fallback="Explore statistical power. Use the accompanying steps for an explanation." >}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="The null" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":false,"h0-z":true,"h1-z":false}'}
-Start with a null population mean of 50, a population SD of 10, and samples of 25. The standard error is $10 / \sqrt{25} = 2$. This curve shows sample means under the null, labeled in $z$ units. For a two-tailed test with $\alpha = .05$, the critical $z$ values are about $\pm 1.96$.
-:::
-
-::: {.tutorial-step data-title="Critical means" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":true,"h0-z":true,"h1-z":false}'}
-On the raw-score ruler, those same boundaries are $50 - 1.96(2) = 46.08$ and $50 + 1.96(2) = 53.92$. Sample means outside these boundaries lead us to reject the null. Keep those raw-score boundaries in mind: we will use the same decision rule when we consider a population where the null is false.
-:::
-
-::: {.tutorial-step data-title="A specified alternative" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":false}'}
-Suppose the true population mean is 55 instead. That's a difference of five points, or $d = 0.5$, because the population SD is 10. Samples of 25 from this alternative population have a sampling distribution centered on 55, still with a standard error of 2. The violet areas show the sample means that would cross the null's rejection boundaries.
-:::
-
-::: {.tutorial-step data-title="The alternative ruler" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
-Now read the boundaries relative to the alternative mean. The lower one is $(46.08 - 55) / 2 = -4.46$ standard errors below it; the upper one is $(53.92 - 55) / 2 = -0.54$. The boundaries are still at the same raw scores. We've changed the ruler we use to describe them.
-:::
-
-::: {.tutorial-step data-title="Misses and detections" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
-The gray area under the alternative curve lies between the critical boundaries. These samples fail to reject a false null: $\beta \approx .295$. The violet area outside the boundaries is power: $1 - \beta \approx .705$. So this design detects this particular effect about 71 percent of the time over repeated studies. Both rejection tails count, though the far-left contribution here is tiny.
-:::
-
-::::
-:::::
-
-We'll work through calculating power both visually and mathematically. Visually, here's our null hypothesis distribution with critical regions highlighted red. As you know by now, these critical regions are the regions of the sampling distribution that will cause us to reject the null hypothesis. So to think about statistical power, we need to imagine what the alternative hypothesis distribution with its different mean would look like, and how it overlaps with the null distribution. Specifically, what proportion of sample means for the alternative hypothesis distribution fall within the critical regions of the null distribution and will cause us to reject the null hypothesis? That is the power of the test, the region shaded violet here.
-
-This is slightly complicated to think about. So we'll work through it step by step. First, we focus on the null distribution. We need to determine the critical $z$ scores that define those red critical regions. Since we're dealing with a normal distribution, we know that we can use the unit normal table to find those scores. So let's say our $\alpha$ is .05. We'd find critical $z$ scores of $\pm 1.96$.
-
-{{< interactive-figure powerCriticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.92,"to":2.0,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.92 to 2.00, with the area to the right of z = 1.96, .0250, highlighted." >}}
-
-The next step is to determine what original sample means those critical $z$ scores correspond to. That requires knowing the null distribution's mean and variability. So let's say the population mean is 50 with a standard deviation of 10. We know from the central limit theorem that this sampling distribution will also have a mean of 50, and its variability, the standard error of the mean, is found by dividing the standard deviation by the square root of the sample size. So let's say our sample size is 25.
-
-<!-- [Note: Original lecture included an interactive element here.] -->
-
-See if you can calculate the critical means.
-
-{{< include quizzes/09-power-critical-means.qmd >}}
-
-Next, we turn our attention to the alternative hypothesis distribution. We need to know what effect size to expect. So in other words, how much higher or lower is the mean of the alternative distribution than the original distribution? Let's say we expect a difference of five points.
-
-<!-- [Note: Original lecture included an interactive element here.] -->
-
-Now we need to work out what $z$ scores correspond to the sample means we just worked out, but for this distribution.
-
-{{< include quizzes/09-power-alternative-means.qmd >}}
-
-So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.54$ is the same as the area to the right of $z = 0.54$, which the table gives as .2946, and the area to the left of $z = -4.46$ is so far out in the tail that it rounds to .0000: $.2946 - .0000 = .2946$. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
-
-{{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.5,"to":0.58,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.54,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.50 to 0.58, with the area to the right of z = 0.54, .2946, highlighted." >}}
-
-And so finally we can work out the statistical power of the test — the chances of correctly rejecting the null hypothesis — by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
-
-Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis 70.5% of the time.
-
-### Factors Affecting Power
-
-It's worth spending some time thinking this through, particularly thinking about how changing different quantities will affect statistical power. Increasing effect size, the distance between the means, increases power because the distributions will be farther apart and overlap less. Increasing sample size also increases power because it reduces the standard error, again meaning that the distributions will overlap less. Reducing our $\alpha$ value lowers power because it makes for a more stringent test. The critical regions of the null distribution will be smaller and so less of the alternative distribution will cause us to reject the null. And the directionality of our hypothesis affects power as well. Using a one-tailed test increases power since it gives a larger critical region in one tail that we're interested in.
-
-If you really understand how and why each of these factors affects power, you'll have a good grasp of the concept.
+To illustrate, let's check in with our bee swarm again.
 
 ::::: {.callout-tip .interactive}
 ## Watch power in action: the swarm returns
@@ -342,6 +275,74 @@ Now it's yours. Mix the three ingredients — sample size, variability, and effe
 ::::
 
 :::::
+
+
+### Calculating Power
+
+The bees are very cute and all, but how do we actually calculate statistical power in practice? For that, we'll need some step-by-step instructions, some formulas. I'll also show you how it looks visualized with some boring old curves, because unfortunately we can't always do statistics with bees.
+
+We'll work through calculating power both visually and mathematically. Visually, here's our null hypothesis distribution with critical regions highlighted red. As you know by now, these critical regions are the regions of the sampling distribution that will cause us to reject the null hypothesis. So to think about statistical power, we need to imagine what the alternative hypothesis distribution with its different mean would look like, and how it overlaps with the null distribution. Specifically, what proportion of sample means for the alternative hypothesis distribution fall within the critical regions of the null distribution and will cause us to reject the null hypothesis? That is the power of the test, the region shaded violet here.
+
+This is slightly complicated to think about. So we'll work through it step by step. First, we focus on the null distribution. We need to determine the critical $z$ scores that define those red critical regions. Since we're dealing with a normal distribution, we know that we can use the unit normal table to find those scores. So let's say our $\alpha$ is .05. We'd find critical $z$ scores of $\pm 1.96$.
+
+{{< interactive-figure powerCriticalZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":1.92,"to":2.0,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":1.96,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 1.92 to 2.00, with the area to the right of z = 1.96, .0250, highlighted." >}}
+
+The next step is to determine what original sample means those critical $z$ scores correspond to. That requires knowing the null distribution's mean and variability. So let's say the population mean is 50 with a standard deviation of 10. We know from the central limit theorem that this sampling distribution will also have a mean of 50, and its variability, the standard error of the mean, is found by dividing the standard deviation by the square root of the sample size. So let's say our sample size is 25.
+
+See if you can calculate the critical means.
+
+{{< include quizzes/09-power-critical-means.qmd >}}
+
+Next, we turn our attention to the alternative hypothesis distribution. We need to know what effect size to expect. So in other words, how much higher or lower is the mean of the alternative distribution than the original distribution? Let's say we expect a difference of five points.
+
+Now we need to work out what $z$ scores correspond to the sample means we just worked out, but for this distribution.
+
+{{< include quizzes/09-power-alternative-means.qmd >}}
+
+So we plug the relevant values into the $z$ equation to work out each value. See if you can get them. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.54$ is the same as the area to the right of $z = 0.54$, which the table gives as .2946, and the area to the left of $z = -4.46$ is so far out in the tail that it rounds to .0000: $.2946 - .0000 = .2946$. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+
+{{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.5,"to":0.58,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.54,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.50 to 0.58, with the area to the right of z = 0.54, .2946, highlighted." >}}
+
+And so finally we can work out the statistical power of the test — the chances of correctly rejecting the null hypothesis — by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
+
+Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis 70.5% of the time.
+
+::::: {#act-calculating-power .callout-tip .interactive .with-controls}
+## Explore statistical power
+
+{{< interactive-figure statisticalPower makeStatisticalPowerDiagram options='{"mu":50,"sigma":10,"n":25,"d":0.5,"alpha":0.05,"showAlt":false,"axisZNull":true,"axisRaw":false}' fallback="Explore statistical power. Use the accompanying steps for an explanation." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="The null" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":false,"h0-z":true,"h1-z":false}'}
+Start with a null population mean of 50, a population SD of 10, and samples of 25. The standard error is $10 / \sqrt{25} = 2$. This curve shows sample means under the null, labeled in $z$ units. For a two-tailed test with $\alpha = .05$, the critical $z$ values are about $\pm 1.96$.
+:::
+
+::: {.tutorial-step data-title="Critical means" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":false,"raw-scores":true,"h0-z":true,"h1-z":false}'}
+On the raw-score ruler, those same boundaries are $50 - 1.96(2) = 46.08$ and $50 + 1.96(2) = 53.92$. Sample means outside these boundaries lead us to reject the null. Keep those raw-score boundaries in mind: we will use the same decision rule when we consider a population where the null is false.
+:::
+
+::: {.tutorial-step data-title="A specified alternative" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":false}'}
+Suppose the true population mean is 55 instead. That's a difference of five points, or $d = 0.5$, because the population SD is 10. Samples of 25 from this alternative population have a sampling distribution centered on 55, still with a standard error of 2. The violet areas show the sample means that would cross the null's rejection boundaries.
+:::
+
+::: {.tutorial-step data-title="The alternative ruler" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+Now read the boundaries relative to the alternative mean. The lower one is $(46.08 - 55) / 2 = -4.46$ standard errors below it; the upper one is $(53.92 - 55) / 2 = -0.54$. The boundaries are still at the same raw scores. We've changed the ruler we use to describe them.
+:::
+
+::: {.tutorial-step data-title="Misses and detections" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+The gray area under the alternative curve lies between the critical boundaries. These samples fail to reject a false null: $\beta \approx .295$. The violet area outside the boundaries is power: $1 - \beta \approx .705$. So this design detects this particular effect about 71 percent of the time over repeated studies. Both rejection tails count, though the far-left contribution here is tiny.
+:::
+
+::::
+:::::
+
+### Factors Affecting Power
+
+It's worth spending some time thinking this through, particularly thinking about how changing different quantities will affect statistical power. Increasing effect size, the distance between the means, increases power because the distributions will be farther apart and overlap less. Increasing sample size also increases power because it reduces the standard error, again meaning that the distributions will overlap less. Reducing our $\alpha$ value lowers power because it makes for a more stringent test. The critical regions of the null distribution will be smaller and so less of the alternative distribution will cause us to reject the null. And the directionality of our hypothesis affects power as well. Using a one-tailed test increases power since it gives a larger critical region in one tail that we're interested in.
+
+If you really understand how and why each of these factors affects power, you'll have a good grasp of the concept.
+
+
 
 For another way to build intuition about how these factors interact, explore [Kristoffer Magnusson's interactive NHST/power visualization](https://rpsychologist.com/d3/NHST/).
 
