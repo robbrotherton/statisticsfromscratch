@@ -351,7 +351,7 @@ heightVariabilityEnsureStyles = () => {
 
     .bias-tracking-demo .bt-mode-button[aria-pressed="true"] {
       border-color: var(--sfs-accent, var(--bs-primary, #0d6efd));
-      background: var(--sfs-highlight-bg, color-mix(in srgb, currentColor 10%, transparent));
+      background: color-mix(in srgb, var(--sfs-accent, var(--bs-primary, #0d6efd)) 12%, transparent);
       color: var(--sfs-accent, var(--bs-primary, #0d6efd));
       font-weight: 700;
     }

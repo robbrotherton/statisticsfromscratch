@@ -109,19 +109,50 @@ body.quarto-dark #tbl-dice-sums {
 }
 
 /* Mark a modal row in static frequency tables without coupling the styling
-   to a particular row number. Mixing yellow with the current page background
-   gives the highlight enough contrast in either theme without becoming an
-   opaque stripe. The heavier type keeps the cue from relying on color alone. */
-.sfs-mode-table {
-  --sfs-mode-highlight-bg: color-mix(
-    in srgb,
-    var(--graph-series-7, #f0e442) 32%,
-    var(--sfs-bg)
-  );
+   to a particular row number. The heavier type keeps the cue from relying on
+   color alone. */
+.sfs-mode-table tbody tr:has(.sfs-mode-marker) > * {
+  background: var(--sfs-highlight-bg);
+  font-weight: 700;
 }
 
-.sfs-mode-table tbody tr:has(.sfs-mode-marker) > * {
-  background: var(--sfs-mode-highlight-bg);
-  font-weight: 700;
+/* The two-by-two table of hypothesis-test decisions against the actual
+   situation in Chapter 9. Errors use the critical-region red so they match
+   the power figures. */
+.sfs-decision-table {
+  --sfs-decision-correct-color: #2e8b57;
+}
+
+body.quarto-dark .sfs-decision-table {
+  --sfs-decision-correct-color: #6fcf97;
+}
+
+.sfs-decision-table th,
+.sfs-decision-table td {
+  text-align: center;
+}
+
+.sfs-decision-table tbody th:not(.sfs-decision-side) {
+  text-align: right;
+}
+
+.sfs-decision-table .sfs-decision-side {
+  writing-mode: vertical-rl;
+  text-orientation: sideways;
+  transform: rotate(180deg);
+}
+
+.sfs-decision-table .sfs-decision-error {
+  color: var(--sfs-critical-color);
+}
+
+.sfs-decision-table .sfs-decision-correct {
+  color: var(--sfs-decision-correct-color);
+}
+
+/* Shade the H0-false column: its header and the last cell of each row. */
+.sfs-decision-highlight-h1 thead tr:last-child > :last-child,
+.sfs-decision-highlight-h1 tbody tr > :last-child {
+  background: var(--sfs-highlight-bg);
 }
 
