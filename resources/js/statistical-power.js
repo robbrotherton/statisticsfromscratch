@@ -11,9 +11,11 @@ sfsInlineMath = function() {
 // The arithmetic and placement rules behind the power diagram, kept free of
 // the DOM so the tests can check them directly. Positions are in pixels.
 window.sfsStatisticalPower = (function() {
+  // The alternative sits `diff` raw units from the null when that is given,
+  // otherwise `d` population SDs away.
   function params(state) {
     const se = state.sigma / Math.sqrt(state.n);
-    const altMean = state.mu + state.d * state.sigma;
+    const altMean = state.mu + (Number.isFinite(state.diff) ? state.diff : state.d * state.sigma);
     const zCritical = spNormalInv(1 - (state.twoTailed ? state.alpha / 2 : state.alpha));
     const highCritical = state.mu + zCritical * se;
     const lowCritical = state.twoTailed ? state.mu - zCritical * se : -Infinity;
@@ -32,6 +34,68 @@ window.sfsStatisticalPower = (function() {
     const maxCenter = Math.max.apply(null, candidates);
     const pad = Math.max(4 * p.se, 0.12 * (maxCenter - minCenter || p.se));
     return [minCenter - pad, maxCenter + pad];
+  }
+
+  // Axes that hold still while the reader drags any slider in `ranges`
+  // ({ key: [min, max] }), so curves visibly narrow, rise and slide rather
+  // than being rescaled to look the same. Every corner of the ranges is
+  // tried, since each curve's reach and height are monotone in each value.
+  // With `solve` ({ target, max }), n at each corner is the exact sample
+  // that reaches the target power, as the figure draws it when solving for n.
+  function fixedExtent(state, ranges, solve) {
+    let states = [Object.assign({}, state)];
+    Object.keys(ranges || {}).forEach((key) => {
+      states = states.flatMap((s) => ranges[key].slice(0, 2)
+        .map((value) => Object.assign({}, s, { [key]: value })));
+    });
+    states.push(state);
+    if (solve) {
+      states = states.map((s) => Object.assign({}, s, { n: exactN(s, solve.target, solve.max).n }));
+    }
+    let low = Infinity;
+    let high = -Infinity;
+    let peak = 0;
+    states.forEach((s) => {
+      const p = params(s);
+      const reach = Math.max(3.5, p.zCritical + 0.5) * p.se;
+      low = Math.min(low, s.mu - reach, p.altMean - reach);
+      high = Math.max(high, s.mu + reach, p.altMean + reach);
+      peak = Math.max(peak, spNormalPdf(0, 0, p.se));
+    });
+    return { domain: [low, high], peak };
+  }
+
+  // The smallest sample that gives at least `target` power, searching up to
+  // `max`. Power grows with n whenever the means differ, so a binary search
+  // finds it; `reached` is false when even `max` falls short.
+  function requiredN(state, target, max) {
+    const powerAt = (n) => params(Object.assign({}, state, { n })).power;
+    if (powerAt(max) < target) return { n: max, reached: false };
+    let low = 1;
+    let high = max;
+    while (low < high) {
+      const mid = Math.floor((low + high) / 2);
+      if (powerAt(mid) >= target) high = mid;
+      else low = mid + 1;
+    }
+    return { n: low, reached: true };
+  }
+
+  // The same, as a real number: the sample at which power equals `target`
+  // exactly. Drawing with it lets the curves glide as the reader drags,
+  // where the whole-number answer would make them twitch back and forth.
+  function exactN(state, target, max) {
+    const powerAt = (n) => params(Object.assign({}, state, { n })).power;
+    if (powerAt(max) < target) return { n: max, reached: false };
+    if (powerAt(1) >= target) return { n: 1, reached: true };
+    let low = 0;
+    let high = Math.log(max);
+    for (let i = 0; i < 50; i += 1) {
+      const mid = (low + high) / 2;
+      if (powerAt(Math.exp(mid)) >= target) high = mid;
+      else low = mid;
+    }
+    return { n: Math.exp(high), reached: true };
   }
 
   // Roughly how wide a label is at the shared 13 px tick size, following
@@ -154,7 +218,7 @@ window.sfsStatisticalPower = (function() {
     return best ? { x: best.x, y: best.y } : null;
   }
 
-  return { params, domain, textWidth, readableTicks, niceStep, zTickValues, clearOf, separatePair, fitRegionLabel };
+  return { params, domain, fixedExtent, requiredN, exactN, textWidth, readableTicks, niceStep, zTickValues, clearOf, separatePair, fitRegionLabel };
 })();
 
 makeStatisticalPowerDiagram = function(opts) {
@@ -172,7 +236,11 @@ makeStatisticalPowerDiagram = function(opts) {
   const AXIS_ROW = 30;
   const AXIS_ORDER = ["raw", "h0", "h1"];
   const SIDE_LABEL_WIDTH = 50;
-  const margin = { top: 26, right: SIDE_LABEL_WIDTH + 12, left: 12 };
+  // A pared-back version for seeing what moves power: no rulers, axes that
+  // hold still, and the sliders beneath the plot, which tutorial steps
+  // reveal one at a time with `show-controls`.
+  const minimal = Boolean(opts.minimal);
+  const margin = { top: 26, right: minimal ? 12 : SIDE_LABEL_WIDTH + 12, left: 12 };
   const fTick = d3.format("~g");
   const fBoundary = d3.format(".2f");
   const f2 = d3.format(".2f");
@@ -196,8 +264,92 @@ makeStatisticalPowerDiagram = function(opts) {
     dimNull: Boolean(opts.dimNull),
     axisRaw: opts.axisRaw === undefined ? true : Boolean(opts.axisRaw),
     axisZNull: Boolean(opts.axisZNull),
-    axisZAlt: Boolean(opts.axisZAlt)
+    axisZAlt: Boolean(opts.axisZAlt),
+    diff: NaN,
+    shownControls: [],
+    // Which quantity is the answer: "power" from the design, or "n" from a
+    // target power.
+    solveFor: opts.solveFor === "n" ? "n" : "power",
+    targetPower: spFiniteNumber(opts.targetPower, 0.8)
   };
+  const MAX_N = 5000;
+  if (minimal) {
+    // Holding the raw difference fixed, not d, is what lets the population
+    // SD change power: at a fixed d, a wider population carries the
+    // alternative farther away in step and the picture only rescales.
+    state.diff = spFiniteNumber(opts.diff, state.d * state.sigma);
+    Object.assign(state, {
+      showAlt: true, shadeBeta: true, shadePower: true, dimNull: false,
+      axisRaw: false, axisZNull: false, axisZAlt: false,
+      shownControls: controlList(opts.showControls)
+    });
+  }
+
+  // The minimal figure's sliders. Each has its own color, so a step that
+  // swaps one slider for another reads as a change of subject. Labels here
+  // are the only UI text these sliders carry.
+  const FACTORS = [
+    {
+      key: "alpha",
+      label: "Alpha",
+      color: "var(--sp-critical-color)",
+      range: [0.01, 0.2, 0.01],
+      readoutWidth: "4.6rem",
+      tex: () => `\\alpha = ${fAlpha(state.alpha)}`
+    },
+    {
+      key: "n",
+      label: "Sample size",
+      color: "var(--graph-series-3, #009e73)",
+      range: [4, 100, 1],
+      readoutWidth: "4.6rem",
+      tex: () => state.solveFor !== "n" ? `n = ${f0(state.n)}`
+        : state.nReached ? `n = ${f0(state.nRequired)}` : `n > ${f0(MAX_N)}`
+    },
+    {
+      key: "sigma",
+      label: "Population standard deviation",
+      color: "var(--graph-series-2, #e69f00)",
+      range: [5, 20, 0.5],
+      readoutWidth: "4.6rem",
+      tex: () => `\\sigma = ${fTick(state.sigma)}`
+    },
+    {
+      key: "diff",
+      label: "Difference between the population means",
+      color: "var(--graph-series-1, #0072b2)",
+      range: [0, 15, 0.5],
+      readoutWidth: "10.5rem",
+      tex: () => `\\mu_1 - \\mu_0 = ${fTick(state.diff)}\\;(d = ${f2(state.diff / state.sigma)})`
+    },
+    {
+      key: "power",
+      label: "Target power",
+      color: "var(--sp-alt-color)",
+      range: [0.5, 0.99, 0.01],
+      readoutWidth: "6.2rem",
+      tex: (p) => state.solveFor === "power"
+        ? `1 - \\beta = ${noEffect(p) ? "\\text{–}" : fProbability(p.power)}`
+        : `1 - \\beta \\geq ${fProbability(state.targetPower)}`
+    }
+  ].map((factor) => Object.assign(factor, {
+    baseRange: (opts.ranges && opts.ranges[factor.key]) || factor.range,
+    range: (opts.ranges && opts.ranges[factor.key]) || factor.range
+  }));
+  const TWO_TAILED_LABEL = "Two-tailed";
+
+  // With no difference between the means the alternative is the null, and
+  // the chance of rejecting is just alpha. Following Magnusson's NHST
+  // visualization, that is not called power: beta and power read as a dash
+  // and are not shaded.
+  function noEffect(p) {
+    return Math.abs(p.altMean - state.mu) < 1e-9;
+  }
+
+  function controlList(value) {
+    const list = Array.isArray(value) ? value : String(value || "").split(",");
+    return list.map((key) => String(key).trim()).filter(Boolean);
+  }
 
   const root = d3.create("div")
     .attr("class", "statistical-power-diagram sfs-figure")
@@ -372,6 +524,149 @@ makeStatisticalPowerDiagram = function(opts) {
     .statistical-power-diagram .sfs-graph .sp-axis-h1 .sfs-graph-tick-line {
       stroke: var(--sp-alt-color);
     }
+
+    .statistical-power-diagram .sp-factors {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      max-width: min(100%, 30rem);
+      min-height: 2.6rem;
+      margin: 0.4rem auto 0;
+    }
+
+    .statistical-power-diagram .sp-factor {
+      --sp-factor-ink: color-mix(in srgb, var(--sp-factor-color) 72%, var(--sfs-text));
+      --sp-track: color-mix(in srgb, var(--sfs-text) 18%, var(--sfs-bg));
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.3rem 0.9rem;
+      padding: 0.3rem 0.65rem;
+      border-left: 4px solid var(--sp-factor-color);
+      border-radius: var(--sfs-radius-sm, 4px);
+      background: color-mix(in srgb, var(--sp-factor-color) 9%, transparent);
+      animation: sp-factor-in 700ms ease-out;
+    }
+
+    .statistical-power-diagram .sp-factor[hidden],
+    .statistical-power-diagram .sp-factor input[hidden] {
+      display: none;
+    }
+
+    /* The answer sits beneath the sliders that produce it. */
+    .statistical-power-diagram .sp-factor.is-output {
+      order: 1;
+      justify-content: center;
+      border-left-style: double;
+      font-size: 1.1rem;
+    }
+
+    .statistical-power-diagram .sp-factor.is-output .sp-factor-slider {
+      flex: 0 0 auto;
+    }
+
+    .statistical-power-diagram .sp-factor.is-output .sp-factor-value {
+      min-width: 0 !important;
+    }
+
+    .statistical-power-diagram .sp-factor input {
+      accent-color: var(--sp-factor-color);
+    }
+
+    .statistical-power-diagram .sp-factor-slider {
+      display: flex;
+      flex: 1 1 15rem;
+      align-items: center;
+      gap: 0.6rem;
+      min-width: 0;
+      margin: 0;
+    }
+
+    .statistical-power-diagram .sp-factor-value {
+      flex: 0 0 auto;
+      color: var(--sp-factor-ink);
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    /* Drawn by hand: with accent-color alone, Chromium paints the unfilled
+       track dark beside a light accent (the orange) and white beside a dark
+       one, differently in each theme. */
+    .statistical-power-diagram .sp-factor input[type="range"] {
+      flex: 1 1 8rem;
+      width: auto;
+      min-width: 3rem;
+      height: 1.2rem;
+      margin: 0;
+      background: transparent;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, var(--sp-factor-color) var(--sp-fill, 50%), var(--sp-track) var(--sp-fill, 50%));
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]::-moz-range-track {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--sp-track);
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]::-moz-range-progress {
+      height: 6px;
+      border-radius: 3px;
+      background: var(--sp-factor-color);
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]::-webkit-slider-thumb {
+      width: 1.05rem;
+      height: 1.05rem;
+      margin-top: calc(3px - 0.525rem);
+      border: 2px solid var(--sfs-bg);
+      border-radius: 50%;
+      background: var(--sp-factor-color);
+      box-shadow: 0 0 0 1px var(--sp-factor-color);
+      -webkit-appearance: none;
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]::-moz-range-thumb {
+      width: 0.85rem;
+      height: 0.85rem;
+      border: 2px solid var(--sfs-bg);
+      border-radius: 50%;
+      background: var(--sp-factor-color);
+      box-shadow: 0 0 0 1px var(--sp-factor-color);
+    }
+
+    .statistical-power-diagram .sp-factor input[type="range"]:focus-visible {
+      outline: 2px solid var(--sfs-focus);
+      outline-offset: 2px;
+    }
+
+    .statistical-power-diagram .sp-factor-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    @keyframes sp-factor-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+        background: color-mix(in srgb, var(--sp-factor-color) 30%, transparent);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .statistical-power-diagram .sp-factor { animation: none; }
+    }
   `);
 
   const controls = root.append("div")
@@ -424,36 +719,90 @@ makeStatisticalPowerDiagram = function(opts) {
     return input.node();
   }
 
-  const popControls = group("Population characteristics");
-  const muInput = addNumber(popControls, "<i>&mu;</i>", state.mu, null, 1);
-  const sigmaInput = addNumber(popControls, "<i>&sigma;</i>", state.sigma, 0.01, 1);
+  // The minimal figure builds only its inline sliders; the full panel's
+  // other inputs stay null and every reader of them checks first.
+  let muInput = null;
+  let sigmaInput = null;
+  let dControl = null;
+  let nControl = null;
+  let alphaControl = null;
+  let twoTailedInput = null;
+  let seValue = null;
+  let showAltInput = null;
+  let shadeBetaInput = null;
+  let shadePowerInput = null;
+  let dimNullInput = null;
+  let axisRawInput = null;
+  let axisZNullInput = null;
+  let axisZAltInput = null;
+  const factorControls = {};
 
-  const dataControls = group("Experiment parameters");
-  const dControl = addSlider(dataControls, "<i>d</i>", state.d, -2, 2, 0.01);
-  const nControl = addSlider(dataControls, "<i>n</i>", state.n, 1, 100, 1);
-  const alphaControl = addSlider(dataControls, "<i>&alpha;</i>", state.alpha, 0.01, 0.5, 0.01);
-  const twoTailedInput = addCheckbox(dataControls, "Two-tailed", state.twoTailed);
-  const seRow = dataControls.append("div")
-    .attr("class", "sp-row sp-row-compact sfs-control-row");
-  seRow.append("span").html("<i>&sigma;<sub>M</sub></i>");
-  const seValue = seRow.append("span")
-    .attr("class", "sp-value sfs-readout-value");
+  if (!minimal) {
+    const popControls = group("Population characteristics");
+    muInput = addNumber(popControls, "<i>&mu;</i>", state.mu, null, 1);
+    sigmaInput = addNumber(popControls, "<i>&sigma;</i>", state.sigma, 0.01, 1);
 
-  const diagramControls = group("Diagram options");
-  const showAltInput = addCheckbox(diagramControls, "Show H<sub>1</sub>", state.showAlt);
-  const shadeBetaInput = addCheckbox(diagramControls, "Shade <i>&beta;</i>", state.shadeBeta);
-  const shadePowerInput = addCheckbox(diagramControls, "Shade power", state.shadePower);
-  const dimNullInput = addCheckbox(diagramControls, "Dim H<sub>0</sub>", state.dimNull);
-  diagramControls.append("p")
-    .attr("class", "sp-group-title sfs-control-title")
-    .style("margin-top", "0.65rem")
-    .text("X-axis");
-  const axisRawInput = addCheckbox(diagramControls, "Raw scores", state.axisRaw);
-  const axisZNullInput = addCheckbox(diagramControls, "H<sub>0</sub> z-scores", state.axisZNull);
-  const axisZAltInput = addCheckbox(diagramControls, "H<sub>1</sub> z-scores", state.axisZAlt);
+    const dataControls = group("Experiment parameters");
+    dControl = addSlider(dataControls, "<i>d</i>", state.d, -2, 2, 0.01);
+    nControl = addSlider(dataControls, "<i>n</i>", state.n, 1, 100, 1);
+    alphaControl = addSlider(dataControls, "<i>&alpha;</i>", state.alpha, 0.01, 0.5, 0.01);
+    twoTailedInput = addCheckbox(dataControls, "Two-tailed", state.twoTailed);
+    const seRow = dataControls.append("div")
+      .attr("class", "sp-row sp-row-compact sfs-control-row");
+    seRow.append("span").html("<i>&sigma;<sub>M</sub></i>");
+    seValue = seRow.append("span")
+      .attr("class", "sp-value sfs-readout-value");
+
+    const diagramControls = group("Diagram options");
+    showAltInput = addCheckbox(diagramControls, "Show H<sub>1</sub>", state.showAlt);
+    shadeBetaInput = addCheckbox(diagramControls, "Shade <i>&beta;</i>", state.shadeBeta);
+    shadePowerInput = addCheckbox(diagramControls, "Shade power", state.shadePower);
+    dimNullInput = addCheckbox(diagramControls, "Dim H<sub>0</sub>", state.dimNull);
+    diagramControls.append("p")
+      .attr("class", "sp-group-title sfs-control-title")
+      .style("margin-top", "0.65rem")
+      .text("X-axis");
+    axisRawInput = addCheckbox(diagramControls, "Raw scores", state.axisRaw);
+    axisZNullInput = addCheckbox(diagramControls, "H<sub>0</sub> z-scores", state.axisZNull);
+    axisZAltInput = addCheckbox(diagramControls, "H<sub>1</sub> z-scores", state.axisZAlt);
+  }
 
   const chartWrap = root.append("div")
     .attr("class", "sp-chart-wrap sfs-chart-wrap");
+
+  // Beneath the plot, like the standard error demo's inline slider, so the
+  // reader's eye goes straight from the control to what it moves.
+  if (minimal) {
+    const strip = root.append("div").attr("class", "sp-factors");
+    FACTORS.forEach((factor) => {
+      const row = strip.append("div")
+        .attr("class", `sp-factor sp-factor-${factor.key}`)
+        .attr("data-factor", factor.key)
+        .style("--sp-factor-color", factor.color);
+      const slider = row.append("label").attr("class", "sp-factor-slider");
+      const value = slider.append("span")
+        .attr("class", "sp-factor-value")
+        .style("min-width", factor.readoutWidth);
+      const input = slider.append("input")
+        .attr("type", "range")
+        .attr("min", factor.range[0])
+        .attr("max", factor.range[1])
+        .attr("step", factor.range[2])
+        .attr("value", factor.key === "power" ? state.targetPower : state[factor.key])
+        .attr("aria-label", factor.label)
+        .attr("data-prevent-swipe", "");
+      factorControls[factor.key] = { factor, row: row.node(), input: input.node(), value: value.node() };
+    });
+    const tails = factorControls.alpha.row.appendChild(document.createElement("label"));
+    tails.className = "sp-factor-check";
+    twoTailedInput = tails.appendChild(document.createElement("input"));
+    twoTailedInput.type = "checkbox";
+    twoTailedInput.checked = state.twoTailed;
+    tails.appendChild(document.createTextNode(TWO_TAILED_LABEL));
+    alphaControl = factorControls.alpha;
+    nControl = factorControls.n;
+    sigmaInput = factorControls.sigma.input;
+  }
 
   // The key names every shaded color and carries the numbers, so the plot
   // needs no headroom for them and a region too thin to label loses nothing.
@@ -585,12 +934,25 @@ makeStatisticalPowerDiagram = function(opts) {
   let boundaryBottom = null;
 
   function readState() {
-    state.mu = spFiniteNumber(muInput.value, state.mu);
     state.sigma = Math.max(0.01, spFiniteNumber(sigmaInput.value, state.sigma));
-    state.d = spFiniteNumber(dControl.input.value, state.d);
     state.n = Math.max(1, Math.round(spFiniteNumber(nControl.input.value, state.n)));
     state.alpha = Math.max(0.001, Math.min(0.999, spFiniteNumber(alphaControl.input.value, state.alpha)));
     state.twoTailed = twoTailedInput.checked;
+    if (minimal) {
+      state.diff = spFiniteNumber(factorControls.diff.input.value, state.diff);
+      state.d = state.diff / state.sigma;
+      state.targetPower = spFiniteNumber(factorControls.power.input.value, state.targetPower);
+      state.nReached = true;
+      if (state.solveFor === "n") {
+        const solved = geometry.requiredN(state, state.targetPower, MAX_N);
+        state.nRequired = solved.n;
+        state.nReached = solved.reached;
+        state.n = geometry.exactN(state, state.targetPower, MAX_N).n;
+      }
+      return;
+    }
+    state.mu = spFiniteNumber(muInput.value, state.mu);
+    state.d = spFiniteNumber(dControl.input.value, state.d);
     state.showAlt = showAltInput.checked;
     state.shadeBeta = shadeBetaInput.checked;
     state.shadePower = shadePowerInput.checked;
@@ -630,7 +992,8 @@ makeStatisticalPowerDiagram = function(opts) {
       sigma: state.sigma,
       d: state.d,
       effectSize: state.d,
-      n: state.n,
+      n: minimal && state.solveFor === "n" ? state.nRequired : state.n,
+      nExact: state.n,
       alpha: state.alpha,
       twoTailed: state.twoTailed,
       showAlt: state.showAlt,
@@ -640,6 +1003,10 @@ makeStatisticalPowerDiagram = function(opts) {
       axisRaw: state.axisRaw,
       axisZNull: state.axisZNull,
       axisZAlt: state.axisZAlt,
+      diff: p.altMean - state.mu,
+      shownControls: state.shownControls.slice(),
+      solveFor: state.solveFor,
+      targetPower: state.targetPower,
       se: p.se,
       standardError: p.se,
       altMean: p.altMean,
@@ -651,8 +1018,8 @@ makeStatisticalPowerDiagram = function(opts) {
       lowCritical: p.lowCritical,
       criticalMeanHigh: p.highCritical,
       criticalMeanLow: state.twoTailed ? p.lowCritical : null,
-      beta: p.beta,
-      power: p.power,
+      beta: noEffect(p) ? null : p.beta,
+      power: noEffect(p) ? null : p.power,
       domain: domain.slice()
     };
   }
@@ -864,9 +1231,62 @@ makeStatisticalPowerDiagram = function(opts) {
         state.shadeBeta ? `beta ${fProbability(p.beta)}` : null,
         state.shadePower ? `power ${fProbability(p.power)}` : null
       ].filter(Boolean);
-      parts.push(`Under H1, centered on ${f2(p.altMean)}${areas.length ? `: ${areas.join(", ")}` : ""}.`);
+      parts.push(noEffect(p)
+        ? "Under H1, identical to H0: with no effect, power is undefined."
+        : `Under H1, centered on ${f2(p.altMean)}${areas.length ? `: ${areas.join(", ")}` : ""}.`);
     }
     return parts.join(" ");
+  }
+
+  // The slider ranges on show, which fixedExtent keeps inside the axes.
+  // A solved quantity has no slider, so no range.
+  function shownRanges() {
+    const ranges = {};
+    state.shownControls.forEach((key) => {
+      if (factorControls[key] && key !== state.solveFor) ranges[key] = factorControls[key].factor.range;
+    });
+    return ranges;
+  }
+
+  // A step can narrow a slider's range (`ranges`: { key: [min, max, step] }).
+  // Solving for n needs this: at a difference near zero the required n,
+  // and with it the height the fixed axes must allow, runs off to infinity.
+  function setRanges(overrides) {
+    Object.values(factorControls).forEach(({ factor, input }) => {
+      factor.range = (overrides && overrides[factor.key]) || factor.baseRange;
+      input.min = factor.range[0];
+      input.max = factor.range[1];
+      input.step = factor.range[2];
+    });
+  }
+
+  // The quantity being solved for shows its value in place of a slider.
+  // Solving for n, the axes hold every curve the shown sliders can reach,
+  // with n solved at each, so a smaller effect visibly calls for narrower,
+  // taller curves: a bigger sample.
+  function minimalExtent() {
+    return geometry.fixedExtent(state, shownRanges(),
+      state.solveFor === "n" ? { target: state.targetPower, max: MAX_N } : null);
+  }
+
+  function syncFactors(p) {
+    Object.values(factorControls).forEach(({ factor, row, input, value }) => {
+      const shown = state.shownControls.includes(factor.key);
+      const output = factor.key === state.solveFor;
+      row.hidden = !shown;
+      row.classList.toggle("is-output", output);
+      input.hidden = output;
+      input.disabled = !shown || output;
+      const fill = (Number(input.value) - factor.range[0]) / (factor.range[1] - factor.range[0]);
+      input.style.setProperty("--sp-fill", `${Math.max(0, Math.min(1, fill)) * 100}%`);
+      if (factor.key === "alpha") twoTailedInput.disabled = !shown;
+      const tex = factor.tex(p);
+      if (value.dataset.tex === tex) return;
+      value.dataset.tex = tex;
+      value.replaceChildren(window.interactiveFigure && window.interactiveFigure.inlineMath
+        ? sfsInlineMath(tex)
+        : document.createTextNode(`${factor.label}: ${input.value}`));
+    });
   }
 
   let renders = 0;
@@ -874,7 +1294,8 @@ makeStatisticalPowerDiagram = function(opts) {
   function render(animate) {
     renders += 1;
     const p = geometry.params(state);
-    const domain = geometry.domain(state, p);
+    const extent = minimal ? minimalExtent() : null;
+    const domain = minimal ? extent.domain : geometry.domain(state, p);
     setValue(p, domain);
 
     const plotHeight = Math.round(Math.max(140, Math.min(240, width * 0.34)));
@@ -883,24 +1304,31 @@ makeStatisticalPowerDiagram = function(opts) {
     // Room for two rulers, which is all the tutorial ever shows; a third
     // switched on from the controls adds its own row.
     const rulers = [state.axisRaw, state.axisZNull, state.axisZAlt].filter(Boolean).length;
-    const height = rowY(Math.max(2, rulers) - 1) + 26;
+    const height = minimal ? baselineY + 12 : rowY(Math.max(2, rulers) - 1) + 26;
     const plotLeft = margin.left;
     const plotRight = width - margin.right;
 
     svg.attr("viewBox", [0, 0, width, height]);
     x.domain(domain).range([plotLeft, plotRight]);
-    y.domain([0, spNormalPdf(state.mu, state.mu, p.se)]).range([baselineY, margin.top]);
+    y.domain([0, minimal ? extent.peak : spNormalPdf(state.mu, state.mu, p.se)]).range([baselineY, margin.top]);
 
-    dControl.value.text(f2(state.d));
-    nControl.value.text(f0(state.n));
-    alphaControl.value.text(f2(state.alpha));
-    seValue.text(f2(p.se));
+    if (minimal) {
+      syncFactors(p);
+    } else {
+      dControl.value.text(f2(state.d));
+      nControl.value.text(f0(state.n));
+      alphaControl.value.text(f2(state.alpha));
+      seValue.text(f2(p.se));
+    }
     alphaKey.value.text(fAlpha(state.alpha));
-    betaKey.value.text(fProbability(p.beta));
-    powerKey.value.text(fProbability(p.power));
-    const showBeta = state.showAlt && state.shadeBeta;
-    const showPower = state.showAlt && state.shadePower;
-    [[betaKey, showBeta], [powerKey, showPower]].forEach(([entry, shown]) => entry.item
+    const undefinedPower = noEffect(p);
+    betaKey.value.text(undefinedPower ? "–" : fProbability(p.beta));
+    powerKey.value.text(undefinedPower ? "–" : fProbability(p.power));
+    const keyBeta = state.showAlt && state.shadeBeta;
+    const keyPower = state.showAlt && state.shadePower;
+    const showBeta = keyBeta && !undefinedPower;
+    const showPower = keyPower && !undefinedPower;
+    [[betaKey, keyBeta], [powerKey, keyPower]].forEach(([entry, shown]) => entry.item
       .classed("is-concealed", !shown)
       .attr("aria-hidden", String(!shown)));
 
@@ -982,12 +1410,13 @@ makeStatisticalPowerDiagram = function(opts) {
 
   function setNumericAction(input, value) {
     const n = actionNumber(value);
-    if (n === null) return false;
+    if (!input || n === null) return false;
     input.value = String(n);
     return true;
   }
 
   function setBooleanAction(input, value) {
+    if (!input) return false;
     input.checked = actionBoolean(value);
     return true;
   }
@@ -996,6 +1425,13 @@ makeStatisticalPowerDiagram = function(opts) {
 
   function applyTutorialAction(action, context) {
     let changed = false;
+
+    // Ranges first, so a value the step sets is not clamped to the old ones.
+    // A step that picks its controls starts from the default ranges.
+    if (minimal && action && ("ranges" in action || "show-controls" in action || "controls-shown" in action)) {
+      setRanges(action.ranges);
+      changed = true;
+    }
 
     Object.entries(action || {}).forEach(([key, value]) => {
       switch (actionKey(key)) {
@@ -1013,10 +1449,30 @@ makeStatisticalPowerDiagram = function(opts) {
         case "population-sd":
           changed = setNumericAction(sigmaInput, value) || changed;
           break;
+        case "diff":
+        case "difference":
+        case "mean-difference":
+          changed = setNumericAction(factorControls.diff && factorControls.diff.input, value) || changed;
+          break;
+        case "show-controls":
+        case "controls-shown":
+          // A step that picks its controls also sets what they solve for,
+          // back to power unless it says.
+          state.shownControls = controlList(value);
+          state.solveFor = action.solve === "n" ? "n" : "power";
+          changed = true;
+          break;
+        case "solve":
+          state.solveFor = value === "n" ? "n" : "power";
+          changed = true;
+          break;
+        case "target-power":
+          changed = setNumericAction(factorControls.power && factorControls.power.input, value) || changed;
+          break;
         case "d":
         case "effect-size":
         case "effectsize":
-          changed = setNumericAction(dControl.input, value) || changed;
+          changed = setNumericAction(dControl && dControl.input, value) || changed;
           break;
         case "n":
         case "sample-size":
@@ -1090,12 +1546,14 @@ makeStatisticalPowerDiagram = function(opts) {
     if (notify) notifyValueChange();
   }
 
-  [
+  // The minimal figure's sliders double as nControl, alphaControl and
+  // sigmaInput, so each input is listened to once.
+  new Set([
     muInput,
     sigmaInput,
-    dControl.input,
-    nControl.input,
-    alphaControl.input,
+    dControl && dControl.input,
+    nControl && nControl.input,
+    alphaControl && alphaControl.input,
     twoTailedInput,
     showAltInput,
     shadeBetaInput,
@@ -1103,8 +1561,9 @@ makeStatisticalPowerDiagram = function(opts) {
     dimNullInput,
     axisRawInput,
     axisZNullInput,
-    axisZAltInput
-  ].forEach((input) => input.addEventListener("input", (event) => {
+    axisZAltInput,
+    ...Object.values(factorControls).map((control) => control.input)
+  ].filter(Boolean)).forEach((input) => input.addEventListener("input", (event) => {
     event.stopPropagation();
     update(true);
   }));

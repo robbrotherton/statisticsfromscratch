@@ -129,3 +129,122 @@ test("the tutorial never shades a region under a hidden alternative", () => {
     if (action["shade-beta"] || action["shade-power"]) assert.equal(action["show-H1"], true);
   }
 });
+
+test("a raw mean difference, unlike d, lets the population SD change power", () => {
+  const base = { mu: 50, n: 25, alpha: 0.05, twoTailed: true };
+  const byD = [5, 20].map((sigma) => power.params({ ...base, sigma, d: 0.5 }).power);
+  assert.ok(Math.abs(byD[0] - byD[1]) < 1e-12);
+  const byDiff = [5, 20].map((sigma) => power.params({ ...base, sigma, diff: 5 }).power);
+  assert.ok(byDiff[0] > byDiff[1] + 0.3);
+  assert.ok(Math.abs(power.params({ ...base, sigma: 10, diff: 5 }).power - 0.705) < 0.001);
+});
+
+test("the minimal figure's axes hold every curve a shown slider can reach", () => {
+  const state = { mu: 50, sigma: 10, n: 25, diff: 5, alpha: 0.05, twoTailed: true };
+  const ranges = { n: [4, 100], sigma: [4, 25], diff: [0, 15] };
+  const { domain, peak } = power.fixedExtent(state, ranges);
+  for (const n of [4, 25, 100]) {
+    for (const sigma of [4, 10, 25]) {
+      for (const diff of [0, 5, 15]) {
+        const s = { ...state, n, sigma, diff };
+        const p = power.params(s);
+        assert.ok(peak >= sfsStats.normalPdf(0, 0, p.se) - 1e-12);
+        for (const center of [s.mu, p.altMean]) {
+          assert.ok(center - 3.5 * p.se >= domain[0] - 1e-9 && center + 3.5 * p.se <= domain[1] + 1e-9);
+        }
+      }
+    }
+  }
+  // With nothing to drag, the axes fit the curves as they stand.
+  const still = power.fixedExtent(state, {});
+  assert.ok(still.domain[1] - still.domain[0] < domain[1] - domain[0]);
+});
+
+test("each factor step reveals its own control, and every step that sets the design starts from the same one", () => {
+  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+  assert.ok(steps.length > 0);
+  const starts = [];
+  for (const { action, major } of steps) {
+    if (action.solve === "n") {
+      // Solving for n shows the effect and the answer.
+      assert.deepEqual([...action["show-controls"]].sort(), ["diff", "n"]);
+    } else if (action["show-controls"].length > 1) {
+      // Solving for power shows the answer, and never sigma: n and sigma
+      // together span too many curve widths for one fixed frame.
+      assert.ok(action["show-controls"].includes("power"));
+      assert.ok(!action["show-controls"].includes("sigma"));
+    } else {
+      assert.deepEqual(action["show-controls"], [major]);
+    }
+    if ("n" in action) {
+      const { "show-controls": shown, solve, ranges, "target-power": target, ...design } = action;
+      starts.push(JSON.stringify(design));
+    }
+  }
+  assert.equal(new Set(starts).size, 1);
+  assert.ok(steps.some(({ action }) => action.solve === "n"));
+});
+
+test("solving for n finds the smallest sample that reaches the target power", () => {
+  const state = { mu: 50, sigma: 10, diff: 5, alpha: 0.05, twoTailed: true };
+  const solved = power.requiredN(state, 0.8, 5000);
+  assert.deepEqual({ ...solved }, { n: 32, reached: true });
+  assert.ok(power.params({ ...state, n: 32 }).power >= 0.8);
+  assert.ok(power.params({ ...state, n: 31 }).power < 0.8);
+  // One tail, lower alpha and a bigger difference move the answer the right way.
+  assert.ok(power.requiredN({ ...state, twoTailed: false }, 0.8, 5000).n < 32);
+  assert.ok(power.requiredN({ ...state, alpha: 0.01 }, 0.8, 5000).n > 32);
+  assert.ok(power.requiredN({ ...state, diff: 10 }, 0.8, 5000).n < 32);
+  // No difference, no sample size is enough.
+  assert.equal(power.requiredN({ ...state, diff: 0 }, 0.8, 5000).reached, false);
+  // The exact n the figure draws with gives the target power and rounds up
+  // to the whole-number answer.
+  const exact = power.exactN(state, 0.8, 5000);
+  assert.ok(Math.abs(power.params({ ...state, n: exact.n }).power - 0.8) < 1e-6);
+  assert.equal(Math.ceil(exact.n), 32);
+});
+
+test("solving for n, the fixed axes hold every curve the effect slider can reach", () => {
+  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+  const { action } = steps.find((step) => step.action.solve === "n");
+  const state = { mu: action.mu, sigma: action.sigma, diff: action.diff, alpha: action.alpha, twoTailed: action["two-tailed"] };
+  const target = action["target-power"];
+  const [low, high] = action.ranges.diff;
+  const { domain, peak } = power.fixedExtent(state, { diff: [low, high] }, { target, max: 5000 });
+  assert.ok(Number.isFinite(peak) && domain.every(Number.isFinite));
+  for (let diff = low; diff <= high; diff += 0.5) {
+    const s = { ...state, diff };
+    const p = power.params({ ...s, n: power.exactN(s, target, 5000).n });
+    assert.ok(Math.abs(p.power - target) < 1e-6);
+    assert.ok(spNormalPeak(p.se) <= peak + 1e-12);
+    assert.ok(p.altMean + 3.5 * p.se <= domain[1] + 1e-9 && s.mu - 3.5 * p.se >= domain[0] - 1e-9);
+  }
+  // The smallest effect needs the tallest curves; the running example sits
+  // well up the axis rather than as a sliver along the bottom.
+  const start = power.params({ ...state, n: power.exactN(state, target, 5000).n });
+  assert.ok(spNormalPeak(start.se) / peak > 0.4);
+});
+
+function spNormalPeak(se) {
+  return sfsStats.normalPdf(0, 0, se);
+}
+
+test("every multi-slider step's fixed axes keep the opening curves well up the plot", () => {
+  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+  const defaults = { alpha: [0.01, 0.2], n: [4, 100], sigma: [5, 20], diff: [0, 15] };
+  for (const { action } of steps.filter((step) => "n" in step.action && step.action["show-controls"].length > 1)) {
+    const state = { mu: action.mu, sigma: action.sigma, n: action.n, diff: action.diff, alpha: action.alpha, twoTailed: action["two-tailed"] };
+    const solveFor = action.solve || "power";
+    const target = action["target-power"] || 0.8;
+    const ranges = {};
+    for (const key of action["show-controls"]) {
+      if (key !== solveFor && defaults[key]) ranges[key] = (action.ranges && action.ranges[key]) || defaults[key];
+    }
+    const solve = solveFor === "n" ? { target, max: 5000 } : null;
+    const { domain, peak } = power.fixedExtent(state, ranges, solve);
+    const start = solve ? { ...state, n: power.exactN(state, target, 5000).n } : state;
+    const p = power.params(start);
+    assert.ok(spNormalPeak(p.se) / peak > 0.3, `${solveFor}: curves start too low`);
+    assert.ok((p.altMean - state.mu + 7 * p.se) / (domain[1] - domain[0]) > 0.3, `${solveFor}: curves start too narrow`);
+  }
+});
