@@ -143,42 +143,64 @@
   };
 
   global.makeEffectSizeTutorial = function(opts = {}) {
-    const chart = scaffold("effect",[-4,6]);
-    let d = opts.d ?? .2, showOverlap = opts.overlap ?? false;
-    const slider = chart.slider("Cohen’s d","d",d,0,2.5,.01,v=>{d=v;draw();});
-    const row = chart.controls.append("label").attr("class", "sfs-check-row");
-    const check = row.append("input").attr("type","checkbox").property("checked",showOverlap).on("change",function(event){event.stopPropagation();showOverlap=this.checked;draw();});
-    row.append("span").text("Shade overlap");
-    chart.legend.text("Solid curve: reference population. Dashed curve: comparison population. Both show individual scores, with the same SD.");
-    let buttons;
-    if (opts.examples) {
-      const table = chart.root.append("table").attr("class","nc-examples");
-      table.append("caption").text("Select an example to picture its effect size.");
-      const head = table.append("thead").append("tr"); ["Grouping variable","Outcome","d","n per group"].forEach(t=>head.append("th").attr("scope","col").text(t));
-      const rows = table.append("tbody").selectAll("tr").data(opts.examples).join("tr");
-      rows.append("td").text(e=>e.group);
-      buttons = rows.append("td").append("button").attr("class","sfs-button").attr("type","button").text(e=>e.label).on("click",(event,e)=>{d=e.d;showOverlap=true;draw();});
-      rows.append("td").text(e=>e.d.toFixed(2));
-      rows.append("td").text(e=>e.n);
-      rows.on("click",(event,e)=>{if(event.target.tagName!=="BUTTON"){d=e.d;showOverlap=true;draw();}});
-    }
-    function draw() {
-      chart.plot({
+    const chart = scaffold("effect", [-3.5, 6]);
+    chart.root.classed("nc-effect", true);
+    chart.legend.remove();
+    chart.root.select(".nc-readout").attr("class", "visually-hidden");
+    chart.root.append("style").text(`
+      .nc-effect .nc-explore {display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;margin:.5rem 0;border-left:3px solid var(--sfs-power-color,#7654b5);background:var(--sfs-panel-bg,var(--sfs-bg));border-radius:var(--sfs-radius-sm)}
+      .nc-effect .nc-explore[hidden] {display:none}
+      .nc-effect .nc-explore span {white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
+      .nc-effect .nc-explore input {flex:1;min-width:3rem;width:auto;margin:0;accent-color:var(--sfs-power-color,#7654b5)}
+    `);
+    let d = clamp(Number(opts.d ?? 1.85), 0, 2.5), showSlider = false;
+    let shown = d, tween = null;
+    const strip = chart.root.append("label").attr("class", "nc-explore").attr("hidden", true);
+    const valueLabel = strip.append("span");
+    const slider = strip.append("input").attr("type", "range").attr("name", "d")
+      .attr("min", 0).attr("max", 2.5).attr("step", .01)
+      .attr("aria-label", "Cohen’s d").attr("data-prevent-swipe", "")
+      .on("input", function(event) { event.stopPropagation(); stopTween(); d = +this.value; draw(); });
+    function scene(value) {
+      return {
         distributions: [
           { mean: 0, color: "var(--sfs-null-color, currentColor)" },
-          { mean: d, color: "var(--sfs-power-color, #7654b5)", dashed: true }
+          { mean: value, color: "var(--sfs-power-color, #7654b5)", dashed: true }
         ],
-        shade: showOverlap ? { kind: "overlap", opacity: .4 } : [],
-        markers: [0,d].map(at => ({at, height: .9, color: "currentColor", dash: "2 4"})),
-        intervals: [{from: 0, to: d, height: 1, arrows: false}],
-        title: `Means ${d.toFixed(2)} SD apart`
-      });
-      slider.property("value",d); check.property("checked",showOverlap);
-      if(buttons) buttons.attr("aria-pressed",e=>String(Math.abs(e.d-d)<.0001));
-      const value = {d, overlap:overlap(d), showOverlap};
-      chart.publish(value,`d = ${d.toFixed(2)}.${showOverlap ? ` Shared area: ${(100*value.overlap).toFixed(1)}% of the area under either curve.` : " Move the slider to change the distance between the means."}`);
+        shade: [],
+        yDomain: [0, .5],
+        labels: { x: "Score (shared z scale)" },
+        markers: (value === 0 ? [0] : [0,value]).map(at => ({at, height: .93, color: "currentColor", dash: "2 4",
+          ...(value === 0 ? {label: "d = 0.00"} : {})})),
+        intervals: [{from: 0, to: value, height: .93, arrows: false,
+          color: "currentColor", strokeWidth: 2.5, label: `d = ${value.toFixed(2)}`}],
+        title: ""
+      };
     }
-    draw(); chart.wrap(action=>{d=clamp(Number(action.d ?? d),0,2.5);showOverlap=action.overlap ?? showOverlap;draw();});
+    function stopTween() { if (tween) { tween.stop(); tween = null; } }
+    function draw() {
+      shown = d;
+      chart.plot(scene(d));
+      slider.property("value", d).attr("aria-valuetext", `${d.toFixed(2)} standard deviations`);
+      valueLabel.text(`d = ${d.toFixed(2)}`);
+      strip.attr("hidden", showSlider ? null : true);
+      chart.publish({d}, `Two illustrative normal populations with equal standard deviations. Their means are ${d.toFixed(2)} standard deviations apart.`);
+    }
+    draw();
+    chart.wrap(action => {
+      stopTween();
+      d = clamp(Number(action.d ?? d), 0, 2.5);
+      showSlider = action["show-slider"] === true;
+      strip.attr("hidden", showSlider ? null : true);
+      if (action.animate === false || shown === d || showSlider) { draw(); return; }
+      const from = shown;
+      tween = d3.timer(elapsed => {
+        const t = d3.easeCubicInOut(Math.min(1, elapsed / 500));
+        shown = from + (d - from) * t;
+        chart.preview(scene(shown));
+        if (elapsed >= 500) { stopTween(); draw(); }
+      });
+    });
     return chart.root.node();
   };
 })(window);
