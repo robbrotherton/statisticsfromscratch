@@ -21,7 +21,18 @@
   var W = 840;                 // sim/band width
   var H = 400;                 // chart band height
   var OVERHANG = 200;          // sim px the swarm canvas extends beyond the band
+  // Empty headroom cropped off the top of the visible band (the gap above
+  // the hive is H / 2). Band coordinates are unchanged; only the SVG viewBox and
+  // the canvas's CSS box shift, so bees still fly out over the page.
+  var TOP_TRIM = 50;
+  var VIEW_H = H - TOP_TRIM;
   var MU0 = W * 0.5;           // null center in band coordinates
+  // Horizontally the canvas reaches up to this far either side of the null
+  // center, whatever the display zoom, so bees can also fly out over the
+  // sidebar and margins. Simulated bees stray at most ~470 px from the hive
+  // (high variability), plus up to 100 px of hive offset. The reach is
+  // further clamped to the viewport so the canvas never widens the page.
+  var SWARM_REACH_X = 600;
   var TICK_MS = 1000 / 60;     // one physics tick = one observation
   var MAX_FRAME_MS = 50;       // dt clamp: no catch-up bursts after suspension
   var FAST_FORWARD_TICKS = 3600; // one simulated minute
@@ -119,7 +130,9 @@
       ".bee-swarm { --sfs-figure-max-width: var(--bs-max-width, 52rem); }",
       ".bee-swarm .bs-chart-wrap { position: relative; overflow: visible; }",
       ".bee-swarm .bs-swarm-canvas {",
-      "  position: absolute; left: 0; top: -50%; width: 100%; height: 200%;",
+      "  position: absolute;",
+      "  top: " + (-100 * (OVERHANG + TOP_TRIM) / VIEW_H) + "%;",
+      "  height: " + (100 * (H + 2 * OVERHANG) / VIEW_H) + "%;",
       "  pointer-events: none; z-index: 2;",
       "}",
       ".bee-swarm .sfs-svg { position: relative; z-index: 1; overflow: hidden; }",
@@ -276,7 +289,7 @@
 
     var svg = chartWrap.append("svg")
       .attr("class", "sfs-svg sfs-graph")
-      .attr("viewBox", [viewLeft, 0, viewWidth, H])
+      .attr("viewBox", [viewLeft, TOP_TRIM, viewWidth, VIEW_H])
       .attr("role", "img")
       .attr("aria-label",
         "Bee swarm simulation: yellow bees flock around a hive; a null " +
@@ -309,7 +322,7 @@
     var meanLayer = svg.append("g").attr("class", "sfs-if-reveal");
     var meanLine = meanLayer.append("line")
       .attr("class", "bs-mean-line")
-      .attr("y1", 16).attr("y2", H - 16);
+      .attr("y1", TOP_TRIM + 16).attr("y2", H - 16);
 
     var canvas = chartWrap.append("canvas")
       .attr("class", "bs-swarm-canvas")
@@ -350,17 +363,31 @@
 
     // ---- canvas sizing -----------------------------------------------------
 
-    var cssWidth = 0;
+    var canvasSize = "";
     var renderScale = 1;
+    var canvasLeft = viewLeft;     // band x of the canvas's left edge
+    var canvasSpan = viewWidth;    // band width the canvas covers
 
     function resizeCanvas() {
-      var width = chartWrap.node().getBoundingClientRect().width || 560;
-      if (Math.abs(width - cssWidth) < 0.5) return false;
-      cssWidth = width;
+      var rect = chartWrap.node().getBoundingClientRect();
+      var width = rect.width || 560;
+      var cssPerUnit = width / viewWidth;
+      // Overhang each side, in whole CSS px, up to the viewport edge.
+      var reach = (MU0 + SWARM_REACH_X - (viewLeft + viewWidth)) * cssPerUnit;
+      var viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+      var leftPx = Math.max(0, Math.floor(Math.min(reach, rect.left)));
+      var rightPx = Math.max(0, Math.floor(Math.min(reach, viewportWidth - rect.right)));
+      var size = [width.toFixed(1), leftPx, rightPx].join();
+      if (size === canvasSize) return false;
+      canvasSize = size;
+      canvasLeft = viewLeft - leftPx / cssPerUnit;
+      canvasSpan = viewWidth + (leftPx + rightPx) / cssPerUnit;
+      canvas.style.left = -leftPx + "px";
+      canvas.style.width = (width + leftPx + rightPx) + "px";
       var dpr = Math.min(2, window.devicePixelRatio || 1);
-      canvas.width = Math.round(width * dpr);
+      canvas.width = Math.round((width + leftPx + rightPx) * dpr);
       canvas.height = Math.round(width * ((H + 2 * OVERHANG) / viewWidth) * dpr);
-      renderScale = canvas.width / viewWidth;
+      renderScale = canvas.width / canvasSpan;
       resetDirty(); // resizing wipes the backing store
       return true;
     }
@@ -377,8 +404,8 @@
 
     // Marks a band-coordinate box as drawn.
     function markDirty(x0, y0, x1, y1) {
-      var left = (x0 - viewLeft) * renderScale;
-      var right = (x1 - viewLeft) * renderScale;
+      var left = (x0 - canvasLeft) * renderScale;
+      var right = (x1 - canvasLeft) * renderScale;
       var top = (y0 + OVERHANG) * renderScale;
       var bottom = (y1 + OVERHANG) * renderScale;
       if (left < dirty.x0) dirty.x0 = left;
@@ -405,7 +432,7 @@
     // Band coordinates (x 0..W, y 0..H) with the canvas extending OVERHANG
     // above and below the band.
     function setBandTransform() {
-      ctx.setTransform(renderScale, 0, 0, renderScale, -viewLeft * renderScale, OVERHANG * renderScale);
+      ctx.setTransform(renderScale, 0, 0, renderScale, -canvasLeft * renderScale, OVERHANG * renderScale);
     }
 
     function clearCanvas() {
@@ -457,7 +484,7 @@
       // center (MU0, H/2), like the prototype's translate(420, 400) on its
       // double-height canvas.
       ctx.setTransform(renderScale, 0, 0, renderScale,
-        (MU0 - viewLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
+        (MU0 - canvasLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
       var bees = sim.swarm.bees;
       if (bees.length) markCircles(bees, bees[0].size);
       ctx.fillStyle = BEE_COLOR;
@@ -474,7 +501,7 @@
       clearCanvas();
       drawHistogram();
       ctx.setTransform(renderScale, 0, 0, renderScale,
-        (MU0 - viewLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
+        (MU0 - canvasLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
       if (GHOST_MODE === "cumulative") {
         // Prototype effect: draw every captured frame up to the playback
         // index, alpha fading from ~0.4 (newest) to 0 across a 10-frame tail.
@@ -1166,6 +1193,10 @@
       });
       resizeObserver.observe(chartWrap.node());
     }
+    // The chart can shift within an unchanged width (sidebar, viewport).
+    window.addEventListener("resize", function() {
+      if (resizeCanvas()) render();
+    });
 
     rootNode.beeSwarm = {
       play: function() { setPlaying(true); },
