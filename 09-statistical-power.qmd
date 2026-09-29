@@ -77,61 +77,38 @@ The last step gives us a few things we need to nail down to flesh out our unders
 
 ## Effect Size
 
-Suppose you run a hypothesis test on some data and find a significant result, like we did in [Chapter @sec-spider-test]. That means that the sample mean we found was sufficiently unlikely to have come from the null hypothesis distribution, according to our arbitrary criterion of $\alpha = .05$ or whatever it was, and so we rejected that null hypothesis. In other words, the significance of the test tells us how (im)probable the result was. But in the end the hypothesis test leads to a binary decision, reject or fail to reject the null; $p < \alpha$ or $p \ge \alpha$. Rejecting the null and declaring a result *significant*does not tell us how *big* of a difference was found, at least not directly.
+Suppose you run a hypothesis test on some data and find a significant result, like we did in [Chapter @sec-spider-test]. That means that the sample mean we found was sufficiently unlikely to have come from the null hypothesis distribution, according to our arbitrary criterion of $\alpha = .05$ or whatever it was, and so we rejected that null hypothesis. In other words, the significance of the test tells us whether the result was sufficiently improbable under our null hypothesis. It's a binary decision, reject or fail to reject the null; $p < \alpha$ or $p \ge \alpha$. Rejecting the null and declaring a result *significant* does not tell us how *big* of a difference was found, at least not directly.
 
 The size of the difference *is* part of the $z$ equation. It's right there in the numerator, $M - \mu_0$. But we divide that numerator by the standard error of the mean, which is a function of the sample size: $\sigma_M = \frac{\sigma}{\sqrt{n}}$. So as sample size increases, the standard error decreases, and even a small difference can become statistically significant, in the sense of being highly unlikely under the null hypothesis. On the other hand, a very large absolute difference in the numerator might turn out to be nonsignificant if we have a very small sample size, because the small $n$ will result in a relatively large denominator for the test statistic.
 
-This can be a little confusing because in everyday language, calling something "significant" usually means it is big or important. But that's not what *statistical* significance means. Small, even trivial differences can be statistically significant. In particular, with a large enough sample size, even a tiny difference can be statistically significant. And that's because increasing sample size decreases the standard error of the mean, because sample size is in the denominator of the standard error equation, and a small standard error makes even very small differences quite improbable.
+This can be a little confusing because in everyday language, calling something "significant" usually means it is big or important. But that's not what *statistical* significance means. With a large enough sample size, even a tiny difference can be statistically significant.
 
-So the significance of the test is only part of the story. Knowing how (im)probable the result was is important, but we also need to know the size of the difference we found. For that, we need a measure of *effect size*: a way of quantifying the absolute magnitude of a treatment effect, independent of sample size and statistical significance.
-
-The trouble is, very small differences might be real, but not very important to us. So we need to consider effect size as well. Effect size tells us how big the treatment effect is in absolute terms, independent of sample size or statistical significance. In simple terms, you can think of effect size as the distance between the population means.
+So the significance of the test is only part of the story. Knowing a result was improbable is important, but it is also useful to know the size of the difference we found, regardless of its statistical significance. This is what measures of *effect size* provide: a way of quantifying the absolute magnitude of a treatment effect, independent of sample size and statistical significance. In simple terms, you can think of effect size as the distance between the null population mean and the result we observed: the bigger the difference, the larger the effect.
 
 ### Cohen's $d$
 
-A common measure of effect size is Cohen's $d$ or difference score. Again, its purpose is to quantify the absolute magnitude of a treatment effect independent of sample size. And it does this by dividing the difference between means by the population standard deviation. 
+A common measure of effect size is Cohen's $d$ or difference score. Again, its purpose is to quantify the absolute magnitude of a treatment effect independent of sample size. It does this by dividing the difference between means by the population standard deviation. So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability.
 
-$$ \begin{aligned} d &= \frac{\text{mean difference}}{\text{standard deviation}} \\[6pt] &= \frac{M - \mu}{\sigma} \end{aligned} $$ {#eq-cohens-d}
+$$ d = \frac{\text{mean difference}}{\text{standard deviation}}$$
 
-So essentially, it's a ratio. The numerator is the difference between means. The denominator is the population variability. The equation comes in slightly different forms for different tests, but for the $z$ test, it is the mean difference over the standard deviation, or our treated sample mean minus the original population mean divided by the population standard deviation $\sigma$. Notice that while the standard error, $\sigma_M$, varies with sample size, the population standard deviation, $\sigma$, does not. It is what it is. So Cohen's $d$ is independent of sample size.
+The equation comes in slightly different forms for different tests, but for the $z$ test, it is the mean difference over the standard deviation, or our treated sample mean minus the original population mean divided by the population standard deviation $\sigma$.
 
-So effect size is fairly easy to calculate. As for how to interpret it, Cohen outlined some rough rules of thumb, whereby a Cohen's $d$ of .2 would generally be considered a small effect, .5 would be considered medium, and .8 large. However, Cohen himself and many others have noted that these rules of thumb may not apply in all situations.
+$$ d = \frac{M - \mu_0}{\sigma} $$ {#eq-cohens-d}
 
-For a beautiful interactive visualization of what different values of Cohen's $d$ actually look like, spend some time with [Kristoffer Magnusson's effect-size visualization](https://rpsychologist.com/cohend/).
-
-
-### Effect size and statistical significance
-
-Let's demonstrate the difference between significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost children's SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$ test would be an appropriate hypothesis test.
-
-So we administer the banana treatment to a sample of test takers and we find the sample mean to be 501. We want to know if this is statistically significant with an $\alpha$ of .05 two-tailed, giving us critical values of $\pm 1.96$.
-
-$$ z = \frac{X - \mu}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{n}} = \frac{1}{100 / \sqrt{n}} = \frac{\sqrt{n}}{100} $$
-
-But we also want to know if it is a meaningful effect, if it's big enough for us to care about. So we need to calculate the effect size as well.
-
-$$ d = \frac{X - \mu}{\sigma} = \frac{501 - 500}{100} = \frac{1}{100} = 0.01 $$
-
-
-First, let's suppose the results came from a sample of 50 students.
-
-{{< include quizzes/09-power-significance-effect-size.qmd >}}
-
-See if you can calculate the $z$ score to determine significance and Cohen's $d$ to quantify the effect size. 
-
-
-Now let's suppose that it came from a sample of fifty thousand students, and calculate the $z$ score and Cohen's $d$ again.
-
-In the first case, with just 50 participants, we were not able to reject the null hypothesis of no difference. Our hypothesis test was non-significant and Cohen's $d$ came out at .01, an absolutely trivial difference. With 50,000 participants, however, the hypothesis test did lead us to reject the null hypothesis. The sample mean of 501 now seemed sufficiently unlikely that we could reject the null hypothesis. Again, this is because sample size determines the standard error, the denominator of the test statistic. So as sample size increases, we become more likely to find a significant difference, all else being equal. But you should have gotten exactly the same answer for Cohen's $d$. It is still a trivial effect, even if it's real. The measure of effect size tells us that because it is independent of sample size.
-
-So based on the results of the significance test, we might be tempted to invest in supplying every schoolchild with a banana before every test they take. But the measure of effect size tells us that probably would not be a sensible use of resources. The tiny effect just wouldn't justify the effort of the treatment.
+Notice how close that is to the sample $z$-score equation, $z = \frac{M - \mu_0}{\sigma_M}$. Both involve the same basic concept: a difference between a sample statistic and a population parameter, normalized by a measure of variability. The difference is that Cohen's $d$ uses the population standard deviation rather than the sampling distribution's standard error. While the standard error, $\sigma_M$, varies with sample size, the population standard deviation, $\sigma$, does not. So Cohen's $d$ is independent of sample size.
 
 ### Interpreting Effect Size
 
-What does a difference of half a standard deviation actually look like? Here, we'll picture two populations of individual scores. For simplicity, both distributions are normal and have the same standard deviation. Moving one mean changes the effect size while leaving the variability within each population alone.
+So effect size is fairly easy to calculate, but what should we make of it? 
+
+In his own book on the subject, Cohen outlined some rough rules of thumb, whereby a Cohen's $d$ of .2 would generally be considered a small effect, .5 would be considered medium, and .8 large. These are widely repeated as rules of thumb; however, Cohen himself cautioned *against* over-reliance on these guidelines. "The terms 'small,'' 'medium,'' and 'large' are relative, not only to each other, but to the area of behavioral science or even more particularly to the specific content and research method being employed in any given investigation. In the face of this relativity, there is a certain risk inherent in offering conventional operational definitions for these terms" [@cohen1988power]. Cohen apparently came to regret even having ventured these rough and qualified guidelines, since they came to be applied without much thought [@funder2019evaluating].
+
+Taking Cohen's point that interpreting effect size depends on context, @funder2019evaluating looked at what effect sizes are actually typically seen across a wide range of psychological studies. They suggested these evidence-based alternative interpretive criteria based on actual data. They suggest that an $r$ of .05 indicates an effect that is very small for the explanation of single events, but potentially consequential over time. An effect size $r$ of .1 indicates an effect that is still small at the level of single events, but potentially more ultimately consequential. An effect size $r$ of .2 indicates a medium effect that is of some explanatory and practical use, even in the short run, and therefore even more important. An effect size $r$ of .3 indicates a large effect that is potentially powerful in both the short and the long run. A very large effect size $r$ of .4 or greater, in the context of psychological research, is likely a gross overestimate, the authors argued, that will rarely be found in a large sample or in a replication.
+
+But even these should not be taken as set-in-stone interpretative rules. The answer to what is a small or large effect size depends.
 
 ::::: {#act-cohens-d .callout-tip .interactive .with-controls}
-## Explore Cohen's d
+## Visualizing Cohen's d
 
 {{< interactive-figure effectSizeTutorial makeEffectSizeTutorial fallback="Explore Cohen's d. Use the accompanying steps for an explanation." >}}
 
@@ -156,6 +133,32 @@ Move the slider toward zero, then toward larger differences. The shared area shr
 :::::
 
 So the labels *small*, *medium*, and *large* need some care. Whether a difference matters depends on what we're measuring, what it costs to produce the change, and what its consequences are. A small difference can matter a great deal when it affects many people or accumulates over time. We'll return to some concrete examples later in this chapter.
+
+### Effect size and statistical significance
+
+Let's demonstrate the difference between statistical significance and effect size. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. SAT scores have a population mean of 500 and a standard deviation of 100. And since we know that standard deviation, we know a $z$-test would be an appropriate hypothesis test.
+
+So we administer the banana treatment to a sample of test takers and we find the sample mean to be 501. We want to know if this is statistically significant, meaning unlikely under the assumption that the mean was unchanged. But we also presumably care whether it is a *meaningful* effect, big enough for us to care about. So we need to calculate the effect size as well.
+
+First, let's suppose the results came from a sample of 50,000 students.
+
+$$ z = \frac{M - \mu_0}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{50,000}} = 2.23 $$
+
+A significant result! But what is the effect size?
+
+$$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
+
+Now let's suppose instead that the same result, $M = 501$, came from a sample of just 1,000 students, and calculate the $z$ score and Cohen's $d$ again.
+
+$$ z = \frac{M - \mu_0}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{1,000}} = 0.32 $$
+
+$$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
+
+In the first case, with $n = 50,000$, we found a significant result. In the second case, with $n = 1,000$, the result was nonsignificant. But in both cases, the effect size was the same: $d = 0.01$. 
+
+This is because sample size determines the standard error, the denominator of the test statistic. So as sample size increases, we become more likely to find a significant difference, all else being equal. But Cohen's $d$ tells us it is the same tiny effect, even if it's real. The measure of effect size tells us that because it is independent of sample size.
+
+So based on the results of the significance test, we might be tempted to invest in supplying every schoolchild with a banana before every test they take. Would that be a good use of resources? Maybe; if the intervention is cheap and easy, it could be cost-effective even if it's effect is small. But if instead of a banana we imagine the intervention is something more costly, like a new curriculum or a new teacher training program, we might be less inclined to invest in it for such a small benefit, even if the benefit is real. That's a pragmatic consideration, not a statistical one. But it is an important one, and it is why we need to consider effect size in addition to statistical significance.
 
 ## Errors in Hypothesis Testing
 
@@ -403,8 +406,6 @@ If you really understand how and why each of these factors affects power, you'll
 :::
 ::::
 :::::
-
-
 
 For another way to build intuition about how these factors interact, explore [Kristoffer Magnusson's interactive NHST/power visualization](https://rpsychologist.com/d3/NHST/).
 
