@@ -315,6 +315,42 @@ sfsCriticalTableEnsureStyles = () => {
         inset 0 -1rem 0.8rem -0.85rem color-mix(in srgb, var(--sfs-text, var(--bs-body-color, #212529)) 45%, transparent);
     }
 
+    /* Collapsed borders don't travel with a sticky header, so scrollable
+       tables draw the top and header rules as inset shadows on the cells. */
+    .critical-value-table .cvt-table-wrap.cvt-scrollable table {
+      border-collapse: separate;
+      border-spacing: 0;
+      border-top: 0;
+    }
+
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      border-bottom: 0;
+    }
+
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead th {
+      background: var(--sfs-bg, var(--bs-body-bg, #fff));
+    }
+
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead tr:first-child th {
+      padding-top: calc(0.22rem + 2px);
+      box-shadow: inset 0 2px 0 var(--sfs-table-rule-color);
+    }
+
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead tr:last-child th {
+      padding-bottom: calc(0.22rem + 2px);
+      box-shadow: inset 0 -2px 0 var(--sfs-table-rule-color);
+    }
+
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead tr:only-child th,
+    .critical-value-table .cvt-table-wrap.cvt-scrollable thead tr:first-child th[rowspan] {
+      box-shadow:
+        inset 0 2px 0 var(--sfs-table-rule-color),
+        inset 0 -2px 0 var(--sfs-table-rule-color);
+    }
+
     .critical-value-table table {
       width: 100%;
       min-width: var(--cvt-table-min-width, 30rem);
