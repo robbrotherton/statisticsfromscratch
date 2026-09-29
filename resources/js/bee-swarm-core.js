@@ -163,6 +163,13 @@
     var total = 0;
     for (var index = 0; index < bees.length; index += 1) {
       var other = bees[index];
+      // Bit-exact early reject: hypot(dx, dy) >= max(|dx|, |dy|), so a pair
+      // this far apart on either axis can never pass `d < perceptionRadius`.
+      // Same pairs contribute in the same order; only the hypot is skipped.
+      var dx = other.position.x - this.position.x;
+      var dy = other.position.y - this.position.y;
+      if (dx >= perceptionRadius || dx <= -perceptionRadius ||
+          dy >= perceptionRadius || dy <= -perceptionRadius) continue;
       var d = dist(this.position.x, this.position.y, other.position.x, other.position.y);
       if (other !== this && d < perceptionRadius) {
         var diff = vSubInto(scratchDiff, this.position, other.position);
