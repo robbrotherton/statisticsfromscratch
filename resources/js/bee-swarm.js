@@ -30,6 +30,14 @@
   var GHOST_TRAIL = 10;        // prototype fade window (frames)
   var CHUNK_TICKS = 60;
   var READOUT_MS = 250;        // donut/value throttle while playing
+  // Histogram bars are proportions on the fixed density axis, so the first
+  // few (autocorrelated) observations make towering bars that then shrink.
+  // Until this many observations exist, bars are scaled against this count
+  // instead of the running total: the pile grows up from the baseline, then
+  // becomes the exact density with no jump. 30 s of live play; simulation
+  // shows later settling is mild (tallest bin ~1.6x -> 1.4x the null peak
+  // at high variability, n = 15).
+  var HIST_RAMP_TICKS = 1800;
 
   // The prototype's ghost replay redraws frames 0..i with a 10-frame alpha
   // fade — cheap on canvas even at 30 frames x 100 bees. Kept as the default
@@ -51,6 +59,41 @@
       instances[index].evaluate();
     }
   }
+
+  // Live play holds until page load has settled. Profiling showed the early
+  // stutter is the page's own startup (HTML parse, MathJax, figure layout,
+  // first GPU raster) stalling frames for 50-300 ms; bees flying through
+  // that looked choppy. Settled = the load event, then SETTLE_FRAMES
+  // consecutive smooth frames, capped at SETTLE_MAX_MS after load so a busy
+  // device still gets its bees. Only live play waits; tutorial actions and
+  // fast-forward rebuilds do not.
+  var SETTLE_FRAMES = 10;
+  var SETTLE_SMOOTH_MS = 25;
+  var SETTLE_MAX_MS = 2500;
+  var pageSettled = false;
+
+  (function watchForSettle() {
+    function settle() {
+      if (pageSettled) return;
+      pageSettled = true;
+      pokeInstances();
+    }
+    function watch() {
+      var start = null;
+      var last = null;
+      var smooth = 0;
+      function check(ts) {
+        if (start === null) start = ts;
+        if (last !== null) smooth = ts - last < SETTLE_SMOOTH_MS ? smooth + 1 : 0;
+        last = ts;
+        if (smooth >= SETTLE_FRAMES || ts - start > SETTLE_MAX_MS) settle();
+        else window.requestAnimationFrame(check);
+      }
+      window.requestAnimationFrame(check);
+    }
+    if (document.readyState === "complete") watch();
+    else window.addEventListener("load", watch, { once: true });
+  }());
 
   // Only an actively running fast-forward suspends sibling instances; one
   // paused offscreen (zero-CPU rule) must not deadlock the visible swarm.
@@ -84,9 +127,9 @@
       ".bee-swarm .bs-critical-region { fill: var(--sfs-critical-color, #c63f3f); opacity: 0.35; stroke: none; }",
       ".bee-swarm .bs-hive-marker { fill: " + HIVE_COLOR + "; }",
       ".bee-swarm .bs-null-hive-marker {",
-      "  fill: none; stroke: " + HIVE_COLOR + "; stroke-width: 1.5; stroke-dasharray: 3 2;",
+      "  fill: none; stroke: var(--sfs-null-color, currentColor); stroke-width: 1.5; stroke-dasharray: 3 2;",
       "}",
-      ".bee-swarm .bs-mean-line { stroke: " + HIVE_COLOR + "; stroke-width: 1.5; stroke-dasharray: 4 4; }",
+      ".bee-swarm .bs-mean-line { stroke: var(--graph-data-color, #0072b2); stroke-width: 1.5; stroke-dasharray: 4 4; }",
       ".bee-swarm .bs-mean-line.is-significant { stroke: var(--sfs-critical-color, #c63f3f); }",
       ".bee-swarm .bs-readouts {",
       "  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;",
@@ -318,7 +361,45 @@
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(width * ((H + 2 * OVERHANG) / viewWidth) * dpr);
       renderScale = canvas.width / viewWidth;
+      resetDirty(); // resizing wipes the backing store
       return true;
+    }
+
+    // Device-pixel bounding box of everything drawn since the last clear.
+    // Clearing just this box (not the whole oversized canvas) is enough to
+    // erase every bee from the previous frame, however far it wandered.
+    var dirty = { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+
+    function resetDirty() {
+      dirty.x0 = dirty.y0 = Infinity;
+      dirty.x1 = dirty.y1 = -Infinity;
+    }
+
+    // Marks a band-coordinate box as drawn.
+    function markDirty(x0, y0, x1, y1) {
+      var left = (x0 - viewLeft) * renderScale;
+      var right = (x1 - viewLeft) * renderScale;
+      var top = (y0 + OVERHANG) * renderScale;
+      var bottom = (y1 + OVERHANG) * renderScale;
+      if (left < dirty.x0) dirty.x0 = left;
+      if (top < dirty.y0) dirty.y0 = top;
+      if (right > dirty.x1) dirty.x1 = right;
+      if (bottom > dirty.y1) dirty.y1 = bottom;
+    }
+
+    // Marks a set of circles centred on the hive-relative origin.
+    function markCircles(points, radius) {
+      if (!points.length) return;
+      var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (var index = 0; index < points.length; index += 1) {
+        var point = points[index].position || points[index];
+        if (point.x < minX) minX = point.x;
+        if (point.x > maxX) maxX = point.x;
+        if (point.y < minY) minY = point.y;
+        if (point.y > maxY) maxY = point.y;
+      }
+      markDirty(MU0 + minX - radius, H * 0.5 + minY - radius,
+        MU0 + maxX + radius, H * 0.5 + maxY + radius);
     }
 
     // Band coordinates (x 0..W, y 0..H) with the canvas extending OVERHANG
@@ -328,14 +409,22 @@
     }
 
     function clearCanvas() {
+      if (dirty.x1 < dirty.x0) return;
+      // Pad for antialiasing, round outward, clamp to the canvas.
+      var x0 = Math.max(0, Math.floor(dirty.x0) - 2);
+      var y0 = Math.max(0, Math.floor(dirty.y0) - 2);
+      var x1 = Math.min(canvas.width, Math.ceil(dirty.x1) + 2);
+      var y1 = Math.min(canvas.height, Math.ceil(dirty.y1) + 2);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (x1 > x0 && y1 > y0) ctx.clearRect(x0, y0, x1 - x0, y1 - y0);
+      resetDirty();
     }
 
     function drawHistogram() {
       if (!state.show.histogram || !hist.total) return;
       var baseline = H - 30;
       var span = baseline - yDensity(densityMaximum);
+      var denominator = Math.max(hist.total, HIST_RAMP_TICKS);
       setBandTransform();
       ctx.save();
       ctx.beginPath();
@@ -343,11 +432,18 @@
       ctx.clip();
       ctx.beginPath();
       var keys = Object.keys(hist.counts);
+      var minX = Infinity, maxX = -Infinity, maxHeight = 0;
       for (var index = 0; index < keys.length; index += 1) {
         var x = Number(keys[index]);
-        var height = (hist.counts[keys[index]] / hist.total) / densityMaximum * span;
+        var height = (hist.counts[keys[index]] / denominator) / densityMaximum * span;
         ctx.rect(x, baseline - height, 1, height);
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (height > maxHeight) maxHeight = height;
       }
+      // Bars are clipped to the visible band.
+      markDirty(Math.max(viewLeft, minX), Math.max(0, baseline - maxHeight),
+        Math.min(viewLeft + viewWidth, maxX + 1), baseline);
       ctx.fillStyle = BEE_COLOR;
       ctx.globalAlpha = 0.5;
       ctx.fill();
@@ -363,6 +459,7 @@
       ctx.setTransform(renderScale, 0, 0, renderScale,
         (MU0 - viewLeft) * renderScale, (H * 0.5 + OVERHANG) * renderScale);
       var bees = sim.swarm.bees;
+      if (bees.length) markCircles(bees, bees[0].size);
       ctx.fillStyle = BEE_COLOR;
       ctx.beginPath();
       for (var index = 0; index < bees.length; index += 1) {
@@ -388,6 +485,7 @@
           ctx.fillStyle = BEE_COLOR;
           ctx.beginPath();
           var frame = frames[frameIndex];
+          markCircles(frame, 10);
           for (var beeIndex = 0; beeIndex < frame.length; beeIndex += 1) {
             ctx.moveTo(frame[beeIndex].x + 10, frame[beeIndex].y);
             ctx.arc(frame[beeIndex].x, frame[beeIndex].y, 10, 0, Math.PI * 2);
@@ -397,6 +495,7 @@
         ctx.globalAlpha = 1;
       } else {
         var current = frames[Math.min(playbackIndex, frames.length - 1)];
+        markCircles(current, 10);
         ctx.globalAlpha = 100 / 255;
         ctx.fillStyle = BEE_COLOR;
         ctx.beginPath();
@@ -413,9 +512,12 @@
       clearCanvas();
       drawHistogram();
       drawBees();
-      meanLine
-        .attr("x1", lastMean).attr("x2", lastMean)
-        .classed("is-significant", lastSignificant);
+      // Hidden, it needn't track; every path that reveals it re-renders.
+      if (state.show.meanLine) {
+        meanLine
+          .attr("x1", lastMean).attr("x2", lastMean)
+          .classed("is-significant", lastSignificant);
+      }
     }
 
     // ---- static overlay (parameter-dependent, not per-frame) ---------------
@@ -500,10 +602,19 @@
     // ---- animation loop ----------------------------------------------------
 
     var anim = { rafId: null, lastTs: null, acc: 0, onscreen: true };
+
+    // A tutorial pause can wait until the sample mean sits at least this many
+    // standard errors from the null, so a frozen "one sample" shows visible
+    // sampling error rather than a mean that happens to sit on the null.
+    var pendingPauseZ = null;
+
+    function pauseDistanceMet(minZ) {
+      return Math.abs(lastMean - MU0) >= minZ * derived.se;
+    }
     var lastInteraction = 0;
 
     function shouldStep() {
-      if (!state.playing || fastForward || prefersReducedMotion() ||
+      if (!pageSettled || !state.playing || fastForward || prefersReducedMotion() ||
           !anim.onscreen || document.hidden) return false;
       if (anyOtherFastForwarding(instanceHandle)) return false;
       if (ARBITRATE_WHEN_ALL_VISIBLE) {
@@ -527,6 +638,13 @@
       while (anim.acc >= TICK_MS) {
         stepOnce();
         anim.acc -= TICK_MS;
+        if (pendingPauseZ !== null && pauseDistanceMet(pendingPauseZ)) {
+          // Freeze on the exact tick that cleared the distance.
+          anim.acc = 0;
+          render();
+          setPlaying(false);
+          return;
+        }
       }
       render();
       throttledReadouts(ts);
@@ -727,6 +845,7 @@
     }
 
     function setPlaying(playing, options) {
+      pendingPauseZ = null;
       playing = Boolean(playing);
       if (playing === state.playing) return false;
       state.playing = playing;
@@ -983,7 +1102,14 @@
         // Tutorial steps never autoplay for reduced-motion readers; the
         // explicit play button remains available.
         var playing = Boolean(normalized.playing) && !prefersReducedMotion();
-        setPlaying(playing, { silent: true });
+        var minZ = Number(normalized["pause-min-z"]) || 0;
+        if (!playing && minZ > 0 && !prefersReducedMotion() && !pauseDistanceMet(minZ)) {
+          // Keep flying until the mean is far enough out; frame() then pauses.
+          setPlaying(true, { silent: true });
+          pendingPauseZ = minZ;
+        } else {
+          setPlaying(playing, { silent: true });
+        }
       }
 
       if (normalized.advance !== undefined) {
