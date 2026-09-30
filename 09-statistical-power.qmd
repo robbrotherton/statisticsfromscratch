@@ -63,17 +63,17 @@ Let's start keeping track of the sample means, building a histogram of their pos
 :::
 
 ::: {.tutorial-step data-major="alternative" data-major-title="False null" data-title="A different hive" data-action='{"variability":"high","sample-size":15,"hive-offset":23,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Now, what if the null is wrong? I'm going to show the hive again, and also move it over a bit. So now the null---the dashed outline---is wrong about where the true population center is. This changes our thought process a bit. Rather than risking falsely rejecting a correct null, we need to think about how likely it is we will *correctly* reject this wrong null. And what are the chances we will fail to reject it, making another kind of mistake?
+Now, what if the null is *wrong*? I'm going to show the hive again, and also move it over a bit. So now the null---the dashed outline---makes an incorrect prediction about where the true population center is. This changes our thought process a bit. Rather than risking falsely rejecting a correct null, we need to think about how likely it is we will *correctly* reject this wrong null. And what are the chances we will fail to reject it, making another kind of mistake?
 :::
 ::::
 
 :::::
 
-The last step gives us an outline for the rest of this chapter. The distance between the null and the actual hive---the difference between the null and true population means---is an *effect size*, expressed in the original units. We'll first look at how to describe that difference relative to population variability, then examine the decisions and mistakes we can make, and finally arrive at the idea of *statistical power*.
+The last step gives us an outline for the rest of this chapter. The distance between the null and the actual hive---the difference between the null and true population means---is an *effect size*. We'll first look at how to describe that difference relative to population variability, then examine the decisions and mistakes we can make, and finally arrive at the idea of *statistical power*, a method of quantifying how likely we are to detect a real effect.
 
 ## Effect Size
 
-A statistically significant result, like the one in @sec-spider-test, tells us that the observed test statistic is sufficiently improbable under the null model to meet our chosen criterion, $\alpha$. It's a binary decision, reject or fail to reject the null; $p < \alpha$ or $p \ge \alpha$. It doesn't tell us how big or important the difference is. In everyday language, "significant" often means important; in hypothesis testing, it means we've met a statistical decision rule.
+A statistically significant result, like the one we found for the sample of three Spider-People [in the previous chapter](#sec-spider-test), tells us that the observed test statistic is sufficiently improbable under the null model to meet our chosen criterion. It's a binary decision, reject or fail to reject the null; $p < \alpha$ or $p \ge \alpha$. It doesn't tell us how big or important the difference is. In everyday language, "significant" often means important, but not in hypothesis testing. In this context, it only means we've met a statistical decision rule, nothing more or less.
 
 The size of the difference *is* part of the $z$ equation from Chapter 8:
 
@@ -85,17 +85,17 @@ So the significance of the test is only part of the story. Measures of *effect s
 
 ### Cohen's $d$
 
-A common standardized measure is Cohen's $d$. (The $d$ stands for "difference.") For our $z$-test setting, where the population standard deviation is known, we calculate it as
+A common standardized measure is Cohen's $d$. (Cohen didn't say so himself, but let's all agree that the $d$ stands for "difference.") For our $z$-test, where the population standard deviation is known, we calculate Cohen's $d$ as:
 
 $$ d = \frac{M - \mu_0}{\sigma} $$ {#eq-cohens-d}
 
-Notice how close that is to the sample $z$-score equation, $z = \frac{M - \mu_0}{\sigma_M}$. The numerator of Cohen's $d$ is the same as in the $z$ equation, but the denominator is the standard deviation of individual scores, $\sigma$, rather than the standard error, $\sigma_M$. A value of $d = 0.5$ means the sample mean is half a population standard deviation above the null mean; $d = -0.5$ means it is half a standard deviation below. The sign tells us the direction, while the absolute value tells us the magnitude.
+Notice how close that is to the sample $z$-score equation, $z = \frac{M - \mu_0}{\sigma_M}$. The numerator is exactly the same, but the denominator is the standard deviation of individual scores, $\sigma$, rather than the standard error, $\sigma_M$. A value of $d = 0.5$ means the sample mean is half a population standard deviation above the null mean; $d = -0.5$ means it is half a standard deviation below. The sign tells us the direction, while the absolute value tells us the magnitude.
 
-Unlike $z$, this calculation does not increase automatically with sample size: the same $M$, $\mu_0$, and $\sigma$ give the same $d$ regardless of $n$. But $d$ calculated from a sample is still an estimate, subject to sampling error. Larger samples generally give more precise estimates of the population effect.
+Unlike $z$, this calculation does not increase automatically with sample size: the same $M$, $\mu_0$, and $\sigma$ give the same $d$ regardless of $n$. So in this sense, the effect size is independent of sample size. (But $d$ calculated from a sample is still an estimate, subject to sampling error; larger samples generally give more *precise* estimates of the population effect.)
 
 ### Effect size and statistical significance
 
-Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. For this example, assume the relevant population without the treatment has a mean of $\mu_0 = 500$ and a known standard deviation of $\sigma = 100$. Assume independent observations and an approximately normal sampling distribution of the mean, making a $z$-test is appropriate.
+Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. For this example, assume the relevant population without the treatment has a mean of $\mu = 500$ and a known standard deviation of $\sigma = 100$. Assume independent observations and an approximately normal sampling distribution of the mean, making a $z$-test is appropriate.
 
 We choose a two-tailed test with $\alpha = .05$ before collecting data. Our critical values are $z \approx \pm 1.96$. After the banana treatment, we observe a sample mean of $M = 501$, one point above the null mean, $\mu_0 = 500$.
 
@@ -103,25 +103,27 @@ First, suppose the sample contains 50,000 students.
 
 $$ z = \frac{M - \mu_0}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{50{,}000}} \approx 2.24 $$
 
-The result is statistically significant: $z$ exceeds 1.96 (two-tailed $p \approx .025$). But what is the effect size?
-
 $$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
 
-Now suppose the same sample mean, $M = 501$, came from a sample ofjust 1,000 students.
+The result is statistically significant: $z$ exceeds 1.96 (two-tailed $p \approx .025$). But the effect size is tiny, just one hundredth of a standard deviation.
+
+Now suppose the same sample mean, $M = 501$, came from a sample of just 1,000 students.
 
 $$ z = \frac{M - \mu_0}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{1{,}000}} \approx 0.32 $$
 
 $$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
 
-This result is nonsignificant. The larger sample gave a smaller standard error and a more extreme $z$, but both samples gave the same estimated effect: a difference of one point, or one hundredth of a standard deviation.
+In this case, the result is nonsignificant. The smaller sample produces a larger standard error and therefore a less extreme $z$. But both samples gave the same estimated effect: a difference of one point, or one hundredth of a standard deviation.
 
-So, assuming there really is a benefit to eating a banana before this test, one study was able to detect it and reject the null, one failed to. In any case, would supplying every student with a banana be a good use of resources? Statistical significance alone can't answer that. We would need to consider the size and precision of the estimated benefit, the cost of the intervention, and whether the study design supports attributing the difference to the banana. A cheap intervention with a small benefit might be worthwhile; a costly one with the same benefit might not be. Effect size helps us make that judgment.
+So, assuming there really is a benefit to eating a banana before this test, one study was able to detect it and reject the null while the other failed to detect it (a kind of inferential error we'll describe more precisely a little later in the chapter).
+
+In any case, would supplying every student with a banana be a good use of resources? Statistical significance alone can't answer that. We would need to consider the size and precision of the estimated benefit, the cost of the intervention, and whether the study design supports attributing the difference to the banana. A cheap intervention with a small benefit might be worthwhile; a costly one with the same benefit might not be. Effect size can help to inform that judgment.
 
 ### Interpreting Effect Size
 
-In his own book on the subject, Cohen outlined some rough rules of thumb. A Cohen's $d$ of .2 could be considered a small effect, .5 medium, and .8 large. However, Cohen himself cautioned *against* over-reliance on these guidelines. "The terms 'small,' 'medium,' and 'large' are relative, not only to each other, but to the area of behavioral science or even more particularly to the specific content and research method being employed in any given investigation," Cohen wrote. "In the face of this relativity, there is a certain risk inherent in offering conventional operational definitions for these terms" [@cohen1988power]. Cohen apparently came to regret having taken that  these rough and qualified guidelines, since they came to be applied without much thought [@funder2019evaluating].
+This raises the question, what should we consider a meaningful effect size? Cohen outlined some rough rules of thumb. A Cohen's $d$ of .2 could be considered a small effect, .5 medium, and .8 large. However, Cohen himself cautioned *against* over-reliance on these guidelines. "The terms 'small,' 'medium,' and 'large' are relative, not only to each other, but to the area of behavioral science or even more particularly to the specific content and research method being employed in any given investigation," Cohen wrote. "In the face of this relativity, there is a certain risk inherent in offering conventional operational definitions for these terms" [@cohen1988power]. Cohen apparently regretted having taken that risk, because the rough guidelines came to be applied without much thought [@funder2019evaluating].
 
-Drawing on observed effects in psychology and examples of their practical consequences, @funder2019evaluating proposed a different set of guidelines. They used the correlation coefficient, $r$, which we'll study in Chapter 17. The table gives their benchmarks alongside approximate $d$ equivalents.
+Taking Cohen's point about context-dependence to heart, @funder2019evaluating proposed a different set of benchmarks. They arrived at these by drawing on observed effects in psychology and examples of their practical consequences. They used the correlation coefficient, $r$, which we'll study in Chapter 17. The table gives their benchmarks alongside approximate $d$ equivalents.
 
 | Description | $\lvert r\rvert$ benchmark | Approximate $\lvert d\rvert$ equivalent |
 |:--|--:|--:|
