@@ -233,43 +233,15 @@ In the bottom-left cell, we are still saying that in reality the null is true, t
 
 ### Type 2 Error (False Negative)
 
-Moving over to the right-hand column, in which we are saying that in reality $H_0$ is *false*: there is a chance of failing to reject that null hypothesis. This is the opposite kind of mistake from the type one error. In this case, we fail to reject the null hypothesis when we should have rejected it. The null hypothesis is false, but our data failed to show persuasive evidence of an effect, leading us to conclude that there isn't one. This is called a **type two error**. A more useful description would be a *false negative*: thinking that there is no effect when actually there is.
+Moving over to the right-hand column, in which we are saying that in reality $H_0$ is *false*: there is a chance of failing to reject that null hypothesis. This is the opposite kind of mistake from the type one error. In this case, we *fail* to reject the null hypothesis when we *should* have rejected it. The null hypothesis is false, but our data failed to show persuasive enough evidence of an effect. This is called a **type two error**. A more useful description would be a *false negative*: thinking that there is no effect when actually there is.
 
-The type two error is referred to as $\beta$. You might think that $\beta$ is just the flip side of $\alpha$, but it's a bit more complicated than that. $\beta$ is related to the statistical power of a hypothesis test. We'll cover that in more detail later in this lecture.
-
-### Remembering the Difference
-
-Now, it's too bad that "type one" and "type two" are such uninformative names because this is a very important concept. One way to try and remember them is to remember that the villagers in the story of the boy who cried wolf made a type one error and a type two error in that order. At first, there was no wolf, just a mischievous young shepherd who cried wolf. The villagers made a false positive mistake. They thought there was a wolf and there wasn't. And the next time there was a wolf, the boy cried wolf again. But this time, the villagers made a false negative, failing to detect the wolf that really was there.
+The probability of making a type two error is referred to as $\beta$. Given the names, you might be tempted tothink that $\beta$ is just the flip side of $\alpha$, but it's not. Each column of the table represents a different possible state of reality; they are independent of one another, and they each have their own probabilities. I said that the probabilities of two cells belonging to the left-hand column sum to 1 (they were $\alpha$ and $1 - \alpha$). The same is true for the right-hand column: the probabilities of the two cells in that column must also sum to 1. So if the probability of making a type two error is $\beta$, then the probability of making the correct decision when the null is false is $1 - \beta$. That quantity has a name of its own: it is called the *statistical power* of the test.
 
 ## Statistical Power
 
-Now that we've established the ideas of effect size and type I and type II errors, we have the tools we need to think about *statistical power*. The power of a test is defined as the probability that the test will reject the null hypothesis *if the treatment really does have an effect*. That clause means we're focusing on the right-hand column of the table here, under which $H_0$ is false.
+The power of a test is defined as the probability that the test will reject the null hypothesis *if the treatment really does have an effect*. We're not saying that we know for sure that the null is false; we're just supposing that it is, and asking how likely it is that we will correctly reject it. It's not a quantity that we arbitrarily set, like $\alpha$; it is a property of the test itself, given the sample size, variability, and effect size. If we know (or can make assumptions about) those quantities, we can calculate the power of a test precisely.
 
-<div class="table-responsive">
-<table id="inf-tab-highlighted" class="sfs-decision-table sfs-decision-highlight-h1">
-  <thead>
-    <tr><th colspan=2></th><th colspan=2>Actual situation</th></tr>
-    <tr><th colspan=2></th><th>$H_0$ true</th><th>$H_0$ false</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th rowspan=2 class="sfs-decision-side">Researcher's<br>Decision</th>
-      <th>Reject $H_0$</th>
-      <td class="sfs-decision-error">Type 1 error<br>$\alpha$</td>
-      <td class="sfs-decision-correct">Correct<br>$1-\beta$</td>
-    </tr>
-    <tr>
-      <th>Fail to reject $H_0$</th>
-      <td class="sfs-decision-correct">Correct</td>
-      <td class="sfs-decision-error">Type 2 error<br>$\beta$</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-There are two possible outcomes: either we fail to reject the null hypothesis, making a type two false negative error; or we correctly reject the null hypothesis. Because these two complementary outcomes cover the whole probability space, their probabilities must add up to 1. The probability of a type two error is referred to as $\beta$. Therefore, the other outcome, the correct rejection of the null, must have a probability of $1 - \beta$. This quantity, $1 - \beta$, is the statistical power of the test.
-
-To illustrate, let's check in with our bee swarm again.
+To illustrate, let's check in with our bees again.
 
 ::::: {.callout-tip .interactive}
 ## Watch power in action: the swarm returns
@@ -277,43 +249,43 @@ To illustrate, let's check in with our bee swarm again.
 {{< interactive-figure beeSwarmPower makeBeeSwarm options='{"seed":"bee-swarm-power-v121","variability":"high","n":15,"hiveOffset":0,"playing":false,"displayScale":1.6,"densityMaximum":0.05,"showEffectSize":false,"showStandardError":false,"collectWhenVisible":true,"tutorialFastForward":true}' fallback="Animated bee swarm illustrating statistical power: when the hive moves away from the null position, the proportion of sample means that land in the critical regions is the power of the test, and it rises with sample size and effect size and falls with variability." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-major="null" data-major-title="Null true" data-title="False alarms" data-action='{"variability":"high","sample-size":15,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: recap the first swarm with the new terms. The hive sits on the null, so every rejection is a type I error; over a minute of samples the proportion significant ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) settles near $\alpha = .05$.]*
+::: {.tutorial-step data-major="null" data-major-title="True null" data-title="False alarms" data-action='{"variability":"high","sample-size":15,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+When we first introduced the bees, they were buzzing around a hive that was exactly where the null hypothesis predicted it to be. The sample means were piling up around the null, and occasionally one would land in a critical region, leading us to reject the null. But since the null was true, those rejections were mistakes: false positives, type I errors. Over time, the proportion of sample means that landed in the critical regions settled near $\alpha = .05$, as expected.
 :::
 
-::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Move the hive" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-*[Placeholder: the hive moves 24 units (38 px in the simulation). The null is now false. Now the question is how often we will correctly reject it, and how often we'll miss it (type II).]*
+::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Move the hive" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+Then we moved the hive. This illustrates the other possible reality: now the null hypothesis is false. The two possible outcomes are that we will either fail to reject the null (which gives us $\beta$), or that we will correctly reject the null ($1 - \beta$).
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Critical regions" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-*[Placeholder: the calculation's steps 1–2. The rejection rule comes from the null alone: its critical regions stay exactly where they were, wherever the real hive is.]*
+How can we figure out what those proportions are? Well, we already defined the critical regions for the null hypothesis. They don't change just because the null is false. They still tell us which sample means would lead us to reject that null, and which would not.
 :::
 
-::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Where the means land" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-*[Placeholder: steps 3–4. The sample means now pile up around the true hive, not the null. The part of the pile that stays between the critical boundaries are misses: $\beta$, the type II error rate.]*
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Where the means land" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+So now we'll just collect sample means for a while and see where they pile up. The swarm is still jittering around the true hive, and the sample means are piling up around that true hive, not the null. Some of those sample means will land in the critical regions, and some will not. The ones that land in the critical regions are correct rejections of the null hypothesis. The ones that land between the critical boundaries are Type 2 errors, false negatives. The proprtion of those sample means gives us $\beta$.
 :::
 
-::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Power" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: step 5. The rest of the pile lands in the critical regions: correct rejections. That proportion ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) is the power, $1 - \beta$.]*
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Power" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+The proportion of sample means that land in the critical regions is the power of the test, $1 - \beta$. That's *statistical power*: the proportion of results that will cause us to correctly reject the false null hypothesis. That proportion ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) is the power, $1 - \beta$.*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"high","sample-size":50,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"high","sample-size":50,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
 *[Placeholder: 50 bees instead of 15. Smaller standard error, tighter pile, less overlap with the null; power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) jumps.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Calmer swarm" data-action='{"variability":"medium","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Calmer swarm" data-action='{"variability":"medium","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
 *[Placeholder: back to 15 bees but a less variable swarm. Same effect: smaller standard error, more power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}).]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Smaller effect" data-action='{"variability":"high","sample-size":15,"hive-offset":19,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Smaller effect" data-action='{"variability":"high","sample-size":15,"hive-offset":19,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
 *[Placeholder: the original swarm, but the hive only half as far from the null (12 units). Power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Stricter alpha" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.01,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Stricter alpha" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.01,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
 *[Placeholder: the original swarm and hive, but $\alpha = .01$. The critical regions shrink, and power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
 :::
 
-::: {.tutorial-step data-major="bridge" data-major-title="Our example" data-title="Back to our example" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+::: {.tutorial-step data-major="bridge" data-major-title="Our example" data-title="Back to our example" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
 *[Placeholder: reset to 15 bees, high variability, the hive 24 units out, $\alpha = .05$. Power is about {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}. The numbers the calculation will use: on a scale where the swarm's standard error is 10, the null hive is at 50 and the true hive at 74 (swarm SD $= 10\sqrt{15} \approx 38.73$). Bridge to the calculation: how could we have worked that out without a swarm?]*
 :::
 ::::
@@ -323,7 +295,7 @@ To illustrate, let's check in with our bee swarm again.
 
 ### Calculating Power
 
-The bees are very cute and all, but how do we actually calculate statistical power in practice? For that, we'll need some step-by-step instructions, some formulas. I'll also show you how it looks visualized with some boring old curves, because unfortunately we can't always do statistics with bees.
+The bees are cute and all, but how do we actually calculate statistical power in practice? For that, we'll need some step-by-step instructions, some formulas. I'll also show you how it looks visualized with some boring old curves, because unfortunately we can't always do statistics with bees.
 
 The key idea is that we need to think about two distributions: the null hypothesis distribution and the alternative hypothesis distribution. The null hypothesis distribution represents what we would expect to see if the null hypothesis were true, while the alternative hypothesis distribution represents what we would expect to see if the alternative hypothesis were true. This requires having some idea of what the alternative hypothesis is, which is usually based on prior research or theory. Applying this in the context of the $z$-test we used in the previous chapter means we also need to know the population standard deviation. (We can apply statistical power in the context of other tests as well.)
 
