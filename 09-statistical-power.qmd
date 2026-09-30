@@ -65,10 +65,6 @@ Let's start keeping track of the sample means, building a histogram of their pos
 ::: {.tutorial-step data-major="alternative" data-major-title="False null" data-title="A different hive" data-action='{"variability":"high","sample-size":15,"hive-offset":23,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
 Now, what if the null is wrong? I'm going to show the hive again, and also move it over a bit. So now the null---the dashed outline---is wrong about where the true population center is. This changes our thought process a bit. Rather than risking falsely rejecting a correct null, we need to think about how likely it is we will *correctly* reject this wrong null. And what are the chances we will fail to reject it, making another kind of mistake?
 :::
-
-::: {.tutorial-step data-major="alternative" data-major-title="False null" data-title="Statistical power" data-action='{"variability":"high","sample-size":15,"hive-offset":23,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-This will depend on a few things. First, how far away is the true population mean from the null? Second, how variable is the population? Third, how many bees are in our sample? And fourth, what alpha level have we set for our test? All of these factors will affect the probability that we will correctly reject the null hypothesis when it is false. This probability is called the statistical power of the test.
-:::
 ::::
 
 :::::
@@ -272,35 +268,47 @@ To illustrate, let's check in with our bee swarm again.
 ::::: {.callout-tip .interactive}
 ## Watch power in action: the swarm returns
 
-{{< interactive-figure beeSwarmPower makeBeeSwarm options='{"seed":"bee-swarm-power-v3","variability":"medium","n":50,"hiveOffset":0,"playing":false}' fallback="Animated bee swarm illustrating statistical power: when the hive moves away from the null position, the proportion of sample means that land in the critical regions is the power of the test, and it rises with sample size and effect size and falls with variability." >}}
+{{< interactive-figure beeSwarmPower makeBeeSwarm options='{"seed":"bee-swarm-power-v121","variability":"high","n":15,"hiveOffset":0,"playing":false,"displayScale":1.6,"densityMaximum":0.05,"showEffectSize":false,"showStandardError":false,"collectWhenVisible":true,"tutorialFastForward":true}' fallback="Animated bee swarm illustrating statistical power: when the hive moves away from the null position, the proportion of sample means that land in the critical regions is the power of the test, and it rises with sample size and effect size and falls with variability." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-major="null" data-major-title="Null true" data-title="Null true" data-action='{"variability":"medium","sample-size":50,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":false,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":false}'}
-The swarm again, with everything in view. The hive sits exactly where the null hypothesis says it should, so the sample means pile onto the null distribution — and the roughly 5% that land in the critical regions are all false alarms.
+::: {.tutorial-step data-major="null" data-major-title="Null true" data-title="False alarms" data-action='{"variability":"high","sample-size":15,"hive-offset":0,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: recap the first swarm with the new terms. The hive sits on the null, so every rejection is a type I error; over a minute of samples the proportion significant ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) settles near $\alpha = .05$.]*
 :::
 
-::: {.tutorial-step data-major="effect" data-major-title="Effect" data-title="Move the hive" data-action='{"variability":"medium","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Now the hive has moved; the dashed marker shows where the null hypothesis still thinks it is. The null is false — there is a real effect of $d =$ {{< interactive-value beeSwarmPower.d format=".2f" >}} — but our critical regions stay right where they were.
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Move the hive" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+*[Placeholder: the hive moves 24 units (38 px in the simulation). The null is now false. Now the question is how often we will correctly reject it, and how often we'll miss it (type II).]*
 :::
 
-::: {.tutorial-step data-major="effect" data-major-title="Effect" data-title="Power" data-action='{"variability":"medium","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Rebuild the pile of sample means. It centers on the true hive, not on the null — and now a sample mean in the critical region is a good thing: a correct detection of the real effect. The proportion of the time that happens is the power of the test: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Critical regions" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+*[Placeholder: the calculation's steps 1–2. The rejection rule comes from the null alone: its critical regions stay exactly where they were, wherever the real hive is.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"medium","sample-size":100,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Give the swarm 100 bees instead of 50. More bees per sample means a smaller standard error, a tighter pile of means, less overlap with the null — and more power: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Where the means land" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
+*[Placeholder: steps 3–4. The sample means now pile up around the true hive, not the null. The part of the pile that stays between the critical boundaries are misses: $\beta$, the type II error rate.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More noise" data-action='{"variability":"high","sample-size":50,"hive-offset":10,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Crank the variability instead. A noisier swarm inflates the standard error, so the same 10-pixel effect is now small relative to the noise, and sample means rarely clear the critical bounds. Power sinks back toward $\alpha$: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Power" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: step 5. The rest of the pile lands in the critical regions: correct rejections. That proportion ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) is the power, $1 - \beta$.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Bigger effect" data-action='{"variability":"medium","sample-size":50,"hive-offset":20,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-Finally, move the hive farther out. A bigger effect is simply easier to see — hardly any sample means stay inside the null's bounds now: {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}.
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"high","sample-size":50,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: 50 bees instead of 15. Smaller standard error, tighter pile, less overlap with the null; power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) jumps.]*
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Explore" data-action='{"variability":"medium","sample-size":50,"hive-offset":20,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"controls-open":true,"animate":true}'}
-Now it's yours. Mix the three ingredients — sample size, variability, and effect size (the hive offset) — and watch what each one does to the power tracker. (The fourth factor, $\alpha$, stays fixed at .05 here.)
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Calmer swarm" data-action='{"variability":"medium","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: back to 15 bees but a less variable swarm. Same effect: smaller standard error, more power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}).]*
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Smaller effect" data-action='{"variability":"high","sample-size":15,"hive-offset":19,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: the original swarm, but the hive only half as far from the null (12 units). Power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
+:::
+
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Stricter alpha" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.01,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: the original swarm and hive, but $\alpha = .01$. The critical regions shrink, and power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
+:::
+
+::: {.tutorial-step data-major="bridge" data-major-title="Our example" data-title="Back to our example" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":3600,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+*[Placeholder: reset to 15 bees, high variability, the hive 24 units out, $\alpha = .05$. Power is about {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}. The numbers the calculation will use: on a scale where the swarm's standard error is 10, the null hive is at 50 and the true hive at 74 (swarm SD $= 10\sqrt{15} \approx 38.73$). Bridge to the calculation: how could we have worked that out without a swarm?]*
 :::
 ::::
 
@@ -333,48 +341,48 @@ $$ M = \mu_0 + z \cdot \sigma_M $$
 
 We obtained two z-scores in step one, corresponding to the two-tailed critical regions. (Statistical power can work with a one-tailed test as well; we would only have a single critical $z$-score in that case.) So we can plug those into the equation, with the $\mu_0$ and the standard error to get the corresponding sample means.
 
-$$ M_{lower} = 50 + (-1.96) \cdot 2 = 46.08 $$
+$$ M_{lower} = 50 + (-1.96) \cdot 10 = 30.40 $$
 
-$$ M_{upper} = 50 + (1.96) \cdot 2 = 53.92 $$
+$$ M_{upper} = 50 + (1.96) \cdot 10 = 69.60 $$
 
-Step 3. Now we turn our attention to the alternative hypothesis distribution. We need to know its center. Here we said we expect a difference of $+5$ points, which centers the distribution on $\mu_1 = 55$, compared to $\mu_0 = 50$. The standard error is the same as before, because the sample size and population standard deviation are the same.
+Step 3. Now we turn our attention to the alternative hypothesis distribution. We need to know its center. Here we said we expect a difference of $+24$ units, which centers the distribution on $\mu_1 = 74$, compared to $\mu_0 = 50$. The standard error is the same as before, because the sample size and population standard deviation are the same.
 
 Now we need to work out what $z$ scores correspond to the sample means we just worked out, but for this distribution.
 
 {{< include quizzes/09-power-alternative-means.qmd >}}
 
-Step 4. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.54$ is the same as the area to the right of $z = 0.54$, which the table gives as .2946, and the area to the left of $z = -4.46$ is so far out in the tail that it rounds to .0000: $.2946 - .0000 = .2946$. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+Step 4. Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.44$ is the same as the area to the right of $z = 0.44$, which the table gives as .3300, and the area to the left of $z = -4.36$ is so far out in the tail that it rounds to .0000: $.3300 - .0000 = .3300$. This gives us the area of the region shaded gray here. This is the proportion of the alternative distribution that will cause us to fail to reject the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
 
-{{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.5,"to":0.58,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.54,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.50 to 0.58, with the area to the right of z = 0.54, .2946, highlighted." >}}
+{{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.4,"to":0.48,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.44,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.40 to 0.48, with the area to the right of z = 0.44, .3300, highlighted." >}}
 
-Step 5. Finally we can work out the statistical power of the test---the chances of correctly rejecting the null hypothesis---by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 29.5% chance of making a type two error, leaving us with a 70.5% chance of making the correct decision to reject the null hypothesis. So the power of the test is .705.
+Step 5. Finally we can work out the statistical power of the test---the chances of correctly rejecting the null hypothesis---by working out the area of the rest of the distribution. This is just $1 - \beta$, because it has to add up to 1. So for this example, we had a 33.0% chance of making a type two error, leaving us with a 67.0% chance of making the correct decision to reject the null hypothesis. So the power of the test is .670.
 
-Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis 70.5% of the time.
+Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis 67.0% of the time.
 
 ::::: {#act-calculating-power .callout-tip .interactive .with-controls}
 ## Explore statistical power
 
-{{< interactive-figure statisticalPower makeStatisticalPowerDiagram options='{"mu":50,"sigma":10,"n":25,"d":0.5,"alpha":0.05,"showAlt":false,"shadeBeta":false,"shadePower":false,"axisZNull":true,"axisRaw":false}' fallback="Explore statistical power. Use the accompanying steps for an explanation." >}}
+{{< interactive-figure statisticalPower makeStatisticalPowerDiagram options='{"mu":50,"sigma":38.73,"n":15,"d":0.62,"alpha":0.05,"showAlt":false,"shadeBeta":false,"shadePower":false,"axisZNull":true,"axisRaw":false}' fallback="Explore statistical power. Use the accompanying steps for an explanation." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="The null" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":false,"show-H1":false,"raw-scores":false,"h0-z":true,"h1-z":false}'}
-Start with a null population mean of 50, a population SD of 10, and samples of 25. The standard error is $10 / \sqrt{25} = 2$. This curve shows sample means under the null, labeled in $z$ units. For a two-tailed test with $\alpha = .05$, the critical $z$ values are about $\pm 1.96$.
+::: {.tutorial-step data-title="The null" data-action='{"mu":50,"sigma":38.73,"n":15,"effect-size":0.62,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":false,"show-H1":false,"raw-scores":false,"h0-z":true,"h1-z":false}'}
+Start with a null population mean of 50, a population SD of 38.73, and samples of 15. The standard error is $38.73 / \sqrt{15} \approx 10$. This curve shows sample means under the null, labeled in $z$ units. For a two-tailed test with $\alpha = .05$, the critical $z$ values are about $\pm 1.96$.
 :::
 
-::: {.tutorial-step data-title="Critical means" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":false,"show-H1":false,"raw-scores":true,"h0-z":true,"h1-z":false}'}
-On the raw-score ruler, those same boundaries are $50 - 1.96(2) = 46.08$ and $50 + 1.96(2) = 53.92$. Sample means outside these boundaries lead us to reject the null. Keep those raw-score boundaries in mind: we will use the same decision rule when we consider a population where the null is false.
+::: {.tutorial-step data-title="Critical means" data-action='{"mu":50,"sigma":38.73,"n":15,"effect-size":0.62,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":false,"show-H1":false,"raw-scores":true,"h0-z":true,"h1-z":false}'}
+On the raw-score ruler, those same boundaries are $50 - 1.96(10) = 30.40$ and $50 + 1.96(10) = 69.60$. Sample means outside these boundaries lead us to reject the null. Keep those raw-score boundaries in mind: we will use the same decision rule when we consider a population where the null is false.
 :::
 
-::: {.tutorial-step data-title="A specified alternative" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":false}'}
-Suppose the true population mean is 55 instead. That's a difference of five points, or $d = 0.5$, because the population SD is 10. Samples of 25 from this alternative population have a sampling distribution centered on 55, still with a standard error of 2. The violet areas show the sample means that would cross the null's rejection boundaries.
+::: {.tutorial-step data-title="A specified alternative" data-action='{"mu":50,"sigma":38.73,"n":15,"effect-size":0.62,"alpha":0.05,"two-tailed":true,"shade-beta":false,"shade-power":false,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":false}'}
+Suppose the true population mean is 74 instead. That's a difference of 24 units, or $d \approx 0.62$, because the population SD is 38.73. Samples of 15 from this alternative population have a sampling distribution centered on 74, still with a standard error of 10. The violet areas show the sample means that would cross the null's rejection boundaries.
 :::
 
-::: {.tutorial-step data-title="The alternative ruler" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"shade-beta":true,"shade-power":false,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
-Now read the boundaries relative to the alternative mean. The lower one is $(46.08 - 55) / 2 = -4.46$ standard errors below it; the upper one is $(53.92 - 55) / 2 = -0.54$. The boundaries are still at the same raw scores. We've changed the ruler we use to describe them.
+::: {.tutorial-step data-title="The alternative ruler" data-action='{"mu":50,"sigma":38.73,"n":15,"effect-size":0.62,"alpha":0.05,"two-tailed":true,"shade-beta":true,"shade-power":false,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+Now read the boundaries relative to the alternative mean. The lower one is $(30.40 - 74) / 10 = -4.36$ standard errors below it; the upper one is $(69.60 - 74) / 10 = -0.44$. The boundaries are still at the same raw scores. We've changed the ruler we use to describe them.
 :::
 
-::: {.tutorial-step data-title="Misses and detections" data-action='{"mu":50,"sigma":10,"n":25,"effect-size":0.5,"alpha":0.05,"two-tailed":true,"shade-beta":true,"shade-power":true,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
-The gray area under the alternative curve lies between the critical boundaries. These samples fail to reject a false null: $\beta \approx .295$. The violet area outside the boundaries is power: $1 - \beta \approx .705$. So this design detects this particular effect about 71 percent of the time over repeated studies. Both rejection tails count, though the far-left contribution here is tiny.
+::: {.tutorial-step data-title="Misses and detections" data-action='{"mu":50,"sigma":38.73,"n":15,"effect-size":0.62,"alpha":0.05,"two-tailed":true,"shade-beta":true,"shade-power":true,"dim-h0":true,"show-H1":true,"raw-scores":true,"h0-z":false,"h1-z":true}'}
+The gray area under the alternative curve lies between the critical boundaries. These samples fail to reject a false null: $\beta \approx .330$. The violet area outside the boundaries is power: $1 - \beta \approx .670$. So this design detects this particular effect about 67 percent of the time over repeated studies. Both rejection tails count, though the far-left contribution here is tiny.
 :::
 
 ::::
