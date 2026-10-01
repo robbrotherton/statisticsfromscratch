@@ -559,8 +559,11 @@
       return graphOptions;
     }
 
+    // `distributions` draws several curves (each its own spec) against the
+    // single mean and SD that define the z axis.
     return {
       distribution: opts.distribution || "normal",
+      distributions: opts.distributions,
       mean,
       sd,
       color: opts.color,
@@ -578,6 +581,9 @@
       animate,
       shade: opts.shade,
       markers: opts.markers,
+      intervals: opts.intervals,
+      yHeadroom: opts.yHeadroom,
+      legend: opts.legend,
       ariaLabel
     };
   }
