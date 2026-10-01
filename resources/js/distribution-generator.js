@@ -54,6 +54,7 @@ sfsDistributionNormalizeType = (value) => {
   if (["f", "f-distribution", "fdistribution", "variance-ratio"].includes(key)) return "f";
   if (["skew-normal", "skewnormal", "skew", "skewed", "skew-norm"].includes(key)) return "skew-normal";
   if (["mixture", "bimodal", "mix"].includes(key)) return "mixture";
+  if (["kde", "kernel-density", "smoothed", "smooth"].includes(key)) return "kde";
   return key;
 }
 
@@ -63,6 +64,7 @@ sfsDistributionDistributionLabel = (dist) => {
   if (dist.type === "f") return `F(${dist.df1}, ${dist.df2})`;
   if (dist.type === "skew-normal") return "Skewed";
   if (dist.type === "mixture") return dist.components && dist.components.length === 2 ? "Bimodal" : "Mixture";
+  if (dist.type === "kde") return "Smoothed";
   return "Normal";
 }
 
@@ -139,8 +141,83 @@ sfsDistributionSpec = (source = {}, parent = {}, index = 0) => {
     dist.components = components;
   }
 
+  if (type === "kde") dist.kde = sfsDistributionKdeSpec(source, parent);
+
   dist.label = sfsDistributionDistributionLabel(dist);
   return dist;
+}
+
+// A smoothed curve estimated from observed scores: a Gaussian kernel density
+// estimate. Repeated scores are pooled into weighted kernels. With `bounds`,
+// kernel mass that would spill past a hard limit of the scale (a rating
+// scale's 1 and 7, say) is reflected back inside it, and the density is zero
+// beyond the limits, so the curve never implies impossible scores.
+sfsDistributionKdeSpec = (source = {}, parent = {}) => {
+  const values = sfsDistributionAsArray(sfsDistributionValueOr(source.data, parent.data))
+    .map(Number)
+    .filter(Number.isFinite);
+  const counts = d3.rollup(values, (group) => group.length, (value) => value);
+  const kernels = Array.from(counts, ([at, count]) => ({ at, weight: count / values.length }))
+    .sort((a, b) => a.at - b.at);
+  const n = values.length;
+  const mean = n ? d3.mean(values) : 0;
+  const sd = n > 1 ? d3.deviation(values) : 0;
+  // Silverman's rule of thumb unless a bandwidth is given.
+  const bandwidth = sfsDistributionPositiveNumber(
+    sfsDistributionValueOr(source.bandwidth, parent.bandwidth),
+    sd > 0 ? 1.06 * sd * Math.pow(n, -0.2) : 1
+  );
+  const rawBounds = sfsDistributionValueOr(source.bounds, parent.bounds);
+  const bounds = Array.isArray(rawBounds) && rawBounds.length === 2
+    ? [sfsDistributionBound(rawBounds[0]), sfsDistributionBound(rawBounds[1])]
+      .map((bound, index) => bound === undefined ? (index ? Infinity : -Infinity) : bound)
+    : [-Infinity, Infinity];
+  return { kernels, n, mean, sd, bandwidth, bounds };
+}
+
+// The kernel at `at` and its mirror images in each finite bound.
+sfsDistributionKdeCenters = (kde, at) => [
+  at,
+  ...(Number.isFinite(kde.bounds[0]) ? [2 * kde.bounds[0] - at] : []),
+  ...(Number.isFinite(kde.bounds[1]) ? [2 * kde.bounds[1] - at] : [])
+]
+
+sfsDistributionKdePdf = (kde, x) => {
+  if (!kde.kernels.length || x < kde.bounds[0] || x > kde.bounds[1]) return 0;
+  return kde.kernels.reduce((sum, kernel) =>
+    sum + kernel.weight * sfsDistributionKdeCenters(kde, kernel.at).reduce((total, center) =>
+      total + sfsDistributionStats.normalPdf(x, center, kde.bandwidth), 0), 0);
+}
+
+sfsDistributionKdeCdf = (kde, x) => {
+  if (!kde.kernels.length || x <= kde.bounds[0]) return 0;
+  if (x >= kde.bounds[1]) return 1;
+  const lower = kde.bounds[0];
+  return kde.kernels.reduce((sum, kernel) =>
+    sum + kernel.weight * sfsDistributionKdeCenters(kde, kernel.at).reduce((total, center) =>
+      total + sfsDistributionStats.normalCdf(x, center, kde.bandwidth) -
+        (Number.isFinite(lower) ? sfsDistributionStats.normalCdf(lower, center, kde.bandwidth) : 0), 0), 0);
+}
+
+sfsDistributionKdeExtent = (kde) => {
+  const first = kde.kernels.length ? kde.kernels[0].at : 0;
+  const last = kde.kernels.length ? kde.kernels[kde.kernels.length - 1].at : 0;
+  return [
+    Math.max(kde.bounds[0], first - 4 * kde.bandwidth),
+    Math.min(kde.bounds[1], last + 4 * kde.bandwidth)
+  ];
+}
+
+sfsDistributionKdeQuantile = (kde, p) => {
+  if (p <= 0) return kde.bounds[0];
+  if (p >= 1) return kde.bounds[1];
+  let [lower, upper] = sfsDistributionKdeExtent(kde);
+  for (let i = 0; i < 60; i += 1) {
+    const midpoint = (lower + upper) / 2;
+    if (sfsDistributionKdeCdf(kde, midpoint) < p) lower = midpoint;
+    else upper = midpoint;
+  }
+  return (lower + upper) / 2;
 }
 
 sfsDistributionSpecs = (opts = {}) => {
@@ -152,6 +229,7 @@ sfsDistributionSpecs = (opts = {}) => {
 }
 
 sfsDistributionPdf = (dist, x) => {
+  if (dist.type === "kde") return sfsDistributionKdePdf(dist.kde, x);
   if (dist.type === "t") return sfsDistributionStats.tPdf(x, dist.df, dist.mean, dist.scale);
   if (dist.type === "f") return sfsDistributionStats.fPdf(x, dist.df1, dist.df2, dist.location, dist.scale);
   if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalPdf(x, dist.location, dist.scale, dist.shape);
@@ -163,6 +241,7 @@ sfsDistributionPdf = (dist, x) => {
 }
 
 sfsDistributionCdf = (dist, x) => {
+  if (dist.type === "kde") return sfsDistributionKdeCdf(dist.kde, x);
   if (dist.type === "t") return sfsDistributionStats.tCdf(x, dist.df, dist.mean, dist.scale);
   if (dist.type === "f") return sfsDistributionStats.fCdf(x, dist.df1, dist.df2, dist.location, dist.scale);
   if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalCdf(x, dist.location, dist.scale, dist.shape);
@@ -201,6 +280,7 @@ sfsDistributionMixtureQuantile = (dist, p) => {
 }
 
 sfsDistributionQuantile = (dist, p) => {
+  if (dist.type === "kde") return sfsDistributionKdeQuantile(dist.kde, p);
   if (dist.type === "t") return sfsDistributionStats.tInv(p, dist.df, dist.mean, dist.scale);
   if (dist.type === "f") return sfsDistributionStats.fInv(p, dist.df1, dist.df2, dist.location, dist.scale);
   if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalInv(p, dist.location, dist.scale, dist.shape);
@@ -214,6 +294,7 @@ sfsDistributionFinitePdf = (dist, x) => {
 }
 
 sfsDistributionDefaultDomain = (dist) => {
+  if (dist.type === "kde") return sfsDistributionKdeExtent(dist.kde);
   const lowerP = dist.type === "f" ? 0.001 : 0.0008;
   const upperP = dist.type === "f" ? 0.995 : 0.9992;
   let lower = sfsDistributionQuantile(dist, lowerP);
@@ -463,6 +544,7 @@ sfsDistributionMarkerStatKey = (value) => {
 }
 
 sfsDistributionMeanValue = (dist) => {
+  if (dist.type === "kde") return dist.kde.mean;
   if (dist.type === "f") return dist.df2 > 2 ? dist.location + dist.scale * dist.df2 / (dist.df2 - 2) : NaN;
   if (dist.type === "skew-normal") return sfsDistributionStats.skewNormalMean(dist.location, dist.scale, dist.shape);
   if (dist.type === "mixture") {
@@ -2353,7 +2435,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
     sfsDistributionNormalizeKey(opts.shadeAnimation || opts.shadeEffect)
   );
   const yMax = d3.max(curveData, (series) => d3.max(series.data, (d) => d.y)) || 1;
-  const yDomain = opts.yDomain || [0, yMax * 1.12];
+  const yDomain = opts.yDomain || [0, yMax * sfsDistributionPositiveNumber(opts.yHeadroom, 1.12)];
   const ariaLabel = opts.ariaLabel || opts.title || "Distribution curve graph";
 
   const rootNode = opts.rootNode || document.createElement("div");
@@ -2630,10 +2712,34 @@ sfsDistributionRenderGraph = (opts = {}) => {
   const lineMarkerItems = markerItems.filter((item) => item.presentation === "line");
   const markerLegend = sfsDistributionAddMarkerLegend(svg, lineMarkerItems, opts, width, margin);
 
+  // Plain-text marker labels on the same row are nudged apart and kept inside
+  // the chart, so lines near an edge or near each other stay legible. Widths
+  // are estimated from the label length at the figure label size.
+  const markerLabelShift = new Map();
+  const plainLabels = markerItems.filter((d) => d.presentation === "line" && d.label !== undefined && d.labelHtml === undefined);
+  d3.groups(plainLabels, (d) => Math.round(markerTopY(d) + d.labelDy)).forEach(([, row]) => {
+    const boxes = row.map((d) => {
+      const at = x(d.x) + d.labelDx;
+      const w = String(d.label).length * 7.7;
+      const left = d.labelAnchor === "end" ? at - w : d.labelAnchor === "start" ? at : at - w / 2;
+      return { d, w, start: left, left: Math.max(2, left) };
+    }).sort((a, b) => a.left - b.left);
+    boxes.forEach((box, index) => {
+      if (index) box.left = Math.max(box.left, boxes[index - 1].left + boxes[index - 1].w + 8);
+    });
+    let limit = width - 2;
+    for (let index = boxes.length - 1; index >= 0; index -= 1) {
+      boxes[index].left = Math.min(boxes[index].left, limit - boxes[index].w);
+      limit = boxes[index].left - 8;
+    }
+    boxes.forEach((box) => markerLabelShift.set(box.d, box.left - box.start));
+  });
+  const markerLabelX = (d) => x(d.x) + d.labelDx + (markerLabelShift.get(d) || 0);
+
   markerGroups.filter((d) => d.presentation === "line" && (d.label !== undefined || d.labelHtml !== undefined) && !markerLegend)
     .append("text")
       .attr("class", "dg-marker-label sfs-graph-label")
-      .attr("x", (d) => x(d.x) + d.labelDx)
+      .attr("x", markerLabelX)
       .attr("y", (d) => markerTopY(d) - 7 + d.labelDy)
       .attr("text-anchor", (d) => d.labelAnchor)
       .style("fill", (d) => d.spec.labelColor || d.color)

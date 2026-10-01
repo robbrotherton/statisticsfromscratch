@@ -56,7 +56,7 @@
     function wrap(action) {
       global.interactiveFigure.wrap({root:root.node(), controls:controls.node(), label:kind === "alpha" ? "alpha and test direction controls" : "effect size controls", placement:"callout", startOpen:true, applyAction:(values,context)=>{if(context && context.setControlsOpen) context.setControlsOpen(Boolean(values["controls-open"])); action(values);}});
     }
-    return {root,controls,plot,preview,legend,slider,publish,wrap};
+    return {root,controls,graph,plot,preview,legend,slider,publish,wrap};
   }
 
   global.makeAlphaTutorial = function() {
@@ -142,19 +142,38 @@
     return chart.root.node();
   };
 
+  // Each group's mean and SD, the pooled SD, and Cohen's d (higher minus lower).
+  function exampleSummary(spec) {
+    const groups = spec.groups.map(group => {
+      const values = group.counts.flatMap(([score, count]) => Array(count).fill(score));
+      return { name: group.name, values, n: values.length, mean: d3.mean(values), sd: d3.deviation(values) };
+    });
+    const [low, high] = groups;
+    const pooled = Math.sqrt(((low.n - 1) * low.sd ** 2 + (high.n - 1) * high.sd ** 2) / (low.n + high.n - 2));
+    return { low, high, pooled, d: (high.mean - low.mean) / pooled };
+  }
+  global.sfsNormalComparisons.exampleSummary = exampleSummary;
+
   global.makeEffectSizeTutorial = function(opts = {}) {
     const chart = scaffold("effect", [-3.5, 6]);
     chart.root.classed("nc-effect", true);
     chart.legend.remove();
     chart.root.select(".nc-readout").attr("class", "visually-hidden");
     chart.root.append("style").text(`
-      .nc-effect .nc-explore {display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;margin:.5rem 0;border-left:3px solid var(--sfs-power-color,#7654b5);background:var(--sfs-panel-bg,var(--sfs-bg));border-radius:var(--sfs-radius-sm)}
+      .nc-effect .nc-explore {display:flex;align-items:center;gap:.8rem;padding:.8rem 1rem;margin:.5rem 0;background:color-mix(in srgb,var(--sfs-power-color,#7654b5) 9%,transparent);border-radius:var(--sfs-radius-sm)}
       .nc-effect .nc-explore[hidden] {display:none}
       .nc-effect .nc-explore span {white-space:nowrap;font-weight:600;font-variant-numeric:tabular-nums}
       .nc-effect .nc-explore input {flex:1;min-width:3rem;width:auto;margin:0;accent-color:var(--sfs-power-color,#7654b5)}
     `);
+    const examples = global.sfsEffectSizeExamples || {};
     let d = clamp(Number(opts.d ?? 1.85), 0, 2.5), showSlider = false;
+    let example = examples[opts.example] ? opts.example : null;
     let shown = d, tween = null;
+    // Survey examples: smoothed curves of the real scores in original units,
+    // with the z ruler beneath. The slider step returns to idealized normals.
+    const exampleView = d3.create("div").attr("class", "nc-example").attr("hidden", true);
+    chart.root.node().insertBefore(exampleView.node(), chart.graph);
+    let exampleGraph = null;
     const strip = chart.root.append("label").attr("class", "nc-explore").attr("hidden", true);
     const valueLabel = strip.append("span");
     const slider = strip.append("input").attr("type", "range").attr("name", "d")
@@ -178,21 +197,77 @@
       };
     }
     function stopTween() { if (tween) { tween.stop(); tween = null; } }
+    function disposeExample() {
+      if (exampleGraph && exampleGraph.sfsInteractive && typeof exampleGraph.sfsInteractive.dispose === "function") {
+        exampleGraph.sfsInteractive.dispose();
+      }
+      exampleGraph = null;
+      exampleView.selectAll("*").remove();
+    }
+    function showExampleView(visible) {
+      exampleView.attr("hidden", visible ? null : true);
+      chart.graph.style.display = visible ? "none" : "";
+      strip.attr("hidden", !visible && showSlider ? null : true);
+    }
+    function drawExample() {
+      stopTween();
+      disposeExample();
+      const spec = examples[example];
+      const { low, high, pooled, d: effect } = exampleSummary(spec);
+      const [lo, hi] = spec.xDomain;
+      const integerScale = hi - lo <= 10;
+      const zTicks = d3.range(Math.ceil((lo - low.mean) / pooled), Math.floor((hi - low.mean) / pooled) + 1);
+      const fmt = d3.format(".3~r");
+      const text = `${high.name} (mean ${fmt(high.mean)}) scored higher than ${low.name.toLowerCase()} ` +
+        `(mean ${fmt(low.mean)}) on ${spec.label.toLowerCase()}: d = ${effect.toFixed(2)}.`;
+      const curve = (group, index) => ({ distribution: "kde", data: group.values, bandwidth: spec.bandwidth,
+        bounds: spec.bounds, name: group.name,
+        color: index ? "var(--graph-series-2, #e69f00)" : "var(--graph-series-1, #0072b2)" });
+      const meanMarker = (group, index) => ({ at: "mean", distribution: index, height: "full",
+        label: group.name, labelAnchor: index ? "start" : "end",
+        labelDx: index ? 4 : -4, color: curve(group, index).color });
+      exampleGraph = global.makeStandardizedScoreGraph({
+        distributions: [curve(low, 0), curve(high, 1)],
+        mean: low.mean,
+        sd: pooled,
+        statConvention: "sample",
+        statGuides: false,
+        xDomain: spec.xDomain,
+        ...(integerScale ? { xTickValues: d3.range(lo, hi + 1) } : { xTicks: 6 }),
+        zTickValues: zTicks,
+        rawAxisSideLabel: `(${spec.unit})`,
+        markers: [meanMarker(low, 0), meanMarker(high, 1)],
+        intervals: [{ from: low.mean, to: high.mean, height: .93, arrows: false,
+          color: "currentColor", strokeWidth: 2.5, label: `d = ${effect.toFixed(2)}` }],
+        yHeadroom: 1.3,
+        legend: false,
+        maxWidth: "42rem",
+        animate: false,
+        ariaLabel: `Smoothed distributions of ${spec.label.toLowerCase()}. ${text} ` +
+          `The original scale is aligned above a z scale in pooled standard deviations from the ${low.name.toLowerCase()} mean.`
+      });
+      exampleView.node().appendChild(exampleGraph);
+      showExampleView(true);
+      chart.publish({ example, d: effect }, text);
+    }
     function draw() {
       shown = d;
       chart.plot(scene(d));
       slider.property("value", d).attr("aria-valuetext", `${d.toFixed(2)} standard deviations`);
       valueLabel.text(`d = ${d.toFixed(2)}`);
-      strip.attr("hidden", showSlider ? null : true);
+      showExampleView(false);
       chart.publish({d}, `Two illustrative normal populations with equal standard deviations. Their means are ${d.toFixed(2)} standard deviations apart.`);
     }
-    draw();
+    if (example) drawExample(); else draw();
     chart.wrap(action => {
       stopTween();
-      d = clamp(Number(action.d ?? d), 0, 2.5);
       showSlider = action["show-slider"] === true;
-      strip.attr("hidden", showSlider ? null : true);
-      if (action.animate === false || shown === d || showSlider) { draw(); return; }
+      if (examples[action.example]) { example = action.example; drawExample(); return; }
+      const wasExample = example !== null;
+      example = null;
+      disposeExample();
+      d = clamp(Number(action.d ?? d), 0, 2.5);
+      if (wasExample || action.animate === false || shown === d || showSlider) { draw(); return; }
       const from = shown;
       tween = d3.timer(elapsed => {
         const t = d3.easeCubicInOut(Math.min(1, elapsed / 500));

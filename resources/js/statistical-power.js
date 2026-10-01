@@ -542,7 +542,6 @@ makeStatisticalPowerDiagram = function(opts) {
       align-items: center;
       gap: 0.3rem 0.9rem;
       padding: 0.3rem 0.65rem;
-      border-left: 4px solid var(--sp-factor-color);
       border-radius: var(--sfs-radius-sm, 4px);
       background: color-mix(in srgb, var(--sp-factor-color) 9%, transparent);
       animation: sp-factor-in 700ms ease-out;
@@ -557,7 +556,6 @@ makeStatisticalPowerDiagram = function(opts) {
     .statistical-power-diagram .sp-factor.is-output {
       order: 1;
       justify-content: center;
-      border-left-style: double;
       font-size: 1.1rem;
     }
 
