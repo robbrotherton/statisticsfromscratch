@@ -62,7 +62,7 @@ Let's let the swarm get back to work. The mean jitters around the hive, occasion
 Let's start keeping track of the sample means, building a histogram of their positions over time. Watch the bees a while and see how the distribution forms. Or if you want to speed things along, click the fast-forward button to add a minute of simulated samples. We'll also track how much of that distribution falls into the critical regions of the null distribution, i.e. the proportion of samples that would lead us to reject the null. Over time, this proportion should be roughly five percent, because that's the definition of $\alpha = .05$.
 :::
 
-::: {.tutorial-step data-major="alternative" data-major-title="False null" data-title="A different hive" data-action='{"variability":"high","sample-size":15,"hive-offset":23,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
+::: {.tutorial-step data-major="alternative" data-major-title="False null" data-title="A different hive" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
 Now, what if the null is *wrong*? I'm going to show the hive again, and also move it over a bit. So now the null hive---the dashed outline---makes an incorrect prediction about where the true population center is. This changes our thought process a bit. Rather than risking falsely rejecting a correct null, we need to think about how likely it is we will *correctly* reject this wrong null. And what are the chances we will fail to reject it, making another kind of mistake?
 :::
 ::::
@@ -79,25 +79,25 @@ The size of the difference *is* part of the $z$ equation from Chapter 8:
 
 $$ z = \frac{M - \mu_0}{\sigma_M} $$
 
-Here, $M$ is the sample mean, $\mu_0$ is the mean specified by the null hypothesis, $\sigma$ is the population standard deviation, and $\sigma_M$ is the standard error of the mean. For a given difference and population variability, increasing $n$ reduces the standard error and makes $z$ more extreme. Even a tiny difference can therefore be statistically significant with a large enough sample. Conversely, a substantial difference can be nonsignificant with a small sample.
+Here, $M$ is the sample mean, and $\mu_0$ is the mean specified by the null hypothesis, so the diffrerence between them is right there in the numerator. But that gets divided by the standard error, $\sigma_M$. You'll remember from the previous chapter that standard error is calculated by dividing the population standard deviation by a function of sample size, $\sigma_M = \frac{\sigma}{\sqrt{n}}$. For a given difference and population variability, increasing $n$ reduces the standard error and makes its $z$ more extreme. Even a tiny difference can therefore be statistically significant with a large enough sample. Conversely, a substantial difference can be nonsignificant with a small sample.
 
-So the significance of the test is only part of the story. Measures of *effect size* describe the magnitude of a difference or relationship. For our one-sample test, we could report the raw difference, $M - \mu_0$, in the original units. The bigger the difference, the larger the effect. But it's often nice to have a standardized measure that allows us to compare effects across different studies and contexts.
+So the *significance* of the test is only part of the story. Measures of *effect size* describe the *magnitude* of a difference or relationship. For our one-sample test, we could report the raw difference, $M - \mu_0$, in the original units. The bigger the difference, the larger the effect. But it's often nice to have a standardized measure that allows us to compare effects across different studies and contexts.
 
 ### Cohen's $d$
 
-A common standardized measure is Cohen's $d$. (Cohen didn't say so himself, but let's all agree that the $d$ stands for "difference.") For our $z$-test, where the population standard deviation is known, we calculate Cohen's $d$ as:
+One such standardized measure is Cohen's $d$. (Cohen didn't say so himself, but let's all agree that the $d$ stands for "difference.") For our $z$-test, where the population standard deviation is known, we calculate Cohen's $d$ as:
 
 $$ d = \frac{M - \mu_0}{\sigma} $$ {#eq-cohens-d}
 
-Notice how close that is to the sample $z$-score equation, $z = \frac{M - \mu_0}{\sigma_M}$. The numerator is exactly the same, but the denominator is the standard deviation of individual scores, $\sigma$, rather than the standard error, $\sigma_M$. A value of $d = 0.5$ means the sample mean is half a population standard deviation above the null mean; $d = -0.5$ means it is half a standard deviation below. The sign tells us the direction, while the absolute value tells us the magnitude.
+Notice how close that is to the sample $z$-score equation, $z = \frac{M - \mu_0}{\sigma_M}$. The numerator is exactly the same, but the denominator is the plain population standard deviation, $\sigma$, rather than the standard error. A value of $d = 0.5$ means the sample mean is half a population standard deviation above the null mean; $d = -0.5$ means it is half a standard deviation below. The sign tells us the direction, while the absolute value tells us the magnitude.
 
-Unlike $z$, this calculation does not increase automatically with sample size: the same $M$, $\mu_0$, and $\sigma$ give the same $d$ regardless of $n$. So in this sense, the effect size is independent of sample size. (But $d$ calculated from a sample is still an estimate, subject to sampling error; larger samples generally give more *precise* estimates of the population effect.)
+Unlike $z$, this calculation does not increase automatically with sample size: the same $M$, $\mu_0$, and $\sigma$ give the same $d$ regardless of $n$. So in this sense, the effect size is independent of sample size. (But $d$ calculated from a sample is still an estimate, and larger samples generally give more *precise* estimates of the population effect.)
 
 ### Effect size and statistical significance
 
-Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT scores. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. For this example, assume the relevant population without the treatment has a mean of $\mu = 500$ and a known standard deviation of $\sigma = 100$. Assume independent observations and an approximately normal sampling distribution of the mean, making a $z$-test is appropriate.
+Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT performance. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. For this example, let's say the relevant population without the treatment has a mean of $\mu = 500$ and a known standard deviation of $\sigma = 100$, making a $z$-test is appropriate. (And that we're sampling independently and the sampling distribution is normal.)
 
-We choose a two-tailed test with $\alpha = .05$ before collecting data. Our critical values are $z \approx \pm 1.96$. After the banana treatment, we observe a sample mean of $M = 501$, one point above the null mean, $\mu_0 = 500$.
+We choose a two-tailed test with $\alpha = .05$ before collecting data, making our critical values are $z \approx \pm 1.96$. After the banana treatment, we observe a sample mean of $M = 501$, one point above the null mean, $\mu_0 = 500$.
 
 First, suppose the sample contains 50,000 students.
 
@@ -105,7 +105,7 @@ $$ z = \frac{M - \mu_0}{\sigma_M} = \frac{501 - 500}{100 / \sqrt{50{,}000}} \app
 
 $$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
 
-The result is statistically significant: $z$ exceeds 1.96 (two-tailed $p \approx .025$). But the effect size is tiny, just one hundredth of a standard deviation.
+The result is statistically significant: $z$ exceeds 1.96. But the effect size is tiny, just one hundredth of a standard deviation.
 
 Now suppose the same sample mean, $M = 501$, came from a sample of just 1,000 students.
 
@@ -115,15 +115,13 @@ $$ d = \frac{M - \mu_0}{\sigma} = \frac{501 - 500}{100} = 0.01 $$
 
 In this case, the result is nonsignificant. The smaller sample produces a larger standard error and therefore a less extreme $z$. But both samples gave the same estimated effect: a difference of one point, or one hundredth of a standard deviation.
 
-So, assuming there really is a benefit to eating a banana before this test, one study was able to detect it and reject the null while the other failed to detect it (a kind of inferential error we'll describe more precisely a little later in the chapter).
-
-In any case, would supplying every student with a banana be a good use of resources? Statistical significance alone can't answer that. We would need to consider the size and precision of the estimated benefit, the cost of the intervention, and whether the study design supports attributing the difference to the banana. A cheap intervention with a small benefit might be worthwhile; a costly one with the same benefit might not be. Effect size can help to inform that judgment.
+Assuming there really is a benefit to eating a banana before this test, one study was able to detect it and reject the null while the other failed to detect it (a kind of inferential error we'll describe more precisely a little later in the chapter). The sample size helped with statistical significance. But would supplying every student with a banana be a good use of resources? Significance alone can't answer that. A cheap intervention with a small benefit might be worthwhile; a costly one with the same benefit might not be. Effect size can help to inform that judgment.
 
 ### Interpreting Effect Size
 
-This raises the question, what should we consider a meaningful effect size? Cohen outlined some rough rules of thumb. A Cohen's $d$ of .2 could be considered a small effect, .5 medium, and .8 large. However, Cohen himself cautioned *against* over-reliance on these guidelines. "The terms 'small,' 'medium,' and 'large' are relative, not only to each other, but to the area of behavioral science or even more particularly to the specific content and research method being employed in any given investigation," Cohen wrote. "In the face of this relativity, there is a certain risk inherent in offering conventional operational definitions for these terms" [@cohen1988power]. Cohen apparently regretted having taken that risk, because the rough guidelines came to be applied without much thought [@funder2019evaluating].
+This raises the question, what should we consider a meaningful effect size? Cohen outlined some rough rules of thumb: $d = .2$ could be considered a small effect, $d = .5$ medium, and $d = .8$ large. However, he cautioned *against* over-reliance on these guidelines. "The terms 'small,' 'medium,' and 'large' are relative, not only to each other, but to the area of behavioral science or even more particularly to the specific content and research method being employed in any given investigation," Cohen wrote. "In the face of this relativity, there is a certain risk inherent in offering conventional operational definitions for these terms" [@cohen1988power]. Cohen apparently regretted having taken that risk, because the rough guidelines came to be applied without much thought [@funder2019evaluating].
 
-Taking Cohen's point about context-dependence to heart, @funder2019evaluating proposed a different set of benchmarks specifc to the field of psychology. They arrived at these by drawing on observed effects in psychology and examples of their practical consequences. They used the correlation coefficient, $r$, which we'll study in Chapter 17. The table gives their benchmarks alongside approximate $d$ equivalents.[^funder-ozer-conversion]
+Taking Cohen's point about context-dependence to heart, @funder2019evaluating proposed a set of benchmarks specifc to the field of psychology. They arrived at these by drawing on published effect sizes across a range of psychological research.[^funder-ozer-conversion]
 
 | $d$ | Description |
 |-:|:---------------|
@@ -135,13 +133,13 @@ Taking Cohen's point about context-dependence to heart, @funder2019evaluating pr
 
 : Funder and Ozer's effect size benchmarks, converted from $r$ to approximate $d$ equivalents. {#tbl-funder-ozer}
 
-[^funder-ozer-conversion]: These conversions use $d = 2r / \sqrt{1-r^2}$, the relationship for a comparison of two equally sized groups with equal within-group standard deviations [@cohen1988power, chap. 2]. They are a guide for comparing scales, not a universal conversion for every correlation or study design.
+[^funder-ozer-conversion]: They actually used the correlation coefficient, $r$, which we'll study in Chapter 17, as the measure of effect size. The table gives their benchmarks alongside approximate $d$ equivalents.These conversions use $d = 2r / \sqrt{1-r^2}$, the relationship for a comparison of two equally sized groups with equal within-group standard deviations [@cohen1988power, chap. 2].
 
-Funder and Ozer stress that even very small effects can matter when they accumulate over time or affect many people. They also caution that unusually large estimates in psychological research should be scrutinized; not that large effects cannot be real, but it would be unusual. Like Cohen's benchmarks, these guidelines need to be used with care and context.
+Funder and Ozer stress that even very small effects can matter when they accumulate over time or affect many people. They also caution that unusually large estimates in psychological research should be scrutinized; not that very large effects cannot be real, but they are are uncommon within psychological research. Like Cohen's benchmarks, these guidelines need to be used with care and context.
 
 ### Effect sizes in context
 
-What do differences of these sizes look like in practice? @simmons2014mturk reported the following examples. (These compare two groups rather than a sample with a fixed null mean, but $d$ still expresses the difference between means in standard deviation units.)
+What do differences of these sizes look like in practice? @simmons2014mturk reported the following examples. (These compare two groups rather than a sample with a fixed null mean, but $d$ still expresses the difference between means in standard deviation units.) @act-cohens-d visualizes these differences using smoothed curves based on the raw data.
 
 | Groups compared | Outcome | Magnitude of $d$ |
 |:--|:--|--:|
@@ -151,20 +149,18 @@ What do differences of these sizes look like in practice? @simmons2014mturk repo
 | Smoker / nonsmoker | Estimated risk of smoking-related death | 0.33 |
 | Prefer science / prefer art | Number of planets named correctly | 0.05 |
 
-@act-cohens-d pictures these differences using standard normal curves (not the original data). The reference curve's mean is zero, and one unit is one common standard deviation. That makes the distance between the curves' means equal to $d$. (In original units, the distance would instead be $d$ times that standard deviation.) We place the comparison mean to the right to show the magnitude, without identifying which group scored higher.
-
 ::::: {#act-cohens-d .callout-tip .interactive}
-## Visualizing Cohen's d
+## Visualizing Cohen's $d$
 
 {{< interactive-figure effectSizeTutorial makeEffectSizeTutorial options='{"example":"height"}' fallback="Smoothed distributions of each pair of groups' survey responses, with each group's mean marked. A bracket labels the difference between means in standard deviation units, and a z scale runs beneath the original scale. The final step shows two idealized normal curves with a slider." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Height" data-action='{"example":"height","show-slider":false}'}
-Men and women's heights differed by $d = 1.83$ in this example: well beyond Cohen's large-effect benchmark of $0.8$. Even here, individual scores overlap.
+Men and women's heights differed by $d = 1.83$ in Simmons' data: well beyond Cohen's large-effect benchmark of $0.8$. But notice that the distributions still overlap; there are some women are taller than some men, even though the averages are quite far apart.
 :::
 
 ::: {.tutorial-step data-title="Social equality" data-action='{"example":"socialeq","show-slider":false}'}
-Liberals and conservatives differed in the importance they placed on social equality by $d = 0.69$. That's between Cohen's medium and large benchmarks, and just above the $d \approx 0.63$ equivalent of Funder and Ozer's large benchmark.
+Liberals and conservatives differed in the importance they placed on social equality by $d = 0.69$, measured on a 7-point scale. That's between Cohen's medium and large benchmarks, and just above the $d \approx 0.63$ equivalent of Funder and Ozer's large benchmark.
 :::
 
 ::: {.tutorial-step data-title="Egg salad" data-action='{"example":"eggsalad","show-slider":false}'}
@@ -172,26 +168,26 @@ People who liked and disliked eggs differed in how often they ate egg salad by $
 :::
 
 ::: {.tutorial-step data-title="Smoking risk" data-action='{"example":"smoking","show-slider":false}'}
-Smokers and nonsmokers differed in their estimates of smoking-related mortality risk by $d = 0.33$. The curves are closer, but whether the difference matters depends on its consequences.
+Smokers and nonsmokers differed in their estimates of smoking-related mortality risk by $d = 0.33$. Notice that the curves don't have to be normal to calculate $d$; it is just a standardized difference between means.
 :::
 
 ::: {.tutorial-step data-title="Naming planets" data-action='{"example":"planets","show-slider":false}'}
-People who preferred science and those who preferred art differed in the number of planets they could name by just $d = 0.05$. The curves are almost on top of each other.
+People who preferred science and those who preferred art differed in the number of planets they could name by just $d = 0.05$; in fact, in this case the difference was not statistically significant. The preference might be associated with other differences, but apparently not with this one.
 :::
 
 ::: {.tutorial-step data-title="Explore" data-action='{"d":0.05,"show-slider":true}'}
-Try your own values. Cohen's benchmarks are $d = 0.2$, $0.5$, and $0.8$; Funder and Ozer's very small and large benchmarks translate to about $0.10$ and $0.63$. Notice how the distance changes while the curves keep the same spread.
+Try your own values, using these normal curves. Cohen's benchmarks are $d = 0.2$, $0.5$, and $0.8$; Funder and Ozer's very small and large benchmarks translate to about $0.10$ and $0.63$. Notice how the distance between means and overlap between distributions changes.
 :::
 ::::
 :::::
 
 ## Errors in Hypothesis Testing
 
-Null hypothesis significance testing is an *inferential* process, by which I mean we're using limited information from a sample to make a general conclusion (the inference) about a population. Hopefully we make the correct decision, rejecting null hypotheses when they are false and failing to reject them when they are true. But we don't know which decision is correct. We don't have direct insight into what's really true in the world, we only have our limited and imperfect data and the inferences it supports to work with. So it is possible to make the wrong decision.
+Null hypothesis significance testing is an *inferential* process, by which I mean we're using limited information from a sample to make a general conclusion (the inference) about a population. Hopefully we make the correct decision, rejecting null hypotheses when they are false and failing to reject them when they are true. But we don't have direct insight into what's really true in the world, we only have our limited and imperfect data and the inferences it supports to work with. We don't know which decision is correct. So it is possible to make the wrong decision.
 
 Attaching some terms to these possibilities will help us think more precisely about them, and eventually quantify the likelihood of different outcomes.
 
-There are only two decisions we can make: either we reject or fail to reject the null hypothesis. But there are two actual states of affairs in reality: either the null hypothesis is true or it is false. So there are four possible outcomes in total, shown in @tbl-inferenece-outcomes. Two of the four are correct decisions; our conclusion corresponds to reality. The other two are errors, where our conclusion does not match reality.
+There are only two decisions we can make: either we reject or fail to reject the null hypothesis. But there are two potential states of reality: either the null hypothesis is true or it is false. So there are four possible situations in total, shown in @tbl-inferenece-outcomes. Two of the four are correct decisions; our conclusion corresponds to reality. The other two are errors, where our conclusion does not match reality.
 
 ::: {#tbl-inferenece-outcomes}
 <div class="table-responsive">
@@ -219,23 +215,23 @@ There are only two decisions we can make: either we reject or fail to reject the
 2x2 table
 :::
 
-Let's work through the four possible outcomes in turn, focusing on the two types of error.
+Let's work through the possibilities, focusing on the two types of error.
 
 ### Type 1 Error (False Positive)
 
-Starting with the top-left cell: there is a chance that we will reject the null hypothesis when we shouldn't. The null hypothesis, $H_0$ is *true* in reality, but our test leads us to reject that null hypothesis. In other words, we might decide that there is an effect when there actually isn't. This is often called a **type one error**. A more useful description would be a *false positive*: thinking that there is an effect when actually there isn't.
+Starting with the top-left cell: the null hypothesis, $H_0$ is *true* in reality, but our test leads us to reject that null hypothesis. In other words, we might infer that there is an effect when there actually isn't. This is often called a **type one error**. A more useful description would be a *false positive*: thinking that there is an effect when actually there isn't.
 
-The type one error, the false positive, is actually just another name for $\alpha$, the probability that we set as our cutoff criterion for unlikely results. If you think about it, an $\alpha$ of .05, say, is an acknowledgement that *if the null hypothesis is correct*, we would see sample means like this five percent of the time. If we ran our experiment 100 times we would reject our null hypothesis five out of those 100 times, if the null is correct.
+The type one error, the false positive, is actually just another name for $\alpha$, the probability that we set as our cutoff criterion for unlikely results. An $\alpha$ of .05, for example, is an acknowledgement that *if the null hypothesis is correct*, we would see sample means like this five percent of the time. If we ran our experiment 100 times we could expect to reject our null hypothesis five out of those 100 times, if the null is correct.
 
-The argument in favor of this is that five percent is sufficiently low that we can live with that risk of a type one false positive error. But there are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a type one error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
+Maybe this sounds bad. Why tolerate a 5% chance of a false positive? Well, given the inferential nature of hypothesis testing, we have to tolerate *some* risk. Too little tolerance and we would never be able to produce satisfying evidence of real effects; too much tolerance and we would be prone to false positives. Using a alpha of .05 became the convention within psychology and much of the social sciences. Like I mentioned in the previous chapter, it puts the threshold at close to 2 standard deviations of a difference, which is a reasonable balance between sensitivity and specificity. But it's not a magic number. There are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a type one error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
 
-In the bottom-left cell, we are still saying that in reality the null is true, there is no real effect. But in this case, we fail to reject the null. Our data leads us to decide that there is no effect. In that case, we have made the correct decision. The probability of making the correct decision when the null is true is $1 - \alpha$. Each column of the table, $H_0$ true and $H_0$ false, represents one possible state of reality; given a true null, either we reject it or not. Those two options cover all the bases and so their two probabilities must sum to 1. So if the probability of making a type one error is $\alpha$, then the probability of making the correct decision when the null is true is $1 - \alpha$.
+In the bottom-left cell, we are still saying that in reality the null is true, there is no real effect. But in this case, we fail to reject the null: our data leads us to infer that there is no effect. In that case, we have made the correct decision. The probability of making the correct decision when the null is true is $1 - \alpha$. Each column of the table, $H_0$ true and $H_0$ false, represents one possible state of reality; given a true null, either we reject it or not. Those two options cover all the bases and so their two probabilities must sum to 1. So if the probability of making a type one error is $\alpha$, then the probability of making the correct decision when the null is true is $1 - \alpha$.
 
 ### Type 2 Error (False Negative)
 
-Moving over to the right-hand column, in which we are saying that in reality $H_0$ is *false*: there is a chance of failing to reject that null hypothesis. This is the opposite kind of mistake from the type one error. In this case, we *fail* to reject the null hypothesis when we *should* have rejected it. The null hypothesis is false, but our data failed to show persuasive enough evidence of an effect. This is called a **type two error**. A more useful description would be a *false negative*: thinking that there is no effect when actually there is.
+Moving over to the right-hand column of @tbl-inferenece-outcomes, here we are saying that in reality $H_0$ is *false*. Still, we either reject of fail to reject the null. So now the possibilites are correctly rejecting or mistakenly failing to reject that false null. This is the opposite kind of mistake from the type one error. The null hypothesis is false, but our data failed to show persuasive enough evidence of an effect. This is called a **type two error**. A more useful description would be a *false negative*: thinking that there is no effect when actually there is.
 
-The probability of making a type two error is referred to as $\beta$. Given the names, you might be tempted tothink that $\beta$ is just the flip side of $\alpha$, but it's not. Each column of the table represents a different possible state of reality; they are independent of one another, and they each have their own probabilities. I said that the probabilities of two cells belonging to the left-hand column sum to 1 (they were $\alpha$ and $1 - \alpha$). The same is true for the right-hand column: the probabilities of the two cells in that column must also sum to 1. So if the probability of making a type two error is $\beta$, then the probability of making the correct decision when the null is false is $1 - \beta$. That quantity has a name of its own: it is called the *statistical power* of the test.
+The probability of making a type two error is referred to as $\beta$. Given the names, you might be tempted to think that $\beta$ is just the flip side of $\alpha$, but it's not. Each column of the table represents a different possible state of reality; they are independent of one another, and they each have their own probabilities. I said that the probabilities of two cells belonging to the left-hand column sum to 1 (they were $\alpha$ and $1 - \alpha$). The same is true for the right-hand column: the probabilities of the two cells in that column must also sum to 1. So if the probability of making a type two error is $\beta$, then the probability of making the correct decision when the null is false is $1 - \beta$. That quantity has a name of its own: it is called the *statistical power* of the test.
 
 ## Statistical Power
 
@@ -243,18 +239,18 @@ The power of a test is defined as the probability that the test will reject the 
 
 To illustrate, let's check in with our bees again.
 
-::::: {.callout-tip .interactive}
+::::: {#act-bees-2 .callout-tip .interactive}
 ## Watch power in action: the swarm returns
 
 {{< interactive-figure beeSwarmPower makeBeeSwarm options='{"seed":"bee-swarm-power-v121","variability":"high","n":15,"hiveOffset":0,"playing":false,"displayScale":1.6,"densityMaximum":0.05,"showEffectSize":false,"showStandardError":false,"collectWhenVisible":true,"tutorialFastForward":true}' fallback="Animated bee swarm illustrating statistical power: when the hive moves away from the null position, the proportion of sample means that land in the critical regions is the power of the test, and it rises with sample size and effect size and falls with variability." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="null" data-major-title="True null" data-title="False alarms" data-action='{"variability":"high","sample-size":15,"hive-offset":0,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-When we first introduced the bees, they were buzzing around a hive that was exactly where the null hypothesis predicted it to be. The sample means were piling up around the null, and occasionally one would land in a critical region, leading us to reject the null. But since the null was true, those rejections were mistakes: false positives, type I errors. Over time, the proportion of sample means that landed in the critical regions settled near $\alpha = .05$, as expected.
+When we first introduced the bees, they were buzzing around a hive that was exactly where the null hypothesis predicted it to be. The sample means were piling up around the null, and occasionally one would land in a critical region, leading us to reject the null. But since the null was true, those rejections were mistakes: false positives, type I errors. Over time, the proportion of sample means that landed in the critical regions should settle near $\alpha = .05$, as expected.
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Move the hive" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Then we moved the hive. This illustrates the other possible reality: now the null hypothesis is false. The two possible outcomes are that we will either fail to reject the null (which gives us $\beta$), or that we will correctly reject the null ($1 - \beta$).
+Then we moved the hive. This illustrates another possible reality, in which the null hypothesis is false. The two possible outcomes are that we will either fail to reject the null (a Type 2 error, denoted $\beta$), or that we will correctly reject the null ($1 - \beta$).
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Critical regions" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
@@ -262,31 +258,31 @@ How can we figure out what those proportions are? Well, we already defined the c
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Where the means land" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-So now we'll just collect sample means for a while and see where they pile up. The swarm is still jittering around the true hive, and the sample means are piling up around that true hive, not the null. Some of those sample means will land in the critical regions, and some will not. The ones that land in the critical regions are correct rejections of the null hypothesis. The ones that land between the critical boundaries are Type 2 errors, false negatives. The proprtion of those sample means gives us $\beta$.
+So now we'll just collect sample means for a while and see where they pile up. The swarm is still jittering around the true hive, and the sample means are piling up in its vicinity. Some of those sample means will land in the critical regions of the null distribution, and some will not. The ones that land in the critical regions are correct rejections of the null hypothesis. The ones that land between the critical boundaries are Type 2 errors. The proprtion of those false negatives gives us $\beta$.
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="Null false" data-title="Power" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-The proportion of sample means that land in the critical regions is the power of the test, $1 - \beta$. That's *statistical power*: the proportion of results that will cause us to correctly reject the false null hypothesis. That proportion ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) is the power, $1 - \beta$.*
+So to quantify the statical power of our bees here, all we have to do is turn back on the tracker and check the "proportion sigfnicant" value. That's the proportion of the sample means in the critical regions, which would cause us to reject the null hypothesis and declare a significant result. $\beta$, the proportion of sample means that land *between* the critical regions, is the probability of a Type 2 error.
 :::
 
 ::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="More bees" data-action='{"variability":"high","sample-size":50,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: 50 bees instead of 15. Smaller standard error, tighter pile, less overlap with the null; power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) jumps.]*
+We'll walk through calculating power when we don't have a swarm of bees to watch shortly, but let's think about what factors might affect a test's power. What if the hive's true position was closer to the null's prediction, or farther away? What if we increased the number of bees here? Or reduced how far they can wander from the hive? Right now, power is around .7. Let's see how that value changes.
 :::
 
-::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Calmer swarm" data-action='{"variability":"medium","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: back to 15 bees but a less variable swarm. Same effect: smaller standard error, more power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}).]*
+::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Calmer swarm" data-action='{"variability":"medium","sample-size":15,"hive-offset":19,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
+First we'll move the hive closer to the null, reducing effect size. If you let the bees buzz around a while (or click the fast-forward button), you'll see that their yellow sampling distribution moves over with the hive, and more of it lands in the nonsignificant region of the null curve. Correspondingly, power---the proportion significant---is reduced.
 :::
 
 ::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Smaller effect" data-action='{"variability":"high","sample-size":15,"hive-offset":19,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: the original swarm, but the hive only half as far from the null (12 units). Power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
+Now what if we reduce the population variability: the bees stick closer to their hive. Their yellow distribution becomes narrower, centered on their hive. And the null distribution, responding to the reduced population standard deviation in its standard error, shrinks. This brings the critical regions in closer to the null hive, with the result that more of the sample means land in the critical regions. Power increases.
 :::
 
 ::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="Stricter alpha" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.01,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: the original swarm and hive, but $\alpha = .01$. The critical regions shrink, and power ({{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}) drops.]*
+Let's add more bees, increasing the sample size. The standard error shrinks again, this time responding to the larger $n$ in its denominator. The sample means pile up more tightly around the true hive. More of them land in the critical regions, and power increases again.
 :::
 
 ::: {.tutorial-step data-major="bridge" data-major-title="Our example" data-title="Back to our example" data-action='{"variability":"high","sample-size":15,"hive-offset":38,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-*[Placeholder: reset to 15 bees, high variability, the hive 24 units out, $\alpha = .05$. Power is about {{< interactive-value beeSwarmPower.proportionSignificant format=".3f" >}}. The numbers the calculation will use: on a scale where the swarm's standard error is 10, the null hive is at 50 and the true hive at 74 (swarm SD $= 10\sqrt{15} \approx 38.73$). Bridge to the calculation: how could we have worked that out without a swarm?]*
+We'll explore these factors more systematically in the next section, but for now let's reset to our original 15 bees producing a test with a power of around .70. That means that if we were to repeat this experiment many times, we would correctly reject the null hypothesis about 70% of the time. The bees here provide an empirical demonstration of that figure, but moving on we'll show how to calculate it based on the test parameters.
 :::
 ::::
 
