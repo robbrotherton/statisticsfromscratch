@@ -1,5 +1,5 @@
 cieStats = window.sfsStats
-cieTInv = cieStats.tInv
+cieNormalInv = cieStats.normalInv
 cieFiniteNumber = cieStats.finiteNumber
 
 cieEnsureStyles = () => {
@@ -346,7 +346,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   // stream, so any absolute draw count reproduces the same samples on back or
   // jump navigation, and switching sample sizes back and forth is stable.
   const streams = new Map();
-  const tCritCache = new Map();
+  const zCritCache = new Map();
 
   function stream() {
     const key = state.sampleSize;
@@ -369,32 +369,33 @@ makeConfidenceIntervalExplorer = function(opts) {
         ranks.push(Math.floor(current.rng() * 13) + 1);
         suits.push(Math.floor(current.rng() * 4));
       }
-      const mean = d3.mean(ranks);
-      const sd = state.sampleSize > 1 ? Math.sqrt(d3.sum(ranks, (r) => (r - mean) * (r - mean)) / (state.sampleSize - 1)) : 0;
       current.records.push({
         index: current.records.length,
         ranks,
         suits,
-        mean,
-        sd,
-        se: sd / Math.sqrt(state.sampleSize)
+        mean: d3.mean(ranks)
       });
     }
     return current.records;
   }
 
-  function tCritical() {
-    const df = state.sampleSize - 1;
-    const key = state.confidence + "-" + df;
-    if (!tCritCache.has(key)) {
-      const alpha = 1 - state.confidence / 100;
-      tCritCache.set(key, cieTInv(1 - alpha / 2, df));
-    }
-    return tCritCache.get(key);
+  // The deck's sigma is known, so intervals use z and the standard error of the
+  // mean, sigma / sqrt(n): every interval at a given n and confidence has the same width.
+  function standardError() {
+    return SIGMA / Math.sqrt(state.sampleSize);
   }
 
-  function intervalFor(record, tCrit) {
-    const marginOfError = tCrit * record.se;
+  function zCritical() {
+    const key = state.confidence;
+    if (!zCritCache.has(key)) {
+      const alpha = 1 - state.confidence / 100;
+      zCritCache.set(key, cieNormalInv(1 - alpha / 2));
+    }
+    return zCritCache.get(key);
+  }
+
+  function intervalFor(record, zCrit) {
+    const marginOfError = zCrit * standardError();
     const lower = record.mean - marginOfError;
     const upper = record.mean + marginOfError;
     return {
@@ -650,10 +651,10 @@ makeConfidenceIntervalExplorer = function(opts) {
 
   function coverage() {
     const records = ensureRecords(state.drawCount);
-    const tCrit = tCritical();
+    const zCrit = zCritical();
     let hits = 0;
     for (let i = 0; i < state.drawCount; i += 1) {
-      if (intervalFor(records[i], tCrit).containsMu) hits += 1;
+      if (intervalFor(records[i], zCrit).containsMu) hits += 1;
     }
     return {
       hits,
@@ -664,8 +665,8 @@ makeConfidenceIntervalExplorer = function(opts) {
 
   function setValue() {
     const record = currentRecord();
-    const tCrit = tCritical();
-    const interval = record ? intervalFor(record, tCrit) : null;
+    const zCrit = zCritical();
+    const interval = record ? intervalFor(record, zCrit) : null;
     const cov = coverage();
     rootNode.value = {
       mu: MU,
@@ -675,14 +676,12 @@ makeConfidenceIntervalExplorer = function(opts) {
       alpha: 1 - state.confidence / 100,
       sampleSize: state.sampleSize,
       n: state.sampleSize,
-      df: state.sampleSize - 1,
-      tCritical: tCrit,
+      zCritical: zCrit,
       drawCount: state.drawCount,
       samplesDrawn: state.drawCount,
       maxSamples: state.maxSamples,
       mean: record ? record.mean : null,
-      sd: record ? record.sd : null,
-      se: record ? record.se : null,
+      se: standardError(),
       marginOfError: interval ? interval.marginOfError : null,
       ciLower: interval ? interval.lower : null,
       ciUpper: interval ? interval.upper : null,
@@ -787,7 +786,7 @@ makeConfidenceIntervalExplorer = function(opts) {
       return;
     }
 
-    const interval = intervalFor(record, tCritical());
+    const interval = intervalFor(record, zCritical());
     sampleStats.innerHTML =
       "<i>M</i> = " + fMean(record.mean) +
       " &nbsp;·&nbsp; " + state.confidence + "% CI [" +
@@ -843,12 +842,12 @@ makeConfidenceIntervalExplorer = function(opts) {
     options = options || {};
     const animate = options.animate !== false && !prefersReducedMotion();
     const records = ensureRecords(state.drawCount);
-    const tCrit = tCritical();
+    const zCrit = zCritical();
     const windowStart = Math.max(0, state.drawCount - WINDOW_SIZE);
     x.domain([windowStart + 0.5, Math.max(WINDOW_SIZE, state.drawCount) + 0.5]);
 
     const visible = records.slice(windowStart, state.drawCount).map((record) => {
-      const interval = intervalFor(record, tCrit);
+      const interval = intervalFor(record, zCrit);
       return { record, interval };
     });
 
