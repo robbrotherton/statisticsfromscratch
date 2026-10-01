@@ -95,9 +95,9 @@ Unlike $z$, this calculation does not increase automatically with sample size: t
 
 ### Effect size and statistical significance
 
-Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT performance. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. For this example, let's say the relevant population without the treatment has a mean of $\mu = 500$ and a known standard deviation of $\sigma = 100$, making a $z$-test is appropriate. (And that we're sampling independently and the sampling distribution is normal.)
+Let's demonstrate the difference with a hypothetical study. Suppose we're educational psychologists trying to develop an intervention to boost students' SAT performance. And suppose we think we've hit upon an effective treatment: giving the test taker a banana just before taking the test. Maybe the potassium helps with cognitive function or something like that, who knows. Let's say the relevant population without the treatment has a mean of $\mu = 500$ and a known standard deviation of $\sigma = 100$, making a $z$-test appropriate. (And that we're sampling independently and the sampling distribution is normal.)
 
-We choose a two-tailed test with $\alpha = .05$ before collecting data, making our critical values are $z \approx \pm 1.96$. After the banana treatment, we observe a sample mean of $M = 501$, one point above the null mean, $\mu_0 = 500$.
+We choose a two-tailed test with $\alpha = .05$ before collecting data, giving critical values of $z \approx \pm 1.96$. After the banana treatment, we observe a sample mean of $M = 501$, one point above the null mean, $\mu_0 = 500$.
 
 First, suppose the sample contains 50,000 students.
 
@@ -139,7 +139,9 @@ Funder and Ozer stress that even very small effects can matter when they accumul
 
 ### Effect sizes in context
 
-What do differences of these sizes look like in practice? @simmons2014mturk reported the following examples. (These compare two groups rather than a sample with a fixed null mean, but $d$ still expresses the difference between means in standard deviation units.) @act-cohens-d visualizes these differences using smoothed curves based on the raw data.
+What do differences of these sizes look like in practice? @simmons2014mturk reported the following effect-size estimates from an MTurk survey.[^simmons-trimming] (These compare two groups rather than a sample with a fixed null mean, but $d$ still expresses the difference between means in standard deviation units.) @act-cohens-d visualizes these differences using smoothed curves based on the raw data.
+
+[^simmons-trimming]: The open-ended responses used here were trimmed below the 5th and above the 95th percentiles, following the author's analysis. The estimates describe this sample data; they should not be taken as fixed population characteristics.
 
 | Groups compared | Outcome | Magnitude of $d$ |
 |:--|:--|--:|
@@ -156,7 +158,7 @@ What do differences of these sizes look like in practice? @simmons2014mturk repo
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Height" data-action='{"example":"height","show-slider":false}'}
-Men and women's heights differed by $d = 1.83$ in Simmons' data: well beyond Cohen's large-effect benchmark of $0.8$. But notice that the distributions still overlap; there are some women are taller than some men, even though the averages are quite far apart.
+Men's and women's heights differed by $d = 1.83$ in Simmons' data: well beyond Cohen's large-effect benchmark of $0.8$. But notice that the distributions still overlap; some women are taller than some men, even though the averages are quite far apart.
 :::
 
 ::: {.tutorial-step data-title="Social equality" data-action='{"example":"socialeq","show-slider":false}'}
@@ -172,7 +174,7 @@ Smokers and nonsmokers differed in their estimates of smoking-related mortality 
 :::
 
 ::: {.tutorial-step data-title="Naming planets" data-action='{"example":"planets","show-slider":false}'}
-People who preferred science and those who preferred art differed in the number of planets they could name by just $d = 0.05$; in fact, in this case the difference was not statistically significant. The preference might be associated with other differences, but apparently not with this one.
+People who preferred science and those who preferred art differed in the number of planets they could name by just $d = 0.05$; in fact, in this case the difference was not statistically significant. This sample doesn't give us convincing evidence of a difference in planet naming; nor does that nonsignificant result establish that the true difference is zero.
 :::
 
 ::: {.tutorial-step data-title="Explore" data-action='{"d":0.05,"show-slider":true}'}
@@ -187,9 +189,9 @@ Null hypothesis significance testing is an *inferential* process, by which I mea
 
 Attaching some terms to these possibilities will help us think more precisely about them, and eventually quantify the likelihood of different outcomes.
 
-There are only two decisions we can make: either we reject or fail to reject the null hypothesis. But there are two potential states of reality: either the null hypothesis is true or it is false. So there are four possible situations in total, shown in @tbl-inferenece-outcomes. Two of the four are correct decisions; our conclusion corresponds to reality. The other two are errors, where our conclusion does not match reality.
+There are only two decisions we can make: either we reject or fail to reject the null hypothesis. But there are two potential states of reality: either the null hypothesis is true or it is false. So there are four possible situations in total, shown in @tbl-inference-outcomes. Two of the four are correct decisions; our conclusion corresponds to reality. The other two are errors, where our conclusion does not match reality.
 
-::: {#tbl-inferenece-outcomes}
+::: {#tbl-inference-outcomes}
 <div class="table-responsive">
 <table id="inf-tab" class="sfs-decision-table">
   <thead>
@@ -200,42 +202,48 @@ There are only two decisions we can make: either we reject or fail to reject the
     <tr>
       <th rowspan=2 class="sfs-decision-side">Researcher's<br>Decision</th>
       <th>Reject $H_0$</th>
-      <td class="sfs-decision-error">Type 1 error<br>$\alpha$</td>
+      <td class="sfs-decision-error">Type I error<br>$\alpha$</td>
       <td class="sfs-decision-correct">Correct<br>$1-\beta$</td>
     </tr>
     <tr>
       <th>Fail to reject $H_0$</th>
-      <td class="sfs-decision-correct">Correct</td>
-      <td class="sfs-decision-error">Type 2 error<br>$\beta$</td>
+      <td class="sfs-decision-correct">Correct<br>$1-\alpha$</td>
+      <td class="sfs-decision-error">Type II error<br>$\beta$</td>
     </tr>
   </tbody>
 </table>
 </div>
 
-2x2 table
+Decisions and their probabilities when the null is true or a specified alternative is true.
 :::
 
 Let's work through the possibilities, focusing on the two types of error.
 
-### Type 1 Error (False Positive)
+### Type I Error (False Positive)
 
-Starting with the top-left cell: the null hypothesis, $H_0$ is *true* in reality, but our test leads us to reject that null hypothesis. In other words, we might infer that there is an effect when there actually isn't. This is often called a **type one error**. A more useful description would be a *false positive*: thinking that there is an effect when actually there isn't.
+Starting with the top-left cell: the null hypothesis, $H_0$, is *true* in reality, but our test leads us to reject that null hypothesis. In other words, we might infer that there is an effect when there actually isn't. This is often called a **Type I error**. A more useful description would be a *false positive*: thinking that there is an effect when actually there isn't.
 
-The type one error, the false positive, is actually just another name for $\alpha$, the probability that we set as our cutoff criterion for unlikely results. An $\alpha$ of .05, for example, is an acknowledgement that *if the null hypothesis is correct*, we would see sample means like this five percent of the time. If we ran our experiment 100 times we could expect to reject our null hypothesis five out of those 100 times, if the null is correct.
+The probability of making a Type I error is $\alpha$, provided the null hypothesis and the assumptions of our test are correct. With $\alpha = .05$, about five percent of repeated samples would land in the critical regions. If the null is true and we ran our experiment many times, we could expect the data to produce a false positive about 5% of the time.
 
-Maybe this sounds bad. Why tolerate a 5% chance of a false positive? Well, given the inferential nature of hypothesis testing, we have to tolerate *some* risk. Too little tolerance and we would never be able to produce satisfying evidence of real effects; too much tolerance and we would be prone to false positives. Using an alpha of .05 became the convention within psychology and much of the social sciences. Like I mentioned in the previous chapter, it puts the threshold at close to 2 standard deviations of a difference, which is a reasonable balance between sensitivity and specificity. But it's not a magic number. There are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a type one error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
+Maybe this sounds bad. Why tolerate a 5% chance of a false positive? Well, given the inferential nature of hypothesis testing, we have to tolerate *some* risk. Too little tolerance and we would never be able to produce satisfying evidence of real effects; too much tolerance and we would be prone to false positives. Using an alpha of .05 became the convention within psychology and much of the social sciences. Like I mentioned in the previous chapter, for a two-tailed $z$ test it puts the threshold close to two standard errors from the null mean. But it's not a magic number. The appropriate balance between false alarms and missed effects depends on their consequences. There are good arguments that five percent is too high and that we should more often use a lower $\alpha$ value of 1 percent or even .1 percent in order to reduce the chances of making a Type I error. That's an ongoing debate and one you might hear more about in more advanced research methods or stats classes.
 
-In the bottom-left cell, we are still saying that in reality the null is true, there is no real effect. But in this case, we fail to reject the null: our data leads us to infer that there is no effect. In that case, we have made the correct decision. The probability of making the correct decision when the null is true is $1 - \alpha$. Each column of the table, $H_0$ true and $H_0$ false, represents one possible state of reality; given a true null, either we reject it or not. Those two options cover all the bases and so their two probabilities must sum to 1. So if the probability of making a type one error is $\alpha$, then the probability of making the correct decision when the null is true is $1 - \alpha$.
+In the bottom-left cell, the null is still true, but this time we fail to reject it. We have made the correct decision: our data did not give us enough evidence to reject a true null. That doesn't mean a nonsignificant result establishes that there is no effect; the same decision could occur when the null is false.
 
-### Type 2 Error (False Negative)
+The probability of making the correct decision when the null is true is $1 - \alpha$. Given a true null, either we reject it or we don't. Those two options cover all the bases, so their probabilities must sum to 1.
 
-Moving over to the right-hand column of @tbl-inferenece-outcomes, here we are saying that in reality $H_0$ is *false*. Still, we either reject or fail to reject the null. So now the possibilities are correctly rejecting or mistakenly failing to reject that false null. This is the opposite kind of mistake from the type one error. The null hypothesis is false, but our data failed to show persuasive enough evidence of an effect. This is called a **type two error**. A more useful description would be a *false negative*: thinking that there is no effect when actually there is.
+### Type II Error (False Negative)
 
-The probability of making a type two error is referred to as $\beta$. Given the names, you might be tempted to think that $\beta$ is just the flip side of $\alpha$, but it's not. Each column of the table represents a different possible state of reality; they are independent of one another, and they each have their own probabilities. I said that the probabilities of two cells belonging to the left-hand column sum to 1 (they were $\alpha$ and $1 - \alpha$). The same is true for the right-hand column: the probabilities of the two cells in that column must also sum to 1. So if the probability of making a type two error is $\beta$, then the probability of making the correct decision when the null is false is $1 - \beta$. That quantity has a name of its own: it is called the *statistical power* of the test.
+Moving over to the right-hand column of @tbl-inference-outcomes, here we are saying that in reality $H_0$ is *false*. Still, we either reject or fail to reject the null. So now the possibilities are correctly rejecting or mistakenly failing to reject that false null. This is the opposite kind of mistake from the Type I error. The null hypothesis is false, but our data failed to show persuasive enough evidence of an effect. This is called a **Type II error**. A more useful description would be a *false negative*: failing to detect an effect that really exists.
+
+The probability of making a Type II error is referred to as $\beta$. Given the names, you might be tempted to think that $\beta$ is just the flip side of $\alpha$, but it's not. Each column describes a different assumed state of reality. The left-hand probabilities apply when the null is true; the right-hand probabilities apply when a particular alternative is true. Within either column, the two outcomes exhaust the possibilities, so their probabilities sum to 1. But $\alpha$ and $\beta$ are not complements of each other.
+
+So if the probability of making a Type II error is $\beta$, then the probability of correctly rejecting the null for that alternative is $1 - \beta$. That quantity has a name of its own: it is called the *statistical power* of the test.
 
 ## Statistical Power
 
-The power of a test is defined as the probability that the test will reject the null hypothesis *if the treatment really does have an effect*. We're not saying that we know for sure that the null is false; we're just supposing that it is, and asking how likely it is that we will correctly reject it. It's not a quantity that we arbitrarily set, like $\alpha$; it is a property of the test itself, given the sample size, variability, and effect size. If we know (or can make assumptions about) those quantities, we can calculate the power of a test precisely.
+The power of a test is the probability that it will reject the null hypothesis *if a specified effect really exists*. We're not saying that we know for sure that the null is false; we're just choosing a particular effect to consider, and asking how likely it is that we will correctly reject the null under those circumstances. Unlike $\alpha$, power is not a property of the test that we arbitrarily set. Power depends on sample size, variability, effect size, $\alpha$, and whether the test is one- or two-tailed. If we know (or can make assumptions about) those quantities, we can calculate power under that model.
+
+When we say a test has something like .80 power, we mean it would detect the specified effect about 80 percent of the time if we could repeat the study many times with new, independent samples. We don't mean there's an 80 percent probability that the hypothesis, or a particular significant finding, is correct. What's true or not in the world is not a matter of probability; something is either true or it isn't. The probability refers to the *test's ability* to detect a real effect, the frequentist idea of long-run proportions of outcomes over repeated samples.
 
 To illustrate, let's check in with our bees again.
 
@@ -250,7 +258,7 @@ When we first introduced the bees, they were buzzing around a hive that was exac
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Move the hive" data-action='{"variability":"high","sample-size":15,"hive-offset":44,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
-Then we moved the hive. This illustrates another possible reality, in which the null hypothesis is false. The two possible outcomes are that we will either fail to reject the null (a Type 2 error, denoted $\beta$), or that we will correctly reject the null ($1 - \beta$).
+Then we moved the hive. This illustrates another possible reality, in which the null hypothesis is false. The two possible outcomes are that we will either fail to reject the null (a Type II error, denoted $\beta$), or that we will correctly reject the null ($1 - \beta$).
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Critical regions" data-action='{"variability":"high","sample-size":15,"hive-offset":44,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":false,"show-significance-tracker":false,"animate":true}'}
@@ -258,11 +266,11 @@ How can we figure out what those proportions are? Well, we already defined the c
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Where the means land" data-action='{"variability":"high","sample-size":15,"hive-offset":44,"alpha":0.05,"playing":true,"advance":0,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":false,"animate":true}'}
-So now we'll just collect sample means for a while and see where they pile up. The swarm is still jittering around the true hive, and the sample means are piling up in its vicinity. Some of those sample means will land in the critical regions of the null distribution, and some will not. The ones that land in the critical regions are correct rejections of the null hypothesis. The ones that land between the critical boundaries are Type 2 errors. The proportion of those false negatives gives us $\beta$.
+So now we'll just collect sample means for a while and see where they pile up. The swarm is still jittering around the true hive, and the sample means are piling up in its vicinity. Some of those sample means will land in the critical regions of the null distribution, and some will not. The ones that land in the critical regions are correct rejections of the null hypothesis. The ones that land between the critical boundaries are Type II errors. The proportion of those false negatives gives us $\beta$.
 :::
 
 ::: {.tutorial-step data-major="power" data-major-title="False null" data-title="Power" data-action='{"variability":"high","sample-size":15,"hive-offset":44,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
-So to quantify the statistical power of our bees here, all we have to do is turn back on the tracker and check the "proportion significant" value. That's the proportion of the sample means in the critical regions, which would cause us to reject the null hypothesis and declare a significant result. $\beta$, the proportion of sample means that land *between* the critical regions, is the probability of a Type 2 error.
+So to quantify the statistical power of our bees here, all we have to do is turn back on the tracker and check the "proportion significant" value. That's the proportion of the sample means in the critical regions, which would cause us to reject the null hypothesis and declare a significant result. $\beta$, the proportion of sample means that land *between* the critical regions, is the probability of a Type II error.
 :::
 
 ::: {.tutorial-step data-major="factors" data-major-title="Factors" data-title="What affects power?" data-action='{"variability":"high","sample-size":15,"hive-offset":44,"alpha":0.05,"playing":true,"show-swarm":true,"show-hive":true,"show-null-hive":true,"show-mean-line":true,"show-null-curve":true,"show-critical-regions":true,"show-histogram":true,"show-significance-tracker":true,"animate":true}'}
@@ -297,17 +305,17 @@ The key idea is that we need to think about two distributions: the null hypothes
 
 The null hypothesis distribution represents what we would expect to see if the null hypothesis were true, while the alternative hypothesis distribution represents what we would expect to see if some specific alternative hypothesis were true. This requires having some idea of what the effect size is, which is usually based on prior research or theory. Applying this in the context of the $z$-test we used in the previous chapter means we also need to know the population standard deviation. (We can apply statistical power in the context of other tests as well.)
 
-Here are the steps we need to follow to calculate statistical power:
+For a two-tailed test, here are the steps we need to follow to calculate statistical power:
 
 1. Find the null distribution's critical values, given $\alpha$
 2. Find the null distribution raw sample means corresponding to those critical values
 3. Find the $z$ scores for those sample means *under the alternative hypothesis distribution*
-4. Find the area of the alternative distribution that falls between those $z$-scores. This gives $\beta$, the probability of a type two error
+4. Find the area of the alternative distribution that falls between those $z$-scores. This gives $\beta$, the probability of a Type II error
 5. Subtract $\beta$ from 1 to get the statistical power of the test
 
 Let's work through the steps with some real numbers, illustrating what happens at each step along the way. The parameters driving the bee swarm simulation:
 
-$\mu_0 = 50$; $\sigma = 38.73$; $n = 15$; $\sigma_M = 10$; $\mu_1 = 78$.
+$\mu_0 = 50$; $\sigma = 38.73$; $n = 15$; $\sigma_M \approx 10$; $\mu_1 = 78$.
 
 (What are the units of measurement? *Bee*-scores, of course.)^[That was a joke. The units are arbitrary, but the calculations do reproduce the characteristics of the little bee-simulation engine.]
 
@@ -331,11 +339,11 @@ $$ z_{lower} = \frac{30.40 - 78}{10} \approx -4.76 $$
 
 $$ z_{upper} = \frac{69.60 - 78}{10} \approx -0.84 $$
 
-**Step 4.** Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.84$ is the same as the area to the right of $z = 0.84$, which the table gives as .2005, and the area to the left of $z = -4.76$ is so far out in the tail that it rounds to .0000: $.2005 - .0000 = .2005$. This is the proportion of the alternative distribution that will cause us to *fail to reject* the null hypothesis, making a type two, false negative error. Remember, we refer to this quantity as $\beta$.
+**Step 4.** Now we can find the proportion of the alternative distribution that falls between those $z$ scores. Using the unit normal table, we subtract the area to the left of the lower boundary from the area to the left of the upper boundary. The area to the left of $z = -0.84$ is the same as the area to the right of $z = 0.84$, which the table gives as .2005, and the area to the left of $z = -4.76$ is so far out in the tail that it rounds to .0000: $.2005 - .0000 = .2005$. This is the proportion of the alternative distribution that will cause us to *fail to reject* the null hypothesis, making a Type II, false negative error. Remember, we refer to this quantity as $\beta$.
 
 {{< interactive-figure powerBetaZTable makeCriticalValueTable options='{"distribution":"normal","layout":"areas","title":"Unit normal table (excerpt)","z":{"from":0.8,"to":0.88,"step":0.01},"zDigits":2,"areas":["left","right","mean-to-z"],"selected":{"z":0.84,"area":"right"},"maxWidth":"32rem"}' fallback="Excerpt of the unit normal table for z from 0.80 to 0.88, with the area to the right of z = 0.84, .2005, highlighted." >}}
 
-**Step 5.** Finally we can work out the statistical power of the test---the chances of correctly rejecting the null hypothesis---by working out the area of the rest of the distribution. This is just $1 - \beta$, because the total area under the curve has to add up to 1. So for this example, we had a 20.05% chance of making a type two error, leaving us with a 79.95% chance of making the correct decision to reject the null hypothesis. So the power of the test is .7995, or about .80.
+**Step 5.** Finally we can work out the statistical power of the test---the chances of correctly rejecting the null hypothesis---by working out the area of the rest of the distribution. This is just $1 - \beta$, because the total area under the curve has to add up to 1. So for this example, we had a 20.05% chance of making a Type II error, leaving us with a 79.95% chance of making the correct decision to reject the null hypothesis. So the power of the test is .7995, or about .80.
 
 Given our stated sample size here, and population standard deviations and means, if we could run this experiment 100 times, we would successfully reject our null hypothesis about 80% of the time.
 
@@ -386,15 +394,15 @@ First, think about the alpha level and directionality of the test. Move the $\al
 :::
 
 ::: {.tutorial-step data-major="alpha" data-major-title="Alpha" data-title="Why?" data-action='{"show-controls":["alpha"]}'}
-Reducing our $\alpha$ value lowers power because it makes for a more stringent test. The critical regions of the null distribution will be smaller and so less of the alternative distribution will cause us to reject the null. And the directionality of our hypothesis affects power as well. Using a one-tailed test increases power since it gives a larger critical region in one tail that we're interested in.
+Reducing our $\alpha$ value lowers power because it makes for a more stringent test. The critical regions of the null distribution will be smaller and so less of the alternative distribution will cause us to reject the null. And the directionality of our hypothesis affects power as well. At the same $\alpha$, a one-tailed test has greater power for effects in its prespecified direction, because its rejection region is larger in that tail. An effect in the opposite direction does not get that advantage. As in Chapter 8, the direction must be chosen before looking at the data.
 :::
 
 ::: {.tutorial-step data-major="n" data-major-title="Sample size" data-title="Try it" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"show-controls":["n"]}'}
-How about changing sample size. How will power change if we increase or decrease the number of participants? Move the sample size slider and watch what happens to power. Again, try to explain it before moving on to the next step.
+How about changing sample size? How will power change if we increase or decrease the number of participants? Move the sample size slider and watch what happens to power. Again, try to explain it before moving on to the next step.
 :::
 
 ::: {.tutorial-step data-major="n" data-major-title="Sample size" data-title="Why?" data-action='{"show-controls":["n"]}'}
-Increasing sample size increases power because it reduces the standard error, again meaning that the distributions will overlap less.
+Increasing sample size increases power for this fixed population difference because it reduces the standard error, again meaning that the sampling distributions will overlap less.
 :::
 
 ::: {.tutorial-step data-major="sigma" data-major-title="Variability" data-title="Try it" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"show-controls":["sigma"]}'}
@@ -402,7 +410,7 @@ Something else that might differ is the variability in the population. How will 
 :::
 
 ::: {.tutorial-step data-major="sigma" data-major-title="Variability" data-title="Why?" data-action='{"show-controls":["sigma"]}'}
-The population standard deviation affects the standard error, which in turn affects the overlap of the distributions. Increasing variability increases the standard error, which increases overlap and reduces power. Decreasing variability decreases the standard error, which decreases overlap and increases power.
+Here we hold the raw difference between population means fixed. The population standard deviation affects the standard error, which in turn affects the overlap of the sampling distributions. Increasing variability increases the standard error, which increases overlap and reduces power. Decreasing variability decreases the standard error, which decreases overlap and increases power.
 :::
 
 ::: {.tutorial-step data-major="diff" data-major-title="Effect size" data-title="Try it" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"show-controls":["diff"]}'}
@@ -413,31 +421,52 @@ Lastly, think about the effect size. How will power change if we increase or dec
 Increasing effect size, the distance between the means, increases power because the distributions will be farther apart and overlap less.
 :::
 
-::: {.tutorial-step data-major="practice" data-major-title="In practice" data-title="Solve for power" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"ranges":{"n":[10,100,1]},"show-controls":["alpha","n","diff","power"]}'}
-Putting this all together, it is possible to calculate the power of a test given the parameters of the study. Researchers can do so retrospectively, to quantify the power of a completed study. You can use the sliders to explore how different combinations of parameters affects power.
-:::
-
-::: {.tutorial-step data-major="practice" data-major-title="In practice" data-title="Solve for n" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"target-power":0.8,"ranges":{"diff":[2.5,10,0.5]},"show-controls":["diff","n"],"solve":"n"}'}
-On the other hand, power can be used prospectively, to determine the sample size needed to detect a hypothesized effect size with a given level of power. Here, power is locked at .80. The slider here allows you to change the anticipated effect size and see its impact on the sample size needed to achieve that power. The smaller the effect size, the larger the sample size needed to detect it with sufficient power.
-
-The equation that produces this result is:
-
-$$ n \approx \frac{z_{1 - \alpha} + z_{1 - \beta}}{d^2} $$
-
-Where $z_{1 - \alpha}$ is the critical $z$ score for the null distribution, $z_{1 - \beta}$ is the critical $z$ score for the alternative distribution, and $d$ is Cohen's $d$, the standardized effect size. This equation is derived from the same principles we used to calculate power above.
-:::
 ::::
 :::::
 
 ### Practical Applications of Power
 
-Since this is all quite abstract, you may be wondering the usefulness of knowing about statistical power. And honestly, it has long been overlooked within psychology. Until recently, it was quite rare for a published research paper to even mention statistical power. But it's now generally accepted that power should be a central feature of research design.
+So how can we put this to use? One way is to ask how much power a proposed study would have to detect a particular effect. We choose a sample size, make assumptions about the effect and variability, and calculate power, just as we've been doing. But we can also turn the question around: how many participants would we need to have a good chance of detecting an effect of that size? This is a useful question to ask *before* we collect our data.
 
-Researchers could calculate the power of a study before beginning their research or after a study has been conducted, using their knowledge or their assumptions about effect size, sample size, and $\alpha$. But a more practically useful use of power is to specify the power you want in advance and adjust your required sample size in order to achieve that level of power. This requires knowing or estimating your expected effect size. And then you can say, for example, that you want a power of .8 or an 80 percent chance of detecting a real effect of that size. And then you can calculate how many participants you need in order to achieve that level of power.
+In practice, we don't usually know the true effect size. We can plan around an effect suggested by earlier research, but those estimates have uncertainty too. Another approach is to ask what smallest difference would matter for our research question, and design the study to have a good chance of detecting that difference. Trying several plausible effect sizes helps us see how much our sample-size decision depends on the assumptions.
+
+A power of .80 is a common planning target, but it still means missing an effect of that size about one time in five. If the consequences of a miss are serious, we might want a higher target. A large sample also doesn't repair biased sampling or poor measurement.
+
+For our two-tailed, one-sample $z$ test, a useful approximation for the required sample size is:
+
+$$ n \approx \frac{\left(z_{1-\alpha/2} + z_{1-\beta}\right)^2}{d^2} $$ {#eq-power-sample-size}
+
+Here, $d$ is the hypothesized population effect, $(\mu_1 - \mu_0)/\sigma$, rather than an effect estimated from data we have yet to collect. The notation $z_q$ means the standard-normal score with proportion $q$ below it. So $z_{1-\alpha/2}$ is our positive critical score, and $z_{1-\beta}$ is the score with our target power below it. For 80% power, that second score is about $0.84$.
+
+For example, suppose we want to detect a population difference of five points, with $\sigma = 10$. That's $d = 5/10 = .5$. For a two-tailed test with $\alpha = .05$ and a target power of .80:
+
+$$ n \approx \frac{(1.96 + 0.84)^2}{.5^2} = 31.36 $$
+
+We round up, giving us 32 participants. For a one-tailed test in the predicted direction, use $z_{1-\alpha}$ instead of $z_{1-\alpha/2}$. The two-tailed formula is an approximation because it neglects rejection in the opposite tail, whose contribution is tiny in this example. @act-power-planning calculates power using both tails and finds the smallest whole-number sample size that reaches the target.
+
+::::: {#act-power-planning .callout-tip .interactive}
+## Planning a study with power
+
+{{< interactive-figure powerPlanning makeStatisticalPowerDiagram options='{"minimal":true,"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"showControls":[]}' fallback="Compare a proposed study's power with the sample size needed for 80 percent power. First vary the design to calculate power, then vary the hypothesized population difference while the required sample size is calculated." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="power" data-major-title="Calculate power" data-title="A proposed study" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"ranges":{"n":[10,100,1]},"show-controls":["alpha","n","diff","power"]}'}
+Suppose we're planning a study with 25 participants, a population SD of 10, and a two-tailed test with $\alpha = .05$. If the true population difference is five points, power is about .71. Use the sliders to explore how different combinations of sample size, alpha, and hypothesized difference affect power. The value at the bottom is the power of the design you've chosen.
+:::
+
+::: {.tutorial-step data-major="n" data-major-title="Choose sample size" data-title="Plan for 80% power" data-action='{"mu":50,"sigma":10,"n":25,"diff":5,"alpha":0.05,"two-tailed":true,"target-power":0.8,"ranges":{"diff":[2.5,10,0.5]},"show-controls":["diff","n"],"solve":"n"}'}
+Now let's turn the question around. Keep the population SD at 10 and the two-tailed $\alpha$ at .05, but require .80 power. For a hypothesized difference of five points, we need 32 participants, as we calculated above. This time, sample size is the answer rather than something you choose with a slider.
+
+Move the difference slider and watch the required sample size change. A smaller difference requires a larger sample to detect it with the same power. The curves narrow as the required sample grows, so that about 80 percent of the alternative distribution still falls in the rejection regions. The displayed $n$ rounds up to a whole number of participants; the curves show the exact threshold before rounding.
+:::
+::::
+:::::
+
+We can evaluate a design's power for independently justified hypothetical effects either before or after data collection. But plugging the effect observed in our own sample back into a power calculation doesn't tell us whether that result is trustworthy. This is sometimes called *observed power*, and it adds no new information to the test's $p$-value [@hoenig2001abuse]. After collecting data, the estimated effect and its uncertainty are more useful for interpretation; we'll look at that uncertainty in the next chapter.
 
 ### Power in Context: Real-World Examples
 
-Let's return to the differences we pictured in @act-cohens-d. @simmons2014mturk also reported the sample sizes needed to detect them with 80 percent power:
+Let's return to the differences we pictured in @act-cohens-d. @simmons2014mturk also reported the following sample-size requirements for 80 percent power, based on the effect estimates from their data:
 
 | Outcome | Magnitude of $d$ | $n$ per group for 80% power |
 |:--|--:|--:|
@@ -447,21 +476,23 @@ Let's return to the differences we pictured in @act-cohens-d. @simmons2014mturk 
 | Estimated risk of smoking-related death | 0.33 | 149 |
 | Number of planets named correctly | 0.05 | 6,176 |
 
-These are the authors' reported sample sizes for comparisons of two groups; $n$ is **per group**. They are not calculations for the one-sample $z$ test we used above. But they give a useful sense of the sample sizes needed to detect real effects in the world with satisfactory statistical power, given their effect sizes.
+These are the authors' reported sample sizes for comparisons of two groups; $n$ is **per group**. They are not calculations for the one-sample $z$ test we used above. They give a useful sense of the sample sizes needed if the true effects match these estimates. Different populations, measures, and designs can produce different requirements.
 
-So, for example, given the real average difference between men and women's heights, you'd need only around twelve people, six men and six women, to have sufficient statistical power to detect it. The difference between men and women's heights is very large, with a Cohen's $d$ of around 1.83. So you don't need many participants to reliably detect it.
+So, for example, if the true difference between men's and women's heights matched this estimate, you'd need only around twelve people, six men and six women, to have sufficient statistical power to detect it. The estimated difference in this sample is very large, with a Cohen's $d$ of around 1.83. So you don't need many participants to reliably detect it.
 
-Often, though, social scientists are interested in more subtle differences. You might think the difference between liberals and conservatives in terms of how important they say social equality is would be pretty robust. But given its effect size of around .7, you already need many more participants, around 33 each of liberals and conservatives, or almost 70 participants total, in order to have a power of .8 to detect the difference.
+Often, though, social scientists are interested in more subtle differences. You might think the difference between liberals and conservatives in terms of how important they say social equality is would be pretty robust. But if the true effect were around $d = .7$, you already need many more participants, around 33 each of liberals and conservatives, or almost 70 participants total, in order to have a power of .8 to detect the difference.
 
-This paper also included some questions that sound kind of funny, like comparing people who say they do or do not like eggs in terms of how often they eat egg salad. You'd think this would be a pretty easy effect to detect, but you'd need close to 100 participants to reliably detect it.
+This paper also included some questions that sound kind of funny, like comparing people who say they do or do not like eggs in terms of how often they eat egg salad. You'd think this would be a pretty easy effect to detect, but detecting an effect of the estimated size with 80 percent power would require close to 100 participants.
 
-A lot of psychology has to do with attitudes and behaviors that we aren't entirely aware of, like motivated cognition. It seems pretty plausible that smokers would underestimate the likelihood of a smoker dying from a smoking-related illness as compared to nonsmokers. And they do. But it's a small enough effect that you'd need almost 300 people in your study to detect it with 80 percent power.
+A lot of psychology has to do with attitudes and behaviors that we aren't entirely aware of, like motivated cognition. It seems pretty plausible that smokers would underestimate the likelihood of a smoker dying from a smoking-related illness as compared to nonsmokers. In this survey, smokers did give lower estimates of that risk. That difference alone doesn't establish why their judgments differed, though. And if the true effect matched this relatively small estimate, you'd need almost 300 people in your study to detect it with 80 percent power.
 
-And lastly, in @simmons2014mturk's data, people who said they prefer science over art could name slightly more of the planets, on average, than people who said they prefer art. Again, it's plausible that this would be the case, but it's a very small difference. If you didn't know the size of the difference in advance, you'd need a study with more than 12,000 people to have 80 percent power to detect it. (In fact, the difference was not statistically significant, so perhaps it's not real at all.)
+And lastly, in @simmons2014mturk's data, people who said they prefer science over art could name slightly more of the planets, on average, than people who said they prefer art. Again, it's plausible that this would be the case, but it's a very small difference. To have 80 percent power to detect a true difference as small as this estimate, you'd need a study with more than 12,000 people. (In fact, the observed difference was not statistically significant: it could be sampling error, or it could reflect a small true difference that wasn't sufficiently extreme to reject the null in this study.)
 
 So this is all worth bearing in mind when you read research. Think about the sample sizes they had, the subtlety of the effects that they're looking for, and whether they really had sufficient power to detect those effects.
 
-In his book *Science Fictions*, psychologist Stuart Ritchie noted that running a study with low statistical power is like setting out to look for distant galaxies with a pair of binoculars. Even if what you're looking for is definitely out there, you have essentially no chance of seeing it. And I would add, anything you do see may not be quite what you think it is.
+We now have several different questions to keep straight. Effect size describes how big a difference is. $\alpha$ describes the chance of rejecting a true null. $\beta$ describes the chance of missing a specified real effect, and power, $1-\beta$, describes the chance of detecting it. Those probabilities concern repeated use of a test under stated assumptions.
+
+Our own study still gives us just one imperfect estimate of the population difference. How precise is that estimate? That's the question we'll turn to in the next chapter.
 
 {{< include quizzes/09-power-learning-checks.qmd >}}
 

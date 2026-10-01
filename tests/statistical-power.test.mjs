@@ -160,8 +160,9 @@ test("the minimal figure's axes hold every curve a shown slider can reach", () =
   assert.ok(still.domain[1] - still.domain[0] < domain[1] - domain[0]);
 });
 
-test("each factor step reveals its own control, and every step that sets the design starts from the same one", () => {
-  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+test("factor and planning steps reveal the right controls and start from the same design", () => {
+  const chapter = readChapter("09-statistical-power.qmd");
+  const steps = ["act-power-factors", "act-power-planning"].flatMap((id) => tutorialSteps(divById(chapter, id)));
   assert.ok(steps.length > 0);
   const starts = [];
   for (const { action, major } of steps) {
@@ -205,7 +206,8 @@ test("solving for n finds the smallest sample that reaches the target power", ()
 });
 
 test("solving for n, the fixed axes hold every curve the effect slider can reach", () => {
-  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+  const chapter = readChapter("09-statistical-power.qmd");
+  const steps = ["act-power-factors", "act-power-planning"].flatMap((id) => tutorialSteps(divById(chapter, id)));
   const { action } = steps.find((step) => step.action.solve === "n");
   const state = { mu: action.mu, sigma: action.sigma, diff: action.diff, alpha: action.alpha, twoTailed: action["two-tailed"] };
   const target = action["target-power"];
@@ -230,7 +232,8 @@ function spNormalPeak(se) {
 }
 
 test("every multi-slider step's fixed axes keep the opening curves well up the plot", () => {
-  const steps = tutorialSteps(divById(readChapter("09-statistical-power.qmd"), "act-power-factors"));
+  const chapter = readChapter("09-statistical-power.qmd");
+  const steps = ["act-power-factors", "act-power-planning"].flatMap((id) => tutorialSteps(divById(chapter, id)));
   const defaults = { alpha: [0.01, 0.2], n: [4, 100], sigma: [5, 20], diff: [0, 15] };
   for (const { action } of steps.filter((step) => "n" in step.action && step.action["show-controls"].length > 1)) {
     const state = { mu: action.mu, sigma: action.sigma, n: action.n, diff: action.diff, alpha: action.alpha, twoTailed: action["two-tailed"] };
