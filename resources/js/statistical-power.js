@@ -741,7 +741,7 @@ makeStatisticalPowerDiagram = function(opts) {
     sigmaInput = addNumber(popControls, "<i>&sigma;</i>", state.sigma, 0.01, 1);
 
     const dataControls = group("Experiment parameters");
-    dControl = addSlider(dataControls, "<i>d</i>", state.d, -2, 2, 0.01);
+    dControl = addSlider(dataControls, "<i>d</i>", state.d, -2, 2, 0.001);
     nControl = addSlider(dataControls, "<i>n</i>", state.n, 1, 100, 1);
     alphaControl = addSlider(dataControls, "<i>&alpha;</i>", state.alpha, 0.01, 0.5, 0.01);
     twoTailedInput = addCheckbox(dataControls, "Two-tailed", state.twoTailed);
