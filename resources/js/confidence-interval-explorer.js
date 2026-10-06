@@ -155,6 +155,22 @@ cieEnsureStyles = () => {
       stroke-dasharray: 6 5;
     }
 
+    .confidence-interval-explorer.cie-cover .cie-interval line {
+      stroke-width: 3.6;
+      transition: none;
+    }
+
+    .confidence-interval-explorer.cie-cover .cie-interval circle {
+      transition: none;
+      stroke-width: 1.5;
+    }
+
+    .confidence-interval-explorer.cie-cover .cie-mu-line {
+      stroke-width: 2;
+      stroke-dasharray: 8 7;
+      opacity: 0.65;
+    }
+
     .confidence-interval-explorer .cie-mu-label {
       fill: var(--graph-text-color, currentColor);
       font-size: 15px;
@@ -270,6 +286,67 @@ cieSeededRng = (seed) => cieMulberry32(cieHashSeed(seed))
 
 cieClamp = (value, min, max) =>
   Math.max(min, Math.min(max, value))
+
+// Shared marks for the tutorial and its abstract cover. Caps travel with the
+// endpoints, including while the margin grows from the point estimate.
+cieAppendInterval = (group, { capWidth = 8, pointRadius = 4 } = {}) => {
+  group.append("line").attr("class", "cie-stem");
+  for (const end of ["upper", "lower"]) {
+    group.append("line").attr("class", "cie-cap cie-cap-" + end)
+      .attr("x1", -capWidth / 2).attr("x2", capWidth / 2);
+  }
+  group.append("circle").attr("r", pointRadius);
+}
+
+ciePositionInterval = (group, mean, upper, lower) => {
+  group.select(".cie-stem").attr("y1", upper).attr("y2", lower);
+  group.select(".cie-cap-upper").attr("y1", upper).attr("y2", upper);
+  group.select(".cie-cap-lower").attr("y1", lower).attr("y2", lower);
+  group.select("circle").attr("cy", mean);
+}
+
+makeConfidenceIntervalCover = (opts = {}) => {
+  cieEnsureStyles();
+  const width = 900, height = 375;
+  const root = d3.create("div")
+    .attr("class", "confidence-interval-explorer sfs-figure sfs-figure-cover cie-cover")
+    .style("--cie-max-width", "var(--sfs-cover-max-width, 46rem)");
+  const svg = root.append("svg")
+    .attr("class", "sfs-svg sfs-graph")
+    .attr("viewBox", [0, 0, width, height])
+    .attr("role", "img")
+    .attr("aria-label", opts.ariaLabel ||
+      "Ten confidence intervals around point estimates. Nine cross a central dashed population-mean line; the final red interval misses it.");
+  const y = d3.scaleLinear().domain([0.5, 13.5]).range([height - 28, 28]);
+  svg.append("line").attr("class", "cie-mu-line")
+    .attr("x1", 32).attr("x2", width - 32)
+    .attr("y1", y(7)).attr("y2", y(7));
+  // A composed illustration, not a random coverage run: all means are possible
+  // six-card sample means, using the tutorial's known-sigma 95% z interval.
+  const means = [7, 8 + 1/6, 6, 7.5, 5 + 1/3, 8.5, 6.5, 7 + 5/6, 6 + 5/6, 10.5];
+  const margin = cieNormalInv(0.975) * Math.sqrt(14 / 6);
+  const groups = svg.append("g").selectAll("g").data(means).join("g")
+    .attr("class", m => "cie-interval" + (Math.abs(m - 7) > margin ? " is-miss" : ""))
+    .attr("transform", (m, i) => `translate(${60 + i * (width - 120) / 9},0)`);
+  cieAppendInterval(groups, { capWidth: 16, pointRadius: 5.5 });
+  const start = i => i * 520 + (i === 9 ? 380 : 0);
+  const timeline = window.interactiveFigure.coverTimeline(root.node(), {
+    animate: opts.animate !== false,
+    duration: start(9) + 620,
+    draw(elapsed) {
+      groups.each(function(m, i) {
+        const group = d3.select(this);
+        const t = elapsed - start(i);
+        const growth = d3.easeCubicInOut(cieClamp((t - 180) / 400, 0, 1));
+        group.attr("opacity", cieClamp(t / 120, 0, 1));
+        group.selectAll("line").attr("opacity", growth > 0 ? 1 : 0);
+        ciePositionInterval(group, y(m), y(m + margin * growth), y(m - margin * growth));
+      });
+    }
+  });
+  root.node().value = { ...timeline };
+  return root.node();
+}
 
 makeConfidenceIntervalExplorer = function(opts) {
   opts = opts || {};
@@ -823,12 +900,10 @@ makeConfidenceIntervalExplorer = function(opts) {
       .attr("class", "cie-interval")
       .attr("transform", (d) => "translate(" + x(d.record.index + 1) + ",0)");
 
-    entered.append("line")
-      .attr("y1", (d) => y(d.record.mean))
-      .attr("y2", (d) => y(d.record.mean));
-    entered.append("circle")
-      .attr("r", 4)
-      .attr("cy", (d) => y(d.record.mean));
+    cieAppendInterval(entered);
+    entered.each(function(d) {
+      ciePositionInterval(d3.select(this), y(d.record.mean), y(d.record.mean), y(d.record.mean));
+    });
 
     const merged = entered.merge(groups)
       .classed("is-miss", (d) => !d.interval.containsMu);
@@ -845,24 +920,16 @@ makeConfidenceIntervalExplorer = function(opts) {
     const lerpDuration = animate && options.lerpWidths ? 400 : 0;
     merged.each(function(d) {
       const group = d3.select(this);
-      const line = group.select("line");
       const isNew = growDuration > 0 && d.record.index === state.drawCount - 1;
+      group.selectAll("line, circle").interrupt("grow");
       if (isNew) {
-        line
-          .attr("y1", y(d.record.mean))
-          .attr("y2", y(d.record.mean))
-          .transition("grow").duration(growDuration)
-          .attr("y1", y(d.interval.upper))
-          .attr("y2", y(d.interval.lower));
-      } else if (lerpDuration > 0) {
-        line.transition("grow").duration(lerpDuration).ease(d3.easeCubicOut)
-          .attr("y1", y(d.interval.upper))
-          .attr("y2", y(d.interval.lower));
-      } else {
-        line.interrupt("grow")
-          .attr("y1", y(d.interval.upper))
-          .attr("y2", y(d.interval.lower));
+        ciePositionInterval(group, y(d.record.mean), y(d.record.mean), y(d.record.mean));
       }
+      const duration = isNew ? growDuration : lerpDuration;
+      const target = duration > 0
+        ? group.transition("grow").duration(duration).ease(d3.easeCubicOut)
+        : group;
+      ciePositionInterval(target, y(d.record.mean), y(d.interval.upper), y(d.interval.lower));
     });
 
     const axis = d3.axisBottom(x)

@@ -672,7 +672,11 @@ sfsDistributionIntervalItems = (opts = {}, distributions = [], domain = [0, 1]) 
       color: spec.color || spec.stroke || "var(--sfs-neutral-color, #7b818a)",
       strokeWidth: sfsDistributionPositiveNumber(spec.strokeWidth, 2),
       opacity: sfsDistributionFiniteNumber(spec.opacity, 0.95),
-      arrows: spec.arrows !== false,
+      // Flat caps override arrowheads; baselineOffset places a bar below the
+      // axis in pixels, independent of the responsive plot height.
+      caps: spec.caps === true,
+      baselineOffset: sfsDistributionFiniteNumber(spec.baselineOffset),
+      arrows: spec.caps !== true && spec.arrows !== false,
       label: typeof spec.label === "string" ? spec.label : undefined,
       labelHtml: sfsDistributionLabelHtml(spec),
       labelDx: sfsDistributionFiniteNumber(spec.labelDx, 0),
@@ -943,7 +947,8 @@ sfsDistributionEnsureStyles = () => {
     }
 
     .distribution-graph .dg-interval-line,
-    .distribution-graph .dg-interval-arrow {
+    .distribution-graph .dg-interval-arrow,
+    .distribution-graph .dg-interval-caps {
       vector-effect: non-scaling-stroke;
       stroke-linecap: round;
     }
@@ -2758,6 +2763,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
       .style("opacity", (d) => d.opacity);
 
   const intervalY = (d) => {
+    if (Number.isFinite(d.baselineOffset)) return y(0) + d.baselineOffset;
     if (d.height === "curve") {
       const limitPdf = Math.min(
         sfsDistributionFinitePdf(d.distribution, d.from),
@@ -2775,6 +2781,16 @@ sfsDistributionRenderGraph = (opts = {}) => {
     .attr("x2", (d) => x(d.to) - (d.arrows ? 1.5 : 0))
     .attr("y1", intervalY)
     .attr("y2", intervalY)
+    .attr("stroke", (d) => d.color)
+    .attr("stroke-width", (d) => d.strokeWidth);
+
+  intervalGroups.filter((d) => d.caps).append("path")
+    .attr("class", "dg-interval-caps")
+    .attr("d", (d) => {
+      const midY = intervalY(d);
+      return `M${x(d.from)},${midY - 6}V${midY + 6}M${x(d.to)},${midY - 6}V${midY + 6}`;
+    })
+    .attr("fill", "none")
     .attr("stroke", (d) => d.color)
     .attr("stroke-width", (d) => d.strokeWidth);
 

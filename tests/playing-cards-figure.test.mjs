@@ -36,7 +36,7 @@ test('opening hands reproduce the coverage stream, including suits and the selec
   const rngContext = {};
   vm.runInNewContext(explorer.slice(explorer.indexOf('cieHashSeed ='), explorer.indexOf('cieClamp =')), rngContext);
   const seed = JSON.parse(chapter.match(/ciCoverage\s+makeConfidenceIntervalExplorer\s+options='([^']+)'/)[1]).seed;
-  for (const [id, n, draw] of [['ciSampleA', 3, 1], ['ciSampleB', 10, 1], ['ciSampleC', 10, 77]]) {
+  for (const [id, n, draw] of [['ciSampleA', 3, 1], ['ciSampleB', 6, 1], ['ciSampleC', 6, 69]]) {
     const opts = JSON.parse(chapter.match(new RegExp(`${id} makePlayingCardHand options='([^']+)'`))[1]);
     const rng = rngContext.cieSeededRng(`${seed}-n${n}`);
     let ranks, suits;

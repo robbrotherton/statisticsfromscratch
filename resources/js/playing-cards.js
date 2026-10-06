@@ -69,7 +69,7 @@
     const compact = opts.compact === true || values.length > 10;
     const hand = document.createElement('div');
     hand.className = 'sfs-card-hand sfs-figure';
-    hand.style.setProperty('--card-columns', Math.min(values.length, compact ? 10 : 5));
+    hand.style.setProperty('--card-columns', Math.min(values.length, compact ? 10 : (values.length === 6 ? 6 : 5)));
     hand.classList.toggle('sfs-card-hand-compact', compact);
     hand.setAttribute('role', 'img');
     hand.setAttribute('aria-label', values.map((rank, i) => hidden.has(i) ? 'Face-down card' : label(rank, suitValues[i])).join(', '));

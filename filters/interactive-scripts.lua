@@ -75,6 +75,10 @@ local manifest = {
     file = "resources/js/confidence-interval-explorer.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools", "playing-cards" }
   },
+  ["confidence-interval-diagrams"] = {
+    file = "resources/js/confidence-interval-diagrams.js",
+    deps = { "d3", "stat-helpers", "interactive-figure-tools", "playing-cards" }
+  },
   ["ci-nhst-diagram"] = {
     file = "resources/js/ci-nhst-diagram.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }
