@@ -2,6 +2,7 @@
 title: "Confidence Intervals"
 interactive-scripts:
   - confidence-interval-explorer
+  - playing-cards
   - distribution-generator
   - ci-nhst-diagram
 ---
@@ -15,46 +16,109 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-<!-- EDITORIAL STRUCTURE — October 4, 2026
+<!-- EDITORIAL STRUCTURE — October 6, 2026
 This is a structural pass, not finished new prose. Planned sequence:
-1. Card samples: notice uncertainty before naming an interval.
+1. Three fixed card samples with free responses; then a static interval comparison.
 2. Point estimate, margin of error, and the class z interval.
 3. Return to cards: repeated-interval coverage, then interpretation/Neyman.
 4. Width, then correspondence with a matching two-sided test.
 5. Meaningful magnitudes and contemporary debate; bridge to estimated sigma.
-Keep the cards in both parts; the opener is scaffolded below, not implemented.
+Keep the same cards and dot-and-interval visual language in both parts.
+The opening hands and reflections are implemented; the interval comparison
+remains scaffolded below. The coverage tutorial replays samples A and B.
 -->
 
-In this chapter, we will introduce the idea of the confidence interval. This is a complementary concept to null hypothesis significance testing.
+In this chapter, we will finish up our initial exploration of Null Hypothesis Significance Testing, the $z$-test, and related ideas, by introducing the *confidence interval*. Like statistical power, this is a complementary concept often used in the context of a hypothesis test. But rather than focusing on a binary decision about whether to reject the null hypothesis, a confidence interval attempts to quantify the uncertainty in our estimate of the population mean.
 
 ## How much can one sample tell us? {#sec-ci-sample-question}
 
-A deck of playing cards is a known population consisting of the numbers 1 through 13 repeated 4 times, once for each suit.
+As we've worked our way through the past couple of chapters, we've been dealing with situations where we have a known population: we know its variability, $\sigma$, and the null hypothesis specifies a population mean, $\mu_0$. We take a sample, calculate its mean, and calculate the corresponding $z$-score to determine whether it is significantly different from the null hypothesis.
+
+In a sense, this approach lets the null hypothesis take precedence over the sample. We are asking how well the sample fits with what the null would lead us to expect. But what if we instead let the sample lead the way?
+
+To put this in context, we'll use another population with known characteristics: a deck of cards. A complete deck consists of the numbers 1 through 13 (Ace = 1; Jack = 11; Queen = 12; King = 13), repeated 4 times, once for each suit. So that's 52 cards total. Its standard deviation is $\sigma = 3.74$. We could calculate its mean too, but for this exercise, set that knowledge aside: what would the sample alone suggest? Each card is replaced and the deck shuffled before the next draw, so the same card can appear more than once.
+
+We can draw a handful of cards from the deck, calculate their mean, and use that as an estimate of the population mean. But how close should we expect that estimate to be to the true population mean? And if we draw another handful of cards, will we get the same answer?
 
 ::: {.callout-tip #act-ci-sampling-question}
 ## Start with a sample
 
-If we draw a handful of cards and calculate their mean, how close should we expect it to be to the mean of the whole deck? Would a second handful give us the same answer?
+These three samples were selected to give us something to compare. Look at each one in turn and jot down your thoughts; you don't need a formula yet.
 
-<!-- TUTORIAL SCAFFOLD — Part 1: sampling before confidence intervals
-- Reuse the card-sampling mechanism, drawing WITH replacement after each card.
-- Begin with one sample of five and its mean; no interval, confidence slider,
-  capture colors, percentage, or hypothesis-test verdict yet.
-- Ask the reader what another sample might look like, then draw a second.
-- Invite a prediction about a larger sample; compare n=5 and n=30, without
-  implying that every larger sample must happen to be closer to the truth.
-- Ask what a single mean leaves out, and how we might show its uncertainty.
-- This is generative reflection, not a test of untaught CI terminology.
-- Reserve a distinct figure ID, ciSamplingQuestion. The current factory has
-  no interval-free mode: add that mode before inserting a live shortcode.
-- Preserve the chosen sample/seed for Part 2 if practical; otherwise explicitly
-  say we are returning to the same population with new samples.
-- Static/example-data route must support the same questions.
+### Sample A: three cards
+
+{{< interactive-figure ciSampleA makePlayingCardHand options='{"ranks":[6,13,2],"suits":[2,0,1]}' fallback="Sample A: 6 of diamonds, King of spades, 2 of hearts. Three cards with a mean of 7." >}}
+
+$n = 3$, $M = 7$.
+
+Using only these three cards, what would you estimate the population mean to be? Suggest a range of values you would still consider plausible. What makes you hesitant to give just one number?
+
+### Sample B: ten cards
+
+{{< interactive-figure ciSampleB makePlayingCardHand options='{"ranks":[7,8,1,7,8,2,8,13,4,12],"suits":[1,1,3,3,1,1,0,0,0,1]}' fallback="Sample B: 7, 8, Ace, 7, 8, 2, 8, King, 4, Queen. Ten cards with a mean of 7." >}}
+
+$n = 10$, $M = 7$.
+
+These ten cards have the same mean. Would you keep your best estimate? Would you make your tentative range wider, narrower, or leave it unchanged? Explain what the extra cards change.
+
+### Sample C: another ten cards
+
+{{< interactive-figure ciSampleC makePlayingCardHand options='{"ranks":[12,13,8,12,8,13,10,9,11,10],"suits":[1,1,3,3,0,3,1,3,2,2]}' fallback="Sample C: Queen, King, 8, Queen, 8, King, 10, 9, Jack, 10. Ten cards with a mean of 10.6." >}}
+
+$n = 10$, $M = 10.6$.
+
+What estimate and tentative range would you give now? Is there a reason to make your range a different width from B's, given the same sample size and known population variability? Could a sample like this come from the same deck?
+
+<!-- OPENING DATA — fixed hands use the shared full-size card renderer.
+Reproducible examples from the existing explorer's RNG:
+- Shared seed: ci-opening-7194. Streams append "-n3" or "-n10" to the seed;
+  each card consumes one RNG draw for rank, then one for suit.
+  Suit indices are 0=spades, 1=hearts, 2=diamonds, 3=clubs.
+- A: n=3, first record. Ranks [6,13,2], suits [2,0,1], M=7.
+- B: n=10, first record. Ranks [7,8,1,7,8,2,8,13,4,12],
+  suits [1,1,3,3,1,1,0,0,0,1], M=7.
+- C: n=10, record 77 (one-based). Ranks [12,13,8,12,8,13,10,9,11,10],
+  suits [1,1,3,3,0,3,1,3,2,2], M=10.6.
+These are deliberately selected examples, not three consecutive random samples.
+Say so to the reader; do not treat two captures out of three as a coverage rate.
+Keep exact ranks AND suits reproducible; seed alone is insufficient without n
+and record index. Do not force selected examples into the later random stream.
+
+-->
+
+<!-- INTERVAL COMPARISON SCAFFOLD — after the three hands and reflections
+Then show a STATIC collection of three horizontal dot-and-interval rows on
+one shared card-value axis, labelled A/B/C, n, and M. Reuse the coverage plot's
+point, endpoint, and dashed-mu-line conventions. First invite comparison of
+bars; reveal/check against mu=7 after the reader has made the estimates above.
+Use sigma=sqrt(14) internally (3.74 is rounded), the same normal critical value
+as the explorer, and 95% for all three. Approximate endpoints:
+A [2.77,11.23]; B [4.68,9.32]; C [8.28,12.92].
+A and B contain mu; C misses it. B and C have IDENTICAL widths despite their
+different observed spreads. A's bar is wider because it has fewer cards.
+Label these approximate 95% confidence intervals, with the arithmetic to come.
+The card population is discrete/non-normal, especially relevant at n=3; do not
+promise exact 95% coverage. Narrower does not mean necessarily closer to mu.
+
+Follow-up free response:
+"What does a bar tell you that the dot alone leaves out? Why might A's bar be
+wider than B's, while B and C have the same width? What information would we
+need to calculate these bars? What does C's miss suggest about whether this
+method can always capture the truth?"
+Resolve enough to orient the reader: M locates the bar; known population sigma,
+n, and a chosen confidence level determine its width. We do not use the spread
+of these particular cards to estimate sigma in this chapter. Defer the formula
+to the next section and long-run meaning to the coverage tutorial. The true mu
+is needed to CHECK a bar, not to construct it. Save the question about a
+specified null value for sec-ci-nhst, where it has a distinct purpose.
+Provide readable card values and interval endpoints in the static fallback.
 -->
 :::
 
 <!-- BRIDGE: connect the question to Chapter 9's ending about magnitude and
-uncertainty. Bring in the class mean of 322.59 ms as a familiar estimate whose
+uncertainty. Refer back to A/B's same estimate but different precision and C's
+precise-looking miss; the three selected bars cannot establish a capture rate.
+Bring in the class mean of 322.59 ms as a familiar estimate whose
 precision we still need to express. Keep this to a short transition. -->
 
 ## Point estimates and margins of error {#sec-ci-estimate}
@@ -69,8 +133,9 @@ However, we know that sample means, though they might be unbiased on average, ar
 mean universally "best," and a convenience sample may systematically miss the
 population of interest. Give a positive interpretation in terms of estimates,
 precision, and compatible values rather than only listing forbidden readings.
-FIGURE SCAFFOLD: replace ciAnatomy's sample-centered bell curve with a point
-and interval bar. Label the estimate, endpoints, and one margin of error.
+FIGURE SCAFFOLD: enlarge sample B's dot and interval from the opening for
+ciAnatomy, replacing the sample-centered bell curve. Keep its M=7 and endpoints
+[4.68,9.32] on the same card-value scale. Label the estimate, endpoints, and one margin of error.
 No area under a curve should be labeled as probability assigned to mu. -->
 
 {{< interactive-figure
@@ -106,7 +171,9 @@ We find the $z$ values which correspond to those regions of the normal distribut
 
 <!-- FIGURE SCAFFOLD: convert ciEquationDiagram to the same interval-bar
 representation as ciAnatomy. L and U are endpoints, not two values of the fixed
-true mu. The normal reference curve belongs in the critical-z explanation. -->
+true mu. Use opening sample B again to connect the formula to the same bar:
+7 +/- 1.96*sqrt(14)/sqrt(10), then recover A and C by changing n or M.
+The normal reference curve belongs in the critical-z explanation. -->
 
 {{< interactive-figure
   ciEquationDiagram
@@ -169,13 +236,18 @@ Returning to our deck, the average of this population ($\mu$) is 7.00, and the s
 <!-- TUTORIAL SCAFFOLD — Part 2: give the interval its long-run meaning
 The implementation now uses known sigma=sqrt(14) and normal critical values;
 the earlier t-interval implementation has already been replaced.
-- Reconnect to the opening's samples and question; now add interval bars.
+- Replay opening sample A (n=3, draw=1), then B (n=10, draw=1), using
+  ci-opening-7194. Same seed, stream size, ranks, and suits, not just same M.
+  Their bars were previewed in the opener; now ask how often this method works.
+- Continue the unfiltered n=10 stream for coverage. Opening C is record 77;
+  at draw=77 it is the displayed card sample. Optionally pause there to recognize
+  its M=10.6 and miss, without implying misses occur at regular intervals.
 - Keep mu fixed while samples and their intervals vary.
 - Distinguish more simulated samples (stabilizes observed coverage) from more
   cards per sample (changes precision and the normal approximation).
-- At n=5 do not promise exact nominal coverage. Consider starting the full
-  coverage demonstration at n=30, or add a normal-population mode when exact
-  coverage is the teaching goal. Do not silently switch populations.
+- The n=3 replay is a precision contrast, not an exact-coverage demonstration.
+  Use n=10 for the main run, retaining the approximate-coverage qualification;
+  compare n=30 later. Do not silently switch populations.
 - Keep null-test decisions out of this first explanation; return to them only
   after the width tutorial, in the matching-test section.
 -->
@@ -187,36 +259,40 @@ the earlier t-interval implementation has already been replaced.
 {{< interactive-figure
   ciCoverage
   makeConfidenceIntervalExplorer
-  options='{"seed":"ci-deck-v497","confidence":95,"sampleSize":5}'
+  options='{"seed":"ci-opening-7194","confidence":95,"sampleSize":3}'
   fallback="Interactive demonstration of confidence-interval coverage: repeated samples of playing cards each produce a confidence interval around their mean, plotted against the deck's true mean of 7. Most intervals capture the true mean, some miss, and the running percentage estimates this approximate interval method's coverage."
 >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="The deck" data-action='{"confidence":95,"sample-size":5,"draw":0,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
+::: {.tutorial-step data-title="The deck" data-action='{"confidence":95,"sample-size":3,"draw":0,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
 In this visualization, you can take samples from the deck repeatedly. Because this is a known population, the dashed line can mark the true population mean, $\mu = 7$ — the value each sample will estimate.
 :::
 
-::: {.tutorial-step data-title="One sample" data-action='{"confidence":95,"sample-size":5,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Each sample produces an estimate of the population parameter with a margin of uncertainty: this is the confidence interval for the sample. These five cards give {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, with a 95% confidence interval of [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}].
+::: {.tutorial-step data-title="One sample" data-action='{"confidence":95,"sample-size":3,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Here is sample A from the opening again: the same three cards, now with the interval whose calculation we have learned. They give {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, with a 95% confidence interval of [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}].
 :::
 
-::: {.tutorial-step data-title="Draw more" data-action='{"confidence":95,"sample-size":5,"draw":15,"delay":250,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+::: {.tutorial-step data-title="Same mean, more cards" data-action='{"confidence":95,"sample-size":10,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Here is sample B again. Its ten cards also give $M = 7$, but its interval is narrower: [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. With the same population variability and confidence level, more cards give a smaller margin of error. Now keep ten cards per sample and see what happens across repeated samples.
+:::
+
+::: {.tutorial-step data-title="Draw more" data-action='{"confidence":95,"sample-size":10,"draw":15,"delay":250,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
 The visualization really is sampling from a fair deck with a mean of 7. But some samples produce confidence intervals that don't include the true population mean. Draw more and look for intervals that miss $\mu$.
 :::
 
-::: {.tutorial-step data-title="Long run" data-action='{"confidence":95,"sample-size":5,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
+::: {.tutorial-step data-title="Long run" data-action='{"confidence":95,"sample-size":10,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
 The confidence interval is a statement about repeated, long-run probabilities: if we sample from a population repeatedly, the proportion of confidence intervals which include the true population mean approaches the method's coverage. Under the normal, known-$\sigma$ model this is the specified confidence level; for these card samples it is approximate. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples here, that proportion is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it's not quite true.
 :::
 
-::: {.tutorial-step data-title="80% CI" data-action='{"confidence":80,"sample-size":5,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+::: {.tutorial-step data-title="80% CI" data-action='{"confidence":80,"sample-size":10,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
 For example, if we compute an 80% CI for each sample, around 80% of those CIs will include the population mean — here, {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident.
 :::
 
 ::: {.tutorial-step data-title="Sample size" data-action='{"confidence":95,"sample-size":30,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With the same known population standard deviation and confidence level, intervals from samples of 30 are narrower than those from samples of five. The observed proportion including $\mu$ here is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%.
+Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With the same known population standard deviation and confidence level, intervals from samples of 30 are narrower than those from samples of ten. The observed proportion including $\mu$ here is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%.
 :::
 
-::: {.tutorial-step data-title="Real research" data-action='{"confidence":95,"sample-size":5,"draw":400,"show-mu":false,"show-cards":true,"show-decision":false,"animate":false,"controls-open":true}'}
+::: {.tutorial-step data-title="Real research" data-action='{"confidence":95,"sample-size":10,"draw":400,"show-mu":false,"show-cards":true,"show-decision":false,"animate":false,"controls-open":true}'}
 With the dashed line hidden, we can see the intervals but can't check which ones contain the true mean. In real research, we generally don't know that mean. The confidence level describes the method's repeated-sampling coverage. Open the controls and keep drawing.
 :::
 ::::
@@ -233,6 +309,10 @@ connect to Chapters 8–9's long-run error rates. Prefer a short paraphrase.
 The former quotation omitted its parameter symbol and an exception clause;
 do not restore it as an exact quote without checking the original p.349.
 Source: https://wwwusers.ts.infn.it/~milotti/Didattica/StatisticaAvanzata/Neyman_1937.pdf
+CALLBACK: the opening's C interval either contains mu or misses it; here it
+misses. Its 95% label describes the procedure, not a probability recalculated
+for that fixed interval. A/B/C were selected for comparison, not to estimate
+coverage; use the full, unfiltered run for the long-run interpretation.
 REVISE INTERPRETATION: qualify "5% of the time" by the model and repeated
 sampling. Avoid a universal ban on probability statements about parameters:
 that is frequentist framing, not a dismissal of Bayesian approaches.
@@ -247,7 +327,11 @@ It's worth thinking about the factors that affect the width of a confidence inte
 :::::: {.callout-tip .interactive #act-ci-width}
 ## What changes the interval's width?
 
-<!-- FIGURE SCAFFOLD: retain the existing controlled comparisons and fixed axes,
+<!-- CALLBACK: A vs B isolates n at the same M; B vs C shifts M at fixed n
+and sigma, so width stays the same. Return to the reader's tentative ranges:
+the known-sigma z interval does not adapt to the observed spread of each hand.
+The population-SD comparison below changes the population assumption itself.
+FIGURE SCAFFOLD: retain the existing controlled comparisons and fixed axes,
 but replace the sample-centered curve with an interval bar. The curve is not a
 known sampling distribution or a posterior distribution of mu.
 OPTIONAL PAYOFF after this tutorial: plan for precision. At sigma=50, a 95%
@@ -345,7 +429,14 @@ So we reject the null because the sample mean is far enough away from the null p
 
 <!-- RELOCATED CARD-DECISION MATERIAL — optional callback here, after the
 correspondence, rather than inside the first coverage explanation.
-Reuse the existing ciCoverage show-decision capability if this earns its place.
+Return explicitly to opening C: M=10.6, n=10, CI approximately [8.28,12.92].
+Ask: "If H0 specified mu0=7, what would the matching two-sided .05 z test
+conclude? Given that we generated these cards from the fair deck, would that
+conclusion be correct? Does an interval containing 7 prove the null?"
+Resolve: reject for C (a Type I error here); A/B would fail to reject, not prove
+H0. Distinguish checking against a known truth in a simulation from testing a
+hypothesized value in research. Use seed ci-opening-7194, n=10, draw=77 if
+replaying C with the existing ciCoverage show-decision capability.
 Test H0: mu=7, NOT "the deck has not been tampered with": changing a deck can
 preserve its mean. Under the known fair-deck simulation, rejecting this true null
 is a Type I error; nominal alpha is approximate for the discrete card model.
@@ -406,6 +497,9 @@ Keep this a short synthesis anchored in the chapter's examples, not a catalogue.
 <!-- ADD brief synthesis and Chapter 11 bridge:
 - What is estimated? How much uncertainty? Which meaningful values remain?
   What cannot be concluded from the design or sample, however narrow the CI?
+- Recall B/C: equal n and known sigma meant equal interval widths despite
+  different sample spreads. When sigma is unknown, sample variability will
+  enter the estimate of standard error as well.
 - So far sigma has been supplied. In Chapter 11, use the same class data to
   estimate variability and construct a t interval; interpretation still matters.
 -->

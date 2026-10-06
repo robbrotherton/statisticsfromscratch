@@ -62,49 +62,9 @@ cieEnsureStyles = () => {
     }
 
     .confidence-interval-explorer .cie-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.08rem;
       width: 2.15rem;
       height: 3rem;
-      border: 1px solid rgba(28, 28, 30, 0.35);
       border-radius: 0.34rem;
-      background: #fdfdfa;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
-      color: #1c1c1e;
-      transition: opacity 200ms ease, transform 200ms ease;
-    }
-
-    .confidence-interval-explorer .cie-card-rank {
-      font-weight: 700;
-      font-size: 0.95rem;
-      line-height: 1;
-    }
-
-    .confidence-interval-explorer .cie-card-suit {
-      font-size: 1.05rem;
-      line-height: 1;
-    }
-
-    .confidence-interval-explorer .cie-card.is-red {
-      color: #bd3a3a;
-    }
-
-    .confidence-interval-explorer .cie-card.is-face-down {
-      background-color: #eef1f5;
-      background-image: repeating-linear-gradient(
-        45deg,
-        rgba(84, 110, 149, 0.5) 0,
-        rgba(84, 110, 149, 0.5) 2px,
-        transparent 2px,
-        transparent 6px
-      );
-    }
-
-    .confidence-interval-explorer .cie-card.is-face-down > * {
-      visibility: hidden;
     }
 
     .confidence-interval-explorer .cie-cards.cie-cards-sm .cie-card {
@@ -735,11 +695,9 @@ makeConfidenceIntervalExplorer = function(opts) {
     if (rebuilt) {
       cardsRow.selectAll("div").remove();
       for (let i = 0; i < state.sampleSize; i += 1) {
-        const card = cardsRow.append("div")
-          .attr("class", "cie-card is-face-down")
-          .attr("aria-hidden", "true");
-        card.append("span").attr("class", "cie-card-rank");
-        card.append("span").attr("class", "cie-card-suit");
+        const card = SFSPlayingCards.create(1, 0, true);
+        card.classList.add("cie-card", "is-face-down");
+        cardsRow.node().appendChild(card);
       }
       renderedCardSize = state.sampleSize;
       renderedCardIndex = null;
@@ -757,7 +715,7 @@ makeConfidenceIntervalExplorer = function(opts) {
     }
 
     // Stagger the reveal for a single deliberate draw; during continuous play
-    // or non-animated jumps, flip everything at once.
+    // or non-animated jumps, reveal everything at once.
     const stagger = animate && !state.playing && !prefersReducedMotion();
     const step = stagger ? Math.min(70, 620 / state.sampleSize) : 0;
     cards.forEach((card, i) => {

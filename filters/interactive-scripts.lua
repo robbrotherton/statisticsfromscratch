@@ -67,9 +67,13 @@ local manifest = {
     file = "resources/js/distribution-generator.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }
   },
+  ["playing-cards"] = {
+    file = "resources/js/playing-cards.js",
+    deps = { "visibility-helper" }
+  },
   ["confidence-interval-explorer"] = {
     file = "resources/js/confidence-interval-explorer.js",
-    deps = { "d3", "stat-helpers", "interactive-figure-tools" }
+    deps = { "d3", "stat-helpers", "interactive-figure-tools", "playing-cards" }
   },
   ["ci-nhst-diagram"] = {
     file = "resources/js/ci-nhst-diagram.js",
