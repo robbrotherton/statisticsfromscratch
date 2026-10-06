@@ -15,15 +15,63 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
+<!-- EDITORIAL STRUCTURE — October 4, 2026
+This is a structural pass, not finished new prose. Planned sequence:
+1. Card samples: notice uncertainty before naming an interval.
+2. Point estimate, margin of error, and the class z interval.
+3. Return to cards: repeated-interval coverage, then interpretation/Neyman.
+4. Width, then correspondence with a matching two-sided test.
+5. Meaningful magnitudes and contemporary debate; bridge to estimated sigma.
+Keep the cards in both parts; the opener is scaffolded below, not implemented.
+-->
+
 In this chapter, we will introduce the idea of the confidence interval. This is a complementary concept to null hypothesis significance testing.
 
-## Confidence Intervals
+## How much can one sample tell us? {#sec-ci-sample-question}
 
-Remember, our sample is only interesting to us insofar as it gives us an indication of the population parameters — particularly the population mean, because we want to know if that mean is different from the population mean that the null hypothesis predicts. The confidence interval quantifies how precisely our sample estimates the population mean by giving a range of likely values.
+A deck of playing cards is a known population consisting of the numbers 1 through 13 repeated 4 times, once for each suit.
 
-A confidence interval consists of two features. There's the point estimate, which is our best guess of the population parameter. Specifically, the point estimate is our sample mean, because you might remember we have said that the sample mean is an unbiased statistic: on average, sample means are equal to the population mean. So if we just have a single sample mean, that is our best guess at the mean of the population from which that sample was drawn.
+::: {.callout-tip #act-ci-sampling-question}
+## Start with a sample
 
-However, we know that sample means, though they might be unbiased on average, are not individually perfect estimates of the population mean. So the confidence interval includes a margin of error — a range either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean. That range covers a stated proportion of the distribution. For a 95% confidence interval, the region in the middle of the distribution is 95% of the distribution. You could have a 99% confidence interval, which covers 99% of the distribution, or an 80% confidence interval, which covers only 80% of the distribution.
+If we draw a handful of cards and calculate their mean, how close should we expect it to be to the mean of the whole deck? Would a second handful give us the same answer?
+
+<!-- TUTORIAL SCAFFOLD — Part 1: sampling before confidence intervals
+- Reuse the card-sampling mechanism, drawing WITH replacement after each card.
+- Begin with one sample of five and its mean; no interval, confidence slider,
+  capture colors, percentage, or hypothesis-test verdict yet.
+- Ask the reader what another sample might look like, then draw a second.
+- Invite a prediction about a larger sample; compare n=5 and n=30, without
+  implying that every larger sample must happen to be closer to the truth.
+- Ask what a single mean leaves out, and how we might show its uncertainty.
+- This is generative reflection, not a test of untaught CI terminology.
+- Reserve a distinct figure ID, ciSamplingQuestion. The current factory has
+  no interval-free mode: add that mode before inserting a live shortcode.
+- Preserve the chosen sample/seed for Part 2 if practical; otherwise explicitly
+  say we are returning to the same population with new samples.
+- Static/example-data route must support the same questions.
+-->
+:::
+
+<!-- BRIDGE: connect the question to Chapter 9's ending about magnitude and
+uncertainty. Bring in the class mean of 322.59 ms as a familiar estimate whose
+precision we still need to express. Keep this to a short transition. -->
+
+## Point estimates and margins of error {#sec-ci-estimate}
+
+Remember, our sample is only interesting to us insofar as it gives us an indication of the population parameters — particularly the population mean, because we want to know if that mean is different from the population mean that the null hypothesis predicts. The confidence interval quantifies how precisely our sample estimates the population mean by giving an interval estimate.
+
+A confidence interval consists of two features. There's the point estimate, which is our estimate of the population parameter. Specifically, the point estimate is our sample mean, because you might remember we have said that the sample mean is an unbiased statistic: on average, sample means are equal to the population mean. So if we just have a single sample mean, we use it to estimate the mean of the population from which that sample was drawn.
+
+However, we know that sample means, though they might be unbiased on average, are not individually perfect estimates of the population mean. So the confidence interval includes a margin of error — a range either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean. The confidence level refers to how often the method captures the population parameter across repeated samples; we'll return to that interpretation after constructing an interval.
+
+<!-- REVISE: qualify unbiasedness by the sampling model; unbiased does not
+mean universally "best," and a convenience sample may systematically miss the
+population of interest. Give a positive interpretation in terms of estimates,
+precision, and compatible values rather than only listing forbidden readings.
+FIGURE SCAFFOLD: replace ciAnatomy's sample-centered bell curve with a point
+and interval bar. Label the estimate, endpoints, and one margin of error.
+No area under a curve should be labeled as probability assigned to mu. -->
 
 {{< interactive-figure
   ciAnatomy
@@ -41,16 +89,24 @@ However, we know that sample means, though they might be unbiased on average, ar
 
 ### Calculating the Confidence Interval
 
-Calculating the boundaries of the confidence interval isn't too complicated; it just involves a little algebra. In the hypothesis testing chapter, we used the $z$ equation to calculate $z$, giving us the exact $z$ score for our observed sample mean based on a population mean we specified from our null hypothesis. In contrast, the confidence interval is not based on that null hypothesis. Instead, we want to calculate $\mu$ — the potential population means which define the upper and lower bounds of the confidence interval. So instead of specifying $\mu$ from the null hypothesis and solving for $z$, we specify $z$ and we solve for $\mu$.
+Calculating the boundaries of the confidence interval isn't too complicated; it just involves a little algebra. In the hypothesis testing chapter, we used the $z$ equation to calculate $z$, giving us the exact $z$ score for our observed sample mean based on a population mean we specified from our null hypothesis. In contrast, the confidence interval is not based on that null hypothesis. Instead, we use the critical $z$ values to find the upper and lower bounds of the confidence interval.
 
 $$ z = \dfrac{M - \mu}{\sigma_M} $$
 
-$$ \mu = M \pm z * \sigma_M $$
+$$ \mu = M - z \sigma_M $$
+
+Using the positive critical value $z^*$ gives the two endpoints:
+
+$$ [L, U] = [M - z^* \sigma_M,\ M + z^* \sigma_M] $$
 
 
-Specifically, the $z$ values we specify are the $z$ values which correspond to the boundaries of the confidence interval, and we find them the same way we find our critical cutoff values for alpha — the most extreme 5% (or whatever) of the distribution. So if we specify a 95% confidence interval, we're saying we want to split the distribution into the 95% in the middle, leaving 5% in the tails, or 2.5% at either end — which is the same as when we specified alpha saying we wanted 5% in the tails, leaving 95% in the middle. Again, like alpha, we can specify different values. We might want a 99% confidence interval or an 80% confidence interval, and that will give us different $z$ scores for the boundaries. But a 95% confidence is fairly standard, the same way that an alpha of 0.05 is.
+Specifically, the $z$ values we specify are the $z$ values which correspond to the boundaries of the confidence interval, and we find them the same way we find our critical cutoff values for alpha — the most extreme 5% (or whatever) of the distribution. So if we specify a 95% confidence interval, we're saying we want to split the distribution into the 95% in the middle, leaving 5% in the tails, or 2.5% at either end — which is the same as when we specified alpha saying we wanted 5% in the tails, leaving 95% in the middle. Again, like alpha, we can specify different values. We might want a 99% confidence interval or an 80% confidence interval, and that will give us different $z$ scores for the boundaries. But a 95% confidence level is fairly standard, the same way that an alpha of 0.05 is.
 
-We find the $z$ values which correspond to those regions of the normal distribution, multiply by the standard error of the mean, and add to (and subtract from) the sample mean to find the corresponding $\mu$ values. Visually, the equation looks like this: the sample mean $M$ sits at the center as the point estimate, the boundaries of the interval are the potential population means $\mu$, and the distance from the center to either boundary is $z \times \sigma_M$.
+We find the $z$ values which correspond to those regions of the normal distribution, multiply by the standard error of the mean, and add to (and subtract from) the sample mean to find the interval endpoints. Visually, the equation looks like this: the sample mean $M$ sits at the center as the point estimate, the boundaries are $L$ and $U$, and the distance from the center to either boundary is $z^* \times \sigma_M$.
+
+<!-- FIGURE SCAFFOLD: convert ciEquationDiagram to the same interval-bar
+representation as ciAnatomy. L and U are endpoints, not two values of the fixed
+true mu. The normal reference curve belongs in the critical-z explanation. -->
 
 {{< interactive-figure
   ciEquationDiagram
@@ -61,24 +117,30 @@ We find the $z$ values which correspond to those regions of the normal distribut
     "shade": {"tail": "center", "p": 0.95, "color": "var(--sfs-confidence-color, #2f6f9f)", "opacity": 0.3},
     "markers": [
       {"at": 0, "labelMarkup": "*M*", "color": "var(--sfs-confidence-color, #2f6f9f)", "labelColor": "var(--sfs-text, currentColor)"},
-      {"at": -1.96, "labelMarkup": "*μ*", "height": 0.55, "color": "var(--sfs-text, currentColor)"},
-      {"at": 1.96, "labelMarkup": "*μ*", "height": 0.55, "color": "var(--sfs-text, currentColor)"}
+      {"at": -1.96, "labelMarkup": "*L*", "height": 0.55, "color": "var(--sfs-text, currentColor)"},
+      {"at": 1.96, "labelMarkup": "*U*", "height": 0.55, "color": "var(--sfs-text, currentColor)"}
     ],
-    "intervals": {"from": 0, "to": 1.96, "height": "curve", "labelMarkup": "*z* × *σ*_*M*_", "color": "var(--sfs-text, currentColor)"},
+    "intervals": {"from": 0, "to": 1.96, "height": "curve", "labelMarkup": "*z*∗ × *σ*_*M*_", "color": "var(--sfs-text, currentColor)"},
     "maxWidth": "34rem"
   }'
-  fallback="A normal curve with M marked at the center, the potential population means mu marking the two edges of the shaded 95% region, and an arrow from M to the upper edge labeled z times sigma sub M."
+  fallback="A normal curve with M marked at the center, L and U marking the two endpoints of the shaded 95% region, and an arrow from M to the upper edge labeled z times sigma sub M."
 >}}
 
 ### Example: Class Reaction Time Data
 
-So let's calculate a confidence interval for some real data: our class's reaction times. Like the samples we imagined in the hypothesis testing chapter, our class of $n = 23$ students took the humanbenchmark.com reaction time test, for which the population of test-takers has a mean of $\mu = 284$ milliseconds and a standard deviation of $\sigma = 50$. The class's average came out at $M = 322.59$ milliseconds. That sample mean is our point estimate — but how precisely does it estimate the mean of the population that our class represents? Since we know the population standard deviation, the standard error of the mean is $\sigma_M = 50 / \sqrt{23} = 10.43$.
+So let's calculate a confidence interval for some real data: our class's reaction times. Our class of $n = 23$ students took the humanbenchmark.com reaction time test. As in Chapter 8, we'll assume a normal population with a known standard deviation of $\sigma = 50$ milliseconds for this calculation; that standard deviation was supplied for the example, not reported by the website. The class's average came out at $M = 322.59$ milliseconds. That sample mean is our point estimate — but how precisely does it estimate the mean of the population that our class represents? Under that known-standard-deviation assumption, the standard error of the mean is $\sigma_M = 50 / \sqrt{23} = 10.43$.
 
 The first step is to specify the $z$ values for the boundaries of the confidence interval. That is, we need to decide on our desired confidence and find the $z$ scores which divide the distribution up in that way. Say we want a 95% confidence interval. We need the $z$ scores that cut off the lowest and highest 2.5% of the normal distribution, leaving 95% in the middle. Those should look familiar from the hypothesis testing chapter: they're $\pm 1.96$, the same values that mark out the two-tailed critical regions for $\alpha = .05$.
 
-Now we can put those values into the equation with our sample mean and standard error of the mean. You should get two answers corresponding to the population means of the two boundaries; allowing for rounding error, you should have gotten something like 302 and 343.
+Now we can put those values into the equation with our sample mean and standard error of the mean. You should get two interval endpoints; allowing for rounding error, you should have gotten something like 302 and 343.
 
-$$\mu = M \pm z \times \sigma_M = 322.59 \pm 1.96 \times 10.43 = [302.2,\ 343.0]$$
+$$ [L,U] = \left[322.59 - 1.96 \times \frac{50}{\sqrt{23}},\ 322.59 + 1.96 \times \frac{50}{\sqrt{23}}\right] \approx [302.2,\ 343.0] $$
+
+<!-- REVISE: connect to Chapter 7's convenience-sample limitation. The interval
+quantifies sampling uncertainty under the model, not whether one class represents
+everyone. No reference/null mean is needed to calculate this interval.
+FIGURE SCAFFOLD: ciClassData should be a dot and interval on a reaction-time
+axis, not a shaded sampling distribution centered on the observed M. -->
 
 {{< interactive-figure
   ciClassData
@@ -100,22 +162,33 @@ $$\mu = M \pm z \times \sigma_M = 322.59 \pm 1.96 \times 10.43 = [302.2,\ 343.0]
 >}}
 
 {{< include quizzes/10-confidence-intervals-ci.qmd >}}
-### Interpreting the Confidence Interval
+## Confidence across repeated samples {#sec-ci-coverage}
 
-It's important to be clear about what the confidence interval does and does not tell us. Again, it primarily indicates the precision of a parameter estimate. It does not say we are 95% sure the true population mean is within this range. It's easy to get confused about this because it would be so natural to take it as an indication that the true population mean must be within the confidence interval. But like alpha and the Type I error, we're admitting that 5% of the time (or whatever we choose as our criterion for "quite unlikely"), the unlikely thing will happen. For the most part, the true population mean is something we can just never have concrete knowledge of. As Jerzy Neyman, the statistician who developed confidence intervals, put it: "The parameter is an unknown constant and no probability statement concerning its value may be made."
+Returning to our deck, the average of this population ($\mu$) is 7.00, and the standard deviation ($\sigma$) is 3.74. The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter — that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against the truth. Each card is replaced before the next draw. We use the known deck standard deviation in the same $z$-interval formula as before; because the card population is discrete rather than normal, its coverage is approximate.
 
-<!-- [Possible typo: "Nyman" in original audio should be "Neyman"] -->
+<!-- TUTORIAL SCAFFOLD — Part 2: give the interval its long-run meaning
+The implementation now uses known sigma=sqrt(14) and normal critical values;
+the earlier t-interval implementation has already been replaced.
+- Reconnect to the opening's samples and question; now add interval bars.
+- Keep mu fixed while samples and their intervals vary.
+- Distinguish more simulated samples (stabilizes observed coverage) from more
+  cards per sample (changes precision and the normal approximation).
+- At n=5 do not promise exact nominal coverage. Consider starting the full
+  coverage demonstration at n=30, or add a normal-population mode when exact
+  coverage is the teaching goal. Do not silently switch populations.
+- Keep null-test decisions out of this first explanation; return to them only
+  after the width tutorial, in the matching-test section.
+-->
 
-A deck of playing cards is a known population consisting of the numbers 1 through 13 repeated 4 times, once for each suit. The average of this population ($\mu$) is 7.00, and the standard deviation ($\sigma$) is 3.74. The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter — that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against the truth.
 
-:::::: {.callout-tip .interactive}
+:::::: {.callout-tip .interactive #act-ci-coverage}
 ## Explore confidence interval coverage
 
 {{< interactive-figure
   ciCoverage
   makeConfidenceIntervalExplorer
   options='{"seed":"ci-deck-v497","confidence":95,"sampleSize":5}'
-  fallback="Interactive demonstration of confidence-interval coverage: repeated samples of playing cards each produce a confidence interval around their mean, plotted against the deck's true mean of 7. Most intervals capture the true mean, some miss, and the running percentage that capture it approaches the stated confidence level."
+  fallback="Interactive demonstration of confidence-interval coverage: repeated samples of playing cards each produce a confidence interval around their mean, plotted against the deck's true mean of 7. Most intervals capture the true mean, some miss, and the running percentage estimates this approximate interval method's coverage."
 >}}
 
 :::: {.callout-footer}
@@ -128,48 +201,68 @@ Each sample produces an estimate of the population parameter with a margin of un
 :::
 
 ::: {.tutorial-step data-title="Draw more" data-action='{"confidence":95,"sample-size":5,"draw":15,"delay":250,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-The visualization really is sampling from a fair deck with a mean of 7. But as you'll see, some of the confidence intervals don't include the true population mean. Sample 7 is one: it just so happened that we obtained a sample whose confidence interval didn't contain $\mu$.
+The visualization really is sampling from a fair deck with a mean of 7. But some samples produce confidence intervals that don't include the true population mean. Draw more and look for intervals that miss $\mu$.
 :::
 
 ::: {.tutorial-step data-title="Long run" data-action='{"confidence":95,"sample-size":5,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-The confidence interval is a statement about repeated, long-run probabilities: if we sample from a population repeatedly, the proportion of confidence intervals which include the true population mean will be equal to the specified level of confidence. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples here, that proportion is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it's not quite true.
+The confidence interval is a statement about repeated, long-run probabilities: if we sample from a population repeatedly, the proportion of confidence intervals which include the true population mean approaches the method's coverage. Under the normal, known-$\sigma$ model this is the specified confidence level; for these card samples it is approximate. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples here, that proportion is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it's not quite true.
 :::
 
 ::: {.tutorial-step data-title="80% CI" data-action='{"confidence":80,"sample-size":5,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
 For example, if we compute an 80% CI for each sample, around 80% of those CIs will include the population mean — here, {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident.
 :::
 
-::: {.tutorial-step data-title="Decisions" data-action='{"confidence":95,"sample-size":5,"draw":400,"show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
-Maybe that sounds a bit disappointing. Surely the whole point of taking a sample is to be able to say something about the population it came from? Well, yes — this is where confidence intervals connect to null hypothesis significance testing. Let's say we suspect that someone has removed some cards from our deck and so its population mean is not, in fact, 7. The null hypothesis, that our deck hasn't been tampered with, would be that $\mu = 7$: if the null value lies outside our confidence interval, we reject the null hypothesis; if it's inside, we don't reject it. This deck really is fair, so each of the {{< interactive-value ciCoverage.missCount format=".0f" >}} rejections here would be a mistake — a Type I error.
-:::
-
 ::: {.tutorial-step data-title="Sample size" data-action='{"confidence":95,"sample-size":30,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With 30 cards per sample, every interval narrows — but the proportion including $\mu$ still matches the specified confidence: {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%.
+Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With the same known population standard deviation and confidence level, intervals from samples of 30 are narrower than those from samples of five. The observed proportion including $\mu$ here is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%.
 :::
 
 ::: {.tutorial-step data-title="Real research" data-action='{"confidence":95,"sample-size":5,"draw":400,"show-mu":false,"show-cards":true,"show-decision":false,"animate":false,"controls-open":true}'}
-With the dashed line hidden, this is what real research looks like: the true population mean is something we can just never have concrete knowledge of. Under the frequentist approach, the population parameter is a fixed constant, and we can't make probabilistic statements about constants. So strictly speaking, the CI for a single sample reflects the uncertainty in that sample's estimate of the parameter, rather than uncertainty about the true value of the parameter. Open the controls and keep drawing.
+With the dashed line hidden, we can see the intervals but can't check which ones contain the true mean. In real research, we generally don't know that mean. The confidence level describes the method's repeated-sampling coverage. Open the controls and keep drawing.
 :::
 ::::
 
 ::::::
 
-### Factors Affecting the Width of a Confidence Interval
+### Interpreting the confidence interval
+
+It's important to be clear about what the confidence interval does and does not tell us. Again, it primarily indicates the precision of a parameter estimate. It does not say we are 95% sure the true population mean is within this range. It's easy to get confused about this because it would be so natural to take it as an indication that the true population mean must be within the confidence interval. But like alpha and the Type I error, we're admitting that 5% of the time (or whatever we choose as our criterion for "quite unlikely"), the unlikely thing will happen.
+
+<!-- ADD HISTORY: Neyman (1937), after the coverage demonstration has made
+his problem intelligible. Explain coverage as a property of the procedure;
+connect to Chapters 8–9's long-run error rates. Prefer a short paraphrase.
+The former quotation omitted its parameter symbol and an exception clause;
+do not restore it as an exact quote without checking the original p.349.
+Source: https://wwwusers.ts.infn.it/~milotti/Didattica/StatisticaAvanzata/Neyman_1937.pdf
+REVISE INTERPRETATION: qualify "5% of the time" by the model and repeated
+sampling. Avoid a universal ban on probability statements about parameters:
+that is frequentist framing, not a dismissal of Bayesian approaches.
+Add one useful reading of an interval (estimate, width, compatible magnitudes),
+not only what 95% does NOT mean; neither 95% of people nor 95% of future means.
+-->
+
+## What affects interval width? {#sec-ci-width}
 
 It's worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our class reaction time interval: $M = 322.59$, $\sigma_M = 10.43$, and a 95% interval of $[302.2,\ 343.0]$.
 
 :::::: {.callout-tip .interactive #act-ci-width}
 ## What changes the interval's width?
 
+<!-- FIGURE SCAFFOLD: retain the existing controlled comparisons and fixed axes,
+but replace the sample-centered curve with an interval bar. The curve is not a
+known sampling distribution or a posterior distribution of mu.
+OPTIONAL PAYOFF after this tutorial: plan for precision. At sigma=50, a 95%
+margin <=10ms requires n >= (1.96*50/10)^2=96.04, so round up to n=97.
+This is a different planning goal from power for a specified alternative. -->
+
 {{< interactive-figure ciWidth makeConfidenceWidthExplorer options='{}' fallback="A sample-centered normal curve and blue confidence interval change as confidence level, sample size, and population variability change. The axes stay fixed so interval widths can be compared directly." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="95% confidence" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true}'}
-The most obvious factor is the confidence level desired — for example, 80%, 95%, or 99%. More confidence (for example, choosing 99% rather than 95%) increases the width of the confidence interval. Less confidence (choosing an 80% confidence interval) decreases the interval width. This is a little bit counterintuitive, because by increasing our confidence from, say, 95% to 99%, we're actually lowering the precision of our estimate.
+The most obvious factor is the confidence level desired — for example, 80%, 95%, or 99%. More confidence (for example, choosing 99% rather than 95%) increases the width of the confidence interval. Less confidence (choosing an 80% confidence interval) decreases the interval width. Increasing the confidence level widens the reported interval; it does not change the sample mean or its standard error.
 :::
 
 ::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="80% confidence" data-action='{"confidence":80,"n":23,"population-sd":50,"animate":true}'}
-Another way to think about this is that we could have a 100% confidence interval: we'd say that 100% of sample means will be between minus infinity and plus infinity, but obviously that wouldn't be a very useful confidence interval. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the class data, an 80% interval uses $z = \pm 1.28$ instead of $\pm 1.96$, shrinking the interval from about 41 milliseconds wide to about 27.
+Another way to think about this is that we could have a 100% confidence interval: we'd include every possible population mean, from minus infinity to plus infinity, but obviously that wouldn't be a very useful confidence interval. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the class data, an 80% interval uses $z = \pm 1.28$ instead of $\pm 1.96$, shrinking the interval from about 41 milliseconds wide to about 27.
 :::
 
 ::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="23 students" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true}'}
@@ -177,7 +270,7 @@ Sample size will affect the precision of our confidence interval as well. As you
 :::
 
 ::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="100 students" data-action='{"confidence":95,"n":100,"population-sd":50,"animate":true}'}
-If our class had $n = 100$ students instead of 23, the standard error would drop from $50 / \sqrt{23} = 10.43$ to $50 / \sqrt{100} = 5.00$, and the 95% interval would narrow from about 41 milliseconds wide to under 20 — a more precise estimate at the same level of confidence. Notice that the whole sampling distribution gets narrower, and the interval narrows with it.
+If our class had $n = 100$ students instead of 23, the standard error would drop from $50 / \sqrt{23} = 10.43$ to $50 / \sqrt{100} = 5.00$, and the 95% interval would narrow from about 41 milliseconds wide to under 20 — a more precise estimate at the same level of confidence. The standard error is smaller, so the interval is narrower. We hold the sample mean fixed here to isolate the change in width.
 :::
 
 ::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 50 ms" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true}'}
@@ -185,23 +278,32 @@ Finally, the variability of the population matters too. The standard error of th
 :::
 
 ::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 25 ms" data-action='{"confidence":95,"n":23,"population-sd":25,"animate":true}'}
-If reaction times had a standard deviation of 25 milliseconds rather than 50, the standard error for our class of 23 would be 5.21 instead of 10.43, and the interval would be about half as wide. Unlike the confidence level and the sample size, though, this isn't something the researcher gets to choose: the population's variability is whatever it is.
+If reaction times had a standard deviation of 25 milliseconds rather than 50, the standard error for our class of 23 would be 5.21 instead of 10.43, and the interval would be about half as wide. Here we're changing the population variability while holding the other inputs fixed.
 :::
 
 ::::
 ::::::
 
-### Confidence Intervals and Hypothesis Testing
+## Confidence intervals and hypothesis testing {#sec-ci-nhst}
 
 Finally, if you really want a deep understanding of null hypothesis significance testing and confidence intervals, you'll spend some time trying to grasp how they correspond to one another. It can be tricky to get your head around, but they each apply the same basic logic from different perspectives.
 
-The $p$ value and the confidence interval will always agree about statistical significance if the confidence interval is $1 - \alpha$. For example, if alpha is 0.05 and you specify a 95% confidence interval: if $p < \alpha$ for the hypothesis test, then the confidence interval will not contain the null hypothesis expected mean. Or to put it another way, if the confidence interval range does not contain the null hypothesis value, then you know that the results are statistically significant. In this sense, as the card-deck visualization above showed, the interpretation of any single confidence interval is most closely related to the binary decision about the null hypothesis.
+A two-sided test and a matching $100(1 - \alpha)\%$ confidence interval agree about statistical significance when they use the same model and standard error. For example, if alpha is 0.05 and you specify a 95% confidence interval: if $p < \alpha$ for the hypothesis test, then the confidence interval will not contain the null hypothesis expected mean. Or to put it another way, if the confidence interval range does not contain the null hypothesis value, then you know that the results are statistically significant. <!-- REVISE: checking whether the interval contains the selected null value
+reproduces that test's binary decision. Do not make this the interval's main
+interpretation; the next section will ask about magnitude and precision. -->
 
 Maybe you already kind of realize why this is the case. Both the alpha level and the confidence level define a distance from a mean to a limit. When alpha corresponds to confidence — when we have alpha .05 and 95% confidence — the distances in both cases are exactly the same. The only difference is that the null hypothesis looks for the distance from the null hypothesis mean to the alpha limit, while the confidence interval looks for the distance from the point estimate to the confidence limit.
 
-This is hard to grasp, so let's look at it visually, using our class reaction time data one more time. The null hypothesis perspective is to focus on the distance from the mean of the null distribution to the edge of the critical region. With an alpha of 0.05, this spans 47.5% of the distribution if we're just looking in one direction. If the sample mean is beyond that boundary, we declare a statistically significant result. The confidence interval perspective is to focus on the distance from the point estimate (which is the sample mean) to the edge of the confidence interval. With a 95% confidence interval, that once again corresponds to 47.5% of the distribution if we're looking in just one direction.
+This is hard to grasp, so let's look at it visually, using our class reaction time data one more time. The null hypothesis perspective is to focus on the distance from the mean of the null distribution to the edge of the critical region. With an alpha of 0.05, this spans 47.5% of the distribution if we're just looking in one direction. If the sample mean is beyond that boundary, we declare a statistically significant result. The confidence interval perspective is to focus on the distance from the point estimate (which is the sample mean) to the edge of the confidence interval. For a 95% interval, that distance is also $1.96 \times \sigma_M$.
 
-::::: {.callout-tip .interactive}
+<!-- TUTORIAL MODIFICATION: ciNhst should retain the null sampling curve but
+show the estimate and CI as a dot and interval. The current sample-centered blue
+curve is only a construction aid, not a probability distribution for mu.
+Reinforce Chapter 8's preselected direction: this correspondence is for matching
+two-sided procedures. Do not imply a one-sided .05 test matches a two-sided 95% CI.
+-->
+
+::::: {.callout-tip .interactive #act-ci-nhst}
 ## Explore the CI–hypothesis test correspondence
 
 {{< interactive-figure
@@ -221,7 +323,7 @@ Significance is really a statement about distance. The arrow marks the span from
 :::
 
 ::: {.tutorial-step data-title="CI view" data-action='{"m":322.59,"n":23,"confidence":95,"show-null":false,"show-ci":true,"show-distances":true,"animate":true}'}
-Now the confidence interval perspective on the very same data. The blue distribution is centered on the point estimate $M$, and the shaded middle 95% is the confidence interval: [{{< interactive-value ciNhst.ciLower format=".1f" >}}, {{< interactive-value ciNhst.ciUpper format=".1f" >}}]. The arrow from $M$ to the interval's edge is $1.96 \times \sigma_M$ again — exactly the same distance as before, measured from the other mean. The null value (the red dot at 284) sits outside the interval.
+Now the confidence interval perspective on the very same data. The interval is centered on the point estimate $M$: [{{< interactive-value ciNhst.ciLower format=".1f" >}}, {{< interactive-value ciNhst.ciUpper format=".1f" >}}]. The arrow from $M$ to the interval's edge is $1.96 \times \sigma_M$ again — exactly the same distance as before, measured from the other mean. The null value (the red dot at 284) sits outside the interval.
 :::
 
 ::: {.tutorial-step data-title="Both" data-action='{"m":322.59,"n":23,"confidence":95,"show-null":true,"show-ci":true,"show-distances":true,"animate":true}'}
@@ -229,17 +331,91 @@ Put both pictures together and the correspondence is clear: the two arrows are t
 :::
 
 ::: {.tutorial-step data-title="Not significant" data-action='{"m":300,"n":23,"confidence":95,"show-null":true,"show-ci":true,"show-distances":true,"animate":true}'}
-Here's what a non-significant result looks like. If the class mean had been 300 ms, it would sit inside the critical boundaries ({{< interactive-math "p =" ciNhst.p format=".3f" >}}), and — correspondingly — the confidence interval [{{< interactive-value ciNhst.ciLower format=".1f" >}}, {{< interactive-value ciNhst.ciUpper format=".1f" >}}] now includes the null hypothesis mean of 284. The two perspectives always agree.
+Here's what a non-significant result looks like. If the class mean had been 300 ms, it would sit inside the critical boundaries ({{< interactive-math "p =" ciNhst.p format=".3f" >}}), and — correspondingly — the confidence interval [{{< interactive-value ciNhst.ciLower format=".1f" >}}, {{< interactive-value ciNhst.ciUpper format=".1f" >}}] now includes the null hypothesis mean of 284. The two matching procedures agree.
 :::
 
 ::: {.tutorial-step data-title="Explore" data-action='{"m":300,"n":23,"confidence":95,"show-null":true,"show-ci":true,"show-distances":true,"controls-open":true,"animate":true}'}
-Open the controls and drag the sample mean back and forth. Watch for the moment $M$ crosses the critical boundary: the $p$ value crosses $\alpha = .05$ at exactly the moment the confidence interval slides off the null mean. Changing the sample size or the confidence level moves both boundaries in lockstep, so the two decisions can never disagree.
+Open the controls and drag the sample mean back and forth. Watch for the moment $M$ crosses the critical boundary: the $p$ value crosses $\alpha = .05$ at exactly the moment the confidence interval slides off the null mean. Changing the sample size or the confidence level moves both boundaries in lockstep, so these matching procedures continue to agree.
 :::
 ::::
 
 :::::
 
-So we reject the null because the sample mean is far enough away from the null population mean — it's one of the most extreme means for that distribution, one of the 5% of least common means — and correspondingly, the null hypothesis mean is not contained within the 95% confidence interval. It is one of the most extreme means for the population that produced the confidence interval, one of the 5% of least common means. This is a subtle idea and it's hard to intuitively grasp. But if you really want to understand this, you'll spend some time dwelling on it.
+So we reject the null because the sample mean is far enough away from the null population mean. Correspondingly, the null hypothesis mean is not contained within the 95% confidence interval. Both decisions use the same distance, $1.96 \times \sigma_M$.
+
+<!-- RELOCATED CARD-DECISION MATERIAL — optional callback here, after the
+correspondence, rather than inside the first coverage explanation.
+Reuse the existing ciCoverage show-decision capability if this earns its place.
+Test H0: mu=7, NOT "the deck has not been tampered with": changing a deck can
+preserve its mean. Under the known fair-deck simulation, rejecting this true null
+is a Type I error; nominal alpha is approximate for the discrete card model.
+The former "Decisions" step's purpose belongs here, not in interpreting coverage.
+-->
+
+## What does the interval add? {#sec-ci-meaning}
+
+<!-- ADD — substantive prose still to draft:
+- Make test/CI correspondence a hinge, not the chapter's final destination.
+  Checking only zero/the null is the same decision; use the rest of the interval.
+- Return to Chapter 9's banana example. Same estimate (+1 SAT point), different n:
+  n=50,000 gives an approximate 95% CI for the difference [0.12,1.88];
+  n=1,000 gives [-5.20,7.20], under the existing known-sigma=100 model.
+- Compare magnitude and precision, then consider a clearly hypothetical,
+  independently chosen meaningful benefit (e.g. 5 points). Do not claim that
+  5 is an established SAT threshold or that small effects never matter.
+- Optional second contrast: two zero-containing intervals [-10,10] and [-1,1]
+  with meaningful effects >=3 in magnitude. Both are nonsignificant, but they
+  leave very different uncertainty about meaningful effects.
+FIGURE SCAFFOLD: aligned dot-and-interval bars, shared raw-unit axis, zero and
+meaningful threshold. Significance should not be the only visual distinction.
+LEARNER TASK: interpret what remains compatible, not just whether zero is inside.
+-->
+
+## Beyond a significant result {#sec-ci-debate}
+
+<!-- ADD HISTORY / CONTEMPORARY DEBATE — select, do not include every item:
+- Recall Fisher (Chapter 8) and Cohen (Chapter 9); avoid repeating their biographies.
+  Neyman/Pearson's long-run testing and Neyman's interval construction share roots:
+  CIs were not recently invented as an escape from testing.
+- After the examples above, use a short Cohen/Meehl -> estimation/reporting thread
+  to explain why researchers debated what a significant result actually tells us.
+- Contrast dated proposals: lower alpha (Benjamin et al., 2018), justify alpha
+  (Lakens et al., 2018), or stop making categorical significance claims
+  (Amrhein, Greenland & McShane, 2019). Include the ASA 2016 cautions and the
+  2021 president's task-force defense of well-used tests as distinct positions.
+- Shared problem: no cutoff or display substitutes for reasoning about design,
+  measurement, selection, effect magnitude, and uncertainty. CIs can become
+  "NHST with whiskers" if readers only inspect null inclusion.
+- Optional method preview: equivalence asks about prespecified negligible bounds;
+  nonsignificance alone does not establish equivalence. Do not teach the mechanics
+  here unless explaining why TOST at alpha=.05 uses a matching 90% CI.
+- Optional Bayesian sidebar: probability about parameters requires an explicit
+  model/prior; it is not ruled out by the frequentist interpretation taught here.
+- End positively: estimates/intervals, transparent plans, complete reporting,
+  replication, and design all help; none repairs every inferential problem.
+Source leads for later prose/citations (not yet added to the bibliography):
+  ASA 2016: https://doi.org/10.1080/00031305.2016.1154108
+  Amrhein et al. 2019: https://www.nature.com/articles/d41586-019-00857-9
+  ASA task force 2021: https://magazine.amstat.org/blog/2021/08/01/task-force-statement-p-value/
+  Lakens 2017 equivalence: https://doi.org/10.1177/1948550617697177
+Keep this a short synthesis anchored in the chapter's examples, not a catalogue.
+-->
+
+## Looking ahead
+
+<!-- ADD brief synthesis and Chapter 11 bridge:
+- What is estimated? How much uncertainty? Which meaningful values remain?
+  What cannot be concluded from the design or sample, however narrow the CI?
+- So far sigma has been supplied. In Chapter 11, use the same class data to
+  estimate variability and construct a t interval; interpretation still matters.
+-->
+
+<!-- LEARNING CHECKS — revise in a later assessment pass:
+Current included questions concern z/significance, not representative CI coverage.
+Replace most with coverage interpretation, width predictions, matching two-sided
+CI/test correspondence, biased-sample limits, and meaningful-range interpretation.
+Keep a little delayed retrieval only if it has a clear job. Do not require the
+reader to complete a quiz to obtain an essential explanation. -->
 
 
 {{< include quizzes/10-confidence-intervals-learning-checks.qmd >}}
