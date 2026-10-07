@@ -195,57 +195,65 @@ The amount we subtract and add, $z \times \sigma_M$, is the margin of error. Cho
 sigma and fixed n. Test inversion is more general, but not every confidence
 interval is symmetric or obtained by translating a fixed-width bracket. -->
 
-### Example: Class Reaction Time Data
+### Example: How much do students sleep?
 
-Let's practice calculating a confidence interval for some real data: the reaction times of a class of $n = 23$ students who took the humanbenchmark.com reaction time test. That's the same test we used back in Chapter 5, where we imagined having Spider-Man take the test. (None of the 23 students who contributed this data were bitten by radioactive spiders, as far as I know.) As we have before, we'll assume that this test produces a population of normally distributed scores with a known standard deviation of $\sigma = 50$ milliseconds (remembering that I just made that up; those are not the actual population characteristics for the test).
+Let's practice calculating a confidence interval for some real data: a sample of $n = 32$ students in my statistics class who reported how many hours of sleep they got the previous night. Their average was $M = 7.31$ hours.
 
-The class's average came out at $M = 322.59$ milliseconds. That sample mean is our point estimate---but how precisely does it estimate the mean of the population that our class represents? Under that known-standard-deviation assumption, the standard error of the mean is $\sigma_M = 50 / \sqrt{23} = 10.43$.
+That mean becomes our point estimate of the population mean. What population mean are we estimating? We should be careful not to overclaim, suggesting that this is some universal average sleep duration or something. Rather, we're estimating something like the average amount of sleep of students like these. The confidence interval will tell us how precise that estimate is.
 
-The first step is to specify the $z$ values for the boundaries of the confidence interval. That is, we need to decide on our desired confidence and find the $z$ scores which divide the distribution up in that way. Say we want a 95% confidence interval. We need the $z$ scores that cut off the lowest and highest 2.5% of the normal distribution, leaving 95% in the middle. That gives us $\pm 1.96$, the same values that mark out the two-tailed critical regions for $\alpha = .05$.
+To calculate it, we just need three ingredients: the sample mean, the standard error of the mean, and the $z$ value for our chosen confidence level.
 
-Now we can put those values into the equation with our sample mean and standard error of the mean. You should get two interval endpoints; allowing for rounding error, you should have gotten something like 302 and 343.
+1. **The sample mean** we already have: $M = 7.31$.
 
-$$ [L,U] = \left[322.59 - 1.96 \times \frac{50}{\sqrt{23}},\ 322.59 + 1.96 \times \frac{50}{\sqrt{23}}\right] \approx [302.2,\ 343.0] $$
+2. **The standard error of the mean.** We'll assume that students' hours of sleep are normally distributed, with a known standard deviation of $\sigma = 1.5$ hours. (Why? I just made it up, that's why.) So the standard error is
+$$ \sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{1.5}{\sqrt{32}} = 0.265 $$
 
-This interval expresses sampling uncertainty under our assumed model. It does not establish that our convenience sample of one class represents everyone whose reaction times we might want to study. No reference or null mean was needed to calculate it.
+3. **The $z$ value.** Say we want a 95% confidence interval. As we saw above, that means $z = 1.96$: the $z$-score that leaves 2.5% of the normal distribution in each tail, and 95% in the middle.
 
-{{< interactive-figure ciClassData makeIntervalDiagram options='{"m":322.59,"sigma":50,"n":23,"xDomain":[280,365],"units":"Mean reaction time (ms)"}' fallback="The class mean is 322.59 ms; its 95% interval extends from approximately 302.2 to 343.0 ms." >}}
+Now we can plug them into the equations to find the upper and lowerlimits. The margin of error is $z \times \sigma_M = 1.96 \times 0.265 = 0.52$, and we subtract it from, and add it to, the sample mean:
+
+$$ \text{lower limit} = 7.31 - 1.96 \times 0.265 = 6.79 \qquad \text{upper limit} = 7.31 + 1.96 \times 0.265 = 7.83 $$
+
+So the 95% confidence interval for students' mean hours of sleep runs from about 6.8 to 7.8 hours. Notice that we didn't need a null hypothesis to calculate it: just the data, the known $\sigma$, and our chosen confidence level. (We'll compare it to a specific null value later in the chapter.)
+
+This interval expresses sampling uncertainty under our assumed model. It does not establish that one class's convenience sample represents all the students whose sleep we might want to study.
+
+{{< interactive-figure ciSleepData makeIntervalDiagram options='{"m":7.31,"sigma":1.5,"n":32,"xDomain":[6.2,8.4],"units":"Mean hours of sleep"}' fallback="The class mean is 7.31 hours; its 95% interval extends from approximately 6.79 to 7.83 hours." >}}
 
 {{< include quizzes/10-confidence-intervals-ci.qmd >}}
 
 ## Factors affecting CI width {#sec-ci-width}
 
-Having calculated one realistic confidence interval for the class reaction times, it's worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our class reaction time interval: $M = 322.59$, $\sigma_M = 10.43$, and a 95% interval of $[302.2,\ 343.0]$, and explores how changing one factor affects the width of the confidence interval.
+Having calculated one realistic confidence interval for students' sleep, it's worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our sleep interval: $M = 7.31$, $\sigma_M = 0.265$, and a 95% interval of $[6.79,\ 7.83]$, and explores how changing one factor affects the width of the confidence interval.
 
 :::::: {.callout-tip .interactive #act-ci-width}
 ## What changes the interval's width?
 
-
-{{< interactive-figure ciWidth makeIntervalDiagram options='{"mode":"width","m":322.59,"sigma":50,"n":23,"units":"Mean reaction time (ms)"}' fallback="An interval around 322.59 ms widens or narrows as sliders change the confidence level, sample size, and population standard deviation. The point estimate and axis stay fixed." >}}
+{{< interactive-figure ciWidth makeIntervalDiagram options='{"mode":"width","m":7.31,"sigma":1.5,"n":32,"xDomain":[5.3,9.3],"nRange":[5,150,1],"sigmaRange":[0.5,3,0.05],"units":"Mean hours of sleep"}' fallback="An interval around 7.31 hours widens or narrows as sliders change the confidence level, sample size, and population standard deviation. The point estimate and axis stay fixed." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="95% confidence" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true,"show-controls":["confidence"]}'}
+::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="95% confidence" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["confidence"]}'}
 The most obvious factor is the confidence level desired — for example, 80%, 95%, or 99%. More confidence (for example, choosing 99% rather than 95%) increases the width of the confidence interval. Less confidence (choosing an 80% confidence interval) decreases the interval width. Increasing the confidence level widens the reported interval; it does not change the sample mean or its standard error. Move the confidence slider and watch the interval.
 :::
 
-::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="80% confidence" data-action='{"confidence":80,"n":23,"population-sd":50,"animate":true,"show-controls":["confidence"]}'}
-Another way to think about this is that we could have a 100% confidence interval: we'd include every possible population mean, from minus infinity to plus infinity, but obviously that wouldn't be a very useful confidence interval. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the class data, an 80% interval uses $z = \pm 1.28$ instead of $\pm 1.96$, shrinking the interval from about 41 milliseconds wide to about 27.
+::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="80% confidence" data-action='{"confidence":80,"n":32,"population-sd":1.5,"animate":true,"show-controls":["confidence"]}'}
+Another way to think about this is that we could have a 100% confidence interval: we'd include every possible population mean, from minus infinity to plus infinity, but obviously that wouldn't be a very useful confidence interval. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the sleep data, an 80% interval uses $z = 1.28$ instead of $1.96$, shrinking the interval from about 1.04 hours wide to about 0.68.
 :::
 
-::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="23 students" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true,"show-controls":["n"]}'}
+::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="32 students" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["n"]}'}
 Sample size will affect the precision of our confidence interval as well. As you know, by and large, larger samples result in a smaller standard error of the mean, which will result in a narrower interval. On the other hand, a smaller sample means a larger standard error, meaning less precision. Move the sample size slider and watch the interval.
 :::
 
-::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="100 students" data-action='{"confidence":95,"n":100,"population-sd":50,"animate":true,"show-controls":["n"]}'}
-If our class had $n = 100$ students instead of 23, the standard error would drop from $50 / \sqrt{23} = 10.43$ to $50 / \sqrt{100} = 5.00$, and the 95% interval would narrow from about 41 milliseconds wide to under 20 — a more precise estimate at the same level of confidence. The standard error is smaller, so the interval is narrower. We hold the sample mean fixed here to isolate the change in width.
+::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="128 students" data-action='{"confidence":95,"n":128,"population-sd":1.5,"animate":true,"show-controls":["n"]}'}
+If our class had $n = 128$ students instead of 32, the standard error would drop from $1.5 / \sqrt{32} = 0.265$ to $1.5 / \sqrt{128} = 0.133$, and the 95% interval would narrow from about 1.04 hours wide to 0.52 — a more precise estimate at the same level of confidence. Notice that it took four times as many students to make the interval half as wide, because the standard error depends on the *square root* of $n$. The standard error is smaller, so the interval is narrower. We hold the sample mean fixed here to isolate the change in width.
 :::
 
-::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 50 ms" data-action='{"confidence":95,"n":23,"population-sd":50,"animate":true,"show-controls":["sigma"]}'}
+::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 1.5 hours" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["sigma"]}'}
 Finally, the variability of the population matters too. The standard error of the mean depends on the population standard deviation, $\sigma_M = \sigma / \sqrt{n}$, so a less variable population produces a smaller standard error and a narrower interval from the same sample size. Move the population standard deviation slider and watch the interval.
 :::
 
-::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 25 ms" data-action='{"confidence":95,"n":23,"population-sd":25,"animate":true,"show-controls":["sigma"]}'}
-If reaction times had a standard deviation of 25 milliseconds rather than 50, the standard error for our class of 23 would be 5.21 instead of 10.43, and the interval would be about half as wide. Here we're changing the population variability while holding the other inputs fixed.
+::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 0.75 hours" data-action='{"confidence":95,"n":32,"population-sd":0.75,"animate":true,"show-controls":["sigma"]}'}
+If students' sleep had a standard deviation of 0.75 hours rather than 1.5, the standard error for our class of 32 would be 0.133 instead of 0.265, and the interval would be half as wide. Here we're changing the population variability while holding the other inputs fixed.
 :::
 
 ::::
@@ -355,7 +363,7 @@ not only what 95% does NOT mean; neither 95% of people nor 95% of future means.
 
 The card tutorial showed the connection: a mean outside the null's critical range produces an interval that excludes that null value. This equivalence applies to **matching two-sided procedures**, using the same model and standard error. A two-sided 95% interval corresponds to a two-sided test with $\alpha=.05$, not a one-sided test at that level.
 
-For the class example, the interval $[302.2,343.0]$ excludes the null value of 284 ms used earlier. The matching test rejects it. But the interval also shows the scale and precision of the estimate, which a yes-or-no verdict leaves out.
+We can see the same correspondence with the sleep data. You've probably heard that people should get 8 hours of sleep a night. Suppose we use that as a reference value and test whether our students' population mean differs from it, $H_0: \mu = 8$, two-tailed with $\alpha = .05$. The test gives $z = (7.31 - 8) / 0.265 = -2.60$, beyond the critical value of $-1.96$, so we reject the null. The 95% interval tells us the same thing at a glance: 8 lies outside $[6.79, 7.83]$. But the interval also tells us something the test doesn't: how *much* less. The population means compatible with our data are roughly 0.17 to 1.21 hours less than 8 hours a night: somewhere between about 10 and 70 minutes short.
 
 For the cards we actually know the population mean is 7. Sample C's interval excludes that true value: the matching rejection would be a Type I error. In research we generally do not know whether a rejection is mistaken. Likewise, an interval containing a null value means we fail to reject it; it does not prove that value is correct.
 
@@ -427,7 +435,7 @@ Keep this a short synthesis anchored in the chapter's examples, not a catalogue.
 - Recall B/C: equal n and known sigma meant equal interval widths despite
   different sample spreads. When sigma is unknown, sample variability will
   enter the estimate of standard error as well.
-- So far sigma has been supplied. In Chapter 11, use the same class data to
+- So far sigma has been supplied. In Chapter 11, use the same sleep data to
   estimate variability and construct a t interval; interpretation still matters.
 -->
 

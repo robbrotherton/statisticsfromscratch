@@ -59,10 +59,11 @@
     const domain = opts.xDomain || (opts.mode === 'width' ? [265, 380] : [1, 13]);
     const readout = root.append('p').attr('class', 'ci-diagram-readout');
     // Width mode reuses Chapter 9's factor sliders; steps pick which one shows.
+    // nRange and sigmaRange ([min, max, step]) fit the sliders to the example's units.
     const factors = opts.mode === 'width' ? [
       {key:'confidence', label:'Confidence level', color:blue, range:[50,99,1], tex:() => `${state.confidence}\\%\\text{ confidence}`},
-      {key:'n', label:'Sample size', color:'var(--graph-series-3, #009e73)', range:[5,100,1], tex:() => `n = ${state.n}`},
-      {key:'sigma', label:'Population standard deviation', color:'var(--graph-series-2, #e69f00)', range:[10,100,1], tex:() => `\\sigma = ${state.sigma}`}
+      {key:'n', label:'Sample size', color:'var(--graph-series-3, #009e73)', range:opts.nRange || [5,100,1], tex:() => `n = ${state.n}`},
+      {key:'sigma', label:'Population standard deviation', color:'var(--graph-series-2, #e69f00)', range:opts.sigmaRange || [10,100,1], tex:() => `\\sigma = ${state.sigma}`}
     ] : [];
     const strip = factors.length ? root.append('div').attr('class', 'sp-factors') : null;
     for (const f of factors) {
