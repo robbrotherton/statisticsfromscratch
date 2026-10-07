@@ -110,7 +110,9 @@ Together, the point estimate and the margin of error form an **interval estimate
 
 How big should the margin of error be? To decide, we need to choose a **confidence level**. This is usually expressed as a percentage, describing how often confidence intervals will include the true population mean within their range across repeated samples. In other words, if we set our confidence level at 95%, we're saying that if we drew sample after sample from a fixed population and computed a confidence interval for each sample, in the long run 95% of the intervals would include the population's true $\mu$. If that sounds a bit abstract and confusing, don't worry. We'll return to this point later in the chapter.
 
-A higher confidence level produces a wider interval. This might sound slightly counterintuitive, but it makes sense if you think about it: if we want to be more confident that our interval captures the true population mean, we need to leave more room for the variability that comes from sampling error. A lower confidence level allows us to be less conservative, and thus we can report a narrower interval. By analogy, say I want to guess the average height of the students taking my statistics course next semester. I could guess very confidently that the average will be between 2'0" and 10'0", but I can only be highly confident because my guess covers pretty much all possibilities. I might also guess something relatively precise, like between 5'6" and 5'8", but I ought to be correspondingly less confident: there are many more ways I can be wrong.
+A higher confidence level produces a wider interval. This might sound slightly counterintuitive, but it makes sense if you think about it: if we want to be more confident that our interval captures the true population mean, we need to leave more room for the variability that comes from sampling error. A lower confidence level allows us to be less conservative, and thus we can report a narrower interval.
+
+By analogy, say I want to guess the average height of the students taking my statistics course next semester. I could guess very confidently that the average will be between 2'0" and 10'0", but I can only be highly confident because my guess covers pretty much all possibilities. I might also guess something relatively precise, like between 5'6" and 5'8", but I ought to be correspondingly less confident: there are many more ways I can be wrong. Another way to think about it is that I could propose with 100% confidence that the mean would be between minus infinity to plus infinity. I'm guaranteed to be right, but it's not a very useful guess all things considered.
 
 ## Constructing a confidence interval {#sec-ci-construction}
 
@@ -131,35 +133,27 @@ To show this logic in action, let's revisit the cards we were dealt earlier. For
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Sample A" data-action='{"sample":0,"stage":0,"animate":false}'}
-Here are the same three cards from sample A. The curve describes sample means we might observe under the null hypothesis $\mu_0 = 7$. The dot below marks what we *actually* observed: $M = 7$. The curve is a model of repeated sample means; the point is the estimate from this one sample.
+Here are the same three cards from sample A. The curve describes sample means we might observe under the null hypothesis $\mu_0 = 7$. The dot below marks what we *actually* observed: $M = 7$. The curve is a sampling distribution---a model of repeated sample means. The point is the estimate from this one sample.
 :::
 
 ::: {.tutorial-step data-title="The null range" data-action='{"sample":0,"stage":1,"animate":true}'}
-A sample mean in this range would not lead us to reject $\mu_0 = 7$. We have constructed a kind of interval, but it is not yet a confidence interval for an unknown population mean. The range runs from the lower critical value to the upper critical value, $1.96$ standard errors either side of 7.
+The space between the lower and upper critical regions is a kind of interval: the range of sample means that would not lead us to reject $\mu_0 = 7$. It's not a confidence interval, but it's related.
 :::
 
 ::: {.tutorial-step data-title="Center on the estimate" data-action='{"sample":0,"stage":2,"animate":true}'}
-Now copy that same span onto the estimate row, centered on $M$. Here $M$ happens to equal 7, so the move is straight down. The new interval, approximately $[2.77,11.23]$, contains the proposed population means that this sample would not reject with the matching two-sided test.
+If move a copy of that same range down so it is centered on $M$, it becomes a confidence interval. Here $M$ happens to equal 7, so the move is straight down. The null range represeted sample means that would fail to reject the null; this new confidence interval represents the population means that this sample would not reject with the matching two-sided test.
 :::
 
 ::: {.tutorial-step data-title="Sample B" data-action='{"sample":1,"stage":2,"animate":true}'}
-Sample B had six cards and the same mean, $M = 7$. The larger sample size results in a smaller standard error, making both the null non-rejection bracket and the confidence interval narrower. Its interval is approximately $[4.01,9.99]$, shown below A’s on the same tracker: the same point estimate, but more precise at the same confidence level.
-:::
-
-::: {.tutorial-step data-title="Sample C" data-action='{"sample":2,"stage":0,"animate":false}'}
-Sample C also had six cards, but its mean was $10.5$. The null curve stays centered on 7 and has exactly the same spread as for B. The point estimate from the sample moves. Before adding an interval, predict: should the margin on either side be wider, narrower, or the same as B's?
-:::
-
-::: {.tutorial-step data-title="Same critical distance" data-action='{"sample":2,"stage":1,"animate":true}'}
-The null bracket is still $[4.01,9.99]$. Its width depends on the known population variability, the sample size, and the chosen cutoff—not on how spread out the cards in this particular hand happen to be. Sample C's mean of $10.5$ lies beyond the upper critical value.
+Sample B had the same mean, $M = 7$, but was made of six cards. The larger sample size results in a smaller standard error of the mean. That is reflected in the null curve becoming narrower, and its interval of nonsignificant means covering a smaller range. The confidence interval becomes narrower too, centered on the same point estimate, but more precise at the same confidence level.
 :::
 
 ::: {.tutorial-step data-title="Down and across" data-action='{"sample":2,"stage":2,"animate":true}'}
-Watch the bracket move down and across to center on $10.5$, below the intervals from A and B. Its width stays unchanged, giving an interval of approximately $[7.51,13.49]$. Now 7 lies outside the interval, just as $10.5$ lay outside the null bracket. Those are the same distance comparison, viewed from opposite ends.
+Sample C was made up of six cards too, but with a mean of $M = 10.5$. The null curve doesn't change, but the confidence interval is now centered on that point estimate of $10.5$, with its margin of error either side.
 :::
 
 ::: {.tutorial-step data-title="Compare all three" data-action='{"sample":2,"stage":2,"summary":true,"animate":true}'}
-With the cards and null model hidden, the same three intervals remain for comparison. A and B have the same estimate but different precision. B and C have equal precision but different estimates. Two intervals include 7; one does not. These examples were selected for comparison, so two out of three does not tell us the method's capture rate. We will investigate that with an unfiltered run of random samples.
+Compariing the three confidence intervals, A and B have the same estimate but different precision as a result of B's larger sample size. B and C have equal precision but different estimates, because of their different sample means. Two intervals include 7; one does not.
 :::
 ::::
 ::::::
@@ -238,15 +232,15 @@ The most obvious factor is the confidence level we choose — for example, 80%, 
 :::
 
 ::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="80% confidence" data-action='{"confidence":80,"n":32,"population-sd":1.5,"animate":true,"show-controls":["confidence"]}'}
-Another way to think about this is that we could have a 100% confidence interval: we'd include every possible population mean, from minus infinity to plus infinity, but obviously that wouldn't be a very useful confidence interval. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the sleep data, an 80% interval uses $z = 1.28$ instead of $1.96$, shrinking the interval from about 1.04 hours wide to about 0.68.
+With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident. For the sleep data, an 80% interval uses $z = 1.28$ instead of $1.96$, shrinking the interval from about 1.04 hours wide to about 0.68.
 :::
 
 ::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="32 students" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["n"]}'}
-Sample size will affect the precision of our confidence interval as well. As you know, by and large, larger samples result in a smaller standard error of the mean, which will result in a narrower interval. On the other hand, a smaller sample means a larger standard error, meaning less precision. Move the sample size slider and watch the interval.
+Sample size will affect the precision of our confidence interval as well. Larger samples result in a smaller standard error of the mean, which will result in a narrower interval. On the other hand, a smaller sample means a larger standard error, meaning less precision. Move the sample size slider and watch the interval.
 :::
 
 ::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="128 students" data-action='{"confidence":95,"n":128,"population-sd":1.5,"animate":true,"show-controls":["n"]}'}
-If our class had $n = 128$ students instead of 32, the standard error would drop from $1.5 / \sqrt{32} = 0.265$ to $1.5 / \sqrt{128} = 0.133$, and the 95% interval would narrow from about 1.04 hours wide to 0.52 — a more precise estimate at the same level of confidence. Notice that it took four times as many students to make the interval half as wide, because the standard error depends on the *square root* of $n$. We hold the sample mean fixed here to isolate the change in width.
+If the mean of $7.31$ had come from a class of $n = 128$ students instead of 32, the standard error would drop from $1.5 / \sqrt{32} = 0.265$ to $1.5 / \sqrt{128} = 0.133$. As a result, the 95% interval would narrow from about 1.04 to 0.52 hours wide. Notice that it took four times as many students to make the interval half as wide, because the standard error depends on the *square root* of $n$.
 :::
 
 ::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 1.5 hours" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["sigma"]}'}
@@ -254,7 +248,7 @@ Finally, the variability of the population matters too. The standard error of th
 :::
 
 ::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 0.75 hours" data-action='{"confidence":95,"n":32,"population-sd":0.75,"animate":true,"show-controls":["sigma"]}'}
-If students' sleep had a standard deviation of 0.75 hours rather than 1.5, the standard error for our class of 32 would be 0.133 instead of 0.265, and the interval would be half as wide. Here we're changing the population variability while holding the other inputs fixed.
+If students' sleep had a standard deviation of 0.75 hours rather than 1.5, the standard error for our class of 32 would be 0.133 instead of 0.265, and the interval would be half as wide. It scales linearly with the population standard deviation, unlike sample size, which scales with the square root.
 :::
 
 ::::
@@ -326,23 +320,23 @@ Here is our first sample. Its mean is {{< interactive-math "M =" ciCoverage.mean
 :::
 
 ::: {.tutorial-step data-title="A second sample" data-action='{"confidence":95,"sample-size":6,"draw":2,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-A second sample gives a different mean, {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, so its interval sits in a different place: [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. The width is the same, because the sample size, $\sigma$, and confidence level haven't changed. The population mean doesn't move either; only the samples, and so the intervals, vary.
+A second sample gives a different mean. Its width is the same as the first, because the sample size, $\sigma$, and confidence level haven't changed. But this interval extends from [{{< interactive-value ciCoverage.ciLower format=".2f" >}} to {{< interactive-value ciCoverage.ciUpper format=".2f" >}}, centered at {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}]
 :::
 
 ::: {.tutorial-step data-title="Keep drawing" data-action='{"confidence":95,"sample-size":6,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Now keep drawing, one sample at a time, up to 100. Most intervals include 7, but every so often one misses, shown in red. That isn't a fault in the deck or the calculation; it is the sampling error we allowed for when we chose 95%. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples, {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of the intervals include $\mu$: not exactly 95%, and a different set of 100 samples would land a little differently again. But over the long run of repeated samples, the proportion settles near the confidence level.
+Now we'll do this for 100 samples. Most intervals include 7, but every so often one doesn't, shown in red. Those are the samples which would have resulted in rejecting the null hypothesis. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples, {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of the intervals include $\mu$, just under the expected 95%. A different set of 100 samples would land a little differently again, but over the long run of repeated samples, the proportion settles near the confidence level.
 :::
 
 ::: {.tutorial-step data-title="80% intervals" data-action='{"confidence":80,"sample-size":6,"draw":100,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Now take the same 100 samples and calculate an 80% interval for each instead. The means stay put; only the margins shrink, from $z = 1.96$ to $z = 1.28$ standard errors. Narrower intervals miss more often: now {{< interactive-value ciCoverage.captureCount format=".0f" >}} of the 100, or {{< interactive-value ciCoverage.capturePercent format=".0f" >}}%, include $\mu$. The confidence level is the long-run capture rate we chose for the method, and any one run of samples lands roughly near it.
+We could calculate an 80% interval for those same 100 samples instead. The means don't move but the margins around them shrink, from $z = 1.96$ to $z = 1.28$ standard errors. The narrower intervals miss $\mu$ more often: now {{< interactive-value ciCoverage.captureCount format=".0f" >}} of the 100, or {{< interactive-value ciCoverage.capturePercent format=".0f" >}}%, include it within their range. The confidence level is the long-run capture rate we chose for the method, and any one run of samples lands roughly near it.
 :::
 
 ::: {.tutorial-step data-title="More cards per sample" data-action='{"confidence":95,"sample-size":30,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Back to 95%, but now each sample has 30 cards instead of six. The six-card intervals fade, and new samples replace them one at a time. A larger sample has a smaller standard error, so each interval is narrower, a more precise estimate. Yet the capture rate stays close to the confidence level: {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of these intervals include $\mu$. Sample size buys precision; the confidence level sets how often the method captures $\mu$.
+Switching back to 95% CIs, we'll draw 100 new samples but with 30 cards instead of six. A larger sample has a smaller standard error, so each interval is narrower, a more precise estimate. Yet the capture rate stays close to the confidence level: {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of these intervals include $\mu$. Sample size can increase precision, whereas the confidence level sets how often the method captures $\mu$.
 :::
 
 ::: {.tutorial-step data-title="One study" data-action='{"confidence":95,"sample-size":30,"draw":100,"focus":"hit","show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
-In real research we don't get 100 samples. We get one, and we don't know $\mu$. What we do have is a null hypothesis, so the line now marks $H_0: \mu = 7$. We can't know whether it is true. Suppose ours is sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}}, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It includes 7, so the matching test would not reject $H_0$. If $H_0$ is true, that is the correct decision. If $H_0$ is false, it is a Type II error. Nothing in this one interval tells us which.
+In real research we usually don't get 100 samples, we just get one. And we don't know the true population $\mu$, we just have our hypothesis. So the line now marks $H_0: \mu = 7$. Suppose the one sample we happen to actually collect is sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}}, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It includes 7, so the matching null test would not reject $H_0$. If $H_0$ is true, that is the correct decision. If $H_0$ is false, it is a Type II error. Neither the null test nor the confidence interval can tell us which is the case.
 :::
 
 ::: {.tutorial-step data-title="A different study" data-action='{"confidence":95,"sample-size":30,"draw":100,"focus":"miss","show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
@@ -368,7 +362,7 @@ Maybe that sounds a bit disappointing. Surely the whole point of taking a sample
 
 Let's say we suspect that someone has removed some cards from our deck, and so its population mean is not, in fact, 7. Our alternative hypothesis would be that $\mu \neq 7$. The null hypothesis, that our deck hasn't been tampered with, would be that $\mu = 7$. (Strictly speaking, that's only a hypothesis about the deck's *mean*. Someone could remove a 2 and a 12 and the mean wouldn't budge.) We will reject the null hypothesis if the sample looks sufficiently unlikely to have been produced by the hypothetical null population. As you know, to quantify "sufficiently unlikely" we choose an alpha ($\alpha$) value, some low probability. That's the level of risk we're willing to accept that we're making a mistake, rejecting the null hypothesis when we shouldn't.
 
-The visualization above really is sampling from a fair deck with a mean of 7. But as you saw, some of the confidence intervals don't include the true population mean. They would cause us to reject the null hypothesis and lead us to believe that someone has indeed tampered with the cards. We'd be making a mistake; it just so happened that we obtained a sample for which the confidence interval didn't contain the true population mean---which is what we can expect to happen about 5% of the time with 95% intervals. Sample C from the start of the chapter was one of those samples: its interval excludes 7, so the matching rejection would be a Type I error. In research we generally do not know whether a rejection is mistaken. Likewise, an interval containing a null value means we fail to reject it; it does not prove that value is correct.
+The visualization above really is sampling from a fair deck with a mean of 7. But as you saw, some of the confidence intervals don't include the true population mean. They would cause us to reject the null hypothesis and lead us to believe that someone has indeed tampered with the cards. We'd be making a mistake; it just so happened that we obtained a sample for which the confidence interval didn't contain the true population mean---which is what we can expect to happen about 5% of the time with 95% intervals. Sample C from the start of the chapter was one of those samples: its interval excludes 7, so the matching rejection would be a Type I error. In real research we generally can't know whether a rejection is mistaken. Likewise, an interval containing a null value means we fail to reject it; it does not prove that value is correct.
 
 The correspondence between interval and test isn't a coincidence. A sample mean outside the null's critical range produces an interval that excludes that null value, because both depend on the same distance: how many standard errors separate $M$ from $\mu_0$. This equivalence applies to **matching two-sided procedures**, using the same model and standard error. A two-sided 95% interval corresponds to a two-sided test with $\alpha=.05$, not a one-sided test at that level.
 
