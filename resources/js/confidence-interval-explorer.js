@@ -121,7 +121,7 @@ cieEnsureStyles = () => {
 
     .confidence-interval-explorer .cie-interval line {
       stroke: var(--cie-hit);
-      stroke-width: 2.4;
+      stroke-width: var(--cie-stroke, 2.4);
       stroke-linecap: round;
       transition: stroke 300ms ease;
     }
@@ -147,6 +147,40 @@ cieEnsureStyles = () => {
 
     .confidence-interval-explorer.cie-neutral .cie-interval circle {
       fill: var(--cie-neutral);
+    }
+
+    /* Intervals left over from the previous sample size while the new run
+       replaces them, one sample at a time. */
+    .confidence-interval-explorer .cie-interval.is-ghost {
+      opacity: 0.22;
+    }
+
+    /* One interval in focus, as a researcher would see their single study:
+       the rest fade back and nothing is coloured by the (unknowable) truth. */
+    .confidence-interval-explorer.cie-focus .cie-interval {
+      opacity: 0.16;
+      transition: opacity 300ms ease;
+    }
+
+    .confidence-interval-explorer.cie-focus .cie-interval.is-focus {
+      opacity: 1;
+    }
+
+    .confidence-interval-explorer.cie-focus .cie-interval:not(.is-focus) line {
+      stroke: var(--cie-neutral);
+    }
+
+    .confidence-interval-explorer.cie-focus .cie-interval:not(.is-focus) circle {
+      fill: var(--cie-neutral);
+    }
+
+    .confidence-interval-explorer.cie-focus .cie-interval.is-focus line {
+      stroke: var(--graph-text-color, currentColor);
+      stroke-width: calc(var(--cie-stroke, 2.4) * 1.5);
+    }
+
+    .confidence-interval-explorer.cie-focus .cie-interval.is-focus circle {
+      fill: var(--graph-text-color, currentColor);
     }
 
     .confidence-interval-explorer .cie-mu-line {
@@ -357,7 +391,6 @@ makeConfidenceIntervalExplorer = function(opts) {
   const RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
   const SUITS = ["♠", "♥", "♦", "♣"];
   const RED_SUITS = new Set([1, 2]);
-  const WINDOW_SIZE = 30;
 
   const width = cieFiniteNumber(opts.width, 680);
   const height = cieFiniteNumber(opts.height, 380);
@@ -375,8 +408,13 @@ makeConfidenceIntervalExplorer = function(opts) {
     showMu: cieBoolean(opts.showMu ?? opts.muLine, true),
     showCards: cieBoolean(opts.showCards ?? opts.cards, true),
     showDecision: cieBoolean(opts.showDecision ?? opts.decision, false),
+    focus: null,
     playing: false
   };
+  // The x axis spans a fixed number of samples from the start, so draws fill
+  // it left to right rather than rescaling it; only past this count does the
+  // window slide.
+  const WINDOW_SIZE = cieClamp(Math.round(cieFiniteNumber(opts.windowSize, 100)), 10, 500);
   state.drawCount = cieClamp(state.drawCount, 0, state.maxSamples);
 
   // Per-sample-size record streams. Records are generated lazily from a seeded
@@ -467,7 +505,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   const sizeInput = sizeRow.append("select")
     .attr("aria-label", "Number of cards per sample")
     .node();
-  [3, 5, 10, 30].forEach((value) => {
+  [3, 6, 10, 30].forEach((value) => {
     const option = document.createElement("option");
     option.value = String(value);
     option.textContent = String(value);
@@ -559,6 +597,15 @@ makeConfidenceIntervalExplorer = function(opts) {
     .attr("class", "cie-intervals")
     .attr("clip-path", "url(#" + clipId + ")");
 
+  // Scale the marks to the slot each sample gets, so a full window of
+  // intervals stays legible without caps and points overlapping.
+  const slot = (width - margin.left - margin.right) / WINDOW_SIZE;
+  const markSize = {
+    capWidth: Math.min(8, slot * 0.75),
+    pointRadius: Math.min(4, Math.max(1.6, slot * 0.4))
+  };
+  intervalsLayer.style("--cie-stroke", Math.min(2.4, Math.max(1.2, slot * 0.3)));
+
   const muLayer = svg.append("g")
     .attr("class", "cie-mu sfs-if-reveal");
   const muLine = muLayer.append("line")
@@ -611,6 +658,11 @@ makeConfidenceIntervalExplorer = function(opts) {
   let cardTimers = [];
   let renderedCardIndex = null;
   let renderedCardSize = null;
+  // Intervals from the previous sample size, kept faded while a new run
+  // replaces them sample by sample.
+  let ghosts = [];
+  let lastStepIndex = null;
+  let sweepTimer = null;
 
   function addCheckbox(parent, label, checked) {
     const row = parent.append("label")
@@ -686,6 +738,25 @@ makeConfidenceIntervalExplorer = function(opts) {
     return ensureRecords(state.drawCount)[state.drawCount - 1];
   }
 
+  // A focus picks out one drawn sample: a sample number, or the first drawn
+  // interval that captures ("hit") or misses ("miss") mu.
+  function focusedRecord() {
+    if (state.focus === null || state.drawCount <= 0) return null;
+    const records = ensureRecords(state.drawCount);
+    if (typeof state.focus === "number") {
+      return records[cieClamp(state.focus, 1, state.drawCount) - 1];
+    }
+    const zCrit = zCritical();
+    const wantHit = state.focus === "hit";
+    return records.slice(0, state.drawCount)
+      .find((record) => intervalFor(record, zCrit).containsMu === wantHit) || null;
+  }
+
+  // The sample the cards and readouts describe: the focused one, else the latest.
+  function displayedRecord() {
+    return focusedRecord() || currentRecord();
+  }
+
   function coverage() {
     const records = ensureRecords(state.drawCount);
     const zCrit = zCritical();
@@ -701,7 +772,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   function setValue() {
-    const record = currentRecord();
+    const record = displayedRecord();
     const zCrit = zCritical();
     const interval = record ? intervalFor(record, zCrit) : null;
     const cov = coverage();
@@ -716,6 +787,8 @@ makeConfidenceIntervalExplorer = function(opts) {
       zCritical: zCrit,
       drawCount: state.drawCount,
       samplesDrawn: state.drawCount,
+      sampleNumber: record ? record.index + 1 : null,
+      focus: state.focus,
       maxSamples: state.maxSamples,
       mean: record ? record.mean : null,
       se: standardError(),
@@ -761,7 +834,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   function renderCards(animate) {
-    const record = currentRecord();
+    const record = displayedRecord();
     cardsRow
       .style("display", state.showCards ? null : "none")
       .classed("cie-cards-sm", state.sampleSize >= 10 && state.sampleSize < 20)
@@ -814,7 +887,7 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   function renderSampleReadout() {
-    const record = currentRecord();
+    const record = displayedRecord();
     if (!record) {
       sampleStats.textContent = "No samples drawn yet";
       verdictNode.style.display = "none";
@@ -822,14 +895,19 @@ makeConfidenceIntervalExplorer = function(opts) {
     }
 
     const interval = intervalFor(record, zCritical());
+    const focused = focusedRecord() === record;
     sampleStats.innerHTML =
+      (focused ? "Sample " + (record.index + 1) + " &nbsp;·&nbsp; " : "") +
       "<i>M</i> = " + fMean(record.mean) +
       " &nbsp;·&nbsp; " + state.confidence + "% CI [" +
       fMean(interval.lower) + ", " + fMean(interval.upper) + "]";
 
+    // In focus, the verdict is what a researcher could see (the decision),
+    // never coloured by whether the null is actually true.
+    const neutral = focused || (!state.showMu && !state.showDecision);
     verdictNode.style.display = "";
-    verdictNode.classList.toggle("is-miss", !interval.containsMu && (state.showMu || state.showDecision));
-    verdictNode.classList.toggle("is-unknown", !state.showMu && !state.showDecision);
+    verdictNode.classList.toggle("is-miss", !interval.containsMu && !neutral);
+    verdictNode.classList.toggle("is-unknown", neutral);
     if (state.showDecision) {
       verdictNode.innerHTML = interval.containsMu
         ? "don't reject H<sub>0</sub>"
@@ -846,6 +924,18 @@ makeConfidenceIntervalExplorer = function(opts) {
     if (state.drawCount <= 0) {
       summaryNode.innerHTML = "Draw samples to build up the long-run picture.";
       decisionNode.textContent = "";
+      return;
+    }
+
+    const focused = focusedRecord();
+    if (focused) {
+      const inside = intervalFor(focused, zCritical()).containsMu;
+      summaryNode.innerHTML = inside
+        ? "7 is inside this interval, so we would not reject H<sub>0</sub>: μ = 7."
+        : "7 is outside this interval, so we would reject H<sub>0</sub>: μ = 7.";
+      decisionNode.innerHTML = inside
+        ? "If H<sub>0</sub> is true: a correct decision. If H<sub>0</sub> is false: a Type II error."
+        : "If H<sub>0</sub> is true: a Type I error. If H<sub>0</sub> is false: a correct decision.";
       return;
     }
 
@@ -881,37 +971,57 @@ makeConfidenceIntervalExplorer = function(opts) {
     const windowStart = Math.max(0, state.drawCount - WINDOW_SIZE);
     x.domain([windowStart + 0.5, Math.max(WINDOW_SIZE, state.drawCount) + 0.5]);
 
+    const focused = focusedRecord();
+    rootNode.classList.toggle("cie-focus", Boolean(focused));
     const visible = records.slice(windowStart, state.drawCount).map((record) => {
       const interval = intervalFor(record, zCrit);
-      return { record, interval };
+      return {
+        key: state.sampleSize + "-" + record.index,
+        index: record.index,
+        mean: record.mean,
+        upper: interval.upper,
+        lower: interval.lower,
+        containsMu: interval.containsMu,
+        focus: record === focused
+      };
     });
+    if (ghosts.length && (windowStart > 0 || state.drawCount >= ghosts.length)) ghosts = [];
+    if (windowStart === 0) {
+      ghosts.forEach((ghost) => {
+        if (ghost.index >= state.drawCount) visible.push(ghost);
+      });
+    }
 
     const shiftDuration = animate && state.playing && options.shifted
       ? Math.min(80, cieFiniteNumber(opts.playDelay, 90) * 0.8)
       : 0;
 
     const groups = intervalsLayer.selectAll("g.cie-interval")
-      .data(visible, (d) => d.record.index);
+      .data(visible, (d) => d.key);
 
     groups.exit().remove();
 
     const entered = groups.enter()
       .append("g")
       .attr("class", "cie-interval")
-      .attr("transform", (d) => "translate(" + x(d.record.index + 1) + ",0)");
+      .attr("transform", (d) => "translate(" + x(d.index + 1) + ",0)");
 
-    cieAppendInterval(entered);
+    cieAppendInterval(entered, markSize);
     entered.each(function(d) {
-      ciePositionInterval(d3.select(this), y(d.record.mean), y(d.record.mean), y(d.record.mean));
+      ciePositionInterval(d3.select(this), y(d.mean),
+        y(d.ghost ? d.upper : d.mean), y(d.ghost ? d.lower : d.mean));
     });
 
     const merged = entered.merge(groups)
-      .classed("is-miss", (d) => !d.interval.containsMu);
+      .classed("is-miss", (d) => !d.containsMu)
+      .classed("is-ghost", (d) => Boolean(d.ghost))
+      .classed("is-focus", (d) => Boolean(d.focus));
+    merged.filter((d) => d.focus).raise();
 
     const positioned = shiftDuration > 0
       ? merged.transition("shift").duration(shiftDuration).ease(d3.easeLinear)
       : merged.interrupt("shift");
-    positioned.attr("transform", (d) => "translate(" + x(d.record.index + 1) + ",0)");
+    positioned.attr("transform", (d) => "translate(" + x(d.index + 1) + ",0)");
 
     const growDuration = animate && options.grow ? 170 : 0;
     // Lerp existing intervals to their new widths on confidence changes: the
@@ -919,17 +1029,18 @@ makeConfidenceIntervalExplorer = function(opts) {
     // one parameter rather than recomputing new CIs.
     const lerpDuration = animate && options.lerpWidths ? 400 : 0;
     merged.each(function(d) {
+      if (d.ghost) return;
       const group = d3.select(this);
-      const isNew = growDuration > 0 && d.record.index === state.drawCount - 1;
+      const isNew = growDuration > 0 && d.index === state.drawCount - 1;
       group.selectAll("line, circle").interrupt("grow");
       if (isNew) {
-        ciePositionInterval(group, y(d.record.mean), y(d.record.mean), y(d.record.mean));
+        ciePositionInterval(group, y(d.mean), y(d.mean), y(d.mean));
       }
       const duration = isNew ? growDuration : lerpDuration;
       const target = duration > 0
         ? group.transition("grow").duration(duration).ease(d3.easeCubicOut)
         : group;
-      ciePositionInterval(target, y(d.record.mean), y(d.interval.upper), y(d.interval.lower));
+      ciePositionInterval(target, y(d.mean), y(d.upper), y(d.lower));
     });
 
     const axis = d3.axisBottom(x)
@@ -980,6 +1091,10 @@ makeConfidenceIntervalExplorer = function(opts) {
   }
 
   function stopPlaying() {
+    if (sweepTimer) {
+      window.clearTimeout(sweepTimer);
+      sweepTimer = null;
+    }
     if (playTimer) {
       window.clearTimeout(playTimer);
       playTimer = null;
@@ -1050,12 +1165,31 @@ makeConfidenceIntervalExplorer = function(opts) {
 
   function resetSamples(notify) {
     stopPlaying();
+    ghosts = [];
     state.drawCount = 0;
     update(notify, { animate: false });
   }
 
-  function rebuildStream() {
+  // keepGhosts holds the current intervals, faded, for a new run to replace.
+  function rebuildStream(keepGhosts) {
     stopPlaying();
+    ghosts = [];
+    if (keepGhosts && state.drawCount > 0) {
+      const zCrit = zCritical();
+      const start = Math.max(0, state.drawCount - WINDOW_SIZE);
+      ghosts = ensureRecords(state.drawCount).slice(start, state.drawCount).map((record) => {
+        const interval = intervalFor(record, zCrit);
+        return {
+          key: state.sampleSize + "-" + record.index,
+          index: record.index - start,
+          mean: record.mean,
+          upper: interval.upper,
+          lower: interval.lower,
+          containsMu: interval.containsMu,
+          ghost: true
+        };
+      });
+    }
     streams.clear();
     state.drawCount = 0;
     renderedCardIndex = null;
@@ -1077,6 +1211,12 @@ makeConfidenceIntervalExplorer = function(opts) {
     let rebuild = false;
     let targetDraw = null;
     let playRequested = null;
+    let nextSampleSize = null;
+    // Each step names its own focus; steps that don't name one show all intervals.
+    let nextFocus = null;
+    const forward = Boolean(context && Number.isInteger(context.index) &&
+      lastStepIndex !== null && context.index === lastStepIndex + 1);
+    if (context && Number.isInteger(context.index)) lastStepIndex = context.index;
 
     Object.entries(action).forEach(([rawKey, value]) => {
       const key = cieActionKey(rawKey);
@@ -1106,11 +1246,7 @@ makeConfidenceIntervalExplorer = function(opts) {
         case "cards-per-sample": {
           const n = Number(value);
           if (Number.isFinite(n)) {
-            const next = cieClamp(Math.round(n), 2, 50);
-            if (next !== state.sampleSize) {
-              state.sampleSize = next;
-              rebuild = true;
-            }
+            nextSampleSize = cieClamp(Math.round(n), 2, 50);
             changed = true;
           }
           break;
@@ -1149,6 +1285,13 @@ makeConfidenceIntervalExplorer = function(opts) {
           state.showDecision = cieBoolean(value, state.showDecision);
           changed = true;
           break;
+        case "focus":
+          if (value === "hit" || value === "miss") {
+            nextFocus = value;
+          } else if (Number.isFinite(Number(value)) && value !== null && value !== false) {
+            nextFocus = Math.max(1, Math.round(Number(value)));
+          }
+          break;
         case "controls":
         case "controls-open":
           if (context && typeof context.setControlsOpen === "function") {
@@ -1159,6 +1302,42 @@ makeConfidenceIntervalExplorer = function(opts) {
           break;
       }
     });
+
+    if (nextFocus !== state.focus) {
+      state.focus = nextFocus;
+      changed = true;
+    }
+    const resize = nextSampleSize !== null && nextSampleSize !== state.sampleSize;
+
+    // Stepping forward to a new sample size: settle the current intervals at
+    // the step's confidence level, fade them, then replace them one sample at
+    // a time so the old and new widths can be compared on the same axis.
+    const sweep = resize && !rebuild && forward && animate &&
+      !prefersReducedMotion() && state.drawCount > 0 &&
+      targetDraw !== null && targetDraw > 0;
+    if (sweep) {
+      stopPlaying();
+      update(false, { animate: true, lerpWidths: true });
+      const signal = context && context.signal;
+      sweepTimer = window.setTimeout(() => {
+        sweepTimer = null;
+        if (signal && signal.aborted) return;
+        rebuildStream(true);
+        state.sampleSize = nextSampleSize;
+        update(false, { animate: false });
+        setDrawCount(targetDraw, {
+          animate: true,
+          notify: true,
+          delay: cieFiniteNumber(action.delay, 40)
+        });
+      }, 650);
+      return;
+    }
+
+    if (resize) {
+      state.sampleSize = nextSampleSize;
+      rebuild = true;
+    }
 
     if (rebuild) {
       rebuildStream();
@@ -1202,8 +1381,8 @@ makeConfidenceIntervalExplorer = function(opts) {
     event.stopPropagation();
     const next = cieClamp(Math.round(Number(sizeInput.value) || state.sampleSize), 2, 50);
     if (next !== state.sampleSize) {
-      state.sampleSize = next;
       rebuildStream();
+      state.sampleSize = next;
     }
     update(true, { animate: false });
   });

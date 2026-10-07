@@ -201,7 +201,9 @@ interval is symmetric or obtained by translating a fixed-width bracket. -->
 
 ### Example: Class Reaction Time Data
 
-Let's practice calculating a confidence interval for some real data: our class's reaction times. Our class of $n = 23$ students took the humanbenchmark.com reaction time test. As in Chapter 8, we'll assume a normal population with a known standard deviation of $\sigma = 50$ milliseconds for this calculation; that standard deviation was supplied for the example, not reported by the website. The class's average came out at $M = 322.59$ milliseconds. That sample mean is our point estimate — but how precisely does it estimate the mean of the population that our class represents? Under that known-standard-deviation assumption, the standard error of the mean is $\sigma_M = 50 / \sqrt{23} = 10.43$.
+Let's practice calculating a confidence interval for some real data: the reaction times of a class of $n = 23$ students who took the humanbenchmark.com reaction time test. That's the same test we used back in Chapter 5, where we imagined having Spider-Man take the test. (None of the 23 students who contributed this data were bitten by radioactive spiders, as far as I know.) As we have before, we'll assume that this test produces a population of normally distributed scores with a known standard deviation of $\sigma = 50$ milliseconds (remembering that I just made that up; those are not the actual population characteristics for the test).
+
+The class's average came out at $M = 322.59$ milliseconds. That sample mean is our point estimate---but how precisely does it estimate the mean of the population that our class represents? Under that known-standard-deviation assumption, the standard error of the mean is $\sigma_M = 50 / \sqrt{23} = 10.43$.
 
 The first step is to specify the $z$ values for the boundaries of the confidence interval. That is, we need to decide on our desired confidence and find the $z$ scores which divide the distribution up in that way. Say we want a 95% confidence interval. We need the $z$ scores that cut off the lowest and highest 2.5% of the normal distribution, leaving 95% in the middle. Those should look familiar from the hypothesis testing chapter: they're $\pm 1.96$, the same values that mark out the two-tailed critical regions for $\alpha = .05$.
 
@@ -214,104 +216,10 @@ This interval expresses sampling uncertainty under our assumed model. It does no
 {{< interactive-figure ciClassData makeIntervalDiagram options='{"m":322.59,"sigma":50,"n":23,"xDomain":[280,365],"units":"Mean reaction time (ms)"}' fallback="The class mean is 322.59 ms; its 95% interval extends from approximately 302.2 to 343.0 ms." >}}
 
 {{< include quizzes/10-confidence-intervals-ci.qmd >}}
-## Confidence across repeated samples {#sec-ci-coverage}
 
-Returning to our deck, the average of this population ($\mu$) is 7.00, and the standard deviation ($\sigma$) is 3.74. The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter — that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against the truth. Each card is replaced before the next draw. We use the known deck standard deviation in the same $z$-interval formula as before; because the card population is discrete rather than normal, its coverage is approximate.
+## Factors affecting CI width {#sec-ci-width}
 
-<!-- TUTORIAL SCAFFOLD — Part 2: give the interval its long-run meaning
-The implementation now uses known sigma=sqrt(14) and normal critical values;
-the earlier t-interval implementation has already been replaced.
-- Replay opening sample A (n=3, draw=1), then B (n=6, draw=1), using
-  ci-opening-585. Same seed, stream size, ranks, and suits, not just same M.
-  Their bars were previewed in the opener; now ask how often this method works.
-- Continue the unfiltered n=6 stream for coverage. Opening C is record 69;
-  at draw=69 it is the displayed card sample. Optionally pause there to recognize
-  its M=10.5 and miss, without implying misses occur at regular intervals.
-- Keep mu fixed while samples and their intervals vary.
-- Distinguish more simulated samples (stabilizes observed coverage) from more
-  cards per sample (changes precision and the normal approximation).
-- The n=3 replay is a precision contrast, not an exact-coverage demonstration.
-  Use n=6 for the main run, retaining the approximate-coverage qualification;
-  compare n=30 later. Do not silently switch populations.
-- Recall the earlier construction, but focus here on fixed truth and varying
-  intervals. Repeating the test verdict on each draw would distract from coverage.
--->
-
-
-:::::: {.callout-tip .interactive #act-ci-coverage}
-## Explore confidence interval coverage
-
-{{< interactive-figure
-  ciCoverage
-  makeConfidenceIntervalExplorer
-  options='{"seed":"ci-opening-585","confidence":95,"sampleSize":3}'
-  fallback="Interactive demonstration of confidence-interval coverage: repeated samples of playing cards each produce a confidence interval around their mean, plotted against the deck's true mean of 7. Most intervals capture the true mean, some miss, and the running percentage estimates this approximate interval method's coverage."
->}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="The deck" data-action='{"confidence":95,"sample-size":3,"draw":0,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-In this visualization, you can take samples from the deck repeatedly. Because this is a known population, the dashed line can mark the true population mean, $\mu = 7$ — the value each sample will estimate.
-:::
-
-::: {.tutorial-step data-title="One sample" data-action='{"confidence":95,"sample-size":3,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Here is sample A from the opening again: the same three cards, now with the interval whose calculation we have learned. They give {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, with a 95% confidence interval of [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}].
-:::
-
-::: {.tutorial-step data-title="Same mean, more cards" data-action='{"confidence":95,"sample-size":6,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-Here is sample B again. Its six cards also give $M = 7$, but its interval is narrower: [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. With the same population variability and confidence level, more cards give a smaller margin of error. Now keep six cards per sample and see what happens across repeated samples.
-:::
-
-::: {.tutorial-step data-title="Draw more" data-action='{"confidence":95,"sample-size":6,"draw":15,"delay":250,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-The visualization really is sampling from a fair deck with a mean of 7. But some samples produce confidence intervals that don't include the true population mean. Draw more and look for intervals that miss $\mu$.
-:::
-
-::: {.tutorial-step data-title="Long run" data-action='{"confidence":95,"sample-size":6,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-The confidence interval is a statement about repeated, long-run probabilities: if we sample from a population repeatedly, the proportion of confidence intervals which include the true population mean approaches the method's coverage. Under the normal, known-$\sigma$ model this is the specified confidence level; for these card samples it is approximate. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples here, that proportion is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it's not quite true.
-:::
-
-::: {.tutorial-step data-title="80% CI" data-action='{"confidence":80,"sample-size":6,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-For example, if we compute an 80% CI for each sample, around 80% of those CIs will include the population mean — here, {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%. With a lower confidence like 80%, we're specifying a narrower range, but we are correspondingly less confident.
-:::
-
-::: {.tutorial-step data-title="Sample size" data-action='{"confidence":95,"sample-size":30,"draw":400,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
-Sample size affects the precision of the confidence interval as well: larger samples result in a smaller standard error of the mean, which results in a narrower interval. With the same known population standard deviation and confidence level, intervals from samples of 30 are narrower than those from samples of six. The observed proportion including $\mu$ here is {{< interactive-value ciCoverage.capturePercent format=".1f" >}}%.
-:::
-
-::: {.tutorial-step data-title="Real research" data-action='{"confidence":95,"sample-size":6,"draw":400,"show-mu":false,"show-cards":true,"show-decision":false,"animate":false,"controls-open":true}'}
-With the dashed line hidden, we can see the intervals but can't check which ones contain the true mean. In real research, we generally don't know that mean. The confidence level describes the method's repeated-sampling coverage. Open the controls and keep drawing.
-:::
-::::
-
-::::::
-
-### Interpreting the confidence interval
-
-It's important to be clear about what the confidence interval does and does not tell us. Again, it primarily indicates the precision of a parameter estimate. The 95% describes the method's long-run capture rate under its assumptions, rather than a probability assigned to the fixed population mean after we observe the interval. It's easy to get confused about this because it would be so natural to take it as an indication that the true population mean must be within the confidence interval. Under the normal, known-$\sigma$ model, 5% of intervals from this procedure miss the true mean in the long run. Coverage for our discrete card population is approximate.
-
-<!-- ADD HISTORY: Neyman (1937), after the coverage demonstration has made
-his problem intelligible. Explain coverage as a property of the procedure;
-connect to Chapters 8–9's long-run error rates and the earlier bracket transfer.
-Neyman's 1937 construction explicitly relates acceptance regions in sample
-space to intervals in parameter space (pp.350–354); the probability refers to
-the procedure's random limits, not a fixed parameter in fixed bounds (p.378).
-Prefer a short paraphrase.
-The former quotation omitted its parameter symbol and an exception clause;
-do not restore it as an exact quote without checking the original p.349.
-Source: https://wwwusers.ts.infn.it/~milotti/Didattica/StatisticaAvanzata/Neyman_1937.pdf
-CALLBACK: the opening's C interval either contains mu or misses it; here it
-misses. Its 95% label describes the procedure, not a probability recalculated
-for that fixed interval. A/B/C were selected for comparison, not to estimate
-coverage; use the full, unfiltered run for the long-run interpretation.
-REVISE INTERPRETATION: qualify "5% of the time" by the model and repeated
-sampling. Avoid a universal ban on probability statements about parameters:
-that is frequentist framing, not a dismissal of Bayesian approaches.
-Add one useful reading of an interval (estimate, width, compatible magnitudes),
-not only what 95% does NOT mean; neither 95% of people nor 95% of future means.
--->
-
-## What affects interval width? {#sec-ci-width}
-
-It's worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our class reaction time interval: $M = 322.59$, $\sigma_M = 10.43$, and a 95% interval of $[302.2,\ 343.0]$.
+Having calculated one realistic confidence interval for the class reaction times, it's worth thinking about the factors that affect the width of a confidence interval. To keep things concrete, each comparison below starts from our class reaction time interval: $M = 322.59$, $\sigma_M = 10.43$, and a 95% interval of $[302.2,\ 343.0]$, and explores how changes one factor affects the width of the confidence interval.
 
 :::::: {.callout-tip .interactive #act-ci-width}
 ## What changes the interval's width?
@@ -355,6 +263,104 @@ If reaction times had a standard deviation of 25 milliseconds rather than 50, th
 
 ::::
 ::::::
+
+## Confidence across repeated samples {#sec-ci-coverage}
+
+I said earlier that the technical, frequentist interpretation of the confidence interval procedure is that it describes how often the interval-producing method captures the true parameter across repeated samples (under its assumptions). Let me explain in more detail what that means.
+
+Remember, the frequentist interpretation of probability is a long-run, repeated-sampling view. Usually we just collect data for a study once, and compute the confidence interval for that one sample. But the confidence level is a statement about the method, not about a single interval we happen to produce. If we were to take many samples from the same population and construct a confidence interval from each sample, we would expect that approximately 95% of those intervals would contain the true population parameter.
+
+So to call a range of values a 95% confidence interval is a statement about the method used to construct it. It is not a claim that the single interval we have calculated has a 95% probability of containing the true population parameter. The true population parameter is fixed, and either it is in the interval or it is not. The 95% confidence level refers to the long-run performance of the method used to construct the interval.
+
+To demonstrate, we can return to the deck of cards, and draw a lot more samples. The average of this population ($\mu$) is 7.00, and the standard deviation ($\sigma$) is 3.74. The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter---that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against the truth. Each card is replaced before the next draw. We use the known deck standard deviation in the same $z$-interval formula as before; because the card population is discrete rather than normal, its coverage is approximate.
+
+<!-- TUTORIAL NOTES — coverage explorer
+- Fresh, unfiltered n=6 stream (seed ci-coverage-486), not a replay of A/B/C.
+  The x axis spans 100 samples from the start; draws fill it one at a time.
+- This seed gives 94/100 at 95%, 79/100 at 80% (same samples), and 96/100 for
+  the n=30 run: near, not exactly at, the confidence level. Prose stays "roughly".
+- n=30 step: the n=6 intervals settle at 95%, fade, and are replaced one
+  sample at a time (forward navigation only; back/jump snaps).
+- Focus steps grey all but one interval and keep the line as H0: the first
+  n=30 interval that includes 7 (sample 1), then the first that misses (25).
+-->
+
+:::::: {.callout-tip .interactive #act-ci-coverage}
+## Explore confidence interval coverage
+
+{{< interactive-figure
+  ciCoverage
+  makeConfidenceIntervalExplorer
+  options='{"seed":"ci-coverage-486","confidence":95,"sampleSize":6}'
+  fallback="Interactive demonstration of confidence-interval coverage: 100 samples of six playing cards each produce a 95% confidence interval, plotted against the deck's true mean of 7. Roughly 95 of the 100 intervals include 7. Recomputed as 80% intervals, roughly 80 do. Samples of 30 cards give narrower 95% intervals, and still roughly 95 of 100 include 7."
+>}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="The deck" data-action='{"confidence":95,"sample-size":6,"draw":0,"show-mu":true,"show-cards":true,"show-decision":false,"animate":false}'}
+We'll draw a fresh set of samples from the deck, six cards at a time, and calculate a 95% confidence interval for each one. Because this is a known population, the dashed line can mark the true population mean, $\mu = 7$. Each interval will either include that line or miss it. The axis has room for 100 samples.
+:::
+
+::: {.tutorial-step data-title="One sample" data-action='{"confidence":95,"sample-size":6,"draw":1,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Here is our first sample. Its mean is {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, giving a 95% confidence interval of [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It includes 7.
+:::
+
+::: {.tutorial-step data-title="A second sample" data-action='{"confidence":95,"sample-size":6,"draw":2,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+A second sample gives a different mean, {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}, so its interval sits in a different place: [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. The width is the same, because the sample size, $\sigma$, and confidence level haven't changed. The population mean doesn't move either; only the samples, and so the intervals, vary.
+:::
+
+::: {.tutorial-step data-title="Keep drawing" data-action='{"confidence":95,"sample-size":6,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Now keep drawing, one sample at a time, up to 100. Most intervals include 7, but every so often one misses, shown in red. That isn't a fault in the deck or the calculation; it is the sampling error we allowed for when we chose 95%. After {{< interactive-value ciCoverage.drawCount format=".0f" >}} samples, {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of the intervals include $\mu$: not exactly 95%, and a different set of 100 samples would land a little differently again. But over the long run of repeated samples, the proportion settles near the confidence level.
+:::
+
+::: {.tutorial-step data-title="80% intervals" data-action='{"confidence":80,"sample-size":6,"draw":100,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Now take the same 100 samples and calculate an 80% interval for each instead. The means stay put; only the margins shrink, from $z^* = 1.96$ to $z^* = 1.28$ standard errors. Narrower intervals miss more often: now {{< interactive-value ciCoverage.captureCount format=".0f" >}} of the 100, or {{< interactive-value ciCoverage.capturePercent format=".0f" >}}%, include $\mu$. The confidence level is the long-run capture rate we chose for the method, and any one run of samples lands roughly near it.
+:::
+
+::: {.tutorial-step data-title="More cards per sample" data-action='{"confidence":95,"sample-size":30,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
+Back to 95%, but now each sample has 30 cards instead of six. The six-card intervals fade, and new samples replace them one at a time. A larger sample has a smaller standard error, so each interval is narrower, a more precise estimate. Yet the capture rate stays close to the confidence level: {{< interactive-value ciCoverage.capturePercent format=".0f" >}}% of these intervals include $\mu$. Sample size buys precision; the confidence level sets how often the method captures $\mu$.
+:::
+
+::: {.tutorial-step data-title="One study" data-action='{"confidence":95,"sample-size":30,"draw":100,"focus":"hit","show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
+In real research we don't get 100 samples. We get one, and we don't know $\mu$. What we do have is a null hypothesis, so the line now marks $H_0: \mu = 7$. We can't know whether it is true. Suppose ours is sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}}, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It includes 7, so the matching test would not reject $H_0$. If $H_0$ is true, that is the correct decision. If $H_0$ is false, it is a Type II error. Nothing in this one interval tells us which.
+:::
+
+::: {.tutorial-step data-title="A different study" data-action='{"confidence":95,"sample-size":30,"draw":100,"focus":"miss","show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
+Now suppose our one study had been sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}} instead, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It excludes 7, so we would reject $H_0$. If $H_0$ is true, that is a Type I error; if it is false, a correct decision. Again, the researcher looking at this one interval can't tell which. It doesn't contain $\mu$ with 95% probability or 5% probability. It either contains $\mu$ or it doesn't, and we don't know which.
+:::
+
+::: {.tutorial-step data-title="Long run vs. one study" data-action='{"confidence":95,"sample-size":30,"draw":100,"show-mu":true,"show-cards":true,"show-decision":true,"animate":true,"controls-open":true}'}
+Because we built the deck, we know $H_0$ is true here, so each of the {{< interactive-value ciCoverage.missCount format=".0f" >}} rejections is a Type I error. This is the same long-run logic as $\alpha$ in the previous chapters. $\alpha = .05$ is the Type I error rate of the testing *procedure* across many studies where $H_0$ is true; 95% confidence is the capture rate of the interval *procedure* across many samples. Neither is the probability that a particular decision is right or a particular interval contains $\mu$. They tell us how often the method goes wrong, not whether it went wrong this time. Open the controls to draw more samples, or change the sample size and confidence level.
+:::
+::::
+
+::::::
+
+### Interpreting the confidence interval
+
+It's important to be clear about what the confidence interval does and does not tell us. Again, it primarily indicates the precision of a parameter estimate. The 95% describes the method's long-run capture rate under its assumptions, rather than a probability assigned to the fixed population mean after we observe the interval. It's easy to get confused about this because it would be so natural to take it as an indication that the true population mean must be within the confidence interval. Under the normal, known-$\sigma$ model, 5% of intervals from this procedure miss the true mean in the long run. Coverage for our discrete card population is approximate.
+
+<!-- ADD HISTORY: Neyman (1937), after the coverage demonstration has made
+his problem intelligible. Explain coverage as a property of the procedure;
+connect to Chapters 8–9's long-run error rates and the earlier bracket transfer.
+Neyman's 1937 construction explicitly relates acceptance regions in sample
+space to intervals in parameter space (pp.350–354); the probability refers to
+the procedure's random limits, not a fixed parameter in fixed bounds (p.378).
+Prefer a short paraphrase.
+The former quotation omitted its parameter symbol and an exception clause;
+do not restore it as an exact quote without checking the original p.349.
+Source: https://wwwusers.ts.infn.it/~milotti/Didattica/StatisticaAvanzata/Neyman_1937.pdf
+CALLBACK: the opening's C interval either contains mu or misses it; here it
+misses. Its 95% label describes the procedure, not a probability recalculated
+for that fixed interval. A/B/C were selected for comparison, not to estimate
+coverage; use the full, unfiltered run for the long-run interpretation.
+REVISE INTERPRETATION: qualify "5% of the time" by the model and repeated
+sampling. Avoid a universal ban on probability statements about parameters:
+that is frequentist framing, not a dismissal of Bayesian approaches.
+Add one useful reading of an interval (estimate, width, compatible magnitudes),
+not only what 95% does NOT mean; neither 95% of people nor 95% of future means.
+-->
+
+
 
 ## Confidence intervals and hypothesis testing {#sec-ci-nhst}
 

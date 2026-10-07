@@ -30,27 +30,31 @@ test('face cards retain their rank and accessible full suit name', () => {
   }
 });
 
-test('opening hands reproduce the coverage stream, including suits and the selected miss', () => {
+test('coverage stream gives the run the tutorial narrates', () => {
   const chapter = readFileSync(new URL('../10-confidence-intervals.qmd', import.meta.url), 'utf8');
   const explorer = readFileSync(new URL('../resources/js/confidence-interval-explorer.js', import.meta.url), 'utf8');
   const rngContext = {};
   vm.runInNewContext(explorer.slice(explorer.indexOf('cieHashSeed ='), explorer.indexOf('cieClamp =')), rngContext);
   const seed = JSON.parse(chapter.match(/ciCoverage\s+makeConfidenceIntervalExplorer\s+options='([^']+)'/)[1]).seed;
-  for (const [id, n, draw] of [['ciSampleA', 3, 1], ['ciSampleB', 6, 1], ['ciSampleC', 6, 69]]) {
-    const opts = JSON.parse(chapter.match(new RegExp(`${id} makePlayingCardHand options='([^']+)'`))[1]);
+  const means = (n) => {
     const rng = rngContext.cieSeededRng(`${seed}-n${n}`);
-    let ranks, suits;
-    for (let i = 0; i < draw; i++) {
-      ranks = []; suits = [];
+    return Array.from({ length: 100 }, () => {
+      let sum = 0;
       for (let j = 0; j < n; j++) {
-        ranks.push(Math.floor(rng() * 13) + 1);
-        suits.push(Math.floor(rng() * 4));
+        sum += Math.floor(rng() * 13) + 1;
+        rng();
       }
-    }
-    assert.deepEqual(opts.ranks, ranks);
-    assert.deepEqual(opts.suits, suits);
-    const mean = ranks.reduce((a, b) => a + b, 0) / n;
-    const contains = Math.abs(mean - 7) <= 1.96 * Math.sqrt(14 / n);
-    assert.equal(contains, id !== 'ciSampleC');
-  }
+      return sum / n;
+    });
+  };
+  const hits = (ms, n, z) => ms.map((m) => Math.abs(m - 7) <= z * Math.sqrt(14 / n));
+  const count = (hs) => hs.filter(Boolean).length;
+  const six = means(6);
+  const thirty = hits(means(30), 30, 1.959964);
+  assert.equal(count(hits(six, 6, 1.959964)), 94);
+  assert.equal(count(hits(six, 6, 1.281552)), 79);
+  assert.equal(count(thirty), 96);
+  assert.ok(hits(six, 6, 1.959964)[0] && hits(six, 6, 1.959964)[1], 'the first two samples both include 7');
+  assert.equal(thirty.indexOf(true), 0, 'focus "hit" is sample 1');
+  assert.equal(thirty.indexOf(false), 24, 'focus "miss" is sample 25');
 });
