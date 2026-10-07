@@ -115,6 +115,7 @@
     const sampleLabel = root.insert('p', 'svg').attr('class','ci-diagram-readout ci-sample-label');
     const readout = root.append('p').attr('class','ci-diagram-readout').attr('aria-live','polite');
     const fixed = svg.append('g').attr('class','ci-construction-fixed');
+    const tracker = svg.append('g').attr('class','ci-estimate-tracker');
     const moving = svg.append('g').attr('class','ci-transfer-bar');
     const state = {sample:0, stage:0, summary:false};
     let previousSample = -1;
@@ -122,12 +123,14 @@
     const sigma = Math.sqrt(14);
     function render(animate = false) {
       moving.interrupt();
+      tracker.selectAll('*').interrupt();
       const width = Math.max(280, root.node().clientWidth || 640);
-      const x = d3.scaleLinear().domain([-1,15]).range([22,width-22]);
+      const x = d3.scaleLinear().domain([-1,15]).range([132,width-22]);
       const sample = samples[state.sample];
       const p = interval(sample.m,sigma,sample.n);
       const letter = String.fromCharCode(65 + state.sample);
-      if (state.sample !== previousSample) {
+      const sampleChanged = state.sample !== previousSample;
+      if (sampleChanged) {
         tray.selectAll('*').remove();
         tray.node().appendChild(global.makePlayingCardHand({...sample, animate:false}));
         previousSample = state.sample;
@@ -137,26 +140,52 @@
       tray.style('display', summary ? 'none' : null);
       sampleLabel.style('display', summary ? 'none' : null);
       root.classed('is-summary',summary);
-      svg.attr('viewBox', `0 0 ${width} ${summary ? 310 : 340}`);
-      fixed.selectAll('*').interrupt().remove();
       const curveBase = 140, nullY = 158, sampleY = 268;
-      fixed.append('g').attr('transform',`translate(0,${summary ? 276 : 307})`).call(d3.axisBottom(x).tickValues([1,4,7,10,13]).tickSizeOuter(0));
-      text(fixed,width/2,summary ? 307 : 335,'Mean card value','middle');
+      const trackerOffset = summary ? -216 : 0;
+      svg.attr('viewBox', `0 0 ${width} ${summary ? 284 : 500}`);
+      fixed.selectAll('*').interrupt().remove();
+      tracker.attr('transform',`translate(0,${trackerOffset})`);
+      const axisY = sampleY + (samples.length - 1) * 80 + 39;
+      tracker.selectAll('g.ci-tracker-axis').data([0]).join('g')
+        .attr('class','ci-tracker-axis').attr('transform',`translate(0,${axisY})`)
+        .call(d3.axisBottom(x).tickValues([1,4,7,10,13]).tickSizeOuter(0));
+      tracker.selectAll('text.ci-tracker-title').data([0]).join('text')
+        .attr('class','ci-tracker-title').attr('x',22).attr('y',sampleY-43)
+        .text('Observed sample means');
+      tracker.selectAll('text.ci-tracker-units').data([0]).join('text')
+        .attr('class','ci-tracker-units').attr('x',(x(-1)+x(15))/2).attr('y',axisY+28)
+        .attr('text-anchor','middle').text('Mean card value');
+      tracker.selectAll('line.ci-null-reference').data([0]).join('line')
+        .attr('class','ci-null-reference').attr('x1',x(mu0)).attr('x2',x(mu0))
+        .attr('y1',sampleY-27).attr('y2',axisY).attr('stroke','currentColor')
+        .attr('stroke-dasharray','4 4').attr('opacity',.35);
+      tracker.selectAll('text.ci-null-reference-label').data(summary ? [0] : []).join('text')
+        .attr('class','ci-null-reference-label').attr('x',x(mu0)+8).attr('y',sampleY-35).text('μ₀ = 7');
+      // Derive completed rows from the tutorial step so Back and direct links agree.
+      const visibleSamples = samples.slice(0,state.sample+1);
+      const rows = tracker.selectAll('g.ci-estimate-row').data(visibleSamples,(_,i)=>i).join('g')
+        .attr('class','ci-estimate-row').attr('transform',(_,i)=>`translate(0,${sampleY+i*80})`);
+      rows.each(function(s,i) {
+        const row=d3.select(this), pi=interval(s.m,sigma,s.n);
+        const complete=summary || i<state.sample || state.stage===2;
+        const active=i===state.sample && !summary;
+        const color=complete && (pi.lower>mu0 || pi.upper<mu0) ? red : blue;
+        row.selectAll('*').interrupt().remove();
+        text(row,12,-6,`Sample ${String.fromCharCode(65+i)}: 95% CI`).attr('class','ci-row-label');
+        text(row,12,12,`n = ${s.n}`).attr('class','ci-row-label');
+        text(row,x(s.m),-17,`M = ${fmt(s.m)}`,'middle');
+        row.append('circle').attr('cx',x(s.m)).attr('r',4.5).attr('fill',color);
+        // The active interval uses the existing transfer animation; earlier ones stay here.
+        if (complete && !active) bar(row.append('g').attr('transform',`translate(${x(s.m)},0)`),x(pi.upper)-x(s.m),color);
+        if (complete) {
+          const labels=row.append('g').attr('class','ci-endpoint-labels');
+          text(labels,x(pi.lower),23,fmt(pi.lower),'middle');
+          text(labels,x(pi.upper),23,fmt(pi.upper),'middle');
+          if(active && animate && !reduced()) labels.attr('opacity',0).transition().delay(800).duration(250).attr('opacity',1);
+        }
+      });
       if (summary) {
         moving.attr('opacity',0);
-        text(fixed,x(mu0)+8,18,'μ₀ = 7');
-        fixed.append('line').attr('x1',x(mu0)).attr('x2',x(mu0)).attr('y1',27).attr('y2',251).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('opacity',.45);
-        samples.forEach((s,i)=>{
-          const pi=interval(s.m,sigma,s.n), y=62+i*80;
-          const includes = pi.lower<=mu0 && pi.upper>=mu0;
-          const row=fixed.append('g').attr('class',includes?'ci-summary-row':'ci-summary-row is-miss');
-          const color=includes?blue:red;
-          text(row,14,y+4,`n = ${s.n}`).attr('class','ci-n-label');
-          text(row,x(s.m),y-17,fmt(s.m),'middle');
-          bar(row.append('g').attr('transform',`translate(${x(s.m)},${y})`),x(pi.upper)-x(s.m),color);
-          text(row,x(pi.lower),y+23,fmt(pi.lower),'middle');
-          text(row,x(pi.upper),y+23,fmt(pi.upper),'middle');
-        });
         readout.text('');
         svg.attr('aria-label','Three selected intervals. A: 2.77 to 11.23; B: 4.01 to 9.99; C: 7.51 to 13.49. A and B include 7; C does not.');
       } else {
@@ -174,28 +203,24 @@
         fixed.append('path').attr('class','ci-null-curve').attr('d',d3.line().x(x).y(v=>density(stats.normalPdf(v,mu0,p.se)))(data))
           .attr('fill','none').attr('stroke','var(--sfs-null-color, currentColor)').attr('stroke-width',2);
         fixed.append('line').attr('x1',x(-1)).attr('x2',x(15)).attr('y1',curveBase).attr('y2',curveBase).attr('stroke','currentColor').attr('opacity',.25);
-        fixed.append('line').attr('x1',x(mu0)).attr('x2',x(mu0)).attr('y1',40).attr('y2',290).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('opacity',.35);
+        fixed.append('line').attr('x1',x(mu0)).attr('x2',x(mu0)).attr('y1',40).attr('y2',sampleY-27).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('opacity',.35);
 
-        text(fixed,22,225,state.stage===2?'Candidate population means':'Observed sample mean');
-        fixed.append('circle').attr('cx',x(sample.m)).attr('cy',sampleY).attr('r',4.5).attr('fill',state.stage===2 && (p.lower>mu0 || p.upper<mu0)?red:blue);
-        text(fixed,x(sample.m),sampleY-15,`M = ${fmt(sample.m)}`,'middle');
         if (state.stage>0) {
           bar(fixed.append('g').attr('class','ci-null-bracket').attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',state.stage===2?.28:0),x(mu0+p.margin)-x(mu0),red,false);
           for(const v of [mu0-p.margin,mu0+p.margin]) fixed.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',density(stats.normalPdf(v,mu0,p.se))).attr('y2',nullY).attr('stroke',red).attr('stroke-dasharray','3 3').attr('opacity',.6);
         }
-        const targetX=x(state.stage===2?sample.m:mu0), targetY=state.stage===2?sampleY:nullY;
+        const targetX=x(state.stage===2?sample.m:mu0), targetY=state.stage===2?sampleY+state.sample*80:nullY;
         bar(moving,x(mu0+p.margin)-x(mu0),state.stage===2 && p.lower<=mu0 && p.upper>=mu0 ? blue : red,false);
-        if (!moving.attr('transform')) moving.attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',0);
+        if (sampleChanged || !moving.attr('transform')) moving.attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',0);
         const target = animate&&!reduced()?moving.transition().duration(state.stage===2?1050:500).ease(d3.easeCubicInOut):moving;
         target.attr('transform',`translate(${targetX},${targetY})`).attr('opacity',state.stage===0?0:1);
-        if (state.stage>0) {
+        if (state.stage===1) {
           const labels=fixed.append('g').attr('class','ci-endpoint-labels');
-          const low=state.stage===2?p.lower:mu0-p.margin;
-          const high=state.stage===2?p.upper:mu0+p.margin;
-          const y=state.stage===2?sampleY+23:nullY+23;
+          const low=mu0-p.margin;
+          const high=mu0+p.margin;
+          const y=nullY+23;
           text(labels,x(low),y,fmt(low),'middle');
           text(labels,x(high),y,fmt(high),'middle');
-          if(animate && !reduced() && state.stage===2) labels.attr('opacity',0).transition().delay(800).duration(250).attr('opacity',1);
         }
         readout.text(state.stage===0?'':state.stage===1?'Sample means that would not reject H₀':`95% confidence interval · margin of error ${fmt(p.margin)}`);
         svg.attr('aria-label',`Sample ${letter}, mean ${fmt(sample.m)}, n ${sample.n}. Null sampling model centered at 7. ${state.stage===2 ? `95% confidence interval from ${fmt(p.lower)} to ${fmt(p.upper)}.` : readout.text()}`);
@@ -209,7 +234,7 @@
       render(action.animate!==false);
     }
     render(); const observer=observe(root,render);
-    root.node().ciConstruction={applyAction,dispose(){observer.disconnect();moving.interrupt();}};
+    root.node().ciConstruction={applyAction,dispose(){observer.disconnect();moving.interrupt();tracker.selectAll('*').interrupt();}};
     global.interactiveFigure.adopt(root.node(), {dispose:root.node().ciConstruction.dispose});
     attachTutorial(root.node(),applyAction);
     return root.node();
