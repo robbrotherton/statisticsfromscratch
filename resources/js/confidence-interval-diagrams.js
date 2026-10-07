@@ -111,19 +111,29 @@
       return {...sample, m: d3.mean(sample.ranks), n: sample.ranks.length};
     });
     const { root, svg } = setup('ci-construction');
-    const tray = root.insert('div', 'svg').attr('class','ci-construction-cards');
-    const sampleLabel = root.insert('p', 'svg').attr('class','ci-diagram-readout ci-sample-label');
-    const readout = root.append('p').attr('class','ci-diagram-readout').attr('aria-live','polite');
+    const viewport = root.insert('div', 'svg').attr('class','ci-construction-viewport');
+    const scene = viewport.append('div').attr('class','ci-construction-scene');
+    scene.node().appendChild(svg.node());
+    const source = scene.insert('div', 'svg').attr('class','ci-construction-source');
+    const tray = source.append('div').attr('class','ci-construction-cards');
+    const sampleLabel = source.append('p').attr('class','ci-diagram-readout ci-sample-label');
+    const readout = scene.append('p').attr('class','ci-diagram-readout').attr('aria-live','polite');
     const fixed = svg.append('g').attr('class','ci-construction-fixed');
     const tracker = svg.append('g').attr('class','ci-estimate-tracker');
     const moving = svg.append('g').attr('class','ci-transfer-bar');
     const state = {sample:0, stage:0, summary:false};
     let previousSample = -1;
+    let renderedSe = null;
+    let renderedSummary = false;
+    const layoutDuration = 680;
     const mu0 = opts.mu0 ?? 7;
     const sigma = Math.sqrt(14);
+    function interruptMotion() {
+      root.selectAll('*').interrupt();
+    }
     function render(animate = false) {
-      moving.interrupt();
-      tracker.selectAll('*').interrupt();
+      interruptMotion();
+      const motion = animate && !reduced();
       const width = Math.max(280, root.node().clientWidth || 640);
       const x = d3.scaleLinear().domain([-1,15]).range([132,width-22]);
       const sample = samples[state.sample];
@@ -137,14 +147,23 @@
       }
       sampleLabel.text(`Sample ${letter} · n = ${sample.n} · M = ${fmt(sample.m)}`);
       const summary = state.summary;
-      tray.style('display', summary ? 'none' : null);
-      sampleLabel.style('display', summary ? 'none' : null);
+      const layoutChanged = summary !== renderedSummary;
+      const layoutTarget = selection => motion && layoutChanged
+        ? selection.transition().duration(layoutDuration).ease(d3.easeCubicInOut)
+        : selection;
       root.classed('is-summary',summary);
       const curveBase = 140, nullY = 158, sampleY = 268;
-      const trackerOffset = summary ? -216 : 0;
-      svg.attr('viewBox', `0 0 ${width} ${summary ? 284 : 500}`);
-      fixed.selectAll('*').interrupt().remove();
-      tracker.attr('transform',`translate(0,${trackerOffset})`);
+      svg.attr('viewBox', `0 0 ${width} 500`);
+      // Scroll one intact scene through a clipped window: every mark moves together.
+      const svgScale = svg.node().getBoundingClientRect().height / 500;
+      const scrollTop = source.node().getBoundingClientRect().height + 216 * svgScale;
+      const fullHeight = scene.node().getBoundingClientRect().height;
+      layoutTarget(viewport).style('height',`${summary ? 284 * svgScale : fullHeight}px`);
+      layoutTarget(scene).style('transform',`translateY(${summary ? -scrollTop : 0}px)`);
+      if (!summary) fixed.selectAll('*').remove();
+      const spreadDelay = motion && !summary && !renderedSummary && renderedSe !== null && Math.abs(renderedSe-p.se)>1e-8
+        ? layoutDuration : 0;
+      const intervalDelay = spreadDelay ? spreadDelay + 180 : 0;
       const axisY = sampleY + (samples.length - 1) * 80 + 39;
       tracker.selectAll('g.ci-tracker-axis').data([0]).join('g')
         .attr('class','ci-tracker-axis').attr('transform',`translate(0,${axisY})`)
@@ -181,38 +200,55 @@
           const labels=row.append('g').attr('class','ci-endpoint-labels');
           text(labels,x(pi.lower),23,fmt(pi.lower),'middle');
           text(labels,x(pi.upper),23,fmt(pi.upper),'middle');
-          if(active && animate && !reduced()) labels.attr('opacity',0).transition().delay(800).duration(250).attr('opacity',1);
+          if(active && motion) labels.attr('opacity',0).transition().delay(intervalDelay+800).duration(250).attr('opacity',1);
         }
       });
       if (summary) {
         moving.attr('opacity',0);
-        readout.text('');
         svg.attr('aria-label','Three selected intervals. A: 2.77 to 11.23; B: 4.01 to 9.99; C: 7.51 to 13.49. A and B include 7; C does not.');
       } else {
         text(fixed,22,20,'Null sampling model: μ₀ = 7');
-        const density = d3.scaleLinear().domain([0,stats.normalPdf(mu0,mu0,p.se)]).range([curveBase,42]);
         const data = d3.range(-1,15.025,.025);
-        const lowerCritical = mu0-p.margin, upperCritical = mu0+p.margin;
-        const tailArea = d3.area().x(x).y0(curveBase).y1(v=>density(stats.normalPdf(v,mu0,p.se)));
-        fixed.selectAll('path.ci-critical-region')
-          .data([
-            [...data.filter(v=>v<lowerCritical),lowerCritical],
-            [upperCritical,...data.filter(v=>v>upperCritical)]
-          ]).join('path').attr('class','ci-critical-region').attr('d',tailArea)
-          .attr('fill',red).attr('opacity',.35).attr('stroke','none');
-        fixed.append('path').attr('class','ci-null-curve').attr('d',d3.line().x(x).y(v=>density(stats.normalPdf(v,mu0,p.se)))(data))
-          .attr('fill','none').attr('stroke','var(--sfs-null-color, currentColor)').attr('stroke-width',2);
+        const criticalZ = p.margin/p.se;
+        const curveTop = 42;
+        const density = d3.scaleLinear().range([curveBase,curveTop]);
+        function drawNull(se) {
+          renderedSe = se;
+          density.domain([0,stats.normalPdf(mu0,mu0,se)]);
+          const lowerCritical = mu0-criticalZ*se, upperCritical = mu0+criticalZ*se;
+          const tailArea = d3.area().x(x).y0(curveBase).y1(v=>density(stats.normalPdf(v,mu0,se)));
+          fixed.selectAll('path.ci-critical-region')
+            .data([
+              [...data.filter(v=>v<lowerCritical),lowerCritical],
+              [upperCritical,...data.filter(v=>v>upperCritical)]
+            ]).join('path').attr('class','ci-critical-region').attr('d',tailArea)
+            .attr('fill',red).attr('opacity',.35).attr('stroke','none');
+          fixed.selectAll('path.ci-null-curve').data([0]).join('path').attr('class','ci-null-curve')
+            .attr('d',d3.line().x(x).y(v=>density(stats.normalPdf(v,mu0,se)))(data))
+            .attr('fill','none').attr('stroke','var(--sfs-null-color, currentColor)').attr('stroke-width',2);
+        }
+        const startSe = renderedSe ?? p.se;
+        drawNull(spreadDelay ? startSe : p.se);
+        if (spreadDelay) fixed.transition().duration(spreadDelay).ease(d3.easeCubicInOut)
+          .tween('spread',()=>{const se=d3.interpolateNumber(startSe,p.se);return t=>drawNull(se(t));});
         fixed.append('line').attr('x1',x(-1)).attr('x2',x(15)).attr('y1',curveBase).attr('y2',curveBase).attr('stroke','currentColor').attr('opacity',.25);
         fixed.append('line').attr('x1',x(mu0)).attr('x2',x(mu0)).attr('y1',40).attr('y2',sampleY-27).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('opacity',.35);
 
         if (state.stage>0) {
-          bar(fixed.append('g').attr('class','ci-null-bracket').attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',state.stage===2?.28:0),x(mu0+p.margin)-x(mu0),red,false);
-          for(const v of [mu0-p.margin,mu0+p.margin]) fixed.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',density(stats.normalPdf(v,mu0,p.se))).attr('y2',nullY).attr('stroke',red).attr('stroke-dasharray','3 3').attr('opacity',.6);
+          const critical = fixed.append('g').attr('class','ci-critical-indicators');
+          bar(critical.append('g').attr('class','ci-null-bracket').attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',state.stage===2?.28:0),x(mu0+p.margin)-x(mu0),red,false);
+          for(const v of [mu0-p.margin,mu0+p.margin]) critical.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',curveBase-(curveBase-curveTop)*Math.exp(-.5*criticalZ*criticalZ)).attr('y2',nullY).attr('stroke',red).attr('stroke-dasharray','3 3').attr('opacity',.6);
+          if (spreadDelay) critical.attr('opacity',0).transition().delay(spreadDelay).duration(180).attr('opacity',1);
         }
         const targetX=x(state.stage===2?sample.m:mu0), targetY=state.stage===2?sampleY+state.sample*80:nullY;
         bar(moving,x(mu0+p.margin)-x(mu0),state.stage===2 && p.lower<=mu0 && p.upper>=mu0 ? blue : red,false);
         if (sampleChanged || !moving.attr('transform')) moving.attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',0);
-        const target = animate&&!reduced()?moving.transition().duration(state.stage===2?1050:500).ease(d3.easeCubicInOut):moving;
+        let target = moving;
+        if (motion) {
+          if (spreadDelay) target = moving.attr('opacity',0).transition().delay(spreadDelay).duration(180).attr('opacity',1).transition();
+          else target = moving.transition();
+          target = target.duration(state.stage===2?1050:500).ease(d3.easeCubicInOut);
+        }
         target.attr('transform',`translate(${targetX},${targetY})`).attr('opacity',state.stage===0?0:1);
         if (state.stage===1) {
           const labels=fixed.append('g').attr('class','ci-endpoint-labels');
@@ -225,6 +261,7 @@
         readout.text(state.stage===0?'':state.stage===1?'Sample means that would not reject H₀':`95% confidence interval · margin of error ${fmt(p.margin)}`);
         svg.attr('aria-label',`Sample ${letter}, mean ${fmt(sample.m)}, n ${sample.n}. Null sampling model centered at 7. ${state.stage===2 ? `95% confidence interval from ${fmt(p.lower)} to ${fmt(p.upper)}.` : readout.text()}`);
       }
+      renderedSummary = summary;
       root.node().constructionState = {...state,...p,n:sample.n,mu0};
     }
     function applyAction(action) {
@@ -234,8 +271,14 @@
       render(action.animate!==false);
     }
     render(); const observer=observe(root,render);
-    root.node().ciConstruction={applyAction,dispose(){observer.disconnect();moving.interrupt();tracker.selectAll('*').interrupt();}};
-    global.interactiveFigure.adopt(root.node(), {dispose:root.node().ciConstruction.dispose});
+    function cancelMotion() {
+      render(false);
+    }
+    root.node().ciConstruction={
+      applyAction, cancelMotion,
+      dispose() { observer.disconnect(); interruptMotion(); }
+    };
+    global.interactiveFigure.adopt(root.node(), {cancelMotion,dispose:root.node().ciConstruction.dispose});
     attachTutorial(root.node(),applyAction);
     return root.node();
   };
