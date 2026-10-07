@@ -22,6 +22,11 @@
   function text(g, x, y, value, anchor = 'start') {
     return g.append('text').attr('x', x).attr('y', y).attr('text-anchor', anchor).text(value);
   }
+  // Static math labels (e.g. σ_M) need tspans; only call this with trusted strings.
+  function mathText(g, x, y, html, anchor = 'start') {
+    return g.append('text').attr('x', x).attr('y', y).attr('text-anchor', anchor).html(html);
+  }
+  const sigmaM = "<tspan font-style='italic'>σ</tspan><tspan baseline-shift='sub' font-size='70%' font-style='italic'>M</tspan>";
   function setup(className) {
     const root = d3.create('div').attr('class', `${className} sfs-figure ci-interval-system`);
     const svg = root.append('svg').attr('role', 'img').attr('class', 'sfs-svg');
@@ -92,11 +97,14 @@
       if (anatomy) {
         text(g, x(p.m), 25, 'Point estimate', 'middle');
         g.append('line').attr('x1', x(p.m)).attr('x2', x(p.m)).attr('y1', 32).attr('y2', 65).attr('stroke', 'currentColor').attr('opacity', .45);
-        text(g, x(p.lower)-10, 79, opts.mode === 'equation' ? 'M − z* SE' : 'Lower limit', 'end');
-        text(g, x(p.upper)+10, 79, opts.mode === 'equation' ? 'M + z* SE' : 'Upper limit');
+        if (opts.mode === 'equation') mathText(g, x(p.lower)-10, 79, `<tspan font-style='italic'>M</tspan> − <tspan font-style='italic'>z</tspan> × ${sigmaM}`, 'end');
+        else text(g, x(p.lower)-10, 79, 'Lower limit', 'end');
+        if (opts.mode === 'equation') mathText(g, x(p.upper)+10, 79, `<tspan font-style='italic'>M</tspan> + <tspan font-style='italic'>z</tspan> × ${sigmaM}`);
+        else text(g, x(p.upper)+10, 79, 'Upper limit');
         const yy = 107;
         g.append('line').attr('class','ci-margin-guide').attr('x1',x(p.m)).attr('x2',x(p.upper)).attr('y1',yy).attr('y2',yy).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('stroke-width',1.5);
-        text(g, (x(p.m) + x(p.upper))/2, 132, opts.mode === 'equation' ? 'z* × SE' : 'Margin of error', 'middle');
+        if (opts.mode === 'equation') mathText(g, (x(p.m) + x(p.upper))/2, 132, `<tspan font-style='italic'>z</tspan> × ${sigmaM}`, 'middle');
+        else text(g, (x(p.m) + x(p.upper))/2, 132, 'Margin of error', 'middle');
       } else {
         g.append('g').attr('transform', 'translate(0,109)').call(d3.axisBottom(x).ticks(width < 420 ? 4 : 7).tickSizeOuter(0));
         text(g, width/2, 146, opts.units || 'Population mean', 'middle');
