@@ -20,8 +20,9 @@ interactive-scripts:
 1. Three fixed card samples and ungraded predictions about estimates/uncertainty.
 2. Point estimate, margin of error, confidence level; static interval anatomy.
 3. Revisit those exact samples: null critical bracket -> interval around M.
-4. Algebra and the class z interval; then random repeated-sampling coverage.
-5. Width, a short test-equivalence callback, meaningful magnitudes and debate.
+4. Algebra and the sleep-data z interval; then factors affecting width.
+5. Repeated-sampling coverage and interpretation, a short test-equivalence
+   callback, meaningful magnitudes and debate.
 Use NHST to explain construction, repetition to explain confidence, and
 estimation to explain the payoff. Only a null sampling model gets a density
 curve. A CI is always a dot and interval, never a shaded curve around M.
@@ -33,7 +34,7 @@ In this chapter, we will finish up our initial exploration of Null Hypothesis Si
 
 As we've worked our way through the past couple of chapters, we've been dealing with situations where we know a population's variability, $\sigma$, and the null hypothesis specifies a population mean, $\mu_0$. We take a sample, calculate its mean, and calculate the corresponding $z$-score to determine whether it is sufficiently unlikely under the null hypothesis.
 
-In a sense, this approach centers the null hypothesis. We are asking how well the sample fits with what the null would lead us to expect. But what if we instead let the sample take center stage, and instead ask what population means look plausible given the sample mean we observed?
+In a sense, this approach centers the null hypothesis. We are asking how well the sample fits with what the null would lead us to expect. But what if we let the sample take center stage instead, and ask what population means look plausible given the sample mean we observed?
 
 To put this in context, consider another population with known characteristics: a deck of cards. A complete deck consists of the numbers 1 through 13 (Ace = 1; Jack = 11; Queen = 12; King = 13), repeated 4 times, once for each suit. So that's 52 cards total, and we can compute the characteristics of the full deck, like its standard deviation, $\sigma = 3.74$. We could also compute its mean, but let's hold off on that, and use a few samples to try to estimate it instead.
 
@@ -41,7 +42,7 @@ To put this in context, consider another population with known characteristics: 
 
 {{< interactive-figure ciSampleA makePlayingCardHand options='{"ranks":[5,4,12],"suits":[3,0,3]}' fallback="Sample A: 5 of clubs, 4 of spades, Queen of clubs. Three cards with a mean of 7." >}}
 
-$n = 3$, $M = 7$
+$n = 3$, $M = 7$.
 
 ```{.quiz-yaml}
 id: ci_opening_a
@@ -90,24 +91,24 @@ questions:
     prompt: >
       What estimate and tentative range would you give now? Is there a reason to make your range a different width from B's, given the same sample size and known population variability? Could a sample like this come from the same deck?
     answer: >
-      The sample mean now suggests 10.5. B and C have the same sample size and known population variability, so we will give them the same margin on either side. A fair deck can produce a sample of high-value cards by chance.
+      The sample mean now suggests 10.5. B and C have the same sample size and come from a population with the same known variability, so we will give them the same margin on either side, even though C's cards happen to look more alike. A fair deck can produce a sample of high-value cards by chance.
 ```
 
 Your guesses bring out two different questions: what value should we estimate, and how much room should we leave for sampling error? I wasn't necessarily expecting precise numerical answers, though maybe you did feel a general hunch about how wide or narrow of a range to consider. If not, that's okay too. The tool that allows us to be precise about all this is the *confidence interval*.
 
 ## Confidence interval features {#sec-ci-estimate}
 
-A confidence interval consists of two features.
+A confidence interval is made from two pieces.
 
 A **point estimate** is a single number used to estimate a population parameter. Here, our point estimate is the sample mean, $M$. In Chapter 4 we demonstrated that, under independent random sampling, the sample mean is an *unbiased* estimator of the population mean: across repeated samples, its average equals $\mu$. We know that any individual mean will vary from the population mean due to sampling error, but the point estimate is the best single number we have for the population mean.
 
-We do need to acknowledge the potential error, though. The second feature is a **margin of error**, a range either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean.
+We do need to acknowledge the potential error, though. The second piece is a **margin of error**, a distance either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean.
 
-Together, the point estimate and the margin of error form an **interval estimate**. We can represent it visually with a dot for the point estimate and error bars extending either side of it representing the margin of error either side of that point. The two ends show the lower and upper limits of the confidence interval; each half of the bar is one margin of error.
+Together, the point estimate and the margin of error form an **interval estimate**. We can represent it visually with a dot for the point estimate and error bars extending one margin of error either side of it. The two ends show the lower and upper limits of the confidence interval; each half of the bar is one margin of error.
 
 {{< interactive-figure ciAnatomy makeIntervalDiagram options='{"mode":"anatomy"}' fallback="A point estimate with an interval extending equally to its left and right. The distance from the point to either endpoint is the margin of error." >}}
 
-Constructing this interval requires us to choose a **confidence level**. This is usually expressed as a percentage, determining how often confidence intervals will include the true population mean within their range across repeated samples. In other words, if set our confidence level at 95%, we're saying that if we drew sample after sample from a fixed population and computed a confidence interval for each sample, in the long run 95% of the intervals would include the population's true $\mu$. If that sounds a bit abstract and confusing, don't worry. We'll return to this point later in the chapter.
+How big should the margin of error be? To decide, we need to choose a **confidence level**. This is usually expressed as a percentage, describing how often confidence intervals will include the true population mean within their range across repeated samples. In other words, if we set our confidence level at 95%, we're saying that if we drew sample after sample from a fixed population and computed a confidence interval for each sample, in the long run 95% of the intervals would include the population's true $\mu$. If that sounds a bit abstract and confusing, don't worry. We'll return to this point later in the chapter.
 
 A higher confidence level produces a wider interval. This might sound slightly counterintuitive, but it makes sense if you think about it: if we want to be more confident that our interval captures the true population mean, we need to leave more room for the variability that comes from sampling error. A lower confidence level allows us to be less conservative, and thus we can report a narrower interval. By analogy, say I want to guess the average height of the students taking my statistics course next semester. I could guess very confidently that the average will be between 2'0" and 10'0", but I can only be highly confident because my guess covers pretty much all possibilities. I might also guess something relatively precise, like between 5'6" and 5'8", but I ought to be correspondingly less confident: there are many more ways I can be wrong.
 
@@ -115,13 +116,13 @@ A higher confidence level produces a wider interval. This might sound slightly c
 
 As you've seen over the past couple of chapters, in the context of NHST, our sample is only interesting to us insofar as it gives us clues about the population it came from. One way of reasoning about what the sample is telling us is to construct a sampling distribution around the null $\mu_0$, and place our sample mean within that distribution. Then we can ask, is the sample mean far enough away from $\mu_0$ to reject that null? The idea of the confidence interval is to apply the same kind of reasoning but from the perspective of the sample mean: what values of $\mu$ would we *fail to reject* given the sample mean we observed?
 
-This isn't an entirely new idea. On our journey through NHST, we have already been constructing a kind of interval. For our two-tailed $z$ test with $\alpha = .05$, we divided the null sampling distribution into rejection and non-rejection regions, bounded by the critical values we looked up in a unit normal table. With $\alpha = .05$ two-tailed this worked out to $\pm 1.96$ standard errors of the null mean, $\mu_0$. An observed mean inside that range would not lead us to reject that null. This is a range of **sample means under a specified population mean**.
+This isn't an entirely new idea. On our journey through NHST, we have already been constructing a kind of interval. For our two-tailed $z$ test with $\alpha = .05$, we divided the null sampling distribution into rejection and non-rejection regions, bounded by the critical values we looked up in a unit normal table: $\pm 1.96$ standard errors either side of the null mean, $\mu_0$. An observed mean inside that range would not lead us to reject that null. This is a range of **sample means under a specified population mean**.
 
 {{< interactive-figure ciNullRange makeDistributionGraph options='{"distribution":"normal","color":"var(--sfs-null-color, currentColor)","title":"Null sampling distribution","style":"minimal","xAxis":true,"xTicks":0,"tickLabels":false,"axisLabels":true,"yLabel":false,"labels":{"x":"Sample means under this null"},"xDomain":[-4,4],"maxWidth":"36rem","aspectRatio":1.65,"margin":{"bottom":92},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.96,"labelMarkup":"μ₀ − 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":0,"label":"μ₀","color":"var(--sfs-null-color, currentColor)"},{"at":1.96,"labelMarkup":"μ₀ + 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"}],"intervals":{"from":-1.96,"to":1.96,"caps":true,"baselineOffset":18,"labelDy":32,"strokeWidth":2.5,"label":"Non-rejection range: 95%","color":"var(--sfs-critical-color, #c63f3f)"},"animate":false,"ariaLabel":"A generic normal null sampling distribution centered on μ₀. The rejection regions beyond μ₀ plus or minus 1.96 standard errors are shaded red, with 2.5 percent in each tail. An interval indicator spans the middle 95 percent: sample means that would not lead us to reject this null."}' fallback="A normal null curve centered on μ₀, with two shaded 2.5% rejection regions and an indicator spanning the non-rejection range from μ₀ − 1.96 σ_M to μ₀ + 1.96 σ_M." >}}
 
-The CI turns the question around: given the sample mean we observed, which **population means** would it not be unusually far from? The distance is the same: if $M$ is within $1.96\,\sigma_M$ of a proposed $\mu_0$, then that $\mu_0$ is within $1.96\,\sigma_M$ of $M$.
+The confidence interval turns this around: given the sample mean we observed, which **population means** would it not be unusually far from? The distance is the same: if $M$ is within $1.96\,\sigma_M$ of a proposed $\mu_0$, then that $\mu_0$ is within $1.96\,\sigma_M$ of $M$.
 
-To show this logic in action let's revisit the cards we were dealt earlier. We will use $\mu_0 = 7$ and the known deck standard deviation, $\sigma = \sqrt{14} \approx 3.74$. The curve is the *normal approximation* to the sampling distribution under this null; cards are discrete, so the approximation is imperfect, particularly with three cards. The matching test and interval use that same approximation.
+To show this logic in action, let's revisit the cards we were dealt earlier. For our null hypothesis, we'll use $\mu_0 = 7$, the midpoint of the card values from 1 to 13, along with the known deck standard deviation, $\sigma = \sqrt{14} \approx 3.74$. (The curve is the *normal approximation* to the sampling distribution under this null; the approximation is imperfect, particularly with three cards. The matching test and interval use that same approximation.)
 
 :::::: {#act-ci-construction .callout-tip .interactive}
 ## From the null range to an interval estimate
@@ -142,7 +143,7 @@ Now copy that same span onto the estimate row, centered on $M$. Here $M$ happens
 :::
 
 ::: {.tutorial-step data-title="Sample B" data-action='{"sample":1,"stage":2,"animate":true}'}
-Sample B had six cards and the same mean, $M = 7$. The larger sample size results in a smaller standard error, making both the null non-rejection bracket and the confidence interval narrower. Its interval is approximately $[4.01,9.99]$ and stays below A’s on the same tracker. The point estimate is the same as Sample A, but the greater precision at the same confidence level comes from the larger sample size.
+Sample B had six cards and the same mean, $M = 7$. The larger sample size results in a smaller standard error, making both the null non-rejection bracket and the confidence interval narrower. Its interval is approximately $[4.01,9.99]$, shown below A’s on the same tracker: the same point estimate, but more precise at the same confidence level.
 :::
 
 ::: {.tutorial-step data-title="Sample C" data-action='{"sample":2,"stage":0,"animate":false}'}
@@ -150,7 +151,7 @@ Sample C also had six cards, but its mean was $10.5$. The null curve stays cente
 :::
 
 ::: {.tutorial-step data-title="Same critical distance" data-action='{"sample":2,"stage":1,"animate":true}'}
-The null bracket is still $[4.01,9.99]$. Its width depends on the known population variability, the sample size, and the chosen cutoff—not on whether this particular hand happens to contain similar-looking cards. Sample C's mean of $10.5$ lies beyond the upper critical value.
+The null bracket is still $[4.01,9.99]$. Its width depends on the known population variability, the sample size, and the chosen cutoff—not on how spread out the cards in this particular hand happen to be. Sample C's mean of $10.5$ lies beyond the upper critical value.
 :::
 
 ::: {.tutorial-step data-title="Down and across" data-action='{"sample":2,"stage":2,"animate":true}'}
@@ -199,7 +200,7 @@ interval is symmetric or obtained by translating a fixed-width bracket. -->
 
 Let's practice calculating a confidence interval for some real data: a sample of $n = 32$ students in my statistics class who reported how many hours of sleep they got the previous night. Their average was $M = 7.31$ hours.
 
-That mean becomes our point estimate of the population mean. What population mean are we estimating? We should be careful not to overclaim, suggesting that this is some universal average sleep duration or something. Rather, we're estimating something like the average amount of sleep of students like these. The confidence interval will tell us how precise that estimate is.
+That mean becomes our point estimate of the population mean. What population mean are we estimating? We should be careful not to overclaim by suggesting that this is some universal average sleep duration or something. Rather, we're estimating something like the average amount of sleep of students like these. The confidence interval will tell us how precise that estimate is.
 
 To calculate it, we just need three ingredients: the sample mean, the standard error of the mean, and the $z$ value for our chosen confidence level.
 
@@ -210,15 +211,15 @@ $$ \sigma_M = \frac{\sigma}{\sqrt{n}} = \frac{1.5}{\sqrt{32}} = 0.265 $$
 
 3. **The $z$ value.** Say we want a 95% confidence interval. As we saw above, that means $z = 1.96$: the $z$-score that leaves 2.5% of the normal distribution in each tail, and 95% in the middle.
 
-Now we can plug them into the equations to find the upper and lowerlimits. The margin of error is $z \times \sigma_M = 1.96 \times 0.265 = 0.52$, and we subtract it from, and add it to, the sample mean:
+Now we can plug them into the equations to find the lower and upper limits. The margin of error is $z \times \sigma_M = 1.96 \times 0.265 = 0.52$, and we subtract it from, and add it to, the sample mean:
 
 $$ \text{lower limit} = 7.31 - 1.96 \times 0.265 = 6.79 \qquad \text{upper limit} = 7.31 + 1.96 \times 0.265 = 7.83 $$
 
 So the 95% confidence interval for students' mean hours of sleep runs from about 6.8 to 7.8 hours. Notice that we didn't need a null hypothesis to calculate it: just the data, the known $\sigma$, and our chosen confidence level. (We'll compare it to a specific null value later in the chapter.)
 
-This interval expresses sampling uncertainty under our assumed model. It does not establish that one class's convenience sample represents all the students whose sleep we might want to study.
-
 {{< interactive-figure ciSleepData makeIntervalDiagram options='{"m":7.31,"sigma":1.5,"n":32,"xDomain":[6.2,8.4],"units":"Mean hours of sleep"}' fallback="The class mean is 7.31 hours; its 95% interval extends from approximately 6.79 to 7.83 hours." >}}
+
+This interval expresses sampling uncertainty under our assumed model. It does not establish that one class's convenience sample represents all the students whose sleep we might want to study.
 
 {{< include quizzes/10-confidence-intervals-ci.qmd >}}
 
@@ -233,7 +234,7 @@ Having calculated one realistic confidence interval for students' sleep, it's wo
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="95% confidence" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["confidence"]}'}
-The most obvious factor is the confidence level desired — for example, 80%, 95%, or 99%. More confidence (for example, choosing 99% rather than 95%) increases the width of the confidence interval. Less confidence (choosing an 80% confidence interval) decreases the interval width. Increasing the confidence level widens the reported interval; it does not change the sample mean or its standard error. Move the confidence slider and watch the interval.
+The most obvious factor is the confidence level we choose — for example, 80%, 95%, or 99%. As we saw earlier, more confidence (choosing 99% rather than 95%) widens the interval, and less confidence (choosing 80%) narrows it. Changing the confidence level changes only $z$; it does not change the sample mean or its standard error. Move the confidence slider and watch the interval.
 :::
 
 ::: {.tutorial-step data-major="confidence" data-major-title="Confidence" data-title="80% confidence" data-action='{"confidence":80,"n":32,"population-sd":1.5,"animate":true,"show-controls":["confidence"]}'}
@@ -245,7 +246,7 @@ Sample size will affect the precision of our confidence interval as well. As you
 :::
 
 ::: {.tutorial-step data-major="sample-size" data-major-title="Sample size" data-title="128 students" data-action='{"confidence":95,"n":128,"population-sd":1.5,"animate":true,"show-controls":["n"]}'}
-If our class had $n = 128$ students instead of 32, the standard error would drop from $1.5 / \sqrt{32} = 0.265$ to $1.5 / \sqrt{128} = 0.133$, and the 95% interval would narrow from about 1.04 hours wide to 0.52 — a more precise estimate at the same level of confidence. Notice that it took four times as many students to make the interval half as wide, because the standard error depends on the *square root* of $n$. The standard error is smaller, so the interval is narrower. We hold the sample mean fixed here to isolate the change in width.
+If our class had $n = 128$ students instead of 32, the standard error would drop from $1.5 / \sqrt{32} = 0.265$ to $1.5 / \sqrt{128} = 0.133$, and the 95% interval would narrow from about 1.04 hours wide to 0.52 — a more precise estimate at the same level of confidence. Notice that it took four times as many students to make the interval half as wide, because the standard error depends on the *square root* of $n$. We hold the sample mean fixed here to isolate the change in width.
 :::
 
 ::: {.tutorial-step data-major="variability" data-major-title="Variability" data-title="SD = 1.5 hours" data-action='{"confidence":95,"n":32,"population-sd":1.5,"animate":true,"show-controls":["sigma"]}'}
