@@ -50,9 +50,35 @@
 
   global.makeIntervalDiagram = function (opts = {}) {
     const { root, svg } = setup('ci-single-interval');
-    const state = { m: opts.m ?? 7, sigma: opts.sigma ?? Math.sqrt(14), n: opts.n ?? 6, confidence: opts.confidence ?? 95 };
+    const state = { m: opts.m ?? 7, sigma: opts.sigma ?? Math.sqrt(14), n: opts.n ?? 6, confidence: opts.confidence ?? 95, shown: [] };
     const domain = opts.xDomain || (opts.mode === 'width' ? [265, 380] : [1, 13]);
     const readout = root.append('p').attr('class', 'ci-diagram-readout');
+    // Width mode reuses Chapter 9's factor sliders; steps pick which one shows.
+    const factors = opts.mode === 'width' ? [
+      {key:'confidence', label:'Confidence level', color:blue, range:[50,99,1], tex:() => `${state.confidence}\\%\\text{ confidence}`},
+      {key:'n', label:'Sample size', color:'var(--graph-series-3, #009e73)', range:[5,100,1], tex:() => `n = ${state.n}`},
+      {key:'sigma', label:'Population standard deviation', color:'var(--graph-series-2, #e69f00)', range:[10,100,1], tex:() => `\\sigma = ${state.sigma}`}
+    ] : [];
+    const strip = factors.length ? root.append('div').attr('class', 'sp-factors') : null;
+    for (const f of factors) {
+      f.row = strip.append('div').attr('class', 'sp-factor').attr('hidden', '').style('--sp-factor-color', f.color);
+      const label = f.row.append('label').attr('class', 'sp-factor-slider');
+      f.value = label.append('span').attr('class', 'sp-factor-value').style('min-width', '7.5rem');
+      f.input = label.append('input').attr('type', 'range').attr('aria-label', f.label).attr('data-prevent-swipe', '')
+        .attr('min', f.range[0]).attr('max', f.range[1]).attr('step', f.range[2])
+        .on('input', function () { state[f.key] = Number(this.value); render(false); });
+    }
+    function syncFactors() {
+      for (const f of factors) {
+        f.row.attr('hidden', state.shown.includes(f.key) ? null : '');
+        f.input.property('value', state[f.key])
+          .style('--sp-fill', `${100 * (state[f.key] - f.range[0]) / (f.range[1] - f.range[0])}%`);
+        const tex = f.tex();
+        if (f.value.attr('data-tex') === tex) continue;
+        f.value.attr('data-tex', tex).node().replaceChildren(global.interactiveFigure?.inlineMath
+          ? global.interactiveFigure.inlineMath(tex) : document.createTextNode(`${f.label}: ${state[f.key]}`));
+      }
+    }
     function render(animate = false) {
       const width = Math.max(280, root.node().clientWidth || 640);
       const x = d3.scaleLinear().domain(domain).range([30, width - 30]);
@@ -86,13 +112,15 @@
       if (animate && !reduced()) point.transition().duration(550).tween('interval', () => {
         const lerp = d3.interpolateNumber(oldHalf, half); return t => bar(point, lerp(t), blue);
       }); else bar(point, half, blue);
-      readout.text(anatomy ? '' : opts.mode === 'width' ? `${state.confidence}% confidence · n = ${state.n} · σ = ${state.sigma}` : `${state.confidence}% confidence interval`);
+      readout.text(anatomy ? '' : opts.mode === 'width' ? `Margin of error ${fmt(p.margin)} · width ${fmt(2 * p.margin)} · standard error ${fmt(p.se)}` : `${state.confidence}% confidence interval`);
+      syncFactors();
       root.node().intervalState = { ...state, ...p };
     }
     const applyAction = action => {
       if (action.n !== undefined) state.n = Math.max(2, Number(action.n));
       if (action['population-sd'] !== undefined) state.sigma = Math.max(.01, Number(action['population-sd']));
       if (action.confidence !== undefined) state.confidence = Math.max(50, Math.min(99, Number(action.confidence)));
+      if (action['show-controls'] !== undefined) state.shown = [].concat(action['show-controls']);
       render(action.animate !== false);
     };
     render();
