@@ -99,7 +99,11 @@ We do need to acknowledge the potential error, though. The second piece is a **m
 
 Together, the point estimate and the margin of error form an **interval estimate**. We can represent it visually with a dot for the point estimate and error bars extending one margin of error either side of it. The two ends show the lower and upper limits of the confidence interval; each half of the bar is one margin of error.
 
+::: {#fig-ci-anatomy}
 {{< interactive-figure ciAnatomy makeIntervalDiagram options='{"mode":"anatomy"}' fallback="A point estimate with an interval extending equally to its left and right. The distance from the point to either endpoint is the margin of error." >}}
+
+The features of a confidence interval: a point estimate, lower and upper limits, and a margin of error extending equally on either side of the point estimate.
+:::
 
 How big should the margin of error be? To decide, we need to choose a **confidence level**. This is usually expressed as a percentage, describing how often confidence intervals will include the true population mean within their range across repeated samples. In other words, if we set our confidence level at 95%, we're saying that if we drew sample after sample from a fixed population and computed a confidence interval for each sample, in the long run 95% of the intervals would include the population's true $\mu$. If that sounds a bit abstract and confusing, don't worry. We'll return to this point later in the chapter.
 
@@ -113,7 +117,11 @@ As you've seen over the past couple of chapters, in the context of NHST, our sam
 
 This isn't an entirely new idea. On our journey through NHST, we have already been constructing a kind of interval. For our two-tailed $z$ test with $\alpha = .05$, we divided the null sampling distribution into rejection and non-rejection regions, bounded by the critical values we looked up in a unit normal table: $\pm 1.96$ standard errors either side of the null mean, $\mu_0$. An observed mean inside that range would not lead us to reject that null. This is a range of **sample means under a specified population mean**.
 
+::: {#fig-ci-null-range}
 {{< interactive-figure ciNullRange makeDistributionGraph options='{"distribution":"normal","color":"var(--sfs-null-color, currentColor)","title":"Null sampling distribution","style":"minimal","xAxis":true,"xTicks":0,"tickLabels":false,"axisLabels":true,"yLabel":false,"labels":{"x":"Sample means under this null"},"xDomain":[-4,4],"maxWidth":"36rem","aspectRatio":1.65,"margin":{"bottom":92},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.96,"labelMarkup":"μ₀ − 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":0,"label":"μ₀","color":"var(--sfs-null-color, currentColor)"},{"at":1.96,"labelMarkup":"μ₀ + 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"}],"intervals":{"from":-1.96,"to":1.96,"caps":true,"baselineOffset":18,"labelDy":32,"strokeWidth":2.5,"label":"Non-rejection range: 95%","color":"var(--sfs-critical-color, #c63f3f)"},"animate":false,"ariaLabel":"A generic normal null sampling distribution centered on μ₀. The rejection regions beyond μ₀ plus or minus 1.96 standard errors are shaded red, with 2.5 percent in each tail. An interval indicator spans the middle 95 percent: sample means that would not lead us to reject this null."}' fallback="A normal null curve centered on μ₀, with two shaded 2.5% rejection regions and an indicator spanning the non-rejection range from μ₀ − 1.96 σ_M to μ₀ + 1.96 σ_M." >}}
+
+The middle 95% of a normal null sampling distribution lies within $1.96\,\sigma_M$ of $\mu_0$. Sample means in this range do not lead to rejection in a two-tailed $z$ test with $\alpha = .05$.
+:::
 
 The confidence interval turns this around: given the sample mean we observed, which **population means** would it not be unusually far from? The distance is the same: if $M$ is within $1.96\,\sigma_M$ of a proposed $\mu_0$, then that $\mu_0$ is within $1.96\,\sigma_M$ of $M$.
 
@@ -183,7 +191,11 @@ $$ \text{lower limit} = M - z \times \sigma_M \qquad \text{upper limit} = M + z 
 
 The amount we subtract and add, $z \times \sigma_M$, is the margin of error. Choosing a different confidence level changes $z$, and so the width of the interval; the point estimate and the standard error stay the same.
 
+::: {#fig-ci-equation}
 {{< interactive-figure ciEquationDiagram makeIntervalDiagram options='{"mode":"equation"}' fallback="A point at M, with lower limit M minus z times sigma-M and upper limit M plus z times sigma-M. One half of the bar is labelled z times sigma-M." >}}
+
+A confidence interval for the population mean extends from $M - z\,\sigma_M$ to $M + z\,\sigma_M$, with margin of error $z\,\sigma_M$.
+:::
 
 ### Example: How much do students sleep?
 
@@ -206,7 +218,11 @@ $$ \text{lower limit} = 7.31 - 1.96 \times 0.265 = 6.79 \qquad \text{upper limit
 
 So the 95% confidence interval runs from about 6.8 to 7.8 hours; this gives us a range of plausible values for the average amount of sleep in the population of students like these, acknowledging the uncertainty in our estimate. Notice that we didn't need a null hypothesis to calculate it: just the data, the known $\sigma$, and our chosen confidence level.
 
+::: {#fig-ci-sleep}
 {{< interactive-figure ciSleepData makeIntervalDiagram options='{"m":7.31,"sigma":1.5,"n":32,"xDomain":[6.2,8.4],"units":"Mean hours of sleep"}' fallback="The class mean is 7.31 hours; its 95% interval extends from approximately 6.79 to 7.83 hours." >}}
+
+The sample mean of 7.31 hours of sleep and its 95% confidence interval, from 6.79 to 7.83 hours, assuming a known population standard deviation of 1.5 hours.
+:::
 
 This interval expresses sampling uncertainty under our assumed model. It does not establish that one class's convenience sample represents all the students whose sleep we might want to study.
 
@@ -337,6 +353,8 @@ For example, recall the idea I floated in Chapter 9 of giving SAT-takers a banan
 |--:|--:|:--|:--|
 | 50,000 | 501 | $[500.12,\ 501.88]$ | Reject $H_0$ |
 | 1,000 | 501 | $[495.20,\ 507.20]$ | Fail to reject $H_0$ |
+
+: Confidence intervals and matching two-tailed test decisions for two hypothetical banana studies with the same sample mean, a null mean of 500, and known $\sigma = 100$. {#tbl-ci-banana-studies}
 
 The point estimates are identical, but they come with different degrees of precision. The larger study is significant, yet even the upper end of its confidence interval suggests a benefit of less than two points (501.88 - 500 = 1.88 points). The small study is nonsignificant, but its interval stretches from a five-point *decrease* to a seven-point improvement. It doesn't establish that the banana does nothing; rather it fails to reject the null and leaves quite a lot of uncertainty about the true effect. From this point of view, the interval adds a way of quantifying that uncertainty which the significance decision alone neglects.
 
