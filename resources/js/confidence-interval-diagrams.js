@@ -189,27 +189,25 @@
         ? selection.transition().duration(layoutDuration).ease(d3.easeCubicInOut)
         : selection;
       root.classed('is-summary',summary);
-      const curveBase = 140, nullY = 158, sampleY = 268;
-      svg.attr('viewBox', `0 0 ${width} 500`);
+      const curveBase = 140, nullY = 158, sampleY = 228, rowGap = 64;
+      const axisY = sampleY + (samples.length - 1) * rowGap + 39;
+      const svgHeight = axisY + 37, summaryTop = sampleY - 50;
+      svg.attr('viewBox', `0 0 ${width} ${svgHeight}`);
       // Scroll one intact scene through a clipped window: every mark moves together.
-      const svgScale = svg.node().getBoundingClientRect().height / 500;
-      const scrollTop = source.node().getBoundingClientRect().height + 216 * svgScale;
+      const svgScale = svg.node().getBoundingClientRect().height / svgHeight;
+      const scrollTop = source.node().getBoundingClientRect().height + summaryTop * svgScale;
       const fullHeight = scene.node().getBoundingClientRect().height;
-      layoutTarget(viewport).style('height',`${summary ? 284 * svgScale : fullHeight}px`);
+      layoutTarget(viewport).style('height',`${summary ? (svgHeight - summaryTop) * svgScale : fullHeight}px`);
       layoutTarget(scene).style('transform',`translateY(${summary ? -scrollTop : 0}px)`);
       if (!summary) fixed.selectAll('*').remove();
       const spreadDelay = motion && !summary && !renderedSummary && renderedSe !== null && Math.abs(renderedSe-p.se)>1e-8
         ? layoutDuration : 0;
       const intervalDelay = spreadDelay ? spreadDelay + 180 : 0;
-      const axisY = sampleY + (samples.length - 1) * 80 + 39;
       tracker.selectAll('g.ci-tracker-axis').data([0]).join('g')
         .attr('class','ci-tracker-axis').attr('transform',`translate(0,${axisY})`)
         .call(d3.axisBottom(x).tickValues([1,4,7,10,13]).tickSizeOuter(0));
-      tracker.selectAll('text.ci-tracker-title').data([0]).join('text')
-        .attr('class','ci-tracker-title').attr('x',22).attr('y',sampleY-43)
-        .text('Observed sample means');
       tracker.selectAll('text.ci-tracker-units').data([0]).join('text')
-        .attr('class','ci-tracker-units').attr('x',(x(-1)+x(15))/2).attr('y',axisY+28)
+        .attr('class','ci-tracker-units').attr('x',(x(-1)+x(15))/2).attr('y',axisY+32)
         .attr('text-anchor','middle').text('Mean card value');
       tracker.selectAll('line.ci-null-reference').data([0]).join('line')
         .attr('class','ci-null-reference').attr('x1',x(mu0)).attr('x2',x(mu0))
@@ -220,7 +218,7 @@
       // Derive completed rows from the tutorial step so Back and direct links agree.
       const visibleSamples = samples.slice(0,state.sample+1);
       const rows = tracker.selectAll('g.ci-estimate-row').data(visibleSamples,(_,i)=>i).join('g')
-        .attr('class','ci-estimate-row').attr('transform',(_,i)=>`translate(0,${sampleY+i*80})`);
+        .attr('class','ci-estimate-row').attr('transform',(_,i)=>`translate(0,${sampleY+i*rowGap})`);
       rows.each(function(s,i) {
         const row=d3.select(this), pi=interval(s.m,sigma,s.n);
         const complete=summary || i<state.sample || state.stage===2;
@@ -277,7 +275,7 @@
           for(const v of [mu0-p.margin,mu0+p.margin]) critical.append('line').attr('x1',x(v)).attr('x2',x(v)).attr('y1',curveBase-(curveBase-curveTop)*Math.exp(-.5*criticalZ*criticalZ)).attr('y2',nullY).attr('stroke',red).attr('stroke-dasharray','3 3').attr('opacity',.6);
           if (spreadDelay) critical.attr('opacity',0).transition().delay(spreadDelay).duration(180).attr('opacity',1);
         }
-        const targetX=x(state.stage===2?sample.m:mu0), targetY=state.stage===2?sampleY+state.sample*80:nullY;
+        const targetX=x(state.stage===2?sample.m:mu0), targetY=state.stage===2?sampleY+state.sample*rowGap:nullY;
         bar(moving,x(mu0+p.margin)-x(mu0),state.stage===2 && p.lower<=mu0 && p.upper>=mu0 ? blue : red,false);
         if (sampleChanged || !moving.attr('transform')) moving.attr('transform',`translate(${x(mu0)},${nullY})`).attr('opacity',0);
         let target = moving;

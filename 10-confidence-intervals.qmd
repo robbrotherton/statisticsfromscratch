@@ -16,18 +16,6 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-<!-- EDITORIAL STRUCTURE — October 6, 2026
-1. Three fixed card samples and ungraded predictions about estimates/uncertainty.
-2. Point estimate, margin of error, confidence level; static interval anatomy.
-3. Revisit those exact samples: null critical bracket -> interval around M.
-4. Algebra and the sleep-data z interval; then factors affecting width.
-5. Repeated-sampling coverage and interpretation, a short test-equivalence
-   callback, meaningful magnitudes and debate.
-Use NHST to explain construction, repetition to explain confidence, and
-estimation to explain the payoff. Only a null sampling model gets a density
-curve. A CI is always a dot and interval, never a shaded curve around M.
--->
-
 In this chapter, we will finish up our initial exploration of Null Hypothesis Significance Testing, the $z$-test, and related ideas, by introducing the *confidence interval*. Like statistical power, this is a complementary concept often used in the context of a hypothesis test. But rather than focusing on a binary decision about whether to reject the null hypothesis, a confidence interval attempts to quantify the uncertainty in our estimate of the population mean.
 
 ## What can one sample tell us? {#sec-ci-sample-question}
@@ -36,7 +24,7 @@ As we've worked our way through the past couple of chapters, we've been dealing 
 
 In a sense, this approach centers the null hypothesis. We are asking how well the sample fits with what the null would lead us to expect. But what if we let the sample take center stage instead, and ask what population means look plausible given the sample mean we observed?
 
-To put this in context, consider another population with known characteristics: a deck of cards. A complete deck consists of the numbers 1 through 13 (Ace = 1; Jack = 11; Queen = 12; King = 13), repeated 4 times, once for each suit. So that's 52 cards total, and we can compute the characteristics of the full deck, like its standard deviation, $\sigma = 3.74$. We could also compute its mean, but let's hold off on that, and use a few samples to try to estimate it instead.
+To put this in context, consider another population with known characteristics: a deck of cards. A complete deck consists of the numbers 1 through 13 (Ace = 1; Jack = 11; Queen = 12; King = 13), repeated 4 times, once for each suit. So that's 52 cards total, and we can compute the characteristics of the full deck, like its standard deviation, $\sigma = 3.74$. We could also compute its mean, but let's hold off on that, and use a few samples to try to estimate it instead.^[We'll suppose that to produce these samples we sample with replacement, putting each card back and shuffling before drawing the next one. So the same card can appear more than once, and each draw is independent.]
 
 ### Sample A: three cards
 
@@ -50,12 +38,13 @@ title: Your prediction
 questions:
   - id: reflect_a
     type: free-response
+    checkLabel: Compare your answer
+    answerLabel: Example answer
     prompt: >
-      Using only these three cards, what would you estimate the population mean to be? Do you have any reservations about giving just one number as an answer? What if I ask you to suggest a range of values you would consider plausible? How confident can you be in your suggested range? (No need for formulas or calculations here; just go with your gut.)
+      Using only these three cards, what would you estimate the population mean to be? Do you have any reservations about giving just one number? What if I ask you to suggest a range of values you would consider plausible. How confident can you be in your suggested range? (No need for formulas or calculations here; just go with your gut.)
     answer: >
       The sample mean of 7 is a natural starting estimate. There is no single required range here: with only three cards, leave room for sampling error. Keep your prediction to compare with the intervals we construct later.
 ```
-
 
 ### Sample B: six cards
 
@@ -69,10 +58,12 @@ title: Your prediction
 questions:
   - id: reflect_b
     type: free-response
+    checkLabel: Compare your answer
+    answerLabel: Example answer
     prompt: >
       These six cards have the same mean as sample A. Would you keep your best estimate? Would you make your tentative range wider, narrower, or leave it unchanged? Explain what the extra cards change.
     answer: >
-      The point estimate can stay at 7. With more independent draws from the same population, the mean tends to vary less from sample to sample, so a narrower range makes sense. This does not guarantee that this particular sample is closer to the truth.
+      Your best estimate can stay at 7. With more independent draws from the same population, the mean tends to vary less from sample to sample, so a narrower range makes sense. This does not guarantee that this particular sample is closer to the truth.
 ```
 
 
@@ -88,8 +79,10 @@ title: Your prediction
 questions:
   - id: reflect_c
     type: free-response
+    checkLabel: Compare your answer
+    answerLabel: Example answer
     prompt: >
-      What estimate and tentative range would you give now? Is there a reason to make your range a different width from B's, given the same sample size and known population variability? Could a sample like this come from the same deck?
+      What estimate and tentative range would you give now? Should your range move, change width, or both? Could a sample like this come from the same deck?
     answer: >
       The sample mean now suggests 10.5. B and C have the same sample size and come from a population with the same known variability, so we will give them the same margin on either side, even though C's cards happen to look more alike. A fair deck can produce a sample of high-value cards by chance.
 ```
@@ -100,7 +93,7 @@ Your guesses bring out two different questions: what value should we estimate, a
 
 A confidence interval is made from two pieces.
 
-A **point estimate** is a single number used to estimate a population parameter. Here, our point estimate is the sample mean, $M$. In Chapter 4 we demonstrated that, under independent random sampling, the sample mean is an *unbiased* estimator of the population mean: across repeated samples, its average equals $\mu$. We know that any individual mean will vary from the population mean due to sampling error, but the point estimate is the best single number we have for the population mean.
+A **point estimate** is a single number used to estimate a population parameter. Here, our point estimate is the sample mean, $M$. In Chapter 4 we demonstrated that, under independent random sampling, the sample mean is an *unbiased* estimator of the population mean: across repeated samples, its average equals $\mu$. We know that an individual mean can differ from the population mean due to sampling error, but the point estimate is the best single number we have for the population mean.
 
 We do need to acknowledge the potential error, though. The second piece is a **margin of error**, a distance either side of the point estimate that indicates the amount of uncertainty surrounding that estimate of the population mean.
 
@@ -112,7 +105,7 @@ How big should the margin of error be? To decide, we need to choose a **confiden
 
 A higher confidence level produces a wider interval. This might sound slightly counterintuitive, but it makes sense if you think about it: if we want to be more confident that our interval captures the true population mean, we need to leave more room for the variability that comes from sampling error. A lower confidence level allows us to be less conservative, and thus we can report a narrower interval.
 
-By analogy, say I want to guess the average height of the students taking my statistics course next semester. I could guess very confidently that the average will be between 2'0" and 10'0", but I can only be highly confident because my guess covers pretty much all possibilities. I might also guess something relatively precise, like between 5'6" and 5'8", but I ought to be correspondingly less confident: there are many more ways I can be wrong. Another way to think about it is that I could propose with 100% confidence that the mean would be between minus infinity to plus infinity. I'm guaranteed to be right, but it's not a very useful guess all things considered.
+By analogy, say I want to guess the average height of the students taking my statistics course next semester. I could guess very confidently that the average will be between 2'0" and 10'0", but I can only be highly confident because my guess covers pretty much all possibilities. I might also guess something relatively precise, like between 5'6" and 5'8", but I ought to be correspondingly less confident: there are many more ways I can be wrong.^[Another way to think about it is that I could propose with 100% confidence that the mean would be between minus infinity to plus infinity. I'm guaranteed to be right, but it's not a very useful guess, all things considered.]
 
 ## Constructing a confidence interval {#sec-ci-construction}
 
@@ -123,6 +116,8 @@ This isn't an entirely new idea. On our journey through NHST, we have already be
 {{< interactive-figure ciNullRange makeDistributionGraph options='{"distribution":"normal","color":"var(--sfs-null-color, currentColor)","title":"Null sampling distribution","style":"minimal","xAxis":true,"xTicks":0,"tickLabels":false,"axisLabels":true,"yLabel":false,"labels":{"x":"Sample means under this null"},"xDomain":[-4,4],"maxWidth":"36rem","aspectRatio":1.65,"margin":{"bottom":92},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.96,"labelMarkup":"μ₀ − 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":0,"label":"μ₀","color":"var(--sfs-null-color, currentColor)"},{"at":1.96,"labelMarkup":"μ₀ + 1.96 *σ*_*M*_","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"}],"intervals":{"from":-1.96,"to":1.96,"caps":true,"baselineOffset":18,"labelDy":32,"strokeWidth":2.5,"label":"Non-rejection range: 95%","color":"var(--sfs-critical-color, #c63f3f)"},"animate":false,"ariaLabel":"A generic normal null sampling distribution centered on μ₀. The rejection regions beyond μ₀ plus or minus 1.96 standard errors are shaded red, with 2.5 percent in each tail. An interval indicator spans the middle 95 percent: sample means that would not lead us to reject this null."}' fallback="A normal null curve centered on μ₀, with two shaded 2.5% rejection regions and an indicator spanning the non-rejection range from μ₀ − 1.96 σ_M to μ₀ + 1.96 σ_M." >}}
 
 The confidence interval turns this around: given the sample mean we observed, which **population means** would it not be unusually far from? The distance is the same: if $M$ is within $1.96\,\sigma_M$ of a proposed $\mu_0$, then that $\mu_0$ is within $1.96\,\sigma_M$ of $M$.
+
+It's useful to think about this correspondence between this range of the null distribution and the confidence interval, since its logic is a direct extrapolation, and we'll talk more about the correspondence as we go on. But beyond their shared mechanics and math, the confidence interval can exist as its own logical thing: no null value is needed to calculate the interval itself.
 
 To show this logic in action, let's revisit the cards we were dealt earlier. For our null hypothesis, we'll use $\mu_0 = 7$, the midpoint of the card values from 1 to 13, along with the known deck standard deviation, $\sigma = \sqrt{14} \approx 3.74$. (The curve is the *normal approximation* to the sampling distribution under this null; the approximation is imperfect, particularly with three cards. The matching test and interval use that same approximation.)
 
@@ -141,26 +136,30 @@ The space between the lower and upper critical regions is a kind of interval: th
 :::
 
 ::: {.tutorial-step data-title="Center on the estimate" data-action='{"sample":0,"stage":2,"animate":true}'}
-If move a copy of that same range down so it is centered on $M$, it becomes a confidence interval. Here $M$ happens to equal 7, so the move is straight down. The null range represented sample means that would fail to reject the null; this new confidence interval represents the population means that this sample would not reject with the matching two-sided test.
+We can move a copy of that range down so it is centered on $M$. Why does that work? Any proposed population mean within $1.96\,\sigma_M$ of our sample mean would put this sample within its own non-rejection range. The new interval collects those proposed population means. Here $M$ happens to equal 7, so the move is straight down.
 :::
 
 ::: {.tutorial-step data-title="Sample B" data-action='{"sample":1,"stage":2,"animate":true}'}
 Sample B had the same mean, $M = 7$, but was made of six cards. The larger sample size results in a smaller standard error of the mean. That is reflected in the null curve becoming narrower, and its interval of nonsignificant means covering a smaller range. The confidence interval becomes narrower too, centered on the same point estimate, but more precise at the same confidence level.
 :::
 
+::: {.tutorial-step data-title="Sample C" data-action='{"sample":2,"stage":1,"animate":true}'}
+Sample C also has six cards, so the null curve and its bracket stay the same as B's. But its mean, $M = 10.5$, lies outside that bracket. Before moving on, where should the confidence interval be centered? Should its width change?
+:::
+
 ::: {.tutorial-step data-title="Down and across" data-action='{"sample":2,"stage":2,"animate":true}'}
-Sample C was made up of six cards too, but with a mean of $M = 10.5$. The null curve doesn't change, but the confidence interval is now centered on that point estimate of $10.5$, with its margin of error either side.
+Now the bracket moves down and across to center on $M = 10.5$, keeping the same width. It no longer reaches 7. The sample mean was too far from 7 to fit inside that null's bracket; equally, 7 is too far from the sample mean to fit inside its confidence interval.
 :::
 
 ::: {.tutorial-step data-title="Compare all three" data-action='{"sample":2,"stage":2,"summary":true,"animate":true}'}
-Comparing the three confidence intervals, A and B have the same estimate but different precision as a result of B's larger sample size. B and C have equal precision but different estimates, because of their different sample means. Two intervals include 7; one does not.
+Compare these with your opening predictions. A and B have the same estimate, but B's larger sample makes its interval narrower. B and C have equal precision but different estimates: C's interval moves without changing width, even though its cards look more alike. We used the deck's known variability, not the spread of each sample, to calculate these margins. Two intervals include 7; one does not.
 :::
 ::::
 ::::::
 
-A hypothesis test asks about one proposed population mean. A confidence interval collects the whole range of proposed means that would *not* be rejected by the matching test. We used a null of $\mu_0 = 7$ to demonstrate that connection, but no chosen null value is needed to calculate the interval itself.
+A hypothesis test asks about one proposed population mean. Here, a confidence interval collects the whole range of proposed means that would *not* be rejected by the matching test.^[Just FYI, we're using a simple method here for a symmetric $z$ interval, with known $\sigma$. Other methods can be used to produce asymmetric intervals. With the card CIs we're also leaving the confidence interval untruncated: Sample C's upper limit exceeds the maximum possible card value of 13. That reflects the normal approximation used by this simple method. More sophisticated methods can produce truncated intervals that respect the population's bounds. That's all beyond the scope of this book, but I wanted you to know it's out there.]
 
-The bars do not show a distribution of probabilities over population means. They show an estimate and its limits. We also leave the approximate $z$ interval untruncated: C's upper limit exceeds the maximum possible card value of 13. That reflects the normal approximation used by this simple method.
+This also explains where the 95% comes from. Under the normal model, 95% of the distributions of sample means falls within $1.96\,\sigma_M$ of the true mean. For exactly those samples, the interval around $M$ reaches far enough to include that true mean. We'll see this happen across repeated samples later in the chapter.
 
 ### Calculating the confidence interval
 
@@ -174,7 +173,7 @@ In Chapter 9, to work out statistical power we rearranged this formula to conver
 
 Now we turn that around. We know the sample mean, and we want the edges of the range of *population* means that would not be rejected. A proposed population mean survives the test as long as $M$ is no more than $z$ standard errors away from it, in either direction. And since the distance from a proposed mean to $M$ is the same as the distance from $M$ to that mean, the population means at the edges of the range lie exactly $z$ standard errors either side of $M$:
 
-$$ \mu = M \pm z \times \sigma_M $$
+$$ \text{confidence interval for }\mu: \quad M \pm z \times \sigma_M $$
 
 Note that here, $z$ isn't a test statistic calculated from our data. It's the critical value matching our chosen confidence level: the positive $z$-score that cuts off the middle portion of the normal distribution from its two tails. For 95% confidence, that's $z = 1.96$, leaving 2.5% in each tail, just like the critical values for a two-tailed test with $\alpha = .05$. For 80% confidence it would be $z = 1.28$, and for 99%, $z = 2.58$.
 
@@ -185,10 +184,6 @@ $$ \text{lower limit} = M - z \times \sigma_M \qquad \text{upper limit} = M + z 
 The amount we subtract and add, $z \times \sigma_M$, is the margin of error. Choosing a different confidence level changes $z$, and so the width of the interval; the point estimate and the standard error stay the same.
 
 {{< interactive-figure ciEquationDiagram makeIntervalDiagram options='{"mode":"equation"}' fallback="A point at M, with lower limit M minus z times sigma-M and upper limit M plus z times sigma-M. One half of the bar is labelled z times sigma-M." >}}
-
-<!-- This recentering construction is for the symmetric z interval with known
-sigma and fixed n. Test inversion is more general, but not every confidence
-interval is symmetric or obtained by translating a fixed-width bracket. -->
 
 ### Example: How much do students sleep?
 
@@ -254,51 +249,19 @@ If students' sleep had a standard deviation of 0.75 hours rather than 1.5, the s
 ::::
 ::::::
 
+Notice that these are some of the same factors that affected statistical power in Chapter 9. More participants, or less population variability, give us a smaller standard error, which in turn produces narrower intervals and more power to detect a specified difference. Raising the confidence level is different. A 99% interval is wider than a 95% interval. Its matching test would use $\alpha = .01$ rather than $.05$. With everything else held fixed, that stricter test has less power.
+
 ## Interpreting confidence intervals {#sec-ci-coverage}
 
-It's important to be clear about what the confidence interval does and does not tell us. Each sample produces an estimate of the population parameter with a margin of uncertainty: that's the confidence interval for the sample. The interpretation of the confidence interval, however, is subtle. The confidence interval is a statement about repeated, long-run probabilities, and there's an alluring misconception lurking in the distinction between a single confidence interval that we have computed for some data, and the confidence interval as a long-run process. To see the difference, we'll need to draw a lot of samples from a population we know.
-
-<!-- ADD HISTORY: Neyman (1937), after the coverage demonstration has made
-his problem intelligible. Explain coverage as a property of the procedure;
-connect to Chapters 8–9's long-run error rates and the earlier bracket transfer.
-Neyman's 1937 construction explicitly relates acceptance regions in sample
-space to intervals in parameter space (pp.350–354); the probability refers to
-the procedure's random limits, not a fixed parameter in fixed bounds (p.378).
-Prefer a short paraphrase.
-The former quotation omitted its parameter symbol and an exception clause;
-do not restore it as an exact quote without checking the original p.349.
-Source: https://wwwusers.ts.infn.it/~milotti/Didattica/StatisticaAvanzata/Neyman_1937.pdf
-CALLBACK: the opening's C interval either contains mu or misses it; here it
-misses. Its 95% label describes the procedure, not a probability recalculated
-for that fixed interval. A/B/C were selected for comparison, not to estimate
-coverage; use the full, unfiltered run for the long-run interpretation.
-REVISE INTERPRETATION: qualify "5% of the time" by the model and repeated
-sampling. Avoid a universal ban on probability statements about parameters:
-that is frequentist framing, not a dismissal of Bayesian approaches.
-Add one useful reading of an interval (estimate, width, compatible magnitudes),
-not only what 95% does NOT mean; neither 95% of people nor 95% of future means.
--->
+So each sample produces an estimate of the population parameter with a margin of uncertainty: that's the confidence interval for the sample. But the interpretation of a confidence interval is subtle. As we've seen a few times now, there's a bit of a logical tension between the practical interpretation of a single sample and the frequentist logic that describes long-run outcomes. Those two interpretations are obviously related, but they are not the same, and we need to understand both to fully grasp the uses and limitations of confidence intervals.
 
 ### The frequentist interpretation: long-run coverage
 
-Remember, the frequentist interpretation of probability is a long-run, repeated-sampling view. Usually we just collect data for a study once, and compute the confidence interval for that one sample. But the confidence level is a statement about the method, not about a single interval we happen to produce. If we sample from a population repeatedly, constructing a confidence interval from each sample, the proportion of confidence intervals which include the true population mean will be roughly equal to the specified level of confidence. For example, if we compute an 80% CI for each sample, around 80% of those CIs will include the population mean. If we compute 95% CIs, around 95% will. (Under the normal, known-$\sigma$ model, those percentages are exact in the long run. For other populations, like the one we're about to use, they're approximate.)
+Remember, the frequentist interpretation of probability is the long-run, repeated-sampling view. If we sample from a population repeatedly and construct a 95% confidence interval from each sample, about 95% of those intervals will include the true population mean. With 80% intervals, about 80% will. (Strictly speaking, these are precise long-run coverage rates under the normal, known-$\sigma$ model; for other populations, like our deck, they're approximate, but close enough.)
 
-So to call a range of values a 95% confidence interval is a statement about the method used to construct it. It is not a claim that the single interval we have calculated has a 95% probability of containing the true population parameter. The true population parameter is fixed, and either it is in the interval or it is not.
+So to call a range of values a 95% confidence interval is a statement about the method used to construct it. It is not a claim that the single interval we have calculated has a 95% probability of containing the true population parameter. The true population parameter is what it is, and either it is in the interval or it is not. Usually we don't know. As the originator of the confidence interval concept, Jerzy Neyman, put it, "The parameter is an unknown constant and no probability statement concerning its value may be made."[^ci-bayes]
 
-To demonstrate, we can return to the deck of cards. A deck of playing cards is a known population consisting of the numbers 1 through 13 repeated 4 times, once for each suit. The average of this population ($\mu$) is 7.00, and the standard deviation ($\sigma$) is 3.74. In the visualization below, you can take samples from this population repeatedly, replacing each card before the next draw. Each sample produces an estimate of the population mean with a margin of uncertainty, using the known deck standard deviation in the same $z$-interval formula as before. Because the card population is discrete rather than normal, its coverage is approximate.
-
-The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter---that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against the truth.
-
-<!-- TUTORIAL NOTES — coverage explorer
-- Fresh, unfiltered n=6 stream (seed ci-coverage-486), not a replay of A/B/C.
-  The x axis spans 100 samples from the start; draws fill it one at a time.
-- This seed gives 94/100 at 95%, 79/100 at 80% (same samples), and 96/100 for
-  the n=30 run: near, not exactly at, the confidence level. Prose stays "roughly".
-- n=30 step: the n=6 intervals settle at 95%, fade, and are replaced one
-  sample at a time (forward navigation only; back/jump snaps).
-- Focus steps grey all but one interval and keep the line as H0: the first
-  n=30 interval that includes 7 (sample 1), then the first that misses (25).
--->
+Let's return to our deck of cards, with $\mu = 7$ and $\sigma \approx 3.74$. In the visualization below, we will approximate the frequentist long-run behavior idea by taking a bunch of samples. Each one will give us an interval using the same $z$ formula as before. The deck is a convenient example of a known population, but generally speaking we don't know the true population parameter---that's the whole reason for taking samples and applying statistics! Sampling from a population we *do* know, though, lets us check every confidence interval against reality, seeing how often the method captures $\mu$ in the long run.
 
 :::::: {.callout-tip .interactive #act-ci-coverage}
 ## Explore confidence interval coverage
@@ -320,7 +283,7 @@ Here is our first sample. Its mean is {{< interactive-math "M =" ciCoverage.mean
 :::
 
 ::: {.tutorial-step data-title="A second sample" data-action='{"confidence":95,"sample-size":6,"draw":2,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-A second sample gives a different mean. Its width is the same as the first, because the sample size, $\sigma$, and confidence level haven't changed. But this interval extends from [{{< interactive-value ciCoverage.ciLower format=".2f" >}} to {{< interactive-value ciCoverage.ciUpper format=".2f" >}}, centered at {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}]
+A second sample gives a different mean. Its width is the same as the first, because the sample size, $\sigma$, and confidence level haven't changed. But this interval extends from {{< interactive-value ciCoverage.ciLower format=".2f" >}} to {{< interactive-value ciCoverage.ciUpper format=".2f" >}}, centered at {{< interactive-math "M =" ciCoverage.mean format=".2f" >}}.
 :::
 
 ::: {.tutorial-step data-title="Keep drawing" data-action='{"confidence":95,"sample-size":6,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
@@ -328,7 +291,7 @@ Now we'll do this for 100 samples. Most intervals include 7, but every so often 
 :::
 
 ::: {.tutorial-step data-title="80% intervals" data-action='{"confidence":80,"sample-size":6,"draw":100,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
-We could calculate an 80% interval for those same 100 samples instead. The means don't move but the margins around them shrink, from $z = 1.96$ to $z = 1.28$ standard errors. The narrower intervals miss $\mu$ more often: now {{< interactive-value ciCoverage.captureCount format=".0f" >}} of the 100, or {{< interactive-value ciCoverage.capturePercent format=".0f" >}}%, include it within their range. The confidence level is the long-run capture rate we chose for the method, and any one run of samples lands roughly near it.
+We could calculate an 80% interval for those same 100 samples instead. The means don't move but the margins around them shrink, from $z = 1.96$ to $z = 1.28$ standard errors. The narrower intervals miss $\mu$ more often: now {{< interactive-value ciCoverage.captureCount format=".0f" >}} of the 100, or {{< interactive-value ciCoverage.capturePercent format=".0f" >}}%, include it within their range. The confidence level is the long-run capture rate we chose for the method, but a run of 100 samples can land above or below it.
 :::
 
 ::: {.tutorial-step data-title="More cards per sample" data-action='{"confidence":95,"sample-size":30,"draw":100,"delay":60,"show-mu":true,"show-cards":true,"show-decision":false,"animate":true}'}
@@ -340,7 +303,7 @@ In real research we usually don't get 100 samples, we just get one. And we don't
 :::
 
 ::: {.tutorial-step data-title="A different study" data-action='{"confidence":95,"sample-size":30,"draw":100,"focus":"miss","show-mu":true,"show-cards":true,"show-decision":true,"animate":true}'}
-Now suppose our one study had been sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}} instead, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It excludes 7, so we would reject $H_0$. If $H_0$ is true, that is a Type I error; if it is false, a correct decision. Again, the researcher looking at this one interval can't tell which. It doesn't contain $\mu$ with 95% probability or 5% probability. It either contains $\mu$ or it doesn't, and we don't know which.
+Now suppose our one study had been sample {{< interactive-value ciCoverage.sampleNumber format=".0f" >}} instead, with interval [{{< interactive-value ciCoverage.ciLower format=".2f" >}}, {{< interactive-value ciCoverage.ciUpper format=".2f" >}}]. It excludes 7, so we would reject $H_0$. If $H_0$ is true, that is a Type I error; if it is false, a correct decision. Again, the researcher looking at this one interval can't tell which.
 :::
 
 ::: {.tutorial-step data-title="Long run vs. one study" data-action='{"confidence":95,"sample-size":30,"draw":100,"show-mu":true,"show-cards":true,"show-decision":true,"animate":true,"controls-open":true}'}
@@ -350,67 +313,43 @@ Because we built the deck, we know $H_0$ is true here, so each of the {{< intera
 
 ::::::
 
-Throughout the demonstration, the deck and its mean never changed. Only the samples, and so the intervals, moved around. The confidence level is a property of that moving process. If that sounds like the logic of $\alpha$ and power from the last two chapters, it should. The theory of confidence intervals was worked out in the 1930s by the Polish statistician Jerzy Neyman [@neyman1937outline], who, a few years earlier, had developed the long-run, decision-oriented approach to hypothesis testing with Egon Pearson. They didn't hope to know whether any particular hypothesis was true or false. Instead, they looked for rules which would ensure that "in the long run of experience, we shall not be too often wrong" [@neyman1933problem, p. 291]. Confidence intervals make the same kind of promise, with the same kind of limitation.
+Throughout the demonstration, the deck and its mean never changed. Only the samples, and so the intervals, moved around. The confidence level is a property of that moving process. If that sounds like the logic of $\alpha$ and power from the last two chapters, it should. The theory of confidence intervals was worked out in the 1930s by the Polish statistician Jerzy Neyman [@neyman1937outline], who, a few years earlier, had developed the long-run, decision-oriented approach to hypothesis testing with Egon Pearson.
 
-So what does the confidence interval for a single sample tell us? The width of the CI reflects the precision of our estimate, but it doesn't allow us to put a probabilistic value on the population parameter. A common mistake is to think that the confidence interval tells us, with the given degree of confidence, that the true population parameter is a value somewhere within the stated range. This sounds intuitive but it's not quite true. Under the frequentist approach, the population parameter is a fixed constant, and we can't make probabilistic statements about constants.[^ci-bayes] So strictly speaking, the CI for a single sample reflects the uncertainty in that sample's estimate of the parameter rather than uncertainty about the true value of the parameter.
+Their reasoning was modest; they didn't expect their frequentist approach to establish whether any *particular* hypothesis was true or false. Instead, they looked for rules which would ensure that "in the long run of experience, we shall not be too often wrong" [@neyman1933problem, p. 291]. Neyman's interval construction also used acceptance regions for proposed parameter values, turning them around to find the values covered by an observed sample's interval [@neyman1937outline, pp. 350–354]. That is the logic we used earlier. Confidence intervals make the same kind of long-run promise, with the same kind of limitation.
+
 
 [^ci-bayes]: That's a feature of the frequentist framework we've been using throughout this book, not a law of nature. *Bayesian* approaches to statistics do treat uncertainty about a parameter as a probability, by combining the data with an explicit prior model of which values are plausible. A Bayesian *credible interval* can be read in the intuitive way, as a range with a given probability of containing the parameter, but only conditional on that prior and model. It's a different tool with its own assumptions, and it isn't what the confidence intervals in this chapter report.
 
-Maybe that sounds a bit disappointing. Surely the whole point of taking a sample is to be able to say something about the population it came from? Well, yes. This is where confidence intervals connect to Null Hypothesis Significance Testing. Rather than saying how confident we are that the population parameter is within a certain range, the sample (and its CI) can help us make an inference about whether the parameter is (or isn't) some specific hypothetical value.
 
 ### Confidence intervals and hypothesis testing {#sec-ci-nhst}
 
-Let's say we suspect that someone has removed some cards from our deck, and so its population mean is not, in fact, 7. Our alternative hypothesis would be that $\mu \neq 7$. The null hypothesis, that our deck hasn't been tampered with, would be that $\mu = 7$. (Strictly speaking, that's only a hypothesis about the deck's *mean*. Someone could remove a 2 and a 12 and the mean wouldn't budge.) We will reject the null hypothesis if the sample looks sufficiently unlikely to have been produced by the hypothetical null population. As you know, to quantify "sufficiently unlikely" we choose an alpha ($\alpha$) value, some low probability. That's the level of risk we're willing to accept that we're making a mistake, rejecting the null hypothesis when we shouldn't.
+Sample C from the start of the chapter illustrates the connection. Its interval excludes 7, so the matching test rejects $H_0: \mu = 7$. For our unchanged deck, that would be a Type I error. An interval containing 7 would lead us to fail to reject the null, but would not prove that the null was true.
 
-The visualization above really is sampling from a fair deck with a mean of 7. But as you saw, some of the confidence intervals don't include the true population mean. They would cause us to reject the null hypothesis and lead us to believe that someone has indeed tampered with the cards. We'd be making a mistake; it just so happened that we obtained a sample for which the confidence interval didn't contain the true population mean---which is what we can expect to happen about 5% of the time with 95% intervals. Sample C from the start of the chapter was one of those samples: its interval excludes 7, so the matching rejection would be a Type I error. In real research we generally can't know whether a rejection is mistaken. Likewise, an interval containing a null value means we fail to reject it; it does not prove that value is correct.
 
 The correspondence between interval and test isn't a coincidence. A sample mean outside the null's critical range produces an interval that excludes that null value, because both depend on the same distance: how many standard errors separate $M$ from $\mu_0$. This equivalence applies to **matching two-sided procedures**, using the same model and standard error. A two-sided 95% interval corresponds to a two-sided test with $\alpha=.05$, not a one-sided test at that level.
 
 We can see the same correspondence with the sleep data. You've probably heard that people should get 8 hours of sleep a night. Suppose we use that as a reference value and test whether our students' population mean differs from it, $H_0: \mu = 8$, two-tailed with $\alpha = .05$. The test gives $z = (7.31 - 8) / 0.265 = -2.60$, beyond the critical value of $-1.96$, so we reject the null. The 95% interval tells us the same thing at a glance: 8 lies outside $[6.79, 7.83]$.
 
-So in this sense, the interpretation of any single confidence interval is closely tied to the binary decision about the null hypothesis: if the null value lies outside our confidence interval, we reject the null hypothesis; if it's inside, we don't reject it. Historically, that's no accident either. Neyman built his confidence intervals out of the same machinery as hypothesis tests. In effect, a confidence interval collects all the hypothetical values of the parameter that the matching test would *not* reject [@neyman1937outline].
-
-<!-- The former six-step class CI/NHST tutorial duplicated the construction
-now introduced above. Keep this short callback; devote the later discussion to
-magnitudes, compatibility, and what an interval adds beyond one null decision.
-A future optional exploration could vary candidate mu0 with the observed CI
-held FIXED, to reinforce that changing the hypothesis does not change the CI. -->
+We can describe statistical power in terms of intervals too. If a particular alternative mean is true, power is the proportion of samples whose matching intervals would exclude the null value. A test with 80% power would produce intervals excluding that false null about 80% of the time. Those intervals can still have 95% confidence: 95% concerns capturing the true mean; 80% concerns excluding the specified false null.
 
 ### What does the interval add? {#sec-ci-meaning}
 
-<!-- ADD — substantive prose still to draft:
-- Make test/CI correspondence a hinge, not the chapter's final destination.
-  Checking only zero/the null is the same decision; use the rest of the interval.
-- Return to Chapter 9's banana example. Same estimate (+1 SAT point), different n:
-  n=50,000 gives an approximate 95% CI for the difference [0.12,1.88];
-  n=1,000 gives [-5.20,7.20], under the existing known-sigma=100 model.
-- Compare magnitude and precision, then consider a clearly hypothetical,
-  independently chosen meaningful benefit (e.g. 5 points). Do not claim that
-  5 is an established SAT threshold or that small effects never matter.
-- Optional second contrast: two zero-containing intervals [-10,10] and [-1,1]
-  with meaningful effects >=3 in magnitude. Both are nonsignificant, but they
-  leave very different uncertainty about meaningful effects.
-FIGURE SCAFFOLD: aligned dot-and-interval bars, shared raw-unit axis, zero and
-meaningful threshold. Significance should not be the only visual distinction.
-LEARNER TASK: interpret what remains compatible, not just whether zero is inside.
--->
+From one point of view, then, confidence intervals don't add much. If all we do with an interval is check whether the null value is inside it, we've simply performed the same significance test another way: a significance test with whiskers. The interval doesn't extract extra information from the data. But it shows more than a single significant-or-not verdict: an estimate, its precision, and a range of magnitudes to consider. We could obtain that same range by testing every proposed population mean. The interval gives us a convenient way to see it all at once.
 
-From one point of view, then, confidence intervals don't add much. If all we do with an interval is check whether the null value is inside it, we've simply performed the same significance test another way: a significance test with whiskers. But it can be argued that the interval provides information the test alone doesn't, as long as we actually use it.
+Think back to the sleep data. The test told us to reject $H_0: \mu = 8$. But the interval also gives us a range of estimates for *how much* less: roughly 0.17 to 1.21 hours, or about 10 to 70 minutes short. Whether that's cause for concern is a question about sleep, not statistics. But the interval does give us a range of magnitudes to think about, rather than just a yes-or-no.
 
-Go back to the sleep data. The test told us to reject $H_0: \mu = 8$. But the interval also tells us something the test doesn't: how *much* less. The population means compatible with our data are roughly 0.17 to 1.21 hours less than 8 hours a night: somewhere between about 10 and 70 minutes short. Whether that's cause for concern is a question about sleep, not statistics. But the interval gives us a range of magnitudes to think about, rather than just a yes-or-no.
-
-The banana example from Chapter 9 makes the point more sharply. Recall that we imagined giving students a banana before taking the SAT, assumed a known $\sigma = 100$, and observed the same sample mean of 501, one point above the null mean of 500, in two studies with very different sample sizes. Since the null value is fixed, we can subtract 500 from each end of the interval for the mean to get an interval for the banana's benefit:
+Or think back to the banana example from Chapter 9. We imagined giving students a banana before taking the SAT, assumed a known $\sigma = 100$, and observed the same sample mean of 501, one point above the null mean of $\mu_0 = 500$, in two studies with very different sample sizes. Since that null $\mu$ is fixed, we can subtract 500 from each end of the interval for the mean to get an interval for the difference. In this hypothetical example, we're treating that difference from the untreated population mean as the banana's benefit:
 
 | Sample size | Estimated benefit | 95% CI for the benefit | Decision ($\alpha = .05$) |
 |--:|--:|:--|:--|
 | 50,000 | 1 point | $[0.12,\ 1.88]$ | Reject $H_0$ |
 | 1,000 | 1 point | $[-5.20,\ 7.20]$ | Fail to reject $H_0$ |
 
-The point estimate is identical. What changes is the precision, and consequently the decision. The large study is significant, but its interval says the benefit is somewhere between about a tenth of a point and two points. Even the upper end is less than two hundredths of a standard deviation ($d \approx 0.02$). So the test says there's an effect, and the interval says it's a small one.
+The point estimates are identical they come with different degrees of precision, and consequently led to different decisions about the null hypothesis. The large study is significant, but the benefits within its interval range from about a tenth of a point to two points. Even the upper end is less than two hundredths of a standard deviation ($d \approx 0.02$). So we have evidence of a difference from zero, but the estimated benefit is small.
 
-The small study is nonsignificant, but its interval doesn't say the banana does nothing. It stretches from a five-point *drop* in scores to a seven-point benefit: a whole bunch of quite different realities are compatible with that result. Now suppose that a 5-point improvement is the smallest benefit that would make it worth buying bananas for every test taker. (I'm making that number up. The point is that the threshold comes from the practical question, not from the statistics, and it needn't be zero.) The significant study's interval falls entirely below 5 points, so it gives us decent grounds for skipping the bananas. The nonsignificant study's interval includes both 0 and 5. It just can't tell us.
+The small study is nonsignificant, but its interval doesn't say the banana does nothing. It stretches from a five-point *drop* in scores to a seven-point benefit. In other words, a whole bunch of quite different realities are compatible with that result. The result from the smaller sample had more uncertainty. Now suppose that a 5-point improvement is the smallest benefit that would make it worth buying bananas for every test taker. (I'm making that number up. The point is that the threshold comes from the practical question, not from the statistics.) The significant study's interval falls entirely below 5 points, so it gives us decent grounds for skipping the bananas. The nonsignificant study's interval includes both 0 and 5. It just can't tell us.
 
-This is the same issue we ran into with power in Chapter 9, seen from the other side. The small study had little power to detect a benefit as small as one point, and a nonsignificant result from an underpowered study is hard to interpret. Calculating "observed power" after the fact doesn't help. A wide interval shows that ambiguity directly, in the units we care about, without having to specify a hypothetical alternative. And not every nonsignificant result is equally ambiguous. Imagine a third, enormous banana study, with 400,000 students and a sample mean of exactly 500. Its interval for the benefit would be about $[-0.31,\ 0.31]$. Like the 1,000-student study, it's nonsignificant. Unlike that study, it leaves very little room for a 5-point benefit, or for any benefit worth mentioning. Two nonsignificant results; two quite different stories.
+This is the same issue we ran into with power in Chapter 9, seen from the other side. If the true benefit were one point, the small study would have little power to detect it, and a nonsignificant result from an underpowered study is hard to interpret. Calculating "observed power" after the fact doesn't help. A wide interval shows that ambiguity directly, in the original units of measurement, without having to specify a hypothetical alternative. And not every nonsignificant result is equally ambiguous. Imagine a third, enormous banana study, with 400,000 students and a sample mean of exactly 500. Its interval for the benefit would be about $[-0.31,\ 0.31]$. Like the 1,000-student study, it's nonsignificant. Unlike that study, it leaves very little room for the 5-point benefit we said would make the bananas worthwhile. Two nonsignificant results; two quite different stories.
 
 Thinking about precision also gives us another way to plan a study. In Chapter 9 we chose a sample size to give a test enough power to detect an effect of a given size. We could instead choose a sample size to make our interval narrow enough to be useful. If we wanted to estimate students' sleep to within a quarter of an hour either way, still assuming $\sigma = 1.5$, we'd need a margin of error of $1.96 \times 1.5 / \sqrt{n} \le 0.25$, which works out to $n \ge 139$ students.
 
@@ -418,64 +357,17 @@ A few cautions keep the interval from being oversold, though. Values inside the 
 
 ### Beyond a significant result {#sec-ci-debate}
 
-<!-- ADD HISTORY / CONTEMPORARY DEBATE — select, do not include every item:
-- Recall Fisher (Chapter 8) and Cohen (Chapter 9); avoid repeating their biographies.
-  Neyman/Pearson's long-run testing and Neyman's interval construction share roots:
-  CIs were not recently invented as an escape from testing.
-- Distinguish construction from reporting emphasis: CIs were connected to
-  testing from the beginning; later estimation advocates emphasized magnitudes
-  and uncertainty rather than one significant/nonsignificant decision.
-  Gardner & Altman (1986): https://www.bmj.com/content/292/6522/746
-  Cumming (2014): https://www.psychologicalscience.org/observer/theres-life-beyond-05
-- After the examples above, use a short Cohen/Meehl -> estimation/reporting thread
-  to explain why researchers debated what a significant result actually tells us.
-- Contrast dated proposals: lower alpha (Benjamin et al., 2018), justify alpha
-  (Lakens et al., 2018), or stop making categorical significance claims
-  (Amrhein, Greenland & McShane, 2019). Include the ASA 2016 cautions and the
-  2021 president's task-force defense of well-used tests as distinct positions.
-- Shared problem: no cutoff or display substitutes for reasoning about design,
-  measurement, selection, effect magnitude, and uncertainty. CIs can become
-  "NHST with whiskers" if readers only inspect null inclusion.
-- Optional method preview: equivalence asks about prespecified negligible bounds;
-  nonsignificance alone does not establish equivalence. Do not teach the mechanics
-  here unless explaining why TOST at alpha=.05 uses a matching 90% CI.
-- Optional Bayesian sidebar: probability about parameters requires an explicit
-  model/prior; it is not ruled out by the frequentist interpretation taught here.
-- End positively: estimates/intervals, transparent plans, complete reporting,
-  replication, and design all help; none repairs every inferential problem.
-Source leads for later prose/citations (not yet added to the bibliography):
-  ASA 2016: https://doi.org/10.1080/00031305.2016.1154108
-  Amrhein et al. 2019: https://www.nature.com/articles/d41586-019-00857-9
-  ASA task force 2021: https://magazine.amstat.org/blog/2021/08/01/task-force-statement-p-value/
-  Lakens 2017 equivalence: https://doi.org/10.1177/1948550617697177
-Keep this a short synthesis anchored in the chapter's examples, not a catalogue.
--->
+I'm being a bit ambivalent about the role of confidence intervals in statistical inference, here. On the one hand, they are built on the same foundations as NHST and don't magically make the data more informative. On the other, they can provide a more complete picture of the uncertainty in our estimates. So they're neither useless, nor a solution to the inherent limitations of frequentist statistics.
 
-None of this is a new argument. As we saw in Chapter 8, Fisher offered .05 as a convenient boundary, not a law of nature. And since Neyman's intervals grew out of the same long-run logic as his tests, confidence intervals weren't invented as an escape hatch from significance testing. But researchers have long worried that a single significant-or-not verdict was being asked to carry too much weight. In 1962, Jacob Cohen (whom we met in Chapter 9) reviewed a year's worth of studies in a leading psychology journal, and found that their average power to detect a medium-sized effect was less than one half [@cohen1962statistical]. A lot of nonsignificant results, in other words, were likely to be as ambiguous as our 1,000-student banana study. In medicine, @gardner1986confidence urged researchers to report estimates with confidence intervals rather than relying on $p$-values alone. In psychology, the same idea was championed as part of a "new statistics" emphasizing effect sizes, intervals, and the accumulation of evidence across studies [@cumming2014new].
+This reflect a long-running debate. Researchers have long worried that a single significant-or-not verdict was being asked to carry too much weight. In 1962, Jacob Cohen (of Cohen's $d$) reviewed 70 studies from a volume of a leading psychology journal, and found that their average power to detect a medium-sized effect was less than .5 [@cohen1962statistical], a bad sign for $p$-values. In 1986, Martin Gardner and Douglas Altman made the case for estimation in medicine in a paper called "Confidence intervals rather than P values: estimation rather than hypothesis testing" [@gardner1986confidence]. The concern was much like our banana example: knowing whether a difference crosses a threshold doesn't tell us how big it might be. In psychology, estimation was championed as part of a "new statistics" emphasizing effect sizes, intervals, and the accumulation of evidence across studies rather than reliance on single "significant" hypothesis tests [@cumming2014new].
 
-The debate is still going. In 2016, the American Statistical Association issued a statement cautioning against basing conclusions on whether a $p$-value crosses a threshold: "No single index should substitute for scientific reasoning" [@wasserstein2016asa, p. 132]. Proposals for what to do about it point in different directions. One group of researchers proposed making the threshold stricter, requiring $p < .005$ for claims of new discoveries [@benjamin2018redefine]. Others responded that researchers should instead justify whatever alpha they choose, based on the costs of different errors in their particular study [@lakens2018justify]---an idea you might recognize from the trade-offs in Chapter 9. Others still argued for abandoning the significant/nonsignificant categories altogether, and interpreting the whole range of values in an interval---while warning that checking whether an interval includes zero just smuggles the same categories back in [@amrhein2019scientists]. And a 2021 task force convened by the ASA's president pushed back, concluding that "$p$-values and significance tests, when properly applied and interpreted, increase the rigor of the conclusions drawn from data" [@benjamini2021asa].
+The debate goes on. Some researchers have argued for abandoning significant/nonsignificant labels altoghether and interpreting estimates and intervals instead [@amrhein2019scientists]. A 2021 task force convened by the ASA's president defended significance tests when properly used [@benjamini2021asa]. Confidence intervals can be used as mechanically as a $p$-value if all we ask is whether the interval includes zero. In 2016, the American Statistical Association cautioned that "No single index should substitute for scientific reasoning" [@wasserstein2016asa, p. 132].
 
-Notice that the confidence interval doesn't settle the debate on its own. As we've seen, an interval and its matching test contain the same cutoff information, and an interval can be read just as mechanically as a $p$-value. What it offers is an opportunity: to look at the estimate, how precise it is, and which meaningful values remain compatible with the data. There are also tools built for more specific versions of those questions. *Equivalence tests*, for example, let researchers test whether an effect is smaller than some meaningful size chosen in advance, something a nonsignificant result alone can't establish [@lakens2017equivalence]. But no cutoff, interval, or alternative framework substitutes for thinking about how a study was designed, what was measured, who was sampled, and how big an effect would actually matter. Confidence intervals, like hypothesis tests, are tools for that thinking, not replacements for it.
+What the interval offers is an opportunity: to look at the estimate, how precise it is, and which meaningful values remain compatible with the data. But no cutoff, interval, or alternative framework substitutes for thinking about how a study was designed, what was measured, who was sampled, and how big an effect would actually matter. Confidence intervals, like hypothesis tests, are tools for that thinking, not replacements for it.
 
 ## Looking ahead
 
-<!-- ADD brief synthesis and Chapter 11 bridge:
-- What is estimated? How much uncertainty? Which meaningful values remain?
-  What cannot be concluded from the design or sample, however narrow the CI?
-- Recall B/C: equal n and known sigma meant equal interval widths despite
-  different sample spreads. When sigma is unknown, sample variability will
-  enter the estimate of standard error as well.
-- So far sigma has been supplied. In Chapter 11, use the same sleep data to
-  estimate variability and construct a t interval; interpretation still matters.
--->
-
-<!-- LEARNING CHECKS — revise in a later assessment pass:
-Current included questions concern z/significance, not representative CI coverage.
-Replace most with coverage interpretation, width predictions, matching two-sided
-CI/test correspondence, biased-sample limits, and meaningful-range interpretation.
-Keep a little delayed retrieval only if it has a clear job. Do not require the
-reader to complete a quiz to obtain an essential explanation. -->
-
+So far we've treated the population standard deviation as something we already know. That is why samples B and C had the same margin of error despite their different spreads. In real research, we usually have to estimate variability from the sample too. In the next chapter, we'll see how that changes our standard error and leads us from $z$ to $t$.
 
 {{< include quizzes/10-confidence-intervals-learning-checks.qmd >}}
 

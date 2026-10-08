@@ -1,59 +1,103 @@
 ```{.quiz-yaml}
 id: 10_confidence_intervals_learning_checks
-title: >
-  Learning Checks
+title: Learning Checks
 questions:
-  - id: expected_z_null
+  - id: coverage_meaning
     type: multiple-choice
     prompt: >
-      On average across many studies, what value of z would you expect if the null
-      hypothesis is true each time?
+      Under the normal, known-$\sigma$ model, what does the 95% in a
+      95% confidence interval describe?
     options:
-      - text: >
-          0
+      - text: The proportion of individual scores inside the interval
+      - text: The probability that the calculated interval contains the population mean
+      - text: The long-run proportion of intervals that contain the population mean
         correct: true
-      - text: >
-          1
-      - text: >
-          The critical value
-      - text: >
-          The sample size
+      - text: The proportion of future sample means inside the calculated interval
     explanation: >
-      If the null is true, the expected difference in the numerator is zero.
+      Imagine repeating the sampling and interval construction many times.
+      In the long run, 95% of those intervals would contain the fixed population
+      mean. That is a property of the procedure, not a probability assigned to
+      the particular interval we calculated. The interval estimates a mean,
+      not a range containing 95% of individual scores or future sample means.
 
-  - id: significant_z_factors
+  - id: sample_size_precision
     type: multiple-choice
     prompt: >
-      Which combination is most likely to produce a significant z statistic?
+      We increase the sample size from 25 to 100, keeping the known population
+      standard deviation and confidence level the same. What happens to the
+      margin of error?
     options:
-      - text: >
-          Large mean difference, small variability, large n
+      - text: It is halved.
         correct: true
-      - text: >
-          Small mean difference, large variability, small n
-      - text: >
-          Large variability and small n only
-      - text: >
-          A large p-value
+      - text: It is divided by four.
+      - text: It stays the same.
+      - text: It doubles.
     explanation: >
-      A larger numerator and smaller standard error of the mean produce a larger
-      absolute z value.
+      The standard error is $\sigma / \sqrt{n}$. Four times as many observations
+      means half the standard error, and therefore half the margin of error.
+      The confidence level stays the same; the estimate becomes more precise.
 
-  - id: single_study_z_null
+  - id: matching_test
     type: multiple-choice
     prompt: >
-      In a single study, what absolute value of z is most expected if the null
-      hypothesis is true?
+      A two-sided 95% confidence interval for a population mean is [6.8, 7.8].
+      What would the matching two-sided test of $H_0: \mu = 8$ conclude at
+      $\alpha = .05$?
     options:
-      - text: >
-          A value near 0
+      - text: Fail to reject, because 8 is close to the upper limit.
+      - text: Reject, because 8 is outside the interval.
         correct: true
-      - text: >
-          A value beyond the critical value
-      - text: >
-          Exactly 1.96 every time
-      - text: >
-          Exactly the sample size
+      - text: Fail to reject, because the interval does not include zero.
+      - text: We need a different sample to make the decision.
     explanation: >
-      Random samples vary, but values near zero are most common under the null.
+      The matching test uses the same data, model, and standard error. A null
+      value outside the interval is rejected. The relevant value here is 8,
+      not zero; and rejection does not guarantee that the null is false.
+
+  - id: meaningful_ranges
+    type: free-response
+    answerLabel: Example answer
+    prompt: >
+      Two studies estimate a treatment's benefit. Their 95% intervals are
+      [-6, 8] and [-1, 1] points. Both matching tests fail to reject a null
+      difference of zero. Suppose a benefit of at least 5 points would make
+      the treatment worthwhile. Do the two studies tell us the same thing?
+    answer: >
+      No. The first interval includes both no benefit and benefits large enough
+      to matter, so it leaves the practical question unresolved. The second
+      interval is much narrower and falls well below 5 points, giving us
+      evidence against a benefit that large under the assumed model. Neither
+      nonsignificant result proves that the true benefit is exactly zero.
+
+  - id: confidence_and_power
+    type: multiple-choice
+    prompt: >
+      A two-sided test has 80% power to detect a specified alternative mean
+      at $\alpha = .05$. If that alternative is true, about what proportion of
+      repeated samples would produce matching 95% intervals that exclude
+      the null value?
+    options:
+      - text: 5%
+      - text: 20%
+      - text: 80%
+        correct: true
+      - text: 95%
+    explanation: >
+      Excluding the null value is equivalent to rejecting it with the matching
+      test, so the proportion is the test's power, 80%. The 95% confidence
+      level concerns how often the intervals capture the true mean, which
+      here differs from the null value.
+
+  - id: convenience_sample
+    type: free-response
+    answerLabel: Example answer
+    prompt: >
+      We collect sleep reports from a very large convenience sample of students
+      at one university and obtain a narrow confidence interval. Does that
+      resolve the problem of estimating mean sleep for all university students?
+    answer: >
+      No. The narrow interval shows precision under the sampling model, but
+      it doesn't establish that this convenience sample represents all
+      university students. A larger sample does not by itself repair biased
+      sampling or inaccurate sleep reports.
 ```
