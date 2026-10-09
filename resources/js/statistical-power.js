@@ -239,7 +239,8 @@ makeStatisticalPowerDiagram = function(opts) {
   // A pared-back version for seeing what moves power: no rulers, axes that
   // hold still, and the sliders beneath the plot, which tutorial steps
   // reveal one at a time with `show-controls`.
-  const minimal = Boolean(opts.minimal);
+  const schematic = Boolean(opts.schematic);
+  const minimal = Boolean(opts.minimal || schematic);
   const margin = { top: 26, right: minimal ? 12 : SIDE_LABEL_WIDTH + 12, left: 12 };
   const fTick = d3.format("~g");
   const fBoundary = d3.format(".2f");
@@ -674,9 +675,9 @@ makeStatisticalPowerDiagram = function(opts) {
     const value = item.append("span").attr("class", "sp-key-value");
     return { item, value };
   }
-  const alphaKey = keyItem("sp-key-alpha", "<i>&alpha;</i> =");
-  const betaKey = keyItem("sp-key-beta", "<i>&beta;</i> =");
-  const powerKey = keyItem("sp-key-power", "Power (1 &minus; <i>&beta;</i>) =");
+  const alphaKey = keyItem("sp-key-alpha", schematic ? "<i>&alpha;</i>" : "<i>&alpha;</i> =");
+  const betaKey = keyItem("sp-key-beta", schematic ? "<i>&beta;</i>" : "<i>&beta;</i> =");
+  const powerKey = keyItem("sp-key-power", schematic ? "Power (1 &minus; <i>&beta;</i>)" : "Power (1 &minus; <i>&beta;</i>) =");
 
   const svg = chartWrap.append("svg")
     .attr("class", "sfs-svg sfs-graph")
@@ -791,6 +792,8 @@ makeStatisticalPowerDiagram = function(opts) {
   let boundaryBottom = null;
 
   function readState() {
+    // A schematic is a fixed illustration; hidden slider ranges must not clamp its supplied values.
+    if (schematic) return;
     state.sigma = Math.max(0.01, spFiniteNumber(sigmaInput.value, state.sigma));
     state.n = Math.max(1, Math.round(spFiniteNumber(nControl.input.value, state.n)));
     state.alpha = Math.max(0.001, Math.min(0.999, spFiniteNumber(alphaControl.input.value, state.alpha)));
@@ -1035,7 +1038,11 @@ makeStatisticalPowerDiagram = function(opts) {
 
   function placeLabels(p, domain, plotLeft, plotRight, baselineY) {
     const peakY = y(spNormalPdf(state.mu, state.mu, p.se));
-    const labelWidth = 22;
+    const labelWidth = schematic ? 94 : 22;
+    if (schematic) {
+      nullLabel.text(`H₀: ${f2(state.mu)}`);
+      altLabel.text(`H₁: ${f2(p.altMean)}`);
+    }
     const nullX = x(state.mu);
     const altX = x(p.altMean);
     // Close means would stack H0 and H1 on one another; they part just
@@ -1078,6 +1085,7 @@ makeStatisticalPowerDiagram = function(opts) {
   }
 
   function describe(p) {
+    if (schematic) return `Schematic normal curves illustrating power, not an exact t-power calculation. Null mean ${f2(state.mu)}; hypothetical alternative mean ${f2(p.altMean)}. Purple area under the alternative beyond the null rejection boundaries represents power; gray area between the boundaries represents beta.`;
     const boundaries = [p.lowCritical, p.highCritical].filter(Number.isFinite).map(f2);
     const parts = [
       `Sampling distribution of the mean under H0, centered on ${fTick(state.mu)} with standard error ${f2(p.se)}.`,
@@ -1177,10 +1185,10 @@ makeStatisticalPowerDiagram = function(opts) {
       alphaControl.value.text(f2(state.alpha));
       seValue.text(f2(p.se));
     }
-    alphaKey.value.text(fAlpha(state.alpha));
+    alphaKey.value.text(schematic ? "" : fAlpha(state.alpha));
     const undefinedPower = noEffect(p);
-    betaKey.value.text(undefinedPower ? "–" : fProbability(p.beta));
-    powerKey.value.text(undefinedPower ? "–" : fProbability(p.power));
+    betaKey.value.text(schematic ? "" : undefinedPower ? "–" : fProbability(p.beta));
+    powerKey.value.text(schematic ? "" : undefinedPower ? "–" : fProbability(p.power));
     const keyBeta = state.showAlt && state.shadeBeta;
     const keyPower = state.showAlt && state.shadePower;
     const showBeta = keyBeta && !undefinedPower;
@@ -1457,7 +1465,7 @@ makeStatisticalPowerDiagram = function(opts) {
     mounted = true;
   }
 
-  if (window.interactiveFigure) {
+  if (window.interactiveFigure && !schematic) {
     window.interactiveFigure.wrap({
       root: rootNode,
       controls: controls.node(),

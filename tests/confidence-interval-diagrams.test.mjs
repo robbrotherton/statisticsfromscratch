@@ -8,6 +8,24 @@ vm.runInNewContext(readFileSync(new URL('../resources/js/stat-helpers.js',import
 vm.runInNewContext(readFileSync(new URL('../resources/js/confidence-interval-diagrams.js',import.meta.url),'utf8'),context);
 const interval=context.window.sfsConfidenceInterval;
 
+test('t intervals use sample SD and n minus one degrees of freedom (R reference)',()=>{
+  const p=interval(322.5913043478261,45.31319210933692,23,95,'t');
+  assert.equal(p.df,22);
+  assert.ok(Math.abs(p.lower-302.9964)<0.0001);
+  assert.ok(Math.abs(p.upper-342.1862)<0.0001);
+  assert.ok(p.lower>284);
+  const small=interval(8,2,3,95,'t');
+  assert.ok(Math.abs(small.critical-4.302652729911)<1e-8);
+  for(const n of [3,6,23,100]) for(const confidence of [80,95,99]) {
+    const t=interval(8,2,n,confidence,'t');
+    const z=interval(8,2,n,confidence);
+    assert.ok(t.margin>z.margin);
+    for(const mu0 of [0,4,7,9,12]) {
+      assert.equal(mu0>=t.lower&&mu0<=t.upper,Math.abs((8-mu0)/t.se)<=t.critical);
+    }
+  }
+});
+
 test('matching z tests and intervals agree across means, sizes and confidence levels',()=>{
   for(const n of [3,6,23,100]) for(const confidence of [80,95,99]) for(const m of [6,7,8,10.5]) {
     const p=interval(m,Math.sqrt(14),n,confidence);

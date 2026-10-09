@@ -6,6 +6,8 @@ interactive-scripts:
   - graph-generator
   - make-inferential-diagram
   - playing-cards
+  - confidence-interval-diagrams
+  - statistical-power
 ---
 
 {{< interactive-figure
@@ -37,41 +39,39 @@ We've introduced the general idea of null hypothesis significance testing in the
 
 We started the previous chapter by taking some samples from a full deck of cards. Since we knew the composition of the deck, we could figure out the population standard deviation, $\sigma$. With that in hand we could compute the standard error of the mean, $\sigma_M$, which contributed to both the confidence interval and the $z$-test statistic.
 
-Let's take some samples from new deck. But this isn't a regular, complete deck. I look some cards out. Which ones? I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples.
+Let's take some samples from a new deck. But this isn't a regular, complete deck. I took some cards out. Which ones? I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples. As before, we put each card back and shuffle before drawing the next one.
 
-### Sample A: six cards
+::: {#quiz-t-sample-variability}
+{{< include quizzes/11-t-test-card-samples.qmd >}}
+:::
 
-{{< interactive-figure tSampleA makePlayingCardHand options='{"ranks":[6,7,7,9,9,10],"suits":[0,1,2,0,1,3]}' fallback="Sample A: 6, 7, 7, 9, 9, 10. Six cards with mean 8 and relatively little spread." >}}
-
-$n = 6$, $M = 8$.
-
-### Sample B: another six cards
-
-{{< interactive-figure tSampleB makePlayingCardHand options='{"ranks":[2,3,7,11,12,13],"suits":[0,1,2,0,1,3]}' fallback="Sample B: 2, 3, 7, Jack, Queen, King. Six cards with mean 8 and greater spread." >}}
-
-$n = 6$, $M = 8$.
-
-<!-- QUIZ: Prediction prompt, before formulas: same mean, same n, but different spread. If each hand were all we had, would we estimate the same uncertainty? Draw out the idea of using sample variability. These are alternative samples, not two groups to compare. Their true SE is the same because they come from the same deck; our estimates of it differ. A tighter hand does not guarantee a more accurate mean. Do not calculate exact t probabilities for six draws from this discrete population. -->
-
-We find ourselves now in a more typical situation now. It's rare that we know the population standard deviation; the proceudres from the past few chapters which rely on knowing $\sigma$ provide the foundations of what is to come, but we can't actually use them very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. Rather, we just let our sample do a little more work. We can use our sample's variability to estimate the population variability. And that means we have to account for the fact that our estimate of uncertainty is itself uncertain.
+We find ourselves now in a more typical situation now. It's rare that we know the population standard deviation; the procedures from the past few chapters which rely on knowing $\sigma$ provide the foundations of what is to come, but we can't actually use them very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. Rather, we just let our sample do a little more work. We can use our sample's variability to estimate the population variability. And that means we have to account for the fact that our estimate of uncertainty is itself uncertain.
 
 The question of uncertainty matters for both confidence intervals and hypothesis tests. To put an interval around a sample mean, or to judge how far it is from a hypothesized mean, we need a standard error. But what if we don't know the population standard deviation?
 
 ## From $z$ to $t$
 
-Here's the inferential process diagram I showed for the $z$-test a few chapters ago.
+Here's the inferential process diagram I showed for the $z$-test a few chapters ago. In that example, we treated the original population's mean and standard deviation as known.
 
-{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","labels":{"original-population":["Reference","population","Null mean μ₀","Unknown σ"]}}' fallback="Treatment-study diagram: a reference mean is specified, population variability is unknown, and inference uses the treated sample mean and standard deviation." >}}
+::: {#fig-t-known-population}
+{{< interactive-figure tKnownPopulationDiagram makeInferentialDiagram options='{"preset":"z-test","maxWidth":"42rem","ariaLabel":"The treatment-study design used for the z test: the original population mean and standard deviation are known. We observe the treated sample mean and sample size, and infer the treated population mean."}' fallback="Known original population μ and σ; treated sample M and n; inference from the treated sample to its population." >}}
 
-<!-- switch that diagram to generic known population -->
-
-Cavests: The statistical comparison doesn't by itself establish that a treatment caused a difference. And a single-sample $t$ test doesn't require a treatment at all, as we'll see with the class reaction times.
+The original population's mean and variability are known. The treated sample is our clue to the unknown treated population.
+:::
 
 We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The reference value is our null hypothesis, not necessarily a population fact we already know.
 
-{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","labels":{"original-population":["Reference","population","Null mean μ₀","Unknown σ"]}}' fallback="Treatment-study diagram: a reference mean is specified, population variability is unknown, and inference uses the treated sample mean and standard deviation." >}}
+::: {#fig-t-estimated-population}
+{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","labels":{"original-population":["Reference","population","Specified μ₀","Unknown σ"],"treated-sample":["Treated sample","M, n, and s"]},"ariaLabel":"The same treatment-study layout with population standard deviation unknown. The null specifies a reference mean μ₀; the treated sample now supplies s as well as M and n. We estimate standard error from s and n."}' fallback="Specified reference mean μ₀ and unknown σ; treated sample M, n, and s; the sample now supplies an estimate of variability too." >}}
+
+The inferential logic is the same. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
+:::
+
+These diagrams show a treatment study. The statistical comparison doesn't by itself establish that a treatment caused a difference, and a single-sample $t$ test doesn't require a treatment at all, as we'll see with the class reaction times.
 
 As an example, we might want to test whether the average sleep duration of a population differs from eight hours. Eight hours is a stipulated reference value, not necessarily a fact about the population mean. In Chapter 10 we did this with the $z$-test; we were able to use the $z$-statistic because we assumed that the population standard deviation was known---I just made up a standard deviation of 1.5 hours. Best not to just make things up, though. At least not when we don't have to. And we had something all along that we could use instead: the *sample's* standard deviation. We can use that to estimate the population standard deviation. We can use basically the same logic as the $z$-test to perform a hypothesis test without ever knowing for sure the population standard deviation. The resulting test statistic is no longer a $z$ statistic. The value gets a new name: a $t$-statistic. And the reference distribution is no longer the standard normal distribution, but a $t$ distribution.
+
+{{< include quizzes/10-confidence-intervals-design.qmd >}}
 
 ### The $t$ statistic
 
@@ -216,7 +216,11 @@ Here 284 is the stipulated benchmark. Whether this class represents a broader po
 
 We'll use $\alpha = .05$ for a two-tailed test. With 23 valid scores, $df = 22$, so the critical values are approximately $\pm 2.074$. We reject the null if $t < -2.074$ or $t > 2.074$.
 
-{{< interactive-figure classRtCriticalTable makeTTable options='{"title":"Critical values for the class test","df":[22],"alphas":[0.025],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":22,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 22 degrees of freedom. The two-tailed .05 critical value is 2.074." >}}
+::: {#tbl-t-class-critical}
+{{< interactive-figure classRtCriticalTable makeTTable options='{"title":"Critical values for the class test","df":{"from":20,"to":24},"alphas":[0.1,0.05,0.025,0.01,0.005],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":22,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 20 through 24 degrees of freedom, highlighting the two-tailed .05 critical value of 2.074 at df = 22." >}}
+
+An excerpt of the $t$ table, with the $df = 22$ row highlighted. The two-tailed $.05$ heading puts $.025$ in each tail.
+:::
 
 ### Step 3: Collect and analyze the data
 
@@ -288,7 +292,13 @@ $$ M \pm t^*s_M = 322.59 \pm 2.074(9.448) \approx [303.00,\ 342.19]\text{ ms} $$
 | Population mean reaction time | $[303.00,\ 342.19]$ ms |
 | Difference from the 284 ms reference | $[19.00,\ 58.19]$ ms |
 
-<!-- DRAFT: Add a simple interval bar with a point at 322.59, endpoints 303.00 and 342.19, and a reference line at 284. Use an interval, not a sample-centered probability curve. Explain why excluding 284 agrees with the two-tailed .05 test, and recall coverage and sampling/measurement limitations. At the same numerical SE, t* gives a wider interval than z*; a t interval need not be wider if the SE also changes. -->
+::: {#fig-t-class-ci}
+{{< interactive-figure classRtConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":322.5913043478261,"s":45.31319210933692,"n":23,"confidence":95,"reference":284,"xDomain":[275,355],"units":"Mean reaction time (ms)"}' fallback="95% t confidence interval for the mean: 303.00 to 342.19 ms, with point estimate 322.59 ms. The reference mean of 284 ms lies below the entire interval." >}}
+
+The 95% $t$ interval excludes the reference mean of 284 ms, agreeing with the two-tailed test at $\alpha = .05$.
+:::
+
+<!-- DRAFT: Recall coverage and sampling/measurement limitations. At the same numerical SE, t* gives a wider interval than z*; a t interval need not be wider if the SE also changes. -->
 
 ## Reporting and interpreting the results
 
@@ -308,16 +318,17 @@ Or maybe a lot of people on that website take the test a bunch of times, rather 
 
 ## Statistical power with a $t$ test
 
-<!-- DRAFT: One short application of Chapter 9. Same influences: true effect, population variability, n, and alpha. With unknown sigma, estimating SE costs power relative to the known-sigma test under the same population assumptions, especially with small n. Use a specified future-study effect, not "observed power" from this class's d. -->
+Remember the two sampling distributions from Chapter 9. The null curve is centered on 284 ms. For the alternative, suppose the true population mean were 322.59 ms—the mean we observed in our class. The purple area shows the chance of rejecting the null if that hypothetical alternative were true.
 
-| Planned test | True standardized effect | $n$ | Two-tailed $\alpha$ | Power |
-|:--|--:|--:|--:|--:|
-| $z$ (known $\sigma$) | 0.5 | 10 | .05 | .353 |
-| $t$ (estimated $\sigma$) | 0.5 | 10 | .05 | .293 |
+::: {#fig-t-power}
+{{< interactive-figure tPowerIllustration makeStatisticalPowerDiagram options='{"schematic":true,"mu":284,"sigma":45.31319210933692,"n":23,"diff":38.5913043478261,"alpha":0.05,"showControls":[]}' fallback="Schematic null and alternative sampling distributions centered on 284 and 322.59 ms. Power is the shaded area under the alternative beyond the null rejection boundaries; beta is the area between them." >}}
 
-<!-- DRAFT: Explain the table in a few sentences. The t calculation uses software and a noncentral t distribution under the specified alternative (noncentrality = 0.5 sqrt(10)); do not shift an ordinary central t curve or reuse the z power formula as an exact t calculation. No noncentral-t algebra lesson needed. -->
+A reminder of the logic of power: the rejection regions come from the null model, but power is an area under the alternative. These schematic normal curves illustrate that logic; they aren't an exact $t$-power calculation.
+:::
 
-{{< include quizzes/10-confidence-intervals-design.qmd >}}
+Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. For planning a future study, we'd specify a plausible effect to detect.
+
+<!-- DRAFT: Briefly recall how true effect, variability, n, and alpha affect power. Optional aside: estimating variability generally costs power relative to knowing it. Exact t power accounts for uncertainty in the estimated SD; no noncentral-t derivation needed here. -->
 
 ## Looking ahead
 
