@@ -251,3 +251,16 @@ test("every multi-slider step's fixed axes keep the opening curves well up the p
     assert.ok((p.altMean - state.mu + 7 * p.se) / (domain[1] - domain[0]) > 0.3, `${solveFor}: curves start too narrow`);
   }
 });
+
+test("t curves slide the null t over, the usual approximation to t-test power (R reference)", () => {
+  const state = { mu: 284, sigma: 47.7552000793148, n: 65, diff: 14.1846153846154, alpha: 0.05, twoTailed: true, distribution: "t" };
+  const p = power.params(state);
+  assert.equal(p.df, 64);
+  // R: pt(ncp - tc, 64) + pt(-ncp - tc, 64), with tc = qt(.975, 64).
+  assert.ok(Math.abs(p.highCritical - 295.833159187506) < 1e-6);
+  assert.ok(Math.abs(p.power - 0.653671441391) < 1e-6);
+  // The normal curves, with z's critical value, overstate it.
+  assert.ok(power.params(Object.assign({}, state, { distribution: "normal" })).power > p.power + 0.01);
+  // The curve drawn is the t density, whose area matches the power above.
+  assert.ok(Math.abs(power.density(284, 284, p) - sfsStats.tPdf(0, 64) / p.se) < 1e-12);
+});
