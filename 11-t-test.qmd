@@ -152,31 +152,30 @@ So now that we know about the properties of the distribution, particularly how i
 
 So instead of referring to the unit normal table like we've done in the past, we refer to a $t$ table. Like the unit normal table, this will give us the $t$ values associated with different regions of the distribution. But unlike the unit normal table, the $t$ table must include values for different degrees of freedom.
 
-{{< interactive-figure staticTTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":30},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":false,"interactive":false}' fallback="Static table of t critical values." >}}
+So typically the table looks something like @fig-t-table. There's a column for degrees of freedom, followed by columns for different alpha values of .1, .05, and so on. And often it'll give these values for both one-tailed and two-tailed hypotheses. Use the heading for your chosen tail and alpha: one-tailed .05 or two-tailed .05, for example. Then you find the right row based on your degrees of freedom, which for a single-sample $t$ test is one less than your sample size.
 
-So typically the table looks something like this. There's a column for degrees of freedom, followed by columns for different alpha values of .1, .05, and so on. And often it'll give these values for both one-tailed and two-tailed hypotheses. Use the heading for your chosen tail and alpha: one-tailed .05 or two-tailed .05, for example. Then you find the right row based on your degrees of freedom, which for a single-sample $t$ test is one less than your sample size.
+::: {#fig-t-table}
+{{< interactive-figure staticTTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":60},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":false,"interactive":false}' fallback="Static table of t critical values." >}}
 
-::::: {.callout-tip .interactive}
-## Connect the table to the critical regions
-
-{{< interactive-figure tCriticalValueTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":30},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":true,"selectedTail":"two","selected":{"df":22,"tail":"two","alpha":0.05},"tableMaxHeight":"18rem"}' fallback="Interactive t critical-value table." >}}
-
-{{< interactive-figure tCriticalCurve makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":{"$value":"tCriticalValueTable.df"},"title":{"$template":"df = ${tCriticalValueTable.df}"},"style":"minimal","height":160,"xDomain":[-4,4],"yDomain":[0,0.45],"xTicks":5,"shade":{"$value":"tCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="t distribution curve with the selected critical region shaded." >}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Two-tailed" data-action='{"df":22,"tail":"two","alpha":0.05,"animate":false}'}
-For a sample of 23 observations, $n = 23$, so $df = 22$. With a two-tailed $\alpha = .05$, the critical values are about $\pm 2.07$.
 :::
 
-::: {.tutorial-step data-title="Smaller df" data-action='{"df":10,"tail":"two","alpha":0.05,"animate":true}'}
-With fewer degrees of freedom, the same two-tailed alpha level needs a larger critical value because the $t$ distribution has heavier tails.
-:::
+To take an example, say we have a sample of $n = 23$ scores. That gives us $df = 22$. @fig-t-critical-regions shows the critical regions for two- and one-tailed tests. If we are doing a two-tailed test with $\alpha = .05$, we look in the two-tailed .05 column and find the critical value of $t = \pm 2.074$. If we were doing a one-tailed test with $\alpha = .05$, we would look in the one-tailed .05 column and find the critical value of $t = +1.717$ (or $-1.717$ if our alternative hypothesis were that the population mean is less than the reference value).
 
-::: {.tutorial-step data-title="One-tailed" data-action='{"df":22,"tail":"right","alpha":0.05,"animate":true}'}
-For a one-tailed $\alpha = .05$ test with the same degrees of freedom, all of the critical area is on one side.
+:::: {#fig-t-critical-regions}
+::: {.sfs-figure-row .sfs-figure-row-wide}
+{{< interactive-figure tTwoTailedCriticalRegions makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Two-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.07387,"label":"−2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.07387,"label":"+2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"}],"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and two critical regions shaded red, 2.5 percent below t equals negative 2.07 and 2.5 percent above t equals positive 2.07."}' fallback="Null t distribution with df = 22 and two critical regions shaded, 2.5% below t = −2.07 and 2.5% above t = +2.07." >}}
+
+{{< interactive-figure tOneTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"One-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"right","alpha":0.05},"markers":{"at":1.71714,"label":"+1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the highest five percent shaded red as a single critical region above t equals 1.72."}' fallback="Null t distribution with df = 22 and the highest 5% shaded as a single critical region above t = 1.72." >}}
+
+
+{{< interactive-figure tOneTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"One-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"left","alpha":0.05},"markers":{"at":-1.71714,"label":"-1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the lowest five percent shaded red as a single critical region below t equals -1.72."}' fallback="Null t distribution with df = 22 and the lowest 5% shaded as a single critical region below t = -1.72." >}}
 :::
+Critical regions for $\alpha = .05$ with $df = 22$.
 ::::
-:::::
+
+Note that if we were doing a $z$-test, our critical values wouldn't have depended on $n$ or $df$; we would have just checked the Unit Normal Table and found the critical values of $\pm 1.96$ for a two-tailed test and $+1.645$ or $-1.645$ for a one-tailed test. In either case, the critical $z$ fromt he normal curve was less extreme than the corresponding $t$-value, because like we said, the $t$ distribution has heavier tails than the normal distribution.
+
+Suppose we had a sample of $n = 60$. Now for the two-tailed $t$-test, the critical values would be $t \pm 2.000$ with $df = 59$, down from $\pm 2.074$ at $df = 22$. The larger sample size and corresponding $df$ means that the $t$ distribution is closer to the normal distribution, and so the critical values are less extreme, closer to the $z = \pm 1.96$ we would have used if we knew the population standard deviation.
 
 {{< include quizzes/11-t-test-t-table.qmd >}}
 
@@ -284,8 +283,6 @@ The numerator shows that the class mean is a little more than 14 milliseconds sl
 Interpreting this effect size is the same as before. It depends on context, expectations, and our judgment about what constitutes a practically important difference.
 
 ### Confidence interval
-
-<!-- DRAFT: Short application of Chapter 10's construction. Same estimate ± margin of error, now using estimated SE and a t critical value with n-1 df. No new derivation of confidence intervals needed. -->
 
 Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom.
 
