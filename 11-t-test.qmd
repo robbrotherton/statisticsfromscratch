@@ -35,21 +35,23 @@ interactive-scripts:
 
 We've introduced the general idea of null hypothesis significance testing in the past few chapters, and we used the $z$ statistic to complete some hypothesis tests. Here we'll introduce a new test statistic, the $t$ test. We'll see how it differs from a $z$ statistic--which is not very much at all, thankfully. It's just used in slightly different circumstances. We'll reintroduce the ideas of sample variance and degrees of freedom because they will be newly relevant thanks to this $t$ statistic. And we'll practice hypothesis testing with the $t$ test.
 
-## What if we don't know the population variability?
+## Known unknowns
 
-We started the previous chapter by taking some samples from a full deck of cards. Since we knew the composition of the deck, we could figure out the population standard deviation, $\sigma$. With that in hand we could compute the standard error of the mean, $\sigma_M$, which contributed to both the confidence interval and the $z$-test statistic.
+We started the previous chapter by taking some samples from a full deck of cards. Since we knew the composition of the deck, we could figure out the population standard deviation, $\sigma$. With that in hand we could compute the standard error of the mean, $\sigma_M$, which contributed to each sample's confidence interval, and the corresponding sample $z$-test statistic if we were to compute it.
 
-Let's take some samples from a new deck. But this isn't a regular, complete deck. I took some cards out. Which ones? I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples. As before, we put each card back and shuffle before drawing the next one.
+Now let's take some samples from a new deck. But this isn't a regular, complete deck. I took some cards out. Which ones? I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples.
 
 ::: {#quiz-t-sample-variability}
 {{< include quizzes/11-t-test-card-samples.qmd >}}
 :::
 
-We find ourselves now in a more typical situation now. It's rare that we know the population standard deviation; the procedures from the past few chapters which rely on knowing $\sigma$ provide the foundations of what is to come, but we can't actually use them very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. Rather, we just let our sample do a little more work. We can use our sample's variability to estimate the population variability. And that means we have to account for the fact that our estimate of uncertainty is itself uncertain.
-
-The question of uncertainty matters for both confidence intervals and hypothesis tests. To put an interval around a sample mean, or to judge how far it is from a hypothesized mean, we need a standard error. But what if we don't know the population standard deviation?
+We find ourselves now in a more typical situation now. It's rare that we know the population standard deviation; the procedures from the past few chapters which rely on knowing $\sigma$ provide the foundations of what is to come, but we can't actually use them very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. Rather, we just let our sample do a little more work. We can use our sample's variability to estimate the population variability. This changes our math very slightly, and it means we have to account for the fact that our estimate of uncertainty is itself uncertain. To accommodate this, we need a new kind of statistic, the $t$ statistic.
 
 ## From $z$ to $t$
+
+As a more concrete example, we might want to test whether the average sleep duration of a population differs from eight hours. Why eight hours? It's not necessarily a known fact about the population mean derived from real data, it's just the common-sense thing that you hear quite often. So eight hours can become our reference value. In Chapter 10 we tested this hypothesis this with the $z$-test; we were able to use the $z$-statistic because we assumed that the population standard deviation was known---I just made up a standard deviation of 1.5 hours.
+
+Best not to just make things up, though. At least not when we don't have to. And we had something all along that we could use instead: the *sample's* standard deviation. We can use that to estimate the population standard deviation. We can use basically the same logic as the $z$-test to perform a hypothesis test without ever knowing for sure the population standard deviation.
 
 Here's the inferential process diagram I showed for the $z$-test a few chapters ago. In that example, we treated the original population's mean and standard deviation as known.
 
@@ -59,6 +61,8 @@ Here's the inferential process diagram I showed for the $z$-test a few chapters 
 The original population's mean and variability are known. The treated sample is our clue to the unknown treated population.
 :::
 
+@fig-t-estimated-population shows the same kind of diagram, but adjusted to show the revised logic. We no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
+
 We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The reference value is our null hypothesis, not necessarily a population fact we already know.
 
 ::: {#fig-t-estimated-population}
@@ -67,15 +71,15 @@ We use a single-sample $t$ test to compare a population mean with a specified re
 The inferential logic is the same. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
 :::
 
-These diagrams show a treatment study. The statistical comparison doesn't by itself establish that a treatment caused a difference, and a single-sample $t$ test doesn't require a treatment at all, as we'll see with the class reaction times.
+The resulting test statistic is no longer a $z$ statistic. The value gets a new name: a $t$-statistic. And the reference distribution is no longer the standard normal distribution, but a $t$ distribution.
 
-As an example, we might want to test whether the average sleep duration of a population differs from eight hours. Eight hours is a stipulated reference value, not necessarily a fact about the population mean. In Chapter 10 we did this with the $z$-test; we were able to use the $z$-statistic because we assumed that the population standard deviation was known---I just made up a standard deviation of 1.5 hours. Best not to just make things up, though. At least not when we don't have to. And we had something all along that we could use instead: the *sample's* standard deviation. We can use that to estimate the population standard deviation. We can use basically the same logic as the $z$-test to perform a hypothesis test without ever knowing for sure the population standard deviation. The resulting test statistic is no longer a $z$ statistic. The value gets a new name: a $t$-statistic. And the reference distribution is no longer the standard normal distribution, but a $t$ distribution.
+Note that these diagrams focus on the idea of a sample receiving some kind of *treatment*. That could be something like a researcher administering a new therapy to a group of patients, or it could mean observing a potential difference arising from a natural process, like comparing the sleep habits of two different groups. The statistical comparison doesn't by itself establish that a treatment caused a difference.
 
 {{< include quizzes/10-confidence-intervals-design.qmd >}}
 
 ### The $t$ statistic
 
-Remember that the $z$ test compares our sample mean with the mean specified by the null hypothesis, $\mu_0$, in units of standard error:
+The $z$ test compares our sample mean with the mean specified by the null hypothesis, $\mu_0$, in units of standard error:
 
 $$ z = \frac{M - \mu_0}{\sigma_M}, \qquad \sigma_M = \frac{\sigma}{\sqrt{n}} $$
 
@@ -83,24 +87,20 @@ It's the denominator here, the standard error of the mean, that describes the va
 
 Thankfully, this isn't just a dead end. There is a very simple solution.
 
-### Estimated standard error
-
-The solution to not knowing the population standard deviation is simply to use our sample's standard deviation to estimate it. Instead of our denominator being the known standard error of the mean, $\sigma_M$, we call it the estimated standard error of the mean, $s_M$. You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.
+The solution to not knowing the population standard deviation is simply to use our sample's standard deviation to estimate it. Instead of our denominator being the known standard error of the mean, $\sigma_M$, we call it the **estimated standard error of the mean**, $s_M$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.)
 
 <!-- DRAFT: Return briefly to the two hands: same n, so the more variable hand supplies the larger estimated SE. Using s solves the missing-denominator problem, but s itself changes from sample to sample. Establish that extra uncertainty before naming the new reference distribution. -->
-
-### Formulas for standard error and estimated standard error
 
 | | Population variability known | Population variability estimated |
 |:--|:--|:--|
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
 | Test statistic | $z = \dfrac{M - \mu_0}{\sigma_M}$ | $t = \dfrac{M - \mu_0}{s_M}$ |
 
-So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes uncertainty in the mean, but now we have to estimate it.
+So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes uncertainty in the mean, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too. We need to account for that additional uncertainty when deciding how unusual a test statistic is.Whereas the $z$-test always relied on the same standard normal curve, the $t$ distribution differs depending on the uncertainty in the denominator.
 
-You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too. We need to account for that when deciding how unusual a test statistic is.
+## The $t$ distribution(s)
 
-### Degrees of freedom revisited
+<!-- DRAFT: Add a short historical paragraph here, now that the small-sample problem is clear: William Sealy Gosset's work at Guinness, his 1908 publication under the name Student, and the origin of "Student's t." Keep the practical small-sample motivation central. Sources and attribution notes are in the private structural-pass record. -->
 
 Remember that to calculate sample variance, we first calculate the sample mean. The deviations from that mean sum to zero, so only $n - 1$ of them are free to vary.
 
@@ -109,10 +109,6 @@ $$ s^2 = \frac{\sum(X-M)^2}{n-1}, \qquad s_M = \frac{s}{\sqrt{n}}, \qquad df = n
 Dividing by $n-1$ corrects the downward bias in the sample variance. But it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for.
 
 For this single-sample $t$ test, $df = n - 1$. Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.
-
-<!-- DRAFT: Add a short historical paragraph here, now that the small-sample problem is clear: William Sealy Gosset's work at Guinness, his 1908 publication under the name Student, and the origin of "Student's t." Keep the practical small-sample motivation central. Sources and attribution notes are in the private structural-pass record. -->
-
-## The $t$ distribution
 
 With the $z$ test, we used the standard normal distribution to judge the standardized test statistic. That reference curve stays the same as sample size changes, even though the standard error of the mean changes.
 
@@ -154,7 +150,7 @@ By thirty degrees of freedom, the difference is subtle. Use the control to try v
 
 In other words, there is a big difference between the distributions for degrees of freedom of one and two, or four and five, but a comparatively small difference between the distributions for twenty-eight and twenty-nine or twenty-nine and thirty degrees of freedom.
 
-## The $t$ Table
+## The $t$ table
 
 So now that we know about the properties of the distribution, particularly how it depends on degrees of freedom, we're ready to start thinking about probabilities. With the normal distribution and the $z$ test, we could determine the area under the curve for, say, the most extreme five percent of the distribution. And we want to do exactly the same thing for the $t$ distribution. The only difference is that, again, there is more than one $t$ distribution. And so the specific probabilities depend on the degrees of freedom.
 
@@ -196,7 +192,7 @@ Independence means that observations do not supply overlapping information. Rand
 
 <!-- DRAFT: Keep this short and connect it to the coming data inspection. No equal-variance assumption is needed between a reference population and a treated population for this one-sample test; introduce equality of two variances only with the pooled test in Chapter 12. -->
 
-## Hypothesis tests, step by step: class reaction times
+## The $t$-test, step by step: reaction times
 
 So now we'll work through an example hypothesis test using our new tool, the $t$ test. For the purposes of the example, we'll use data collected by a statistics class using the reaction time test from our Spider-People example.
 
@@ -281,19 +277,21 @@ You should have calculated $t \approx 2.39$. Our sample mean is about 2.39 estim
 
 The equivalent two-tailed $p$-value, calculated with software using the unrounded statistic, is approximately $.020$. As in Chapter 8, this includes outcomes at least as extreme in either direction. Our critical-value table locates the rejection boundary; it doesn't give this exact $p$-value.
 
-## Effect size and confidence interval
-
-### How big is the difference?
+### Effect size
 
 We can use a version of Cohen's $d$ for the single-sample $t$ test, just as we did with the $z$ test. The difference here is that we use sample standard deviation ($s$) in place of the unknown population standard deviation ($\sigma$).
 
-$$ M-\mu_0 = 14.18\text{ ms}, \qquad d = \frac{M-\mu_0}{s} = \frac{298.18-284}{47.76} \approx 0.30 $$
+$$ d = \frac{M-\mu_0}{s} = \frac{298.18-284}{47.76} \approx 0.30 $$
 
-<!-- DRAFT: One brief interpretation: the sample mean is 14.18 ms slower than the reference, about .30 sample SDs above it. Recall Chapter 9: magnitude and practical importance are separate from significance; report magnitude and uncertainty regardless of the test decision. -->
+The numerator shows that the class mean is a little more than 14 milliseconds slower than the reference null of 284 ms. The denominator puts this raw difference in units of the standard deviation, estimated from the sample itself, for a Cohen's $d$ of about .30.
 
-### A confidence interval for the mean
+Interpreting this effect size is the same as before. It depends on context, expectations, and our judgment about what constitutes a practically important difference.
+
+### Confidence interval
 
 <!-- DRAFT: Short application of Chapter 10's construction. Same estimate ± margin of error, now using estimated SE and a t critical value with n-1 df. No new derivation of confidence intervals needed. -->
+
+Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom.
 
 $$ M \pm t^*s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
 
@@ -322,7 +320,9 @@ There's a lot of information packed into this fairly short, dry, technical state
 
 ### Interpreting the results
 
-If we wanted to get headlines, maybe we could say something like "statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group.
+Performing the analysis, computing the effect size and confidence interval, reporting the results; once you get the hang of it that's all fairly mechanical. But interpreting the results requires more thought.
+
+If we wanted to make the most of our reaction time findings, maybe we could say something like "study shows that studying statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group.
 
 Or maybe a lot of people on that website take the test a bunch of times, and maybe their reaction times got a little faster with practice, so maybe our class was just unpracticed at this task rather than slower in general. Or maybe we're making a Type I error. This is a good lesson on why a "statistically significant" result doesn't by itself explain the difference or establish how widely it generalizes.
 
