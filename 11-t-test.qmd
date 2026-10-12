@@ -89,8 +89,6 @@ Thankfully, this isn't just a dead end. There is a very simple solution.
 
 The solution to not knowing the population standard deviation is simply to use our sample's standard deviation to estimate it. Instead of our denominator being the known standard error of the mean, $\sigma_M$, we call it the **estimated standard error of the mean**, $s_M$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.)
 
-<!-- DRAFT: Return briefly to the two hands: same n, so the more variable hand supplies the larger estimated SE. Using s solves the missing-denominator problem, but s itself changes from sample to sample. Establish that extra uncertainty before naming the new reference distribution. -->
-
 | | Population variability known | Population variability estimated |
 |:--|:--|:--|
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
@@ -110,25 +108,15 @@ Gosset published his work in 1908 under the pseudonym "Student," because Guinnes
 
 ## The $t$ distribution(s)
 
-This bring us back to the idea of degrees of freedom. Unlike the single standard normal curve, the $t$ distribution is actually a family of distributions. There's a slightly different $t$ curve for each value of degrees of freedom.
+The essntial point is that, unlike the single standard normal curve, the $t$ distribution is actually a family of distributions, with a slightly different curve for each value of degrees of freedom. When we calculate a $t$-statistic for a sample mean and want to determine its $p$-value, we have to pick which precise $t$ distribution to use for the probabilities based on $df$.
 
-Remember that to calculate sample variance, we first calculate the sample mean, then the deviations from that mean. The deviations must sum to zero, so only $n - 1$ of them are free to vary.
+The $t$ statistic inherits its degrees of freedom from the sample variance in its denominator. Because the deviations from the sample mean must sum to zero, only $n - 1$ of them are free to vary, so for the single-sample $t$ test, $df = n - 1$. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
 
-$$ s^2 = \frac{\sum(X-M)^2}{n-1} $$
-$$ s_M = \frac{s}{\sqrt{n}} $$
-$$ df = n-1 $$
+Dividing by $n - 1$ corrects the downward bias in the sample variance, but it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for. With low degrees of freedom, the curve has heavier tails than the standard normal curve: extreme values are more common because we are dividing by an uncertain estimate of standard error. As degrees of freedom increase, the curve approaches the standard normal curve.
 
-Dividing by $n-1$ corrects the downward bias in the sample variance. But it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for. When we calculate a $t$-statistic for a sample mean and want to determine its $p$-value, we have to pick which precise $t$ distribution to use for the probabilities based on $df$.
+Gosset plotted his curve for samples of ten alongside a normal curve, noting that "large deviations are more common than in the normal curve." Near the center, the two curves give similar answers. But farther out, he warned, "the normal curve gives a false feeling of security" [@student1908probable, p. 12]. The graph below is a modern version of his comparison, showing the $t$ distribution for different degrees of freedom with the standard normal distribution for reference. The shape changes quickly at very low degrees of freedom, but the change slows down as degrees of freedom increase.
 
-For this single-sample $t$ test, $df = n - 1$. The $t$-statistic inherits the sample's degrees of freedom. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
-
-### How the $t$ distribution changes with degrees of freedom
-
-With low degrees of freedom, the curve has heavier tails than the standard normal curve: extreme standardized statistics are more common because we are dividing by an uncertain estimate of standard error. As degrees of freedom increase, the curve approaches the standard normal curve.
-
-The graph below shows how the $t$ distribution changes along with degrees of freedom, with the standard normal distribution shown for reference. The shape changes quickly at very low degrees of freedom, but the change slows down as degrees of freedom increase.
-
-::::: {.callout-tip .interactive}
+::::: {#act-t-distribution .callout-tip .interactive}
 ## Explore the $t$ distribution
 
 {{< interactive-figure tDistributionDfExplorer makeTDistributionDfExplorer options='{"df":1,"controlsOpen":false,"color":"var(--sfs-null-color, currentColor)"}' fallback="Interactive t-distribution explorer controlled by degrees of freedom." >}}
@@ -142,12 +130,12 @@ With one degree of freedom, the $t$ curve is much flatter than the normal curve 
 Increasing to two degrees of freedom already pulls the center upward and the tails downward.
 :::
 
-::: {.tutorial-step data-title="df = 5" data-action='{"df":5,"animate":true}'}
-By five degrees of freedom, the curve is still visibly wider than the normal curve, but the difference is smaller.
+::: {.tutorial-step data-title="df = 3" data-action='{"df":3,"animate":true}'}
+Three degrees of freedom matches Gosset's card experiment, and our hands of four cards. The curve is still visibly wider than the normal curve. About 14% of the $t$ distribution lies beyond $\pm 1.96$, where the normal curve has only 5%.
 :::
 
-::: {.tutorial-step data-title="df = 10" data-action='{"df":10,"animate":true}'}
-At ten degrees of freedom, the $t$ distribution is approaching the normal distribution.
+::: {.tutorial-step data-title="df = 9" data-action='{"df":9,"animate":true}'}
+Nine degrees of freedom matches Gosset's own comparison, for samples of ten. The $t$ distribution is approaching the normal distribution, but the tails still hold more: about 8% lies beyond $\pm 1.96$.
 :::
 
 ::: {.tutorial-step data-title="df = 30" data-action='{"df":30,"animate":true,"controls-open":true}'}
