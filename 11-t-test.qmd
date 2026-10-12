@@ -56,7 +56,7 @@ Best not to just make things up, though. At least not when we don't have to. And
 Here's the inferential process diagram I showed for the $z$-test a few chapters ago. In that example, we treated the original population's mean and standard deviation as known.
 
 ::: {#fig-t-known-population}
-{{< interactive-figure tKnownPopulationDiagram makeInferentialDiagram options='{"preset":"z-test","maxWidth":"42rem","ariaLabel":"The treatment-study design used for the z test: the original population mean and standard deviation are known. We observe the treated sample mean and sample size, and infer the treated population mean."}' fallback="Known original population μ and σ; treated sample M and n; inference from the treated sample to its population." >}}
+{{< interactive-figure tKnownPopulationDiagram makeInferentialDiagram options='{"preset":"z-test","maxWidth":"42rem","ariaLabel":"The z-test design: the reference mean μ₀ is specified, and the standard deviation σ is known. The treated sample supplies M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and known σ; treated sample supplies M and n; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
 
 The original population's mean and variability are known. The treated sample is our clue to the unknown treated population.
 :::
@@ -66,7 +66,7 @@ The original population's mean and variability are known. The treated sample is 
 We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The reference value is our null hypothesis, not necessarily a population fact we already know.
 
 ::: {#fig-t-estimated-population}
-{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","labels":{"original-population":["Reference","population","Specified μ₀","Unknown σ"],"treated-sample":["Treated sample","M, n, and s"]},"ariaLabel":"The same treatment-study layout with population standard deviation unknown. The null specifies a reference mean μ₀; the treated sample now supplies s as well as M and n. We estimate standard error from s and n."}' fallback="Specified reference mean μ₀ and unknown σ; treated sample M, n, and s; the sample now supplies an estimate of variability too." >}}
+{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
 
 The inferential logic is the same. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
 :::
@@ -96,27 +96,25 @@ The solution to not knowing the population standard deviation is simply to use o
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
 | Test statistic | $z = \dfrac{M - \mu_0}{\sigma_M}$ | $t = \dfrac{M - \mu_0}{s_M}$ |
 
-So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes uncertainty in the mean, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too. We need to account for that additional uncertainty when deciding how unusual a test statistic is.Whereas the $z$-test always relied on the same standard normal curve, the $t$ distribution differs depending on the uncertainty in the denominator.
+So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too. We need to account for that additional uncertainty when deciding how unusual a test statistic is. Whereas the $z$-test always relied on the same standard normal curve, the $t$ distribution differs depending on the uncertainty in the denominator.
 
 ## The $t$ distribution(s)
 
-<!-- DRAFT: Add a short historical paragraph here, now that the small-sample problem is clear: William Sealy Gosset's work at Guinness, his 1908 publication under the name Student, and the origin of "Student's t." Keep the practical small-sample motivation central. Sources and attribution notes are in the private structural-pass record. -->
+This bring us back to the idea of degrees of freedom. Unlike the single standard normal curve, the $t$ distribution is actually a family of distributions. There's a slightly different $t$ curve for each value of degrees of freedom.
 
-Remember that to calculate sample variance, we first calculate the sample mean. The deviations from that mean sum to zero, so only $n - 1$ of them are free to vary.
+Remember that to calculate sample variance, we first calculate the sample mean, then the deviations from that mean. The deviations must sum to zero, so only $n - 1$ of them are free to vary.
 
 $$ s^2 = \frac{\sum(X-M)^2}{n-1}, \qquad s_M = \frac{s}{\sqrt{n}}, \qquad df = n-1 $$
 
-Dividing by $n-1$ corrects the downward bias in the sample variance. But it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for.
+Dividing by $n-1$ corrects the downward bias in the sample variance. But it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for. When we calculate a $t$-statistic for a sample mean and want to determine its $p$-value, we have to pick which precise $t$ distribution to use for the probabilities based on $df$.
 
-For this single-sample $t$ test, $df = n - 1$. Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.
-
-With the $z$ test, we used the standard normal distribution to judge the standardized test statistic. That reference curve stays the same as sample size changes, even though the standard error of the mean changes.
-
-The $t$ distribution is a family of distributions. There's a slightly different $t$ curve for each value of degrees of freedom. With low degrees of freedom, the curve has heavier tails than the standard normal curve: extreme standardized statistics are more common because we are dividing by an uncertain estimate of standard error. As degrees of freedom increase, the curve approaches the standard normal curve.
-
-These curves describe the test statistic under the null hypothesis, assuming independent observations from a normal population. They aren't distributions of individual reaction times, or of sample means in milliseconds.
+For this single-sample $t$ test, $df = n - 1$. The $t$-statistic inherits the sample's degrees of freedom. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
 
 ### How the $t$ distribution changes with degrees of freedom
+
+<!-- DRAFT: Add a short historical paragraph here, now that the small-sample problem is clear: William Sealy Gosset's work at Guinness, his 1908 publication under the name Student, and the origin of "Student's t." Keep the practical small-sample motivation central. Sources and attribution notes are in the private structural-pass record. -->
+
+With low degrees of freedom, the curve has heavier tails than the standard normal curve: extreme standardized statistics are more common because we are dividing by an uncertain estimate of standard error. As degrees of freedom increase, the curve approaches the standard normal curve.
 
 The graph below shows how the $t$ distribution changes along with degrees of freedom, with the standard normal distribution shown for reference. The shape changes quickly at very low degrees of freedom, but the change slows down as degrees of freedom increase.
 

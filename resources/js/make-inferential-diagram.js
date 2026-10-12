@@ -154,7 +154,8 @@ idgLabelFor = (labels, id, fallback) => {
 
 idgMergeLabels = (nodes, labels) =>
   nodes.map((node) => Object.assign({}, node, {
-    label: idgLabelFor(labels, node.id, node.label)
+    label: idgLabelFor(labels, node.id, node.label),
+    detail: idgLabelFor(labels, `${node.id}-detail`, node.detail)
   }))
 
 idgLinkLabelKey = (link) =>
@@ -169,16 +170,19 @@ idgSingleSamplePreset = (opts, variant) => {
   const labels = opts.labels || {};
   const zTest = variant === "z-test";
   const tTest = variant === "single-t" || variant === "single-sample-t";
-  const originalLabel = zTest
-    ? ["Known", "original", "population", "$\\mu, \\sigma$"]
+  // z and t share box names; only the detail lines change, so the two
+  // diagrams can be read side by side for what each test knows or estimates.
+  const referenceDetail = zTest
+    ? ["Specified $\\mu_0$", "Known $\\sigma$"]
     : tTest
-      ? ["Partially known", "original population", "$\\mu$"]
-      : ["Original", "population"];
-  const treatedSampleLabel = zTest
-    ? ["Treated sample", "$M, n$"]
+      ? ["Specified $\\mu_0$", "Unknown $\\sigma$"]
+      : [];
+  const treatedSampleDetail = zTest
+    ? ["$M, n$"]
     : tTest
-      ? ["Treated sample", "$n, M, SD$"]
-      : ["Treated sample"];
+      ? ["$M, n, s$"]
+      : [];
+  const treatedPopulationDetail = zTest || tTest ? ["Unknown $\\mu$"] : [];
 
   const nodes = idgMergeLabels([
     {
@@ -188,8 +192,9 @@ idgSingleSamplePreset = (opts, variant) => {
       y: 125,
       width: 230,
       height: 145,
-      label: originalLabel,
-      dashed: !zTest,
+      label: ["Reference", "population"],
+      detail: referenceDetail,
+      dashed: tTest,
       role: "population"
     },
     {
@@ -199,7 +204,8 @@ idgSingleSamplePreset = (opts, variant) => {
       y: 125,
       width: 230,
       height: 145,
-      label: ["Unknown", "treated", "population"],
+      label: ["Treated", "population"],
+      detail: treatedPopulationDetail,
       dashed: true,
       fill: idgTreatedFill,
       role: "population"
@@ -221,7 +227,8 @@ idgSingleSamplePreset = (opts, variant) => {
       y: 335,
       width: 235,
       height: 90,
-      label: treatedSampleLabel,
+      label: ["Treated sample"],
+      detail: treatedSampleDetail,
       fill: idgTreatedFill,
       role: "sample"
     }
@@ -251,7 +258,8 @@ idgSingleSamplePreset = (opts, variant) => {
       curve: 0.18,
       arrow: "end",
       dashed: true,
-      label: idgLabelFor(labels, "inference-link", ""),
+      label: idgLabelFor(labels, "inference-link", "Inference"),
+      labelOffsetX: 62,
       className: "idg-link-inference"
     },
     {
@@ -259,7 +267,8 @@ idgSingleSamplePreset = (opts, variant) => {
       to: "treated-population",
       curve: 0,
       dashed: true,
-      label: idgLabelFor(labels, "comparison-link", ""),
+      label: idgLabelFor(labels, "comparison-link", "Same $\\mu$?"),
+      labelOffsetY: -20,
       className: "idg-link-comparison"
     }
   ];
@@ -754,12 +763,29 @@ idgDrawLabel = (parent, lines, x, y, opts = {}) => {
     .style("font-size", idgCssLength(opts.fontSize))
     .style("font-weight", opts.fontWeight || null);
   const lineHeight = idgFiniteNumber(opts.lineHeight, idgFiniteNumber(opts.fontSize, 25) * 1.15);
-  const startY = y - ((cleanLines.length - 1) * lineHeight) / 2;
+  const detailLines = idgTextLines(opts.detailLines);
+  const detailSize = idgFiniteNumber(opts.detailSize, idgFiniteNumber(opts.fontSize, 25) * 0.88);
+  const detailLineHeight = idgFiniteNumber(opts.detailLineHeight, detailSize * 1.15);
+  const detailGap = detailLines.length ? detailSize * 0.3 : 0;
+  const totalHeight = (cleanLines.length - 1) * lineHeight
+    + (detailLines.length ? (lineHeight + detailLineHeight) / 2 + detailGap + (detailLines.length - 1) * detailLineHeight : 0);
+  const startY = y - totalHeight / 2;
 
   cleanLines.forEach((line, index) => {
     text.append("tspan")
       .attr("x", x)
       .attr("y", startY + index * lineHeight)
+      .text(idgLabelText(line));
+  });
+
+  const detailStartY = startY + (cleanLines.length - 1) * lineHeight
+    + (lineHeight + detailLineHeight) / 2 + detailGap;
+  detailLines.forEach((line, index) => {
+    text.append("tspan")
+      .attr("class", "idg-node-detail")
+      .attr("x", x)
+      .attr("y", detailStartY + index * detailLineHeight)
+      .style("font-size", idgCssLength(detailSize))
       .text(idgLabelText(line));
   });
 
@@ -798,6 +824,10 @@ idgDiagramStyleText = `
     font-size: 25px;
     font-weight: 650;
     line-height: 1.1;
+  }
+
+  .inferential-diagram-svg .idg-node-detail {
+    font-weight: 450;
   }
 
   .inferential-diagram-svg .idg-link {
@@ -1018,7 +1048,8 @@ makeInferentialDiagram = (opts = {}) => {
       className: "idg-node-label",
       fontSize: nodeLabelSize,
       lineHeight: nodeLineHeight,
-      fontWeight: node.labelWeight || null
+      fontWeight: node.labelWeight || null,
+      detailLines: node.detail
     });
   });
 
