@@ -2,6 +2,9 @@ spStats = window.sfsStats
 spNormalPdf = spStats.normalPdf
 spNormalCdf = spStats.normalCdf
 spNormalInv = spStats.normalInv
+spTPdf = spStats.tPdf
+spTCdf = spStats.tCdf
+spTInv = spStats.tInv
 spFiniteNumber = spStats.finiteNumber
 
 sfsInlineMath = function() {
@@ -13,16 +16,28 @@ sfsInlineMath = function() {
 window.sfsStatisticalPower = (function() {
   // The alternative sits `diff` raw units from the null when that is given,
   // otherwise `d` population SDs away.
+  // With `distribution: "t"` both curves are the t distribution on n - 1 df,
+  // scaled by the standard error, and the alternative is the null's curve
+  // slid over. That is the usual approximation to t-test power: exact power
+  // uses the noncentral t, which software reports a little differently.
   function params(state) {
     const se = state.sigma / Math.sqrt(state.n);
     const altMean = state.mu + (Number.isFinite(state.diff) ? state.diff : state.d * state.sigma);
-    const zCritical = spNormalInv(1 - (state.twoTailed ? state.alpha / 2 : state.alpha));
+    const df = state.distribution === "t" ? Math.max(1, state.n - 1) : null;
+    const tail = 1 - (state.twoTailed ? state.alpha / 2 : state.alpha);
+    const zCritical = df ? spTInv(tail, df) : spNormalInv(tail);
     const highCritical = state.mu + zCritical * se;
     const lowCritical = state.twoTailed ? state.mu - zCritical * se : -Infinity;
-    const powerLow = spNormalCdf(lowCritical, altMean, se);
-    const powerHigh = 1 - spNormalCdf(highCritical, altMean, se);
+    const cdf = (value, mean) => df ? spTCdf(value, df, mean, se) : spNormalCdf(value, mean, se);
+    const powerLow = Number.isFinite(lowCritical) ? cdf(lowCritical, altMean) : 0;
+    const powerHigh = 1 - cdf(highCritical, altMean);
     const beta = 1 - powerLow - powerHigh;
-    return { se, altMean, zCritical, highCritical, lowCritical, beta, power: 1 - beta, powerLow, powerHigh };
+    return { se, df, altMean, zCritical, highCritical, lowCritical, beta, power: 1 - beta, powerLow, powerHigh };
+  }
+
+  // The height of either curve, centered on `mean`, at `value`.
+  function density(value, mean, p) {
+    return p.df ? spTPdf(value, p.df, mean, p.se) : spNormalPdf(value, mean, p.se);
   }
 
   // Both curves and every boundary stay in view whether or not H1 is shown,
@@ -60,7 +75,7 @@ window.sfsStatisticalPower = (function() {
       const reach = Math.max(3.5, p.zCritical + 0.5) * p.se;
       low = Math.min(low, s.mu - reach, p.altMean - reach);
       high = Math.max(high, s.mu + reach, p.altMean + reach);
-      peak = Math.max(peak, spNormalPdf(0, 0, p.se));
+      peak = Math.max(peak, density(0, 0, p));
     });
     return { domain: [low, high], peak };
   }
@@ -218,7 +233,7 @@ window.sfsStatisticalPower = (function() {
     return best ? { x: best.x, y: best.y } : null;
   }
 
-  return { params, domain, fixedExtent, requiredN, exactN, textWidth, readableTicks, niceStep, zTickValues, clearOf, separatePair, fitRegionLabel };
+  return { params, density, domain, fixedExtent, requiredN, exactN, textWidth, readableTicks, niceStep, zTickValues, clearOf, separatePair, fitRegionLabel };
 })();
 
 makeStatisticalPowerDiagram = function(opts) {
@@ -239,7 +254,8 @@ makeStatisticalPowerDiagram = function(opts) {
   // A pared-back version for seeing what moves power: no rulers, axes that
   // hold still, and the sliders beneath the plot, which tutorial steps
   // reveal one at a time with `show-controls`.
-  const minimal = Boolean(opts.minimal);
+  const schematic = Boolean(opts.schematic);
+  const minimal = Boolean(opts.minimal || schematic);
   const margin = { top: 26, right: minimal ? 12 : SIDE_LABEL_WIDTH + 12, left: 12 };
   const fTick = d3.format("~g");
   const fBoundary = d3.format(".2f");
@@ -270,7 +286,8 @@ makeStatisticalPowerDiagram = function(opts) {
     // Which quantity is the answer: "power" from the design, or "n" from a
     // target power.
     solveFor: opts.solveFor === "n" ? "n" : "power",
-    targetPower: spFiniteNumber(opts.targetPower, 0.8)
+    targetPower: spFiniteNumber(opts.targetPower, 0.8),
+    distribution: opts.distribution === "t" ? "t" : "normal"
   };
   const MAX_N = 5000;
   if (minimal) {
@@ -280,7 +297,9 @@ makeStatisticalPowerDiagram = function(opts) {
     state.diff = spFiniteNumber(opts.diff, state.d * state.sigma);
     Object.assign(state, {
       showAlt: true, shadeBeta: true, shadePower: true, dimNull: false,
-      axisRaw: false, axisZNull: false, axisZAlt: false,
+      // A fixed schematic can ask for the raw ruler, so its means read in
+      // the example's own units; the sliders' moving domain never shows one.
+      axisRaw: opts.axisRaw === true, axisZNull: false, axisZAlt: false,
       shownControls: controlList(opts.showControls)
     });
   }
@@ -663,8 +682,10 @@ makeStatisticalPowerDiagram = function(opts) {
 
   // The key names every shaded color and carries the numbers, so the plot
   // needs no headroom for them and a region too thin to label loses nothing.
+  const showKey = opts.key !== false;
   const key = chartWrap.append("div")
     .attr("class", "sp-key")
+    .style("display", showKey ? null : "none")
     .attr("aria-live", "polite")
     .attr("aria-atomic", "true");
   function keyItem(className, labelHtml) {
@@ -674,9 +695,9 @@ makeStatisticalPowerDiagram = function(opts) {
     const value = item.append("span").attr("class", "sp-key-value");
     return { item, value };
   }
-  const alphaKey = keyItem("sp-key-alpha", "<i>&alpha;</i> =");
-  const betaKey = keyItem("sp-key-beta", "<i>&beta;</i> =");
-  const powerKey = keyItem("sp-key-power", "Power (1 &minus; <i>&beta;</i>) =");
+  const alphaKey = keyItem("sp-key-alpha", schematic ? "<i>&alpha;</i>" : "<i>&alpha;</i> =");
+  const betaKey = keyItem("sp-key-beta", schematic ? "<i>&beta;</i>" : "<i>&beta;</i> =");
+  const powerKey = keyItem("sp-key-power", schematic ? "Power (1 &minus; <i>&beta;</i>)" : "Power (1 &minus; <i>&beta;</i>) =");
 
   const svg = chartWrap.append("svg")
     .attr("class", "sfs-svg sfs-graph")
@@ -782,6 +803,17 @@ makeStatisticalPowerDiagram = function(opts) {
       .html(spec.side);
     axes[spec.name] = { g, ticks, boundaries, side, row: null, visible: false };
   });
+  // The minimal figure has no room at the side for "(M)", so the raw ruler
+  // takes an ordinary axis title instead, which can also carry units.
+  const axisTitle = opts.axisLabel ? axes.raw.g.append("text")
+    .attr("class", "sfs-axis-label sfs-graph-label")
+    .attr("y", 44)
+    .attr("text-anchor", "middle")
+    .text(opts.axisLabel) : null;
+  if (minimal) axes.raw.side.style("display", "none");
+  // Optionally the beta and power regions carry their areas, as the key
+  // does in the full figure.
+  const regionValues = Boolean(opts.regionValues);
 
   const boundaryLines = boundaryLayer.selectAll("line")
     .data([0, 1])
@@ -791,6 +823,8 @@ makeStatisticalPowerDiagram = function(opts) {
   let boundaryBottom = null;
 
   function readState() {
+    // A schematic is a fixed illustration; hidden slider ranges must not clamp its supplied values.
+    if (schematic) return;
     state.sigma = Math.max(0.01, spFiniteNumber(sigmaInput.value, state.sigma));
     state.n = Math.max(1, Math.round(spFiniteNumber(nControl.input.value, state.n)));
     state.alpha = Math.max(0.001, Math.min(0.999, spFiniteNumber(alphaControl.input.value, state.alpha)));
@@ -819,15 +853,15 @@ makeStatisticalPowerDiagram = function(opts) {
     state.axisZAlt = axisZAltInput.checked;
   }
 
-  function curveData(mean, se, domain, steps) {
+  function curveData(mean, p, domain, steps) {
     const dx = (domain[1] - domain[0]) / steps;
     return d3.range(steps + 1).map((i) => {
       const value = domain[0] + i * dx;
-      return { value, density: spNormalPdf(value, mean, se) };
+      return { value, density: geometry.density(value, mean, p) };
     });
   }
 
-  function segmentData(mean, se, from, to, domain) {
+  function segmentData(mean, p, from, to, domain) {
     const lo = Math.max(Number.isFinite(from) ? from : domain[0], domain[0]);
     const hi = Math.min(Number.isFinite(to) ? to : domain[1], domain[1]);
     if (hi <= lo) return [];
@@ -835,7 +869,7 @@ makeStatisticalPowerDiagram = function(opts) {
     const dx = (hi - lo) / steps;
     return d3.range(steps + 1).map((i) => {
       const value = lo + i * dx;
-      return { value, density: spNormalPdf(value, mean, se) };
+      return { value, density: geometry.density(value, mean, p) };
     });
   }
 
@@ -1034,8 +1068,12 @@ makeStatisticalPowerDiagram = function(opts) {
   }
 
   function placeLabels(p, domain, plotLeft, plotRight, baselineY) {
-    const peakY = y(spNormalPdf(state.mu, state.mu, p.se));
-    const labelWidth = 22;
+    const peakY = y(geometry.density(state.mu, state.mu, p));
+    const labelWidth = schematic ? 94 : 22;
+    if (schematic) {
+      nullLabel.text(`H₀: ${f2(state.mu)}`);
+      altLabel.text(`H₁: ${f2(p.altMean)}`);
+    }
     const nullX = x(state.mu);
     const altX = x(p.altMean);
     // Close means would stack H0 and H1 on one another; they part just
@@ -1046,8 +1084,8 @@ makeStatisticalPowerDiagram = function(opts) {
     nullLabel.attr("x", placed[0]).attr("y", peakY - 8);
     altLabel.attr("x", placed[1]).attr("y", peakY - 8);
 
-    const altTop = (px) => y(spNormalPdf(x.invert(px), p.altMean, p.se));
-    const nullTop = (px) => y(spNormalPdf(x.invert(px), state.mu, p.se));
+    const altTop = (px) => y(geometry.density(x.invert(px), p.altMean, p));
+    const nullTop = (px) => y(geometry.density(x.invert(px), state.mu, p));
     // Measured when the browser can lay the text out; estimated otherwise.
     const widthOf = (label) => {
       label.style("display", null);
@@ -1055,29 +1093,61 @@ makeStatisticalPowerDiagram = function(opts) {
       const measured = typeof node.getComputedTextLength === "function" ? node.getComputedTextLength() : 0;
       return measured > 0 ? measured : geometry.textWidth(node.textContent, 8);
     };
+    const fit = (from, to, width, height, crossNull) => geometry.fitRegionLabel({
+      from: x(Math.max(from, domain[0])),
+      to: x(Math.min(to, domain[1])),
+      top: altTop,
+      avoid: crossNull ? null : nullTop,
+      baseline: baselineY,
+      width,
+      height
+    });
     const place = (label, from, to) => {
-      const spot = geometry.fitRegionLabel({
-        from: x(Math.max(from, domain[0])),
-        to: x(Math.min(to, domain[1])),
-        top: altTop,
-        avoid: nullTop,
-        baseline: baselineY,
-        width: widthOf(label),
-        height: 15
-      });
+      const spot = fit(from, to, widthOf(label), 15);
       label
         .style("display", spot ? null : "none")
         .attr("x", spot ? spot.x : 0)
         .attr("y", spot ? spot.y : 0);
+      return Boolean(spot);
+    };
+    // A label with its value tries one line ("β = .346") first, then the
+    // symbol stacked over the bare value, which fits a phone's narrower regions.
+    const placeValue = (label, symbol, value, from, to) => {
+      label.html(`${symbol} = ${value}`);
+      if (place(label, from, to)) return;
+      label.html(`<tspan>${symbol}</tspan><tspan dy="1.2em">${value}</tspan>`);
+      const lines = label.selectAll("tspan").filter(function() { return this.parentNode === label.node(); });
+      const measured = d3.max(lines.nodes(), (node) => typeof node.getComputedTextLength === "function" ? node.getComputedTextLength() : 0);
+      const width = measured > 0 ? measured : geometry.textWidth(value, 8);
+      // Last, the label may sit across the null curve: its halo keeps it legible.
+      const spot = fit(from, to, width, 32) || fit(from, to, width, 32, true);
+      label.style("display", spot ? null : "none");
+      if (!spot) return;
+      label.attr("x", spot.x).attr("y", spot.y - 9);
+      lines.attr("x", spot.x);
     };
 
-    place(betaLabel, p.lowCritical, p.highCritical);
+    const beta = "<tspan font-style=\"italic\">&beta;</tspan>";
+    const withValues = regionValues && !noEffect(p);
     // Power is labelled in whichever rejection tail holds more of it.
-    if (p.powerLow > p.powerHigh) place(powerLabel, -Infinity, p.lowCritical);
-    else place(powerLabel, p.highCritical, Infinity);
+    const powerRange = p.powerLow > p.powerHigh ? [-Infinity, p.lowCritical] : [p.highCritical, Infinity];
+    if (withValues) {
+      placeValue(betaLabel, beta, fProbability(p.beta), p.lowCritical, p.highCritical);
+      placeValue(powerLabel, `1 &minus; ${beta}`, fProbability(p.power), powerRange[0], powerRange[1]);
+    } else {
+      place(betaLabel, p.lowCritical, p.highCritical);
+      place(powerLabel, powerRange[0], powerRange[1]);
+    }
+    // A value whose region is too narrow for it, as on a phone, moves to the key.
+    if (regionValues && schematic && showKey && !noEffect(p)) {
+      const hidden = (label) => label.style("display") === "none";
+      betaKey.value.text(hidden(betaLabel) ? `= ${fProbability(p.beta)}` : "");
+      powerKey.value.text(hidden(powerLabel) ? `= ${fProbability(p.power)}` : "");
+    }
   }
 
   function describe(p) {
+    if (schematic) return `Schematic ${p.df ? `t curves (df = ${p.df})` : "normal curves"} illustrating power, not an exact t-power calculation. Null mean ${f2(state.mu)}; hypothetical alternative mean ${f2(p.altMean)}. Purple area under the alternative beyond the null rejection boundaries represents power; gray area between the boundaries represents beta.${regionValues && !noEffect(p) ? ` Beta ${fProbability(p.beta)}; power ${fProbability(p.power)}.` : ""}`;
     const boundaries = [p.lowCritical, p.highCritical].filter(Number.isFinite).map(f2);
     const parts = [
       `Sampling distribution of the mean under H0, centered on ${fTick(state.mu)} with standard error ${f2(p.se)}.`,
@@ -1161,13 +1231,15 @@ makeStatisticalPowerDiagram = function(opts) {
     // Room for two rulers, which is all the tutorial ever shows; a third
     // switched on from the controls adds its own row.
     const rulers = [state.axisRaw, state.axisZNull, state.axisZAlt].filter(Boolean).length;
-    const height = minimal ? baselineY + 12 : rowY(Math.max(2, rulers) - 1) + 26;
+    const height = minimal
+      ? (state.axisRaw ? baselineY + (axisTitle ? 50 : 26) : baselineY + 12)
+      : rowY(Math.max(2, rulers) - 1) + 26;
     const plotLeft = margin.left;
     const plotRight = width - margin.right;
 
     svg.attr("viewBox", [0, 0, width, height]);
     x.domain(domain).range([plotLeft, plotRight]);
-    y.domain([0, minimal ? extent.peak : spNormalPdf(state.mu, state.mu, p.se)]).range([baselineY, margin.top]);
+    y.domain([0, minimal ? extent.peak : geometry.density(state.mu, state.mu, p)]).range([baselineY, margin.top]);
 
     if (minimal) {
       syncFactors(p);
@@ -1177,10 +1249,10 @@ makeStatisticalPowerDiagram = function(opts) {
       alphaControl.value.text(f2(state.alpha));
       seValue.text(f2(p.se));
     }
-    alphaKey.value.text(fAlpha(state.alpha));
+    alphaKey.value.text(schematic ? "" : fAlpha(state.alpha));
     const undefinedPower = noEffect(p);
-    betaKey.value.text(undefinedPower ? "–" : fProbability(p.beta));
-    powerKey.value.text(undefinedPower ? "–" : fProbability(p.power));
+    betaKey.value.text(schematic ? "" : undefinedPower ? "–" : fProbability(p.beta));
+    powerKey.value.text(schematic ? "" : undefinedPower ? "–" : fProbability(p.power));
     const keyBeta = state.showAlt && state.shadeBeta;
     const keyPower = state.showAlt && state.shadePower;
     const showBeta = keyBeta && !undefinedPower;
@@ -1193,13 +1265,13 @@ makeStatisticalPowerDiagram = function(opts) {
     svg.attr("aria-label", description);
     svgTitle.text(description);
 
-    nullCurve.attr("d", line(curveData(state.mu, p.se, domain, 320)));
-    altCurve.attr("d", line(curveData(p.altMean, p.se, domain, 320)));
-    drawArea(nullRejectLeft, state.twoTailed ? segmentData(state.mu, p.se, domain[0], p.lowCritical, domain) : []);
-    drawArea(nullRejectRight, segmentData(state.mu, p.se, p.highCritical, domain[1], domain));
-    drawArea(altPowerLeft, state.twoTailed ? segmentData(p.altMean, p.se, domain[0], p.lowCritical, domain) : []);
-    drawArea(altPowerRight, segmentData(p.altMean, p.se, p.highCritical, domain[1], domain));
-    drawArea(altBetaFill, segmentData(p.altMean, p.se, p.lowCritical, p.highCritical, domain));
+    nullCurve.attr("d", line(curveData(state.mu, p, domain, 320)));
+    altCurve.attr("d", line(curveData(p.altMean, p, domain, 320)));
+    drawArea(nullRejectLeft, state.twoTailed ? segmentData(state.mu, p, domain[0], p.lowCritical, domain) : []);
+    drawArea(nullRejectRight, segmentData(state.mu, p, p.highCritical, domain[1], domain));
+    drawArea(altPowerLeft, state.twoTailed ? segmentData(p.altMean, p, domain[0], p.lowCritical, domain) : []);
+    drawArea(altPowerRight, segmentData(p.altMean, p, p.highCritical, domain[1], domain));
+    drawArea(altBetaFill, segmentData(p.altMean, p, p.lowCritical, p.highCritical, domain));
 
     baseline.attr("x1", plotLeft).attr("x2", plotRight).attr("y1", baselineY).attr("y2", baselineY);
 
@@ -1216,6 +1288,7 @@ makeStatisticalPowerDiagram = function(opts) {
       drawAxis(axes[name], specs[name], boundaryValues, plotLeft, plotRight);
       axes[name].side.attr("x", plotRight + 10);
     });
+    if (axisTitle) axisTitle.attr("x", (plotLeft + plotRight) / 2);
     placeAxes(rowY, baselineY, animate);
     placeLabels(p, domain, plotLeft, plotRight, baselineY);
 
@@ -1457,7 +1530,7 @@ makeStatisticalPowerDiagram = function(opts) {
     mounted = true;
   }
 
-  if (window.interactiveFigure) {
+  if (window.interactiveFigure && !schematic) {
     window.interactiveFigure.wrap({
       root: rootNode,
       controls: controls.node(),

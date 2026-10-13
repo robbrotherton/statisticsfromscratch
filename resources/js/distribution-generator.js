@@ -3773,6 +3773,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const valueFormats = new Map(parameters.map((parameter) => [parameter.key, sfsDistributionExplorerParameterFormat(parameter, opts)]));
   let activeTween = null;
   let lastRender = null;
+  // Tutorial callouts suppress the drawer, so inlineSliders puts the
+  // parameters in Chapter 9's factor strip beneath the plot instead; steps
+  // reveal rows with show-controls, as in the power and CI width tutorials.
+  const inlineSliders = opts.inlineSliders === true;
+  let shownControls = [].concat(opts.showControls || []);
 
   const root = d3.create("div")
     .attr("class", "distribution-explorer sfs-figure")
@@ -3780,12 +3785,12 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .style("--sfs-figure-margin", opts.cssMargin || opts.marginCss || null);
   const rootNode = root.node();
 
-  const controls = root.append("div")
+  const controls = inlineSliders ? null : root.append("div")
     .attr("class", "dpe-controls sfs-control-grid");
 
-  const controlsPanel = controls.append("section")
+  const controlsPanel = controls && controls.append("section")
     .attr("class", "dpe-panel sfs-control-panel sfs-if-control-panel");
-  controlsPanel.append("p")
+  if (controlsPanel) controlsPanel.append("p")
     .attr("class", "sfs-control-title")
     .text(opts.controlsTitle || "Distribution");
 
@@ -3807,12 +3812,36 @@ makeDistributionParameterExplorer = function(opts = {}) {
     controlsByKey.set(parameter.key, { input: input.node(), value: valueNode, parameter });
   }
 
-  parameters.forEach(addSlider);
-
   const intervalReadout = opts.confidenceInterval
     ? root.append("p").attr("class", "dpe-interval-readout sfs-readout-value") : null;
   const chartWrap = root.append("div")
     .attr("class", "dpe-chart-wrap sfs-chart-wrap");
+
+  const strip = inlineSliders ? root.append("div").attr("class", "sp-factors") : null;
+
+  function addFactor(parameter) {
+    const source = parameter.source;
+    const row = strip.append("div")
+      .attr("class", `sp-factor sp-factor-${parameter.key}`)
+      .attr("data-factor", parameter.key)
+      .attr("hidden", "")
+      .style("--sp-factor-color", source.color || controlledBase.color);
+    const slider = row.append("label").attr("class", "sp-factor-slider");
+    const valueNode = slider.append("span")
+      .attr("class", "sp-factor-value")
+      .style("min-width", source.readoutWidth || "4.5rem");
+    const input = slider.append("input")
+      .attr("type", "range")
+      .attr("min", parameter.min)
+      .attr("max", parameter.max)
+      .attr("step", parameter.step)
+      .attr("value", parameter.value)
+      .attr("aria-label", source.ariaLabel || parameter.key)
+      .attr("data-prevent-swipe", "");
+    controlsByKey.set(parameter.key, { input: input.node(), value: valueNode, parameter, row: row.node() });
+  }
+
+  parameters.forEach(inlineSliders ? addFactor : addSlider);
 
   const svg = chartWrap.append("svg")
     .attr("class", "dpe-svg sfs-svg sfs-graph sfs-graph-distribution")
@@ -3979,7 +4008,23 @@ makeDistributionParameterExplorer = function(opts = {}) {
       const control = controlsByKey.get(parameter.key);
       if (!control) return;
       const format = valueFormats.get(parameter.key);
-      control.value.text(format(source[parameter.key]));
+      if (!control.row) {
+        control.value.text(format(source[parameter.key]));
+        return;
+      }
+      const shown = shownControls.includes(parameter.key);
+      control.row.hidden = !shown;
+      control.input.disabled = !shown;
+      const fill = (Number(control.input.value) - parameter.min) / (parameter.max - parameter.min || 1);
+      control.input.style.setProperty("--sp-fill", `${sfsDistributionClamp(fill, 0, 1) * 100}%`);
+      // The target, as in Chapter 9: a tween's fractional df never shows.
+      const tex = `${parameter.source.tex || parameter.key} = ${format(state[parameter.key])}`;
+      const valueNode = control.value.node();
+      if (valueNode.dataset.tex === tex) return;
+      valueNode.dataset.tex = tex;
+      valueNode.replaceChildren(window.interactiveFigure && window.interactiveFigure.inlineMath
+        ? window.interactiveFigure.inlineMath(tex)
+        : document.createTextNode(tex));
     });
   }
 
@@ -4231,6 +4276,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
     const animate = action.animate === undefined ? true : sfsDistributionBoolean(action.animate, true);
     const duration = action.duration;
 
+    if (inlineSliders && action["show-controls"] !== undefined) {
+      shownControls = [].concat(action["show-controls"]);
+      syncControls(renderedState, { syncInputs: false });
+    }
+
     if (context && typeof context.setControlsOpen === "function") {
       const controlsOpen = sfsDistributionValueOr(action["controls-open"], sfsDistributionValueOr(action.controls, action["show-controls"]));
       if (controlsOpen !== undefined) context.setControlsOpen(sfsDistributionBoolean(controlsOpen, true), animate);
@@ -4248,7 +4298,21 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   renderPlot(renderedState);
 
-  if (window.interactiveFigure) {
+  if (window.interactiveFigure && inlineSliders) {
+    // No drawer to wrap, so claim the callout's tutorial directly.
+    let attempts = 0;
+    const attachTutorial = () => {
+      if (!rootNode.isConnected) {
+        if (++attempts < 60) requestAnimationFrame(attachTutorial);
+        return;
+      }
+      const footer = rootNode.closest(".callout")?.querySelector(".callout-footer");
+      if (!footer || footer.dataset.sfsIfTutorial === "true") return;
+      const steps = Array.from(footer.children).filter((node) => node.classList.contains("tutorial-step"));
+      window.interactiveFigure.createTutorial({ root: rootNode, footer, steps, applyAction: applyTutorialAction });
+    };
+    requestAnimationFrame(attachTutorial);
+  } else if (window.interactiveFigure) {
     window.interactiveFigure.wrap({
       root: rootNode,
       controls: controls.node(),
@@ -4317,7 +4381,7 @@ makeTDistributionDfExplorer = (opts = {}) => {
     yDomain: [0, 0.45],
     xTicks: 5,
     yTicks: 4,
-    parameters: [{ key: "df", min: 1, max: 30, step: 1, value: initialDf }],
+    parameters: [{ key: "df", min: 1, max: 30, step: 1, value: initialDf, tex: "df", ariaLabel: "Degrees of freedom" }],
     controlsTitle: "t distribution",
     controlsLabel: "t distribution controls",
     ariaLabel: "Interactive graph comparing the normal distribution with a t distribution controlled by degrees of freedom"

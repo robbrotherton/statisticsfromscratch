@@ -6,10 +6,13 @@
   const fmt = d3.format('.2f');
   const reduced = () => document.documentElement.dataset.motion === 'reduced' ||
     global.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function interval(m, sigma, n, confidence = 95) {
+  function interval(m, sigma, n, confidence = 95, distribution = 'normal') {
     const se = sigma / Math.sqrt(n);
-    const margin = stats.normalInv((1 + confidence / 100) / 2) * se;
-    return { m, se, margin, lower: m - margin, upper: m + margin };
+    const probability = (1 + confidence / 100) / 2;
+    const df = distribution === 't' ? n - 1 : null;
+    const critical = df === null ? stats.normalInv(probability) : stats.tInv(probability, df);
+    const margin = critical * se;
+    return { m, se, margin, lower: m - margin, upper: m + margin, critical, df, distribution };
   }
   global.sfsConfidenceInterval = interval;
   function bar(g, half, color, dot = true) {
@@ -55,7 +58,11 @@
 
   global.makeIntervalDiagram = function (opts = {}) {
     const { root, svg } = setup('ci-single-interval');
-    const state = { m: opts.m ?? 7, sigma: opts.sigma ?? Math.sqrt(14), n: opts.n ?? 6, confidence: opts.confidence ?? 95, shown: [] };
+    const isT = opts.distribution === 't';
+    if (isT && !(opts.s > 0 && opts.n >= 2)) throw new RangeError('A t interval needs a positive sample SD and n >= 2.');
+    const state = { m: opts.m ?? 7, sigma: isT ? opts.s : opts.sigma ?? Math.sqrt(14), n: opts.n ?? 6, confidence: opts.confidence ?? 95, shown: [] };
+    const seSymbol = isT ? sigmaM.replace('σ', 's') : sigmaM;
+    const criticalSymbol = isT ? 't*' : 'z';
     const domain = opts.xDomain || (opts.mode === 'width' ? [265, 380] : [1, 13]);
     const readout = root.append('p').attr('class', 'ci-diagram-readout');
     // Width mode reuses Chapter 9's factor sliders; steps pick which one shows.
@@ -63,7 +70,7 @@
     const factors = opts.mode === 'width' ? [
       {key:'confidence', label:'Confidence level', color:blue, range:[50,99,1], tex:() => `${state.confidence}\\%\\text{ confidence}`},
       {key:'n', label:'Sample size', color:'var(--graph-series-3, #009e73)', range:opts.nRange || [5,100,1], tex:() => `n = ${state.n}`},
-      {key:'sigma', label:'Population standard deviation', color:'var(--graph-series-2, #e69f00)', range:opts.sigmaRange || [10,100,1], tex:() => `\\sigma = ${state.sigma}`}
+      {key:'sigma', label:isT ? 'Sample standard deviation' : 'Population standard deviation', color:'var(--graph-series-2, #e69f00)', range:opts.sigmaRange || [10,100,1], tex:() => `${isT ? 's' : '\\sigma'} = ${state.sigma}`}
     ] : [];
     const strip = factors.length ? root.append('div').attr('class', 'sp-factors') : null;
     for (const f of factors) {
@@ -88,25 +95,30 @@
     function render(animate = false) {
       const width = Math.max(280, root.node().clientWidth || 640);
       const x = d3.scaleLinear().domain(domain).range([30, width - 30]);
-      const p = interval(state.m, state.sigma, state.n, state.confidence);
+      const p = interval(state.m, state.sigma, state.n, state.confidence, isT ? 't' : 'normal');
       svg.selectAll('*').interrupt();
       svg.attr('viewBox', `0 0 ${width} ${opts.mode === 'anatomy' || opts.mode === 'equation' ? 145 : 154}`).attr('aria-label',
-        `${state.confidence}% confidence interval: estimate ${fmt(p.m)}, lower ${fmt(p.lower)}, upper ${fmt(p.upper)}; margin of error ${fmt(p.margin)}.`);
+        `${state.confidence}% ${isT ? 't ' : ''}confidence interval: estimate ${fmt(p.m)}, lower ${fmt(p.lower)}, upper ${fmt(p.upper)}; margin of error ${fmt(p.margin)}.${Number.isFinite(opts.reference) ? ` Reference mean ${opts.reference}.` : ''}`);
       const g = svg.selectAll('g.ci-static-layer').data([0]).join('g').attr('class', 'ci-static-layer');
       g.selectAll('*').remove();
       const anatomy = opts.mode === 'anatomy' || opts.mode === 'equation';
       if (anatomy) {
         text(g, x(p.m), 25, 'Point estimate', 'middle');
         g.append('line').attr('x1', x(p.m)).attr('x2', x(p.m)).attr('y1', 32).attr('y2', 65).attr('stroke', 'currentColor').attr('opacity', .45);
-        if (opts.mode === 'equation') mathText(g, x(p.lower)-10, 79, `<tspan font-style='italic'>M</tspan> − <tspan font-style='italic'>z</tspan> × ${sigmaM}`, 'end');
+        if (opts.mode === 'equation') mathText(g, x(p.lower)-10, 79, `<tspan font-style='italic'>M</tspan> − <tspan font-style='italic'>${criticalSymbol}</tspan> × ${seSymbol}`, 'end');
         else text(g, x(p.lower)-10, 79, 'Lower limit', 'end');
-        if (opts.mode === 'equation') mathText(g, x(p.upper)+10, 79, `<tspan font-style='italic'>M</tspan> + <tspan font-style='italic'>z</tspan> × ${sigmaM}`);
+        if (opts.mode === 'equation') mathText(g, x(p.upper)+10, 79, `<tspan font-style='italic'>M</tspan> + <tspan font-style='italic'>${criticalSymbol}</tspan> × ${seSymbol}`);
         else text(g, x(p.upper)+10, 79, 'Upper limit');
         const yy = 107;
         g.append('line').attr('class','ci-margin-guide').attr('x1',x(p.m)).attr('x2',x(p.upper)).attr('y1',yy).attr('y2',yy).attr('stroke','currentColor').attr('stroke-dasharray','4 4').attr('stroke-width',1.5);
-        if (opts.mode === 'equation') mathText(g, (x(p.m) + x(p.upper))/2, 132, `<tspan font-style='italic'>z</tspan> × ${sigmaM}`, 'middle');
+        if (opts.mode === 'equation') mathText(g, (x(p.m) + x(p.upper))/2, 132, `<tspan font-style='italic'>${criticalSymbol}</tspan> × ${seSymbol}`, 'middle');
         else text(g, (x(p.m) + x(p.upper))/2, 132, 'Margin of error', 'middle');
       } else {
+        if (Number.isFinite(opts.reference)) {
+          g.append('line').attr('class', 'ci-reference').attr('x1', x(opts.reference)).attr('x2', x(opts.reference))
+            .attr('y1', 44).attr('y2', 109).attr('stroke', 'currentColor').attr('stroke-dasharray', '4 4').attr('opacity', .6);
+          text(g, x(opts.reference), 24, `μ₀ = ${opts.reference}`, 'middle');
+        }
         g.append('g').attr('transform', 'translate(0,109)').call(d3.axisBottom(x).ticks(width < 420 ? 4 : 7).tickSizeOuter(0));
         text(g, width/2, 146, opts.units || 'Population mean', 'middle');
         text(g, x(p.m), 39, `M = ${fmt(p.m)}`, 'middle');
@@ -121,13 +133,14 @@
       if (animate && !reduced()) point.transition().duration(550).tween('interval', () => {
         const lerp = d3.interpolateNumber(oldHalf, half); return t => bar(point, lerp(t), blue);
       }); else bar(point, half, blue);
-      readout.text(anatomy ? '' : opts.mode === 'width' ? `Margin of error ${fmt(p.margin)} · width ${fmt(2 * p.margin)} · standard error ${fmt(p.se)}` : `${state.confidence}% confidence interval`);
+      readout.text(anatomy ? '' : opts.mode === 'width' ? `Margin of error ${fmt(p.margin)} · width ${fmt(2 * p.margin)} · ${isT ? 'estimated ' : ''}standard error ${fmt(p.se)}` : `${state.confidence}% ${isT ? `t confidence interval · df = ${p.df}` : 'confidence interval'}`);
       syncFactors();
       root.node().intervalState = { ...state, ...p };
     }
     const applyAction = action => {
       if (action.n !== undefined) state.n = Math.max(2, Number(action.n));
       if (action['population-sd'] !== undefined) state.sigma = Math.max(.01, Number(action['population-sd']));
+      if (isT && action['sample-sd'] !== undefined) state.sigma = Math.max(.01, Number(action['sample-sd']));
       if (action.confidence !== undefined) state.confidence = Math.max(50, Math.min(99, Number(action.confidence)));
       if (action['show-controls'] !== undefined) state.shown = [].concat(action['show-controls']);
       render(action.animate !== false);
