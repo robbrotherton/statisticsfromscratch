@@ -82,14 +82,14 @@ $$ z = \frac{M - \mu_0}{\sigma_M}, \qquad \sigma_M = \frac{\sigma}{\sqrt{n}} $$
 
 Again, the issue is that most often in real research we don't know $\sigma$, and so our $z$ test statistic is missing part of its denominator.
 
-So for the $t$ statistic, we substitute the sample standard deviation, $s$, for the unknown $\sigma$. Our denominator becomes the **estimated standard error of the mean**, $s_M$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.)
+So for the $t$ statistic, we use the sample standard deviation, $s$, to estimate the unknown population standard deviation, $\sigma$. We then divide $s$ by $\sqrt{n}$ to calculate our denominator, the **estimated standard error of the mean**, $s_M$. It's an estimate because it's calculated from $s$ rather than the true $\sigma$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.)
 
 | | Population variability known | Population variability estimated |
 |:--|:--|:--|
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
 | Test statistic | $z = \dfrac{M - \mu_0}{\sigma_M}$ | $t = \dfrac{M - \mu_0}{s_M}$ |
 
-So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
+So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we calculate it from an estimate of the population standard deviation. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
 
 
 ### Student's $t$
@@ -114,13 +114,13 @@ Why does the $t$ distribution have heavier tails than the standard normal distri
 | Estimated standard error, $s_M=s/\sqrt{4}$ | 0.91 | 2.68 |
 | $t=(8-7)/s_M$ | 1.10 | 0.37 |
 
-The less variable hand makes the same mean difference look almost three times as large in standard-error units. If the deck's mean really is 7, both sample means are wrong by exactly the same amount, but the smaller standard error makes one look much more extreme.
+The less variable hand makes the same mean difference look almost three times as large in standard-error units. If the deck's mean really is 7, both sample means are wrong by exactly the same amount, but the smaller sample standard deviation gives us a smaller estimated standard error, making one look much more extreme.
 
-The trouble is that, because the quantity we're estimating (standard deviation) contributes to the denominator of the test statistic, errors of underestimation and of overestimation have unbalanced effects. Underestimating the standard error by half its true value doubles the statistic. Overestimating by half reduces the statistic to two-thirds of its original value. So equal percentage errors in the denominator don't produce equal changes in the statistic. A denominator close to zero can turn a fairly small and ordinary mean difference into a very extreme test statistic.^[You might remember that we already use $n-1$ when calculating sample variance to correct its downward bias. But that correction works across many samples; it doesn't make each sample's estimate exact. An individual sample can still give us a standard error that's much too small or much too large. And now we're dividing by that estimate to judge how unusual the mean difference is, so it's a different problem that the $t$ distribution solves.] Under the normal-population model, a small sample standard deviation doesn't come with a smaller mean error to compensate: the two vary independently.
+The trouble is that, because our estimate of the population standard deviation contributes to the denominator of the test statistic, errors of underestimation and of overestimation have unbalanced effects. If $s$ is half the true $\sigma$, the standard error calculated from it is also half its true value, doubling the statistic. If $s$ overestimates $\sigma$ by half, the statistic is reduced to two-thirds of its original value. So equal percentage errors in the estimated variability don't produce equal changes in the test statistic.
 
-Across repeated samples, this means that we will get more extreme statistics than the standard normal curve predicts---reflected in the heavier tails of the $t$ distribution. The curve remains symmetric around zero; the extra extremes occur in both tails.
+Under the normal-population model, a small sample standard deviation doesn't come with a smaller mean error to compensate: the two vary independently. Across repeated samples, this means that we will get more extreme statistics than the standard normal curve predicts---reflected in the heavier tails of the $t$ distribution. The curve remains symmetric around zero; the extra extremes occur in both tails.^[You might remember that we already use $n-1$ when calculating sample variance to correct its downward bias. But that correction works across many samples; it doesn't make each sample's estimate exact. An individual sample can still give us a standard deviation that's much too small or much too large as an estimate of $\sigma$. And now we're dividing by the standard error calculated from that estimate to judge how unusual the mean difference is, so it's a different problem that the $t$ distribution solves.]
 
-With fewer observations, the estimate of standard error varies more from sample to sample relative to its true value, making substantial underestimates more likely. With more observations, the estimate becomes more consistent, so the $t$ curve approaches the standard normal curve.
+With fewer observations, the sample standard deviation varies more from sample to sample relative to the true population standard deviation, making substantial underestimates more likely. With more observations, the estimate becomes more consistent, so the $t$ curve approaches the standard normal curve.
 
 Gosset illustrated the tail problem with his theoretical curve for samples of ten. Even compared with a normal curve having the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12]. Our graph below uses the modern $t$ statistic and the standard normal curve. Let's start with samples of four, like our card hands and Gosset's card experiment, then increase to ten.
 
@@ -137,11 +137,11 @@ Our hands of four cards and Gosset's groups of four have $df=3$. The shaded tail
 :::
 
 ::: {.tutorial-step data-title="Ten observations: df = 9" data-action='{"df":9,"animate":true,"show-controls":[]}'}
-Now increase the sample size to ten, the size Gosset used for his theoretical comparison. More observations make the estimate of standard error more reliable. The tails come down, but about 8.2% still lies beyond $\pm1.96$. That's closer to 5%, but we'd still reject a true null too often if we used the normal cutoff.
+Now increase the sample size to ten, the size Gosset used for his theoretical comparison. More observations make the estimate of population standard deviation more reliable. The tails come down, but about 8.2% still lies beyond $\pm1.96$. That's closer to 5%, but we'd still reject a true null too often if we used the normal cutoff.
 :::
 
 ::: {.tutorial-step data-title="Thirty-one observations: df = 30" data-action='{"df":30,"animate":true,"show-controls":["df"]}'}
-At $df=30$, we have 31 observations. About 5.9% lies beyond $\pm1.96$, so the difference is smaller again. Use the control to explore. Try $df=1$ or 2: with only two or three observations, the estimate of variability is especially uncertain. Then return to higher degrees of freedom and watch the curve approach the normal curve.
+At $df=30$, we have 31 observations. About 5.9% lies beyond $\pm1.96$, so the difference is smaller again. Use the control to explore. Try $df=1$ or 2: with only two or three observations, the estimate of population standard deviation is especially uncertain. Then return to higher degrees of freedom and watch the curve approach the normal curve.
 :::
 ::::
 :::::
@@ -181,7 +181,7 @@ Suppose we had a sample of $n = 60$. For a two-tailed $t$ test at $\alpha = .05$
 
 Let's work through an example hypothesis test using our new tool, the $t$ test. Once again, we'll use data from the humanbenchmark.com reaction time test we've imagined giving to a sample of Spider-People. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
-In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of 50 milliseconds. But now let's not pretend to know that population standard deviation. We'll estimate the standard error using the class's variability, and compare the mean with the same website reference of 284 milliseconds.
+In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of 50 milliseconds. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
@@ -295,7 +295,7 @@ The figure below illustrates the logic by placing two $t$ curves at those hypoth
 An illustration of statistical power. The rejection regions come from the null model, but power is an area under the alternative. These schematic $t$ curves illustrate that logic; they aren't an exact $t$-power calculation.
 :::
 
-[^t-power-approximation]: I'm simplifying the illustration and computation of power here by using a single $t$ curve shifted over to the alternative mean. Statistical software will give a slightly different answer than my approximation. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The difference can be greater with smaller samples. This is because calculating power in the context of $t$ actually requires some slightly more nuanced math to account for the estimated standard error varying from sample to sample. This uses something called a noncentral $t$ distribution. That's beyond the scope of this book; for us, grasping the general logic is enough.
+[^t-power-approximation]: I'm simplifying the illustration and computation of power here by using a single $t$ curve shifted over to the alternative mean. Statistical software will give a slightly different answer than my approximation. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The difference can be greater with smaller samples. This is because calculating power in the context of $t$ actually requires some slightly more nuanced math to account for the sample standard deviation varying from sample to sample, which changes the standard error calculated from it. This uses something called a noncentral $t$ distribution. That's beyond the scope of this book; for us, grasping the general logic is enough.
 
 Bear in mind that using the logic of statistical power in this way constitutes a retrospective power analysis. It can provide useful context to help interpret the results, but its use is limited. Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. For planning a future study, we'd specify a plausible effect to detect.
 
