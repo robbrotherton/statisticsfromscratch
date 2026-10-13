@@ -89,57 +89,56 @@ So for the $t$ statistic, we substitute the sample standard deviation, $s$, for 
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
 | Test statistic | $z = \dfrac{M - \mu_0}{\sigma_M}$ | $t = \dfrac{M - \mu_0}{s_M}$ |
 
-So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
+So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we have to estimate it. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
 
-So whereas the $z$-test always relied on the same standard normal curve, the specific curve describing the distribution of $t$ statistics differs depending on the uncertainty in the denominator.
 
 ### Student's $t$
 
-To show why the $t$ curve depends on sample size, a brief historical interlude. The statistical ideas behind all this were developed by William Sealy Gosset, who spent his career working for Guinness, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production, like which varieties of barley to grow, how best to cultivate them, and things like that. After writing an internal report titled "The application of the law of error to work of the brewery," Guinness sent Gosset to study for a year under pioneering statistician Karl Pearson.
+The statistical ideas behind this were developed by William Sealy Gosset, who spent his career working for the Guinness brewing company, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production. His work included experiments on which varieties of barley to grow, how best to cultivate them, and things like that. Gosset studied for a while under pioneering statistician Karl Pearson, but he realized that the data he was working with with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Gosset might be working with just four farms, each growing one plot of each variety [@box1987guinness].
 
-Gosset realized that the experiments he was running for Guinness were much smaller in scale than the large datasets generally used by statisticians like Pearson. Barley trials, for example, started with just four farms, each growing one plot of each variety [@box1987guinness]. The small sample sizes meant that variability from sample to sample was a greater concern: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
+Gosset realized that a small experiment's results could look more convincing than they really were if it just happened to show little variability. To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Doing this, he was able to show that statstical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiements that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
 
-To work out just how misleading, Gosset did something like we were doing with the samples of cards at the beginning of this chapter. He took an earlier dataset recording the heights and finger lengths of 3,000 prisoners and wrote them out on 3,000 pieces of card, "which were then very thoroughly shuffled and drawn at random." He split them into 750 samples of $n = 4$ to compare the distributions of the samples' standard deviations and standardized mean differences with theoretical normal curves [@student1908probable, p. 13].
+Think back to the two hands of cards at the start of this chapter. Both had a mean of 8 and four cards. Suppose we wanted to compare that mean with a reference value of 7 (checking how likely it is that the deck has the usual mean of 7 for a complete deck of playing cards). The numerator would be the same for both hands: $8-7=1$. But sample A would give us an estimated standard error of about 0.91, while sample B would give us about 2.68. Dividing the same difference by those estimates gives us $t$ statistics of about 1.10 and 0.37. The less variable hand makes the same mean difference look larger in standard-error units.
 
-Gosset published his work in 1908 under the pseudonym "Student," because Guinness allowed its scientists to publish only under a pseudonym [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
+Which hand is providing the better answer? That depends on the true variability of the deck, which we don't know. Maybe it's low, and Sample A is reflecting that. Or maybe it's high, and Sample A's four cards just happened to cluster together. When we're using a sample's variability in the standard error, a small sample standard deviation doesn't guarantee a small error in the sample mean.
+
+So we need to account for unusual a statistic is when its denominator is estimated from the sample too. Gosset published his solution in 1908 under the pseudonym "Student," because Guinness allowed its scientists to publish only under a pseudonym [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
 
 ## The $t$ distribution(s)
 
-The essential point is that, unlike the single standard normal curve, the $t$ distribution is actually a whole family of distributions, with a slightly different curve for each value of degrees of freedom. When we calculate a $t$ statistic for a sample mean and want to determine its $p$-value, we have to pick which precise $t$ distribution to use for the probabilities based on $df$.
+Here's why estimating standard error changes the curve. Suppose a sample mean is one true standard error above the population mean. If we knew that true standard error, we'd get $z=1$. If our sample happened to estimate standard error at half its true value, we'd divide the same difference by a denominator half as big and get $t=2$. If it estimated standard error at twice its true value, we'd get $t=0.5$.
 
-The $t$ statistic inherits its degrees of freedom from the sample variance in its denominator. Because the deviations from the sample mean must sum to zero, only $n - 1$ of them are free to vary, so for the single-sample $t$ test, $df = n - 1$. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
+So some samples exaggerate the standardized difference and others underestimate it. Those effects don't cancel: dividing by a very small number can make the statistic very large, in either direction. Under the normal-population model, a sample's mean and standard deviation vary independently. A small standard deviation doesn't come with a correspondingly small error in the mean to compensate. Across repeated samples, we get more extreme standardized statistics than the standard normal curve predicts. Those are the **heavier tails** of the $t$ distribution.
 
-Dividing by $n - 1$ corrects the downward bias in the sample variance, but it doesn't make any particular sample's estimate exact. That remaining uncertainty is what the $t$ distribution accounts for. With low degrees of freedom, the curve has heavier tails than the standard normal curve: extreme values are more common because we are dividing by an uncertain estimate of standard error. As degrees of freedom increase, the curve approaches the standard normal curve.
+With just a few observations, it's easier for the sample to happen to contain mostly similar values and give us a small estimate of variability. With more observations, the estimate becomes more consistent from sample to sample. The denominator is less likely to be far too small, and the $t$ curve approaches the standard normal curve. This is a different point from the one we made in Chapter 7: larger samples also make the sample means themselves less variable. Here we're looking at how reliably we can estimate that variability.
 
-Gosset plotted his curve for samples of ten alongside a normal curve, noting that "large deviations are more common than in the normal curve." Near the center, the two curves give similar answers. But farther out, he warned, "the normal curve gives a false feeling of security" [@student1908probable, p. 12]. The graph below illustrates the same comparison using our modern $t$ statistic, showing the $t$ distribution for different degrees of freedom with the standard normal distribution for reference. The shape changes quickly at very low degrees of freedom, but the change slows down as degrees of freedom increase.
+The $t$ distribution is therefore a family of curves. For a single-sample $t$ test, we choose the curve using $df=n-1$, the degrees of freedom from the sample variance in the denominator. Remember that the deviations from the sample mean must sum to zero, so only $n-1$ are free to vary. Dividing by $n-1$ corrects the downward bias in sample variance; it doesn't make each sample's estimate exact. More degrees of freedom mean a more reliable estimate and a curve closer to the standard normal. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
+
+Gosset illustrated the tail problem with his theoretical curve for samples of ten. Even compared with a normal curve having the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12]. Our graph below uses the modern $t$ statistic and the standard normal curve. Let's start with samples of four, like our card hands and Gosset's card experiment, then increase to ten.
+
+The graph describes **test statistics across repeated samples when the null hypothesis is true**, assuming independent observations from a normal population. The playing cards helped us see what estimating variability does; their ranks don't form a normal population, so their $t$ statistics wouldn't follow these curves exactly.
 
 ::::: {#act-t-distribution .callout-tip .interactive}
 ## Explore the $t$ distribution
 
-{{< interactive-figure tDistributionDfExplorer makeTDistributionDfExplorer options='{"df":1,"inlineSliders":true,"color":"var(--sfs-null-color, currentColor)"}' fallback="Interactive t-distribution explorer controlled by degrees of freedom." >}}
+{{< interactive-figure tDistributionDfExplorer makeTDistributionDfExplorer options='{"df":3,"inlineSliders":true,"tailComparison":1.96,"xTickValues":[-4,-1.96,0,1.96,4],"color":"var(--sfs-null-color, currentColor)"}' fallback="Interactive comparison of t and standard normal distributions, with fixed boundaries at −1.96 and +1.96. About 14.5% of t statistics with df = 3 fall beyond these boundaries, compared with 5% of standard normal scores." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="df = 1" data-action='{"df":1,"animate":false,"show-controls":[]}'}
-With one degree of freedom, the $t$ curve is much flatter than the normal curve and more of the probability is out in the tails.
+::: {.tutorial-step data-title="Four observations: df = 3" data-action='{"df":3,"animate":false,"show-controls":[]}'}
+Our hands of four cards and Gosset's groups of four have $df=3$. The shaded tails lie beyond $\pm1.96$, our familiar normal cutoffs. The normal curve puts 5% of its probability there, but this $t$ curve puts about 14.5% there. If we used the normal cutoff for these $t$ statistics, we'd reject a true null hypothesis much more often than our intended 5%.
 :::
 
-::: {.tutorial-step data-title="df = 2" data-action='{"df":2,"animate":true,"show-controls":[]}'}
-Increasing to two degrees of freedom already pulls the center upward and the tails downward.
+::: {.tutorial-step data-title="Ten observations: df = 9" data-action='{"df":9,"animate":true,"show-controls":[]}'}
+Now increase the sample size to ten, the size Gosset used for his theoretical comparison. More observations make the estimate of standard error more reliable. The tails come down, but about 8.2% still lies beyond $\pm1.96$. That's closer to 5%, but we'd still reject a true null too often if we used the normal cutoff.
 :::
 
-::: {.tutorial-step data-title="df = 3" data-action='{"df":3,"animate":true,"show-controls":[]}'}
-Three degrees of freedom matches Gosset's card experiment, and our hands of four cards. The curve is still visibly wider than the normal curve. About 14% of the $t$ distribution lies beyond $\pm 1.96$, where the normal curve has only 5%.
-:::
-
-::: {.tutorial-step data-title="df = 9" data-action='{"df":9,"animate":true,"show-controls":[]}'}
-Nine degrees of freedom matches Gosset's own comparison, for samples of ten. The $t$ distribution is approaching the normal distribution, but the tails still hold more: about 8% lies beyond $\pm 1.96$.
-:::
-
-::: {.tutorial-step data-title="df = 30" data-action='{"df":30,"animate":true,"show-controls":["df"]}'}
-By thirty degrees of freedom, the difference is subtle. Use the control to try values in between.
+::: {.tutorial-step data-title="Thirty-one observations: df = 30" data-action='{"df":30,"animate":true,"show-controls":["df"]}'}
+At $df=30$, we have 31 observations. About 5.9% lies beyond $\pm1.96$, so the difference is smaller again. Use the control to explore. Try $df=1$ or 2: with only two or three observations, the estimate of variability is especially uncertain. Then return to higher degrees of freedom and watch the curve approach the normal curve.
 :::
 ::::
 :::::
+
+So to keep our two-tailed rejection rate at 5%, we need cutoffs farther from zero than $\pm1.96$. How much farther depends on degrees of freedom. That's what the $t$ table tells us.
 
 ### The $t$ table
 
