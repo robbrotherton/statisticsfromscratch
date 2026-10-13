@@ -6,7 +6,8 @@ questions:
   - id: sample_size_power_t
     type: true-false
     prompt: >
-      An effect that exists is more likely to be detected if sample size n is large.
+      Holding the true mean difference, population variability, and alpha fixed,
+      increasing sample size makes an effect more likely to be detected.
     answer: true
     explanation: >
       Larger samples tend to reduce the estimated standard error.
@@ -45,8 +46,8 @@ questions:
   - id: reported_t_sample_size
     type: numeric
     prompt: >
-      For that same reported result, $t(21) = 2.38, p < .05$: how many people were
-      in the sample?
+      For that same reported result from a single-sample $t$ test,
+      $t(21) = 2.38, p < .05$: how many people were in the sample?
     hint: >
       For a single-sample $t$ test, $df = n - 1$.
     answer: 22
@@ -59,22 +60,23 @@ questions:
   - id: expected_t_null
     type: numeric
     prompt: >
-      What value of $t$ would you expect to see if the null hypothesis is true?
+      Under the null hypothesis, what value is the $t$ distribution centered on?
     hint: >
-      If there is no treatment effect, what should the numerator, $M - \mu$, be
-      on average?
+      If the population mean equals the null reference, should positive or
+      negative deviations from that reference be more likely under the model?
     answer: 0
     tolerance: 0
     explanation: >
-      If the null hypothesis is true, the sample mean should on average equal
-      the population mean, making the numerator — and therefore $t$ — zero on
-      average.
+      The null $t$ distribution is symmetric around zero. Individual samples
+      usually give a nonzero $t$; being centered on zero doesn't mean every
+      sample mean equals the null reference.
 
   - id: significant_t_factors
     type: multiple-choice
     prompt: >
-      Which combination of factors is most likely to produce a significant value
-      for the $t$ statistic?
+      Holding sample size and the decision criterion fixed, which combination
+      tends to give the largest absolute $t$ statistic? Treat a large mean
+      difference as one far from the null reference in either direction.
     options:
       - text: >
           Large mean difference and small sample variability
@@ -88,15 +90,34 @@ questions:
     explanation: >
       The $t$ statistic is a ratio: the mean difference is the numerator, and
       the variability-based estimated standard error is the denominator. A big
-      numerator and a small denominator give the largest $t$.
+      absolute numerator and a small denominator give the largest absolute $t$.
 
   - id: sd_power_t
     type: true-false
     prompt: >
-      An effect that exists is less likely to be detected if the sample standard
-      deviation $s$ is large.
+      Holding the true mean difference, sample size, and alpha fixed, greater
+      population variability makes an effect less likely to be detected.
     answer: true
     explanation: >
-      A larger sample standard deviation means a larger estimated standard
-      error, which shrinks the $t$ statistic for a given mean difference.
+      Greater population variability means more sampling variability. The
+      same true mean difference is harder to distinguish from sampling error,
+      reducing power.
+
+  - id: difference_ci_decision
+    type: multiple-choice
+    prompt: >
+      The class's 95% confidence interval for the population mean difference
+      from 284 ms is [2.35, 26.02] ms. What does this imply for the two-tailed
+      $t$ test at $\alpha = .05$ using the same data and assumptions?
+    options:
+      - text: Reject the null hypothesis, because the interval excludes zero.
+        correct: true
+      - text: Fail to reject the null hypothesis, because the interval excludes 284.
+      - text: There is a 95% probability that the null hypothesis is false.
+      - text: Studying statistics caused slower reaction times.
+    explanation: >
+      This interval is for the difference, so the null value is zero. It
+      excludes zero, agreeing with the two-tailed test's rejection at .05.
+      The interval doesn't assign a probability to the null hypothesis or
+      establish what caused the difference.
 ```
