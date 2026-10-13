@@ -141,7 +141,7 @@ By thirty degrees of freedom, the difference is subtle. Use the control to try v
 ::::
 :::::
 
-## The $t$ table
+### The $t$ table
 
 So now we want to find the $t$ values that mark off our critical regions. In the unit normal table, we looked up a $z$ score to find the area beyond it. The $t$ table below works in the other direction: choose a tail probability and degrees of freedom, and it gives you the critical $t$ value.
 
@@ -155,45 +155,34 @@ In @fig-t-table, use the column heading for your chosen tail and alpha: one-tail
 To take an example, say we have a sample of $n = 23$ scores. That gives us $df = 22$. @fig-t-critical-regions shows the critical regions for two- and one-tailed tests. If we are doing a two-tailed test with $\alpha = .05$, we look in the two-tailed .05 column and find the critical value of $t = \pm 2.074$. If we were doing a one-tailed test with $\alpha = .05$, we would look in the one-tailed .05 column and find the critical value of $t = +1.717$ (or $-1.717$ if our alternative hypothesis were that the population mean is less than the reference value).
 
 :::: {#fig-t-critical-regions}
-::: {.sfs-figure-row .sfs-figure-row-wide}
 {{< interactive-figure tTwoTailedCriticalRegions makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Two-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.07387,"label":"−2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.07387,"label":"+2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"}],"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and two critical regions shaded red, 2.5 percent below t equals negative 2.07 and 2.5 percent above t equals positive 2.07."}' fallback="Null t distribution with df = 22 and two critical regions shaded, 2.5% below t = −2.07 and 2.5% above t = +2.07." >}}
 
 {{< interactive-figure tUpperTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Upper-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"right","alpha":0.05},"markers":{"at":1.71714,"label":"+1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the highest five percent shaded red as a single critical region above t equals 1.72."}' fallback="Null t distribution with df = 22 and the highest 5% shaded as a single critical region above t = 1.72." >}}
 
 {{< interactive-figure tLowerTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Lower-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"left","alpha":0.05},"markers":{"at":-1.71714,"label":"-1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the lowest five percent shaded red as a single critical region below t equals -1.72."}' fallback="Null t distribution with df = 22 and the lowest 5% shaded as a single critical region below t = -1.72." >}}
-:::
+
 Critical regions for $\alpha = .05$ with $df = 22$.
 ::::
 
-For a $z$ test at $\alpha = .05$, our critical values wouldn't depend on $n$ or $df$: we'd use $\pm 1.96$ for a two-tailed test and $+1.645$ or $-1.645$ for a one-tailed test. These are less extreme than the corresponding $t$ values. The $t$ distribution has heavier tails, so we have to go farther from zero to leave the same proportion in the critical regions.
+For a $z$ test at $\alpha = .05$, our critical values wouldn't depend on $n$ or $df$: we'd use $\pm 1.96$ for a two-tailed test and $+1.645$ or $-1.645$ for a one-tailed test. Notice that the $t$ critical values are more extreme than the corresponding $z$ values. The $t$ distribution has heavier tails, so we have to go farther from zero to leave the same proportion in the critical regions.
 
 Suppose we had a sample of $n = 60$. For a two-tailed $t$ test at $\alpha = .05$, the critical values would be $t = \pm 2.000$ with $df = 59$, down from $\pm 2.074$ at $df = 22$. The larger sample size and corresponding $df$ mean that the $t$ distribution is closer to the normal distribution, and so the critical values are less extreme, closer to the $z = \pm 1.96$ we would have used if we knew the population standard deviation.
 
 {{< include quizzes/11-t-test-t-table.qmd >}}
 
-## Assumptions of the single-sample $t$ test
+## A $t$ test, step by step
 
-The exact $t$ reference distribution assumes independent observations from a normal population. With larger samples, the procedure can tolerate some departures from normality, but there is no automatic cutoff at $n=30$. Strong skew and extreme observations deserve attention, especially in small samples.
+Let's work through an example hypothesis test using our new tool, the $t$ test. Once again, we'll use data from the humanbenchmark.com reaction time test we've imagined giving to a sample of Spider-People. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
-Independence means that one person's score shouldn't depend on another person's score. Repeated attempts by the same person, for example, wouldn't usually count as independent observations. For the class data below, we'd want to check that the scores are from separate students rather than treating repeated attempts as extra people.
-
-Random sampling helps us make an inference about the population we sampled from. A convenience sample, like a statistics class, leaves more doubt about which broader population it can reasonably tell us about. A larger sample doesn't automatically repair dependence or selection bias.
-
-## The $t$ test, step by step: reaction times
-
-So now we'll work through an example hypothesis test using our new tool, the $t$ test. For the purposes of the example, we'll use data collected by a statistics class using the reaction time test from our Spider-People example.
-
-In Chapter 8, I supplied a population standard deviation of 50 milliseconds. But now let's not pretend to know that population standard deviation. We'll estimate the standard error using the class's variability, and compare the mean with the same website reference of 284 milliseconds.
-
-This is a worked analysis of existing data. In a planned test, we'd specify the hypotheses and decision criteria before looking at the results, as in Chapter 8.
+In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of 50 milliseconds. But now let's not pretend to know that population standard deviation. We'll estimate the standard error using the class's variability, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
-We'll use a nondirectional hypothesis: the population mean differs from the reference in either direction.
+We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value
 
-$$ H_0: \mu = 284\text{ ms} \qquad H_1: \mu \ne 284\text{ ms} $$
+$$ H_0: \mu = 284\text{ ms} $$
 
-For this exercise, we'll treat 284 as a fixed reference value. Whether this class represents a broader population of students is a separate question from the calculation.
+$$ H_1: \mu \ne 284\text{ ms} $$
 
 ### Step 2: Set the decision criteria
 
@@ -250,17 +239,20 @@ Now we can put that estimated standard error into the denominator of our $t$ sta
 
 $$ t = \frac{M-\mu_0}{s_M} = \frac{298.18-284}{5.923} $$
 
-{{< include quizzes/11-t-test-t-statistic.qmd >}}
-
 ### Step 4: Make a decision
 
-You should have calculated $t \approx 2.39$. Our sample mean is about 2.39 estimated standard errors above the null reference. This exceeds the upper critical value of 1.998, so we reject the null hypothesis.
+The sample's $t$ statistic exceeds the upper critical value of 1.998, so we reject the null hypothesis.
 
 {{< interactive-figure classRtTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":64,"title":"Null distribution: df = 64","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":5,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.99773,"label":"−1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":1.99773,"label":"+1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.394714,"label":"t = 2.39","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null t distribution with 64 degrees of freedom. The two rejection regions lie beyond ±1.998; the observed t of 2.39 is in the right rejection region." >}}
 
 The equivalent two-tailed $p$-value is approximately $.020$. As in Chapter 8, this includes outcomes at least as extreme in either direction. (Our critical-value table locates the critical region boundary, not this exact $p$-value; for that we usually use statistical software.)
 
-### Effect size
+
+### Step 5: Calculate more stuff
+
+I didn't include these in our original 4-step hypothesis-testing procedure, but we've acquired some additional tools since then that we can also adapt to this new context.
+
+#### Effect size
 
 We can use a version of Cohen's $d$ for the single-sample $t$ test, just as we did with the $z$ test. The difference here is that we use the sample standard deviation ($s$) in place of the unknown population standard deviation ($\sigma$).
 
@@ -270,16 +262,11 @@ The numerator shows that the class mean is a little more than 14 milliseconds sl
 
 Interpreting this effect size is the same as before. It depends on context, expectations, and our judgment about what constitutes a practically important difference.
 
-### Confidence interval
+#### Confidence interval
 
-Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom. Here $t^*$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t^* \approx 1.998$.
+Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom. Here $t$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t \approx 1.998$.
 
-$$ M \pm t^*s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
-
-| Estimate | 95% confidence interval |
-|:--|:--|
-| Population mean reaction time | $[286.35,\ 310.02]$ ms |
-| Difference from the 284 ms reference | $[2.35,\ 26.02]$ ms |
+$$ M \pm t \times s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
 
 ::: {#fig-t-class-ci}
 {{< interactive-figure classRtConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":298.1846153846154,"s":47.7552000793148,"n":65,"confidence":95,"reference":284,"xDomain":[275,320],"units":"Mean reaction time (ms)"}' fallback="95% t confidence interval for the mean: 286.35 to 310.02 ms, with point estimate 298.18 ms. The reference mean of 284 ms lies below the entire interval." >}}
@@ -287,9 +274,25 @@ $$ M \pm t^*s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
 The 95% $t$ interval excludes the reference mean of 284 ms, agreeing with the two-tailed test at $\alpha = .05$.
 :::
 
-Subtracting the fixed reference of 284 ms from both ends gives the interval for the difference: about 2 to 26 milliseconds slower than the reference.
+The meaning of 95% confidence is the same as in Chapter 10: under the model's assumptions, this procedure would produce intervals containing the true population mean in 95% of repeated samples. It doesn't account for selection bias or measurement problems. And at the same numerical standard error, the larger $t$ makes the interval a little wider than one using $z = 1.96$.
 
-The meaning of 95% confidence is the same as in Chapter 10: under the model's assumptions, this procedure would produce intervals containing the true population mean in 95% of repeated samples. It doesn't account for selection bias or measurement problems. And at the same numerical standard error, the larger $t^*$ makes the interval a little wider than one using $z^* = 1.96$.
+#### Statistical power
+
+Remember the two sampling distributions from Chapter 9: one under the null hypothesis and one under a specified alternative. We can use the same idea to think about power for a $t$ test. Suppose the true population mean really is 298.18 ms---the mean we observed in our class. With samples of 65 and a two-tailed $\alpha = .05$ test, how often would we reject the null of 284 ms?
+
+The figure below illustrates the logic by placing two $t$ curves at those hypothetical population means. The purple area represents the chance of rejecting that null hypothesis if that alternative were true.[^t-power-approximation]
+
+::: {#fig-t-power}
+{{< interactive-figure tPowerIllustration makeStatisticalPowerDiagram options='{"schematic":true,"mu":284,"sigma":47.7552000793148,"n":65,"diff":14.1846153846154,"alpha":0.05,"showControls":[],"distribution":"t","key":false,"axisRaw":true,"axisLabel":"Mean reaction time (ms)","regionValues":true}' fallback="Schematic null and alternative t curves (df = 64) centered on 284 and 298.18 ms. Power is the shaded area under the alternative beyond the null rejection boundaries, about .654; beta is the area between them, about .346." >}}
+
+An illustration of statistical power. The rejection regions come from the null model, but power is an area under the alternative. These schematic $t$ curves illustrate that logic; they aren't an exact $t$-power calculation.
+:::
+
+[^t-power-approximation]: I'm simplifying the illustration and computation of power here by using a single $t$ curve shifted over to the alternative mean. Statistical software will give a slightly different answer than my approximation. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The difference can be greater with smaller samples. This is because calculating power in the context of $t$ actually requires some slightly more nuanced math to account for the estimated standard error varying from sample to sample. This uses something called a noncentral $t$ distribution. That's beyond the scope of this book; for us, grasping the general logic is enough.
+
+Bear in mind that using the logic of statistical power in this way constitutes a retrospective power analysis. It can provide useful context to help interpret the results, but its use is limited. Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. For planning a future study, we'd specify a plausible effect to detect.
+
+The same factors affect power as before. Holding the others fixed, a larger true mean difference, less population variability, or a larger sample makes an effect easier to detect. Increasing alpha also increases power, but at the cost of a greater chance of a Type I error.
 
 ## Reporting and interpreting the results
 
@@ -305,29 +308,17 @@ There's a lot of information packed into this fairly short, dry, technical state
 
 Performing the analysis, computing the effect size and confidence interval, and reporting the results are all fairly mechanical once you get the hang of it. But interpreting the results requires more thought.
 
-Our test provides evidence that the population mean differs from the 284 ms benchmark, under the assumptions we've made. It doesn't tell us what caused the difference.
+So what does it mean, that we rejected our null hypothesis here? Our test provides evidence that the population mean differs from the 284 ms benchmark, under the assumptions we've made. It doesn't tell us what caused the difference.
 
-We could be tempted to turn our reaction time findings into a headline, something like "study shows that studying statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group.
+We could be tempted to turn our reaction time findings into a headline, something like "study shows that studying statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group. Maybe a lot of people on <humanbenchmark.com> take the test a bunch of times and get faster with practice, so our class was just unpracticed at this task rather than slower in general. Differences in devices or browsers could also affect the measured times. Or maybe we're making a Type I error. Or maybe the skew in the distrubtion of reaction times (which humanbenchmark.com acknowledges, and I said we could ignore) is great enough to affect the results. This is a good lesson on why a "statistically significant" result doesn't by itself explain the difference or establish how widely it generalizes.
 
-Maybe a lot of people on that website take the test a bunch of times and get faster with practice, so our class was just unpracticed at this task rather than slower in general. Differences in devices or browsers could also affect the measured times. Or maybe we're making a Type I error. This is a good lesson on why a "statistically significant" result doesn't by itself explain the difference or establish how widely it generalizes.
+### Assumptions of the single-sample $t$ test
 
-### Statistical power with a $t$ test
+Interpreting the outcome of a test fairly also depends on whether the assumptions of the test are reasonable. The exact $t$ reference distribution assumes independent observations from a normal population. With larger samples, the procedure can tolerate some departures from normality, but remember there is no automatic cutoff (at $n=30$ or anywhere else). Strong skew and extreme observations deserve attention, especially in small samples.
 
-Remember the two sampling distributions from Chapter 9: one under the null hypothesis and one under a specified alternative. We can use the same idea to think about power for a $t$ test. Suppose the true population mean were 298.18 ms—the mean we observed in our class—and the population standard deviation were about 47.76 ms. With samples of 65 and a two-tailed $\alpha = .05$ test, how often would we reject the null of 284 ms?
+Independence means that one person's score shouldn't depend on another person's score. Repeated attempts by the same person, for example, wouldn't usually count as independent observations. For the class data below, we'd want to check that the scores are from separate students rather than treating repeated attempts as extra people.
 
-The figure below illustrates the logic by placing two schematic curves at those hypothetical population means. The purple area represents the chance of rejecting the null if that alternative were true. These aren't literal sampling distributions of the raw sample means; the exact $t$ test calculation accounts for the estimated standard error varying from sample to sample.[^t-power-approximation]
-
-::: {#fig-t-power}
-{{< interactive-figure tPowerIllustration makeStatisticalPowerDiagram options='{"schematic":true,"mu":284,"sigma":47.7552000793148,"n":65,"diff":14.1846153846154,"alpha":0.05,"showControls":[],"distribution":"t","key":false,"axisRaw":true,"axisLabel":"Mean reaction time (ms)","regionValues":true}' fallback="Schematic null and alternative t curves (df = 64) centered on 284 and 298.18 ms. Power is the shaded area under the alternative beyond the null rejection boundaries, about .654; beta is the area between them, about .346." >}}
-
-A reminder of the logic of power: the rejection regions come from the null model, but power is an area under the alternative. These schematic $t$ curves illustrate that logic; they aren't an exact $t$-power calculation.
-:::
-
-[^t-power-approximation]: The figure shifts a copy of the null $t$ curve to illustrate the alternative. Exact power uses a different distribution, called the *noncentral t distribution*. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The approximation can be less close with smaller samples.
-
-Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. For planning a future study, we'd specify a plausible effect to detect.
-
-The same factors affect power as before. Holding the others fixed, a larger true mean difference, less population variability, or a larger sample makes an effect easier to detect. Increasing alpha also increases power, but at the cost of a greater chance of a Type I error.
+Random sampling helps us make an inference about the population we sampled from. A convenience sample, like a statistics class, leaves more doubt about which broader population it can reasonably tell us about. A larger sample doesn't automatically repair dependence or selection bias.
 
 ## Looking ahead
 
