@@ -3817,6 +3817,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const chartWrap = root.append("div")
     .attr("class", "dpe-chart-wrap sfs-chart-wrap");
 
+  // Compare probability beyond fixed cutoffs, rather than moving each
+  // distribution's cutoffs to keep its tail area constant.
+  const tailCutoff = sfsDistributionFiniteNumber(opts.tailComparison, NaN);
+  const compareTails = Number.isFinite(tailCutoff) && tailCutoff > 0;
+  const tailReadout = compareTails
+    ? root.append("p").attr("class", "dpe-tail-readout sfs-readout-value") : null;
+
   const strip = inlineSliders ? root.append("div").attr("class", "sp-factors") : null;
 
   function addFactor(parameter) {
@@ -3870,6 +3877,12 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .attr("class", "dpe-shades");
   const curveLayer = svg.append("g")
     .attr("class", "dpe-curves");
+  const tailMarkers = compareTails ? svg.append("g")
+    .attr("class", "dpe-tail-markers")
+    .selectAll("line").data([-tailCutoff, tailCutoff]).join("line")
+    .style("stroke", "var(--sfs-neutral-color, #7b818a)")
+    .attr("stroke-dasharray", "3 4")
+    .attr("vector-effect", "non-scaling-stroke") : null;
   const xAxisLayer = svg.append("g")
     .attr("class", "dpe-x-axis")
     .attr("transform", `translate(0,${height - margin.bottom})`);
@@ -3942,7 +3955,12 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: dist,
       data: sfsDistributionCurveData(dist, domain, points)
     }));
-    const shadeOptions = opts.confidenceInterval ? Object.assign({}, opts, {
+    const shadeOptions = compareTails ? Object.assign({}, opts, {
+      shade: distributions.flatMap((dist) => [
+        { distribution: dist.key, to: -tailCutoff, color: dist.color, opacity: 0.24 },
+        { distribution: dist.key, from: tailCutoff, color: dist.color, opacity: 0.24 }
+      ])
+    }) : opts.confidenceInterval ? Object.assign({}, opts, {
       shade: { tail: "center", p: source.confidence / 100,
         color: "var(--sfs-confidence-color, #2f6f9f)", opacity: 0.3 }
     }) : opts;
@@ -3956,6 +3974,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
       domain,
       curveData,
       shadeItems,
+      tailAreas: compareTails ? distributions.map((dist) => ({
+        key: dist.key, label: dist.name || dist.label,
+        probability: sfsDistributionCdf(dist, -tailCutoff) + 1 - sfsDistributionCdf(dist, tailCutoff)
+      })) : null,
       yDomain
     };
   }
@@ -3970,6 +3992,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: controlled.type,
       distributions: plot.distributions,
       controlledDistribution: controlled,
+      ...(compareTails ? { tailCutoff, tailAreas: plot.tailAreas } : {}),
       domain: plot.domain.slice(),
       yDomain: plot.yDomain.slice()
     });
@@ -4109,6 +4132,16 @@ makeDistributionParameterExplorer = function(opts = {}) {
     y.domain(plot.yDomain).nice();
 
     if (axisChanged || !lastRender) drawAxes(plot);
+
+    if (compareTails) {
+      tailMarkers.attr("x1", (d) => x(d)).attr("x2", (d) => x(d))
+        .attr("y1", y(0)).attr("y2", margin.top);
+      const summary = `Beyond ±${tailCutoff}: ${plot.tailAreas.map((item) =>
+        `${item.label}: ${d3.format(".1%")(item.probability)}`).join(" · ")}`;
+      tailReadout.text(summary);
+      const description = `${opts.ariaLabel || "Interactive distribution comparison"}. ${summary}. Shaded tails continue beyond the plotted range.`;
+      svg.attr("aria-label", description).select("title").text(description);
+    }
 
     const shadePaths = shadeLayer.selectAll("path")
       .data(plot.shadeItems, (d, index) => `${d.kind}-${d.distribution ? d.distribution.key : "overlap"}-${index}`);
