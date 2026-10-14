@@ -45,13 +45,11 @@ Now let's take some samples from a new deck. But this isn't a regular, complete 
 {{< include quizzes/11-t-test-card-samples.qmd >}}
 :::
 
-We find ourselves in a more typical situation now. It's rare that we know the population standard deviation when we're doing real research. The procedures from the past few chapters provide the foundations, but we can't use this known-$\sigma$ approach very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. We just let our sample do a little more work: we use *its* variability to *estimate* the population variability. This changes our math slightly, and it means we have to account for the fact that our estimate of uncertainty is itself uncertain. Doing so gives us the $t$ statistic.
+We find ourselves in a more typical situation now. It's rare that we know the population standard deviation when we're doing real research, and so we can't use the known-$\sigma$ $z$-test approach very often in practice. Thankfully, we don't have to throw out everything we've learned and start from scratch. The procedures from the past few chapters provide the foundations. We just let our sample do a little more work: we use *its* variability to *estimate* the population variability. This changes our math slightly, and it means we have to account for the fact that our estimate of uncertainty is itself uncertain. Doing so brings us to the $t$ statistic.
 
 ## From $z$ to $t$
 
-In Chapter 10, we used the class's sleep data to calculate a confidence interval and perform a $z$ test of whether the population mean differs from eight hours. Eight hours was a reference value, not a fact we already knew about the population. Both calculations relied on assuming a population standard deviation of 1.5 hours. I just made that standard deviation up.
-
-Best not to just make things up, though, at least not when we don't have to. We had something all along that we could use instead: the *sample's* standard deviation. That lets us use basically the same hypothesis-testing logic without knowing (or needing to make up) the population standard deviation.
+In Chapter 10, we used the class's sleep data to calculate a confidence interval and perform a $z$ test of whether the population mean differs from our null hypothesis reference value of eight hours (based on the common advice about getting enough sleep, not a fact we already knew about the population.) Both calculations relied on assuming a population standard deviation of 1.5 hours. I just made that standard deviation up.
 
 Here's the inferential process diagram I showed for the $z$ test a few chapters ago. In that example, we treated the original population's mean and standard deviation as known.
 
@@ -61,6 +59,8 @@ Here's the inferential process diagram I showed for the $z$ test a few chapters 
 The original population's mean and variability are known. The treated sample is our clue to the unknown treated population.
 :::
 
+Best not to just make things up, though, at least not when we don't have to. We had something all along that we could use instead: the *sample's* standard deviation. That lets us use basically the same hypothesis-testing logic without knowing (or needing to make up) the population standard deviation.
+
 @fig-t-estimated-population shows the same kind of diagram, but adjusted to show the revised logic. We no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
 
 We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The null hypothesis says that the population mean equals that reference value. It doesn't have to be a population fact we already know.
@@ -68,7 +68,7 @@ We use a single-sample $t$ test to compare a population mean with a specified re
 ::: {#fig-t-estimated-population}
 {{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
 
-The inferential logic is the same. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
+A diagram representing the logic of the single-sample $t$ test. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
 :::
 
 
@@ -91,20 +91,19 @@ So for the $t$ statistic, we use the sample standard deviation, $s$, to estimate
 
 So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we calculate it from an estimate of the population standard deviation. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
 
-
 ### Student's $t$
 
-The statistical ideas behind this were developed by William Sealy Gosset, who spent his career working for the Guinness brewing company, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production. His work included experiments on which varieties of barley to grow, how best to cultivate them, and things like that. Gosset studied for a while under pioneering statistician Karl Pearson, but he realized that the data he was working with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Gosset might be working with just four farms, each growing one plot of each variety [@box1987guinness].
+The statistical ideas behind this were developed by William Sealy Gosset. Unlike many of the figures who developed the statistical procedures we still rely on today, Gosset wasn't an academic statistician. In fact, he spent his career working for the Guinness brewing company, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production. His work included experiments on which varieties of barley to grow, how best to cultivate them, and things like that. Guinness sent him to study for a year under pioneering statistician Karl Pearson, but Gosset realized that the data he was working with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Gosset might be working with just four farms, each growing one plot of each variety [@box1987guinness].
 
-Gosset realized that a small experiment's results could look more convincing than they really were if it just happened to show little variability. To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Doing this, he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
+Gosset realized that a small experiment's results could look more convincing than they really were if a sample just happened to show little variability. To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Doing this, he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
 
-So Gosset needed a way to judge mean differences that allowed for uncertainty in the sample's estimate of variability. Gosset published his solution in 1908 under the pseudonym "Student," because Guinness allowed its scientists to publish only under a pseudonym [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
+So Gosset developed a way to judge mean differences that allowed for uncertainty in the sample's estimate of variability. He published his solution in 1908 under the pseudonym "Student," because Guinness didn't allow its scientists to publish under their real names [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
 
 ## The $t$ distribution(s)
 
 Unlike the single standard normal curve we used for $z$, the $t$ distribution gives us a different curve for each value of degrees of freedom. For a single-sample $t$ test, we choose the curve using $df=n-1$, the degrees of freedom from the sample variance in the denominator. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
 
-Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails. The difference is greatest at low degrees of freedom. As the degrees of freedom increase, the $t$ distribution approaches the standard normal distribution ever more closely.
+Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails.
 
 Why does the $t$ distribution have heavier tails than the standard normal distribution? Think back to the two hands of cards at the start of this chapter. Both had four cards and a mean of 8. Suppose we wanted to test whether the deck has the usual mean of 7 for a complete deck of playing cards. Both hands would give us the same numerator, $M-\mu_0=8-7=1$. But they'd give us different denominators:
 
@@ -116,13 +115,13 @@ Why does the $t$ distribution have heavier tails than the standard normal distri
 
 If the deck's mean really is 7, both hands miss it by exactly the same amount. But sample A's smaller SD gives us a smaller denominator, making the same difference look almost three times as extreme.
 
-This is the problem with estimating population SD: an unusually small estimate can magnify an ordinary mean difference into a very large $t$ statistic. An unusually large estimate shrinks the statistic toward zero, but those effects don't balance out. Shrinking has a limit---zero---while magnification has no limit as the denominator approaches zero. Under normal sampling, the sample mean and SD vary independently, so a small denominator doesn't come with a smaller mean error to compensate. Across repeated samples, we therefore get more extreme statistics in both directions: **heavier tails**.^[Dividing by $n-1$ corrects the long-run downward bias in sample variance. It doesn't prevent individual samples from underestimating or overestimating population variability.]
+This is the problem with estimating standard deviation: an unusually small estimate can magnify an ordinary mean difference into a very large $t$ statistic. An unusually large estimate shrinks the statistic toward zero, but those effects don't balance out. Shrinking has a limit---zero---while magnification has no limit as the denominator approaches zero. Under normal sampling, the sample mean and standard deviation vary independently, so a small denominator doesn't come with a smaller mean error to compensate. Across repeated samples, we therefore get more extreme results relative to nonextreme, central results, producing the heavier tails of the distribution.^[Dividing by $n-1$ corrects the long-run downward bias in sample variance. It doesn't prevent individual samples from underestimating or overestimating population variability.]
 
-With fewer observations, the SD estimate is less reliable, making substantial underestimates more likely. With more observations, the estimate becomes more consistent and the $t$ curve approaches the standard normal curve.
+The difference is greatest at low degrees of freedom. As the degrees of freedom increase, the $t$ distribution approaches the standard normal distribution ever more closely. With fewer observations, the SD estimate is less reliable, making substantial underestimates more likely. With more observations, the estimate becomes more consistent and the $t$ curve approaches the standard normal curve.
 
-Gosset illustrated the tail problem with his theoretical curve for samples of ten. Even compared with a normal curve having the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12]. Our graph below uses the modern $t$ statistic and the standard normal curve. Let's start with samples of four, like our card hands and Gosset's card experiment, then increase to ten.
+Gosset illustrated the tail problem with his theoretical curve for samples of ten. Compared to a normal curve with the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12].
 
-The graph describes **test statistics across repeated samples when the null hypothesis is true**, assuming independent observations from a normal population. The playing cards helped us see what estimating variability does; their ranks don't form a normal population, so their $t$ statistics wouldn't follow these curves exactly.
+@act-t-distribution below uses the modern $t$ statistic and the standard normal curve. The graph describes test statistics across repeated samples when the null hypothesis is true, assuming independent observations from a normal population. (The playing cards' ranks don't form a normal population, so their $t$ statistics wouldn't follow these curves exactly.)
 
 ::::: {#act-t-distribution .callout-tip .interactive}
 ## Explore the $t$ distribution
@@ -148,28 +147,28 @@ So to keep our two-tailed rejection rate at 5%, we need cutoffs farther from zer
 
 ### The $t$ table
 
-So now we want to find the $t$ values that mark off our critical regions. In the unit normal table, we looked up a $z$ score to find the area beyond it. The $t$ table below works in the other direction: choose a tail probability and degrees of freedom, and it gives you the critical $t$ value.
+So how do we find the critical $t$ values that cut off say 5% of the appropriate distribution? In the unit normal table, we looked up a $z$ score to find the area beyond it. The $t$ table generally works in the other direction: choose a tail probability and degrees of freedom, and it gives you the critical $t$ value.
 
 In @fig-t-table, use the column heading for your chosen tail and alpha: one-tailed .05 or two-tailed .05, for example. Then find the row for your degrees of freedom, which for a single-sample $t$ test is one less than your sample size. We need those different rows because, unlike the single standard normal curve, the $t$ curve changes with $df$.
 
 ::: {#fig-t-table}
-{{< interactive-figure staticTTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":60},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":false,"interactive":false}' fallback="Static table of t critical values." >}}
+{{< interactive-figure staticTTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":100},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":false,"interactive":false,"tableMaxHeight":"35em"}' fallback="Static table of t critical values." >}}
 
 :::
 
 To take an example, say we have a sample of $n = 23$ scores. That gives us $df = 22$. @fig-t-critical-regions shows the critical regions for two- and one-tailed tests. If we are doing a two-tailed test with $\alpha = .05$, we look in the two-tailed .05 column and find the critical value of $t = \pm 2.074$. If we were doing a one-tailed test with $\alpha = .05$, we would look in the one-tailed .05 column and find the critical value of $t = +1.717$ (or $-1.717$ if our alternative hypothesis were that the population mean is less than the reference value).
 
 :::: {#fig-t-critical-regions}
-{{< interactive-figure tTwoTailedCriticalRegions makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Two-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.07387,"label":"−2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.07387,"label":"+2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"}],"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and two critical regions shaded red, 2.5 percent below t equals negative 2.07 and 2.5 percent above t equals positive 2.07."}' fallback="Null t distribution with df = 22 and two critical regions shaded, 2.5% below t = −2.07 and 2.5% above t = +2.07." >}}
+{{< interactive-figure tTwoTailedCriticalRegions makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Two-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.07387,"label":"−2.074","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.07387,"label":"+2.07","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"}],"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and two critical regions shaded red, 2.5 percent below t equals negative 2.07 and 2.5 percent above t equals positive 2.07."}' fallback="Null t distribution with df = 22 and two critical regions shaded, 2.5% below t = −2.07 and 2.5% above t = +2.07." >}}
 
-{{< interactive-figure tUpperTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Upper-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"right","alpha":0.05},"markers":{"at":1.71714,"label":"+1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the highest five percent shaded red as a single critical region above t equals 1.72."}' fallback="Null t distribution with df = 22 and the highest 5% shaded as a single critical region above t = 1.72." >}}
+{{< interactive-figure tUpperTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Upper-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"right","alpha":0.05},"markers":{"at":1.71714,"label":"+1.717","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the highest five percent shaded red as a single critical region above t equals 1.717."}' fallback="Null t distribution with df = 22 and the highest 5% shaded as a single critical region above t = 1.717." >}}
 
-{{< interactive-figure tLowerTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Lower-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"left","alpha":0.05},"markers":{"at":-1.71714,"label":"-1.72","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the lowest five percent shaded red as a single critical region below t equals -1.72."}' fallback="Null t distribution with df = 22 and the lowest 5% shaded as a single critical region below t = -1.72." >}}
+{{< interactive-figure tLowerTailedCriticalRegion makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":22,"title":"Lower-tailed, α = .05","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":9,"labels":{"x":"t statistic"},"shade":{"tail":"left","alpha":0.05},"markers":{"at":-1.71714,"label":"-11.717","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},"animate":true,"ariaLabel":"Null t distribution with 22 degrees of freedom and the lowest five percent shaded red as a single critical region below t equals -1.717."}' fallback="Null t distribution with df = 22 and the lowest 5% shaded as a single critical region below t = -1.717." >}}
 
 Critical regions for $\alpha = .05$ with $df = 22$.
 ::::
 
-For a $z$ test at $\alpha = .05$, our critical values wouldn't depend on $n$ or $df$: we'd use $\pm 1.96$ for a two-tailed test and $+1.645$ or $-1.645$ for a one-tailed test. Notice that the $t$ critical values are more extreme than the corresponding $z$ values. The $t$ distribution has heavier tails, so we have to go farther from zero to leave the same proportion in the critical regions.
+For a $z$ test at $\alpha = .05$, our critical values wouldn't depend on $n$ or $df$: we'd use $\pm 1.96$ for a two-tailed test and $+1.645$ or $-1.645$ for a one-tailed test. Notice that the $t$ critical values are more extreme than the corresponding $z$ values. With the $t$ distribution, we have to go farther from zero to leave the same proportion in the critical regions because of its heavier tails.
 
 Suppose we had a sample of $n = 60$. For a two-tailed $t$ test at $\alpha = .05$, the critical values would be $t = \pm 2.000$ with $df = 59$, down from $\pm 2.074$ at $df = 22$. The larger sample size and corresponding $df$ mean that the $t$ distribution is closer to the normal distribution, and so the critical values are less extreme, closer to the $z = \pm 1.96$ we would have used if we knew the population standard deviation.
 
@@ -177,13 +176,13 @@ Suppose we had a sample of $n = 60$. For a two-tailed $t$ test at $\alpha = .05$
 
 ## A $t$ test, step by step
 
-Let's work through an example hypothesis test using our new tool, the $t$ test. Once again, we'll use data from the humanbenchmark.com reaction time test we've imagined giving to a sample of Spider-People. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
+Let's work through an example hypothesis test using our new tool, the $t$ test. We'll use data from the [humanbenchmark.com reaction time test](https://www.humanbenchmark.com/tests/reactiontime) we've imagined giving to a sample of Spider-People in previous chapters. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
-In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of 50 milliseconds. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
+In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of $\sigma = 50$ milliseconds. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
-We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value
+We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value. (Like we said in Chapter 8, nondirectional hypotheses are generally the default, unless we have a specific reason to believe the effect will be in one direction only.)
 
 $$ H_0: \mu = 284\text{ ms} $$
 
@@ -191,7 +190,7 @@ $$ H_1: \mu \ne 284\text{ ms} $$
 
 ### Step 2: Set the decision criteria
 
-We'll use $\alpha = .05$ for a two-tailed test. With 65 scores, $df = 64$, so the critical values are approximately $\pm 1.998$. We reject the null if $t < -1.998$ or $t > 1.998$.
+We'll use $\alpha = .05$. With 65 scores, $df = 64$, so the critical values for this two-tailed test are approximately $\pm 1.998$. We reject the null if $t < -1.998$ or $t > 1.998$.
 
 ::: {#tbl-t-class-critical}
 {{< interactive-figure classRtCriticalTable makeTTable options='{"title":"Critical values for the class test","df":{"from":62,"to":66},"alphas":[0.1,0.05,0.025,0.01,0.005],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":64,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 62 through 66 degrees of freedom, highlighting the two-tailed .05 critical value of 1.998 at df = 64." >}}
@@ -221,14 +220,13 @@ Here are the scores, in milliseconds:
 
 If you count them up, you'll find 65 scores, giving us the 64 degrees of freedom used above.
 
-
+::: {#fig-class-rt-histogram}
 {{< interactive-figure classRtHistogram makeGraph options='{"type":"histogram","data":[296,282,299,263,287,335,233,318,405,321,339,284,336,267,346,286,299,255,310,320,359,284,325,253,301,250,426,258,332,339,382,390,289,324,255,285,311,274,380,294,279,326,303,349,269,260,283,312,239,159,216,197,350,334,251,255,322,240,283,307,312,265,283,326,270],"binWidth":20,"binStart":140,"binStop":440,"xDomain":[140,440],"xTicks":10,"labels":{"x":"Reaction Time (ms)","y":"Frequency"}}' fallback="Grouped histogram of class reaction times. The reference value for the test is 284 ms." >}}
 
-The histogram is a bit lumpy and uneven, but most scores form a central cluster with a few farther out on either side. The low score of 159 ms and high scores of 405 and 426 ms deserve a closer look. In a real analysis, we'd check for recording errors or problems completing the task, rather than discard scores just because they're unusual.
+A grouped histogram, with a binwidth of 20ms, representing the 65 reaction times recorded for a class of students who took the humanbenchmark.com reaction time test.
+:::
 
-A sample histogram doesn't establish the shape of its population. Still, with 65 observations and no pronounced skew visible here, the $t$ test is a reasonable choice for this practice analysis, assuming the observations are independent. That doesn't settle whether one class represents a broader population of students.
-
-To calculate our sample standard deviation, we use the raw scores, not the midpoints of the histogram's intervals. Remember from Chapter 4 that we divide the sum of squared deviations from the sample mean by $n-1$ to get the sample variance, then take its square root to get $s$. That gives us the following quantities:
+To calculate our sample standard deviation, we divide the sum of squared deviations from the sample mean by $n-1$ to get the sample variance, then take its square root to get $s$---exactly the procedure explored in Chapter 4. That gives us the following quantities:
 
 | Quantity | Symbol | Class data |
 |:--|:--|--:|
@@ -238,11 +236,13 @@ To calculate our sample standard deviation, we use the raw scores, not the midpo
 | Null reference mean | $\mu_0$ | 284 ms |
 | Degrees of freedom | $df = n-1$ | 64 |
 
+Using those values, we can compute the estimated standard error of the mean:
+
 $$ s_M = \frac{s}{\sqrt{n}} = \frac{47.76}{\sqrt{65}} \approx 5.923\text{ ms} $$
 
-Now we can put that estimated standard error into the denominator of our $t$ statistic:
+Then we can put that estimated standard error into the denominator of our $t$ statistic:
 
-$$ t = \frac{M-\mu_0}{s_M} = \frac{298.18-284}{5.923} $$
+$$ t = \frac{M-\mu_0}{s_M} = \frac{298.18-284}{5.923} = 2.39 $$
 
 ### Step 4: Make a decision
 
@@ -255,11 +255,11 @@ The equivalent two-tailed $p$-value is approximately $.020$. As in Chapter 8, th
 
 ### Step 5: Calculate more stuff
 
-I didn't include these in our original 4-step hypothesis-testing procedure, but we've acquired some additional tools since then that we can also adapt to this new context.
+I didn't include these in our original 4-step hypothesis-testing procedure in Chapter 8, but we've acquired some additional tools since then that we can also adapt to this new context.
 
 #### Effect size
 
-We can use a version of Cohen's $d$ for the single-sample $t$ test, just as we did with the $z$ test. The difference here is that we use the sample standard deviation ($s$) in place of the unknown population standard deviation ($\sigma$).
+We can use a version of Cohen's $d$ for the single-sample $t$ test, just as we did with the $z$ test. The only difference here is that we use the sample standard deviation ($s$) in place of the unknown population standard deviation ($\sigma$).
 
 $$ d = \frac{M-\mu_0}{s} = \frac{298.18-284}{47.76} \approx 0.30 $$
 
@@ -269,7 +269,7 @@ Interpreting this effect size is the same as before. It depends on context, expe
 
 #### Confidence interval
 
-Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom. Here $t$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t \approx 1.998$.
+Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom from the matching two-tailed test. Here $t$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t \approx 1.998$.
 
 $$ M \pm t \times s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
 
@@ -295,7 +295,7 @@ An illustration of statistical power. The rejection regions come from the null m
 
 [^t-power-approximation]: I'm simplifying the illustration and computation of power here by using a single $t$ curve shifted over to the alternative mean. Statistical software will give a slightly different answer than my approximation. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The difference can be greater with smaller samples. This is because calculating power in the context of $t$ actually requires some slightly more nuanced math to account for the sample standard deviation varying from sample to sample, which changes the standard error calculated from it. This uses something called a noncentral $t$ distribution. That's beyond the scope of this book; for us, grasping the general logic is enough.
 
-Bear in mind that using the logic of statistical power in this way constitutes a retrospective power analysis. It can provide useful context to help interpret the results, but its use is limited. Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. For planning a future study, we'd specify a plausible effect to detect.
+Bear in mind that using the logic of statistical power in this way constitutes a retrospective power analysis. It can provide useful context to help interpret the results, but its use is limited. Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. If we were planning a future study, we could specify a plausible effect size and figure out how many participants we would need to achieve the desired power.
 
 The same factors affect power as before. Holding the others fixed, a larger true mean difference, less population variability, or a larger sample makes an effect easier to detect. Increasing alpha also increases power, but at the cost of a greater chance of a Type I error.
 
@@ -320,6 +320,10 @@ We could be tempted to turn our reaction time findings into a headline, somethin
 ### Assumptions of the single-sample $t$ test
 
 Interpreting the outcome of a test fairly also depends on whether the assumptions of the test are reasonable. The exact $t$ reference distribution assumes independent observations from a normal population. With larger samples, the procedure can tolerate some departures from normality, but remember there is no automatic cutoff (at $n=30$ or anywhere else). Strong skew and extreme observations deserve attention, especially in small samples.
+
+The histogram of the data in @fig-class-rt-histogram looked a bit lumpy and uneven, but most scores form a central cluster with a few farther out on either side. The low score of 159 ms and high scores of 405 and 426 ms deserve a closer look. In a real analysis, we'd check for recording errors or problems completing the task, rather than discard scores just because they're unusual.
+
+A sample histogram doesn't establish the shape of its population. Still, with 65 observations and no pronounced skew visible here, the $t$ test is a reasonable choice for this practice analysis, assuming the observations are independent. That doesn't settle whether one class represents a broader population of students.
 
 Independence means that one person's score shouldn't depend on another person's score. Repeated attempts by the same person, for example, wouldn't usually count as independent observations. For the class data below, we'd want to check that the scores are from separate students rather than treating repeated attempts as extra people.
 
