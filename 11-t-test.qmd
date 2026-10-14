@@ -50,53 +50,26 @@ We find ourselves in a more typical situation now. It's rare that we know the po
 
 ## From $z$ to $t$
 
-In Chapter 10, we used the class's sleep data to calculate a confidence interval and perform a $z$ test of whether the population mean differs from our null hypothesis reference value of eight hours (based on the common advice about getting enough sleep, not a fact we already knew about the population.) Both calculations relied on assuming a population standard deviation of 1.5 hours. I just made that standard deviation up.
-
-Here's the inferential process diagram I showed for the $z$ test a few chapters ago. In that example, we treated the original population's mean and standard deviation as known.
-
-::: {#fig-t-known-population}
-{{< interactive-figure tKnownPopulationDiagram makeInferentialDiagram options='{"preset":"z-test","maxWidth":"42rem","ariaLabel":"The z-test design: the reference mean μ₀ is specified, and the standard deviation σ is known. The treated sample supplies M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and known σ; treated sample supplies M and n; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
-
-The original population's mean and variability are known. The treated sample is our clue to the unknown treated population.
-:::
-
-Best not to just make things up, though, at least not when we don't have to. We had something all along that we could use instead: the *sample's* standard deviation. That lets us use basically the same hypothesis-testing logic without knowing (or needing to make up) the population standard deviation.
-
-@fig-t-estimated-population shows the same kind of diagram, but adjusted to show the revised logic. We no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
-
-We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The null hypothesis says that the population mean equals that reference value. It doesn't have to be a population fact we already know.
-
-::: {#fig-t-estimated-population}
-{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
-
-A diagram representing the logic of the single-sample $t$ test. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
-:::
-
-
-{{< include quizzes/10-confidence-intervals-design.qmd >}}
-
-### The $t$ statistic
-
-This slight change in logic means we need to tweak the math as well. The $z$ test compares our sample mean with the mean specified by the null hypothesis, $\mu_0$, in units of standard error:
-
-$$ z = \frac{M - \mu_0}{\sigma_M}, \qquad \sigma_M = \frac{\sigma}{\sqrt{n}} $$
-
-Again, the issue is that most often in real research we don't know $\sigma$, and so our $z$ test statistic is missing part of its denominator.
-
-So for the $t$ statistic, we use the sample standard deviation, $s$, to estimate the unknown population standard deviation, $\sigma$. We then divide $s$ by $\sqrt{n}$ to calculate our denominator, the **estimated standard error of the mean**, $s_M$. It's an estimate because it's calculated from $s$ rather than the true $\sigma$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics.)
+When I say it changes our math slightly, I mean very slightly. We just use the sample standard deviation, $s$, instead of a known population $\sigma$. That's all. We divide $s$ by $\sqrt{n}$ to calculate the denominator of the $t$ statistic, the **estimated standard error of the mean**, $s_M$. It's *estimated* because it's calculated from $s$ rather than the true $\sigma$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics; the estimated standard error gets a letter, $s$, because it's based on a sample statistic.)
 
 | | Population variability known | Population variability estimated |
 |:--|:--|:--|
 | Standard error | $\sigma_M = \dfrac{\sigma}{\sqrt{n}}$ | $s_M = \dfrac{s}{\sqrt{n}}$ |
 | Test statistic | $z = \dfrac{M - \mu_0}{\sigma_M}$ | $t = \dfrac{M - \mu_0}{s_M}$ |
 
-So this is the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we calculate it from an estimate of the population standard deviation. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
+So for example, back in Chapter 8 we performed a $z$ test to see whether radioactive spider bites seemed to have affected the reaction times of a sample of three people who we imagined had taken the [humanbenchmark.com reaction time test](https://www.humanbenchmark.com/tests/reactiontime). The calculations relied on assuming a population standard deviation of 50 milliseconds, but that wasn't really a fact we knew about the population; I just made it up.
+
+Best not to just make things up, though, at least not when we don't have to. We computed the sample mean; to use the $t$ statistic we also compute the sample's standard deviation. That lets us use basically the same hypothesis-testing logic without knowing (or needing to invent) the population standard deviation.
+
+So that's the fundamental difference between the $z$ statistic and the $t$ statistic. The numerator is the same. The denominator still describes the variability of the sampling distribution, but now we calculate it from an estimate of the population standard deviation. You might say the $t$ test is just the $z$ test in a different pair of pants. But the change has a consequence: the denominator now varies from sample to sample too, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
 
 ### Student's $t$
 
-The statistical ideas behind this were developed by William Sealy Gosset. Unlike many of the figures who developed the statistical procedures we still rely on today, Gosset wasn't an academic statistician. In fact, he spent his career working for the Guinness brewing company, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production. His work included experiments on which varieties of barley to grow, how best to cultivate them, and things like that. Guinness sent him to study for a year under pioneering statistician Karl Pearson, but Gosset realized that the data he was working with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Gosset might be working with just four farms, each growing one plot of each variety [@box1987guinness].
+The statistical ideas behind this were developed by William Sealy Gosset. Unlike many of the figures who developed the statistical procedures we still rely on today, Gosset wasn't an academic statistician. In fact, he spent his career working for the Guinness brewing company, eventually becoming Head Brewer. Around the turn of the 20th century, Gosset helped the company bring science and statistics to bear on questions of beer production. His work included experiments on which varieties of barley to grow, how best to cultivate them, and things like that.
 
-Gosset realized that a small experiment's results could look more convincing than they really were if a sample just happened to show little variability. To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Doing this, he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
+Guinness sent Gosset to study for a year under pioneering statistician Karl Pearson. There, Gosset discovered that the data he was working with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Gosset might be working with just four farms, each growing one plot of each variety [@box1987guinness]. He realized that a small experiment's results could look more convincing than they really were if a sample just happened to show little variability.
+
+To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Each sample would have not only a different mean, but also a different standard deviation. Doing this, he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
 
 So Gosset developed a way to judge mean differences that allowed for uncertainty in the sample's estimate of variability. He published his solution in 1908 under the pseudonym "Student," because Guinness didn't allow its scientists to publish under their real names [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
 
@@ -104,9 +77,7 @@ So Gosset developed a way to judge mean differences that allowed for uncertainty
 
 Unlike the single standard normal curve we used for $z$, the $t$ distribution gives us a different curve for each value of degrees of freedom. For a single-sample $t$ test, we choose the curve using $df=n-1$, the degrees of freedom from the sample variance in the denominator. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
 
-Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails.
-
-Why does the $t$ distribution have heavier tails than the standard normal distribution? Think back to the two hands of cards at the start of this chapter. Both had four cards and a mean of 8. Suppose we wanted to test whether the deck has the usual mean of 7 for a complete deck of playing cards. Both hands would give us the same numerator, $M-\mu_0=8-7=1$. But they'd give us different denominators:
+Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails. Why? Think back to the two hands of cards at the start of this chapter. Both had four cards and a mean of 8. Suppose we wanted to test whether the deck has the usual mean of 7 for a complete deck of playing cards. Both hands would give us the same numerator, $M-\mu_0=8-7=1$. But they'd give us different denominators:
 
 | | Sample A: 6, 7, 9, 10 | Sample B: 2, 5, 12, 13 |
 |:--|--:|--:|
@@ -114,7 +85,7 @@ Why does the $t$ distribution have heavier tails than the standard normal distri
 | Estimated standard error, $s_M=s/\sqrt{4}$ | 0.91 | 2.68 |
 | $t=(8-7)/s_M$ | 1.10 | 0.37 |
 
-If the deck's mean really is 7, both hands miss it by exactly the same amount. But sample A's smaller SD gives us a smaller denominator, making the same difference look almost three times as extreme.
+If the deck's mean really is 7, both hands miss it by exactly the same amount. But sample A's smaller standard deviation gives us a smaller denominator, making the same difference look almost three times as extreme.
 
 This is the problem with estimating standard deviation: an unusually small estimate can magnify an ordinary mean difference into a very large $t$ statistic. An unusually large estimate shrinks the statistic toward zero, but those effects don't balance out. Shrinking has a limit---zero---while magnification has no limit as the denominator approaches zero. Under normal sampling, the sample mean and standard deviation vary independently, so a small denominator doesn't come with a smaller mean error to compensate. Across repeated samples, we therefore get more extreme results relative to nonextreme, central results, producing the heavier tails of the distribution.^[Dividing by $n-1$ corrects the long-run downward bias in sample variance. It doesn't prevent individual samples from underestimating or overestimating population variability.]
 
@@ -179,7 +150,7 @@ Suppose we had a sample of $n = 60$. For a two-tailed $t$ test at $\alpha = .05$
 
 Let's work through an example hypothesis test using our new tool, the $t$ test. We'll use data from the [humanbenchmark.com reaction time test](https://www.humanbenchmark.com/tests/reactiontime) we've imagined giving to a sample of Spider-People in previous chapters. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
-In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds. I supplied a population standard deviation of $\sigma = 50$ milliseconds. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
+In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds for our null hypothesis. I supplied a population standard deviation of $\sigma = 50$ milliseconds to make the $z$-test work. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
@@ -188,6 +159,16 @@ We'll use a nondirectional alternative hypothesis: the population mean differs f
 $$ H_0: \mu = 284\text{ ms} $$
 
 $$ H_1: \mu \ne 284\text{ ms} $$
+
+@fig-t-estimated-population shows the same kind of diagram, but adjusted to show the revised logic. We no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
+
+We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The null hypothesis says that the population mean equals that reference value. It doesn't have to be a population fact we already know.
+
+::: {#fig-t-estimated-population}
+{{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
+
+A diagram representing the logic of the single-sample $t$ test. We still have a reference mean, but population variability is now unknown. The sample supplies $s$ as well as its mean and size.
+:::
 
 ### Step 2: Set the decision criteria
 
@@ -209,13 +190,13 @@ Here are the scores, in milliseconds:
 65 scores
 :::
 
-If you count them up, you'll find 65 scores, giving us the 64 degrees of freedom used above.
-
 ::: {#fig-class-rt-histogram}
 {{< interactive-figure classRtHistogram makeGraph options='{"type":"histogram","data":[296,282,299,263,287,335,233,318,405,321,339,284,336,267,346,286,299,255,310,320,359,284,325,253,301,250,426,258,332,339,382,390,289,324,255,285,311,274,380,294,279,326,303,349,269,260,283,312,239,159,216,197,350,334,251,255,322,240,283,307,312,265,283,326,270],"binWidth":20,"binStart":140,"binStop":440,"xDomain":[140,440],"xTicks":10,"labels":{"x":"Reaction Time (ms)","y":"Frequency"}}' fallback="Grouped histogram of class reaction times. The reference value for the test is 284 ms." >}}
 
 A grouped histogram, with a binwidth of 20ms, representing the 65 reaction times recorded for a class of students who took the humanbenchmark.com reaction time test.
 :::
+
+If you count them up, you'll find $n = 65$ scores, giving us the 64 degrees of freedom used above. If you add up all the values you get $\Sigma X = 19,382$. So the sample mean is $M = \frac{\Sigma X}{n} = \frac{19,382}{65} = 298.18$ ms.
 
 To calculate our sample standard deviation, we divide the sum of squared deviations from the sample mean by $n-1$ to get the sample variance, then take its square root to get $s$---exactly the procedure explored in Chapter 4. That gives us the following quantities:
 
