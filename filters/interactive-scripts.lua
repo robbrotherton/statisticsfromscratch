@@ -20,6 +20,10 @@ local manifest = {
   ["interactive-figure-tools"] = {
     file = "resources/js/interactive-figure.js"
   },
+  ["data-display"] = {
+    file = "resources/js/data-display.js",
+    deps = { "interactive-figure-tools" }
+  },
   ["bee-swarm-core"] = {
     file = "resources/js/bee-swarm-core.js"
   },
