@@ -40,7 +40,7 @@ We've introduced the general idea of null hypothesis significance testing in the
 
 We started the previous chapter by taking some samples from a full deck of cards. Since we knew the composition of the deck, we could figure out the population standard deviation, $\sigma$. Knowing $\sigma$ let us calculate the standard error of the mean, $\sigma_M$, for our confidence interval and the denominator of the corresponding $z$ test.
 
-Now let's take some samples from a new deck. But this isn't a regular, complete deck. I took some cards out. Which ones? I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples and think it through.
+Now let's take some samples from a new deck. But maybe this isn't a regular, complete deck. Maybe I took some cards out. Which ones? Maybe I didn't even look! So the characteristics of the population are now a mystery: we don't know $\mu$, or the true standard deviation, $\sigma$. What are we to do? Let's compare two potential samples and think it through.
 
 ::: {#quiz-t-sample-variability}
 {{< include quizzes/11-t-test-card-samples.qmd >}}
@@ -50,7 +50,17 @@ We find ourselves in a more typical situation now. It's rare that we know the po
 
 ## From $z$ to $t$
 
-When I say it changes our math slightly, I mean very slightly. We just use the sample standard deviation, $s$, instead of a known population $\sigma$. That's all. We divide $s$ by $\sqrt{n}$ to calculate the denominator of the $t$ statistic, which we call the **estimated standard error of the mean**, $s_M$. It's *estimated* because it's calculated from $s$ rather than the true $\sigma$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics; the estimated standard error gets a letter, $s$, because it's based on a sample statistic.)
+When I say it changes our math slightly, I mean very slightly. We just use the sample standard deviation, $s$, instead of a known population $\sigma$. That's all. We divide $s$ by $\sqrt{n}$ to calculate the denominator of the $t$ statistic, which we call the **estimated standard error of the mean**, $s_M$. 
+
+$$ s_M = \dfrac{s}{\sqrt{n}} $$ {#eq-estimated-standard-error}
+
+It's *estimated* because it's calculated from $s$ rather than the true $\sigma$. (You'll remember that Greek symbols are usually used to refer to population parameters and letters for sample statistics; the estimated standard error gets a letter, $s_M$, because it's based on a sample statistic.)
+
+Then we use that estimated standard error as the denominator of the $t$ statistic, just as we used the standard error in the denominator of the $z$ statistic.
+
+$$ t = \dfrac{M - \mu_0}{s_M} $$ {#eq-t-statistic}
+
+Here's a side-by-side comparison of the $z$ and $t$ statistics.
 
 | | Population variability known | Population variability estimated |
 |:--|:--|:--|
@@ -63,7 +73,7 @@ Best not to just make things up, though, at least not when we don't have to. We 
 
 So the numerator is the same. The denominator still describes the variability of the sampling distribution, but now we calculate it from an estimate of the population standard deviation. You might say the $t$ test is just the $z$ test in a different pair of pants.
 
-But the change has an important consequence. Hypothesis testing is about imagining the distribution of test statistics we would expect to see if the null hypothesis were true. In the context of the $z$ test, each sample's numerator would differ because of the different possible sample means, but the denominators were all fixed because of the known $\sigma$; this formed a normal distribution of $z$ statistics. But if we compute a $t$ statistic for each sample, both the numerator and the denominator vary from sample to sample, since each sample provides its own estimate of the population's variability. We need to account for that additional uncertainty when deciding how unusual a test statistic is.
+But the change has an important consequence. Hypothesis testing is about imagining the distribution of test statistics we would expect to see if the null hypothesis were true and we sampled repeatedly from the population it describes. In the context of the $z$ test, each sample's numerator would differ because of the different possible sample means, but the denominators would always be the same because of the known $\sigma$; this forms a normal distribution of $z$ statistics. But if we compute a $t$ statistic for each sample, both the numerator *and denominator* vary from sample to sample, since each sample provides its own estimate of the population's variability, in addition to the mean. We need to account for that additional uncertainty when figuring out the distribution of the $t$ statistics.
 
 ### Student's $t$
 
@@ -71,15 +81,17 @@ The statistical ideas behind this were developed by William Sealy Gosset. Unlike
 
 Guinness sent Gosset to study for a year under pioneering statistician Karl Pearson. There, Gosset discovered that the data he was working with at Guinness was often much smaller-scale than the big datasets Pearson had access to. Whereas Pearson could develop procedures based on datasets with thousands of observations, Gosset might be working with just four farms, each growing a different variety of barley [@box1987guinness]. He realized that a small experiment's results could look more convincing than they really were if a sample just happened to show little variability.
 
-To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Each sample would have not only a different mean, but also a different standard deviation. Doing this, he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
+To show this, Gosset did something like our little playing card demonstration at the start of the chapter. He wrote values (real heights and finger length measurements from an earlier dataset of 3,000 prisoners) on pieces of cardboard, shuffled them, and divided them into 750 samples of four [@student1908probable]. Each sample would have not only a different mean, but also a different standard deviation. The sample could be used to estimate the population standard deviation, but he was able to show that statistical procedures developed around large sample sizes and the normal curve do not work equally well with small samples and experiments that *can't* be repeated hundreds of times: "as we decrease the number of experiments, the value of the standard deviation found from the sample of experiments becomes itself subject to an increasing error, until judgments reached in this way may become altogether misleading" [@student1908probable, p. 2].
 
 So Gosset developed a way to judge mean differences that allowed for uncertainty in the sample's estimate of variability. He published his solution in 1908 under the pseudonym "Student," because Guinness didn't allow its scientists to publish under their real names [@box1987guinness]. Another statistician, Ronald Fisher (whose 1925 book gave us the .05 convention in Chapter 8), later rescaled the resulting statistic, named it $t$, and tabled it by degrees of freedom [@fisher1925statistical]. The name we use today credits both of them: Student's $t$.
 
 ## The $t$ distribution(s)
 
-Gosset's solution was to ditch the standard normal distribution and compare $t$ statistics with a different reference distribution: the **$t$ distribution**. Unlike the single standard normal curve we used for $z$, there's a different $t$ curve for each value of **degrees of freedom**. For a single-sample $t$ test, we use $df=n-1$, the degrees of freedom from the sample variance in the denominator. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
+The solution was to ditch the standard normal distribution and compare $t$ statistics with a different reference distribution: the **$t$ distribution**. Unlike the single standard normal curve we used for $z$, there's a different $t$ curve for each value of **degrees of freedom**. For a single-sample $t$ test, we use $df=n-1$, the degrees of freedom from the sample variance in the denominator. (Other kinds of $t$ tests can have different degrees of freedom, as we'll see in the next chapters.)
 
-Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails. Why? Partly, math. We're estimating the population standard deviation from the sample data; maybe we'll underestimate it, maybe we'll overestimate it. But because it contributes to the *denominator* of the $t$ statistic, the errors are not equally consequential. A too-small denominator inflates the statistic more than an equally too-large denominator shrinks it.
+<!-- include static figure showing dashed normal curve and a solid t curve with df = 10 (emulating Gosset's original figure). the curves should be clearly labeled. no other shading beneath the curve or anything like that #fig-t-comparison -->
+
+Compared with the standard normal curve, any given $t$ curve is more spread out: lower in the center and higher in the far tails. Why? Math. We're estimating the population standard deviation from the sample data; maybe we'll underestimate it, maybe we'll overestimate it. But the errors are not equally consequential. Because the estimated standard deviation is in the *denominator* of the $t$ statistic, underestimating it inflates the statistic (pushing it farther from zero) more than overestimating it by the same amount shrinks it.
 
 To illustrate, think back to the two hands of cards from @quiz-t-sample-variability. Both had four cards and a mean of 8. Now suppose I lied: I didn't actually mess with the deck. Both hands came from a full deck, with $\mu = 7$ and $\sigma = 3.74$. Both hands have the same numerator, $M-\mu_0 = 8-7 = 1$, but different denominators:
 
@@ -90,13 +102,15 @@ To illustrate, think back to the two hands of cards from @quiz-t-sample-variabil
 | Standard error | $\sigma_M=1.87$ | $s_M=1.08$ | $s_M=2.68$ |
 | Test statistic | $z=0.53$ | $t=0.93$ | $t=0.37$ |
 
-Both hands miss the true standard deviation by about the same amount, in opposite directions. But compared with the $z$ statistic, which used the true $\sigma$, sample A's underestimate inflates the statistic by almost 75%, while sample B's overestimate shrinks it by only about 30%.
+Both hands were wrong about the true standard deviation by about the same amount, in opposite directions. But compared with the $z$ statistic, which used the true $\sigma$, sample A's underestimate inflates the statistic by almost 75%, while sample B's overestimate shrinks it by only about 30%. In other words, making the denominator too small has a bigger effect than making it too large by the same amount.
 
-This mathematical lopsidedness is compounded by another factor. Underestimates are also the more common error. We saw in Chapter 4 that dividing $SS$ by $n-1$ makes the sample *variance* unbiased---correct on average. But the misses aren't evenly scattered around that average: more samples underestimate, balanced by fewer, larger overestimates. Since underestimates are both more common and more consequential, they push more $t$ statistics out into the tails than overestimates pull back toward the center.^[Under normal sampling, the sample mean and standard deviation vary independently, so a too-small denominator doesn't tend to come with a smaller numerator to compensate.]
+So estimating the standard deviation introduces extra uncertainty into the test statistic. Sometimes the estimate will be too large, pulling the statistic toward zero. Sometimes it will be too small, pushing the statistic farther from zero. But because of this mathematical lopsidedness, underestimating the denominator has a disproportionately large effect. The result is a distribution with heavier tails---more extreme values than we'd expect if the denominator were fixed at the true population standard deviation.[^variance-footnote]
 
-How much depends on sample size. The smaller the sample, the less reliable its standard deviation, and the more the distribution is pushed out into the tails. As degrees of freedom increase, the $t$ distribution approaches the standard normal curve.
+[^variance-footnote]: The mathematical lopsidedness is compounded by another factor: samples underestimate variability *more often* than overestimating it. We saw in Chapter 4 that dividing $SS$ by $n-1$ makes the sample *variance* unbiased---correct on average. But the errors aren't evenly scattered around the true value. More samples underestimate variance, balanced by fewer, larger overestimates. The sample standard deviation, derived by taking the square root of variance, also tends to underestimate $\sigma$. So underestimates are both more common and mathematically more influential in the ratio. Under normal sampling, the sample mean and standard deviation vary independently, so a too-small denominator doesn't tend to come with a smaller numerator to compensate.
 
-Gosset illustrated the tail problem with his theoretical curve for samples of ten. Compared to a normal curve with the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12].
+How much this changes the distribution depends on sample size. The smaller the sample, the less reliable its standard deviation, and the more the distribution is pushed out into the tails. As degrees of freedom increase, the $t$ distribution approaches the standard normal curve.
+
+<!-- Gosset illustrated the tail problem with his theoretical curve for samples of ten. Compared to a normal curve with the same standard deviation, his curve put more probability in the far tails. Using the normal curve could make an unusual-looking result seem much rarer than it really was [@student1908probable, p. 12]. -->
 
 @act-t-distribution compares $t$ curves of different degrees of freedom with the standard normal curve. Each shows the distribution of test statistics across repeated samples when the null hypothesis is true, assuming independent observations from a normal population.
 
