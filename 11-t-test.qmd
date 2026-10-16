@@ -183,19 +183,17 @@ Suppose we had a sample of $n = 60$, with $df = 59$. For a two-tailed $t$ test a
 
 Let's work through an example hypothesis test using our new tool, the $t$ test. We'll use data from the [humanbenchmark.com reaction time test](https://www.humanbenchmark.com/tests/reactiontime) we've imagined giving to a sample of Spider-People in previous chapters. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
-In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds for our null hypothesis. I supplied a population standard deviation of $\sigma = 50$ milliseconds to make the $z$-test work. But now let's not pretend to know that population standard deviation. We'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
+In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds for our null hypothesis. This time, rather than making up a value for $\sigma$, we'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
-We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value. (Like we said in Chapter 8, nondirectional hypotheses are generally the default, unless we have a specific reason to believe the effect will be in one direction only.)
+We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value. (Like I said in Chapter 8, nondirectional hypotheses are generally the default, unless we have a specific reason to believe the effect will be in one direction only.)
 
 $$ H_0: \mu = 284\text{ ms} $$
 
 $$ H_1: \mu \ne 284\text{ ms} $$
 
-@fig-t-estimated-population shows the same kind of diagram, but adjusted to show the revised logic. We no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
-
-We use a single-sample $t$ test to compare a population mean with a specified reference value when we don't know the population standard deviation. The null hypothesis says that the population mean equals that reference value. It doesn't have to be a population fact we already know.
+@fig-t-estimated-population shows the logic of the hypothesis test using the same kind of diagram as in Chapter 8, but adjusted to show the revised logic. Like the single-sample $z$ test, a single-sample $t$ test compares a population mean with a specified reference value. Unlike the $z$ test, we no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
 
 ::: {#fig-t-estimated-population}
 {{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
@@ -223,13 +221,7 @@ Here are the scores, in milliseconds:
 65 scores
 :::
 
-::: {#fig-class-rt-histogram}
-{{< interactive-figure classRtHistogram makeGraph options='{"type":"histogram","data":[296,282,299,263,287,335,233,318,405,321,339,284,336,267,346,286,299,255,310,320,359,284,325,253,301,250,426,258,332,339,382,390,289,324,255,285,311,274,380,294,279,326,303,349,269,260,283,312,239,159,216,197,350,334,251,255,322,240,283,307,312,265,283,326,270],"binWidth":20,"binStart":140,"binStop":440,"xDomain":[140,440],"xTicks":10,"labels":{"x":"Reaction Time (ms)","y":"Frequency"}}' fallback="Grouped histogram of class reaction times. The reference value for the test is 284 ms." >}}
-
-A grouped histogram, with a binwidth of 20ms, representing the 65 reaction times recorded for a class of students who took the humanbenchmark.com reaction time test.
-:::
-
-If you count them up, you'll find $n = 65$ scores, giving us the 64 degrees of freedom used above. If you add up all the values you get $\Sigma X = 19,382$. So the sample mean is $M = \frac{\Sigma X}{n} = \frac{19,382}{65} = 298.18$ ms.
+If you count them up, you'll find $n = 65$ scores, giving us the 64 degrees of freedom used above. If you add up all the values you get $\Sigma X = 19{,}382$. So the sample mean is $M = \frac{\Sigma X}{n} = \frac{19{,}382}{65} = 298.18$ ms.
 
 To calculate our sample standard deviation, we divide the sum of squared deviations from the sample mean by $n-1$ to get the sample variance, then take its square root to get $s$---exactly the procedure explored in Chapter 4. That gives us the following quantities:
 
@@ -268,13 +260,13 @@ We can use a version of Cohen's $d$ for the single-sample $t$ test, just as we d
 
 $$ d = \frac{M-\mu_0}{s} = \frac{298.18-284}{47.76} \approx 0.30 $$
 
-The numerator shows that the class mean is a little more than 14 milliseconds slower than the reference value of 284 ms. The denominator puts this raw difference in units of the standard deviation, estimated from the sample itself, for a Cohen's $d$ of about .30.
+The numerator shows that the class mean is a little more than 14 milliseconds slower than the reference value of 284 ms. The denominator puts this raw difference in units of the standard deviation, estimated from the sample itself, for a Cohen's $d$ of about 0.30.
 
 Interpreting this effect size is the same as before. It depends on context, expectations, and our judgment about what constitutes a practically important difference.
 
 #### Confidence interval
 
-Likewise, we can compute a confidence interval for our estimate of the population mean. Once again, we just tweak the formula to use the estimated standard error and the $t$ critical value for 64 degrees of freedom from the matching two-tailed test. Here $t$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t \approx 1.998$.
+Likewise, we can compute a confidence interval for the population mean. Once again, we just tweak the formula to use the estimated standard error and a $t$ critical value. Here $t$ is the positive critical value for our chosen confidence level and $df$, not the $t = 2.39$ we calculated from the data. For 95% confidence and $df = 64$, $t \approx 1.998$, the same value as our two-tailed test at $\alpha = .05$.
 
 $$ M \pm t \times s_M = 298.18 \pm 1.998(5.923) \approx [286.35,\ 310.02]\text{ ms} $$
 
@@ -320,17 +312,23 @@ Performing the analysis, computing the effect size and confidence interval, and 
 
 So what does it mean, that we rejected our null hypothesis here? Our test provides evidence that the population mean differs from the 284 ms benchmark, under the assumptions we've made. It doesn't tell us what caused the difference.
 
-We could be tempted to turn our reaction time findings into a headline, something like "study shows that studying statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group. Maybe a lot of people on <humanbenchmark.com> take the test a bunch of times and get faster with practice, so our class was just unpracticed at this task rather than slower in general. Differences in devices or browsers could also affect the measured times. Or maybe we're making a Type I error. Or maybe the skew in the distrubtion of reaction times (which humanbenchmark.com acknowledges, and I said we could ignore) is great enough to affect the results. This is a good lesson on why a "statistically significant" result doesn't by itself explain the difference or establish how widely it generalizes.
+We could be tempted to turn our reaction time findings into a headline, something like "study shows that studying statistics makes your brain work slower." But this class wasn't randomly assigned to study statistics, and the reference value isn't a randomized comparison group. Maybe a lot of people on humanbenchmark.com take the test a bunch of times and get faster with practice, so our class was just unpracticed at this task rather than slower in general. Differences in devices or browsers could also affect the measured times. Or maybe we're making a Type I error. This is a good lesson on why a "statistically significant" result doesn't by itself explain the difference or establish how widely it generalizes.
 
 ### Assumptions of the single-sample $t$ test
 
 Interpreting the outcome of a test fairly also depends on whether the assumptions of the test are reasonable. The exact $t$ reference distribution assumes independent observations from a normal population. With larger samples, the procedure can tolerate some departures from normality, but remember there is no automatic cutoff (at $n=30$ or anywhere else). Strong skew and extreme observations deserve attention, especially in small samples.
 
-The histogram of the data in @fig-class-rt-histogram looked a bit lumpy and uneven, but most scores form a central cluster with a few farther out on either side. The low score of 159 ms and high scores of 405 and 426 ms deserve a closer look. In a real analysis, we'd check for recording errors or problems completing the task, rather than discard scores just because they're unusual.
+::: {#fig-class-rt-histogram}
+{{< interactive-figure classRtHistogram makeGraph options='{"type":"histogram","data":[296,282,299,263,287,335,233,318,405,321,339,284,336,267,346,286,299,255,310,320,359,284,325,253,301,250,426,258,332,339,382,390,289,324,255,285,311,274,380,294,279,326,303,349,269,260,283,312,239,159,216,197,350,334,251,255,322,240,283,307,312,265,283,326,270],"binWidth":20,"binStart":140,"binStop":440,"xDomain":[140,440],"xTicks":10,"labels":{"x":"Reaction Time (ms)","y":"Frequency"}}' fallback="Grouped histogram of class reaction times. The reference value for the test is 284 ms." >}}
 
-A sample histogram doesn't establish the shape of its population. Still, with 65 observations and no pronounced skew visible here, the $t$ test is a reasonable choice for this practice analysis, assuming the observations are independent. That doesn't settle whether one class represents a broader population of students.
+A grouped histogram, with a bin width of 20 ms, representing the 65 reaction times recorded for a class of students who took the humanbenchmark.com reaction time test.
+:::
 
-Independence means that one person's score shouldn't depend on another person's score. Repeated attempts by the same person, for example, wouldn't usually count as independent observations. For the class data below, we'd want to check that the scores are from separate students rather than treating repeated attempts as extra people.
+The histogram of the data in @fig-class-rt-histogram looks a bit lumpy and uneven, but most scores form a central cluster with a few farther out on either side. The low score of 159 ms and high scores of 405 and 426 ms deserve a closer look. In a real analysis, we'd check for recording errors or problems completing the task, rather than discard scores just because they're unusual.
+
+A sample histogram doesn't establish the shape of its population. Still, with 65 observations and no pronounced skew visible here, the $t$ test is a reasonable choice for this practice analysis, assuming the observations are independent.
+
+Independence means that one person's score shouldn't depend on another person's score. Repeated attempts by the same person, for example, wouldn't usually count as independent observations. For the class data, we'd want to check that the scores are from separate students rather than treating repeated attempts as extra people.
 
 Random sampling helps us make an inference about the population we sampled from. A convenience sample, like a statistics class, leaves more doubt about which broader population it can reasonably tell us about. A larger sample doesn't automatically repair dependence or selection bias.
 
