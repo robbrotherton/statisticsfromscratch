@@ -181,19 +181,19 @@ Suppose we had a sample of $n = 60$, with $df = 59$. For a two-tailed $t$ test a
 
 ## A $t$ test, step by step
 
-Let's work through an example hypothesis test using our new tool, the $t$ test. We'll use data from the [humanbenchmark.com reaction time test](https://www.humanbenchmark.com/tests/reactiontime) we've imagined giving to a sample of Spider-People in previous chapters. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
+Let's work through an example hypothesis test using our new tool, the $t$ test. We'll use data from the humanbenchmark.com reaction time test we've imagined giving to a sample of Spider-People in previous chapters. But this time we'll use some actual data from students in a statistics class. (None of them were bitten by radioactive spiders, as far as I know.)
 
 In Chapter 8, we used the test's reported average of $\mu = 284$ milliseconds for our null hypothesis. This time, rather than making up a value for $\sigma$, we'll use the class's standard deviation to estimate the population standard deviation, calculate the standard error from it, and compare the mean with the same website reference of 284 milliseconds.
 
 ### Step 1: State the hypotheses
 
-We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the treated population mean is equal to the null reference value. (Like I said in Chapter 8, nondirectional hypotheses are generally the default, unless we have a specific reason to believe the effect will be in one direction only.)
+We'll use a nondirectional alternative hypothesis: the population mean differs from the reference in either direction. Correspondingly, the null hypothesis says that there is no difference; the population mean is equal to the reference value. (Like I said in Chapter 8, nondirectional hypotheses are generally the default, unless we have a specific reason to believe the effect will be in one direction only.)
 
 $$ H_0: \mu = 284\text{ ms} $$
 
 $$ H_1: \mu \ne 284\text{ ms} $$
 
-@fig-t-estimated-population shows the logic of the hypothesis test using the same kind of diagram as in Chapter 8, but adjusted to show the revised logic. Like the single-sample $z$ test, a single-sample $t$ test compares a population mean with a specified reference value. Unlike the $z$ test, we no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean.
+@fig-t-estimated-population shows the logic of the hypothesis test using the same kind of diagram as in Chapter 8, but adjusted to show the revised logic. Like the single-sample $z$ test, a single-sample $t$ test compares a population mean with a specified reference value. Unlike the $z$ test, we no longer claim knowledge of the reference population's standard deviation. Instead, we estimate it from the sample's standard deviation. The sample's mean and size are still known, and we can still use them to make an inference about the treated population's mean. Here the "treatment" is just being a student in a statistics class---not something anyone was assigned to, as we'll see when we interpret the results.
 
 ::: {#fig-t-estimated-population}
 {{< interactive-figure singleTInferentialDiagram makeInferentialDiagram options='{"preset":"single-t","maxWidth":"42rem","ariaLabel":"The same design for the single-sample t test: the reference mean μ₀ is specified, and σ is unknown. The treated sample now supplies s as well as M and n, from which we make an inference about the unknown mean μ of the treated population, and ask whether it is the same as μ₀."}' fallback="Reference population with specified μ₀ and unknown σ; treated sample supplies M, n, and s; inference to the treated population's unknown μ; does it have the same μ as the reference?" >}}
@@ -203,7 +203,7 @@ A diagram representing the logic of the single-sample $t$ test. We still have a 
 
 ### Step 2: Set the decision criteria
 
-We'll use $\alpha = .05$. With 65 scores, $df = 64$, so the critical values for this two-tailed test are approximately $\pm 1.998$. We reject the null if $t < -1.998$ or $t > 1.998$.
+We'll use $\alpha = .05$. With 65 scores, $df = 64$. Looking in the two-tailed .05 column of the $t$ table (@fig-t-table), as we did earlier, gives critical values of $\pm 1.998$. We reject the null if $t < -1.998$ or $t > 1.998$.
 
 ::: {#tbl-t-class-critical}
 {{< interactive-figure classRtCriticalTable makeTTable options='{"title":"Critical values for the class test","df":{"from":62,"to":66},"alphas":[0.1,0.05,0.025,0.01,0.005],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":64,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 62 through 66 degrees of freedom, highlighting the two-tailed .05 critical value of 1.998 at df = 64." >}}
@@ -243,9 +243,13 @@ $$ t = \frac{M-\mu_0}{s_M} = \frac{298.18-284}{5.923} = 2.39 $$
 
 ### Step 4: Make a decision
 
-The sample's $t$ statistic exceeds the upper critical value of 1.998, so we reject the null hypothesis.
+The sample's $t$ statistic exceeds the upper critical value of 1.998, so we reject the null hypothesis. The class's mean reaction time was significantly slower than the 284 ms null hypothesis reference.
 
+::: {#fig-t-class-decision}
 {{< interactive-figure classRtTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":64,"title":"Null distribution: df = 64","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":5,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.99773,"label":"−1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":1.99773,"label":"+1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.394714,"label":"t = 2.39","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null t distribution with 64 degrees of freedom. The two rejection regions lie beyond ±1.998; the observed t of 2.39 is in the right rejection region." >}}
+
+The observed $t = 2.39$ falls in the upper critical region of the null $t$ distribution with $df = 64$.
+:::
 
 The equivalent two-tailed $p$-value is approximately $.020$. As in Chapter 8, this includes outcomes at least as extreme in either direction. (Our critical-value table locates the critical region boundary, not this exact $p$-value; for that we usually use statistical software.)
 
@@ -302,9 +306,11 @@ The same factors affect power as before. Holding the others fixed, a larger true
 
 There's a fairly standard way of reporting a hypothesis test. Here's an example based on our class reaction time data:
 
-> A two-tailed single-sample $t$ test comparing the class reaction times ($M = 298.18$ ms, $SD = 47.76$ ms) with a reference of 284 ms was statistically significant, $t(64) = 2.39$, $p = .020$, $d = 0.30$. The estimated mean difference was 14.18 ms, with a 95% confidence interval of [2.35, 26.02] ms.
+> A two-tailed single-sample $t$ test comparing the class reaction times ($M = 298.18$ ms, $SD = 47.76$ ms) with a reference of 284 ms was statistically significant, $t(64) = 2.39$, $p < .05$, $d = 0.30$, 95% CI [286.35, 310.02] ms.
 
-There's a lot of information packed into this fairly short, dry, technical statement. You should report the kind of hypothesis test, the null reference, the descriptive statistics, the test statistic and its degrees of freedom in parentheses, the $p$-value, and the estimated magnitude and uncertainty.
+There's a lot of information packed into this fairly short, dry, technical statement. You should report the kind of hypothesis test, the null reference, the descriptive statistics, the test statistic and its degrees of freedom in parentheses, whether $p$ fell below $\alpha$, the effect size, and the confidence interval.[^exact-p]
+
+[^exact-p]: Statistical software would also give the exact $p$-value (about .020 here, as we saw in Step 4). If you have it, you can report it in place of $p < .05$: $t(64) = 2.39$, $p = .020$.
 
 ### Interpreting the results
 
