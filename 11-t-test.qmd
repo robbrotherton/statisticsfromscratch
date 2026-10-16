@@ -296,7 +296,27 @@ An illustration of statistical power. The rejection regions come from the null m
 
 [^t-power-approximation]: I'm simplifying the illustration and computation of power here by using a single $t$ curve shifted over to the alternative mean. Statistical software will give a slightly different answer than my approximation. For these hypothetical values, software gives power of about .655, compared with the figure's approximation of .654. The difference can be greater with smaller samples. This is because calculating power in the context of $t$ actually requires some slightly more nuanced math to account for the sample standard deviation varying from sample to sample, which changes the standard error calculated from it. This uses something called a noncentral $t$ distribution. That's beyond the scope of this book; for us, grasping the general logic is enough.
 
-Bear in mind that using the logic of statistical power in this way constitutes a retrospective power analysis. It can provide useful context to help interpret the results, but its use is limited. Using the observed mean to position this hypothetical alternative doesn't tell us the true population mean, or how convincing this completed study was. If we were planning a future study, we could specify a plausible effect size and figure out how many participants we would need to achieve the desired power.
+Bear in mind that plugging the mean we observed back into the power calculation is called *observed power*. It doesn't tell us the true population mean, or whether this result is trustworthy. In fact, in a test like this one, any result with $p \approx .02$ will come out with an observed power of about .65. Observed power isn't adding new information. it's just a restatement of the result we already have [@hoenig2001abuse].
+
+Like we said, power is more useful for planning. In this sample we saw a difference between the sample mean and null of around 14 ms. Say we would want to know if there was a difference of 10 ms or more, in either direction. The next time we run the study, we could plan the sample size around that difference to ensure a power of .80.
+
+We would use the sample-size equation from Chapter 9 (@eq-power-sample-size), with a couple of tweaks:
+
+$$ n \approx \frac{\left(z_{1-\alpha/2} + z_{1-\beta}\right)^2}{d^2} $$
+
+First, $d$ is the hypothesized difference in standard deviation units, so we need a value for the population standard deviation. We still don't know it, but our class gives us an estimate, $s = 47.76$ ms. (Using our data to estimate variability is fine; the problem with observed power was using it to choose the effect.) A difference of 10 ms is then $d = 10/47.76 \approx 0.209$. For a two-tailed test with $\alpha = .05$ and power of .80, we use the same values as in Chapter 9:
+
+$$ n \approx \frac{(1.96 + 0.84)^2}{0.209^2} \approx 179.5 $$
+
+Rounding up, that's 180 students.
+
+Second, we'll analyze the data with a $t$ test, so the critical value should come from the $t$ distribution with $df = n - 1$. That's slightly awkward, because $n$ is what we're trying to find. But we can use our first answer as a starting point. With around 180 students, $df \approx 179$, and the two-tailed .05 critical value is about 1.973 (beyond the last row of our table, but already very close to 1.96). Swapping that in for 1.96:
+
+$$ n \approx \frac{(1.973 + 0.84)^2}{0.209^2} \approx 181.2 $$
+
+That rounds up to 182. Statistical software, which does the exact calculation with the noncentral $t$ distribution I mentioned in a footnote above, gives 181. With a sample this large, using $t$ instead of $z$ barely changes the answer. It matters more for small samples, where the $t$ critical values are farther from the $z$ values.
+
+The bigger source of uncertainty is the standard deviation. If the population standard deviation is larger than our class's 47.76 ms, a study with 182 students would have less power than we planned for, so it can be worth recruiting a few extra.
 
 The same factors affect power as before. Holding the others fixed, a larger true mean difference, less population variability, or a larger sample makes an effect easier to detect. Increasing alpha also increases power, but at the cost of a greater chance of a Type I error.
 
