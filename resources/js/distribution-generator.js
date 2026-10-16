@@ -843,12 +843,26 @@ sfsDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   return legend;
 }
 
+// Distribution legends sit flush with the plot's right edge. Measure the
+// rendered labels when the SVG is in the page; before that, estimate from
+// label length as the marker legend does.
+sfsDistributionLegendWidth = (legend) => {
+  const node = legend.node();
+  if (node && node.isConnected) {
+    try {
+      const box = node.getBBox();
+      if (box.width > 0) return box.width;
+    } catch (error) { /* not rendered yet */ }
+  }
+  const labels = legend.selectAll("text").nodes().map((text) => text.textContent || "");
+  return (d3.max(labels, (label) => label.length) || 0) * 6.5 + 24;
+}
+
 sfsDistributionAddLegend = (svg, distributions, opts, width, margin) => {
   if (distributions.length < 2 || opts.legend === false) return;
 
   const legend = svg.append("g")
-    .attr("class", "dg-legend sfs-graph-legend")
-    .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
+    .attr("class", "dg-legend sfs-graph-legend");
 
   const items = legend.selectAll("g")
     .data(distributions)
@@ -868,6 +882,9 @@ sfsDistributionAddLegend = (svg, distributions, opts, width, margin) => {
     .attr("x", 24)
     .attr("y", 4)
     .text((d) => d.name || d.label);
+
+  legend.attr("transform",
+    `translate(${width - margin.right - sfsDistributionLegendWidth(legend)},${margin.top})`);
 }
 
 sfsDistributionEnsureStyles = () => {
@@ -3895,8 +3912,18 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const labelLayer = svg.append("g")
     .attr("class", "dpe-label-layer");
   const legendLayer = svg.append("g")
-    .attr("class", "dpe-legend sfs-graph-legend")
-    .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
+    .attr("class", "dpe-legend sfs-graph-legend");
+  // Widest legend so far: a label that gains a digit (df 9 -> 10) moves the
+  // legend left once, rather than jittering as the slider moves.
+  let legendWidth = 0;
+  function placeLegend() {
+    const current = sfsDistributionLegendWidth(legendLayer);
+    // Only hold on to measured widths; an estimate made before the SVG is in
+    // the page can overshoot.
+    if (rootNode.isConnected) legendWidth = Math.max(legendWidth, current);
+    const placed = rootNode.isConnected ? legendWidth : current;
+    legendLayer.attr("transform", `translate(${width - margin.right - placed},${margin.top})`);
+  }
 
   sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
   const intervalLayer = opts.confidenceInterval
@@ -4087,6 +4114,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
     }
   }
 
+  // Label the controlled curve with its target, as the slider readout does,
+  // so a tween's fractional df never shows in the legend either.
+  function legendLabel(dist) {
+    if (dist.role !== "controlled" || controlledBase.name) return dist.name || dist.label;
+    return sfsDistributionExplorerLabel(sfsDistributionSpec(distributionSourceFor(state), opts, dist.index), opts);
+  }
+
   function drawLegend(distributions) {
     if (distributions.length < 2 || opts.legend === false) {
       legendLayer.selectAll("*").remove();
@@ -4117,10 +4151,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
           .attr("stroke", (d) => d.stroke)
           .attr("stroke-dasharray", (d) => d.strokeDasharray);
         item.select("text")
-          .text((d) => d.name || d.label);
+          .text(legendLabel);
       });
 
     items.exit().remove();
+    placeLegend();
   }
 
   function renderPlot(source = renderedState, options = {}) {
@@ -4390,7 +4425,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
         y.range([height - margin.bottom, margin.top]);
         area.y0(y(0));
         xAxisLayer.attr("transform", `translate(0,${height - margin.bottom})`);
-        legendLayer.attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
+        legendWidth = 0;
         labelLayer.selectAll("*").remove();
         sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
         lastRender = null;
