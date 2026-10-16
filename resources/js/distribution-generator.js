@@ -3844,7 +3844,33 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const tailReadout = compareTails
     ? root.append("p").attr("class", "dpe-tail-readout sfs-readout-value") : null;
 
-  const strip = inlineSliders ? root.append("div").attr("class", "sp-factors") : null;
+  const strip = inlineSliders ? root.append("div").attr("class", "sp-factors dpe-factors") : null;
+  // The strip takes no space until a step reveals a slider, then slides open
+  // the way the controls drawer does (interactive-figure.js) before the row
+  // fades in (sfs-figures.css).
+  const STRIP_SLIDE_MS = 280;
+  let stripOpen = null;
+  let stripTimer = null;
+  function setStripOpen(open, animate) {
+    if (!strip || open === stripOpen) return;
+    const node = strip.node();
+    const first = stripOpen === null;
+    stripOpen = open;
+    window.clearTimeout(stripTimer);
+    Object.assign(node.style, { height: "", minHeight: "", marginTop: "", overflow: "", transition: "" });
+    node.classList.toggle("is-empty", !open);
+    if (!open || first || !animate || sfsDistributionPrefersReducedMotion() || !node.isConnected) return;
+
+    const target = node.getBoundingClientRect().height;
+    const marginTop = window.getComputedStyle(node).marginTop;
+    Object.assign(node.style, { height: "0px", minHeight: "0px", marginTop: "0px", overflow: "hidden" });
+    node.getBoundingClientRect();
+    node.style.transition = `height ${STRIP_SLIDE_MS}ms ease, margin-top ${STRIP_SLIDE_MS}ms ease`;
+    Object.assign(node.style, { height: `${target}px`, marginTop });
+    stripTimer = window.setTimeout(() => {
+      Object.assign(node.style, { height: "", minHeight: "", marginTop: "", overflow: "", transition: "" });
+    }, STRIP_SLIDE_MS + 40);
+  }
 
   function addFactor(parameter) {
     const source = parameter.source;
@@ -4057,6 +4083,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function syncControls(source = state, options = {}) {
     if (options.syncInputs !== false) syncInputValues();
+    let anyRowShown = false;
     parameters.forEach((parameter) => {
       const control = controlsByKey.get(parameter.key);
       if (!control) return;
@@ -4066,6 +4093,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
         return;
       }
       const shown = shownControls.includes(parameter.key);
+      if (shown) anyRowShown = true;
       control.row.hidden = !shown;
       control.input.disabled = !shown;
       const fill = (Number(control.input.value) - parameter.min) / (parameter.max - parameter.min || 1);
@@ -4079,6 +4107,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
         ? window.interactiveFigure.inlineMath(tex)
         : document.createTextNode(tex));
     });
+    setStripOpen(anyRowShown, options.animateStrip === true);
   }
 
   function drawAxes(plot) {
@@ -4353,7 +4382,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     if (inlineSliders && action["show-controls"] !== undefined) {
       shownControls = [].concat(action["show-controls"]);
-      syncControls(renderedState, { syncInputs: false });
+      syncControls(renderedState, { syncInputs: false, animateStrip: animate });
     }
 
     if (context && typeof context.setControlsOpen === "function") {
