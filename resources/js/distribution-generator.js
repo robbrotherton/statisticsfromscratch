@@ -3821,6 +3821,9 @@ makeDistributionParameterExplorer = function(opts = {}) {
   // distribution's cutoffs to keep its tail area constant.
   const tailCutoff = sfsDistributionFiniteNumber(opts.tailComparison, NaN);
   const compareTails = Number.isFinite(tailCutoff) && tailCutoff > 0;
+  // A tutorial can show the bare curves first and reveal the tails with a
+  // "show-tails" step action.
+  let tailsShown = compareTails && opts.showTails !== false;
   const tailReadout = compareTails
     ? root.append("p").attr("class", "dpe-tail-readout sfs-readout-value") : null;
 
@@ -3955,7 +3958,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: dist,
       data: sfsDistributionCurveData(dist, domain, points)
     }));
-    const shadeOptions = compareTails ? Object.assign({}, opts, {
+    const shadeOptions = tailsShown ? Object.assign({}, opts, {
       shade: distributions.flatMap((dist) => [
         { distribution: dist.key, to: -tailCutoff, color: dist.color, opacity: 0.24 },
         { distribution: dist.key, from: tailCutoff, color: dist.color, opacity: 0.24 }
@@ -4135,11 +4138,15 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     if (compareTails) {
       tailMarkers.attr("x1", (d) => x(d)).attr("x2", (d) => x(d))
-        .attr("y1", y(0)).attr("y2", margin.top);
+        .attr("y1", y(0)).attr("y2", margin.top)
+        .style("visibility", tailsShown ? null : "hidden");
       const summary = `Beyond ±${tailCutoff}: ${plot.tailAreas.map((item) =>
         `${item.label}: ${d3.format(".1%")(item.probability)}`).join(" · ")}`;
-      tailReadout.text(summary);
-      const description = `${opts.ariaLabel || "Interactive distribution comparison"}. ${summary}. Shaded tails continue beyond the plotted range.`;
+      // Hidden rather than removed, so revealing the tails doesn't shift the plot.
+      tailReadout.text(summary).style("visibility", tailsShown ? null : "hidden");
+      const label = opts.ariaLabel || "Interactive distribution comparison";
+      const description = tailsShown
+        ? `${label}. ${summary}. Shaded tails continue beyond the plotted range.` : label;
       svg.attr("aria-label", description).select("title").text(description);
     }
 
@@ -4290,7 +4297,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     let changed = false;
     Object.entries(action || {}).forEach(([key, value]) => {
       const actionKey = sfsDistributionNormalizeKey(key);
-      if (["animate", "duration", "controls", "controls-open", "show-controls"].includes(actionKey)) return;
+      if (["animate", "duration", "controls", "controls-open", "show-controls", "show-tails"].includes(actionKey)) return;
       if (actionKey === "parameters" && value && typeof value === "object") {
         changed = applyActionEntries(value) || changed;
         return;
@@ -4319,7 +4326,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
       if (controlsOpen !== undefined) context.setControlsOpen(sfsDistributionBoolean(controlsOpen, true), animate);
     }
 
+    const showTails = action["show-tails"] === undefined
+      ? tailsShown : compareTails && sfsDistributionBoolean(action["show-tails"], true);
+    const tailsChanged = showTails !== tailsShown;
+    tailsShown = showTails;
+
     if (applyActionEntries(action)) update(true, { animate, duration });
+    else if (tailsChanged) update(true, { animate: false });
   }
 
   controlsByKey.forEach((control) => {
@@ -4364,16 +4377,20 @@ makeDistributionParameterExplorer = function(opts = {}) {
       },
       dispose: stopTween
     });
-    if (opts.confidenceInterval) window.interactiveFigure.observeResponsiveLayout({
+    // Redraw at the measured width, as the static graphs do, so axis text keeps
+    // its size on a phone instead of shrinking with a fixed viewBox.
+    window.interactiveFigure.observeResponsiveLayout({
       root: rootNode, container: chartWrap.node(), minimumWidth: 280, maximumWidth: 1000,
       onLayout(layout) {
         width = layout.width;
-        height = Math.max(300, Math.min(360, width * 0.55));
+        height = opts.confidenceInterval
+          ? Math.max(300, Math.min(360, width * 0.55)) : Math.max(240, width / aspectRatio);
         svg.attr("viewBox", [0, 0, width, height]);
         x.range([margin.left, width - margin.right]);
         y.range([height - margin.bottom, margin.top]);
         area.y0(y(0));
         xAxisLayer.attr("transform", `translate(0,${height - margin.bottom})`);
+        legendLayer.attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
         labelLayer.selectAll("*").remove();
         sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
         lastRender = null;

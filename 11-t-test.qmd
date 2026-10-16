@@ -91,16 +91,21 @@ The solution was to ditch the standard normal distribution and compare $t$ stati
 
 Compared with the standard normal curve, the $t$ curve is more spread out: lower in the center and higher in the far tails.
 
+::: {#fig-t-comparison}
+{{< interactive-figure tNormalComparison makeDistributionGraph options='{"distributions":[{"type":"normal","key":"normal-reference","name":"Normal","color":"var(--sfs-neutral-color, #7b818a)","strokeWidth":2,"strokeDasharray":"7 5","opacity":0.95},{"type":"t","df":3,"key":"t-df-3","name":"t(df = 3)","color":"var(--sfs-null-color, currentColor)"}],"xDomain":[-5,5],"yDomain":[0,0.45],"xTickValues":[-4,-2,0,2,4],"yTicks":4,"labels":{"x":"z or t score","y":"Density"},"animate":true,"ariaLabel":"The standard normal curve, dashed, compared with a t distribution with 3 degrees of freedom, solid. The t curve is lower in the center and higher in both far tails."}' fallback="The standard normal curve compared with a t distribution with 3 degrees of freedom. The t curve is lower in the center and higher in both far tails." >}}
+
+<!-- DRAFT caption: Rob to write. Make clear this is one t curve (samples of four, df = 3), not the t distribution. -->
+The standard normal curve and the $t$ distribution for samples of four ($df = 3$).
+:::
+
 Why? Math, basically. The $t$ statistic is a ratio. Dividing by a denominator that is too small inflates the ratio (pushing $t$ farther from zero) more than a denominator equally too big shrinks it.
 
 To illustrate, think back to the two hands of cards from @quiz-t-sample-variability. Both had four cards and a mean of 8. Now suppose I lied: I didn't actually mess with the deck. Both hands came from a full deck, with $\mu = 7$ and $\sigma = 3.74$. Both hands have the same numerator, $M-\mu_0 = 8-7 = 1$, but different denominators:
 
 | | Known $\sigma$ | Sample A: 6, 7, 8, 11 | Sample B: 2, 5, 12, 13 |
 |:--|--:|--:|--:|
-| Standard deviation | $\sigma=3.74$ | $s=2.16$ | $s=5.35$ |
-| Error in standard deviation | | 1.58 too small | 1.61 too large |
-| Standard error | $\sigma_M=1.87$ | $s_M=1.08$ | $s_M=2.68$ |
-| Test statistic | $z=0.53$ | $t=0.93$ | $t=0.37$ |
+| Standard deviation | $\sigma=3.74$ | $s=2.16 \, (-1.58)$ | $s=5.35 \, (+1.61)$ |
+| Test statistic | $z=0.53$ | $t=0.93 \, (+74\%)$ | $t=0.37 \, (-30\%)$ |
 
 Both hands were wrong about the true standard deviation by about the same amount, in opposite directions. But compared with the $z$ statistic, which used the true $\sigma$, sample A's underestimate inflates the statistic by almost 75%, while sample B's overestimate shrinks it by only about 30%. In other words, making the denominator too small has a bigger effect than making it too large by the same amount.
 
@@ -119,19 +124,32 @@ Gosset illustrated the tail problem with his theoretical curve for samples of te
 ::::: {#act-t-distribution .callout-tip .interactive}
 ## Explore the $t$ distribution
 
-{{< interactive-figure tDistributionDfExplorer makeTDistributionDfExplorer options='{"df":3,"inlineSliders":true,"tailComparison":1.96,"xTickValues":[-4,-1.96,0,1.96,4],"color":"var(--sfs-null-color, currentColor)"}' fallback="Interactive comparison of t and standard normal distributions, with fixed boundaries at −1.96 and +1.96. About 14.5% of t statistics with df = 3 fall beyond these boundaries, compared with 5% of standard normal scores." >}}
+{{< interactive-figure tDistributionDfExplorer makeTDistributionDfExplorer options='{"df":9,"inlineSliders":true,"tailComparison":1.96,"showTails":false,"xTickValues":[-4,-1.96,0,1.96,4],"color":"var(--sfs-null-color, currentColor)"}' fallback="Interactive comparison of t and standard normal distributions, with fixed boundaries at −1.96 and +1.96. About 8.2% of t statistics with df = 9 fall beyond these boundaries, compared with 5% of standard normal scores." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Four observations: df = 3" data-action='{"df":3,"animate":false,"show-controls":[]}'}
-Our hands of four cards and Gosset's groups of four have $df=3$. The shaded tails lie beyond $\pm1.96$, our familiar normal cutoffs. The normal curve puts 5% of its probability there, but this $t$ curve puts about 14.5% there. If we used the normal cutoff for these $t$ statistics, we'd reject a true null hypothesis much more often than our intended 5%.
+::: {.tutorial-step data-title="Ten observations: df = 9" data-action='{"df":9,"show-tails":false,"animate":false,"show-controls":[]}'}
+<!-- DRAFT step copy, assembled from the old steps: Rob to rewrite -->
+Here's the $t$ curve for samples of ten, $df = 9$, with the standard normal curve for comparison. Look at the far tails, where the $t$ curve sits above the normal curve.
 :::
 
-::: {.tutorial-step data-title="Ten observations: df = 9" data-action='{"df":9,"animate":true,"show-controls":[]}'}
-Now increase the sample size to ten, the size Gosset used for his theoretical comparison. More observations make the estimate of population standard deviation more reliable. The tails come down, but about 8.2% still lies beyond $\pm1.96$. That's closer to 5%, but we'd still reject a true null too often if we used the normal cutoff.
+::: {.tutorial-step data-title="Shading the tails" data-action='{"df":9,"show-tails":true,"animate":false,"show-controls":[]}'}
+<!-- DRAFT step copy, assembled from the old steps: Rob to rewrite -->
+The shaded tails lie beyond $\pm1.96$, our familiar normal cutoffs. The normal curve puts 5% of its probability there, but this $t$ curve puts about 8.2% there. If we used the normal cutoff for these $t$ statistics, we'd reject a true null hypothesis more often than our intended 5%.
 :::
 
-::: {.tutorial-step data-title="Thirty-one observations: df = 30" data-action='{"df":30,"animate":true,"show-controls":["df"]}'}
-At $df=30$, we have 31 observations. About 5.9% lies beyond $\pm1.96$, so the difference is smaller again. Use the control to explore. Try $df=1$ or 2: with only two or three observations, the estimate of population standard deviation is especially uncertain. Then return to higher degrees of freedom and watch the curve approach the normal curve.
+::: {.tutorial-step data-title="Four observations: df = 3" data-action='{"df":3,"show-tails":true,"animate":true,"show-controls":[]}'}
+<!-- DRAFT step copy, assembled from the old steps: Rob to rewrite -->
+Our hands of four cards and Gosset's groups of four have $df=3$. With fewer observations, the estimate of population standard deviation is less reliable, and about 14.5% lies beyond $\pm1.96$. We'd reject a true null hypothesis much more often than our intended 5%.
+:::
+
+::: {.tutorial-step data-title="Thirty-one observations: df = 30" data-action='{"df":30,"show-tails":true,"animate":true,"show-controls":[]}'}
+<!-- DRAFT step copy, assembled from the old steps: Rob to rewrite -->
+At $df=30$, we have 31 observations. More observations make the estimate of population standard deviation more reliable. About 5.9% lies beyond $\pm1.96$, so the difference is smaller again, but we'd still reject a true null a little too often if we used the normal cutoff.
+:::
+
+::: {.tutorial-step data-title="Explore" data-action='{"show-tails":true,"show-controls":["df"]}'}
+<!-- DRAFT step copy, assembled from the old steps: Rob to rewrite -->
+Use the control to explore. Try $df=1$ or 2: with only two or three observations, the estimate of population standard deviation is especially uncertain. Then return to higher degrees of freedom and watch the curve approach the normal curve.
 :::
 ::::
 :::::
