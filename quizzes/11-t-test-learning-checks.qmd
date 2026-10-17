@@ -1,122 +1,144 @@
 ```{.quiz-yaml}
 id: 11_t_test_learning_checks
-title: >
-  Learning Checks
+title: Learning Checks
 questions:
-  - id: sample_size_power_t
-    type: true-false
-    prompt: >
-      Holding the true mean difference, population variability, and alpha fixed,
-      increasing sample size makes an effect more likely to be detected.
-    answer: true
-    explanation: >
-      Larger samples tend to reduce the estimated standard error.
-
-  - id: t_vs_z
+  - id: estimated_sd_reference_curve
     type: free-response
+    checkLabel: Compare your answer
+    answerLabel: Example answer
     prompt: >
-      What are the differences between the $t$ distribution and the $z$ distribution?
+      In a single-sample test, why can't we simply replace the unknown
+      population standard deviation with the sample standard deviation and
+      keep using the usual $z$ cutoffs? Why does the problem become smaller
+      with larger samples?
     answer: >
-      The $z$ distribution is a single standard normal distribution. The $t$
-      distribution is a family of distributions that depends on degrees of freedom,
-      with heavier tails for small samples and an increasingly normal shape as $df$
-      grows.
-    explanation: >
-      The $t$ test uses estimated standard error because the population standard
-      deviation is unknown.
+      The sample standard deviation varies from sample to sample, so the
+      denominator of the test statistic varies too. A sample can underestimate
+      population variability and make its test statistic look unusually large
+      in either direction. Under the normal-population model, the $t$
+      distribution accounts for the extra extreme statistics with heavier
+      tails. We need cutoffs farther from zero to keep the same alpha. Larger
+      samples estimate population variability more reliably, so the $t$ curve
+      and its cutoffs approach the standard normal ones.
 
-  - id: reported_t_result
-    type: multiple-choice
+  - id: calculate_single_sample_t
+    type: free-response
+    checkLabel: Compare your answer
+    answerLabel: Example answer
     prompt: >
-      The results of a hypothesis test are reported as $t(21) = 2.38, p < .05$. What
-      does the 21 represent?
-    options:
-      - text: >
-          Degrees of freedom
-        correct: true
-      - text: >
-          Sample mean
-      - text: >
-          Sample size exactly
-      - text: >
-          The $p$-value
+      An independent random sample of 16 scores from a normally distributed
+      population has $M = 46$ and $s = 8$. Test $H_0: \mu = 50$ against a
+      two-tailed alternative at $\alpha = .05$. Calculate the estimated
+      standard error, $t$, and degrees of freedom, then state your decision.
+      The critical values for $df = 15$ are $\pm 2.131$. Show your working.
+    answer: >
+      The estimated standard error is $s_M = 8 / \sqrt{16} = 2$.
+      Then $t = (46 - 50) / 2 = -2$, with $df = 16 - 1 = 15$.
+      Since $-2$ lies between $-2.131$ and $+2.131$, we fail to reject
+      the null hypothesis. The sample mean is below 50, but the difference
+      isn't statistically significant at $.05$.
     explanation: >
-      The value in parentheses after $t$ is the degrees of freedom.
+      The negative sign tells us the direction of the difference; it doesn't
+      by itself determine significance. Using the familiar $z$ cutoff of
+      $-1.96$ would give the wrong decision here. Failing to reject doesn't
+      establish that the population mean is exactly 50.
 
   - id: reported_t_sample_size
     type: numeric
     prompt: >
-      For that same reported result from a single-sample $t$ test,
-      $t(21) = 2.38, p < .05$: how many people were in the sample?
+      A single-sample $t$ test is reported as $t(21) = 2.38, p < .05$.
+      How many people were in the sample?
     hint: >
       For a single-sample $t$ test, $df = n - 1$.
     answer: 22
     tolerance: 0
     explanation: >
-      Degrees of freedom for a single-sample $t$ test is $n - 1$, so $n = 21 + 1
-      = 22$. And since $p < .05$, the statistical decision was to reject the
-      null hypothesis.
+      Degrees of freedom for a single-sample $t$ test is $n - 1$, so $n = 21 + 1 = 22$.
 
-  - id: expected_t_null
-    type: numeric
-    prompt: >
-      Under the null hypothesis, what value is the $t$ distribution centered on?
-    hint: >
-      If the population mean equals the null reference, should positive or
-      negative deviations from that reference be more likely under the model?
-    answer: 0
-    tolerance: 0
-    explanation: >
-      The null $t$ distribution is symmetric around zero. Individual samples
-      usually give a nonzero $t$; being centered on zero doesn't mean every
-      sample mean equals the null reference.
-
-  - id: significant_t_factors
+  - id: interpret_cohens_d_units
     type: multiple-choice
     prompt: >
-      Holding sample size and the decision criterion fixed, which combination
-      tends to give the largest absolute $t$ statistic? Treat a large mean
-      difference as one far from the null reference in either direction.
+      A single-sample test gives $t(399) = 4.00$, $p < .001$, and $d = 0.20$.
+      What does $d = 0.20$ tell us about the observed mean difference?
     options:
-      - text: >
-          Large mean difference and small sample variability
+      - text: It is 0.20 sample standard deviations above the null reference.
         correct: true
-      - text: >
-          Small mean difference and large sample variability
-      - text: >
-          Small mean difference and small sample variability
-      - text: >
-          Large mean difference and large sample variability
+      - text: It is 0.20 estimated standard errors above the null reference.
+      - text: It is 0.20 points above the null reference on the original scale.
     explanation: >
-      The $t$ statistic is a ratio: the mean difference is the numerator, and
-      the variability-based estimated standard error is the denominator. A big
-      absolute numerator and a small denominator give the largest absolute $t$.
+      Cohen's $d$ divides the mean difference by $s$; $t$ divides it by the
+      estimated standard error. They use different units. A statistically
+      significant result doesn't by itself tell us whether the difference
+      is practically important.
 
-  - id: sd_power_t
-    type: true-false
-    prompt: >
-      Holding the true mean difference, sample size, and alpha fixed, greater
-      population variability makes an effect less likely to be detected.
-    answer: true
-    explanation: >
-      Greater population variability means more sampling variability. The
-      same true mean difference is harder to distinguish from sampling error,
-      reducing power.
-
-  - id: mean_ci_decision
+  - id: matching_ci_includes_null
     type: multiple-choice
     prompt: >
-      The class's 95% confidence interval for the population mean is
-      [286.35, 310.02] ms. What does this imply for the two-tailed
-      $t$ test against 284 ms at $\alpha = .05$, using the same data and assumptions?
+      A study reports a 95% $t$ confidence interval for the population mean
+      of [46, 54]. For the matching two-tailed test of $H_0: \mu = 50$ at
+      $\alpha = .05$, using the same data and assumptions, what is the decision?
     options:
-      - text: Reject the null hypothesis, because the interval excludes 284 ms.
+      - text: Fail to reject, because the interval includes 50.
         correct: true
-      - text: Fail to reject the null hypothesis, because the interval excludes zero.
-      - text: There is a 95% probability that the null hypothesis is false.
-      - text: Studying statistics caused slower reaction times.
+      - text: Reject, because the interval excludes zero.
+      - text: Reject, because the interval includes values other than 50.
     explanation: >
-      The interval excludes the null reference value of 284 ms, agreeing with
-      the two-tailed test's rejection at .05. The interval doesn't assign a
-      probability to the null hypothesis or establish what caused the difference.
+      We compare the interval with the proposed null mean, which is 50 here.
+      Including 50 agrees with failing to reject in the matching two-tailed
+      test. It doesn't prove that 50 is the true population mean.
+
+  - id: repeated_attempts_independence
+    type: multiple-choice
+    prompt: >
+      A researcher records ten reaction-time attempts from each of six students
+      and analyzes all 60 attempts as independent observations in a
+      single-sample $t$ test. Which assumption is most directly in doubt?
+    options:
+      - text: Independence of observations.
+        correct: true
+      - text: A normally distributed population.
+      - text: Random selection from the population.
+    explanation: >
+      Attempts by the same person are likely to be related, so 60 attempts
+      don't provide 60 independent observations. A roughly normal-looking
+      histogram wouldn't resolve that problem. We would need an analysis
+      that respects which attempts came from the same student.
+
+  - id: planning_sd_underestimated
+    type: multiple-choice
+    prompt: >
+      A researcher plans a study to detect a true difference of 10 ms, using
+      an estimated population SD of 48 ms. The sample size is chosen to aim
+      for power of .80. If the true SD is actually 60 ms, with the true
+      difference, sample size, and alpha unchanged, how will power compare
+      with the planned value?
+    options:
+      - text: Lower.
+        correct: true
+      - text: About the same.
+      - text: Higher.
+    explanation: >
+      Greater population variability makes the same true difference harder
+      to distinguish from sampling error. A sample-size calculation depends
+      on its planning assumptions; it doesn't guarantee .80 power if the
+      population SD was underestimated.
+
+  - id: observed_power_information
+    type: multiple-choice
+    prompt: >
+      A researcher plugs the observed mean difference into a power calculation
+      after completing a study. The resulting observed power is .65. What
+      does this tell us about the result beyond its $p$-value?
+    options:
+      - text: It adds no independent information about the result.
+        correct: true
+      - text: It gives a 65% probability that the alternative hypothesis is true.
+      - text: It gives a 65% probability that a repeat study will be significant.
+    explanation: >
+      Observed power reuses the effect found in the same data; it doesn't
+      establish the true population effect. For this kind of test, with
+      sample size and alpha fixed, it restates information already in the
+      $p$-value. Planning is more useful when we specify a difference worth
+      detecting and state our assumptions about variability before
+      collecting the new data.
 ```
