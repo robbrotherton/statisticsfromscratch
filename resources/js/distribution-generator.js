@@ -843,12 +843,26 @@ sfsDistributionAddMarkerLegend = (svg, markerItems, opts, width, margin) => {
   return legend;
 }
 
+// Distribution legends sit flush with the plot's right edge. Measure the
+// rendered labels when the SVG is in the page; before that, estimate from
+// label length as the marker legend does.
+sfsDistributionLegendWidth = (legend) => {
+  const node = legend.node();
+  if (node && node.isConnected) {
+    try {
+      const box = node.getBBox();
+      if (box.width > 0) return box.width;
+    } catch (error) { /* not rendered yet */ }
+  }
+  const labels = legend.selectAll("text").nodes().map((text) => text.textContent || "");
+  return (d3.max(labels, (label) => label.length) || 0) * 6.5 + 24;
+}
+
 sfsDistributionAddLegend = (svg, distributions, opts, width, margin) => {
   if (distributions.length < 2 || opts.legend === false) return;
 
   const legend = svg.append("g")
-    .attr("class", "dg-legend sfs-graph-legend")
-    .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
+    .attr("class", "dg-legend sfs-graph-legend");
 
   const items = legend.selectAll("g")
     .data(distributions)
@@ -868,6 +882,9 @@ sfsDistributionAddLegend = (svg, distributions, opts, width, margin) => {
     .attr("x", 24)
     .attr("y", 4)
     .text((d) => d.name || d.label);
+
+  legend.attr("transform",
+    `translate(${width - margin.right - sfsDistributionLegendWidth(legend)},${margin.top})`);
 }
 
 sfsDistributionEnsureStyles = () => {
@@ -3821,10 +3838,39 @@ makeDistributionParameterExplorer = function(opts = {}) {
   // distribution's cutoffs to keep its tail area constant.
   const tailCutoff = sfsDistributionFiniteNumber(opts.tailComparison, NaN);
   const compareTails = Number.isFinite(tailCutoff) && tailCutoff > 0;
+  // A tutorial can show the bare curves first and reveal the tails with a
+  // "show-tails" step action.
+  let tailsShown = compareTails && opts.showTails !== false;
   const tailReadout = compareTails
     ? root.append("p").attr("class", "dpe-tail-readout sfs-readout-value") : null;
 
-  const strip = inlineSliders ? root.append("div").attr("class", "sp-factors") : null;
+  const strip = inlineSliders ? root.append("div").attr("class", "sp-factors dpe-factors") : null;
+  // The strip takes no space until a step reveals a slider, then slides open
+  // the way the controls drawer does (interactive-figure.js) before the row
+  // fades in (sfs-figures.css).
+  const STRIP_SLIDE_MS = 280;
+  let stripOpen = null;
+  let stripTimer = null;
+  function setStripOpen(open, animate) {
+    if (!strip || open === stripOpen) return;
+    const node = strip.node();
+    const first = stripOpen === null;
+    stripOpen = open;
+    window.clearTimeout(stripTimer);
+    Object.assign(node.style, { height: "", minHeight: "", marginTop: "", overflow: "", transition: "" });
+    node.classList.toggle("is-empty", !open);
+    if (!open || first || !animate || sfsDistributionPrefersReducedMotion() || !node.isConnected) return;
+
+    const target = node.getBoundingClientRect().height;
+    const marginTop = window.getComputedStyle(node).marginTop;
+    Object.assign(node.style, { height: "0px", minHeight: "0px", marginTop: "0px", overflow: "hidden" });
+    node.getBoundingClientRect();
+    node.style.transition = `height ${STRIP_SLIDE_MS}ms ease, margin-top ${STRIP_SLIDE_MS}ms ease`;
+    Object.assign(node.style, { height: `${target}px`, marginTop });
+    stripTimer = window.setTimeout(() => {
+      Object.assign(node.style, { height: "", minHeight: "", marginTop: "", overflow: "", transition: "" });
+    }, STRIP_SLIDE_MS + 40);
+  }
 
   function addFactor(parameter) {
     const source = parameter.source;
@@ -3892,8 +3938,18 @@ makeDistributionParameterExplorer = function(opts = {}) {
   const labelLayer = svg.append("g")
     .attr("class", "dpe-label-layer");
   const legendLayer = svg.append("g")
-    .attr("class", "dpe-legend sfs-graph-legend")
-    .attr("transform", `translate(${width - margin.right - 130},${margin.top})`);
+    .attr("class", "dpe-legend sfs-graph-legend");
+  // Widest legend so far: a label that gains a digit (df 9 -> 10) moves the
+  // legend left once, rather than jittering as the slider moves.
+  let legendWidth = 0;
+  function placeLegend() {
+    const current = sfsDistributionLegendWidth(legendLayer);
+    // Only hold on to measured widths; an estimate made before the SVG is in
+    // the page can overshoot.
+    if (rootNode.isConnected) legendWidth = Math.max(legendWidth, current);
+    const placed = rootNode.isConnected ? legendWidth : current;
+    legendLayer.attr("transform", `translate(${width - margin.right - placed},${margin.top})`);
+  }
 
   sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
   const intervalLayer = opts.confidenceInterval
@@ -3955,7 +4011,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: dist,
       data: sfsDistributionCurveData(dist, domain, points)
     }));
-    const shadeOptions = compareTails ? Object.assign({}, opts, {
+    const shadeOptions = tailsShown ? Object.assign({}, opts, {
       shade: distributions.flatMap((dist) => [
         { distribution: dist.key, to: -tailCutoff, color: dist.color, opacity: 0.24 },
         { distribution: dist.key, from: tailCutoff, color: dist.color, opacity: 0.24 }
@@ -4027,6 +4083,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
   function syncControls(source = state, options = {}) {
     if (options.syncInputs !== false) syncInputValues();
+    let anyRowShown = false;
     parameters.forEach((parameter) => {
       const control = controlsByKey.get(parameter.key);
       if (!control) return;
@@ -4036,6 +4093,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
         return;
       }
       const shown = shownControls.includes(parameter.key);
+      if (shown) anyRowShown = true;
       control.row.hidden = !shown;
       control.input.disabled = !shown;
       const fill = (Number(control.input.value) - parameter.min) / (parameter.max - parameter.min || 1);
@@ -4049,6 +4107,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
         ? window.interactiveFigure.inlineMath(tex)
         : document.createTextNode(tex));
     });
+    setStripOpen(anyRowShown, options.animateStrip === true);
   }
 
   function drawAxes(plot) {
@@ -4084,6 +4143,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
     }
   }
 
+  // Label the controlled curve with its target, as the slider readout does,
+  // so a tween's fractional df never shows in the legend either.
+  function legendLabel(dist) {
+    if (dist.role !== "controlled" || controlledBase.name) return dist.name || dist.label;
+    return sfsDistributionExplorerLabel(sfsDistributionSpec(distributionSourceFor(state), opts, dist.index), opts);
+  }
+
   function drawLegend(distributions) {
     if (distributions.length < 2 || opts.legend === false) {
       legendLayer.selectAll("*").remove();
@@ -4114,10 +4180,11 @@ makeDistributionParameterExplorer = function(opts = {}) {
           .attr("stroke", (d) => d.stroke)
           .attr("stroke-dasharray", (d) => d.strokeDasharray);
         item.select("text")
-          .text((d) => d.name || d.label);
+          .text(legendLabel);
       });
 
     items.exit().remove();
+    placeLegend();
   }
 
   function renderPlot(source = renderedState, options = {}) {
@@ -4135,11 +4202,15 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     if (compareTails) {
       tailMarkers.attr("x1", (d) => x(d)).attr("x2", (d) => x(d))
-        .attr("y1", y(0)).attr("y2", margin.top);
+        .attr("y1", y(0)).attr("y2", margin.top)
+        .style("visibility", tailsShown ? null : "hidden");
       const summary = `Beyond ±${tailCutoff}: ${plot.tailAreas.map((item) =>
         `${item.label}: ${d3.format(".1%")(item.probability)}`).join(" · ")}`;
-      tailReadout.text(summary);
-      const description = `${opts.ariaLabel || "Interactive distribution comparison"}. ${summary}. Shaded tails continue beyond the plotted range.`;
+      // Hidden rather than removed, so revealing the tails doesn't shift the plot.
+      tailReadout.text(summary).style("visibility", tailsShown ? null : "hidden");
+      const label = opts.ariaLabel || "Interactive distribution comparison";
+      const description = tailsShown
+        ? `${label}. ${summary}. Shaded tails continue beyond the plotted range.` : label;
       svg.attr("aria-label", description).select("title").text(description);
     }
 
@@ -4290,7 +4361,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
     let changed = false;
     Object.entries(action || {}).forEach(([key, value]) => {
       const actionKey = sfsDistributionNormalizeKey(key);
-      if (["animate", "duration", "controls", "controls-open", "show-controls"].includes(actionKey)) return;
+      if (["animate", "duration", "controls", "controls-open", "show-controls", "show-tails"].includes(actionKey)) return;
       if (actionKey === "parameters" && value && typeof value === "object") {
         changed = applyActionEntries(value) || changed;
         return;
@@ -4311,7 +4382,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     if (inlineSliders && action["show-controls"] !== undefined) {
       shownControls = [].concat(action["show-controls"]);
-      syncControls(renderedState, { syncInputs: false });
+      syncControls(renderedState, { syncInputs: false, animateStrip: animate });
     }
 
     if (context && typeof context.setControlsOpen === "function") {
@@ -4319,7 +4390,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
       if (controlsOpen !== undefined) context.setControlsOpen(sfsDistributionBoolean(controlsOpen, true), animate);
     }
 
+    const showTails = action["show-tails"] === undefined
+      ? tailsShown : compareTails && sfsDistributionBoolean(action["show-tails"], true);
+    const tailsChanged = showTails !== tailsShown;
+    tailsShown = showTails;
+
     if (applyActionEntries(action)) update(true, { animate, duration });
+    else if (tailsChanged) update(true, { animate: false });
   }
 
   controlsByKey.forEach((control) => {
@@ -4364,16 +4441,20 @@ makeDistributionParameterExplorer = function(opts = {}) {
       },
       dispose: stopTween
     });
-    if (opts.confidenceInterval) window.interactiveFigure.observeResponsiveLayout({
+    // Redraw at the measured width, as the static graphs do, so axis text keeps
+    // its size on a phone instead of shrinking with a fixed viewBox.
+    window.interactiveFigure.observeResponsiveLayout({
       root: rootNode, container: chartWrap.node(), minimumWidth: 280, maximumWidth: 1000,
       onLayout(layout) {
         width = layout.width;
-        height = Math.max(300, Math.min(360, width * 0.55));
+        height = opts.confidenceInterval
+          ? Math.max(300, Math.min(360, width * 0.55)) : Math.max(240, width / aspectRatio);
         svg.attr("viewBox", [0, 0, width, height]);
         x.range([margin.left, width - margin.right]);
         y.range([height - margin.bottom, margin.top]);
         area.y0(y(0));
         xAxisLayer.attr("transform", `translate(0,${height - margin.bottom})`);
+        legendWidth = 0;
         labelLayer.selectAll("*").remove();
         sfsDistributionAddLabels(labelLayer, opts, display, margin, width, height);
         lastRender = null;
