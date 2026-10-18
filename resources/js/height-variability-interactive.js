@@ -278,10 +278,9 @@ heightVariabilityEnsureStyles = () => {
       vector-effect: non-scaling-stroke;
     }
 
-    .height-variability-demo .hv-bracket-cap {
+    .height-variability-demo .sfs-span-cap {
       stroke: inherit;
       stroke-width: inherit;
-      vector-effect: non-scaling-stroke;
     }
 
     .height-variability-demo .hv-sample-center-mark,
@@ -1949,9 +1948,7 @@ makeHeightVariabilityDemo = function(opts) {
 
   const popLine = popSdLayer.append("g")
     .attr("class", "hv-pop-line");
-  popLine.append("line");
-  popLine.append("line").attr("class", "hv-bracket-cap");
-  popLine.append("line").attr("class", "hv-bracket-cap");
+  sfsSpanMarks.append(popLine);
   const centerTrianglePath = d3.symbol().type(d3.symbolTriangle).size(42)();
   const populationCenterMark = popSdLayer.append("path")
     .attr("class", "hv-center-mark hv-population-center-mark")
@@ -1965,9 +1962,7 @@ makeHeightVariabilityDemo = function(opts) {
 
   const fixedCenterComparisonLine = fixedCenterLayer.append("g")
     .attr("class", "hv-fixed-center-line");
-  fixedCenterComparisonLine.append("line");
-  fixedCenterComparisonLine.append("line").attr("class", "hv-bracket-cap");
-  fixedCenterComparisonLine.append("line").attr("class", "hv-bracket-cap");
+  sfsSpanMarks.append(fixedCenterComparisonLine);
   const fixedCenterMark = fixedCenterLayer.append("path")
     .attr("class", "hv-center-mark hv-fixed-center-mark")
     .attr("d", centerTrianglePath)
@@ -1978,9 +1973,7 @@ makeHeightVariabilityDemo = function(opts) {
 
   const sampleComparisonLine = biasedLayer.append("g")
     .attr("class", "hv-sample-line");
-  sampleComparisonLine.append("line");
-  sampleComparisonLine.append("line").attr("class", "hv-bracket-cap");
-  sampleComparisonLine.append("line").attr("class", "hv-bracket-cap");
+  sfsSpanMarks.append(sampleComparisonLine);
   const sampleCenterSize = 8.4;
   const sampleCenterMark = sampleComparisonLine.append("rect")
     .attr("class", "hv-sample-center-mark")
@@ -1996,9 +1989,7 @@ makeHeightVariabilityDemo = function(opts) {
       .style("--sfs-if-reveal-opacity", 1);
     const line = comparison.append("g")
       .attr("class", `${className} hv-comparison-line`);
-    line.append("line");
-    line.append("line").attr("class", "hv-bracket-cap");
-    line.append("line").attr("class", "hv-bracket-cap");
+    sfsSpanMarks.append(line);
     const label = comparison.append("text")
       .attr("class", `hv-label hv-comparison-label sfs-tick-label ${labelClassName || ""}`.trim())
       .attr("text-anchor", "middle");
@@ -2149,23 +2140,13 @@ makeHeightVariabilityDemo = function(opts) {
     rootNode.dispatchEvent(event);
   }
 
+  // SD spans are drawn by the shared span-marks helper, so they match the
+  // capped spans in other chapters.
   function setLineWithCaps(group, x1, x2, lineY, capHeight, shouldAnimate = false, delay = 0) {
-    let main = group.select("line:not(.hv-bracket-cap)").interrupt();
-    let caps = group.selectAll(".hv-bracket-cap").data([x1, x2]).interrupt();
-    if (shouldAnimate && !heightVariabilityReducedMotion()) {
-      main = main.transition().delay(delay).duration(620).ease(d3.easeCubicInOut);
-      caps = caps.transition().delay(delay).duration(620).ease(d3.easeCubicInOut);
-    }
-    main
-      .attr("x1", x1)
-      .attr("x2", x2)
-      .attr("y1", lineY)
-      .attr("y2", lineY);
-    caps
-      .attr("x1", (d) => d)
-      .attr("x2", (d) => d)
-      .attr("y1", lineY - capHeight / 2)
-      .attr("y2", lineY + capHeight / 2);
+    const transition = shouldAnimate && !heightVariabilityReducedMotion()
+      ? (selection) => selection.transition().delay(delay).duration(620).ease(d3.easeCubicInOut)
+      : null;
+    sfsSpanMarks.set(group, x1, x2, lineY, { capHeight, transition });
   }
 
   const spanGrowDuration = 460;
@@ -2173,32 +2154,12 @@ makeHeightVariabilityDemo = function(opts) {
   const spanShiftPause = 100;
 
   function growLineWithCaps(group, centerX, x1, x2, lineY, capHeight, delay = 0) {
-    const main = group.select("line:not(.hv-bracket-cap)")
-      .interrupt()
-      .attr("x1", centerX)
-      .attr("x2", centerX)
-      .attr("y1", lineY)
-      .attr("y2", lineY);
-    const caps = group.selectAll(".hv-bracket-cap")
-      .interrupt()
-      .attr("x1", centerX)
-      .attr("x2", centerX)
-      .attr("y1", lineY - capHeight / 2)
-      .attr("y2", lineY + capHeight / 2);
-
-    const mainGrowth = main.transition()
-      .delay(delay)
-      .duration(spanGrowDuration)
-      .ease(d3.easeCubicOut)
-      .attr("x1", x1)
-      .attr("x2", x2);
-    caps.transition()
-      .delay(delay)
-      .duration(spanGrowDuration)
-      .ease(d3.easeCubicOut)
-      .attr("x1", (_, index) => index === 0 ? x1 : x2)
-      .attr("x2", (_, index) => index === 0 ? x1 : x2);
-    return mainGrowth;
+    return sfsSpanMarks.grow(group, centerX, x1, x2, lineY, {
+      capHeight,
+      delay,
+      duration: spanGrowDuration,
+      ease: d3.easeCubicOut
+    });
   }
 
   function positionSampleSpan(
@@ -2272,13 +2233,13 @@ makeHeightVariabilityDemo = function(opts) {
     const lineY = comparisonLastY;
     const capHeight = 14;
 
-    const main = sampleComparisonLine.select("line:not(.hv-bracket-cap)")
+    const main = sampleComparisonLine.select(".sfs-span-line")
       .interrupt()
       .attr("x1", fittedCenterX)
       .attr("x2", fittedCenterX)
       .attr("y1", lineY)
       .attr("y2", lineY);
-    const caps = sampleComparisonLine.selectAll(".hv-bracket-cap")
+    const caps = sampleComparisonLine.selectAll(".sfs-span-cap")
       .interrupt()
       .attr("x1", fittedCenterX)
       .attr("x2", fittedCenterX)

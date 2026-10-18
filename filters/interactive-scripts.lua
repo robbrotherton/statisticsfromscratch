@@ -69,7 +69,7 @@ local manifest = {
   },
   ["distribution-generator"] = {
     file = "resources/js/distribution-generator.js",
-    deps = { "d3", "stat-helpers", "interactive-figure-tools" }
+    deps = { "d3", "stat-helpers", "interactive-figure-tools", "span-marks" }
   },
   ["playing-cards"] = {
     file = "resources/js/playing-cards.js",
@@ -118,9 +118,13 @@ local manifest = {
     file = "resources/js/variability-table-generator.js",
     deps = { "d3", "interactive-figure-tools" }
   },
+  ["span-marks"] = {
+    file = "resources/js/span-marks.js",
+    deps = { "d3" }
+  },
   ["height-variability-interactive"] = {
     file = "resources/js/height-variability-interactive.js",
-    deps = { "d3", "stat-helpers", "interactive-figure-tools" }
+    deps = { "d3", "stat-helpers", "interactive-figure-tools", "span-marks" }
   },
   ["mean-balance-beam"] = {
     file = "resources/js/mean-balance-beam.js",
@@ -153,6 +157,10 @@ local manifest = {
   ["anova-variability-explorer"] = {
     file = "resources/js/anova-variability-explorer.js",
     deps = { "d3", "interactive-figure-tools" }
+  },
+  ["score-rows"] = {
+    file = "resources/js/score-rows.js",
+    deps = { "d3", "interactive-figure-tools", "span-marks" }
   },
   ["likert-helper"] = {
     file = "resources/js/likert-helper.js",

@@ -964,8 +964,7 @@ sfsDistributionEnsureStyles = () => {
     }
 
     .distribution-graph .dg-interval-line,
-    .distribution-graph .dg-interval-arrow,
-    .distribution-graph .dg-interval-caps {
+    .distribution-graph .dg-interval-arrow {
       vector-effect: non-scaling-stroke;
       stroke-linecap: round;
     }
@@ -2792,7 +2791,7 @@ sfsDistributionRenderGraph = (opts = {}) => {
   };
   const intervalArrowSize = 7;
 
-  intervalGroups.append("line")
+  intervalGroups.filter((d) => !d.caps).append("line")
     .attr("class", "dg-interval-line")
     .attr("x1", (d) => x(d.from) + (d.arrows ? 1.5 : 0))
     .attr("x2", (d) => x(d.to) - (d.arrows ? 1.5 : 0))
@@ -2801,15 +2800,16 @@ sfsDistributionRenderGraph = (opts = {}) => {
     .attr("stroke", (d) => d.color)
     .attr("stroke-width", (d) => d.strokeWidth);
 
-  intervalGroups.filter((d) => d.caps).append("path")
-    .attr("class", "dg-interval-caps")
-    .attr("d", (d) => {
-      const midY = intervalY(d);
-      return `M${x(d.from)},${midY - 6}V${midY + 6}M${x(d.to)},${midY - 6}V${midY + 6}`;
-    })
-    .attr("fill", "none")
-    .attr("stroke", (d) => d.color)
-    .attr("stroke-width", (d) => d.strokeWidth);
+  // Capped intervals use the book's shared span mark (span-marks.js), so
+  // they match the SD spans drawn in other chapters.
+  intervalGroups.filter((d) => d.caps).each(function(d) {
+    const group = d3.select(this);
+    sfsSpanMarks.append(group);
+    sfsSpanMarks.set(group, x(d.from), x(d.to), intervalY(d));
+    group.selectAll("line")
+      .attr("stroke", d.color)
+      .attr("stroke-width", d.strokeWidth);
+  });
 
   intervalGroups.filter((d) => d.arrows).each(function(d) {
     const group = d3.select(this);
