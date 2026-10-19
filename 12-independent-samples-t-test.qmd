@@ -38,11 +38,11 @@ interactive-scripts:
      ideally randomly assigned. Full plan: admin/editorial/integration/
      chapters-12-13-structure-2026-10-18.md -->
 
-In the last chapter we introduced the single-sample $t$ test. Here, we'll move on to another variant: the independent-samples $t$ test. We'll start by comparing the two, seeing what kind of research designs call for which versions of the $t$ test, and then we'll work through calculating the independent-samples $t$ statistic and using it in a hypothesis test.
+In the last chapter we introduced the single-sample $t$ test. Here, we'll move on to another variant: the independent-samples $t$ test. We'll compare the two to see what's new and what's the same, and we'll give it the same treatment as before, using it to analyze some data to see how the hypothesis test works and what it tells us.
 
 ## Compared with what?
 
-To refresh your memory of the single-sample $t$ statistic, suppose we run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we measure momentary happiness using a seven-point scale.
+To refresh your memory of the single-sample $t$ statistic, suppose we run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we ask how happy they feel compared with usual, using a seven-point scale.
 
 ::: center
 Here's $10! 💵
@@ -61,7 +61,7 @@ But notice that 4 isn't a known population mean. It's a guess about how people w
        to begin with; the midpoint isn't the untreated average; all of these.
        Feedback leads to "we need a comparison group measured the same way." -->
 
-Rather than guessing, we could build the comparison into the study itself. Suppose we don't want to give everyone $10 and just see what happens. We want to create two different situations and see if there's a difference between them. So for this study, imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Maybe they'll buy their pal a coffee or whatever. And then later that day we ask everyone in both groups about their current level of happiness. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this [e.g., @dunn2014prosocial]. We'll return to what their results show later in the chapter.)
+Rather than guessing, we could build the comparison into the study itself. Imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. And then later that day we ask everyone in both groups how happy they feel compared with usual. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this [e.g., @dunn2014prosocial]. We'll return to what their results show later in the chapter.)
 
 :::: {.columns}
 
@@ -88,15 +88,15 @@ Spend this on someone else 💵
 {{< include quizzes/12-independent-t-two-groups.qmd >}}
 :::
 
-This design doesn't need a reference value at all. Instead of comparing one sample mean with a number we've guessed, we compare two sample means with each other. It also asks a different question: not whether getting money affects happiness, but whether *how* you spend it does. That's not a question the single-sample $t$ test can answer. We now have two samples representing two hypothetical populations, and a null hypothesis that doesn't name a value for either population mean. It just says that they're the same.
+This design doesn't need a reference value for either population mean. Instead of comparing one sample mean with a number we've guessed, we compare two sample means with each other. It also asks a different question: not whether getting money affects happiness, but whether *how* you spend it does. That's not a question the single-sample $t$ test can answer. We now have two samples representing two hypothetical populations, and a null hypothesis that doesn't name a value for either population mean. It just says that they're the same.
 
 This kind of study is an experiment. We, the researchers, decide which condition each person experiences: spend the money on yourself, or spend it on someone else. Deliberately changing something like this, so that we can see whether it has an effect, is called a **manipulation**. Here, the manipulation is the spending instruction; everything else about the procedure, including the money and the happiness question, is the same for everyone.
 
 Our manipulation produces two samples. Each participant does one thing or the other, never both. So the two groups consist of different people, and nothing links a particular score in one group to a particular score in the other. We call these **independent samples**. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people.
 
-How we decide who goes in which group matters too. If we let people choose, the groups might differ in other ways. Maybe generous people would choose to spend on someone else, and maybe generous people are happier to begin with. Instead, we can use **random assignment**: each person's condition is decided by chance, like a coin flip. Then the groups should differ, on average, only in how they were told to spend the money. People who happen to be cheerful, or having a bad day, are just as likely to end up in either group. That's what would let us attribute any difference in happiness to the spending, rather than to who happened to end up where. (Contrast the statistics class in Chapter 11, which nobody assigned to anything; that limited what we could conclude from its reaction times.) Chance can still make the groups differ a bit, of course. That's sampling error, and it's what the hypothesis test has to account for.
+How we decide who goes in which group matters too. If we let people choose, the groups might differ in other ways. Maybe generous people would choose to spend on someone else, and maybe generous people are happier to begin with. Instead, we'll use **random assignment**: each person's condition is decided by chance, like a coin flip. Then the groups should differ, on average, only in how they were told to spend the money. People who happen to be cheerful, or having a bad day, are just as likely to end up in either group. That's what would let us attribute a difference in happiness to the spending, rather than to who happened to end up where. (Contrast the statistics class in Chapter 11, which nobody assigned to anything; that limited what we could conclude from its reaction times.) Chance can still make the groups differ a bit, of course. That's sampling error, and it's what the hypothesis test has to account for.
 
-Thankfully, there is a variation of the $t$ statistic, and corresponding hypothesis test, that is designed for this kind of situation. It's called the **independent-samples $t$ test**. It allows us to compare two sample means and determine whether the difference between them is statistically significant.
+The **independent-samples $t$ test** allows us to compare two sample means and determine whether their difference is statistically significant. It doesn't require random assignment: we can also compare preexisting groups, such as people who already choose to spend on themselves or on others. But then a difference wouldn't by itself establish what caused it.
 
 <!-- FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
      distribution builder (makeSamplingDistributionBuilder) that draws a pair
@@ -124,9 +124,9 @@ $$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$ {#eq-independent-t
 
 If you ignore the subscripts and repeated symbols, it's the same structure as the single-sample $t$: $M$ minus $\mu$ over $s$. But there is a bit more going on, so let's break it down:
 
-- **The statistic.** Each sample supplies its own mean, and our question is about the difference between them, so the statistic becomes the difference between the two sample means, $M_1 - M_2$. Which sample we call 1 and which we call 2 is arbitrary; swapping them only flips the sign of the difference. So it makes sense to choose the order that matches the direction we're interested in. If we suspect that spending on others boosts happiness more than spending on ourselves, we can make the spend-on-other group sample 1 and subtract the spend-on-self group's mean, so that a difference in the expected direction comes out positive.
+- **The statistic.** Each sample provides a mean, and our question is about the difference between them, so the statistic becomes the difference between the two sample means, $M_1 - M_2$. Which sample we call 1 and which we call 2 is arbitrary; swapping them only flips the sign of the difference. Here we'll call the spend-on-other group sample 1 and subtract the spend-on-self group's mean, so higher ratings for spending on others give a positive difference.
 - **The parameter.** The null hypothesis doesn't tell us the value of either population mean, only that they're the same. So the parameter we subtract is the difference between the population means, $\mu_1 - \mu_2$, which the null hypothesis says is zero.
-- **The standard error.** A standard error describes the variability of a statistic---the distribution of that statistic we'd see if we repeated the process many times. Here the statistic isn't a single mean, or the two separate means, but the difference between them. So we call this the estimated standard error of the mean difference, and the symbol gets that in its subscript: $s_{M_1 - M_2}$. This standard error needs to describe the distribution of those mean differences we'd see under the null hypothesis. So how much will the two sample means differ from one another due to sampling error alone, and how will those differences pile up? The answer has to account for both sets of scores: each sample gives us its own estimate of variability, and we need a way to combine them.
+- **The standard error.** A standard error describes the variability of a statistic---the distribution of that statistic we'd see if we repeated the process many times. Here the statistic isn't a single mean, or the two separate means, but the difference between them. So we call this the estimated standard error of the mean difference, and the symbol gets that in its subscript: $s_{M_1 - M_2}$. This has to account for both sets of scores: each sample gives us its own estimate of variability, and we need a way to combine them.
 
 Before we look at how to calculate each piece, let's see what they look like in action.
 
@@ -137,7 +137,7 @@ Before we look at how to calculate each piece, let's see what they look like in 
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Scores" data-action='{"tScale":false,"stage":"scores","means":false,"meanGap":false,"spread":"none","animate":false,"colorBy":"person"}'}
-Let's say we've had ten people participate in our spending study; five spent some money on themselves and five spent some money on someone else. Their subsequent happiness ratings on the 7-point scale are shown on the number lines, one dot per person and one row per group.
+Let's say we've had ten people participate in our spending study; five spent some money on themselves and five spent some money on someone else. Their subsequent happiness ratings on the 7-point scale are shown on the number lines, one dot per person and one row per group. (These scores aren't real; I just made them up for illustration.)
 :::
 
 ::: {.tutorial-step data-title="Means" data-action='{"tScale":false,"means":true,"meanGap":false,"spread":"none","colorBy":"group"}'}
@@ -145,7 +145,7 @@ Now let's compute the sample means. Rather than comparing ten individual scores,
 :::
 
 ::: {.tutorial-step data-title="Difference" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"none","colorBy":"group"}'}
-This difference becomes the numerator of our $t$ statistic, $M_1 - M_2$. Here that's spend on other minus spend on self: $5 - 4 = 1$. Remember, there's no specified reference $\mu$ to compare against; rather, we compare that statistic with a null hypothesis that says $\mu_1 - \mu_2 = 0$. While subtracting that zero is important conceptually, mathematically it doesn't affect the value of the numerator.
+This difference becomes the numerator of our $t$ statistic, $M_1 - M_2$. Here that's spend on other minus spend on self: $5 - 4 = 1$. Remember, there's no specified value for either population mean; rather, we compare that statistic with a null hypothesis that says $\mu_1 - \mu_2 = 0$. While subtracting that zero is important conceptually, mathematically it doesn't affect the value of the numerator.
 :::
 
 ::: {.tutorial-step data-title="Spread" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"sd","colorBy":"group"}'}
@@ -166,10 +166,6 @@ So we have our ratio. We can divide the numerator by the denominator to change t
 ::::
 :::::
 
-### The numerator: a difference between means
-
-Let's take a closer look at the pieces of @eq-independent-t, starting with the numerator. The statistic is the difference between the two sample means, $M_1 - M_2$, with the groups ordered to match the direction we're interested in. The parameter is the difference between the population means, $\mu_1 - \mu_2$. Because the null hypothesis says the two population means are the same, that parameter is always zero. So when we come to actually calculate the numerator, we can ignore that zero; it will just be the difference between the two sample means. For the spending data, that's $5 - 4 = 1$.
-
 ### The denominator: uncertainty from both groups
 
 The denominator, $s_{M_1 - M_2}$, is the estimated standard error of the mean difference: how much of a difference we'd expect to see between two sample means by chance alone. Here's the equation:
@@ -188,13 +184,13 @@ Why one estimate rather than two? The version of the $t$ test we're learning her
 
 $$ s_p^2 = \frac{SS_1 + SS_2}{df_1 + df_2} $$ {#eq-pooled-variance}
 
-So essentially the pooled variance is just a weighted average of the two samples' variances. We calculate it by adding up the two samples' sums of squares and dividing by the total of their degrees of freedom. Remember, sum of squares divided by degrees of freedom gives us the average squared deviation for a sample---its variance. So here we're pooling all the sums of squares together and effectively weighting them by each sample's degrees of freedom, because bigger samples, with higher degrees of freedom, provide more accurate estimates of population parameters.
+So essentially the pooled variance is just a weighted average of the two samples' variances. We calculate it by adding up the two samples' sums of squares and dividing by the total of their degrees of freedom.
 
 Another form of the equation uses the samples' variances rather than their sums of squares:
 
 $$ s_p^2 = \frac{df_1 s_1^2 + df_2 s_2^2}{df_1 + df_2} $$
 
-That is algebraically equivalent to the sums of squares version, because $SS$ is equal to variance multiplied by degrees of freedom. This version makes the weighting explicit: each sample's variance counts in proportion to its degrees of freedom. And it can be a bit more useful if we've already calculated the samples' variances and we can't be bothered working out their sums of squares separately.
+That is algebraically equivalent to the sums of squares version, because $SS$ is equal to variance multiplied by degrees of freedom. This version makes the weighting explicit: each sample's variance counts in proportion to its degrees of freedom. Bigger samples provide more accurate estimates, so they count for more.
 
 ### Degrees of freedom
 
@@ -212,8 +208,6 @@ These are the same degrees of freedom in the denominator of the pooled variance,
 
 ### Putting it all together
 
-So these are the steps to calculate the independent-samples $t$ statistic. Most of the extra work is in the denominator. First, we calculate the pooled variance, and we use that to calculate the estimated standard error of the mean difference. Then we divide the difference between the sample means by that standard error.
-
 @tbl-t-structure-comparison lines up the pieces of the two $t$ statistics we've seen so far.
 
 | | Single-sample $t$ | Independent-samples $t$ |
@@ -230,13 +224,13 @@ And this gives us the usual ratio: how many standard errors separate the differe
 
 ## An independent-samples $t$ test, step by step
 
-So let's run with the example of giving two different groups of people $10, telling one group to spend it on themselves and the other group to spend it on someone else. (The ten happiness scores we'll use are made up for illustration; we'll get to what the real studies found later in the chapter.)
+So let's run with the example of giving two different groups of people $10, telling one group to spend it on themselves and the other group to spend it on someone else.
 
 ### Step 1: State the hypotheses
 
-As usual, the first step is to state our hypotheses. As always, the null hypothesis is our default assumption that there is no difference between groups, that the treatment has no effect. Specifically, in the case of the independent-samples test, the null hypothesis is that $\mu_1 - \mu_2 = 0$. We state it this way because again we don't claim to know in advance what the value of $\mu_1$ or $\mu_2$ is. We just expect that the difference between them is zero---or to put it another, more intuitive way, that they are the same.
+The null hypothesis says that the two population means are the same: $\mu_1 - \mu_2 = 0$.
 
-The alternative hypothesis is that there is a difference between the groups, that the treatment does have an effect. As before, we could state either a directional or a non-directional hypothesis. A directional hypothesis would state that the difference will be greater than zero if we expect spending on someone else to make people happier, or less than zero if we expect the opposite. A non-directional hypothesis would state simply that the difference will not be equal to zero, and we'll be looking for a difference in either direction using a two-tailed test. Like I said in Chapter 8, nondirectional hypotheses are generally the default, unless a directional test is justified and chosen before inspecting the data. So let's run with a two-tailed test for this example:
+We'll use a nondirectional alternative, looking for a difference in either direction. As in Chapter 8, a directional test would need to be justified and chosen before inspecting the data. So let's run with a two-tailed test:
 
 $$ H_0: \mu_{\text{other}} - \mu_{\text{self}} = 0 $$
 
@@ -245,22 +239,17 @@ $$ H_1: \mu_{\text{other}} - \mu_{\text{self}} \ne 0 $$
 ::: {#fig-independent-inferential}
 {{< interactive-figure independentInferentialDiagram makeInferentialDiagram options='{"preset":"independent","maxWidth":"42rem"}' fallback="Inferential process diagram for an independent-samples t test." >}}
 
-A diagram representing the logic of the independent-samples $t$ test. Neither population mean is known. Each sample supplies its own mean, size, and standard deviation, from which we make inferences about the two treated populations, and ask whether they have the same mean.
+A diagram representing the logic of the independent-samples $t$ test. Neither population mean is known; each sample supplies its own mean, size, and standard deviation. The diagram separates the two inferential paths, without showing how people enter the groups. In our spending experiment, both "Original population" boxes represent the same source population, and participants are randomly assigned to spending conditions. With preexisting groups, the source populations may differ and no treatment need be assigned.
 :::
 
-<!-- FIGURE: check the "independent" preset against Ch 11's "single-t"
-     preset. Ch 11 marks sigma as unknown and s as supplied by the sample;
-     the two-group preset should carry the same conventions (both mus
-     unknown, one shared sigma estimated by s_p) so the diagrams read as a
-     series. -->
-
-Put in terms of the inferential diagram, for the single-sample situation we had an original untreated population that we thought we knew something about: its mean. That was the basis of our null hypothesis: that the treated population would have that same mean. We inferred the variability from our sample.
-
-Now for the more complicated research design with two different samples, things are slightly more complicated. We no longer claim to know anything about the populations that we want to compare. So we have to infer both populations' characteristics based on their sample means and standard deviations and sample sizes.
+<!-- FIGURE (deferred): retain the general two-path schematic. The caption
+     distinguishes random assignment from comparisons of preexisting groups.
+     A future experiment-specific version could show one recruited sample
+     splitting into conditions by random assignment. -->
 
 ### Step 2: Set the decision criteria
 
-Step two is to define our critical regions. Again, since the $t$ distribution is actually a family of distributions with a slightly different mathematical curve for every possible value of degrees of freedom, we need to know the degrees of freedom for our test at this point.
+As before, our degrees of freedom determine which $t$ curve we use to set the critical regions.
 
 We'll use $\alpha = .05$. With five people in each group, $df = 4 + 4 = 8$ (@eq-independent-df). Looking in the two-tailed .05 column of the $t$ table gives critical values of $\pm 2.306$. We reject the null if $t < -2.306$ or $t > 2.306$.
 
@@ -280,7 +269,7 @@ Step three is where we get our data and calculate our test statistic. Here are t
 Happiness ratings for the two spending groups.
 :::
 
-Remember, for the independent-samples $t$ test, this involves calculating the estimated standard error of the mean difference for the denominator, which involves calculating the pooled variance of our two samples. So we're going to need to know either the sums of squares for each sample or each sample variance.
+To calculate the pooled variance, we'll need each sample's sum of squares or variance.
 
 ::: {#fig-independent-variability}
 {{< interactive-figure independentTVariabilityTables makeVariabilityTables options='{"tables":[{"title":"Spend on other","data":[6,3,5,7,4],"sample":true},{"title":"Spend on self","data":[4,1,7,3,5],"sample":true}],"stage":"sd","controls":false}' fallback="Variability tables for the two spending groups. Spend on other: scores 6, 3, 5, 7, 4; mean 5; SS = 10; variance 2.5; SD 1.58. Spend on self: scores 4, 1, 7, 3, 5; mean 4; SS = 20; variance 5; SD 2.24." >}}
@@ -318,9 +307,7 @@ Now try the same calculations with some different data.
 
 ### Step 4: Make a decision
 
-As usual, step four is to ask: is the mean difference sufficiently large that it seems unlikely to have come from the null hypothesis distribution, which states that there is no difference? In short, is your calculated $t$ statistic within the critical regions you identified earlier? If it is, you reject the null hypothesis. If it isn't, you fail to reject the null hypothesis.
-
-So in this case, our statistic of $0.82$ is not within the critical region. There was a difference between our two sample means of one point on our seven-point scale. Given the estimated standard error of the mean difference, that is not sufficiently unlikely to make us reject the null hypothesis in this case. It is not one of the 5% of most extreme mean differences for the null hypothesis sampling distribution.
+Our $t = 0.82$ falls between the critical values of $\pm 2.306$, so we fail to reject the null hypothesis.
 
 ::: {#fig-independent-decision}
 {{< interactive-figure independentTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":8,"title":"Null distribution: df = 8","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":5,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.306004,"label":"−2.306","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.306004,"label":"+2.306","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":0.816497,"label":"t = 0.82","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null t distribution with 8 degrees of freedom. The two rejection regions lie beyond ±2.306; the observed t of 0.82 falls between them." >}}
@@ -344,23 +331,23 @@ This is the version of $d$ behind the MTurk group comparisons we explored in Cha
 
 #### Confidence interval
 
-Lastly, we can calculate a confidence interval for an independent-samples $t$ test, much as we did for the single-sample $t$ test. Again, it quantifies the precision of a statistic. The difference here is that our interval isn't for a particular population mean, but for the difference between two population means, $\mu_1 - \mu_2$. The formula takes the same form as before, using our new estimate and its estimated standard error:
+We can calculate a confidence interval much as we did for the single-sample $t$ test. The difference here is that our interval isn't for a particular population mean, but for the difference between two population means, $\mu_1 - \mu_2$. The formula takes the same form as before, using our new estimate and its estimated standard error:
 
 $$ (M_1 - M_2) \pm t \times s_{M_1 - M_2} $$
 
-So for our little money-buying-happiness example, let's say we want a 95% confidence interval for our mean difference of $1$ with ten participants and an estimated standard error of the mean difference of 1.225. The critical $t$ values are exactly the same as we had for the hypothesis test because we're using the same definition of common and uncommon, splitting a distribution into the 5% in the tails and 95% in the middle.
+For a 95% interval, we use the same critical value, $2.306$, as our two-tailed test at $\alpha = .05$.
 
 {{< include quizzes/12-independent-t-confidence-interval.qmd >}}
 
 $$ (M_1 - M_2) \pm t \times s_{M_1 - M_2} = 1 \pm 2.306(1.225) \approx [-1.82,\ 3.82] $$
 
 ::: {#fig-independent-ci}
-{{< interactive-figure independentConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":1,"se":1.224745,"df":8,"confidence":95,"reference":0,"referenceLabel":"No difference","estimateLabel":"M₁ − M₂","xDomain":[-3,5],"units":"Difference in mean happiness (other − self)"}' fallback="95% t confidence interval for the difference in mean happiness: −1.82 to 3.82, with point estimate 1. The null value of 0 lies inside the interval." >}}
+{{< interactive-figure independentConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":1,"se":1.224745,"df":8,"confidence":95,"reference":0,"referenceLabel":"No difference","estimateLabel":"M₁ − M₂","xDomain":[-3,5],"units":"Difference in mean rating (other − self)"}' fallback="95% t confidence interval for the difference in mean happiness rating: −1.82 to 3.82, with point estimate 1. The null value of 0 lies inside the interval." >}}
 
 The 95% $t$ interval for the difference between population means includes zero, agreeing with the two-tailed test at $\alpha = .05$.
 :::
 
-Notice here that the confidence interval includes a mean difference of zero within that range. Our hypothesis test failed to reject the null hypothesis because our observed difference of $1$ was not among the least common 5% of differences for the null distribution. As we saw in Chapter 10, a 95% interval and a two-tailed test at $\alpha = .05$, using the same standard error, will always agree in this way.
+Notice here that the confidence interval includes a mean difference of zero within that range. Our hypothesis test failed to reject the null hypothesis because our $t = 0.82$ was not among the most extreme 5% of values in the null $t$ distribution. As we saw in Chapter 10, a 95% interval and a two-tailed test at $\alpha = .05$, using the same standard error, will always agree in this way.
 
 But notice also how wide the interval is. It runs from almost 2 points favoring spending on yourself to almost 4 points favoring spending on someone else, on a 7-point scale. Our data are compatible with no difference, and with sizable differences in either direction. So our nonsignificant result means "we can't tell," not "no difference."
 
@@ -368,7 +355,7 @@ But notice also how wide the interval is. It runs from almost 2 points favoring 
 
 Remember that plugging the result we observed back into a power calculation, *observed power*, doesn't add any new information (Chapter 11). And with a nonsignificant result, it's especially tempting to conclude that "the study was underpowered!" As we said in Chapter 9, power is more useful for planning.
 
-Say we want to be able to detect a difference of one point on the 7-point scale, in either direction. We would use the sample-size equation from Chapter 9 (@eq-power-sample-size), with one change for two groups:
+Say we consider a difference of one point on the 7-point scale worth detecting, in either direction. That's a planning judgment, rather than just a choice to match the difference we observed. For two equally sized groups, we would use the sample-size equation from Chapter 9 (@eq-power-sample-size), with one change:
 
 $$ n \approx \frac{2\left(z_{1-\alpha/2} + z_{1-\beta}\right)^2}{d^2} $$
 
@@ -380,7 +367,7 @@ $$ n \approx \frac{2(1.96 + 0.84)^2}{0.516^2} \approx 58.9 $$
 
 Rounding up, that's 59 people per group, or 118 in total.[^independent-sample-size] That's why two-group designs need more people than a single-sample test to detect the same $d$.
 
-[^independent-sample-size]: As in Chapter 11, statistical software can do the exact calculation using the noncentral $t$ distribution. Here it gives 60 per group. For two groups, the exact answer is usually about one more per group than the $z$ approximation.
+[^independent-sample-size]: As in Chapter 11, statistical software can do the exact calculation using the noncentral $t$ distribution. Here it gives 60 per group.
 
 The bigger source of uncertainty is the standard deviation. Our pooled estimate comes from just ten people. If the population standard deviation is larger, a study with 59 per group would have less power than we planned for, so it can be prudent to aim for more than the calculations would suggest anyway, just in case.
 
@@ -394,21 +381,17 @@ The bigger source of uncertainty is the standard deviation. Our pooled estimate 
 
 ### Reporting results
 
-Even though we got a non-significant result, we still have to report the results. When you find a non-significant difference, you have to be just as meticulous about reporting all the relevant information as if you had found a significant result. Here's how we might report this one:
+A nonsignificant result still needs all the relevant information. Here's how we might report ours:
 
-> A two-tailed independent-samples $t$ test comparing happiness ratings for people who spent the money on someone else ($M = 5$, $SD = 1.58$) and people who spent it on themselves ($M = 4$, $SD = 2.24$) found a nonsignificant difference, $M_1 - M_2 = 1.00$, 95% CI [-1.82, 3.82], $t(8) = 0.82$, $p > .05$, $d = 0.52$.
+> A two-tailed independent-samples $t$ test comparing ratings of happiness relative to usual for people who spent the money on someone else ($M = 5$, $SD = 1.58$) and people who spent it on themselves ($M = 4$, $SD = 2.24$) found a nonsignificant difference, $M_1 - M_2 = 1.00$, 95% CI [-1.82, 3.82], $t(8) = 0.82$, $p > .05$, $d = 0.52$.
 
 As in Chapter 11, you should report the kind of hypothesis test, the descriptive statistics, the estimate with its confidence interval, the test statistic and its degrees of freedom in parentheses, whether $p$ fell below $\alpha$, and the effect size.
 
 ### Interpreting the results
 
-So what does it mean, that we failed to reject our null hypothesis here? Not that spending makes no difference to happiness. Our data are compatible with no difference, but also with a medium-sized difference in either direction. Five people per group just can't tell those possibilities apart; we'd need something like 59 per group to reliably detect a difference of one point.
+So what does it mean, that we failed to reject our null hypothesis here? Not that spending makes no difference to happiness. Our data are compatible with no difference, but also with sizable differences in either direction. Five people per group just can't tell those possibilities apart; we'd need something like 59 per group to reliably detect a difference of one point.
 
-Had we found a significant difference, though, this design would have let us say more than the class reaction time study in Chapter 11 could. There, the class wasn't assigned to study statistics, so we had to list alternative explanations for the difference. Here, if people were randomly assigned to their spending condition, the groups should differ, on average, only in how they spent the money. Random assignment rules out most of those alternative explanations. That's what this chapter's opening question, "Compared with what?", was building toward.
-
-<!-- DRAFT (optional): limits that remain, in a sentence: the data are
-     illustrative; a 7-point rating treated as equal-interval; what
-     "happiness later that day" does and doesn't capture. -->
+Had we found a significant difference, though, this design would have let us say more than the class reaction time study in Chapter 11 could. There, the class wasn't assigned to study statistics, so we had to list alternative explanations for the difference. Here, since people were randomly assigned to their spending condition, the groups should differ, on average, only in how they spent the money. Random assignment rules out most of those alternative explanations. It doesn't make our participants representative of everyone, though, or tell us whether any difference would last beyond that day. That's what this chapter's opening question, "Compared with what?", was building toward: a comparison that helps us interpret what caused a difference.
 
 #### One study, and the body of evidence
 
@@ -420,9 +403,11 @@ The real research behind our made-up example shows why we need to look beyond wh
 
 Interpreting the outcome of a test fairly also depends on whether the assumptions of the test are reasonable. As with the single-sample test, the exact $t$ reference distribution assumes independent observations from normal populations. With larger samples, the procedure can tolerate some departures from normality, but remember there is no automatic cutoff (at $n = 30$ or anywhere else). Strong skew and extreme observations deserve attention, especially in small samples.
 
-Independence now has two parts. First, as in Chapter 11, the observations within each sample must be independent of one another: one person's score shouldn't depend on another person's score. Second, the two samples must be independent of each other. Nothing pairs a particular score in one group with a particular score in the other; they're different people, assigned separately. That's what makes these *independent* samples. Keep this one in mind; it's the assumption the next chapter will break.
+Our seven-point ratings can't form an exactly normal population, and five people per group gives us little protection from departures from that assumption. We're using these made-up scores to illustrate the calculation, treating the scale's steps as roughly equal; a real study would need more care about its measurement and distributions.
 
-And third, for independent-samples $t$ tests, we assume that the two populations from which the samples are selected have equal variances. This is called **homogeneity of variance**. It's required because we calculated pooled variance as a weighted average of our two sample variances, and averages are only meaningful if you're averaging together things that are fundamentally similar. So we average our sample variabilities as estimates of the same single true population variability. If the two populations actually have different variances, the pooled variance is a compromise that matches neither, and the estimated standard error can be wrong, especially when the sample sizes are unequal.[^welch]
+Independence now has two parts. First, as in Chapter 11, the observations within each sample must be independent of one another: one person's score shouldn't depend on another person's score. Second, the two samples must be independent of each other. Nothing pairs a particular score in one group with a particular score in the other; they're different people, with no matching or other links across groups. That's what makes these *independent* samples. Keep this one in mind; it's the assumption the next chapter will break.
+
+And third, for this pooled version of the independent-samples $t$ test, we assume that the two populations from which the samples are selected have equal variances. This is called **homogeneity of variance**. Pooling treats our two sample variances as estimates of the same population variance. If the two populations actually have different variances, the pooled variance is a compromise that matches neither, and the estimated standard error can be wrong, especially when the sample sizes are unequal.[^welch]
 
 [^welch]: Many statistical programs, including R, use a version of the test called *Welch's $t$ test* by default, which doesn't make this assumption. Instead of pooling, it uses each sample's own variance, $s_{M_1 - M_2} = \sqrt{s_1^2/n_1 + s_2^2/n_2}$, and adjusts the degrees of freedom according to this equation:
 
@@ -432,7 +417,7 @@ And third, for independent-samples $t$ tests, we assume that the two populations
 
 ## Looking ahead
 
-So when we don't have a reference value for the null hypothesis, we can build the comparison into the design. The independent-samples $t$ test uses the difference between two sample means as its estimate. Its standard error gathers uncertainty from both groups, and its degrees of freedom are $n_1 + n_2 - 2$. But the basic logic of the test doesn't change.
+So when we don't have a reference value for a population mean, we can build the comparison into the design. The independent-samples $t$ test uses the difference between two sample means as its estimate. Its standard error gathers uncertainty from both groups, and for the pooled version its degrees of freedom are $n_1 + n_2 - 2$. But the basic logic of the test doesn't change.
 
 But what if, instead of different people in each condition, we measured the same people twice? Say we had children wind fishing reels as fast as they could, once alone and once racing against another child. The data would look much the same: two columns of numbers. But every row would belong to one child. Would this chapter's test still be right? That's the next chapter.
 
