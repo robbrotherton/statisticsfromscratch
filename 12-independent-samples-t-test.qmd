@@ -36,34 +36,11 @@ interactive-scripts:
      ideally randomly assigned. Full plan: admin/editorial/integration/
      chapters-12-13-structure-2026-10-18.md -->
 
-<!-- FIX: "last couple of lectures" is lecture language. The roadmap sentence
-     should match Ch 11's opening paragraph in shape: what's new, what carries
-     over, what we'll do. -->
-
 In the last chapter we introduced the single-sample $t$ test. Here, we'll move on to another variant: the independent-samples $t$ test. We'll start by comparing the two, seeing what kind of research designs call for which versions of the $t$ test, and then we'll work through calculating the independent-samples $t$ statistic and using it in a hypothesis test.
 
 ## Compared with what?
 
-<!-- DRAFT: working title. This section plays the role of Ch 11's "Known
-     unknowns": a concrete question that leads readers to the statistical
-     problem before we formalize it. Ch 11 ended by asking what happens if we
-     don't have a reference value like 284 ms; this answers it with a design.
-     Sequence of realizations to lead the reader through:
-       1. One group gets $10 (existing setup below). What would a mean of,
-          say, 3.6 tell us? Compared with what?
-       2. The scale midpoint isn't a known population mean (FIX below). And
-          even if we knew the untreated mean, the single-sample design
-          answers "does getting $10 matter?", not "does HOW you spend it
-          matter?"
-       3. So build the comparison into the design: two groups that differ
-          only in the thing we care about. Random assignment is what makes
-          "only" plausible.
-       4. Now ask the reader the Ch 11 questions again. What does the null
-          say? (No value for either mean, just that they're equal.) How much
-          could the two means differ by chance alone? (Both wobble, so more
-          than one mean would.) -->
-
-To refresh your memory of the single-sample $t$ statistic, suppose you run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we measure momentary happiness using a seven-point scale.
+To refresh your memory of the single-sample $t$ statistic, suppose we run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we measure momentary happiness using a seven-point scale.
 
 ::: center
 Here's $10! 💵
@@ -77,21 +54,16 @@ Here's $10! 💵
      pick 4 (the midpoint) as a reference, but it's a guess about untreated people, and that
      guess is exactly what the next design replaces with data. -->
 
-Arguably, we have a good reason to think we can predict what the population mean should be if the money has no effect at all. By definition, on average, people should report average happiness levels. So for the null hypothesis, we could use a reference value of 4. $H_0$ would state that the untreated population mean $\mu = 4$; $H_0$ would state that the treated population mean $\mu_1 \ne 4$ (for a nondirectional test). But we don't know how variable scores in those hypothetical populations might be, so we can't claim knowledge of the population standard deviation, $\sigma$. As a result, we can't use the $z$ test. Instead, the single-sample $t$ test would be appropriate.
+Arguably, we have a good reason to think we can predict what the population mean should be if the money has no effect at all. By definition, on average, people should report average happiness levels. So for the null hypothesis, we could use a reference value of 4. $H_0$ would state that the untreated population mean $\mu = 4$; $H_1$ would state that the treated population mean $\mu_1 \ne 4$ (for a nondirectional test). But we don't know how variable scores in those hypothetical populations might be, so we can't claim knowledge of the population standard deviation, $\sigma$. As a result, we can't use the $z$ test. Instead, the single-sample $t$ test would be appropriate.
 
-<!-- DRAFT: quiz opportunity, parallel to Ch 11's card-sample quiz (new
-     include, e.g. quizzes/12-independent-t-compared-with-what.qmd):
-       Q1 (supported prediction): "Everyone given $10 reports M = 4.6. Which
-          of these could explain a mean above 4?" Options: the money; people
-          in the sample were happier to begin with; the midpoint isn't the
-          untreated average; all of these. Feedback leads to "we need a
-          comparison group measured the same way."
-       Q2 (free response, generative): "How would you redesign the study to
-          find out whether spending on others makes people happier than
-          spending on themselves?" Feedback sketches the two-group design that
-          the next paragraph introduces. -->
+<!-- DRAFT: optional short quiz before the two-group design (the design
+     itself is now questioned in quiz-two-groups, below):
+       "Everyone given $10 reports M = 4.6. Which of these could explain a
+       mean above 4?" Options: the money; people in the sample were happier
+       to begin with; the midpoint isn't the untreated average; all of these.
+       Feedback leads to "we need a comparison group measured the same way." -->
 
-But now suppose we have a slightly more complicated design. Suppose we don't want to give everyone $10 and just see what happens. We want to create two different situations and see if there's a difference between them. So for this study, imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Maybe they'll buy their pal a coffee or whatever. And then later that day we ask everyone in both groups about their current level of happiness. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this [e.g. @dunn2014prosocial] We'll return to what their results show later in the chapter.)
+But now suppose we have a slightly more complicated design. Suppose we don't want to give everyone $10 and just see what happens. We want to create two different situations and see if there's a difference between them. So for this study, imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Maybe they'll buy their pal a coffee or whatever. And then later that day we ask everyone in both groups about their current level of happiness. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this [e.g., @dunn2014prosocial]. We'll return to what their results show later in the chapter.)
 
 :::: {.columns}
 
@@ -135,19 +107,13 @@ Here, we're suggesting a research design with a manipulation which produces two 
 
 Thankfully, there is a variation of the $t$ statistic, and corresponding hypothesis test, that is designed for this kind of situation. It's called the **independent-samples $t$ test**. It allows us to compare two sample means and determine whether the difference between them is statistically significant.
 
-<!-- DRAFT: the second realization, about sampling error. Ask the reader to
-     imagine running the two-group study again with new people, even if
-     spending made no difference at all. Would the two group means come out
-     identical? No: each group's mean wobbles around its population mean,
-     and the difference wobbles with both. So "how big a difference would we
-     expect by chance?" needs uncertainty from both groups. This is the
-     question the denominator answers in the next section.
-     FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
+<!-- FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
      distribution builder (makeSamplingDistributionBuilder) that draws a pair
      of samples from one population and stacks M1 - M2. Readers would see
      the null distribution of differences centered at 0 and wider than a
-     single mean's (by a factor of root 2 with equal n). The builder has no
-     difference mode today. -->
+     single mean's (by a factor of root 2 with equal n). It would illustrate
+     the standard-error bullet in "From one sample to two". The builder has
+     no difference mode today. -->
 
 ## From one sample to two
 
@@ -173,20 +139,6 @@ If you ignore the subscripts and repeated symbols, it's the same structure as th
 
 Before we look at how to calculate each piece, let's see what they look like in action.
 
-<!-- DRAFT: picture first, formulas second. This tutorial is the
-     conceptual version of everything the subsections below formalize, using
-     the example's data: two means and their difference (the numerator);
-     each sample's spread; the pooled spread; and the standard error of the
-     difference (the denominator), drawn as a length sharing an end with the difference
-     so their ratio, t, can be seen. Everything is on the rating scale: the
-     SDs are the square roots of the variances the formulas pool, and
-     SE = s_p x sqrt(1/n1 + 1/n2). (Pooling happens on variances, so the
-     merged span is 1.94, not the 1.91 midpoint of the two SDs; the step text
-     can mention that or not.) The pooled SD is also d's denominator, which
-     the effect-size section can call back to. Deliberately no deviation
-     lines: those are Ch 14's job. Ch 13 reuses the SD spans for difference
-     scores. Built with makeScoreRows (score-rows.js). The step text introduces the quantities before the formulas below. -->
-
 ::::: {#act-spending-rows .callout-tip .interactive}
 ## What goes into the $t$ statistic
 
@@ -194,7 +146,7 @@ Before we look at how to calculate each piece, let's see what they look like in 
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Scores" data-action='{"tScale":false,"stage":"scores","means":false,"meanGap":false,"spread":"none","animate":false,"colorBy":"person"}'}
-Let's say we've had ten people participate in our spending study; 5 spent some money on themselves and 5 spent some money on someone else. Their subsequent happiness ratings on the 7-point scale are shown on the number lines, one dot per person and one row per group.
+Let's say we've had ten people participate in our spending study; five spent some money on themselves and five spent some money on someone else. Their subsequent happiness ratings on the 7-point scale are shown on the number lines, one dot per person and one row per group.
 :::
 
 ::: {.tutorial-step data-title="Means" data-action='{"tScale":false,"means":true,"meanGap":false,"spread":"none","colorBy":"group"}'}
@@ -202,7 +154,7 @@ Now let's compute the sample means. Rather than comparing ten individual scores,
 :::
 
 ::: {.tutorial-step data-title="Difference" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"none","colorBy":"group"}'}
-This difference becomes the numerator of our $t$ statistic, $M_1 - M_2$. Here that's spend on other minus spend on self: $5 - 4 = 1$. Remember, there's no specified reference $\mu$ to compare against; rather we compare that statistic with a null hypothesis that says $\mu_1 - \mu_2 = 0$. While subtracting that zero is important conceptually, mathematically it doesn't affect the value of the numerator.
+This difference becomes the numerator of our $t$ statistic, $M_1 - M_2$. Here that's spend on other minus spend on self: $5 - 4 = 1$. Remember, there's no specified reference $\mu$ to compare against; rather, we compare that statistic with a null hypothesis that says $\mu_1 - \mu_2 = 0$. While subtracting that zero is important conceptually, mathematically it doesn't affect the value of the numerator.
 :::
 
 ::: {.tutorial-step data-title="Spread" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"sd","colorBy":"group"}'}
@@ -210,7 +162,7 @@ Each sample also has its own standard deviation: in this case, 2.24 and 1.58 poi
 :::
 
 ::: {.tutorial-step data-title="Pooled" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"pooled","colorBy":"group"}'}
-We assume the two populations have the same variance; their estimates of variability only differ due to sampling error. So we "pool" their variances to get a better estimate of the common population variance. This is shown here as the "pooled" standard deviation, which is 1.94 points---roughly half way between the two individual SDs. (It's not exactly half way because we average the *variances* rather than the SDs, which pull the answer toward the larger variance.)
+We assume the two populations have the same variance; their estimates of variability only differ due to sampling error. So we "pool" their variances to get a better estimate of the common population variance. This is shown here as the "pooled" standard deviation, which is 1.94 points---roughly halfway between the two individual SDs. (It's not exactly halfway because we average the *variances* rather than the SDs, which pulls the answer toward the larger one.)
 :::
 
 ::: {.tutorial-step data-title="Standard error" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"se","colorBy":"group"}'}
@@ -242,7 +194,7 @@ The denominator also looks more complicated here. This notation, $s_{M_1 - M_2}$
 
 $$ s_{M_1 - M_2} = \sqrt{\frac{s_p^2}{n_1} + \frac{s_p^2}{n_2}} $$ {#eq-independent-se}
 
-It is the square root of $s_p^2$ divided by the sample size of sample one plus $s_p^2$ over $n$ for sample two. If you think back to the calculation for standard error we've used in the past, it's been the square root of variance over $n$. And so this looks kind of similar, but there's two things going on here — and presumably that's because we have two samples — and there's this unfamiliar symbol $s_p^2$.
+It is the square root of $s_p^2$ divided by the sample size of sample one plus $s_p^2$ over $n$ for sample two. If you think back to the calculation for standard error we've used in the past, it's been the square root of variance over $n$. And so this looks kind of similar, but there are two things going on here — and presumably that's because we have two samples — and there's this unfamiliar symbol $s_p^2$.
 
 $$ s_p^2 = \frac{SS_1 + SS_2}{df_1 + df_2} $$ {#eq-pooled-variance}
 
