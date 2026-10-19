@@ -213,7 +213,7 @@ test("chapter 11's tutorial pictures the class data against the reference and zo
   assert.deepEqual(steps.map((action) => action.zoom), [false, false, false, false, false, true, true]);
   assert.deepEqual(steps.map((action) => action.tScale), [false, false, false, false, false, false, true]);
 
-  // Keep the tutorial in its existing draft-only publication scope.
+  // The tutorial is available in public builds.
   const fenceStart = qmd.lastIndexOf('{.content-visible when-profile="draft"}', qmd.indexOf("{#act-class-rt-rows"));
-  assert.ok(fenceStart > 0);
+  assert.equal(fenceStart, -1);
 });
