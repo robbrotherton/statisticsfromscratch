@@ -9,6 +9,7 @@ interactive-scripts:
   - confidence-interval-diagrams
   - statistical-power
   - data-display
+  - score-rows
 ---
 
 {{< interactive-figure
@@ -238,13 +239,64 @@ Using those values, we can compute the estimated standard error of the mean:
 
 $$ s_M = \frac{s}{\sqrt{n}} = \frac{47.76}{\sqrt{65}} \approx 5.923\text{ ms} $$
 
-Then we can put that estimated standard error into the denominator of our $t$ statistic:
+Then we can put that estimated standard error into the denominator and we have our $t$ statistic:
 
 $$ t = \frac{M-\mu_0}{s_M} \approx \frac{298.18-284}{5.923} \approx 2.39 $$
 
+:::::: {.content-visible when-profile="draft"}
+
+<!-- DRAFT (draft profile only until the step text is written; remove this
+     fence to publish). A short picture of the calculation just performed,
+     and the first appearance of the visual language Ch 12's "What goes into
+     the t statistic" tutorial builds on: blue bracket = numerator
+     (M - mu0), red span = denominator. The SD shrinks to the standard error
+     (47.76 -> 5.92, a factor of sqrt(65), about 8). The zoom step enlarges
+     the axis, because a 14 ms difference and a 6 ms SE are too small to
+     compare at the scale of individual reaction times. Zoomed in, the
+     difference is visibly about 2.4 SEs long: t = 2.39. Built with
+     makeScoreRows (score-rows.js). Step text is bracketed placeholder copy. -->
+
+::::: {#act-class-rt-rows .callout-tip .interactive}
+## Picturing the $t$ statistic
+
+{{< interactive-figure classRtScoreRows makeScoreRows options='{"groups":[{"name":"Class","values":[296,282,299,263,287,335,233,318,405,321,339,284,336,267,346,286,299,255,310,320,359,284,325,253,301,250,426,258,332,339,382,390,289,324,255,285,311,274,380,294,279,326,303,349,269,260,283,312,239,159,216,197,350,334,251,255,322,240,283,307,312,265,283,326,270]}],"reference":{"value":284,"label":"μ₀ = 284"},"dotRadius":5.5,"dotStroke":1,"stack":"ties","xMin":140,"xMax":440,"zoomDomain":[276,306],"axisLabel":"Reaction time (ms)","tAxisLabel":"t (standard errors from μ₀)","meanLabel":"M = 298.18","means":false,"gapLabel":"M − μ₀","tutorial":true,"maxWidth":"40rem"}' fallback="The 65 class reaction times as dots, with the reference value of 284 ms and the class mean of 298.18 ms. The difference is 14.18 ms; the sample SD is 47.76 ms and the estimated standard error 5.92 ms, so the difference is about 2.4 standard errors (t = 2.39)." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Scores" data-action='{"tScale":false,"means":false,"meanGap":false,"spread":"none","zoom":false,"animate":false}'}
+Did you enjoy doing those sums? The equations are fine and necessary, of course, but I like to picture what's going on visually as well. So here are the 65 recorded reaction times as dots on a number line, with the null reference 284 ms marked.
+:::
+
+::: {.tutorial-step data-title="Mean" data-action='{"tScale":false,"means":true,"meanGap":false,"spread":"none","zoom":false}'}
+And here's the class mean, 298.18 ms, computed from the data.
+:::
+
+::: {.tutorial-step data-title="Difference" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"none","zoom":false}'}
+The difference between the mean and the reference value, 14.18 ms, becomes the numerator of the $t$ statistic.
+:::
+
+::: {.tutorial-step data-title="Spread" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"sd","zoom":false}'}
+Here's the sample standard deviation, 47.76 ms, shown $\pm 1$ SD either side of the mean.
+:::
+
+::: {.tutorial-step data-title="Standard error" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"se","zoom":false}'}
+The standard deviation becomes part of the denominator of the $t$ statistic; it shrinks by $\sqrt{n}$ to become the estimated standard error. At this scale it looks pretty small; sample means vary much less than individual scores do.
+:::
+
+::: {.tutorial-step data-title="Zoom" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"se","zoom":true}'}
+Zooming in shows the ratio of numerator to denominator more clearly. The numerator looks a good bit bigger than the denominator, so we'd expect a $t$ greater than 1. Note that we're still in the original units of measurement, milliseconds. Just one more step to turn this into an actual $t$ value.
+:::
+
+::: {.tutorial-step data-title="t" data-action='{"tScale":true,"means":true,"meanGap":true,"spread":"se","zoom":true}'}
+Dividing the numerator by the denominator changes the ruler. Now we're measuring in standard errors, not milliseconds. The difference between the mean and the reference value is $t \approx 2.39$. The null hypothesis $\mu_0$ is our reference point; that becomes $t$ = 0, and the class mean becomes $t = 2.39$, 2.39 standard errors above that reference value.
+:::
+::::
+:::::
+
+::::::
+
 ### Step 4: Make a decision
 
-The sample's $t$ statistic exceeds the upper critical value of 1.998, so we reject the null hypothesis. The class's mean reaction time was significantly slower than the 284 ms null hypothesis reference.
+Now we compare the sample's $t$ statistic from Step 3 to the critical values we identified in Step 2. In this case, the sample's $t$ statistic of $2.39$ exceeds the upper critical value of $1.998$, so we reject the null hypothesis. The class's mean reaction time was significantly slower than the 284 ms null hypothesis reference.
 
 ::: {#fig-t-class-decision}
 {{< interactive-figure classRtTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":64,"title":"Null distribution: df = 64","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-4,4],"xTicks":5,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-1.99773,"label":"−1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":1.99773,"label":"+1.998","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.394714,"label":"t = 2.39","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null t distribution with 64 degrees of freedom. The two rejection regions lie beyond ±1.998; the observed t of 2.39 is in the right rejection region." >}}

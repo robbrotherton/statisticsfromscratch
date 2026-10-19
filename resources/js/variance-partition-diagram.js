@@ -34,7 +34,7 @@ vpdPrefersReducedMotion = () => {
 // 16. Colors are paired with the word labels, never used alone; the neutral
 // gray for chance/error is deliberate (noise reads as gray).
 vpdSourceCatalog = {
-  "treatment": { label: "Treatment effect", color: "var(--sfs-comparison-color, #2f6f9f)" },
+  "treatment": { label: "Treatment effect", color: "var(--sfs-effect-color, #7654b5)" },
   "chance": { label: "Chance", color: "var(--sfs-neutral-color, #7b818a)" },
   "error": { label: "Sampling error", color: "var(--sfs-neutral-color, #7b818a)" },
   "ind-diff": { label: "Individual differences", color: "var(--sfs-current-color, #d1495b)" }
@@ -337,14 +337,14 @@ vpdEnsureStyles = () => {
   style.textContent = `
     .variance-partition-diagram {
       --sfs-figure-max-width: var(--vpd-max-width, 46rem);
-      --vpd-numerator-fill: color-mix(in srgb, var(--sfs-comparison-color, #2f6f9f) 14%, var(--sfs-bg, #fff));
+      --vpd-numerator-fill: color-mix(in srgb, var(--sfs-effect-color, #7654b5) 14%, var(--sfs-bg, #fff));
       --vpd-denominator-fill: color-mix(in srgb, var(--sfs-neutral-color, #7b818a) 14%, var(--sfs-bg, #fff));
       --vpd-emphasis-bg: color-mix(in srgb, var(--sfs-current-color, #d1495b) 16%, transparent);
     }
 
     @supports not (color: color-mix(in srgb, white, black)) {
       .variance-partition-diagram {
-        --vpd-numerator-fill: #dcebf5;
+        --vpd-numerator-fill: #e8e2f3;
         --vpd-denominator-fill: #e8eaec;
         --vpd-emphasis-bg: rgba(209, 73, 91, 0.16);
       }

@@ -17,15 +17,31 @@
 //
 // Annotations, switched on and off independently by tutorial actions:
 //   means        each row's dashed mean line
-//   meanGap      a bracket between the first two rows' means (the numerator
-//                of an independent-samples t)
-//   spread       "sd": a capped span, mean +/- 1 SD, just under each row (the
-//                book's shared SD mark, span-marks.js); "pooled": the pooled
-//                SD; "se": the standard error of the difference; "none".
-//                With `middle: true` the pooled and SE spans sit between the
-//                rows under the difference bracket (see spanItems).
-// In the differences stage the score rows fade and the spread span applies
-// to the difference row as well.
+//   meanGap      the bracket (effect color) from the null value to the
+//                estimate: the numerator of t
+//   spread       "sd": each row's mean +/- SD span (Chapter 4's mark, from
+//                span-marks.js) with a center cap, its value on the wing
+//                pointing toward the null value; "pooled" (two samples):
+//                copies of the two inner wings peel off and merge into one
+//                pooled-SD segment; "se": the standard error. The pooled SD
+//                and SE (noise color) start at the null value, like the
+//                bracket, so the two lengths compare directly and t reads
+//                as "how many SEs from the null value". The SD spans stay in
+//                place throughout.
+// In the differences stage the score rows fade and the bracket, SD span and
+// SE apply to the difference row (null value 0, estimate M_D).
+//   tScale       the last step of the t grammar: the axis relabels in t units
+//                (0 at the null value, one unit per SE; the SE already starts
+//                there and becomes "1 SE"), and the null-value and estimate
+//                lines are relabeled with their t values. The dots and SD spans
+//                fade, since they aren't on the t scale.
+//
+// One-sample mode (Chapter 11): a single group plus `reference` (the null
+// value). The bracket runs from the reference value to the mean, and "se"
+// draws the standard error of the mean, s / sqrt(n), centered under it.
+// `dotRadius` shrinks the dots for larger samples, and the `zoom` action
+// animates the axis to `zoomDomain`, so a small difference and SE that are
+// hard to see at the scale of individual scores can be compared.
 //
 // The pure helpers (statistics, stacking, person colors, difference domain)
 // are exposed on window.sfsScoreRows so other figures and the tests can share
@@ -34,23 +50,22 @@
   "use strict";
 
   const STAGES = ["scores", "pairs", "differences"];
-  // Group rows skip series 1 (blue) so the samples never compete with the
-  // comparison blue used for the difference between means, and skip series 4
-  // (vermilion), too close to the red used for the SE. Bluish green first,
-  // then orange.
+  // Data rows use the ordinary series colors (blue is the book's data
+  // color). Series 4 (vermilion) is skipped: too close to the red of the SE.
   const GROUP_COLORS = [
-    "var(--graph-series-3, #009e73)",
+    "var(--graph-series-1, #0072b2)",
     "var(--graph-series-2, #e69f00)",
-    "var(--graph-series-5, #cc79a7)"
+    "var(--graph-series-3, #009e73)"
   ];
   const TABLEAU10_FALLBACK = [
     "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f",
     "#edc949", "#af7aa1", "#ff9da7", "#9c755f", "#bab0ab"
   ];
   // Semantic colors shared with the Chapter 14 ANOVA explorer: the
-  // difference between means is the between-groups signal (comparison blue);
-  // the pooled SD and standard error are within-groups noise (current red).
-  const SIGNAL_COLOR = "var(--sfs-comparison-color, #2f6f9f)";
+  // difference (the numerator; between-groups signal) is the effect color,
+  // the purple of power and the alternative distribution in Chapter 9; the
+  // pooled SD and standard error are within-groups noise (current red).
+  const SIGNAL_COLOR = "var(--sfs-effect-color, #7654b5)";
   const NOISE_COLOR = "var(--sfs-current-color, #d1495b)";
   const DOT_RADIUS = 6.5;
   const STACK_STEP = 14;
@@ -124,7 +139,11 @@
       paired: canPair,
       differences,
       meanDifference: differences.length ? d3.mean(differences) : null,
-      sdDifference: differences.length > 1 ? d3.deviation(differences) : null
+      sdDifference: differences.length > 1 ? d3.deviation(differences) : null,
+      // Standard error of a single sample's mean, s / sqrt(n).
+      seMean: groups.length === 1 && groups[0].values.length > 1
+        ? sds[0] / Math.sqrt(groups[0].values.length)
+        : null
     };
   }
 
@@ -137,7 +156,13 @@
     const step = finite(options.step, STACK_STEP);
     const minGap = finite(options.minGap, 1e-9);
     const position = typeof options.position === "function" ? options.position : (value) => value;
-    const levels = [0, -1, 1, -2, 2, -3, 3, -4, 4];
+    // `upward` stacks only above the row (0, -1, -2, ...) instead of
+    // alternating below and above.
+    const levels = [0];
+    for (let k = 1; k <= 20; k += 1) {
+      if (options.upward) levels.push(-k);
+      else levels.push(-k, k);
+    }
     const lastAtLevel = new Map();
     const offsets = new Array(values.length).fill(0);
     values
@@ -184,6 +209,8 @@
     return [center - span / 2, center + span / 2];
   }
 
+  let clipCount = 0;
+
   window.sfsScoreRows = { computeStats, stackOffsets, personColor, differenceDomain, normalizeStage, normalizeSpread };
 
   function prefersReducedMotion() {
@@ -214,7 +241,7 @@
         stroke-width: 1;
       }
       .sfs-score-rows .sr-row-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 700; }
-      .sfs-score-rows .sr-dot { stroke: var(--bs-body-bg, #fff); stroke-width: 2; }
+      .sfs-score-rows .sr-dot { stroke: var(--bs-body-bg, #fff); stroke-width: var(--sr-dot-stroke, 2px); }
       .sfs-score-rows .sr-connector { fill: none; stroke-width: 2; stroke-linecap: round; }
       .sfs-score-rows .sr-mean-line { stroke-width: 2.5; stroke-dasharray: 5 4; }
       .sfs-score-rows .sr-mean-label { font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
@@ -224,7 +251,11 @@
       .sfs-score-rows .sr-difference-color { fill: var(--sfs-text, currentColor); }
       .sfs-score-rows .sr-ghost-line { fill: none; stroke-width: 2; stroke-linecap: round; }
       .sfs-score-rows .sr-ghosts { pointer-events: none; }
-      .sfs-score-rows .sr-span { stroke-width: 2.2; }
+      .sfs-score-rows .sr-span,
+      .sfs-score-rows .sr-den-span { stroke-width: 2.2; }
+      .sfs-score-rows .sr-reference-line { stroke: var(--sfs-null-color, currentColor); stroke-width: 2; stroke-dasharray: 3 3; }
+      .sfs-score-rows .sr-halo { stroke: var(--bs-body-bg, #fff); stroke-width: 5; opacity: 0.85; }
+      .sfs-score-rows .sr-reference-label { fill: var(--sfs-null-color, currentColor); font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
       .sfs-score-rows .sr-span-label { font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
       .sfs-score-rows .sr-gap line { stroke: ${SIGNAL_COLOR}; stroke-width: 2.2; }
       .sfs-score-rows .sr-gap text { fill: ${SIGNAL_COLOR}; font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
@@ -250,6 +281,23 @@
           opts.differences === true ? {} : opts.differences)
       : null;
     const personLabels = Array.isArray(opts.personLabels) ? opts.personLabels.map(String) : [];
+    const referenceValue = Number(opts.reference && typeof opts.reference === "object" ? opts.reference.value : opts.reference);
+    const reference = groups.length === 1 && Number.isFinite(referenceValue)
+      ? { value: referenceValue, label: (opts.reference && opts.reference.label) || `reference = ${referenceValue}` }
+      : null;
+    const dotRadius = finite(opts.dotRadius, DOT_RADIUS);
+    // "ties": dots stay on the row line and stack only on exactly equal
+    // values, overlapping otherwise (their outlines tell them apart). Tied
+    // dots rise half a diameter each, upward only, so they read as a small
+    // pile on one value rather than stray marks.
+    // Default: nearby dots are dodged so none overlap.
+    const stackTiesOnly = String(opts.stack || "").toLowerCase() === "ties";
+    // Width of the background-colored outline that separates touching dots.
+    const dotStroke = finite(opts.dotStroke, 2);
+    const zoomDomain = Array.isArray(opts.zoomDomain) && opts.zoomDomain.length === 2 &&
+      opts.zoomDomain.every((value) => Number.isFinite(Number(value)))
+      ? opts.zoomDomain.map(Number)
+      : null;
     const allValues = groups.flatMap((group) => group.values);
     const xDomain = [
       finite(opts.xMin, Math.floor(d3.min(allValues) - 2)),
@@ -261,7 +309,10 @@
       lastStage: null,
       means: meansAvailable && bool(opts.means, showAxis),
       meanGap: bool(opts.meanGap, false),
-      spread: normalizeSpread(opts.spread)
+      spread: normalizeSpread(opts.spread),
+      zoom: false,
+      tScale: false,
+      lastTScale: false
     };
     // SD spans and their labels sit under each row, so tutorials (which may
     // show them) get more room between rows.
@@ -278,7 +329,8 @@
 
     const root = d3.create("div")
       .attr("class", "sfs-score-rows sfs-figure")
-      .style("--sr-max-width", opts.maxWidth || null);
+      .style("--sr-max-width", opts.maxWidth || null)
+      .style("--sr-dot-stroke", `${dotStroke}px`);
     const rootNode = root.node();
     const controls = root.append("div").attr("class", "sr-controls");
     const svg = root.append("svg")
@@ -298,24 +350,45 @@
       const plot = { left: Math.max(56, 16 + longestLabel * (narrow ? 8.2 : 9)), right: width - 18 };
       // `middle` keeps the difference bracket and the pooled span between
       // the first two rows, so they need a wider gap.
+      const x = d3.scaleLinear().domain(xDomain).range([plot.left, plot.right]);
+      const xZoom = zoomDomain ? d3.scaleLinear().domain(zoomDomain).range([plot.left, plot.right]) : null;
+      const stackStep = stackTiesOnly ? dotRadius : dotRadius * 2 + 1.5;
+      const rowOffsets = groups.map((group) => stackOffsets(group.values, {
+        position: x,
+        minGap: stackTiesOnly ? 1e-6 : dotRadius * 2 + 1,
+        step: stackStep,
+        upward: stackTiesOnly
+      }));
+      // How far the stacked dots reach above and below their row.
+      const above = d3.max(rowOffsets, (offsets) => -d3.min(offsets)) || 0;
+      const below = d3.max(rowOffsets, (offsets) => d3.max(offsets)) || 0;
+      const meanHalf = Math.max(MEAN_HALF_HEIGHT, Math.max(above, below) + dotRadius + 4);
+      const spanOffset = reference ? below + dotRadius + 14 : SPAN_OFFSET;
       const rowGap = middle ? 152 : (narrow ? 64 : 72) + (roomy ? 12 : 0);
-      const firstRow = meansAvailable ? 40 : 26;
+      const firstRow = meansAvailable
+        ? 24 + Math.max(16, above + dotRadius)
+        : Math.max(26, above + dotRadius + 10);
       const rowY = (i) => firstRow + i * rowGap;
       const axisClearance = roomy ? 52 : 32;
-      const axisY = rowY(groups.length - 1) + axisClearance;
+      // One-sample mode stacks the SD span, the bracket and the SE under the row.
+      const oneSampleGapY = rowY(0) + spanOffset + 48;
+      const oneSampleSeY = oneSampleGapY + 28;
+      const axisY = reference ? oneSampleSeY + 34 : rowY(groups.length - 1) + axisClearance;
       const differenceRowY = axisY + 100;
-      const differenceAxisY = differenceRowY + axisClearance;
+      // Tutorials can draw the bracket and SE under the difference row.
+      const dGapY = differenceRowY + 62;
+      const dDenY = differenceRowY + 88;
+      const differenceAxisY = differenceRowY + (roomy ? 124 : axisClearance);
       const height = differenceOpts
         ? differenceAxisY + 52
         : showAxis ? axisY + 52 : rowY(groups.length - 1) + 30;
-      const x = d3.scaleLinear().domain(xDomain).range([plot.left, plot.right]);
       const dx = differenceOpts
         ? d3.scaleLinear().domain(differenceDomain(stats.differences, xDomain, stats.means[0])).range([plot.left, plot.right])
         : null;
       const ticks = narrow ? 4 : 8;
 
       const observations = groups.flatMap((group, groupIndex) => {
-        const offsets = stackOffsets(group.values, { position: x, minGap: DOT_RADIUS * 2 + 1 });
+        const offsets = rowOffsets[groupIndex];
         return group.values.map((value, index) => ({
           key: `${groupIndex}-${index}`,
           groupIndex,
@@ -347,10 +420,55 @@
           }))
         : [];
 
-      const gapY = middle ? rowY(0) + 62 : rowY(0) + rowGap / 2;
-      const pooledY = rowY(0) + 92;
-      return { width, height, plot, rowGap, rowY, gapY, pooledY, middle, axisY, differenceRowY, differenceAxisY, x, dx, ticks,
+      const gapY = reference ? oneSampleGapY : middle ? rowY(0) + 62 : rowY(0) + rowGap / 2;
+      const pooledY = reference ? oneSampleSeY : rowY(0) + 92;
+      return { width, height, plot, rowGap, rowY, gapY, pooledY, middle, axisY, differenceRowY, differenceAxisY, dGapY, dDenY, x, xZoom, dx, ticks,
+        narrow,
+        meanHalf, spanOffset,
         observations, differencePoints, pairs };
+    }
+
+    // The score scale currently in use: zoomed or full.
+    function xs() {
+      return state.zoom && geometry.xZoom ? geometry.xZoom : geometry.x;
+    }
+
+    function scoreAxis(scale) {
+      const zoomed = scale !== geometry.x;
+      return d3.axisBottom(scale)
+        .tickValues(!zoomed && Array.isArray(opts.tickValues) ? opts.tickValues : null)
+        .ticks(geometry.ticks).tickSizeOuter(0)
+        .tickFormat(tickFormat(scale, geometry.ticks));
+    }
+
+    // The same pixels, labeled in t units: (value - null value) / SE.
+    function tAxis(scale, parts) {
+      const [d0, d1] = scale.domain();
+      const tScaleLinear = d3.scaleLinear()
+        .domain([(d0 - parts.nullValue) / parts.se, (d1 - parts.nullValue) / parts.se])
+        .range(scale.range());
+      return d3.axisBottom(tScaleLinear)
+        .ticks(geometry.ticks).tickSizeOuter(0)
+        .tickFormat(tickFormat(tScaleLinear, geometry.ticks));
+    }
+
+    function tValue(parts) {
+      return (parts.estimate - parts.nullValue) / parts.se;
+    }
+
+    // Swap an axis between score units and t units, fading so the tick
+    // labels don't appear to slide between unrelated scales.
+    function updateAxis(axis, generator, label, duration, swapped) {
+      if (axis.empty()) return;
+      if (swapped && duration > 0) {
+        axis.interrupt().style("opacity", 0).call(generator)
+          .transition().duration(duration).style("opacity", 1);
+      } else if (duration > 0) {
+        axis.interrupt().style("opacity", 1).transition().duration(duration).ease(d3.easeCubicInOut).call(generator);
+      } else {
+        axis.interrupt().style("opacity", 1).call(generator);
+      }
+      axis.select(".sr-axis-label").text(label);
     }
 
     function tickFormat(scale, count) {
@@ -369,15 +487,25 @@
       svg.attr("viewBox", `0 0 ${g.width} ${g.height}`);
       canvas.selectAll("*").interrupt().remove();
 
+      // Clip regions, so marks sliding off the axis during a zoom (dots, SD
+      // spans, outgoing tick labels) stay inside the figure. Data marks stop
+      // at the plot's edges; axes get a little extra room for end labels.
+      clipCount += 1;
+      const clips = { data: `sr-clip-data-${clipCount}`, axis: `sr-clip-axis-${clipCount}` };
+      const defs = canvas.append("defs");
+      defs.append("clipPath").attr("id", clips.data).append("rect")
+        .attr("x", g.plot.left - 2).attr("y", 0)
+        .attr("width", g.plot.right - g.plot.left + 4).attr("height", g.height);
+      defs.append("clipPath").attr("id", clips.axis).append("rect")
+        .attr("x", g.plot.left - 24).attr("y", 0)
+        .attr("width", g.plot.right - g.plot.left + 48).attr("height", g.height);
+
 
       if (showAxis) {
-        const axis = canvas.append("g")
-          .attr("class", "sr-axis")
+        const axis = canvas.append("g").attr("clip-path", `url(#${clips.axis})`).append("g")
+          .attr("class", "sr-axis sr-score-axis")
           .attr("transform", `translate(0,${g.axisY})`)
-          .call(d3.axisBottom(g.x)
-            .tickValues(Array.isArray(opts.tickValues) ? opts.tickValues : null)
-            .ticks(g.ticks).tickSizeOuter(0)
-            .tickFormat(tickFormat(g.x, g.ticks)));
+          .call(scoreAxis(xs()));
         axis.append("text")
           .attr("class", "sr-axis-label")
           .attr("x", (g.plot.left + g.plot.right) / 2).attr("y", 38)
@@ -397,19 +525,34 @@
         .attr("fill", (d, i) => GROUP_COLORS[i % GROUP_COLORS.length])
         .text((d) => d.name);
 
+      if (reference) {
+        const ref = canvas.append("g").attr("class", "sr-reference");
+        // A background-colored halo keeps the dotted line visible where dots
+        // pile up on it.
+        ref.append("line")
+          .attr("class", "sr-halo")
+          .attr("y1", g.rowY(0) - g.meanHalf).attr("y2", g.rowY(0) + g.meanHalf);
+        ref.append("line")
+          .attr("class", "sr-reference-line")
+          .attr("y1", g.rowY(0) - g.meanHalf).attr("y2", g.rowY(0) + g.meanHalf);
+        ref.append("text")
+          .attr("class", "sr-reference-label")
+          .attr("y", g.rowY(0) - g.meanHalf - 5)
+          .text(reference.label);
+      }
+
+      // Positioned in render, so they can follow a zoom.
       const means = canvas.append("g").attr("class", "sr-means");
       if (meansAvailable) {
         const mean = means.selectAll("g").data(stats.means).join("g");
         mean.append("line")
           .attr("class", "sr-mean-line")
           .attr("stroke", (d, i) => GROUP_COLORS[i % GROUP_COLORS.length])
-          .attr("x1", (d) => g.x(d)).attr("x2", (d) => g.x(d))
-          .attr("y1", (d, i) => g.rowY(i) - MEAN_HALF_HEIGHT).attr("y2", (d, i) => g.rowY(i) + MEAN_HALF_HEIGHT);
+          .attr("y1", (d, i) => g.rowY(i) - g.meanHalf).attr("y2", (d, i) => g.rowY(i) + g.meanHalf);
         mean.append("text")
           .attr("class", "sr-mean-label")
           .attr("fill", (d, i) => GROUP_COLORS[i % GROUP_COLORS.length])
-          .attr("x", (d) => g.x(d)).attr("y", (d, i) => g.rowY(i) - MEAN_HALF_HEIGHT - 5)
-          .attr("text-anchor", "middle")
+          .attr("y", (d, i) => g.rowY(i) - g.meanHalf - 5)
           .text(opts.meanLabel || "mean");
       }
 
@@ -426,8 +569,8 @@
           .attr("x", g.plot.left - 12).attr("y", g.differenceRowY + 5)
           .attr("text-anchor", "end")
           .text(differenceOpts.label);
-        const differenceAxis = skeleton.append("g")
-          .attr("class", "sr-axis")
+        const differenceAxis = skeleton.append("g").attr("clip-path", `url(#${clips.axis})`).append("g")
+          .attr("class", "sr-axis sr-difference-axis")
           .attr("transform", `translate(0,${g.differenceAxisY})`)
           .call(d3.axisBottom(g.dx).ticks(g.ticks).tickSizeOuter(0).tickFormat(tickFormat(g.dx, g.ticks)));
         differenceAxis.append("text")
@@ -448,7 +591,9 @@
           .attr("class", "sr-zero-line")
           .attr("x1", g.dx(0)).attr("x2", g.dx(0))
           .attr("y1", g.differenceRowY - 26).attr("y2", g.differenceRowY + 26);
-        reveal.append("text")
+        // On narrow screens the zero line and the axis's 0 say it; the label
+        // would collide with the SD label.
+        if (!g.narrow) reveal.append("text")
           .attr("class", "sr-zero-label")
           // Below the row, right of zero, level with the SD label (which is
           // centered on the mean difference, left of zero): clear of the
@@ -461,20 +606,70 @@
           .attr("x1", g.dx(stats.meanDifference)).attr("x2", g.dx(stats.meanDifference))
           .attr("y1", g.differenceRowY - MEAN_HALF_HEIGHT).attr("y2", g.differenceRowY + MEAN_HALF_HEIGHT);
         reveal.append("text")
-          .attr("class", "sr-mean-label")
+          .attr("class", "sr-mean-label sr-d-mean-label")
           .attr("fill", SIGNAL_COLOR)
           .attr("x", g.dx(stats.meanDifference)).attr("y", g.differenceRowY - MEAN_HALF_HEIGHT - 5)
           .attr("text-anchor", "middle")
           .text(differenceOpts.meanLabel);
       }
 
-      canvas.append("g").attr("class", "sr-spread");
+      const clipped = (layer) => layer.attr("clip-path", `url(#${clips.data})`);
+      clipped(canvas.append("g").attr("class", "sr-spread"));
+      canvas.append("g").attr("class", "sr-denominator");
       canvas.append("g").attr("class", "sr-gap");
-      canvas.append("g").attr("class", "sr-connectors");
-      canvas.append("g").attr("class", "sr-dots");
-      canvas.append("g").attr("class", "sr-difference-dots");
+      clipped(canvas.append("g").attr("class", "sr-connectors"));
+      clipped(canvas.append("g").attr("class", "sr-dots"));
+      clipped(canvas.append("g").attr("class", "sr-difference-dots"));
       canvas.append("g").attr("class", "sr-ghosts");
+      // Reference and mean lines sit on top of the dots, under the ghosts.
+      state.lastTScale = false;
+      canvas.select(".sr-reference").raise();
+      canvas.select(".sr-means").raise();
+      canvas.select(".sr-ghosts").raise();
       state.lastStage = null;
+    }
+
+    // Means, reference value and axis follow the current scale. With a
+    // reference value, the two labels sit on either side of their lines so
+    // they don't collide when the lines are close.
+    function positionMarks(duration) {
+      const scale = xs();
+      const move = (selection) => selection.interrupt().transition().duration(duration).ease(d3.easeCubicInOut);
+      const meanAboveReference = reference ? stats.means[0] >= reference.value : true;
+      const differencesStage = state.stage === "differences";
+      const parts = tParts(differencesStage);
+      const tMode = state.tScale && Boolean(parts) && Number.isFinite(parts.se);
+      const swapped = state.tScale !== state.lastTScale;
+      const tLabel = (value) => `t = ${fmt((value - parts.nullValue) / parts.se)}`;
+      canvas.select(".sr-means").selectAll("g").each(function(mean, i) {
+        const node = d3.select(this);
+        move(node.select("line")).attr("x1", scale(mean)).attr("x2", scale(mean));
+        node.select("text").attr("text-anchor", reference ? (meanAboveReference ? "start" : "end") : "middle");
+        move(node.select("text")).attr("x", scale(mean) + (reference ? (meanAboveReference ? 4 : -4) : 0));
+        node.select("text").text(tMode && !differencesStage ? tLabel(mean) : opts.meanLabel || "mean");
+      });
+      if (reference) {
+        const ref = canvas.select(".sr-reference");
+        move(ref.selectAll("line")).attr("x1", scale(reference.value)).attr("x2", scale(reference.value));
+        ref.select("text").attr("text-anchor", meanAboveReference ? "end" : "start");
+        move(ref.select("text")).attr("x", scale(reference.value) + (meanAboveReference ? -4 : 4));
+        ref.select("text").text(tMode ? "t = 0" : reference.label);
+      }
+      const scoreTMode = tMode && !differencesStage;
+      updateAxis(canvas.select(".sr-score-axis"),
+        scoreTMode ? tAxis(scale, parts) : scoreAxis(scale),
+        scoreTMode ? (opts.tAxisLabel || "t (standard errors from the null value)") : (opts.axisLabel || "Score"),
+        duration, swapped);
+      if (differenceOpts) {
+        const dTMode = tMode && differencesStage;
+        updateAxis(canvas.select(".sr-difference-axis"),
+          dTMode ? tAxis(geometry.dx, parts) : d3.axisBottom(geometry.dx).ticks(geometry.ticks).tickSizeOuter(0).tickFormat(tickFormat(geometry.dx, geometry.ticks)),
+          dTMode ? (differenceOpts.tAxisLabel || "t (standard errors from 0)") : differenceOpts.axisLabel,
+          duration, swapped);
+        canvas.select(".sr-d-mean-label").text(dTMode ? tLabel(stats.meanDifference) : differenceOpts.meanLabel);
+        canvas.select(".sr-zero-label").text(dTMode ? "t = 0" : differenceOpts.zeroLabel);
+      }
+      state.lastTScale = state.tScale;
     }
 
     function colorFor(d) {
@@ -498,10 +693,14 @@
 
     function annotationDescription() {
       const parts = [];
+      if (state.meanGap && reference) parts.push(`the gap between the mean and ${reference.label} (${fmt(Math.abs(stats.means[0] - reference.value))})`);
       if (state.meanGap && groups.length > 1) parts.push(`the gap between the means (${fmt(Math.abs(stats.means[1] - stats.means[0]))})`);
       if (state.spread === "sd") parts.push(`a span one SD either side of each mean (${stats.sds.map(fmt).join(" and ")})`);
       if (state.spread === "pooled") parts.push(`the pooled SD (${fmt(stats.pooledSd)})`);
-      if (state.spread === "se") parts.push(`the standard error of the difference (${fmt(stats.seDifference)}) next to the difference itself`);
+      if (state.spread === "se" && reference) parts.push(`the standard error of the mean (${fmt(stats.seMean)}) under that gap`);
+      if (state.zoom) parts.push("zoomed in on the gap");
+      if (state.tScale) parts.push("the axis relabeled in t units, with the null value at 0 and one unit per standard error");
+      if (state.spread === "se" && !reference) parts.push(`the standard error of the difference (${fmt(stats.seDifference)}) next to the difference itself`);
       return parts.length ? `; showing ${parts.join(", ")}` : "";
     }
 
@@ -514,7 +713,7 @@
     function finishGhosts() {
       canvas.select(".sr-ghosts").selectAll("*").interrupt().remove();
       canvas.select(".sr-difference-dots").selectAll("circle").interrupt()
-        .style("opacity", state.stage === "differences" ? 1 : 0);
+        .style("opacity", state.stage === "differences" && !state.tScale ? 1 : 0);
     }
 
     function render(options) {
@@ -533,17 +732,24 @@
         .data(g.observations, (d) => d.key)
         .join((enter) => enter.append("circle")
           .attr("class", "sr-dot")
-          .attr("r", DOT_RADIUS)
-          .attr("cx", (d) => g.x(d.value))
+          .attr("r", dotRadius)
+          .attr("cx", (d) => xs()(d.value))
           .attr("cy", (d) => d.y)
           .call((circle) => circle.append("title").text((d) => dotTitle(d, groups[d.groupIndex].name))))
+        // Higher dots first, so a pile of tied scores sits behind the dot on
+        // the line rather than in front of it.
+        .sort((a, b) => a.y - b.y)
         .attr("fill", colorFor)
         .interrupt()
         .transition().duration(duration)
-        .style("opacity", differencesStage ? 0.22 : 1);
+        .attr("cx", (d) => xs()(d.value))
+        // Zoomed in, most scores fall off the axis: they have done their job.
+        .style("opacity", state.zoom || state.tScale ? 0 : differencesStage ? 0.22 : 1);
+
+      positionMarks(duration);
 
       const connectorsVisible = stats.paired && (state.stage !== "scores" || showConnectors);
-      const connectorOpacity = differencesStage ? 0.18 : state.stage === "scores" ? 0.4 : 0.6;
+      const connectorOpacity = state.tScale ? 0 : differencesStage ? 0.18 : state.stage === "scores" ? 0.4 : 0.6;
       canvas.select(".sr-connectors").selectAll("path")
         .data(connectorsVisible ? g.pairs : [], (d) => d.index)
         .join(
@@ -563,7 +769,8 @@
         .style("opacity", !state.means ? 0 : differencesStage ? 0.22 : 1);
 
       renderGap(duration, differencesStage);
-      renderSpread(duration, differencesStage, slide);
+      renderSdSpans(duration, differencesStage, slide);
+      renderDenominator(duration, differencesStage);
 
       if (differenceOpts) {
         canvas.select(".sr-difference-skeleton").interrupt().transition().duration(duration)
@@ -579,23 +786,62 @@
             .attr("cy", (d) => d.y)
             .attr("fill", (d) => d.personColor)
             .call((circle) => circle.append("title").text((d) => dotTitle(d, differenceOpts.label))))
-          .style("opacity", differencesStage && !slide ? 1 : 0);
+          .style("opacity", differencesStage && !slide && !state.tScale ? 1 : 0);
         if (slide) slideToDifferences();
       }
       state.lastStage = state.stage;
     }
 
-    // A bracket from the first mean to the second, drawn out when it
-    // appears, labeled with the size of the difference.
-    function renderGap(duration, differencesStage) {
+    // The visual grammar of a t statistic, shared by Chapters 11-13:
+    //   - the bracket (effect color) runs from the null value to the estimate:
+    //     mu0 -> M (one sample), M1 -> M2 (two samples), 0 -> M_D (differences);
+    //   - each row's spread is Chapter 4's mean +/- SD span, with a center cap
+    //     at the mean and its value written on the wing that points toward the
+    //     null value;
+    //   - the denominator (noise color) is a single segment starting at the
+    //     null value and pointing toward the estimate, so it shares its start
+    //     with the bracket: their lengths compare directly, and the ratio is t.
+    function tParts(differencesStage) {
       const g = geometry;
-      const visible = state.meanGap && state.means && groups.length > 1 && !differencesStage;
-      const y = g.gapY;
-      const from = g.x(stats.means[0]);
-      const to = groups.length > 1 ? g.x(stats.means[1]) : from;
-      const label = `${opts.gapLabel || "difference between means"} = ${fmt(Math.abs(stats.means[1] - stats.means[0]))}`;
+      if (differencesStage && differenceOpts) {
+        return {
+          scale: g.dx, nullValue: 0, estimate: stats.meanDifference,
+          gapY: g.dGapY, denY: g.dDenY,
+          se: stats.sdDifference / Math.sqrt(stats.differences.length),
+          gapLabel: differenceOpts.gapLabel || "difference from 0"
+        };
+      }
+      if (reference) {
+        return {
+          scale: xs(), nullValue: reference.value, estimate: stats.means[0],
+          gapY: g.gapY, denY: g.pooledY, se: stats.seMean,
+          gapLabel: opts.gapLabel || "difference from reference"
+        };
+      }
+      if (groups.length > 1) {
+        return {
+          scale: xs(), nullValue: stats.means[0], estimate: stats.means[1],
+          gapY: g.gapY, denY: g.pooledY, se: stats.seDifference,
+          gapLabel: opts.gapLabel || "difference between means"
+        };
+      }
+      return null;
+    }
+
+    // The bracket, drawn out from the null value when it appears.
+    function renderGap(duration, differencesStage) {
+      const parts = tParts(differencesStage);
+      const scoreRows = !differencesStage;
+      const visible = Boolean(parts) && state.meanGap && (scoreRows ? state.means : true);
+      const from = parts ? parts.scale(parts.nullValue) : 0;
+      const to = parts ? parts.scale(parts.estimate) : 0;
+      const y = parts ? parts.gapY : 0;
+      const tMode = state.tScale && parts && Number.isFinite(parts.se);
+      const label = !parts ? ""
+        : tMode ? `${parts.gapLabel} = ${fmt(Math.abs(tValue(parts)))} SE`
+        : `${parts.gapLabel} = ${fmt(Math.abs(parts.estimate - parts.nullValue))}`;
       const marker = canvas.select(".sr-gap").selectAll("g.sr-gap-marker")
-        .data(visible ? [0] : [])
+        .data(visible ? [differencesStage ? "d" : "rows"] : [], (d) => d)
         .join(
           (enter) => {
             const group = enter.append("g").attr("class", "sr-gap-marker");
@@ -604,7 +850,7 @@
             group.append("line").attr("class", "sr-gap-span")
               .attr("x1", from).attr("x2", from).attr("y1", y).attr("y2", y);
             group.append("line").attr("class", "sr-gap-cap-to")
-              .attr("x1", to).attr("x2", to).attr("y1", y - 5).attr("y2", y + 5)
+              .attr("x1", from).attr("x2", from).attr("y1", y - 5).attr("y2", y + 5)
               .style("opacity", 0);
             group.append("text").attr("text-anchor", "middle")
               .attr("x", (from + to) / 2).attr("y", y - 8)
@@ -615,78 +861,54 @@
           (update) => update,
           (exit) => exit.interrupt().transition().duration(duration).style("opacity", 0).remove()
         );
-      marker.select(".sr-gap-span").interrupt().transition().duration(duration).attr("x2", to);
-      marker.select(".sr-gap-cap-to").interrupt().transition().delay(duration).duration(duration / 2).style("opacity", 1);
-      marker.select("text").interrupt().transition().delay(duration).duration(duration / 2).style("opacity", 1);
+      const move = (selection) => selection.interrupt().transition().duration(duration).ease(d3.easeCubicInOut);
+      move(marker.select(".sr-gap-span")).attr("x1", from).attr("x2", to);
+      move(marker.select(".sr-gap-cap-from")).attr("x1", from).attr("x2", from);
+      move(marker.select(".sr-gap-cap-to")).attr("x1", to).attr("x2", to).style("opacity", 1);
+      move(marker.select("text")).attr("x", (from + to) / 2).style("opacity", 1);
+      marker.select("text").text(label);
     }
 
-    // The spans to draw for the current spread setting, each with its end
-    // points in pixels:
-    //   sd      one +/-SD span under each row (and the difference row)
-    //   pooled  with `middle`, one +/-pooled-SD span between the rows, under
-    //           the difference bracket; otherwise every row's span takes the
-    //           pooled SD
-    //   se      with `middle`, the pooled span becomes a single segment, one
-    //           standard error of the difference long, centered under the
-    //           bracket, so the two lengths can be compared: their ratio is t
-    function spanItems(differencesStage) {
+    // Each row's mean +/- SD span. `wingTarget` is the value the labeled
+    // wing points toward: the null value, or the other sample's mean.
+    function sdSpans(differencesStage) {
       const g = geometry;
-      const text = "var(--sfs-text, currentColor)";
-      const merged = g.middle && groups.length === 2 && ["pooled", "se"].includes(state.spread);
-      if (merged) {
-        const center = (stats.means[0] + stats.means[1]) / 2;
-        if (state.spread === "pooled") {
-          return [{
-            key: "pooled", color: NOISE_COLOR, opacity: 1, y: g.pooledY,
-            left: g.x(center - stats.pooledSd), right: g.x(center + stats.pooledSd), center: g.x(center),
-            label: `sₚ = ${fmt(stats.pooledSd)}`
-          }];
-        }
-        // Centered under the difference bracket, so the two lengths line up.
-        return [{
-          key: "pooled", color: NOISE_COLOR, opacity: 1, y: g.pooledY,
-          left: g.x(center - stats.seDifference / 2), right: g.x(center + stats.seDifference / 2), center: g.x(center),
-          label: `SE = ${fmt(stats.seDifference)}`
-        }];
-      }
-      const pooled = state.spread !== "sd";
-      const items = groups.map((group, i) => {
-        const sd = pooled ? stats.pooledSd : stats.sds[i];
+      const scale = xs();
+      const rows = groups.map((group, i) => {
+        const mean = stats.means[i];
+        const target = reference ? reference.value
+          : groups.length > 1 ? stats.means[i === 0 ? 1 : 0] : mean + 1;
         return {
-          key: `g${i}`,
+          key: `g${i}`, scale, mean, sd: stats.sds[i], target,
+          y: g.rowY(i) + g.spanOffset,
           color: GROUP_COLORS[i % GROUP_COLORS.length],
-          opacity: differencesStage ? 0.22 : 1,
-          y: g.rowY(i) + SPAN_OFFSET,
-          left: g.x(stats.means[i] - sd), right: g.x(stats.means[i] + sd), center: g.x(stats.means[i]),
-          label: `${pooled ? "sₚ" : "s"} = ${fmt(sd)}`
+          opacity: state.zoom || state.tScale ? 0 : differencesStage ? 0.22 : 1
         };
       });
-      if (differenceOpts && differencesStage && Number.isFinite(stats.sdDifference)) {
-        items.push({
-          key: "d", color: NOISE_COLOR, opacity: 1, y: g.differenceRowY + SPAN_OFFSET,
-          left: g.dx(stats.meanDifference - stats.sdDifference),
-          right: g.dx(stats.meanDifference + stats.sdDifference),
-          center: g.dx(stats.meanDifference),
-          label: `s = ${fmt(stats.sdDifference)}`
+      if (differencesStage && differenceOpts && Number.isFinite(stats.sdDifference)) {
+        rows.push({
+          key: "d", scale: g.dx, mean: stats.meanDifference, sd: stats.sdDifference, target: 0,
+          y: g.differenceRowY + SPAN_OFFSET,
+          color: "var(--sfs-text, currentColor)", opacity: state.tScale ? 0 : 1
         });
       }
-      return items;
+      return rows.map((row) => {
+        const direction = row.target >= row.mean ? 1 : -1;
+        return Object.assign(row, {
+          left: row.scale(row.mean - row.sd),
+          right: row.scale(row.mean + row.sd),
+          center: row.scale(row.mean),
+          wing: [row.scale(row.mean), row.scale(row.mean + direction * row.sd)],
+          label: `s = ${fmt(row.sd)}`
+        });
+      });
     }
 
-    // Draws the spans (the book's shared SD mark, span-marks.js) with their
-    // values written beneath. New spans grow out from their centers, as in
-    // Chapter 4. When the row spans give way to the merged pooled span, they
-    // travel to it and fade, and the merged span appears where they meet.
-    function renderSpread(duration, differencesStage, slide) {
+    function renderSdSpans(duration, differencesStage, slide) {
       const g = geometry;
-      // The difference row's span waits for the slide to finish.
       const differenceDelay = slide ? 400 + g.pairs.length * 140 + 1450 : 0;
-      const items = state.spread === "none" ? [] : spanItems(differencesStage);
-      const mergeTarget = items.find((item) => item.key === "pooled");
-      const easeMove = (delay) => (selection) => selection.transition().delay(delay).duration(duration).ease(d3.easeCubicInOut);
+      const items = state.spread === "none" ? [] : sdSpans(differencesStage);
       const entering = new Set();
-      let merging = false;
-
       const spans = canvas.select(".sr-spread").selectAll("g.sr-span-group")
         .data(items, (d) => d.key)
         .join(
@@ -694,51 +916,164 @@
             .attr("class", "sr-span-group")
             .each(function(item) {
               entering.add(item.key);
-              sfsSpanMarks.append(d3.select(this).append("g").attr("class", "sr-span"));
+              sfsSpanMarks.append(d3.select(this).append("g").attr("class", "sr-span"), { center: true });
               d3.select(this).append("text").attr("class", "sr-span-label").attr("text-anchor", "middle");
             }),
           (update) => update,
-          (exit) => exit.each(function() {
-            const node = d3.select(this);
-            node.interrupt();
-            if (mergeTarget && duration > 0) {
-              // Travel to the merged span, then fade.
-              merging = true;
-              node.select(".sr-span-label").interrupt().transition().duration(duration / 3).style("opacity", 0);
-              sfsSpanMarks.set(node.select(".sr-span"), mergeTarget.left, mergeTarget.right, mergeTarget.y, { transition: easeMove(0) });
-              node.transition().delay(duration).duration(duration / 2).style("opacity", 0).remove();
-            } else {
-              node.transition().duration(duration).style("opacity", 0).remove();
-            }
-          })
+          (exit) => exit.interrupt().transition().duration(duration).style("opacity", 0).remove()
         );
-
       spans.each(function(item) {
         const node = d3.select(this);
         const span = node.select(".sr-span").attr("stroke", item.color);
         const isNew = entering.has(item.key) && duration > 0;
-        const delay = item.key === "d" ? differenceDelay : merging && isNew ? duration : 0;
-        if (isNew && !merging) {
+        const delay = item.key === "d" ? differenceDelay : 0;
+        if (isNew) {
           sfsSpanMarks.grow(span, item.center, item.left, item.right, item.y, { delay, duration });
+          span.select(".sfs-span-mid").attr("x1", item.center).attr("x2", item.center);
         } else {
           sfsSpanMarks.set(span, item.left, item.right, item.y, {
-            transition: duration > 0 && !isNew ? easeMove(delay) : null
+            center: item.center,
+            transition: duration > 0
+              ? (selection) => selection.transition().delay(delay).duration(duration).ease(d3.easeCubicInOut)
+              : null
           });
         }
-        // Centered under the span, kept inside the figure.
-        const halfWidth = item.label.length * 3.5;
+        // The value sits under the wing that points toward the null value.
         node.select(".sr-span-label")
           .attr("fill", item.color)
           .text(item.label)
           .interrupt()
           .transition().delay(isNew ? 0 : delay).duration(isNew ? 0 : duration).ease(d3.easeCubicInOut)
-          .attr("x", Math.max(halfWidth + 2, Math.min(item.center, g.width - halfWidth - 2)))
+          .attr("x", (item.wing[0] + item.wing[1]) / 2)
           .attr("y", item.y + 16);
         if (isNew) node.style("opacity", 0);
         node.interrupt()
           .transition().delay(delay).duration(isNew ? duration / 2 : duration)
           .style("opacity", item.opacity);
       });
+    }
+
+    // The denominator segment: the pooled SD (two samples) or the standard
+    // error, starting at the null value and pointing toward the estimate.
+    function denominatorTarget(differencesStage) {
+      const parts = tParts(differencesStage);
+      if (!parts) return null;
+      let length = null;
+      let label = "";
+      if (state.spread === "pooled" && groups.length > 1 && !differencesStage) {
+        length = stats.pooledSd;
+        label = `sₚ = ${fmt(stats.pooledSd)}`;
+      } else if (state.spread === "se") {
+        length = parts.se;
+        label = `SE = ${fmt(parts.se)}`;
+      }
+      if (!Number.isFinite(length)) return null;
+      // The denominator starts at the null value and points toward the
+      // estimate, like the bracket: the SE is how far a mean typically lands
+      // from the null value by chance. On the t scale nothing moves; it just
+      // becomes one unit.
+      const direction = parts.estimate >= parts.nullValue ? 1 : -1;
+      const anchor = parts.scale(parts.nullValue);
+      const end = parts.scale(parts.nullValue + direction * length);
+      if (state.tScale && state.spread === "se") label = "1 SE";
+      return { x1: Math.min(anchor, end), x2: Math.max(anchor, end), y: parts.denY, label };
+    }
+
+    // Where the denominator comes from: a copy of each relevant SD wing.
+    function denominatorSources(differencesStage) {
+      return sdSpans(differencesStage)
+        .filter((item) => differencesStage ? item.key === "d" : item.key !== "d")
+        .map((item) => ({
+          x1: Math.min(item.wing[0], item.wing[1]),
+          x2: Math.max(item.wing[0], item.wing[1]),
+          y: item.y
+        }));
+    }
+
+    // Moves a span group through three phases in one transition: fade in
+    // where it starts, drop to the target height, then take the target's
+    // length. One tween, so a later move can't cancel a pending phase.
+    function peel(group, from, to, duration, onEnd) {
+      const lines = {
+        main: group.select(".sfs-span-line"),
+        caps: group.selectAll(".sfs-span-cap")
+      };
+      const cap = sfsSpanMarks.CAP_HEIGHT / 2;
+      const place = (x1, x2, y) => {
+        lines.main.attr("x1", x1).attr("x2", x2).attr("y1", y).attr("y2", y);
+        lines.caps.each(function(d, i) {
+          const x = i === 0 ? x1 : x2;
+          d3.select(this).attr("x1", x).attr("x2", x).attr("y1", y - cap).attr("y2", y + cap);
+        });
+      };
+      place(from.x1, from.x2, from.y);
+      const phase = (t, start, end) => d3.easeCubicInOut(Math.max(0, Math.min(1, (t - start) / (end - start))));
+      group.style("opacity", 0)
+        .transition("peel").duration(duration).ease(d3.easeLinear)
+        .tween("peel", () => (t) => {
+          group.style("opacity", Math.min(1, t / 0.15));
+          const drop = phase(t, 0.2, 0.55);
+          const shape = phase(t, 0.6, 1);
+          place(
+            from.x1 + (to.x1 - from.x1) * shape,
+            from.x2 + (to.x2 - from.x2) * shape,
+            from.y + (to.y - from.y) * drop
+          );
+        })
+        .on("end", () => { if (onEnd) onEnd(); });
+    }
+
+    function renderDenominator(duration, differencesStage) {
+      const layer = canvas.select(".sr-denominator");
+      layer.selectAll(".sr-den-copy").interrupt().remove();
+      const target = denominatorTarget(differencesStage);
+      const existing = layer.select("g.sr-den");
+      if (!target) {
+        if (!existing.empty()) existing.interrupt().transition().duration(duration).style("opacity", 0).remove();
+        return;
+      }
+      const label = (group) => group.select("text")
+        .attr("x", (target.x1 + target.x2) / 2).attr("y", target.y + 16).text(target.label);
+
+      if (!existing.empty() && !existing.classed("is-leaving")) {
+        // Already on screen: just take the new length (pooled SD -> SE).
+        sfsSpanMarks.set(existing.select(".sr-den-span"), target.x1, target.x2, target.y, {
+          transition: duration > 0
+            ? (selection) => selection.transition().duration(duration).ease(d3.easeCubicInOut)
+            : null
+        });
+        existing.select("text").interrupt().style("opacity", 1);
+        label(existing);
+        existing.interrupt().style("opacity", 1);
+        return;
+      }
+
+      const make = (className) => {
+        const group = layer.append("g").attr("class", className);
+        sfsSpanMarks.append(group.append("g").attr("class", "sr-den-span").attr("stroke", NOISE_COLOR));
+        group.append("text").attr("class", "sr-span-label").attr("text-anchor", "middle")
+          .attr("fill", NOISE_COLOR).style("opacity", 0);
+        return group;
+      };
+      const den = make("sr-den");
+      label(den);
+      const sources = denominatorSources(differencesStage);
+      if (!(duration > 0) || !sources.length) {
+        sfsSpanMarks.set(den.select(".sr-den-span"), target.x1, target.x2, target.y);
+        den.select("text").style("opacity", 1);
+        return;
+      }
+      // Copies of the SD wings peel off, drop, and become the denominator;
+      // with two samples, the two copies merge into one.
+      const peelDuration = 1700;
+      sources.forEach((source, i) => {
+        const group = i === 0 ? den : make("sr-den-copy");
+        peel(group.select(".sr-den-span"), source, target, peelDuration, () => {
+          if (i > 0) group.remove();
+        });
+        if (i === 0) group.style("opacity", 1);
+      });
+      den.select("text").transition().delay(peelDuration).duration(250).style("opacity", 1);
     }
 
     // Each pair's line slides sideways until its first score sits on the
@@ -808,6 +1143,9 @@
       const meanGap = action.meanGap !== undefined ? action.meanGap : action["mean-gap"];
       if (meanGap !== undefined) state.meanGap = bool(meanGap, state.meanGap);
       if (action.spread !== undefined) state.spread = normalizeSpread(action.spread);
+      if (action.zoom !== undefined) state.zoom = Boolean(zoomDomain) && bool(action.zoom, state.zoom);
+      const tScale = action.tScale !== undefined ? action.tScale : action["t-scale"];
+      if (tScale !== undefined) state.tScale = bool(tScale, state.tScale);
       render({ animate: action.animate !== false });
     }
 

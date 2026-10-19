@@ -5,8 +5,10 @@
 // caps, and the score rows of Chapters 12 and 13.
 //
 // The span is a group holding one .sfs-span-line and two .sfs-span-cap
-// lines. Color and stroke width come from the caller (set on the group or
-// its lines); the shared styles only fix the line ends and scaling.
+// lines, plus an optional .sfs-span-mid cap marking its center (the mean,
+// for a mean +/- SD span). Color and stroke width come from the caller (set
+// on the group or its lines); the shared styles only fix the line ends and
+// scaling.
 (function() {
   "use strict";
 
@@ -28,12 +30,14 @@
     document.head.appendChild(style);
   }
 
-  // Adds the span's three lines to an existing group and returns the group.
-  function append(group) {
+  // Adds the span's lines to an existing group and returns the group.
+  // `{ center: true }` adds a cap at the center as well.
+  function append(group, options) {
     ensureStyles();
     group.append("line").attr("class", "sfs-span-line");
     group.append("line").attr("class", "sfs-span-cap");
     group.append("line").attr("class", "sfs-span-cap");
+    if (options && options.center) group.append("line").attr("class", "sfs-span-cap sfs-span-mid");
     return group;
   }
 
@@ -48,8 +52,12 @@
     const main = animate(group.select(".sfs-span-line").interrupt())
       .attr("x1", x1).attr("x2", x2)
       .attr("y1", y).attr("y2", y);
-    animate(group.selectAll(".sfs-span-cap").data([x1, x2]).interrupt())
+    const center = Number.isFinite(options.center) ? options.center : (x1 + x2) / 2;
+    animate(group.selectAll(".sfs-span-cap:not(.sfs-span-mid)").data([x1, x2]).interrupt())
       .attr("x1", (d) => d).attr("x2", (d) => d)
+      .attr("y1", y - capHeight / 2).attr("y2", y + capHeight / 2);
+    animate(group.selectAll(".sfs-span-mid").interrupt())
+      .attr("x1", center).attr("x2", center)
       .attr("y1", y - capHeight / 2).attr("y2", y + capHeight / 2);
     return main;
   }
