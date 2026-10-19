@@ -124,6 +124,15 @@ We can't use the single-sample $t$ test here because we have *two* hypothetical 
 
 Here, we're suggesting a research design with a manipulation which produces two samples. Each participant does one thing or the other, never both. So the two groups consist of different people, and nothing links a particular score in one group to a particular score in the other. We call these **independent samples**. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people.
 
+<!-- DRAFT: random assignment to conditions is what lets a difference be
+     attributed to the spending instruction rather than to who ended up in
+     which group. (Pays off in "Interpreting the results"; contrast Ch 11's
+     class, which nobody assigned.) Sketch: "If we decide who goes in which
+     group at random, then the groups should differ, on average, only in how
+     they were told to spend the money. That's what would let us blame any
+     difference in happiness on the spending, rather than on who happened to
+     end up where." -->
+
 Thankfully, there is a variation of the $t$ statistic, and corresponding hypothesis test, that is designed for this kind of situation. It's called the **independent-samples $t$ test**. It allows us to compare two sample means and determine whether the difference between them is statistically significant.
 
 <!-- DRAFT: the second realization, about sampling error. Ask the reader to
@@ -142,54 +151,27 @@ Thankfully, there is a variation of the $t$ statistic, and corresponding hypothe
 
 ## From one sample to two
 
-<!-- DRAFT: name the design here, now that the quiz (quiz-two-groups) has
-     led the reader to the issues. Points to make, briefly:
-       - Each person experiences one condition and contributes one score:
-         a between-participants (independent-samples) design. Ch 13 opens by
-         contrasting this with within-participants designs, so define the
-         term here and let Ch 13 lean on it.
-       - Random assignment to conditions is what lets a difference be
-         attributed to the spending instruction rather than to who ended up
-         in which group. (Pays off in "Interpreting the results"; contrast
-         Ch 11's class, which nobody assigned.)
-       - "Independent" means nothing links a particular score in one group
-         to a particular score in the other. Plant this now; Ch 13 turns on
-         it.
-     Possible sketch:
-       "Each person does one or the other, never both. Researchers call this
-       a between-participants design, because the comparison is made between
-       different groups of people. And if we decide who goes in which group
-       at random, then the groups should differ, on average, only in how
-       they were told to spend the money. That's what would let us blame
-       any difference in happiness on the spending, rather than on who
-       happened to end up where." -->
+The independent-samples $t$ statistic isn't an entirely new idea. Every $t$ statistic has the same basic conceptual structure:
 
-<!-- DRAFT: Ch 11's "From z to t" showed the change as a side-by-side table
-     (tbl-z-t-comparison). Reuse that device: the existing "structure of the
-     t statistic" paragraphs below state the general form, then a table puts
-     the single-sample and independent-samples versions side by side. Ch 13
-     extends the same table with a third column, so the three chapters build
-     one table between them. Candidate table (math only; caption to write):
+$$ t = \frac{\text{sample statistic} - \text{population parameter}}{\text{estimated standard error}} $$ {#eq-t-structure}
 
-       |                  | Single sample              | Independent samples                         |
-       | Estimate         | M                          | M1 - M2                                     |
-       | Null value       | mu0                        | mu1 - mu2 = 0                               |
-       | Estimated SE     | s_M = s / sqrt(n)          | s_(M1-M2) = sqrt(sp^2/n1 + sp^2/n2)         |
-       | df               | n - 1                      | (n1 - 1) + (n2 - 1)                         |
+The numerator compares what we *observed* (the sample statistic) with what the null hypothesis *predicted* (the population parameter). The denominator says how big a difference we'd expect from sampling error alone. So $t$ tells us how many standard errors separate our data from our hypothesis. We used the single-sample $t$ test in the previous chapter, and we'll meet a third in the next, but they all stick to this basic template.
 
-     FIX: the general-structure paragraphs refer to "the equation" for the
-     single-sample test without showing it. Ch 11 now has @eq-t-statistic;
-     cross-reference it instead of re-describing it. -->
+For the single-sample $t$ test, the statistic was the sample mean, the parameter was the population mean specified by the null hypothesis, and the standard error was estimated from the sample's standard deviation and size (@eq-t-statistic):
 
-Before we get into how to actually calculate the independent-samples $t$ statistic, it's worth outlining the conceptual structure of the $t$ statistic in general. We met the single-sample variety in the previous chapter, and we'll introduce a third variation in the next chapter, but they all share the same basic conceptual structure.
+$$ t = \frac{M - \mu_0}{s_M} $$
 
-The numerator always takes the form of a sample statistic minus a population parameter, and the denominator is always the estimated standard error for that statistic. So in plainer language, we could say the numerator quantifies how different was what we observed from what we predicted based on the null hypothesis, and the denominator quantifies how big of a difference we would typically see just by chance alone. So the more of a difference we saw over and above what would be expected by chance, the bigger our numerator will be compared to the denominator and the larger the $t$ statistic we will get. Or a succinct, technical way of putting it would be the numerator is constructed from the difference between our data and our hypothesis, and the denominator is the expected sampling error.
+For the independent-samples $t$ statistic, filling in the template gives us this new equation:
 
-For the single-sample $t$ test, the equation looked like this:
+$$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$ {#eq-independent-t}
 
-$$t = \frac{M - \mu}{s_M}$$
+If you ignore the subscripts and repeated symbols, it's the same structure as the single-sample $t$: $M$ minus $\mu$ over $s$. But there is a bit more going on, so let's break it down:
 
-The sample statistic was the single sample's mean; we subtracted $\mu$, the expected population mean; and we divided by the estimated standard error of the mean, which we calculated using the single sample's standard deviation and our sample size.
+- **The statistic.** Each sample supplies its own mean, and our question is about the difference between them, so the statistic becomes the difference between the two sample means, $M_1 - M_2$.
+- **The parameter.** The null hypothesis doesn't tell us the value of either population mean, only that they're the same. So the parameter we subtract is the difference between the population means, $\mu_1 - \mu_2$.
+- **The standard error.** A standard error describes the variability of a statistic---the distribution of that statistic we'd see if we repeated the process many times. Here the statistic isn't a single mean, or the two separate means, but the difference between them. So we call this the estimated standard error of the mean difference, and the symbol gets that in its subscript: $s_{M_1 - M_2}$. This standard error needs to describe the distribution of those mean differences we'd see under the null hypothesis. So how much will the two sample means differ from one another due to sampling error alone, and how will those differences pile up? The answer has to account for both sets of scores: each sample gives us its own estimate of variability, and we need a way to combine them.
+
+Before we look at how to calculate each piece, let's see what they look like in action.
 
 <!-- DRAFT: picture first, formulas second. This tutorial is the
      conceptual version of everything the subsections below formalize, using
@@ -212,42 +194,38 @@ The sample statistic was the single sample's mean; we subtracted $\mu$, the expe
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Scores" data-action='{"tScale":false,"stage":"scores","means":false,"meanGap":false,"spread":"none","animate":false,"colorBy":"person"}'}
-Here are the spending study's ten happiness ratings, one dot per person and one row per group. The people in one row are different from those in the other: these are independent samples.
+Let's say we've had ten people participate in our spending study; 5 spent some money on themselves and 5 spent some money on someone else. Their subsequent happiness ratings on the 7-point scale are shown on the number lines, one dot per person and one row per group.
 :::
 
 ::: {.tutorial-step data-title="Means" data-action='{"tScale":false,"means":true,"meanGap":false,"spread":"none","colorBy":"group"}'}
-Now let's group those individual scores by sample and compare their means. Each sample has its own mean: 4 for spending on yourself and 5 for spending on someone else. Here we compare two sample means, rather than one sample mean with a fixed reference value.
+Now let's compute the sample means. As usual, we don't care that we have 10 individuals, just that we have two independent samples, with means we can compare.
 :::
 
 ::: {.tutorial-step data-title="Difference" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"none","colorBy":"group"}'}
-The bracket shows the mean for spending on others minus the mean for spending on yourself: $5 - 4 = 1$ point. Under the null hypothesis, the population difference is zero, so this observed difference is the numerator of $t$.
+This difference becomes the numerator of our $t$ statistic, $M_1 - M_2$. Remember, there's no specified reference $\mu$ to compare against; rather we compare that statistic with a null hypothesis that says $\mu_1 - \mu_2 = 0$. While subtracting that zero is important conceptually, mathematically it doesn't affect the value of the numerator.
 :::
 
 ::: {.tutorial-step data-title="Spread" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"sd","colorBy":"group"}'}
-Each sample also has its own standard deviation: 2.24 and 1.58 points. Each span reaches one SD on either side of its mean. Both samples' variability contributes to the uncertainty in the difference between their means.
+Each sample also has its own standard deviation: in this case, 2.24 and 1.58 points. Both samples' variability contributes to the uncertainty in the difference between their means, so we need a way of combining them.
 :::
 
 ::: {.tutorial-step data-title="Pooled" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"pooled","colorBy":"group"}'}
-For this test, we assume the two populations have the same variance. We pool the sample variances, weighting by their degrees of freedom, then take the square root: the pooled SD is 1.94 points. The merging spans show this combined estimate; it isn't simply the average of the two SDs.
+We assume the two populations have the same variance; their estimates of variability only differ due to sampling error. So we "pool" their variances to get a better estimate of the common population variance. This is shown here as the "pooled" standard deviation, which is 1.94 points---roughly half way between the two individual SDs (not exactly half way because the greater variability in one sample inflates the answer a bit).
 :::
 
 ::: {.tutorial-step data-title="Standard error" data-action='{"tScale":false,"means":true,"meanGap":true,"spread":"se","colorBy":"group"}'}
-We use the pooled SD and both sample sizes to estimate the standard error of the difference: $s_{M_1-M_2} = 1.94\sqrt{1/5 + 1/5} \approx 1.22$ points. The red segment is one SE long. It estimates how much the difference between means would vary across repeated pairs of independent samples.
+The actual denominator of our $t$ statistic is the standard error of the mean difference, which, like other kinds of standard error, depends not only on the population variability estimate, but also on sample size. Scaling the pooled SD here gives $s_{M_1-M_2} = \approx 1.22$ points. That value estimates how much the difference between means would vary across repeated pairs of independent samples.
 :::
 
 ::: {.tutorial-step data-title="t" data-action='{"tScale":true,"means":true,"meanGap":true,"spread":"se","colorBy":"group"}'}
-Change the ruler to standard errors, with zero difference anchored at the spend-on-self mean. This places the other mean at $t = 1/1.22 \approx 0.82$. The observed difference is less than one estimated standard error above zero. The first sample mean is still an estimate; using it as the ruler's origin doesn't make it a known population mean.
+So have our ratio. We can divide the numerator by the denominator to change the ruler to standard errors. This places the observed difference at $t = 1/1.22 \approx 0.82$. That is less than one estimated standard error above zero.
 :::
 ::::
 :::::
 
 ### The numerator: a difference between means
 
-This is what the equation looks like for the independent-samples test.
-
-$$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$ {#eq-independent-t}
-
-The numerator looks a bit more complicated, but remember that basic form: we have a statistic minus a parameter divided by a standard error.
+Let's take a closer look at @eq-independent-t. The numerator looks a bit more complicated, but remember that basic form: we have a statistic minus a parameter divided by a standard error.
 
 In this case, our statistic is no longer a single sample mean. Instead, it's the difference between two sample means, denoted by $M_1$, the mean of the first sample, minus $M_2$, the mean of the second sample. And we subtract from that statistic the expected population parameter. And again, it's not just a single population's mean, but the difference between two population means.
 
@@ -300,6 +278,18 @@ To be long-winded about it, the total degrees of freedom for an independent-samp
 ### Putting it all together
 
 So these are the steps to calculate the independent-samples $t$ statistic. Most of the extra work is in the denominator. First, we have to calculate pooled variance, and we use that to calculate the estimated standard error of the mean difference. Then we use that as the denominator with the difference between sample means as the numerator for our $t$ statistic, remembering that the population parameter — the difference between $\mu$s — is zero and can effectively be ignored when we're calculating this.
+
+@tbl-t-structure-comparison lines up the pieces of the two $t$ statistics we've seen so far.
+
+| | Single-sample $t$ | Independent-samples $t$ |
+|:--|:--|:--|
+| Sample statistic | $M$ | $M_1 - M_2$ |
+| Parameter under $H_0$ | $\mu_0$ | $\mu_1 - \mu_2 = 0$ |
+| Variability estimate | $s^2$ | $s_p^2$ (pooled) |
+| Estimated standard error | $s_M$ | $s_{M_1 - M_2}$ |
+| Degrees of freedom | $n - 1$ | $(n_1 - 1) + (n_2 - 1)$ |
+
+: The pieces of the single-sample and independent-samples $t$ statistics. Both follow the structure of @eq-t-structure. {#tbl-t-structure-comparison}
 
 <!-- FIX: under the null, signed t statistics are centered on zero, not one.
      "Around one" is only loosely true of their typical size, ignoring sign.
