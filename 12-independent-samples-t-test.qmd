@@ -116,8 +116,34 @@ Spend this on someone else 💵
 :::
 ::::
 
-<!-- DRAFT: name the design here, once the reader has the example to attach
-     it to. Points to make, briefly:
+::: {#quiz-two-groups}
+{{< include quizzes/12-independent-t-two-groups.qmd >}}
+:::
+
+We can't use the single-sample $t$ test here because we have *two* hypothetical populations and we don't know either of their means. So we can't formulate a null hypothesis based on expected means the way we could with the single-sample design.
+
+Here, we're suggesting a research design with a manipulation which produces two samples. Each participant does one thing or the other, never both. So the two groups consist of different people, and nothing links a particular score in one group to a particular score in the other. We call these **independent samples**. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people.
+
+Thankfully, there is a variation of the $t$ statistic, and corresponding hypothesis test, that is designed for this kind of situation. It's called the **independent-samples $t$ test**. It allows us to compare two sample means and determine whether the difference between them is statistically significant.
+
+<!-- DRAFT: the second realization, about sampling error. Ask the reader to
+     imagine running the two-group study again with new people, even if
+     spending made no difference at all. Would the two group means come out
+     identical? No: each group's mean wobbles around its population mean,
+     and the difference wobbles with both. So "how big a difference would we
+     expect by chance?" needs uncertainty from both groups. This is the
+     question the denominator answers in the next section.
+     FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
+     distribution builder (makeSamplingDistributionBuilder) that draws a pair
+     of samples from one population and stacks M1 - M2. Readers would see
+     the null distribution of differences centered at 0 and wider than a
+     single mean's (by a factor of root 2 with equal n). The builder has no
+     difference mode today. -->
+
+## From one sample to two
+
+<!-- DRAFT: name the design here, now that the quiz (quiz-two-groups) has
+     led the reader to the issues. Points to make, briefly:
        - Each person experiences one condition and contributes one score:
          a between-participants (independent-samples) design. Ch 13 opens by
          contrasting this with within-participants designs, so define the
@@ -138,26 +164,6 @@ Spend this on someone else 💵
        any difference in happiness on the spending, rather than on who
        happened to end up where." -->
 
-Each person does one or the other, never both. So the two groups consist of different people, and nothing links a particular score in one group to a particular score in the other. We call these **independent samples**. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people.
-
-We can't use the single-sample $t$ test here because we have *two* hypothetical populations and we don't know either of their means. So we can't formulate a null hypothesis based on expected means the way we could with the single-sample design.
-
-<!-- DRAFT: the second realization, about sampling error. Ask the reader to
-     imagine running the two-group study again with new people, even if
-     spending made no difference at all. Would the two group means come out
-     identical? No: each group's mean wobbles around its population mean,
-     and the difference wobbles with both. So "how big a difference would we
-     expect by chance?" needs uncertainty from both groups. This is the
-     question the denominator answers in the next section.
-     FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
-     distribution builder (makeSamplingDistributionBuilder) that draws a pair
-     of samples from one population and stacks M1 - M2. Readers would see
-     the null distribution of differences centered at 0 and wider than a
-     single mean's (by a factor of root 2 with equal n). The builder has no
-     difference mode today. -->
-
-## From one sample to two
-
 <!-- DRAFT: Ch 11's "From z to t" showed the change as a side-by-side table
      (tbl-z-t-comparison). Reuse that device: the existing "structure of the
      t statistic" paragraphs below state the general form, then a table puts
@@ -175,9 +181,15 @@ We can't use the single-sample $t$ test here because we have *two* hypothetical 
      single-sample test without showing it. Ch 11 now has @eq-t-statistic;
      cross-reference it instead of re-describing it. -->
 
-Before we get into how to actually calculate the independent-samples test, it's worth just outlining the conceptual structure of the $t$ statistic in general, because this is true of all the variations of the $t$ test. The numerator always takes the form of a sample statistic minus a population parameter, and the denominator is always the estimated standard error for that statistic. So in plainer language, we could say the numerator quantifies how different was what we observed from what we predicted based on the null hypothesis, and the denominator quantifies how big of a difference we would typically see just by chance alone. So the more of a difference we saw over and above what would be expected by chance, the bigger our numerator will be compared to the denominator and the larger the $t$ statistic we will get. Or a succinct, technical way of putting it would be the numerator is constructed from the difference between our data and our hypothesis, and the denominator is the expected sampling error.
+Before we get into how to actually calculate the independent-samples $t$ statistic, it's worth outlining the conceptual structure of the $t$ statistic in general. We met the single-sample variety in the previous chapter, and we'll introduce a third variation in the next chapter, but they all share the same basic conceptual structure.
 
-For the single-sample $t$ test, the equation looked like this. The sample statistic was the single sample's mean; we subtracted $\mu$, the expected population mean; and we divided by the estimated standard error of the mean, which we calculated using the single sample's standard deviation and our sample size.
+The numerator always takes the form of a sample statistic minus a population parameter, and the denominator is always the estimated standard error for that statistic. So in plainer language, we could say the numerator quantifies how different was what we observed from what we predicted based on the null hypothesis, and the denominator quantifies how big of a difference we would typically see just by chance alone. So the more of a difference we saw over and above what would be expected by chance, the bigger our numerator will be compared to the denominator and the larger the $t$ statistic we will get. Or a succinct, technical way of putting it would be the numerator is constructed from the difference between our data and our hypothesis, and the denominator is the expected sampling error.
+
+For the single-sample $t$ test, the equation looked like this:
+
+$$t = \frac{M - \mu}{s_M}$$
+
+The sample statistic was the single sample's mean; we subtracted $\mu$, the expected population mean; and we divided by the estimated standard error of the mean, which we calculated using the single sample's standard deviation and our sample size.
 
 <!-- DRAFT: picture first, formulas second. This tutorial is the
      conceptual version of everything the subsections below formalize, using
