@@ -1,5 +1,5 @@
 // Rows of scores on a shared axis, one row per condition: the display
-// Chapters 12 and 13 use to show who contributed which score.
+// Chapters 11–13 use to show who contributed which score.
 //
 // It deliberately shares the visual language of the Chapter 14 ANOVA
 // variability explorer (anova-variability-explorer.js): one lane per group,
@@ -658,7 +658,7 @@
       const scoreTMode = tMode && !differencesStage;
       updateAxis(canvas.select(".sr-score-axis"),
         scoreTMode ? tAxis(scale, parts) : scoreAxis(scale),
-        scoreTMode ? (opts.tAxisLabel || "t (standard errors from the null value)") : (opts.axisLabel || "Score"),
+        scoreTMode ? (geometry.narrow ? "t (standard errors)" : opts.tAxisLabel || "t (standard errors from the null value)") : (opts.axisLabel || "Score"),
         duration, swapped);
       if (differenceOpts) {
         const dTMode = tMode && differencesStage;
@@ -683,7 +683,7 @@
       if (state.stage === "differences") {
         return `${state.spread !== "none" ? `The difference scores have SD ${fmt(stats.sdDifference)}. ` : ""}` +
           `Each person's two scores, joined by a line, become one difference score (${groups[1].name} minus ${groups[0].name}). ` +
-          `The difference scores sit in their own row on an axis with the same scale, with mean ${fmt(stats.meanDifference)}.`;
+          `The difference scores have mean ${fmt(stats.meanDifference)}${annotationDescription()}.`;
       }
       if (state.stage === "pairs") {
         return `Rows of scores for ${names}. Each person has one score in each row, joined by a line and shown in the same color.`;
@@ -694,13 +694,17 @@
     function annotationDescription() {
       const parts = [];
       if (state.meanGap && reference) parts.push(`the gap between the mean and ${reference.label} (${fmt(Math.abs(stats.means[0] - reference.value))})`);
-      if (state.meanGap && groups.length > 1) parts.push(`the gap between the means (${fmt(Math.abs(stats.means[1] - stats.means[0]))})`);
-      if (state.spread === "sd") parts.push(`a span one SD either side of each mean (${stats.sds.map(fmt).join(" and ")})`);
+      if (state.meanGap && groups.length > 1 && state.stage !== "differences") parts.push(`the gap between the means (${fmt(Math.abs(stats.means[1] - stats.means[0]))})`);
+      if (state.spread === "sd" && state.stage !== "differences") parts.push(`a span one SD either side of each mean (${stats.sds.map(fmt).join(" and ")})`);
       if (state.spread === "pooled") parts.push(`the pooled SD (${fmt(stats.pooledSd)})`);
       if (state.spread === "se" && reference) parts.push(`the standard error of the mean (${fmt(stats.seMean)}) under that gap`);
       if (state.zoom) parts.push("zoomed in on the gap");
       if (state.tScale) parts.push("the axis relabeled in t units, with the null value at 0 and one unit per standard error");
-      if (state.spread === "se" && !reference) parts.push(`the standard error of the difference (${fmt(stats.seDifference)}) next to the difference itself`);
+      if (state.spread === "se" && !reference) {
+        const se = state.stage === "differences"
+          ? stats.sdDifference / Math.sqrt(stats.differences.length) : stats.seDifference;
+        parts.push(`the standard error of the difference (${fmt(se)}) next to the difference itself`);
+      }
       return parts.length ? `; showing ${parts.join(", ")}` : "";
     }
 
@@ -716,6 +720,14 @@
         .style("opacity", state.stage === "differences" && !state.tScale ? 1 : 0);
     }
 
+    // Named peel tweens run on the span group, while ordinary transitions
+    // run on its children. Cancel both before a new action can reposition
+    // them; otherwise an old tween can overwrite the new step's geometry.
+    function cancelTransitions() {
+      canvas.selectAll("*").interrupt().interrupt("peel");
+      finishGhosts();
+    }
+
     function render(options) {
       options = options || {};
       const g = geometry;
@@ -726,7 +738,7 @@
       const duration = animate ? 450 : 0;
 
       svg.select(".sr-title").text(stageDescription());
-      finishGhosts();
+      cancelTransitions();
 
       canvas.select(".sr-dots").selectAll("circle")
         .data(g.observations, (d) => d.key)
@@ -822,7 +834,7 @@
         return {
           scale: xs(), nullValue: stats.means[0], estimate: stats.means[1],
           gapY: g.gapY, denY: g.pooledY, se: stats.seDifference,
-          gapLabel: opts.gapLabel || "difference between means"
+          gapLabel: opts.gapLabel || (g.narrow ? "difference" : "difference between means")
         };
       }
       return null;
@@ -838,8 +850,8 @@
       const y = parts ? parts.gapY : 0;
       const tMode = state.tScale && parts && Number.isFinite(parts.se);
       const label = !parts ? ""
-        : tMode ? `${parts.gapLabel} = ${fmt(Math.abs(tValue(parts)))} SE`
-        : `${parts.gapLabel} = ${fmt(Math.abs(parts.estimate - parts.nullValue))}`;
+        : tMode ? `${parts.gapLabel} = ${fmt(tValue(parts))} SE`
+        : `${parts.gapLabel} = ${fmt(parts.estimate - parts.nullValue)}`;
       const marker = canvas.select(".sr-gap").selectAll("g.sr-gap-marker")
         .data(visible ? [differencesStage ? "d" : "rows"] : [], (d) => d)
         .join(
@@ -861,6 +873,7 @@
           (update) => update,
           (exit) => exit.interrupt().transition().duration(duration).style("opacity", 0).remove()
         );
+      marker.style("opacity", 1);
       const move = (selection) => selection.interrupt().transition().duration(duration).ease(d3.easeCubicInOut);
       move(marker.select(".sr-gap-span")).attr("x1", from).attr("x2", to);
       move(marker.select(".sr-gap-cap-from")).attr("x1", from).attr("x2", from);
@@ -1025,19 +1038,19 @@
 
     function renderDenominator(duration, differencesStage) {
       const layer = canvas.select(".sr-denominator");
-      layer.selectAll(".sr-den-copy").interrupt().remove();
+      layer.selectAll(".sr-den-copy").remove();
       const target = denominatorTarget(differencesStage);
       const existing = layer.select("g.sr-den");
       if (!target) {
-        if (!existing.empty()) existing.interrupt().transition().duration(duration).style("opacity", 0).remove();
+        if (!existing.empty()) existing.transition().duration(duration).style("opacity", 0).remove();
         return;
       }
       const label = (group) => group.select("text")
         .attr("x", (target.x1 + target.x2) / 2).attr("y", target.y + 16).text(target.label);
 
-      if (!existing.empty() && !existing.classed("is-leaving")) {
+      if (!existing.empty()) {
         // Already on screen: just take the new length (pooled SD -> SE).
-        sfsSpanMarks.set(existing.select(".sr-den-span"), target.x1, target.x2, target.y, {
+        sfsSpanMarks.set(existing.select(".sr-den-span").style("opacity", 1), target.x1, target.x2, target.y, {
           transition: duration > 0
             ? (selection) => selection.transition().duration(duration).ease(d3.easeCubicInOut)
             : null
@@ -1149,7 +1162,7 @@
       render({ animate: action.animate !== false });
     }
 
-    rootNode.addEventListener("sfs-if:cancel-transitions", finishGhosts);
+    rootNode.addEventListener("sfs-if:cancel-transitions", cancelTransitions);
 
     rootNode.scoreRows = {
       setStage(stage, animate) { applyTutorialAction({ stage, animate }); },
