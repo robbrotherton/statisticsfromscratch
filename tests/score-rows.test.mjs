@@ -15,9 +15,9 @@ function loadScoreRows() {
   return context.sfsScoreRows;
 }
 
-function figureOptions(qmd, figureId) {
-  const match = new RegExp(`interactive-figure ${figureId} makeScoreRows options='([^']+)'`).exec(qmd);
-  assert.ok(match, `makeScoreRows figure ${figureId} not found`);
+function figureOptions(qmd, figureId, generator = "makeScoreRows") {
+  const match = new RegExp(`interactive-figure ${figureId} ${generator} options='([^']+)'`).exec(qmd);
+  assert.ok(match, `${generator} figure ${figureId} not found`);
   return JSON.parse(match[1]);
 }
 
@@ -148,8 +148,9 @@ test("SDs, pooled SD, and the SD of differences match the chapters' worked value
 
 test("chapter 12's spending tutorial builds from means to the difference, spread, pooled SD and SE", () => {
   const qmd = readChapter("12-independent-samples-t-test.qmd");
-  const listed = (label) => /^Spend on (self|other): (.+)$/m.test(qmd) &&
-    new RegExp(`^Spend on ${label}: (.+)$`, "m").exec(qmd)[1].split("&emsp;").map(Number);
+  // Step 3's tables use the same scores as the tutorial.
+  const tables = figureOptions(qmd, "independentTVariabilityTables", "makeVariabilityTables").tables;
+  const listed = (label) => tables.find((table) => table.title === `Spend on ${label}`).data;
   const options = figureOptions(qmd, "spendingScoreRows");
   assert.deepEqual(options.groups[0].values, listed("self"));
   assert.deepEqual(options.groups[1].values, listed("other"));
