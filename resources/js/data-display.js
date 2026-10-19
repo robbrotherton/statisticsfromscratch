@@ -11,6 +11,9 @@
 //   order     initial "entered" (default) | "ascending" | "descending"
 //   controls  false hides the sort buttons (a static listing)
 //   count     false hides the "n scores" label
+//   align     "center" centres each row of chips under its name (a chapter
+//             figure); default leaves them flush left (the Data Explorer)
+//   swatches  false drops the colour square before each column's name
 //
 //   With several columns (groups, conditions) each column is its own named
 //   row of chips, sorted on its own. Text comes from the Data Explorer's
@@ -64,6 +67,8 @@
         list-style: none;
       }
       .data-display .dd-column + .dd-column { margin-top: 0.5rem; }
+      .data-display.dd-align-center .dd-column-name { text-align: center; }
+      .data-display.dd-align-center .dd-values { justify-content: center; }
       .data-display .dd-column-name {
         margin: 0 0 0.25rem;
         font-size: 0.9rem;
@@ -119,7 +124,7 @@
     let columns = [];
 
     const root = document.createElement("section");
-    root.className = "data-display sfs-figure";
+    root.className = "data-display sfs-figure" + (opts.align === "center" ? " dd-align-center" : "");
     root.setAttribute("aria-label", opts.ariaLabel || (S ? S.ariaLabel : "The scores"));
     root.value = { order, values: [], columns: [] };
 
@@ -231,7 +236,8 @@
           n.className = "dd-count";
           n.textContent = countText(column.values.length);
           n.hidden = opts.count === false;
-          heading.append(swatch, document.createTextNode(column.name), n);
+          if (opts.swatches !== false) heading.appendChild(swatch);
+          heading.append(document.createTextNode(column.name), n);
           block.appendChild(heading);
         }
         const list = document.createElement("ol");
