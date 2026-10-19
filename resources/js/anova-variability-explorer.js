@@ -70,7 +70,7 @@
       .anova-variability-explorer {
         --ave-total: var(--sfs-muted, #68727d);
         --ave-within: var(--sfs-current-color, #d1495b);
-        --ave-between: var(--sfs-comparison-color, #2f6f9f);
+        --ave-between: var(--sfs-effect-color, #7654b5);
         width: 100%;
         max-width: var(--ave-max-width, 58rem);
         margin: 0 auto 0.75rem;
