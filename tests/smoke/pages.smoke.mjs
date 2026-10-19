@@ -173,6 +173,63 @@ for (const viewport of VIEWPORTS) {
             height: root.getBoundingClientRect().height
           };
         });
+        // Color changes preserve observations and positions. Revisiting the
+        // opening step restores identity colors; paired rows retain identity.
+        const dots = () => figure.locator(".sr-dots circle").evaluateAll((nodes) =>
+          nodes.map((node) => ({
+            key: node.__data__.key,
+            group: node.__data__.groupIndex,
+            person: node.__data__.index,
+            color: getComputedStyle(node).fill,
+            x: +node.getAttribute("cx"),
+            y: +node.getAttribute("cy")
+          })).sort((a, b) => a.key.localeCompare(b.key))
+        );
+        await apply({ ...actions[0], animate: false });
+        await page.waitForTimeout(30);
+        const individuals = await dots();
+        assert.ok(new Set(individuals.map((dot) => dot.color)).size > 1);
+        await apply(actions[1]);
+        // Inspect animation frames as well as the final state: interpolating
+        // a CSS variable as a D3 color can introduce a black intermediate fill.
+        const unexpectedColors = await figure.evaluate(async (root, initial) => {
+          const original = new Map(initial.map((dot) => [dot.key, dot.color]));
+          const groupColors = [...root.querySelectorAll(".sr-lanes .sr-row-label")]
+            .map((label) => getComputedStyle(label).fill);
+          const unexpected = new Set();
+          const deadline = performance.now() + 500;
+          do {
+            await new Promise(requestAnimationFrame);
+            for (const node of root.querySelectorAll(".sr-dots circle")) {
+              const color = getComputedStyle(node).fill;
+              const datum = node.__data__;
+              if (color !== original.get(datum.key) && color !== groupColors[datum.groupIndex]) {
+                unexpected.add(color);
+              }
+            }
+          } while (performance.now() < deadline);
+          return [...unexpected];
+        }, individuals);
+        assert.deepEqual(unexpectedColors, []);
+        const summarized = await dots();
+        assert.deepEqual(summarized.map(({ key, x, y }) => ({ key, x, y })),
+          individuals.map(({ key, x, y }) => ({ key, x, y })));
+        if (chapter === "13-related-samples-t-test") {
+          assert.deepEqual(summarized, individuals);
+          for (const dot of individuals.filter((dot) => dot.group === 0)) {
+            assert.equal(dot.color, individuals.find((other) => other.group === 1 && other.person === dot.person).color);
+          }
+        } else {
+          for (const group of new Set(summarized.map((dot) => dot.group))) {
+            assert.equal(new Set(summarized.filter((dot) => dot.group === group).map((dot) => dot.color)).size, 1);
+          }
+          if (chapter === "12-independent-samples-t-test") {
+            assert.equal(new Set(individuals.map((dot) => dot.color)).size, individuals.length);
+          }
+        }
+        await apply(actions[0]);
+        await page.waitForTimeout(500);
+        assert.deepEqual(await dots(), individuals);
         const final = actions.at(-1);
         const se = actions.find((action) => action.spread === "se");
         await apply({ ...actions[0], animate: false });
@@ -190,7 +247,7 @@ for (const viewport of VIEWPORTS) {
         }
         assert.equal(interrupted.opacity, 1);
         assert.equal(interrupted.count, 1);
-        const gap = await figure.locator(".sr-gap-span").evaluate((line) =>
+        const gap = await figure.locator(".sr-gap .sfs-span-line").evaluate((line) =>
           Math.abs(+line.getAttribute("x2") - +line.getAttribute("x1"))
         );
         const expectedT = await figure.evaluate((root) => {
@@ -208,6 +265,8 @@ for (const viewport of VIEWPORTS) {
           await apply(action);
           await page.waitForTimeout(30);
           assert.equal(await figure.evaluate((root) => root.getBoundingClientRect().height), snapped.height);
+          if (action === actions[0]) assert.deepEqual(await dots(), individuals);
+          if (action === actions[1]) assert.deepEqual(await dots(), summarized);
           const clippedLabels = await figure.evaluate((root) => {
             const bounds = root.querySelector("svg").getBoundingClientRect();
             return [...root.querySelectorAll(".sr-axis-label, .sr-gap text")]
@@ -217,6 +276,20 @@ for (const viewport of VIEWPORTS) {
               }).map((label) => label.textContent);
           });
           assert.deepEqual(clippedLabels, []);
+          const capDimensions = await figure.evaluate((root) => {
+            return [...root.querySelectorAll(".sfs-span-cap")].map((cap) => ({
+              height: Math.abs(+cap.getAttribute("y2") - +cap.getAttribute("y1")),
+              width: parseFloat(getComputedStyle(cap).strokeWidth),
+              linecap: getComputedStyle(cap).strokeLinecap,
+              expectedHeight: window.sfsSpanMarks.CAP_HEIGHT,
+              expectedWidth: window.sfsSpanMarks.STROKE_WIDTH
+            }));
+          });
+          for (const cap of capDimensions) {
+            assert.equal(cap.height, cap.expectedHeight);
+            assert.equal(cap.width, cap.expectedWidth);
+            assert.equal(cap.linecap, "round");
+          }
         }
       } finally {
         await page.close();

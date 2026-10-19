@@ -307,6 +307,7 @@
     const state = {
       stage: allowedStage(opts.stage),
       lastStage: null,
+      colorBy: opts.colorBy === "person" ? "person" : "group",
       means: meansAvailable && bool(opts.means, showAxis),
       meanGap: bool(opts.meanGap, false),
       spread: normalizeSpread(opts.spread),
@@ -673,7 +674,7 @@
     }
 
     function colorFor(d) {
-      const byPerson = state.stage !== "scores" || opts.colorBy === "person";
+      const byPerson = state.stage !== "scores" || state.colorBy === "person";
       return byPerson ? d.personColor : d.groupColor;
     }
 
@@ -688,7 +689,10 @@
       if (state.stage === "pairs") {
         return `Rows of scores for ${names}. Each person has one score in each row, joined by a line and shown in the same color.`;
       }
-      return `Rows of scores for ${names}, one dot per score${state.means ? ", with each row's mean marked" : ""}${annotationDescription()}.`;
+      const coloring = state.colorBy === "person"
+        ? stats.paired ? ", with matching colors for each person's two scores" : ", with varied colors for individual observations"
+        : ", colored by sample";
+      return `Rows of scores for ${names}, one dot per score${coloring}${state.means ? ", with each row's mean marked" : ""}${annotationDescription()}.`;
     }
 
     function annotationDescription() {
@@ -751,6 +755,8 @@
         // Higher dots first, so a pile of tied scores sits behind the dot on
         // the line rather than in front of it.
         .sort((a, b) => a.y - b.y)
+        // Group colors are CSS variables. D3 cannot interpolate those color
+        // strings, so apply the fill directly while positions still animate.
         .attr("fill", colorFor)
         .interrupt()
         .transition().duration(duration)
@@ -857,15 +863,10 @@
         .join(
           (enter) => {
             const group = enter.append("g").attr("class", "sr-gap-marker");
-            group.append("line").attr("class", "sr-gap-cap-from")
-              .attr("x1", from).attr("x2", from).attr("y1", y - 5).attr("y2", y + 5);
-            group.append("line").attr("class", "sr-gap-span")
-              .attr("x1", from).attr("x2", from).attr("y1", y).attr("y2", y);
-            group.append("line").attr("class", "sr-gap-cap-to")
-              .attr("x1", from).attr("x2", from).attr("y1", y - 5).attr("y2", y + 5)
-              .style("opacity", 0);
+            sfsSpanMarks.append(group);
+            sfsSpanMarks.set(group, from, from, y);
             group.append("text").attr("text-anchor", "middle")
-              .attr("x", (from + to) / 2).attr("y", y - 8)
+              .attr("x", (from + to) / 2).attr("y", y - 12)
               .text(label)
               .style("opacity", 0);
             return group;
@@ -875,9 +876,7 @@
         );
       marker.style("opacity", 1);
       const move = (selection) => selection.interrupt().transition().duration(duration).ease(d3.easeCubicInOut);
-      move(marker.select(".sr-gap-span")).attr("x1", from).attr("x2", to);
-      move(marker.select(".sr-gap-cap-from")).attr("x1", from).attr("x2", from);
-      move(marker.select(".sr-gap-cap-to")).attr("x1", to).attr("x2", to).style("opacity", 1);
+      sfsSpanMarks.set(marker, from, to, y, { transition: move });
       move(marker.select("text")).attr("x", (from + to) / 2).style("opacity", 1);
       marker.select("text").text(label);
     }
@@ -1152,6 +1151,7 @@
     function applyTutorialAction(action) {
       if (!action || typeof action !== "object") return;
       if (action.stage !== undefined) state.stage = allowedStage(action.stage);
+      if (action.colorBy === "person" || action.colorBy === "group") state.colorBy = action.colorBy;
       if (action.means !== undefined) state.means = meansAvailable && bool(action.means, state.means);
       const meanGap = action.meanGap !== undefined ? action.meanGap : action["mean-gap"];
       if (meanGap !== undefined) state.meanGap = bool(meanGap, state.meanGap);
