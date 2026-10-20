@@ -21,28 +21,11 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-<!-- PLAN (structural pass, 2026-10-18). Comment cues in this file:
-       DRAFT:  proposed content or a prose sketch (not finished text)
-       FIGURE: an opportunity to use an existing generator, or a new build
-       FIX:    a known problem in the existing prose below it (from the
-               2026-10-04 integration review), to resolve when rewriting
-     Skeleton mirrors Chapter 11, section for section:
-       Ch 11 "Known unknowns"              -> Compared with what? (design-led opener)
-       Ch 11 "From z to t"                 -> From one sample to two
-       Ch 11 "A t test, step by step"      -> An independent-samples t test, step by step (Steps 1-5)
-       Ch 11 "Reporting and interpreting"  -> same, with independent-samples assumptions
-       Ch 11 "Looking ahead"               -> same, pointing at paired designs
-     The one new problem in this chapter: we now estimate BOTH means, so the
-     null names no value for either, and sampling error comes from two groups.
-     The design feature that creates it: different people in each condition,
-     ideally randomly assigned. Full plan: admin/editorial/integration/
-     chapters-12-13-structure-2026-10-18.md -->
-
-In the last chapter we introduced the single-sample $t$ test. Here, we'll move on to another variant: the independent-samples $t$ test. We'll compare the two to see what's new and what's the same. Then we'll give it the same treatment as before, using it to analyze some data to see how the hypothesis test works and what it tells us.
+In the last chapter we introduced the single-sample $t$ statistic. Here, we'll move on to another variant: the independent-samples $t$. We'll compare the two to see what's new and what's the same. Then we'll use it to analyze some data, seeing how the hypothesis test works and what it tells us.
 
 ## Compared with what?
 
-To refresh your memory of the single-sample $t$ statistic, suppose we're interested in whether money can buy happiness. We run a study in which we take a sample of people and give them all $10. We want to know if the small cash gift will affect their self-reported happiness, so we ask how happy they feel compared with usual, using a seven-point scale.
+To refresh your memory of the single-sample $t$ statistic, suppose we're interested in whether money can buy happiness. We run a study in which we take a sample of people and give them all $10. After they've had a chance to spend it, we ask how happy they feel compared with usual, using a seven-point scale.
 
 ::: center
 Here's $10! 💵
@@ -50,9 +33,9 @@ Here's $10! 💵
 
 {{< interactive-figure moneyLikert makeLikert options='{"labels":["1. A lot less than usual","2. Somewhat less than usual","3. A little less than usual","4. About average","5. A little more than usual","6. Somewhat more than usual","7. A lot more than usual"]}' fallback="A seven-point Likert response scale." >}}
 
-To do the kind of test we did in the last chapter, we need a reference value for the null hypothesis. The midpoint of the scale, 4, labeled "About average," is an obvious candidate. It's not a known population mean, just a guess; if the money had no effect at all, perhaps people would report average happiness levels, on average.^[We'd probably want to validate that somehow, or a significant result might tell us more about that assumption than about the money.] We don't know how variable scores in that hypothetical population might be, so the single-sample $t$ test would be the right tool.
+How can we determine if the small cash gift affected our participants' self-reported happiness? To do the kind of hypothesis test we did in the previous chapter we need a reference value for the null hypothesis. One potential candidate would be the midpoint of the scale, 4, labeled "About average." It's not a known population mean, just a guess based on the scale's wording; if the money had no effect at all, perhaps people would report average happiness levels, on average.^[We'd probably want to validate that somehow, or a significant result might tell us more about that assumption than about the money.] We don't know how variable scores in that hypothetical population might be, so the single-sample $t$ test would be the right tool.
 
-But there are a lot of different things you can do with your money. Spending a little windfall one way might make you happier than spending it another way. So now imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Later we ask everyone in both groups how happy they feel compared with usual. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this to see whether prosocial spending makes people feel happier [e.g., @dunn2014prosocial]. We'll return to what their results show later in the chapter.)
+But there are a lot of different things you can do with your money. Spending a little windfall one way might make you happier than spending it another way. So now imagine we create two different samples of people. Everyone in one sample is given $10 and told to spend it on something for themselves---an iced coffee or a sandwich or a magazine or whatever they like. Everyone in the other sample is also given $10, but they are told to spend it on someone else. Later we ask everyone in both groups how happy they feel compared with usual. (This isn't a purely hypothetical example, by the way: researchers really have run studies like this to see whether prosocial spending makes people feel happier, e.g., @dunn2014prosocial. We'll return to what their results show later in the chapter.)
 
 :::: {.columns}
 
@@ -79,25 +62,35 @@ Spend this on someone else 💵
 {{< include quizzes/12-independent-t-two-groups.qmd >}}
 :::
 
-With this design, we don't have a reference value for either population mean. Luckily, we don't need them. Instead of comparing each sample mean with a number we've guessed, we compare the two sample means with each other. The design asks not whether getting money affects happiness, but whether *how* you spend it does. That's not a question the single-sample $t$ test can answer. We now have two samples representing two hypothetical populations, and a null hypothesis that doesn't name a value for either population mean. It just says that they're the same.
+With this design, we don't have a reference value for either population mean. Luckily, we don't need them. We compare the two sample means with each other. We have two samples representing two hypothetical populations; the null hypothesis doesn't name a value for either population mean, it just says that there's no difference between them.
 
-The kind of research I'm describing is an **experiment**. We, the researchers, decide which condition each person experiences: spend the money on yourself, or spend it on someone else. Deliberately changing something like this, so that we can see whether it has an effect, is called a **manipulation**. Here, the manipulation is the spending instruction; everything else about the procedure, including the money and the happiness question, is the same for everyone.
+## From one sample to two
 
-Our manipulation produces two samples. Each participant does one thing or the other, never both. So the two groups consist of different people, and nothing links a particular score in one group to a particular score in the other. We call these **independent samples**. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people.
+The kind of research I'm describing is an **experiment**. The researchers deliberately change something, called a **manipulation**, to see whether it has an effect. Here, the manipulation is the spending instruction; everything else, like the amount of money and the wording of the happiness question, is the same for everyone. Often who gets which instruction is decided by **random assignment**: each person's condition is decided by chance, like a coin flip. If we let people choose, the groups might differ in other ways. Maybe generous people would choose to spend on someone else, and maybe generous people are happier to begin with. With random assignment, people who happen to be cheerful, or having a bad day, are just as likely to end up in either group, so the only *systematic* difference between the groups is the one we created. Chance can still make the groups differ a bit, of course. That's sampling error, and it's what the hypothesis test has to account for.
 
-How we decide who goes in which group matters too. If we let people choose, the groups might differ in other ways. Maybe generous people would choose to spend on someone else, and maybe generous people are happier to begin with. Instead, we'll use **random assignment**: each person's condition is decided by chance, like a coin flip. Then the groups should differ, on average, only in how they were told to spend the money. People who happen to be cheerful, or having a bad day, are just as likely to end up in either group. That's what would let us attribute a difference in happiness to the spending, rather than to who happened to end up where. (Contrast the statistics class in Chapter 11, which nobody assigned to anything; that limited what we could conclude from its reaction times.) Chance can still make the groups differ a bit, of course. That's sampling error, and it's what the hypothesis test has to account for.
+Note that in this design, each participant belongs to one sample or the other, not both. A study set up this way is called a **between-participants design**, because the comparison is made between different groups of people. Nothing links a particular score in one group to a particular score in the other, so we call these **independent samples**.
 
-The **independent-samples $t$ test** allows us to compare two sample means and determine whether their difference is statistically significant. It doesn't require random assignment: we can also compare preexisting groups, such as people who already choose to spend on themselves or on others. But then a difference wouldn't by itself establish what caused it.
+The **independent-samples $t$ test** allows us to compare two sample means and determine whether their difference is statistically significant.
+
+@fig-independent-inferential shows this logic, using the same kind of diagram as @fig-t-estimated-population. The two samples are drawn from some original population. (The diagram shows it twice to avoid a more awkward layout, but theoretically everyone comes from the same single population to begin with). Random assignment splits our participants into two samples, and each sample gets a different treatment: one spends on themselves, the other on someone else. Each treated sample stands for a hypothetical treated population---what happiness would look like if the whole population spent their money that way. In the single-sample test, we compared one treated population with a reference population. Now there's no reference population; we compare the two treated populations with each other. We don't know either mean, but the null hypothesis doesn't need them. It just says they're the same, $\mu_1 - \mu_2 = 0$, and our evidence is the difference between the sample means, $M_1 - M_2$.
+
+::: {#fig-independent-inferential}
+{{< interactive-figure independentInferentialDiagram makeInferentialDiagram options='{"preset":"independent","stats":false,"maxWidth":"42rem","ariaLabel":"Two samples come from the original population and receive different treatments. From each treated sample we make an inference about an unknown treated population, and ask whether the two treated populations have the same mean, mu 1 minus mu 2 equals 0. The samples are compared by the difference between their means, M1 minus M2."}' fallback="Two samples from the original population receive different treatments; inference from each treated sample to its unknown treated population; do the treated populations have the same mean (μ₁ − μ₂ = 0)? The samples are compared by M₁ − M₂." >}}
+
+A diagram representing the logic of the independent-samples $t$ test. Two samples from the original population receive different treatments. Each treated sample stands for an unknown treated population, and the null hypothesis says those populations have the same mean.
+:::
+
+This kind of design and statistical test also works without random assignment. If we let people choose which way to spend their money, we could still compare the samples this way. But like I said, then the two original populations might really be different, and a significant difference wouldn't tell us what *caused* it. Sometimes researchers want to compare groups that can't be randomnly assigned, like men and women, or people who voted for one political party or another, or whatever. The independent-samples $t$ test can still be used, but the results are correlational rather than causal.
 
 <!-- FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
      distribution builder (makeSamplingDistributionBuilder) that draws a pair
      of samples from one population and stacks M1 - M2. Readers would see
      the null distribution of differences centered at 0 and wider than a
      single mean's (by a factor of root 2 with equal n). It would illustrate
-     the standard-error bullet in "From one sample to two". The builder has
+     the standard-error bullet in "Independent-samples $t$". The builder has
      no difference mode today. -->
 
-## From one sample to two
+## Independent-samples $t$
 
 The independent-samples $t$ statistic isn't an entirely new idea. Every $t$ statistic has the same basic conceptual structure:
 
@@ -219,24 +212,13 @@ So let's run with the example of giving two different groups of people $10, tell
 
 ### Step 1: State the hypotheses
 
-The null hypothesis says that the two population means are the same: $\mu_1 - \mu_2 = 0$.
+The null hypothesis says that the two population means are the same: $\mu_1 - \mu_2 = 0$. That's the comparison across the top of @fig-independent-inferential.
 
 We'll use a nondirectional alternative, looking for a difference in either direction. As in Chapter 8, a directional test would need to be justified and chosen before inspecting the data. So let's run with a two-tailed test:
 
 $$ H_0: \mu_{\text{other}} - \mu_{\text{self}} = 0 $$
 
 $$ H_1: \mu_{\text{other}} - \mu_{\text{self}} \ne 0 $$
-
-::: {#fig-independent-inferential}
-{{< interactive-figure independentInferentialDiagram makeInferentialDiagram options='{"preset":"independent","maxWidth":"42rem"}' fallback="Inferential process diagram for an independent-samples t test." >}}
-
-A diagram representing the logic of the independent-samples $t$ test. Neither population mean is known; each sample supplies its own mean, size, and standard deviation. The diagram separates the two inferential paths, without showing how people enter the groups. In our spending experiment, both "Original population" boxes represent the same source population, and participants are randomly assigned to spending conditions. With preexisting groups, the source populations may differ and no treatment need be assigned.
-:::
-
-<!-- FIGURE (deferred): retain the general two-path schematic. The caption
-     distinguishes random assignment from comparisons of preexisting groups.
-     A future experiment-specific version could show one recruited sample
-     splitting into conditions by random assignment. -->
 
 ### Step 2: Set the decision criteria
 
