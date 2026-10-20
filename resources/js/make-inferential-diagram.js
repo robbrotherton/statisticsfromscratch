@@ -283,6 +283,8 @@ idgSingleSamplePreset = (opts, variant) => {
 
 idgIndependentFullPreset = (opts) => {
   const labels = opts.labels || {};
+  // stats: false gives the generic version, without each sample's n, M, SD.
+  const stats = opts.stats !== false;
   const nodes = idgMergeLabels([
     {
       id: "original-population-a",
@@ -302,7 +304,7 @@ idgIndependentFullPreset = (opts) => {
       y: 115,
       width: 185,
       height: 120,
-      label: ["Unknown", "treated", "population A"],
+      label: ["Unknown", "treated", "population 1"],
       dashed: true,
       fill: idgTreatedFill,
       role: "population"
@@ -314,7 +316,7 @@ idgIndependentFullPreset = (opts) => {
       y: 115,
       width: 185,
       height: 120,
-      label: ["Unknown", "treated", "population B"],
+      label: ["Unknown", "treated", "population 2"],
       dashed: true,
       fill: idgTreatedFill,
       role: "population"
@@ -337,7 +339,7 @@ idgIndependentFullPreset = (opts) => {
       y: 365,
       width: 185,
       height: 86,
-      label: ["Sample A"],
+      label: ["Sample 1"],
       role: "sample"
     },
     {
@@ -347,7 +349,8 @@ idgIndependentFullPreset = (opts) => {
       y: 365,
       width: 185,
       height: 86,
-      label: ["Treated", "sample A", "$n_1, M_1, SD_1$"],
+      label: ["Treated", "sample 1"],
+      detail: stats ? ["$n_1, M_1, SD_1$"] : [],
       fill: idgTreatedFill,
       role: "sample"
     },
@@ -358,7 +361,8 @@ idgIndependentFullPreset = (opts) => {
       y: 365,
       width: 185,
       height: 86,
-      label: ["Treated", "sample B", "$n_2, M_2, SD_2$"],
+      label: ["Treated", "sample 2"],
+      detail: stats ? ["$n_2, M_2, SD_2$"] : [],
       fill: idgTreatedFill,
       role: "sample"
     },
@@ -369,7 +373,7 @@ idgIndependentFullPreset = (opts) => {
       y: 365,
       width: 185,
       height: 86,
-      label: ["Sample B"],
+      label: ["Sample 2"],
       role: "sample"
     }
   ], labels);
@@ -426,23 +430,25 @@ idgIndependentFullPreset = (opts) => {
       to: "treated-population-b",
       curve: 0,
       dashed: true,
-      label: idgLabelFor(labels, "population-comparison-link", ""),
-      labelOffsetY: -20,
+      // The inner columns sit close together, so the comparison labels go
+      // above the populations and below the samples rather than between them.
+      label: idgLabelFor(labels, "population-comparison-link", "$\\mu_1 - \\mu_2 = 0$?"),
+      labelOffsetY: -88,
       className: "idg-link-comparison"
     },
     {
       from: "treated-sample-a",
       to: "treated-sample-b",
       curve: 0,
-      label: idgLabelFor(labels, "sample-comparison-link", ""),
-      labelOffsetY: 24,
+      label: idgLabelFor(labels, "sample-comparison-link", "$M_1 - M_2$"),
+      labelOffsetY: 70,
       className: "idg-link-comparison"
     }
   ];
 
   return {
     width: idgFiniteNumber(opts.width, 980),
-    height: idgFiniteNumber(opts.height, 455),
+    height: idgFiniteNumber(opts.height, 470),
     nodes,
     links
   };
