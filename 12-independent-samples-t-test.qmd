@@ -14,13 +14,6 @@ interactive-scripts:
 
 {{< interactive-figure independentSamplesCover makeSampleComparisonCover options='{}' fallback="Two differently colored block distributions building up from their baselines." >}}
 
-{{< include _coming-soon.qmd >}}
-
-:::::::: {.content-visible when-profile="draft"}
-
-<!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
-     When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
-
 In the last chapter we introduced the single-sample $t$ statistic. Here, we'll move on to another variant: the independent-samples $t$. We'll compare the two to see what's new and what's the same. Then we'll use it to analyze some data, seeing how the hypothesis test works and what it tells us.
 
 ## Compared with what?
@@ -72,7 +65,7 @@ Each participant belongs to one sample or the other, not both. A study set up th
 
 The **independent-samples $t$ test** allows us to compare two sample means and determine whether their difference is statistically significant. Chance can make the group means differ a bit, even if the manipulation doesn't do anything. That's what the test statistic has to account for.
 
-@fig-independent-inferential shows this logic, using the same kind of diagram as @fig-t-estimated-population. The two samples are drawn from some original population. (The diagram shows it twice to avoid a more awkward layout, but theoretically everyone in both samples comes from the same single population to begin with). The treatment splits participants into two independent samples. Each treated sample represents a hypothetical treated population---what happiness would look like if the whole population spent their money that way. In the single-sample test, we compared one treated population with a reference population. Now neither population mean is specified in advance; we compare the two treated populations with each other. The null hypothesis says they're the same, $\mu_1 - \mu_2 = 0$, and our evidence is the difference between the sample means, $M_1 - M_2$.
+@fig-independent-inferential shows this logic, using the same kind of diagram as @fig-t-estimated-population. The two samples are drawn from some original population. (The diagram shows it twice to avoid a more awkward layout, but theoretically everyone in both samples comes from the same single population to begin with.) The treatment splits participants into two independent samples. Each treated sample represents a hypothetical treated population---what happiness would look like if the whole population spent their money that way. In the single-sample test, we compared one treated population with a reference population. Now neither population mean is specified in advance; we compare the two treated populations with each other. The null hypothesis says they're the same, $\mu_1 - \mu_2 = 0$, and our evidence is the difference between the sample means, $M_1 - M_2$.
 
 ::: {#fig-independent-inferential}
 {{< interactive-figure independentInferentialDiagram makeInferentialDiagram options='{"preset":"independent","stats":false,"maxWidth":"42rem","ariaLabel":"Two samples come from the original population and receive different treatments. From each treated sample we make an inference about an unknown treated population, and ask whether the two treated populations have the same mean, mu 1 minus mu 2 equals 0. The samples are compared by the difference between their means, M1 minus M2."}' fallback="Two samples from the original population receive different treatments; inference from each treated sample to its unknown treated population; do the treated populations have the same mean (μ₁ − μ₂ = 0)? The samples are compared by M₁ − M₂." >}}
@@ -81,14 +74,6 @@ A diagram representing the logic of the independent-samples $t$ test. Two sample
 :::
 
 This kind of design and statistical test also works without random assignment. If we let people choose which way to spend their money, we could still compare the samples this way. But the groups might differ in other ways. Maybe generous people would choose to spend on someone else, and maybe generous people are happier to begin with [cf. @dickens1843carol]. With random assignment, people who happen to be cheerful, or having a bad day, are just as likely to end up in either group, so the only *systematic* difference between the groups is the one we created. Sometimes researchers want to compare groups that can't be randomly assigned, like men and women, or people who voted for one political party or another, or whatever. The independent-samples $t$ test can still be used, but the results are correlational rather than causal. The two original populations might be different in other ways as well, and a significant difference wouldn't tell us what *caused* it.
-
-<!-- FIGURE (new build, optional): a two-group mode for the Ch 7 sampling
-     distribution builder (makeSamplingDistributionBuilder) that draws a pair
-     of samples from one population and stacks M1 - M2. Readers would see
-     the null distribution of differences centered at 0 and wider than a
-     single mean's (by a factor of root 2 with equal n). It would illustrate
-     the standard-error bullet in "Independent-samples $t$". The builder has
-     no difference mode today. -->
 
 ## The independent-samples $t$ statistic
 
@@ -247,7 +232,7 @@ To calculate the pooled variance, we'll need each sample's sum of squares (or va
 ::: {#fig-independent-variability}
 {{< interactive-figure independentTVariabilityTables makeVariabilityTables options='{"tables":[{"title":"Spend on other","data":[6,3,5,7,4],"sample":true},{"title":"Spend on self","data":[4,1,7,3,5],"sample":true}],"stage":"sd","controls":false}' fallback="Variability tables for the two spending groups. Spend on other: scores 6, 3, 5, 7, 4; mean 5; SS = 10; variance 2.5; SD 1.58. Spend on self: scores 4, 1, 7, 3, 5; mean 4; SS = 20; variance 5; SD 2.24." >}}
 
-Deviations, sums of squares, variances, and standard deviations for the two spending groups. The spend-on-other group is sample 1, with $SS_1 = 10$; the spend-on-self group is sample 2, with $SS_2 = 20$. The standard deviations are the same ones we saw in @act-spending-rows.
+Deviations, sums of squares, variances, and standard deviations for the two spending groups.
 :::
 
 First, we pool the variances (@eq-pooled-variance):
@@ -294,7 +279,7 @@ Phew! That was a lot of work. Now you can try the same calculations with some di
 
 ### Step 5: Estimate the effect, interval, and power
 
-As in Chapter 11, we aren't quite done once we've made our decision. With a nonsignificant result, these estimates are still important. A nonsignificant result doesn't mean that no effect exists, but rather that our data doesn't provide strong enough evidence to conclude that an effect exists. Effect size and the confidence interval can give a sense of what our data can and can't rule out, and statistical power can help us plan for future studies.
+As in Chapter 11, we aren't quite done once we've made our decision. With a nonsignificant result, these estimates are still important. A nonsignificant result doesn't mean that no effect exists, but rather that our data don't provide strong enough evidence to conclude that an effect exists. Effect size and the confidence interval can give a sense of what our data can and can't rule out, and statistical power can help us plan for future studies.
 
 #### Effect size
 
@@ -302,7 +287,7 @@ For the independent-samples $t$ test, Cohen's $d$ divides the difference between
 
 $$d = \frac{M_1 - M_2}{\sqrt{s_p^2}} = \frac{5 - 4}{\sqrt{3.75}} \approx 0.52$$
 
-By Cohen's rough benchmarks, a difference of half a standard deviation would be a medium-sized effect; by @funder2019evaluating's it would actually be considered quite large. Of course, with five people per group, this estimate is very imprecise, as the confidence interval will show.
+By Cohen's rough benchmarks, a difference of half a standard deviation would be a medium-sized effect; by Funder and Ozer's [-@funder2019evaluating] it would actually be considered quite large. Of course, with five people per group, this estimate is very imprecise, as the confidence interval will show.
 
 #### Confidence interval
 
@@ -342,12 +327,6 @@ Rounding up, that's 59 people per group, or 118 in total; two-group designs need
 
 [^independent-sample-size]: As in Chapter 11, statistical software can do the exact calculation using the noncentral $t$ distribution. Here it gives 60 per group.
 
-<!-- FIGURE (optional): Ch 11's schematic power diagram
-     (makeStatisticalPowerDiagram, schematic: true) computes SE as
-     sigma/sqrt(n). A two-group option (e.g. "groups": 2, so SE =
-     sigma*sqrt(2/n)) would let Ch 12 illustrate the planning scenario.
-     Ch 11's planning part had no diagram, so this isn't needed. -->
-
 ## Reporting and interpreting the results
 
 ### Reporting results
@@ -366,7 +345,7 @@ Had we found a significant difference, though, this design would have let us say
 
 #### One study, and the body of evidence
 
-The real research I based the prosocial spending example on is a nice illustration of why we always need to look beyond any one result, whatever it shows. An initial experiment with 46 people found significantly greater happiness after spending on others, with an estimated effect of $d = .67$ [@dunn2008spending]. But its 95% confidence interval, [.05, 1.27], left plenty of uncertainty about how big the effect might be [@aknin2020spending]. Later studies used much larger samples. In a 2020 report, an experiment with 712 people using a small payment either to buy treats for themselves or a sick child found a smaller significant effect, $d = .36$. Online experiments asking people to *recall* past spending initially found a nonsignificant result; then, with a modified procedure and over 5,000 people, a significant but very small effect, $d = .06$ [@aknin2020spending]. And a closer replication of the original experiment in 2022 found a nonsignificant result on the original happiness measure, but a significant result on an additional, exploratory question about happiness just after the purchase [@kim2022prosocial].[^spending-analyses] So any single finding will never be definitive. The question becomes how big a difference we can detect, how precisely we can estimate it, and under what circumstances it appears.
+The real research I based the prosocial spending example on is a nice illustration of why we always need to look beyond any one result, whatever it shows. An initial experiment with 46 people found significantly greater happiness after spending on others, with an estimated effect of $d = 0.67$ [@dunn2008spending]. But its 95% confidence interval, [0.05, 1.27], left plenty of uncertainty about how big the effect might be [@aknin2020spending]. Later studies used much larger samples. In a 2020 report, an experiment with 712 people using a small payment either to buy treats for themselves or a sick child found a smaller significant effect, $d = 0.36$. Online experiments asking people to *recall* past spending initially found a nonsignificant result; then, with a modified procedure and over 5,000 people, a significant but very small effect, $d = 0.06$ [@aknin2020spending]. And a closer replication of the original experiment in 2022 found a nonsignificant result on the original happiness measure, but a significant result on an additional, exploratory question about happiness just after the purchase [@kim2022prosocial].[^spending-analyses] So any single finding will never be definitive. The question becomes how big a difference we can detect, how precisely we can estimate it, and under what circumstances it appears.
 
 [^spending-analyses]: Some of the real research also did things like adjusting for happiness measured before the experimental task. Our example simplifies the design and uses illustrative data.
 
@@ -376,7 +355,7 @@ Interpreting the outcome of a test fairly also depends on whether the assumption
 
 Note also that single responses on the seven-point rating scale I used for our example can't form an exactly normal population, and five people per group gives us little protection from departures from that assumption. A real study would need more care about its measurement and distributions. Often participants would respond to several items and researchers analyze the averaged scores, which are more likely to be approximately normal. As we said back in Chapter 1, treating ordinal Likert items as interval scales is common, but not uncontroversial.
 
-As we've seen in previous chapters, this test assumes that our scores are independent. This applies to scores within each sample: the observations within groups must be independent of one another: one person's score shouldn't depend on another person's score. As the name of the test implies, the two samples must also be independent. Nothing pairs a particular score in one group with a particular score in the other; they're different people, with no matching or other links across groups. That's what makes these *independent* samples. (This is the assumption the next chapter will break.) 
+As we've seen in previous chapters, this test assumes that our scores are independent. This applies to scores within each sample: one person's score shouldn't depend on another person's score. As the name of the test implies, the two samples must also be independent. Nothing pairs a particular score in one group with a particular score in the other; they're different people, with no matching or other links across groups. That's what makes these *independent* samples. (This is the assumption the next chapter will break.)
 
 And third, for this pooled version of the independent-samples $t$ test, we assume that the two populations from which the samples are selected have equal variances. This is called **homogeneity of variance**. Pooling treats our two sample variances as estimates of the same population variance. If the two populations actually have different variances, the pooled variance is a compromise that matches neither, and the estimated standard error can be wrong, especially when the sample sizes are unequal.[^welch]
 
@@ -388,10 +367,8 @@ And third, for this pooled version of the independent-samples $t$ test, we assum
 
 ## Summary
 
-So when we don't have a reference value for a population mean, we can build the comparison into the design. The basic logic of the test doesn't change, but we use a version of the $t$ statistic which takes the difference between two sample means as its statistic, a difference of zero for its null hypothesis parameter, and pools variances and degrees of freedom to account for the combined uncertainty in both samples’ estimates.
+So when we don't have a reference value for a population mean, we can build the comparison into the design. The basic logic of the test doesn't change, but we use a version of the $t$ statistic which takes the difference between two sample means as its statistic, a difference of zero for its null hypothesis parameter, and pools variances and degrees of freedom to account for the combined uncertainty in both samples' estimates.
 
 Now imagine another design for this kind of research: we could have *the same person* spend some money on themselves and some money on someone else, and compare their happiness ratings after each purchase. The data would look much the same: two sets of scores. But we'd be violating that assumption of independent samples, because we'd have two scores from each person. Can we modify our approach to the $t$ statistic again to account for the relatedness? That's our topic for the next chapter.
 
 {{< include quizzes/12-independent-t-learning-checks.qmd >}}
-
-::::::::
