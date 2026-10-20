@@ -15,6 +15,13 @@
     return { m, se, margin, lower: m - margin, upper: m + margin, critical, df, distribution };
   }
   global.sfsConfidenceInterval = interval;
+  // For estimates whose standard error isn't s / sqrt(n), such as a difference
+  // between two means: the caller supplies the SE and df directly.
+  function intervalFromSE(m, se, df, confidence = 95) {
+    const critical = stats.tInv((1 + confidence / 100) / 2, df);
+    const margin = critical * se;
+    return { m, se, margin, lower: m - margin, upper: m + margin, critical, df, distribution: 't' };
+  }
   function bar(g, half, color, dot = true) {
     g.attr('data-half',half).attr('stroke', color).attr('stroke-width', 2.5).attr('fill', 'none');
     g.selectAll('path').data([half]).join('path')
@@ -59,7 +66,8 @@
   global.makeIntervalDiagram = function (opts = {}) {
     const { root, svg } = setup('ci-single-interval');
     const isT = opts.distribution === 't';
-    if (isT && !(opts.s > 0 && opts.n >= 2)) throw new RangeError('A t interval needs a positive sample SD and n >= 2.');
+    const givenSE = isT && opts.se > 0 && opts.df > 0;
+    if (isT && !givenSE && !(opts.s > 0 && opts.n >= 2)) throw new RangeError('A t interval needs a positive sample SD and n >= 2, or a positive se and df.');
     const state = { m: opts.m ?? 7, sigma: isT ? opts.s : opts.sigma ?? Math.sqrt(14), n: opts.n ?? 6, confidence: opts.confidence ?? 95, shown: [] };
     const seSymbol = isT ? sigmaM.replace('σ', 's') : sigmaM;
     const criticalSymbol = isT ? 't*' : 'z';
@@ -95,7 +103,8 @@
     function render(animate = false) {
       const width = Math.max(280, root.node().clientWidth || 640);
       const x = d3.scaleLinear().domain(domain).range([30, width - 30]);
-      const p = interval(state.m, state.sigma, state.n, state.confidence, isT ? 't' : 'normal');
+      const p = givenSE ? intervalFromSE(state.m, opts.se, opts.df, state.confidence)
+        : interval(state.m, state.sigma, state.n, state.confidence, isT ? 't' : 'normal');
       svg.selectAll('*').interrupt();
       svg.attr('viewBox', `0 0 ${width} ${opts.mode === 'anatomy' || opts.mode === 'equation' ? 145 : 154}`).attr('aria-label',
         `${state.confidence}% ${isT ? 't ' : ''}confidence interval: estimate ${fmt(p.m)}, lower ${fmt(p.lower)}, upper ${fmt(p.upper)}; margin of error ${fmt(p.margin)}.${Number.isFinite(opts.reference) ? ` Reference mean ${opts.reference}.` : ''}`);
@@ -117,11 +126,11 @@
         if (Number.isFinite(opts.reference)) {
           g.append('line').attr('class', 'ci-reference').attr('x1', x(opts.reference)).attr('x2', x(opts.reference))
             .attr('y1', 44).attr('y2', 109).attr('stroke', 'currentColor').attr('stroke-dasharray', '4 4').attr('opacity', .6);
-          text(g, x(opts.reference), 24, `μ₀ = ${opts.reference}`, 'middle');
+          text(g, x(opts.reference), 24, opts.referenceLabel || `μ₀ = ${opts.reference}`, 'middle');
         }
         g.append('g').attr('transform', 'translate(0,109)').call(d3.axisBottom(x).ticks(width < 420 ? 4 : 7).tickSizeOuter(0));
         text(g, width/2, 146, opts.units || 'Population mean', 'middle');
-        text(g, x(p.m), 39, `M = ${fmt(p.m)}`, 'middle');
+        text(g, x(p.m), 39, `${opts.estimateLabel || 'M'} = ${fmt(p.m)}`, 'middle');
         text(g, x(p.lower), 92, fmt(p.lower), 'middle');
         text(g, x(p.upper), 92, fmt(p.upper), 'middle');
       }
