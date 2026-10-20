@@ -1,24 +1,38 @@
 ```{.quiz-yaml}
 id: 13_related_t_independent_samples
-title: >
-  Independent-Samples t
+title: Independent-samples t
 questions:
   - id: triplett_independent_t
-    type: multiple-choice
+    type: numeric
     prompt: >
-      When the Triplett data are incorrectly treated as independent samples, what is
-      the approximate t statistic described in the chapter?
-    options:
-      - text: >
-          0.99
-        correct: true
-      - text: >
-          -2.91
-      - text: >
-          4.08
-      - text: >
-          46.8
+      Calculate the independent-samples $t$ statistic for the worked example's
+      five alone times and five competition times. Deliberately ignore the
+      pairs, and use competition minus alone.
+    answer: -0.985245
+    tolerance: 0.03
+    hint: >
+      Use Chapter 12's pooled variance and estimated standard error.
+      The difference between the means is still $-6.2$ seconds.
     explanation: >
-      Treating the paired data as independent leaves more individual-difference
-      variability in the denominator.
+      The sums of squares are 527.2 for the alone times and 264.8 for the
+      competition times. So $s_p^2 = (527.2 + 264.8)/(4 + 4) = 99$,
+      $s_{M_1-M_2} = \sqrt{99/5 + 99/5} \approx 6.29$, and
+      $t = -6.2/6.29 \approx -0.99$. This calculation ignores the known pairs
+      and includes differences in children's overall speed in its variability estimate.
+    diagnostics:
+      - id: pooled_variance
+        type: numeric
+        prompt: What pooled variance did you calculate?
+        answer: 99
+        tolerance: 0.05
+        explanation: >
+          Add the two sums of squares, then divide by the sum of their
+          degrees of freedom: $(527.2 + 264.8)/(4 + 4) = 99$.
+      - id: independent_se
+        type: numeric
+        prompt: What estimated standard error did you calculate?
+        answer: 6.29285
+        tolerance: 0.03
+        explanation: >
+          $\sqrt{99/5 + 99/5} = \sqrt{39.6} \approx 6.29$ seconds.
 ```

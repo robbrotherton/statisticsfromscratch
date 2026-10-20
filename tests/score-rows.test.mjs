@@ -96,8 +96,11 @@ test("paired people keep one color across rows; unpaired people never share one"
 
 test("chapter 13's pairs tutorial uses Triplett's table and ends on the difference scores", () => {
   const qmd = readChapter("13-related-samples-t-test.qmd");
+  // Scope the data check to the worked table; practice tables have other children.
+  const table = /^((?:\|[^\n]*\n)+)\n: [^\n]*\{#tbl-triplett\}/m.exec(qmd);
+  assert.ok(table, "worked Triplett table not found");
   const tableRows = Array.from(
-    qmd.matchAll(/^\| [A-Z][a-z]+ [A-Z]\. \| (\d+) \| (\d+) \|$/gm),
+    table[1].matchAll(/^\| [A-Z][a-z]+ [A-Z]\. \| (\d+) \| (\d+) \|$/gm),
     (match) => [Number(match[1]), Number(match[2])]
   );
   assert.equal(tableRows.length, 5);
@@ -168,7 +171,7 @@ test("chapter 12's spending tutorial builds from means to the difference, spread
   assert.deepEqual(steps.map((action) => action.tScale), [false, false, false, false, false, false, true]);
 
   // The tutorial comes before the formulas it illustrates.
-  assert.ok(qmd.indexOf("{#act-spending-rows") < qmd.indexOf("### The numerator"));
+  assert.ok(qmd.indexOf("{#act-spending-rows") < qmd.indexOf("{#eq-independent-se}"));
   // Every step sets every switch, so stepping backward restores the state.
   for (const action of steps) {
     for (const key of ["means", "meanGap", "spread", "tScale"]) assert.ok(key in action, key);

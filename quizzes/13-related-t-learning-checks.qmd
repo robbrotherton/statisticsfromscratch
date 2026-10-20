@@ -6,10 +6,13 @@ questions:
   - id: t_zero
     type: free-response
     prompt: >
-      What would a related-samples t statistic of 0 suggest?
+      If the estimated standard error is greater than zero, what does a
+      related-samples $t$ statistic of 0 tell us?
     answer: >
-      It suggests that the mean difference is exactly zero relative to the estimated
-      standard error, so the data provide no evidence of a treatment effect.
+      The sample mean difference is exactly zero. Individual difference scores can
+      still be positive or negative and cancel each other out. It doesn't
+      establish that every person had identical scores in both conditions,
+      or that the population mean difference is zero.
     explanation: >
       A t value of zero occurs when the numerator is zero.
 
@@ -23,4 +26,84 @@ questions:
       the same people measured twice or matched participants in corresponding pairs.
     explanation: >
       The analysis is based on difference scores for each pair.
+
+  - id: matched_pairs
+    type: free-response
+    prompt: >
+      We match 24 children into 12 pairs by age, then randomly assign one
+      child in each pair to perform alone and the other in competition.
+      What are $n$ and $df$ for the related-samples test?
+    answer: >
+      Each pair contributes one difference score, so $n = 12$ and $df = 11$.
+      We have 24 children, but only 12 differences to analyze.
+
+  - id: subtraction_direction
+    type: free-response
+    prompt: >
+      What would change if we calculated alone minus competition instead of
+      competition minus alone in our worked example? Would our two-tailed
+      test decision change?
+    answer: >
+      Every difference would reverse sign, so $M_D$ would be $+6.2$ and
+      $t$ would be $+2.91$. The standard deviation and standard error would
+      stay the same. The two-tailed test decision would be unchanged,
+      because the distance from zero would be the same.
+
+  - id: cbt_related_t
+    type: numeric
+    prompt: |
+      Return to the CBT study from Chapters 5 and 8. The same 40 people
+      had mean DOCS symptom scores of 30.25 before treatment and 15.49
+      afterward [@abramowitz2010docs, Table 9]. Higher scores mean more
+      severe symptoms. For these 40 complete pairs, use an estimated
+      standard deviation of the differences of $s_D = 9.75$ points.
+      Calculate the related-samples $t$ statistic, using after minus before
+      and a null population mean difference of zero.
+
+      The SD of differences is reconstructed approximately from the paper's
+      reported paired test; it isn't either condition's separate SD.
+    answer: -9.57
+    tolerance: 0.04
+    hints:
+      - >
+        The mean of the differences is the difference between the means:
+        after minus before. Divide it by $s_D/\sqrt{n}$.
+    explanation: >
+      $M_D = 15.49 - 30.25 = -14.76$ points, and
+      $s_{M_D} = 9.75/\sqrt{40} \approx 1.542$ points.
+      So $t = -14.76/1.542 \approx -9.57$. The negative sign means
+      lower symptom scores after treatment. This uses the paired design,
+      rather than treating pretreatment sample statistics as population values.
+    diagnostics:
+      - id: cbt_mean_difference
+        type: numeric
+        prompt: What mean difference did you calculate, after minus before?
+        answer: -14.76
+        tolerance: 0.01
+        explanation: >
+          $15.49 - 30.25 = -14.76$ points. Keep the subtraction direction
+          the same throughout.
+      - id: cbt_se
+        type: numeric
+        prompt: What estimated standard error did you calculate?
+        answer: 1.54161
+        tolerance: 0.02
+        explanation: >
+          $9.75/\sqrt{40} \approx 1.542$ points. The numerator here is
+          the SD of the differences, not the pretreatment SD of 14.89.
+
+  - id: cbt_decision
+    type: free-response
+    prompt: >
+      For the CBT calculation, what are the degrees of freedom, and would
+      you reject the null hypothesis in a two-tailed test at $\alpha = .05$?
+      The critical values for $df = 39$ are $\pm 2.023$.
+      What does the result tell us about symptoms, and does it establish
+      that therapy caused the change?
+    answer: >
+      With 40 complete pairs, $df = 39$. Our $t \approx -9.57$ falls
+      below $-2.023$, so we reject the null hypothesis. The mean symptom
+      score was significantly lower after treatment. The before-and-after
+      comparison alone doesn't establish that therapy caused the change;
+      we would need a design that helps rule out other explanations.
 ```
