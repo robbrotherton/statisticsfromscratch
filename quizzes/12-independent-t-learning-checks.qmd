@@ -19,7 +19,9 @@ questions:
           A single-sample $z$ test, because there are 40 students
     explanation: >
       There are two groups of different people, and the question is whether
-      their means differ. No reference value or known $\sigma$ is needed.
+      their means differ. We don't need to specify either population mean or
+      know the population standard deviation; the usual null hypothesis says
+      their difference is zero.
 
   - id: both_samples_se
     type: multiple-choice
@@ -34,7 +36,8 @@ questions:
       - text: >
           Because the two samples always have different variances.
       - text: >
-          Because we need to divide by the total sample size twice.
+          Because the standard error measures the spread of all the individual
+          scores in both groups.
     explanation: >
       Even if the null hypothesis is true, each sample mean wobbles from sample
       to sample, so their difference wobbles with both.
@@ -42,34 +45,37 @@ questions:
   - id: ci_excludes_zero
     type: multiple-choice
     prompt: >
-      An independent-samples t test finds a mean difference of 2.3 and a 95% CI of
-      [0.3, 4.3]. Can you predict whether the matching two-sided hypothesis test
-      (same standard error) rejects the null at alpha = .05?
+      An independent-samples $t$ test finds a mean difference of 2.3 and a 95% CI
+      of [0.3, 4.3]. What decision does the matching two-tailed test, using the
+      same standard error, make at $\alpha = .05$?
     options:
       - text: >
-          Yes, because the interval excludes 0
+          Reject $H_0$, because zero lies outside the interval.
         correct: true
       - text: >
-          No, because every confidence interval rejects the null
+          Fail to reject $H_0$, because 2.3 lies inside the interval.
       - text: >
-          No, because the mean difference is positive
-      - text: >
-          Cannot tell anything from the interval
+          Fail to reject $H_0$, because the interval contains more than one
+          possible difference.
     explanation: >
-      A 95% CI that excludes the null value of zero corresponds to p < .05 for a
-      matching two-tailed test.
+      A 95% CI that excludes the null value of zero corresponds to $p < .05$
+      for a matching two-tailed test. The interval is centered on the observed
+      difference, 2.3; what matters for this decision is whether it includes zero.
 
-  - id: ci_zero_certain
-    type: true-false
+  - id: homogeneity_of_variance
+    type: multiple-choice
     prompt: >
-      A confidence interval for an independent-samples test that includes zero
-      establishes that the true population parameter is 95% certain to be zero.
-    answer: false
+      What does the pooled version of the independent-samples $t$ test assume
+      about the two populations' variances?
+    options:
+      - text: They are equal.
+        correct: true
+      - text: They differ by the same amount as their means.
+      - text: They are equal to the observed sample variances.
     explanation: >
-      Including zero means zero is one plausible value for the difference
-      between population means, along with every other value in the interval.
-      The data can't rule out no difference, but they don't establish it
-      either.
+      The sample variances can differ through sampling error. Pooling treats
+      them as estimates of one common population variance. Welch's version
+      does not require equal population variances.
 
   - id: nonsignificant_meaning
     type: multiple-choice
@@ -89,4 +95,29 @@ questions:
       A nonsignificant result means the data are compatible with no
       difference, but the wide interval shows they're compatible with sizable
       differences too.
+
+  - id: effect_size_denominator
+    type: numeric
+    prompt: >
+      A study finds a mean difference of 6, a pooled standard deviation of 3,
+      and an estimated standard error of 1.5. What is Cohen's $d$?
+    answer: 2
+    tolerance: 0.01
+    explanation: >
+      $d = 6/3 = 2$. Dividing by the standard error would give $t = 4$ for a
+      null difference of zero. Effect size uses the spread of scores; $t$ uses
+      the uncertainty in the estimate.
+
+  - id: planning_total_sample_size
+    type: numeric
+    prompt: >
+      For a planned study with two equally sized groups, the chapter's
+      approximate sample-size equation gives $n = 50$. How many participants
+      should you plan for in total?
+    answer: 100
+    tolerance: 0
+    explanation: >
+      The equation gives 50 per group, so 100 altogether. This is a planning
+      estimate for the chosen target difference, not a calculation of observed
+      power.
 ```
