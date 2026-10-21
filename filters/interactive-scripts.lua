@@ -162,6 +162,13 @@ local manifest = {
     file = "resources/js/score-rows.js",
     deps = { "d3", "interactive-figure-tools", "span-marks" }
   },
+  ["triplett-core"] = {
+    file = "resources/js/triplett-core.js"
+  },
+  ["triplett-race"] = {
+    file = "resources/js/triplett-race.js",
+    deps = { "interactive-figure-tools", "triplett-core" }
+  },
   ["likert-helper"] = {
     file = "resources/js/likert-helper.js",
     deps = { "d3" }

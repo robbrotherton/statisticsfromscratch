@@ -6,6 +6,7 @@ interactive-scripts:
   - distribution-generator
   - confidence-interval-diagrams
   - score-rows
+  - triplett-race
 ---
 
 {{< interactive-figure relatedSamplesCover makeSampleComparisonCover options='{"related":true}' fallback="Two block distributions in distinct blue shades building up from paired observations." >}}
@@ -19,43 +20,45 @@ interactive-scripts:
 
 This will be our last chapter on the $t$ statistic. We'll introduce one more variant of the $t$ test, the related-samples $t$ test, which is used when we want to compare two samples but, unlike the independent-samples in the previous chapter, the two samples are somehow related. We'll discuss the kind of research designs that this involves, the pros and cons of related and independent designs, and we'll learn how to calculate the related-samples $t$ test, paying attention to how it differs from the independent-samples $t$ test.
 
-## Alone or against each other?
+## The competition machine
 
-First, a little game for you to play.
+First, a little game for you to play!
 
-<!-- insert triplett game here -->
+::::: {#act-triplett-race .callout-tip .interactive}
+## The competition machine
 
-Did you enjoy that? How'd you do? Better when you were racing that devious red flag?
+{{< interactive-figure triplettRace makeTriplettRace options='{"tutorial":true}' fallback="A game based on Triplett's competition machine: wind a reel to send a flag around a track four times, first alone and then racing a rival flag. It needs JavaScript." >}}
 
-This is a little digital recreation of one of my favorite studies in the history of psychology. In fact, it is often credited as being the first published experiment in social psychology. It was published by Norman Triplett in 1898. Triplett had conducted the study as part of his masters research. He was interested in how the presence of other people might affect performance on some kinds of tasks. This is now known as **social facilitation**: the idea that the presence of other people can improve our performance on some kinds of tasks [@triplett1898dynamogenic]
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Practice" data-action='{"phase":"practice","advanceOnFinish":true}'}
+First, some practice so you can see how the game works. Your blue flag is moved by winding the reel; move your mouse or finger in little circles as if you're turning the handle (or press the space key on your keyboard if you prefer). In the real race you'll do 4 laps, but for practice just do 2.
+:::
 
-Triplett first examined cycling records, comparing unpaced rides against the clock, rides with someone setting the pace, and competition races. He compared averages and graphed patterns in the data.
+::: {.tutorial-step data-title="Alone" data-action='{"phase":"alone","advanceOnFinish":true}'}
+Now for the real thing! You'll do 4 laps by yourself, and your time will be recorded. Press start when you're ready.
+:::
 
-![Triplett's graph comparing cycling records in unpaced, paced, and competition conditions, from his 1898 paper.](resources/figures/triplett.png){#fig-triplett}
+::: {.tutorial-step data-title="Competition" data-action='{"phase":"competition","advanceOnFinish":true}'}
+A challenger appears! You'll race again, but now against the red flag! Click start when you're ready.
+:::
+
+::: {.tutorial-step data-title="Results" data-action='{"phase":"results"}'}
+How'd you do? Did you win? Did you do better when you were racing that devious red flag? That's the important question for us. Feel free to play again, but this first difference 
+:::
+::::
+:::::
+
+This is a little digital recreation of one of my favorite studies in the history of psychology. In fact, it is often credited as being the first published experiment in social psychology. It was conducted by Norman Triplett as part of his masters research at Indiana University, and published in 1898. He was interested in how the presence of other people might affect performance on some kinds of tasks. This is now known as **social facilitation**: the idea that the presence of other people can improve our performance on some kinds of tasks [@triplett1898dynamogenic]
+
+At first, Triplett examined cycling records, comparing unpaced rides against the clock, rides with someone setting the pace, and competition races. He compared averages and graphed patterns in the data.
 
 But Triplett realized he needed some more convincing, more carefully controlled data. So he devised a clever apparatus to study this in a lab. It was a "competition machine" designed as a children's game whereby two kids could compete with each other. Two fishing reels were secured to the end of a Y-shaped apparatus that was clamped on top of a heavy table. Bands of silk cord were run over the axles of the reels and across two pulleys, so that turning the reel would cause a small flag sewn into the silk to move around the four-meter circuit. The task was to turn the reel and complete the circuit four times as quickly as possible. Triplett had children do this a number of times, either by themselves or racing against another kid who was doing it standing right next to them.
 
-What makes the paper so charming is that, because the $t$ test hadn't yet been developed, Triplett included full tables of the raw data in his paper, including the first names and last initials of the children. Compared to modern results sections filled with impersonal aggregate statistics, it's a delight to imagine little Violet F. and Wille H. facing off across the competition machine, teeth gritted in determination, Triplett watching on impassively with clipboard in hand.
+![Triplett's diagram of the Competition Machine, from his 1898 paper.](resources/figures/triplett.png){#fig-triplett}
 
-The five children in @tbl-triplett are the first five listed in Table I, Group A of Triplett's paper. We'll compare their first trial alone with their first trial in competition, rounding the times to whole seconds to keep the arithmetic manageable. Triplett grouped these children among those whose performance generally improved in competition, so this selected example is for learning the procedure, rather than estimating the overall effect in his study.
+What makes the paper so charming is that, because the $t$ test hadn't yet been developed, Triplett included full tables of the raw data in his paper, including the first names and last initials of the children. Compared to modern results sections filled with impersonal aggregate statistics, it's a delight to imagine little Violet F. and Willie H. facing off across the competition machine, teeth gritted in determination, Triplett watching on with clipboard in hand. He noted some wonderfully specific details. "An intense desire to win," Triplett noted, was often accompanied by "labored breathing, flushed faces and a stiffening or contraction of the muscles of the arm." The youngest children sometimes became so excited that they could barely turn the crank. "The effort to continue turning in these cases was by a swaying of the whole body." One particularly competitive five-year-old was so upset at losing his race that, according to his mother, he "felt badly about it all day."
 
-This makes for a good example for us, because the same numbers can go through two different calculations. We'll first analyze them as related samples, keeping each child's scores together. Then we'll deliberately ignore those pairs and use Chapter 12's independent-samples test to see what changes. Only one of those analyses fits the design.
-
-| Participant | Alone | Competition |
-|:------------|--:|--:|
-| Violet F. | 54 | 43 |
-| Anna P. | 67 | 57 |
-| Willie H. | 38 | 39 |
-| Bessie V. | 46 | 41 |
-| Howard C. | 42 | 36 |
-
-: Times (in seconds) from Triplett's competition-machine study. {#tbl-triplett}
-
-![A page of Triplett's data from the 1898 paper.](resources/figures/triplett-data.png){#fig-triplett-data}
-
-What do we know about these numbers that two separate columns would hide? Each row comes from one child. Anna took longer than Willie in both conditions. The children differ considerably in their overall speed, but the comparison we're interested in is how each child's own time changed.
-
-So the two columns aren't independent. Knowing a child's time alone tells us something about their likely time in competition. That's the link Chapter 12's test assumed wasn't there. We need a way to keep that information when we compare the conditions.
+Anyway, this gives us a context in which to think about the consequences of this kind of research design, in which each participant does something more than once, and the statistical approach to the resulting data.
 
 ### Between- and within-participants designs
 
@@ -88,6 +91,34 @@ One thing worth pointing out, though, is that to get five scores in each conditi
 {{< include quizzes/13-related-t-designs.qmd >}}
 
 ## From two samples to one
+
+The five children in @tbl-triplett are the first five listed in Table I, Group A of Triplett's paper. We'll compare their first trial alone with their first trial in competition, rounding the times to whole seconds to keep the arithmetic manageable. Triplett grouped these children among those whose performance generally improved in competition, so this selected example is for learning the procedure, rather than estimating the overall effect in his study.
+
+This makes for a good example for us, because the same numbers can go through two different calculations. We'll first analyze them as related samples, keeping each child's scores together. Then we'll deliberately ignore those pairs and use Chapter 12's independent-samples test to see what changes. Only one of those analyses fits the design.
+
+| Participant | Alone | Competition |
+|:------------|--:|--:|
+| Violet F. | 54 | 43 |
+| Anna P. | 67 | 57 |
+| Willie H. | 38 | 39 |
+| Bessie V. | 46 | 41 |
+| Howard C. | 42 | 36 |
+
+: Times (in seconds) from Triplett's competition-machine study. {#tbl-triplett}
+
+![A page of Triplett's data from the 1898 paper.](resources/figures/triplett-data.png){#fig-triplett-data}
+
+<!-- PLAN: quick multiple-choice quiz here (one click, not free-response),
+     before the rhetorical question below answers it. Readers commit to a
+     guess about what the rows tell us that two separate columns would hide
+     (each row is one child; stable differences in overall speed), and the
+     "From pairs to differences" tutorial then resolves it. Could tie back
+     to the game, e.g. a classmate who is slow both alone and in competition.
+     Would be quizzes/13-related-t-pairs.qmd, included on its own line. -->
+
+What do we know about these numbers that two separate columns would hide? Each row comes from one child. Anna took longer than Willie in both conditions. The children differ considerably in their overall speed, but the comparison we're interested in is how each child's own time changed.
+
+So the two columns aren't independent. Knowing a child's time alone tells us something about their likely time in competition. That's the link Chapter 12's test assumed wasn't there. We need a way to keep that information when we compare the conditions.
 
 ::::: {#act-triplett-pairs .callout-tip .interactive}
 ## From pairs to differences

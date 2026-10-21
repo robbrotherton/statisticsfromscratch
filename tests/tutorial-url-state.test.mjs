@@ -402,6 +402,7 @@ function createTutorialDom(initialHash = "") {
       steps: nodes.steps,
       applyAction(action, detail) {
         actions.push({ action: { ...action }, index: detail.index });
+        if (options.onAction) options.onAction(action, detail);
       }
     });
     return { ...nodes, controller, actions };
@@ -511,4 +512,34 @@ test("an unlabelled tutorial remains fully interactive without claiming URL stat
   assert.equal(dom.window.location.hash, "#somewhere-else");
   assert.equal(dom.replacements.length, 0);
   assert.ok(tutorial.steps.every((step) => step.id === ""));
+});
+
+test("a figure can hold the reader on a step until it unlocks Next", () => {
+  const dom = createTutorialDom();
+  // Steps 1 and 2 hold the reader; the others do not.
+  const tutorial = dom.mountTutorial("act-race", {
+    onAction(action, detail) {
+      detail.setForwardLocked(detail.index < 2);
+    }
+  });
+  const next = tutorial.callout.querySelector(".sfs-if-tutorial-next");
+  const prev = tutorial.callout.querySelector(".sfs-if-tutorial-prev");
+  const railNodes = tutorial.callout.querySelectorAll(".sfs-if-stepper-node");
+
+  assert.equal(next.disabled, true);
+  assert.ok(railNodes.slice(1).every((node) => node.disabled), "later rail steps wait too");
+  next.dispatchEvent(new dom.FakeEvent("click"));
+  assert.equal(tutorial.controller.getStep(), 0);
+
+  tutorial.controller.setForwardLocked(false);
+  assert.equal(next.disabled, false);
+  assert.ok(railNodes.every((node) => !node.disabled));
+  next.dispatchEvent(new dom.FakeEvent("click"));
+  assert.equal(tutorial.controller.getStep(), 1);
+  assert.equal(next.disabled, true, "the next step's figure locks again");
+  assert.equal(prev.disabled, false, "Back is never held");
+
+  tutorial.controller.next();
+  assert.equal(tutorial.controller.getStep(), 2, "the figure itself may still advance");
+  assert.equal(next.disabled, false, "a step whose figure sets no lock is free");
 });
