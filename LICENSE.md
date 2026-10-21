@@ -30,3 +30,8 @@ Third-party material—including libraries, fonts, datasets, and credited
 images—remains subject to its original license or usage terms and is not
 relicensed by this notice. Nothing here grants rights that the copyright holder
 does not own or control.
+
+The citation style file [`apa.csl`](apa.csl) comes from the [Citation Style
+Language styles repository](https://github.com/citation-style-language/styles)
+and is licensed under [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/);
+its authors are credited in the file.
