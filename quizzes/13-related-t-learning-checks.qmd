@@ -1,79 +1,156 @@
 ```{.quiz-yaml}
 id: 13_related_t_learning_checks
-title: >
-  Learning Checks
+title: Learning Checks
 questions:
-  - id: t_zero
-    type: free-response
-    prompt: >
-      If the estimated standard error is greater than zero, what does a
-      related-samples $t$ statistic of 0 tell us?
-    answer: >
-      The sample mean difference is exactly zero. Individual difference scores can
-      still be positive or negative and cancel each other out. It doesn't
-      establish that every person had identical scores in both conditions,
-      or that the population mean difference is zero.
-    explanation: >
-      A t value of zero occurs when the numerator is zero.
-
-  - id: designs
-    type: free-response
-    prompt: >
-      When should you use a related-samples t test rather than an independent-
-      samples t test?
-    answer: >
-      Use a related-samples t test when the two sets of scores are paired, such as
-      the same people measured twice or matched participants in corresponding pairs.
-    explanation: >
-      The analysis is based on difference scores for each pair.
-
   - id: matched_pairs
     type: free-response
     prompt: >
       We match 24 children into 12 pairs by age, then randomly assign one
       child in each pair to perform alone and the other in competition.
-      What are $n$ and $df$ for the related-samples test?
+      Which kind of $t$ test fits this design? What are $n$ and $df$?
     answer: >
-      Each pair contributes one difference score, so $n = 12$ and $df = 11$.
-      We have 24 children, but only 12 differences to analyze.
+      A related-samples $t$ test. Each matched pair contributes one
+      difference score, so $n = 12$ and $df = 11$. We have 24 children,
+      but only 12 differences to analyze.
+    explanation: >
+      Related samples don't have to involve the same people measured twice.
+      What matters is that each score in one condition is paired with a
+      particular score in the other.
 
-  - id: subtraction_direction
+  - id: t_zero
     type: free-response
     prompt: >
-      What would change if we calculated alone minus competition instead of
-      competition minus alone in our worked example? Would our two-tailed
-      test decision change?
+      We're testing a null population mean difference of zero, and the
+      estimated standard error is greater than zero. What would a
+      related-samples $t$ statistic of 0 tell us? Would it mean nobody's
+      score changed?
     answer: >
-      Every difference would reverse sign, so $M_D$ would be $+6.2$ and
-      $t$ would be $+2.91$. The standard deviation and standard error would
-      stay the same. The two-tailed test decision would be unchanged,
-      because the distance from zero would be the same.
+      The sample mean difference is exactly zero. Individual difference scores
+      can still be positive or negative and cancel each other out. It
+      doesn't mean every person had identical scores in both conditions,
+      or establish that the population mean difference is zero.
+
+  - id: practice_t
+    type: numeric
+    prompt: |
+      Here are five other children from Triplett's study, with their times
+      rounded to whole seconds ([Triplett, 1898, Table II, Group A](https://psychclassics.yorku.ca/Triplett/)).
+      These children came from the group Triplett classified as adversely
+      affected by competition, so again we're using selected data for practice.
+
+      <table class="table">
+      <thead><tr><th scope="col">Participant</th><th scope="col" class="text-end">Alone</th><th scope="col" class="text-end">Competition</th></tr></thead>
+      <tbody>
+      <tr><td>Jack R.</td><td class="text-end">44</td><td class="text-end">44</td></tr>
+      <tr><td>Helen F.</td><td class="text-end">44</td><td class="text-end">51</td></tr>
+      <tr><td>Emma P.</td><td class="text-end">38</td><td class="text-end">42</td></tr>
+      <tr><td>Warner J.</td><td class="text-end">42</td><td class="text-end">44</td></tr>
+      <tr><td>Genevieve M.</td><td class="text-end">36</td><td class="text-end">36</td></tr>
+      </tbody>
+      </table>
+
+      Calculate each child's difference score, then the related-samples
+      $t$ statistic. Use competition minus alone and a null population
+      mean difference of zero.
+    answer: 1.96
+    tolerance: 0.03
+    hints:
+      - >
+        Subtract each child's alone time from their competition time.
+        Zero differences still count as observations.
+      - >
+        Find the sample mean and sample SD of the differences, then
+        divide the SD by $\sqrt{n}$ to get the estimated standard error.
+    explanation: >
+      The differences are 0, 7, 4, 2, and 0 seconds. Their mean is 2.6,
+      $SS = 35.2$, and $s_D = \sqrt{35.2/4} \approx 2.97$ seconds.
+      So $s_{M_D} = 2.96648/\sqrt{5} \approx 1.327$ seconds, and
+      $t = 2.6/1.32665 \approx 1.96$. The positive sign means slower
+      times in competition, on average. Both zero differences count,
+      so $n = 5$ and $df = 4$.
+    diagnostics:
+      - id: difference_mean
+        type: numeric
+        prompt: What is the mean of your five difference scores?
+        answer: 2.6
+        tolerance: 0.01
+        explanation: >
+          Add 0, 7, 4, 2, and 0, then divide by 5.
+      - id: difference_sd
+        type: numeric
+        prompt: What is the sample standard deviation of the differences?
+        answer: 2.96648
+        tolerance: 0.03
+        explanation: >
+          Subtract 2.6 from each difference, square those deviations, and
+          add them to get $SS = 35.2$. Divide by $df = 4$ and take the square root.
+      - id: difference_se
+        type: numeric
+        prompt: What estimated standard error did you calculate?
+        answer: 1.32665
+        tolerance: 0.03
+        explanation: >
+          $s_{M_D} = s_D/\sqrt{n} = 2.96648/\sqrt{5} \approx 1.327$ seconds.
+
+  - id: practice_interval
+    type: free-response
+    prompt: >
+      For those five children, calculate the 95% confidence interval for the
+      mean difference. Use a critical $t$ of 2.776. Would you reject the
+      null hypothesis in a two-tailed test at $\alpha = .05$? Does the
+      result establish that competition had no effect?
+    answer: >
+      $2.6 \pm 2.776(1.32665) \approx [-1.08,\ 6.28]$ seconds.
+      The interval includes zero, agreeing with the failure to reject the
+      null hypothesis: $t \approx 1.96$ falls between $\pm 2.776$.
+      This doesn't establish no effect. The interval includes differences
+      favoring either condition, and the data were selected for practice
+      rather than for estimating the overall effect in Triplett's study.
+
+  - id: practice_effect_size
+    type: numeric
+    prompt: >
+      For the same five children, calculate Cohen's $d$ using the
+      standard deviation of the differences.
+    answer: 0.87645
+    tolerance: 0.02
+    explanation: >
+      $d = M_D/s_D = 2.6/2.96648 \approx 0.88$. This expresses the mean
+      difference in SDs of the differences. Dividing by the estimated
+      standard error instead would give $t$, not $d$.
 
   - id: cbt_related_t
     type: numeric
     prompt: |
       Return to the CBT study from Chapters 5 and 8. The same 40 people
       had mean DOCS symptom scores of 30.25 before treatment and 15.49
-      afterward [@abramowitz2010docs, Table 9]. Higher scores mean more
-      severe symptoms. For these 40 complete pairs, use an estimated
-      standard deviation of the differences of $s_D = 9.75$ points.
-      Calculate the related-samples $t$ statistic, using after minus before
-      and a null population mean difference of zero.
+      afterward ([Abramowitz et al., 2010, Table 9](https://doi.org/10.1037/a0018260)). Higher scores mean more
+      severe symptoms. Use an estimated SD of the differences of
+      $s_D = 9.75$ points.
 
-      The SD of differences is reconstructed approximately from the paper's
-      reported paired test; it isn't either condition's separate SD.
+      We don't have the individual scores here. Can you still calculate
+      the related-samples $t$ statistic? Use after minus before and a
+      null population mean difference of zero.
+
+      (The SD of differences is reconstructed approximately from the
+      paper's reported paired test.)
     answer: -9.57
     tolerance: 0.04
     hints:
       - >
-        The mean of the differences is the difference between the means:
-        after minus before. Divide it by $s_D/\sqrt{n}$.
+        Think about the relationship between the mean of the differences
+        and the two condition means.
+      - >
+        Subtract the before-treatment mean from the after-treatment mean,
+        then divide by $s_D/\sqrt{n}$.
     explanation: >
-      $M_D = 15.49 - 30.25 = -14.76$ points, and
-      $s_{M_D} = 9.75/\sqrt{40} \approx 1.542$ points.
-      So $t = -14.76/1.542 \approx -9.57$. The negative sign means
-      lower symptom scores after treatment. This uses the paired design,
-      rather than treating pretreatment sample statistics as population values.
+      We can subtract the means: $M_D = 15.49 - 30.25 = -14.76$ points.
+      The mean of the differences equals the difference between the means
+      for the same complete pairs; we don't need the raw scores to find it.
+      With $s_{M_D} = 9.75/\sqrt{40} \approx 1.542$ points,
+      $t = -14.76/1.54161 \approx -9.57$. The negative sign means
+      lower symptom scores after treatment. The SD of differences had to
+      be supplied; subtracting the two condition SDs wouldn't give it.
     diagnostics:
       - id: cbt_mean_difference
         type: numeric
@@ -81,22 +158,20 @@ questions:
         answer: -14.76
         tolerance: 0.01
         explanation: >
-          $15.49 - 30.25 = -14.76$ points. Keep the subtraction direction
-          the same throughout.
+          $15.49 - 30.25 = -14.76$ points.
       - id: cbt_se
         type: numeric
         prompt: What estimated standard error did you calculate?
         answer: 1.54161
         tolerance: 0.02
         explanation: >
-          $9.75/\sqrt{40} \approx 1.542$ points. The numerator here is
-          the SD of the differences, not the pretreatment SD of 14.89.
+          $9.75/\sqrt{40} \approx 1.542$ points. Use the SD of differences,
+          not the SD of either condition separately.
 
   - id: cbt_decision
     type: free-response
     prompt: >
-      For the CBT calculation, what are the degrees of freedom, and would
-      you reject the null hypothesis in a two-tailed test at $\alpha = .05$?
+      For the CBT calculation, would you reject the null hypothesis in a two-tailed test at $\alpha = .05$?
       The critical values for $df = 39$ are $\pm 2.023$.
       What does the result tell us about symptoms, and does it establish
       that therapy caused the change?
@@ -106,4 +181,19 @@ questions:
       score was significantly lower after treatment. The before-and-after
       comparison alone doesn't establish that therapy caused the change;
       we would need a design that helps rule out other explanations.
+
+  - id: planning_differences
+    type: free-response
+    prompt: >
+      You're planning another before-and-after study, and you've chosen
+      a target mean change, $\alpha$, and desired power. Would the two
+      condition SDs give you the variability estimate you need to work
+      out the required number of complete pairs? Why might you recruit
+      more people than that number?
+    answer: >
+      No. We need an estimate of the SD of the differences; the two separate
+      SDs don't tell us how closely the paired scores go together.
+      We might recruit extra people because some won't provide both
+      measurements. Dropout can also bias the result if the people who
+      leave differ from those who stay.
 ```
