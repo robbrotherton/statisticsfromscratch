@@ -918,7 +918,7 @@
 
     function renderSdSpans(duration, differencesStage, slide) {
       const g = geometry;
-      const differenceDelay = slide ? 400 + g.pairs.length * 140 + 1450 : 0;
+      const differenceDelay = slide ? slideSchedule(g.pairs.length).end : 0;
       const items = state.spread === "none" ? [] : sdSpans(differencesStage);
       const entering = new Set();
       const spans = canvas.select(".sr-spread").selectAll("g.sr-span-group")
@@ -1088,12 +1088,32 @@
       den.select("text").transition().delay(peelDuration).duration(250).style("opacity", 1);
     }
 
+    // Pairs travel one at a time, so the eye can follow each: the next pair
+    // starts only once the previous one has landed. The first pair moves
+    // more slowly and pauses before it drops, demonstrating the move; the
+    // rest follow at a brisker pace.
+    const SLIDE_START = 350;
+    const SLIDE_FIRST = { slide: 900, hold: 300, drop: 800 };
+    const SLIDE_REST = { slide: 550, hold: 100, drop: 500 };
+    const SLIDE_FADE = 350;
+
+    function slideSchedule(count) {
+      let t = SLIDE_START;
+      const steps = d3.range(count).map((i) => {
+        const timing = i === 0 ? SLIDE_FIRST : SLIDE_REST;
+        const step = { delay: t, ...timing };
+        t += timing.slide + timing.hold + timing.drop;
+        return step;
+      });
+      return { steps, end: t };
+    }
+
     // Each pair's line slides sideways until its first score sits on the
     // zero guide; its second score then marks the difference. The line drops
     // into the difference row and leaves that difference dot behind.
     function slideToDifferences() {
       const g = geometry;
-      const stagger = 140;
+      const schedule = slideSchedule(g.pairs.length).steps;
       const ghosts = canvas.select(".sr-ghosts").selectAll("g.sr-ghost")
         .data(g.pairs, (d) => d.index)
         .join((enter) => {
@@ -1111,33 +1131,33 @@
         const firstX = g.dx(0);
         const secondX = g.x(pair.second.value) + shift;
         const end = { x: g.dx(pair.difference.value), y: pair.difference.y };
-        const delay = 350 + i * stagger;
+        const { delay, slide, hold, drop } = schedule[i];
 
         ghost.select("line")
           .attr("stroke", color)
           .attr("x1", g.x(pair.first.value)).attr("y1", pair.first.y)
           .attr("x2", g.x(pair.second.value)).attr("y2", pair.second.y)
-          .transition().delay(delay).duration(750).ease(d3.easeCubicInOut)
+          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
           .attr("x1", firstX).attr("x2", secondX)
-          .transition().duration(700).ease(d3.easeCubicInOut)
+          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
           .attr("y1", end.y).attr("x2", end.x).attr("y2", end.y)
-          .transition().duration(350)
+          .transition().duration(SLIDE_FADE)
           .style("opacity", 0);
         ghost.select(".sr-ghost-first")
           .attr("fill", color)
           .attr("cx", g.x(pair.first.value)).attr("cy", pair.first.y)
-          .transition().delay(delay).duration(750).ease(d3.easeCubicInOut)
+          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
           .attr("cx", firstX)
-          .transition().duration(700).ease(d3.easeCubicInOut)
+          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
           .attr("cy", end.y)
-          .transition().duration(350)
+          .transition().duration(SLIDE_FADE)
           .style("opacity", 0);
         ghost.select(".sr-ghost-second")
           .attr("fill", color)
           .attr("cx", g.x(pair.second.value)).attr("cy", pair.second.y)
-          .transition().delay(delay).duration(750).ease(d3.easeCubicInOut)
+          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
           .attr("cx", secondX)
-          .transition().duration(700).ease(d3.easeCubicInOut)
+          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
           .attr("cx", end.x).attr("cy", end.y)
           .on("end", () => {
             canvas.select(".sr-difference-dots").selectAll("circle")
