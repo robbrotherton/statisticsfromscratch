@@ -163,6 +163,15 @@ sfsVariabilityEnsureStyles = () => {
       line-height: 1;
     }
 
+    .variability-table .vt-has-columns th,
+    .variability-table .vt-has-columns td {
+      width: auto;
+    }
+
+    .variability-table .vt-context-cell {
+      text-align: left;
+    }
+
     .variability-table .vt-data-last td {
       border-bottom: 2px solid var(--sfs-text, var(--bs-body-color, #212529));
     }
@@ -300,7 +309,7 @@ sfsVariabilityNumberFormatter = (digits) => {
   if (digits === undefined || digits === null || digits === "auto") {
     return (value) => {
       if (!Number.isFinite(value)) return "";
-      if (Math.abs(value - Math.round(value)) < 1e-10) return String(Math.round(value));
+      if (Math.abs(value - Math.round(value)) < 1e-10) return d3.format("d")(Math.round(value));
       return d3.format(".2~f")(value);
     };
   }
@@ -574,6 +583,13 @@ sfsVariabilityTableNode = (opts = {}) => {
   const sdSymbol = opts.sdSymbol || (stats.sample ? "SD" : "\\sigma");
   const ssSymbol = opts.ssSymbol || "SS";
   const tableId = opts.id || sfsVariabilityHtmlId("variability-table");
+  // Optional context columns (e.g., participant, raw conditions) shown before
+  // the value column. Summary rows leave these cells blank.
+  const contextColumns = (Array.isArray(opts.columns) ? opts.columns : []).map((column) => ({
+    label: column.label === undefined ? column.key : column.label,
+    value: sfsVariabilityAccessor(column.key),
+    align: column.align || (column.numeric ? "right" : "left")
+  }));
   const initialStage = sfsVariabilityClampStage(opts.initialStage === undefined ? opts.stage : opts.initialStage);
   const root = d3.create("div")
     .attr("class", "variability-table sfs-figure")
@@ -635,7 +651,7 @@ sfsVariabilityTableNode = (opts = {}) => {
   const wrap = root.append("div")
     .attr("class", "vt-table-wrap");
   const table = wrap.append("table")
-    .attr("class", "sfs-data-table")
+    .attr("class", contextColumns.length ? "sfs-data-table vt-has-columns" : "sfs-data-table")
     .attr("aria-label", opts.ariaLabel || opts.title || "Variability calculation table");
 
   if (opts.caption) {
@@ -644,6 +660,12 @@ sfsVariabilityTableNode = (opts = {}) => {
 
   const thead = table.append("thead");
   const header = thead.append("tr");
+  const appendBlankContextCells = (tr) => contextColumns.forEach(() => tr.append("td"));
+  contextColumns.forEach((column) => {
+    header.append("th")
+      .classed("vt-context-cell", column.align === "left")
+      .text(column.label);
+  });
   header.append("th").append(() => sfsVariabilityInlineMath(valueSymbol));
   sfsVariabilityAppendReveal(header.append("th"), "deviations", sfsVariabilityInlineMath(deviationSymbol));
   sfsVariabilityAppendReveal(header.append("th"), "squared-deviations", sfsVariabilityInlineMath(squaredDeviationSymbol));
@@ -652,12 +674,18 @@ sfsVariabilityTableNode = (opts = {}) => {
   stats.rows.forEach((row, index) => {
     const tr = tbody.append("tr")
       .attr("class", index === stats.rows.length - 1 ? "vt-data-last" : null);
+    contextColumns.forEach((column) => {
+      tr.append("td")
+        .classed("vt-context-cell", column.align === "left")
+        .text(column.value(row.source) ?? "");
+    });
     tr.append("td").text(format.value(row.value));
     sfsVariabilityAppendReveal(tr.append("td"), "deviations", format.deviation(stats.deviations[index]));
     sfsVariabilityAppendReveal(tr.append("td"), "squared-deviations", format.squaredDeviation(stats.squaredDeviations[index]));
   });
 
   const summary1 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
+  appendBlankContextCells(summary1);
   sfsVariabilityAppendReveal(summary1.append("td"), "mean",
     sfsVariabilitySummaryNode(meanSymbol, format.summary(stats.mean)));
   summary1.append("td");
@@ -665,12 +693,14 @@ sfsVariabilityTableNode = (opts = {}) => {
     sfsVariabilitySummaryNode(ssSymbol, format.summary(stats.ss)));
 
   const summary2 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
+  appendBlankContextCells(summary2);
   summary2.append("td");
   summary2.append("td");
   sfsVariabilityAppendReveal(summary2.append("td"), "variance",
     sfsVariabilitySummaryNode(varianceSymbol, format.summary(stats.variance)));
 
   const summary3 = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
+  appendBlankContextCells(summary3);
   summary3.append("td");
   summary3.append("td");
   sfsVariabilityAppendReveal(summary3.append("td"), "sd",

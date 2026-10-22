@@ -71,6 +71,40 @@ idgTexReplacements = [
 idgMapScript = (value, map) =>
   String(value).split("").map((char) => map[char] || char).join("")
 
+// Unicode has no subscript for some letters (D, for one), so those scripts
+// are marked here and drawn as shifted tspans by idgAppendLabelText.
+idgScriptMarkPattern = /\u0001([bp])([^\u0002]*)\u0002/g
+
+idgScriptGroup = (content, map, kind) =>
+  String(content).split("").every((char) => map[char])
+    ? idgMapScript(content, map)
+    : `\u0001${kind}${content}\u0002`
+
+idgPlainLabelText = (text) =>
+  String(text).replace(idgScriptMarkPattern, "$2")
+
+idgAppendLabelText = (tspan, text, fontSize) => {
+  const parts = String(text).split(idgScriptMarkPattern);
+  if (parts.length === 1) {
+    tspan.text(text);
+    return;
+  }
+  let shift = 0;
+  for (let index = 0; index < parts.length; index += 3) {
+    if (parts[index] || shift) {
+      tspan.append("tspan").attr("dy", shift ? -shift : null).text(parts[index]);
+      shift = 0;
+    }
+    if (index + 2 < parts.length) {
+      shift = (parts[index + 1] === "b" ? 0.25 : -0.4) * fontSize;
+      tspan.append("tspan")
+        .attr("dy", shift)
+        .style("font-size", idgCssLength(fontSize * 0.72))
+        .text(parts[index + 2]);
+    }
+  }
+}
+
 idgHasTexNotation = (line) =>
   /(\$[^$]+\$|\\\([\s\S]*?\\\)|\\\[[\s\S]*?\\\]|\\[A-Za-z]+|[_^]\{?[A-Za-z0-9+\-=()]\}?)/.test(String(line || ""))
 
@@ -90,10 +124,10 @@ idgLabelText = (line) => {
   });
 
   return text
-    .replace(/_\{([^{}]+)\}/g, (match, content) => idgMapScript(content, idgSubscriptMap))
-    .replace(/\^\{([^{}]+)\}/g, (match, content) => idgMapScript(content, idgSuperscriptMap))
-    .replace(/_([A-Za-z0-9+\-=()])/g, (match, content) => idgMapScript(content, idgSubscriptMap))
-    .replace(/\^([A-Za-z0-9+\-=()])/g, (match, content) => idgMapScript(content, idgSuperscriptMap))
+    .replace(/_\{([^{}]+)\}/g, (match, content) => idgScriptGroup(content, idgSubscriptMap, "b"))
+    .replace(/\^\{([^{}]+)\}/g, (match, content) => idgScriptGroup(content, idgSuperscriptMap, "p"))
+    .replace(/_([A-Za-z0-9+\-=()])/g, (match, content) => idgScriptGroup(content, idgSubscriptMap, "b"))
+    .replace(/\^([A-Za-z0-9+\-=()])/g, (match, content) => idgScriptGroup(content, idgSuperscriptMap, "p"))
     .replace(/\{([^{}]+)\}/g, "$1");
 }
 
@@ -454,6 +488,162 @@ idgIndependentFullPreset = (opts) => {
   };
 }
 
+idgRelatedPreset = (opts) => {
+  const labels = opts.labels || {};
+  // The right two columns repeat the single-sample t diagram with D
+  // subscripts; the left two show one sample receiving both treatments,
+  // in contrast to the two separate samples of the independent diagram.
+  const nodes = idgMergeLabels([
+    {
+      id: "original-population",
+      shape: "population",
+      x: 140,
+      y: 125,
+      width: 230,
+      height: 145,
+      label: ["Original", "population"],
+      dashed: true,
+      role: "population"
+    },
+    {
+      id: "reference-population",
+      shape: "population",
+      x: 465,
+      y: 125,
+      width: 230,
+      height: 145,
+      label: ["Reference", "population"],
+      detail: ["Specified $\\mu_D = 0$", "Unknown $\\sigma_D$"],
+      dashed: true,
+      role: "population"
+    },
+    {
+      id: "treated-population",
+      shape: "population",
+      x: 825,
+      y: 125,
+      width: 230,
+      height: 145,
+      label: ["Treated", "population"],
+      detail: ["Unknown $\\mu_D$"],
+      dashed: true,
+      fill: idgTreatedFill,
+      role: "population"
+    },
+    {
+      id: "sample",
+      shape: "sample",
+      x: 140,
+      y: 360,
+      width: 210,
+      height: 90,
+      label: ["Sample"],
+      role: "sample"
+    },
+    {
+      id: "treated-sample-a",
+      shape: "sample",
+      x: 465,
+      y: 312,
+      width: 220,
+      height: 76,
+      label: ["Treated sample 1"],
+      fill: idgTreatedFill,
+      role: "sample"
+    },
+    {
+      id: "treated-sample-b",
+      shape: "sample",
+      x: 465,
+      y: 408,
+      width: 220,
+      height: 76,
+      label: ["Treated sample 2"],
+      fill: idgTreatedFill,
+      role: "sample"
+    },
+    {
+      id: "difference-sample",
+      shape: "sample",
+      x: 825,
+      y: 360,
+      width: 235,
+      height: 90,
+      label: ["Difference scores"],
+      detail: ["$M_D, n, s_D$"],
+      fill: idgTreatedFill,
+      role: "sample"
+    }
+  ], labels);
+
+  const links = [
+    {
+      from: "original-population",
+      to: "sample",
+      curve: 0.18,
+      arrow: "end",
+      className: "idg-link-sampling"
+    },
+    {
+      from: "sample",
+      to: "treated-sample-a",
+      curve: 0,
+      arrow: "end",
+      label: idgLabelFor(labels, "treatment-link", ""),
+      className: "idg-link-treatment"
+    },
+    {
+      from: "sample",
+      to: "treated-sample-b",
+      curve: 0,
+      arrow: "end",
+      className: "idg-link-treatment"
+    },
+    {
+      from: "treated-sample-a",
+      to: "difference-sample",
+      curve: 0,
+      arrow: "end",
+      label: idgLabelFor(labels, "difference-link", "Subtract"),
+      labelOffsetY: -26,
+      className: "idg-link-difference"
+    },
+    {
+      from: "treated-sample-b",
+      to: "difference-sample",
+      curve: 0,
+      arrow: "end",
+      className: "idg-link-difference"
+    },
+    {
+      from: "difference-sample",
+      to: "treated-population",
+      curve: 0.18,
+      arrow: "end",
+      dashed: true,
+      label: idgLabelFor(labels, "inference-link", "Inference"),
+      labelOffsetX: 62,
+      className: "idg-link-inference"
+    },
+    {
+      from: "reference-population",
+      to: "treated-population",
+      curve: 0,
+      dashed: true,
+      label: idgLabelFor(labels, "comparison-link", "Same $\\mu_D$?"),
+      labelOffsetY: -20,
+      className: "idg-link-comparison"
+    }
+  ];
+
+  return {
+    width: idgFiniteNumber(opts.width, 960),
+    height: idgFiniteNumber(opts.height, 460),
+    nodes,
+    links
+  };
+}
+
 idgIndependentCompactPreset = (opts) => {
   const labels = opts.labels || {};
   const nodes = idgMergeLabels([
@@ -649,6 +839,9 @@ idgPreset = (opts = {}) => {
   if (["independent", "independent-full", "independent-samples", "independent-samples-full"].includes(preset)) {
     return idgIndependentFullPreset(opts);
   }
+  if (["related", "related-samples", "paired", "paired-samples", "repeated-measures"].includes(preset)) {
+    return idgRelatedPreset(opts);
+  }
   if (["independent-compact", "two-sample", "two-sample-compact", "comparison"].includes(preset)) {
     return idgIndependentCompactPreset(opts);
   }
@@ -778,21 +971,21 @@ idgDrawLabel = (parent, lines, x, y, opts = {}) => {
   const startY = y - totalHeight / 2;
 
   cleanLines.forEach((line, index) => {
-    text.append("tspan")
+    const tspan = text.append("tspan")
       .attr("x", x)
-      .attr("y", startY + index * lineHeight)
-      .text(idgLabelText(line));
+      .attr("y", startY + index * lineHeight);
+    idgAppendLabelText(tspan, idgLabelText(line), idgFiniteNumber(opts.fontSize, 25));
   });
 
   const detailStartY = startY + (cleanLines.length - 1) * lineHeight
     + (lineHeight + detailLineHeight) / 2 + detailGap;
   detailLines.forEach((line, index) => {
-    text.append("tspan")
+    const tspan = text.append("tspan")
       .attr("class", "idg-node-detail")
       .attr("x", x)
       .attr("y", detailStartY + index * detailLineHeight)
-      .style("font-size", idgCssLength(detailSize))
-      .text(idgLabelText(line));
+      .style("font-size", idgCssLength(detailSize));
+    idgAppendLabelText(tspan, idgLabelText(line), detailSize);
   });
 
   return text;
@@ -889,7 +1082,7 @@ idgDiagramStyleText = `
 
 idgAccessibleLabel = (opts, titleLines) =>
   opts.alt || opts.ariaLabel || (titleLines.length
-    ? titleLines.map(idgLabelText).join(" ")
+    ? titleLines.map((line) => idgPlainLabelText(idgLabelText(line))).join(" ")
     : "Inferential statistics diagram")
 
 makeInferentialDiagram = (opts = {}) => {
