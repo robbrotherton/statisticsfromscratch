@@ -940,6 +940,11 @@
     let maxVisited = index;
     let actionController = null;
     let actionGeneration = 0;
+    // A step's figure can hold the reader on that step until they have done
+    // something there (the Chapter 13 race must be run before moving on).
+    // Back still works; only Next and the rail's later steps wait. Every
+    // step change clears the lock, so only the figure that set it can hold it.
+    let forwardLocked = false;
     let tutorialScrollFrame = null;
     let tutorialLoadScrollHandler = null;
 
@@ -995,6 +1000,7 @@
 
       node.addEventListener("click", function(event) {
         event.preventDefault();
+        if (forwardLocked && entry.stepIndex > index) return;
         spendTutorialHint();
         if (entry.stepIndex !== index) {
           render(entry.stepIndex, { applyAction: true, updateHash: true });
@@ -1366,6 +1372,7 @@
         : null;
       actionGeneration += 1;
       api.cancelTransitions(root);
+      forwardLocked = false;
 
       const position = positionFor(nextIndex);
 
@@ -1381,7 +1388,8 @@
           setControlsOpen: opts.setControlsOpen,
           generation: actionGeneration,
           signal: actionController ? actionController.signal : null,
-          repeat: Boolean(repeat)
+          repeat: Boolean(repeat),
+          setForwardLocked
         });
       }
 
@@ -1454,6 +1462,7 @@
       if (renderOptions.applyAction) {
         applyStepAction(steps[index], index, renderOptions.requestedAction);
       }
+      syncForwardLock();
 
       // A step can change the viz's height (and, in side mode, its width), so
       // re-centre the arrows and re-test the gutter fit once it has drawn.
@@ -1469,6 +1478,25 @@
       }));
     }
 
+    function syncForwardLock() {
+      if (forwardLocked) nextButton.disabled = true;
+      items.forEach(function(entry) {
+        entry.node.disabled = forwardLocked && entry.stepIndex > index;
+      });
+    }
+
+    function setForwardLocked(locked) {
+      const next = Boolean(locked);
+      if (next === forwardLocked) return;
+      forwardLocked = next;
+      if (!next) {
+        const atEnd = index === steps.length - 1;
+        nextButton.disabled = atEnd && !repeatActions[index];
+      }
+      syncForwardLock();
+      syncHint();
+    }
+
     prevButton.addEventListener("click", function(event) {
       event.preventDefault();
       spendTutorialHint();
@@ -1477,6 +1505,7 @@
 
     nextButton.addEventListener("click", function(event) {
       event.preventDefault();
+      if (forwardLocked) return;
       spendTutorialHint();
       if (index === steps.length - 1 && repeatActions[index]) {
         applyStepAction(steps[index], index, repeatActions[index], true);
@@ -1525,7 +1554,8 @@
       },
       getPosition() {
         return positionFor(index);
-      }
+      },
+      setForwardLocked
     };
 
     function handleTutorialMotionChange(event) {
