@@ -98,7 +98,7 @@ One thing worth pointing out, though, is that to get five scores in each conditi
 
 ## From two samples to one
 
-Let's use some of Triplett's own data to make things concrete. His procedure was a bit more complicated than I'm making out here, but for our purposes we'll take just the first five kids from one of the paper's tables. Following a practice trial, all these kids first did the race alone, then with a competitor. @tbl-triplett shows the data. (I've rounded the times to whole seconds to keep the math more manageable.) Triplett grouped these five kids among those whose performance generally improved in competition, so this selected example is for learning the procedure, rather than estimating the overall effect in his study.
+Let's use some of Triplett's own data to make things concrete. His procedure was a bit more complicated than I'm making out here, but for our purposes we'll take just the first five kids from one of the paper's tables. Following a practice trial, all these kids first did a race alone, then with a competitor. @tbl-triplett shows the data. (I've rounded the times to whole seconds to keep the math more manageable. Note also that the race took much longer overall on Triplett's machine than the version you played in @act-triplett-race.) Triplett grouped these five kids among those whose performance generally improved in competition, so this selected example is for learning the procedure, rather than estimating the overall effect in his study.
 
 | Participant | Alone | Competition |
 |:------------|--:|--:|
@@ -280,13 +280,13 @@ The corresponding two-tailed $p$-value is approximately $.044$, just below our $
 
 #### Effect size
 
-As before, we should also estimate the effect size, whether or not the result is significant. Cohen's $d$ works like the single-sample version: divide the mean difference by the standard deviation of the differences. We'll label this version $d_z$ to make clear which standard deviation we're using:
+As before, we should also estimate the effect size, whether or not the result is significant. Cohen's $d$[^related-effect-size] works like the single-sample version: divide the mean difference by the standard deviation of the differences:
 
-$$ d_z = \frac{M_D}{s_D} = \frac{-6.2}{4.764} \approx -1.30 $$
+$$ d = \frac{M_D}{s_D} = \frac{-6.2}{4.764} \approx -1.30 $$
 
-The mean difference is about 1.3 standard deviations of the differences below zero. But this isn't directly comparable to Chapter 12's $d$, which used a pooled standard deviation of the original scores. Pairing hasn't made the six-second change bigger; it's changed the variability we use to standardize it.[^related-effect-size]
+The mean difference is about 1.3 standard deviations of the differences below zero.
 
-[^related-effect-size]: There are several ways to standardize an effect in a repeated-measures design. The choice matters when comparing effect sizes across designs; see Lakens [-@lakens2013calculating].
+[^related-effect-size]: You may see this version written $d_z$ elsewhere. That has nothing to do with $z$-scores: Cohen used $Z$ to stand for the difference score, $Z = X - Y$, which we've been calling $D$. There are also other ways to standardize an effect in a repeated-measures design. The choice matters when comparing effect sizes across designs; see Lakens [-@lakens2013calculating].
 
 #### Confidence interval
 
@@ -294,7 +294,7 @@ The confidence interval works just like the single-sample interval, too, but now
 
 $$ M_D \pm t \times s_{M_D} = -6.2 \pm 2.776(2.131) \approx [-12.12,\ -0.28] $$
 
-The interval ranges from about twelve seconds faster in competition to a fraction of a second faster. That's still a wide range. Notice that it barely excludes zero, agreeing with our two-tailed test's $p$-value of about $.044$.
+The interval ranges from about twelve seconds faster in competition to a fraction of a second faster. That's still a wide range. Notice that it barely excludes zero, agreeing with our two-tailed test's $p$-value of about $.044$, only just squeaking past the $\alpha = .05$ threashold.
 
 ::: {#fig-related-ci}
 {{< interactive-figure relatedConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":-6.2,"s":4.764452,"n":5,"confidence":95,"reference":0,"xDomain":[-15,5],"units":"Mean difference, competition − alone (s)"}' fallback="95% t confidence interval for the mean difference: −12.12 to −0.28 seconds, with point estimate −6.2 seconds. Zero lies just above the interval." >}}
@@ -314,7 +314,7 @@ Rounding up, that's 20 children, each measured in both conditions. An exact calc
 
 The hard part is estimating how variable the changes will be. Two conditions could each have a lot of variability, but if the same people score high in both, their differences could be much less variable. That's what happened here. And our estimate comes from only five children, so we shouldn't treat it as a precise description of the population.
 
-### Try it with some different children
+<!-- ### Try it with some different children
 
 Now try the procedure yourself. These five children are from Table II, Group A, which Triplett described as stimulated adversely by competition [@triplett1898dynamogenic]. As in our worked example, we'll use their first trial alone and their first trial in competition, rounded to whole seconds.
 
@@ -330,25 +330,51 @@ Now try the procedure yourself. These five children are from Table II, Group A, 
 
 Use $D = \text{Competition} - \text{Alone}$ again, and test $H_0: \mu_D = 0$ against $H_1: \mu_D \ne 0$, with $\alpha = .05$. This is practice with a selected group of children, rather than a test of the overall effect of competition in Triplett's study.
 
-{{< include quizzes/13-related-t-practice.qmd >}}
+{{< include quizzes/13-related-t-practice.qmd >}} -->
 
-## What pairing buys
+## Reporting and interpreting the results
 
-What if we hadn't noticed that each row belonged to one child? Let's deliberately treat the columns as if they came from different children and use Chapter 12's test.
+### Reporting results
 
-### Ignoring the pairs
+As usual, we need to report the descriptive statistics, the kind of test, the estimated difference and its confidence interval, the test statistic with its degrees of freedom, the $p$-value or whether it falls below $\alpha$, and the effect size. Here's how we might report our worked example:
 
-First, see if you can calculate the independent-samples $t$ statistic for these data. Use competition minus alone, as before. This is practice with Chapter 12's calculation, though it's the wrong analysis for these paired observations.
+> In this selected five-child example, children completed the task faster in competition ($M = 43.2$, $SD = 8.14$ seconds) than alone ($M = 49.4$, $SD = 11.48$ seconds). A two-tailed related-samples $t$ test found a significant mean difference, $M_D = -6.20$ seconds, 95% CI [-12.12, -0.28], $t(4) = -2.91$, $p < .05$, $d = -1.30$.
 
-{{< include quizzes/13-related-t-independent-samples.qmd >}}
+### Interpreting the results
 
-With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The pooled variance comes out at 99. The estimated standard error of the mean difference is $s_{M_1 - M_2} = \sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
+Our test tells us about the differences we analyzed, but interpreting them requires us to think about how we got the data. We chose children from a group Triplett classified by their response to competition, so we can't use this result to estimate the overall effect in his study.
 
-### Using the pairs
+And for the five pairs of scores I selected, every child did the alone trial first and the competition trial second. So they'd all had more practice by the time they raced against someone else. Maybe some of the improvement was just getting better at turning the reel. Or maybe they were getting tired, which could push their times in the other direction. Using the same children twice removes stable differences in their overall speed, but it doesn't remove things that change between the two runs.
 
-But our related-samples calculation already showed what happens when we keep the pairs. Mathematically, both procedures give us an answer. Only the related-samples test accounts for each child's two scores belonging together.
+This is an **order effect**: a change in performance or responses caused by the order in which the conditions are experienced. Triplett anticipated this problem. His full design included several trials and varied the sequence of alone and competition trials across groups of children [@triplett1898dynamogenic]. Our simplified first-pair analysis leaves that part of his design out.
 
-Here's what changes when we account for the pairs. Both calculations use competition minus alone.
+One way to deal with order effects is **counterbalancing**. In a simple two-condition study, we could have some children do the alone trial first and the competition trial second, and other children do competition first and alone second. That way, extra practice or fatigue on the second run wouldn't always go along with the same condition. Triplett's sequences were more complicated than that, but the essential point is the same: think about what else changes between measurements, and build the design to help separate those changes from the effect we're interested in.
+
+### Assumptions of the related-samples $t$ test
+
+The difference scores must be independent of one another. We expect the two scores within a pair to be related; that's why we put them together. But one child's change shouldn't depend on another child's change. In a matched-subjects study, each matched pair contributes one difference, and those differences need to be independent across pairs. For Triplett's data, we'd also want to know who raced against whom, since opponents could influence each other's performances.
+
+And second, there's the familiar assumption about normality. As with the single-sample test, the exact $t$ reference distribution assumes a normal population, but here it's the population of *difference scores* that matters. Neither condition has to be normally distributed separately. Larger samples can tolerate some departures, but strong skew or extreme differences deserve attention, especially with only five pairs.
+
+### What pairing buys
+
+What if we hadn't realized that each row belonged to one child? Let's briefly forget everything we just learned about related samples and subject the same data we just worked with to an independent-samples $t$ test. This treats the two sets of times, for alone and competition, as if they came from different children, and uses Chapter 12's equations and test.
+
+<!-- ### Ignoring the pairs -->
+
+<!-- First, see if you can calculate the independent-samples $t$ statistic for these data. Use competition minus alone, as before. This is practice with Chapter 12's calculation, though it's the wrong analysis for these paired observations.
+
+{{< include quizzes/13-related-t-independent-samples.qmd >}} -->
+
+With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The competition times are sample 1, with variance $s_1^2 = 66.2$; the alone times are sample 2, with $s_2^2 = 131.8$. Pooling them weights each variance by its degrees of freedom:
+
+$$ s_p^2 = \frac{df_1 s_1^2 + df_2 s_2^2}{df_1 + df_2} = \frac{4(66.2) + 4(131.8)}{4 + 4} = 99 $$
+
+With equal sample sizes, the pooled variance is just the average of the two. The estimated standard error of the mean difference is $s_{M_1 - M_2} = \sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
+
+We already saw that the correct analysis, treating the scores as related and analyzing the differences, produced a more extreme $t$ statistic, which was sufficient to reject the null hypothesis (despite the lower $df$ and correspondingly more extreme critical $t$ values). By accounting for each child's two scores belonging together, we were able to perform a more powerful test.
+
+Here's what changes when we account for the pairs.
 
 | Quantity | Ignoring the pairs | Using the pairs |
 |:--|--:|--:|
@@ -362,31 +388,13 @@ Here's what changes when we account for the pairs. Both calculations use competi
 
 : The same scores analyzed with and without their known pairing. The independent-samples calculation is inappropriate for these paired observations. {#tbl-related-comparison}
 
-The numerator hasn't changed. The mean of the differences is exactly the difference between the means. What changed is the variability we used to calculate the denominator. The independent-samples calculation includes how much the children differ in their overall speed. The related-samples calculation uses how much their *changes* differ. Here that's a much smaller number, so we get a smaller standard error and a narrower confidence interval, even though the lower degrees of freedom require a more extreme critical $t$.
+The numerator didn't change. The mean of the differences is exactly the difference between the sample means. What changed is the variability we used to calculate the denominator. The independent-samples calculation includes how much the children differ in their overall speed. The related-samples calculation uses how much their *changes* differ; it excludes the individual differences that reflect some kids being faster than others and allows the analysis to focus on each child's change own their own terms. Here that's a much smaller number, so we get a smaller standard error and a narrower confidence interval, even though the lower degrees of freedom require a more extreme critical $t$.
 
-But this isn't a choice we make by trying both tests and keeping the answer we prefer. The numbers will go through either calculation without complaining. We have to know where those numbers came from. These scores belong in pairs, so our analysis needs to use the pairs. And pairing isn't a guarantee of greater power: it helps when the two scores in each pair tend to go together, as they do here.
+Obviously which variety of $t$ test we use isn't a choice we make by trying both out and keeping the answer we prefer. My point is that the numbers don't know or care what we subject them to. We have to know where those numbers came from, and what the appropriate statistical tools are. These scores belong in pairs, so our analysis needs to use the pairs. Pairing doesn't guarantee greater power, but it helps when the two scores in each pair do tend to go together, as as the case for our data here.
 
 ### The advantages of pairing
 
-As far as practical advantages go, the required number of participants is kind of a big deal. Participants can be expensive and time consuming to recruit, especially if we're not just using intro psych students and giving them course credit. Getting two measurements from each person can make recruitment easier. A within-participants design also allows us to study changes within individuals over time, for example when studying the efficacy of a psychological treatment.
-
-## Reporting and interpreting the results
-
-### Reporting results
-
-As usual, we need to report the descriptive statistics, the kind of test, the estimated difference and its confidence interval, the test statistic with its degrees of freedom, the $p$-value or whether it falls below $\alpha$, and the effect size. Here's how we might report our worked example:
-
-> In this selected five-child example, children completed the task faster in competition ($M = 43.2$, $SD = 8.14$ seconds) than alone ($M = 49.4$, $SD = 11.48$ seconds). A two-tailed related-samples $t$ test found a significant mean difference, $M_D = -6.20$ seconds, 95% CI [-12.12, -0.28], $t(4) = -2.91$, $p < .05$, $d_z = -1.30$.
-
-### Interpreting the results
-
-Our test tells us about the differences we analyzed, but interpreting them requires us to think about how we got the data. We chose children from a group Triplett classified by their response to competition, so we can't use this result to estimate the overall effect in his study.
-
-And for the five pairs of scores I selected, every child did the alone trial first and the competition trial second. So they'd all had more practice by the time they raced against someone else. Maybe some of the improvement was just getting better at turning the reel. Or maybe they were getting tired, which could push their times in the other direction. Using the same children twice removes stable differences in their overall speed, but it doesn't remove things that change between the two runs.
-
-This is an **order effect**: a change in performance or responses caused by the order in which the conditions are experienced. Triplett anticipated this problem. His full design included several trials and varied the sequence of alone and competition trials across groups of children [@triplett1898dynamogenic]. Our simplified first-pair analysis leaves that part of his design out.
-
-One way to deal with order effects is **counterbalancing**. In a simple two-condition study, we could have some children do the alone trial first and the competition trial second, and other children do competition first and alone second. That way, extra practice or fatigue on the second run wouldn't always go along with the same condition. Triplett's sequences were more complicated than that, but the essential point is the same: think about what else changes between measurements, and build the design to help separate those changes from the effect we're interested in.
+As far as practical advantages go, the required number of participants is kind of a big deal. Participants can be expensive and time consuming to recruit, especially if we're not just using intro psych students and giving them course credit. Getting two measurements from each person can offer greater value for money. A within-participants design also allows us to study changes within individuals over time, for example when studying the efficacy of a psychological treatment.
 
 ### Returning to the CBT study
 
@@ -397,12 +405,6 @@ So we may need to recruit more people than the number of complete pairs we want.
 The CBT example has been through a few different calculations by now. In Chapter 5, I treated the posttreatment mean as though it were one person's score. In Chapter 8, we pretended the pretreatment sample statistics were known population values. Now we can use the design the data actually came from: the same people measured before and after treatment. This is the kind of dependence we flagged in Chapter 7, and it calls for a related-samples test.
 
 The closing learning checks give you the pre- and posttreatment means, the number of complete pairs, and an estimate of the standard deviation of the difference scores, so you can finish that analysis yourself. We need the variability of the *changes*, rather than the pretreatment standard deviation we used before. And remember that a before-and-after improvement by itself doesn't establish that therapy caused it. Some improvement might have happened anyway; we'd want a comparison that helps rule that out.
-
-### Assumptions of the related-samples $t$ test
-
-The difference scores must be independent of one another. We expect the two scores within a pair to be related; that's why we put them together. But one child's change shouldn't depend on another child's change. In a matched-subjects study, each matched pair contributes one difference, and those differences need to be independent across pairs. For Triplett's data, we'd also want to know who raced against whom, since opponents could influence each other's performances.
-
-And second, there's the familiar assumption about normality. As with the single-sample test, the exact $t$ reference distribution assumes a normal population, but here it's the population of *difference scores* that matters. Neither condition has to be normally distributed separately. Larger samples can tolerate some departures, but strong skew or extreme differences deserve attention, especially with only five pairs.
 
 ## Looking ahead
 
