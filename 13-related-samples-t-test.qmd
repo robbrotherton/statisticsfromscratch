@@ -185,29 +185,45 @@ A diagram representing the logic of the related-samples $t$ test. One sample rec
 
 ## The related-samples $t$ statistic
 
-Remember that the basic structure of all $t$ tests is: 
+Remember that every $t$ statistic has the same basic structure (@eq-t-structure):
 
 $$ t = \frac{\text{sample statistic} - \text{population parameter}}{\text{estimated standard error}} $$
 
-A sample statistic minus the population value specified by our null hypothesis, divided by an estimated standard error. For the single-sample $t$ test, this took the form:
+For the single-sample $t$ test, the null gave us a reference value for the population mean, $\mu_0$ (@eq-t-statistic):
 
-$$ \frac{M - \mu_0}{s_M} $$
+$$ t = \frac{M - \mu_0}{s_M} $$
 
-The null gave us a reference value for the population mean. For the independent-samples $t$ test, the statistic was the difference between sample means, and the null said the difference between population means was zero. The denominator was the estimated standard error of the mean difference.
+For the independent-samples $t$ test, the statistic was the difference between sample means, and the null said the difference between population means was zero (@eq-independent-t):
 
-Conceptually, the related-samples $t$ test is basically identical to the single-sample $t$ test. We just add a $D$ subscript to everything to denote that we're dealing with difference scores rather than the original scores. The statistic is the mean of the difference scores, $M_D$. The population parameter is the mean of the population of difference scores, $\mu_D$, which the null hypothesis says is zero:
+$$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
+
+Conceptually, the related-samples $t$ test is just the single-sample $t$ test, applied to difference scores. We just add a $D$ subscript to things to show that we're dealing with difference scores rather than the original scores: $M$ becomes $M_D$, the mean of the difference scores; $s$ becomes $s_D$; and $s_M$ becomes $s_{M_D}$. The parameter becomes $\mu_D$. As in Chapter 12, we're writing the parameter itself because its about a hypothesized difference, and the null hypothesis says its value is zero:
 
 $$ t = \frac{M_D - \mu_D}{s_{M_D}} $$ {#eq-related-t}
 
-The denominator is the **estimated standard error of the mean difference**, $s_{M_D}$. As in Chapter 11, this estimates how much the mean of the difference scores would vary from sample to sample. To calculate it, we divide the sample standard deviation of the difference scores, $s_D$, by the square root of the number of pairs, $n$:
+The denominator is the **estimated standard error of the mean difference score**, $s_{M_D}$. Don't confuse it with Chapter 12's estimated standard error of the mean difference, $s_{M_1 - M_2}$. The means themselves can match: for our children, the mean of the differences, $-6.2$, is the same as the difference between the two condition means, $43.2 - 49.4$. But the two standard errors are calculated differently, and as we'll see later in the chapter, that can make a big difference to the resulting $t$. As in Chapter 11, $s_{M_D}$ estimates how much the mean of the difference scores would vary from sample to sample. To calculate it, we divide the sample standard deviation of the difference scores, $s_D$, by the square root of the number of pairs, $n$:
 
 $$ s_{M_D} = \frac{s_D}{\sqrt{n}} $$ {#eq-related-se}
 
-So once we've calculated our differences, everything works just like the single-sample test. With a null mean difference of zero, we divide $M_D$ by its estimated standard error to see how many standard errors our observed mean difference falls from zero.
+So once we've calculated our differences, everything works just like the single-sample test. With a null mean difference of zero, the parameter is irrelavant mathematically---we just divide $M_D$ by its estimated standard error to see how many standard errors our observed mean difference falls from zero.
 
 ### Degrees of freedom
 
 We'll need to know the degrees of freedom for the $t$ test. Here it's $df = n - 1$, where $n$ counts complete pairs, or difference scores. In a within-participants study, each person contributes one difference score. In a matched-subjects study, each matched *pair* of people contributes one difference. So our five children supply ten original times, but only five difference scores, giving $df = 4$.
+
+### All the $t$s
+
+@tbl-t-structure-comparison-related adds the related-samples test to the comparison from Chapter 12 so we can see all the pieces of each of the $t$ statistics we've learned about. It might look like a lot of different things, but if you can see the common threads behind the different symbols, it's a good sign that you're understanding the structure of the $t$ statistic, rather than just trying to memorize formulas.
+
+| | Single-sample $t$ | Independent-samples $t$ | Related-samples $t$ |
+|:--|:--|:--|:--|
+| Sample statistic | $M$ | $M_1 - M_2$ | $M_D$ |
+| Parameter under $H_0$ | $\mu_0$ | $\mu_1 - \mu_2 = 0$ | $\mu_D = 0$ |
+| Variability estimate | $s^2$ | $s_p^2$ (pooled) | $s_D^2$ |
+| Estimated standard error | $s_M$ | $s_{M_1 - M_2}$ | $s_{M_D}$ |
+| Degrees of freedom | $n - 1$ | $(n_1 - 1) + (n_2 - 1)$ | $n - 1$ (pairs) |
+
+: The pieces of the three $t$ statistics. All follow the structure of @eq-t-structure, and the related-samples column is the single-sample column with a $D$ subscript. {#tbl-t-structure-comparison-related}
 
 ## A related-samples $t$ test, step by step
 
@@ -329,7 +345,7 @@ First, see if you can calculate the independent-samples $t$ statistic for these 
 
 {{< include quizzes/13-related-t-independent-samples.qmd >}}
 
-With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The pooled variance comes out at 99. The estimated standard error of the mean difference is $\sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
+With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The pooled variance comes out at 99. The estimated standard error of the mean difference is $s_{M_1 - M_2} = \sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
 
 ### Using the pairs
 
