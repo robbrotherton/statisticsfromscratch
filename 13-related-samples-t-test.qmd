@@ -20,7 +20,7 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-This will be our last chapter on the $t$ statistic. We'll introduce one more variant of the $t$ test, the related-samples $t$ test, which is used when we want to compare two samples but, unlike the independent samples in the previous chapter, the two samples are somehow related. We'll discuss the kind of research designs that this involves, the pros and cons of related and independent designs, and we'll learn how to calculate the related-samples $t$ test, paying attention to how it differs from the independent-samples $t$ test.
+This will be our last chapter on the $t$ statistic. We'll introduce the related-samples $t$ test, used to compare two samples that, unlike those in the previous chapter, are somehow related. We'll discuss the research designs this involves, their pros and cons, and how to calculate the test.
 
 ## The competition machine
 
@@ -60,7 +60,7 @@ But Triplett realized he needed some more convincing, more carefully controlled 
 
 What makes the paper so charming is that Triplett included full tables of the raw data in his paper, including the first names and last initials of the children. Compared to modern results sections filled with impersonal aggregate statistics, it's a delight to imagine little Violet F. and Willie H. staring each other down across the competition machine, teeth gritted in determination, Triplett watching on with clipboard in hand. He noted some wonderfully specific details. "An intense desire to win," Triplett wrote, was often accompanied by "labored breathing, flushed faces and a stiffening or contraction of the muscles of the arm." The youngest children sometimes became so excited that they could barely turn the crank; "The effort to continue turning in these cases was by a swaying of the whole body." One particularly competitive five-year-old was so upset at losing his race, according to his mother, that he "felt badly about it all day."
 
-Anyway, this gives us a context in which to think about the consequences of this kind of research design, in which each participant does something more than once, and the statistical approach to the resulting data.
+This gives us a context in which to think about research designs where each participant does something more than once, and how to analyze the resulting data.
 
 ### Between- and within-participants designs
 
@@ -72,7 +72,7 @@ This requires some more thought about research design. In Chapter 12, we used a 
 Independent samples contain different, independent groups of people, represented here by 10 different colored dots. 
 :::
 
-Because it's a completely different group of people in each sample, there are at least two reasons why our sample means might differ from one another. One is any treatment effect that increases or decreases scores overall. That's what we're hoping to discover. But another reason is just the individual differences between those different groups of people. By chance, one group might have a few more people who score high on our measure and the other group a few more people who score low. Those individual differences are a potential source of variability that we have to keep in mind.
+Because it's a different group of people in each sample, there are at least two reasons why our sample means might differ. One is a treatment effect that increases or decreases scores overall. That's what we're hoping to discover. But one group might have a few more people who score high on our measure and the other a few more who score low, just by chance. Those individual differences are another source of variability between groups.
 
 Now, compare that to a **related-samples design**, in which each score in one sample is paired with a specific score in the other. The most common version is the **within-participants design**, also called a *repeated-measures design*. Every participant experiences and contributes data to both conditions. When you played the game in @act-triplett-race, you produced two scores, one alone and one in competition. That's what Triplett got from each of the kids he tested.
 
@@ -82,7 +82,7 @@ Now, compare that to a **related-samples design**, in which each score in one sa
 In a within-participants design, the same people contribute a score in each condition. The groups are not independent, represented by the line connecting each pair of same-colored dots.
 :::
 
-There are still individual differences *within* each sample, because each sample is made up of different people. But it's those same people (represented by the same colored dots) in each sample. A child who is generally slow contributes a score to both conditions, so that stable difference in overall speed doesn't explain the difference between conditions. When the paired scores tend to go together, taking those stable differences out of the comparison can give us a more powerful test. (Other things could still change between the two measurements, though, like practice or fatigue. We'll come back to those when we interpret the results.)
+There are still individual differences *within* each sample, but it's the same people in both. A child who is generally slow contributes a score to both conditions, so that stable difference in overall speed doesn't explain the difference between conditions. When the paired scores tend to go together, taking those stable differences out of the comparison can give us a more powerful test. (Other things could still change between the two measurements, though, like practice or fatigue. We'll come back to those when we interpret the results.)
 
 #### Matched-subjects designs
 
@@ -118,7 +118,7 @@ Let's use some of Triplett's own data to make things concrete. His procedure was
 
 {{< include quizzes/13-related-t-pairs.qmd >}}
 
-If we ignored the Participant column, the data would resemble the kind of scores from independent samples that we worked with in the last chapter. But the column of names tells us that each row comes from one child; the scores are related. The children differ in their overall speed. Anna P. took quite a bit longer than Willie H. in both conditions. But the comparison we're interested in is how each child's *own* time changed. We need a way to distill that information when we compare the conditions.
+If we ignored the Participant column, the data would resemble the kind of scores from independent samples that we worked with in the last chapter. But the column of names tells us that each row comes from one child; the scores are related. Notice that the children differ in their overall speed. Anna P. took quite a bit longer than Willie H. in both conditions, but the comparison we're interested in is how each child's *own* time changed. We need a way to distill that information when we compare the conditions.
 
 Let's look at this visually, like we did for independent samples last time, before we walk through the equations.
 
@@ -158,9 +158,7 @@ Dividing numerator by denominator relabels the lower axis in standard errors fro
 ::::
 :::::
 
-At first, the structure of the data for the related-samples design looks similar. We have two samples of scores, but crucially, the two samples are no longer independent. They consist of the same people, or people we've deliberately paired up to be similar. So if we treated this data the same way we treat the independent-samples data, we'd be violating the assumption of independence of scores.
-
-So rather than treating the two sets of scores separately, we turn them into a *single sample of difference* scores. We subtract each child's time alone from their time in competition to get the **difference score**, $D$, and we can put that as a new column in our table.
+Treating these paired scores as independent would violate the assumption of independence. Instead, we turn them into a *single sample of difference scores*. Subtracting each child's time alone from their time in competition gives the **difference score**, $D$, shown in a new column:
 
 | Participant | Alone | Competition | $D$ |
 |:------------|--:|--:|--:|
@@ -174,14 +172,12 @@ So rather than treating the two sets of scores separately, we turn them into a *
 
 Negative differences mean faster times in competition; positive differences mean slower times. We could subtract in the other direction, but we need to keep the direction the same for every row. Reversing it would reverse the signs of the mean difference and $t$, without changing our two-tailed test decision.
 
-With the single set of difference scores, we're back conceptually closer to the single-sample $t$ test that we worked with in Chapter 11. We have a single sample of difference scores and we want to know the characteristics of the population of difference scores that produced them.
-
 @fig-related-inferential shows this logic, using the same kind of diagram as @fig-t-estimated-population and @fig-independent-inferential. On the left, the design looks like the independent-samples design, with two treated samples. But now they come from a single sample: the same people receive both treatments. Subtracting within each pair turns the two treated samples into one sample of difference scores. From there, the right side is the single-sample $t$ test again, with a subscript $D$ added. The treated population is now a population of difference scores, and we compare its unknown mean, $\mu_D$, with the reference value of $0$ that the null hypothesis specifies.
 
 ::: {#fig-related-inferential}
 {{< interactive-figure relatedInferentialDiagram makeInferentialDiagram options='{"preset":"related","maxWidth":"42rem","ariaLabel":"One sample from the original population receives both treatments, giving two treated samples made up of the same people. Subtracting within each pair gives a single sample of difference scores, which supplies M D, n, and s D. From it we make an inference about the unknown mean mu D of the treated population of differences, and ask whether it is the same as the reference population, where mu D is specified as 0 and sigma D is unknown."}' fallback="One sample from the original population receives both treatments; subtracting within each pair gives difference scores with M_D, n, and s_D; inference to the treated population's unknown μ_D; is it the same as the reference value μ_D = 0?" >}}
 
-A diagram representing the logic of the related-samples $t$ test. One sample receives both treatments, and the paired scores become a single sample of differences. The rest is the logic of the single-sample $t$ test, applied to difference scores, with a reference mean of $\mu_D = 0$.
+The related-samples $t$ test: paired scores become a single sample of differences, with a null reference mean of $\mu_D = 0$.
 :::
 
 ## The related-samples $t$ statistic
@@ -206,7 +202,7 @@ The denominator is the **estimated standard error of the mean difference score**
 
 $$ s_{M_D} = \frac{s_D}{\sqrt{n}} $$ {#eq-related-se}
 
-So once we've calculated our differences, everything works just like the single-sample test. With a null mean difference of zero, the parameter is irrelevant mathematically---we just divide $M_D$ by its estimated standard error to see how many standard errors our observed mean difference falls from zero.
+With a null mean difference of zero, we just divide $M_D$ by its estimated standard error to see how many standard errors our observed mean difference falls from zero.
 
 ### Degrees of freedom
 
@@ -214,7 +210,7 @@ We'll need to know the degrees of freedom for the $t$ test. Here it's $df = n - 
 
 ### All the $t$s
 
-@tbl-t-structure-comparison-related adds the related-samples test to the comparison from Chapter 12 so we can see all the pieces of each of the $t$ statistics we've learned about. It might look like a lot of different things, but if you can see the common threads behind the different symbols, it's a good sign that you're understanding the structure of the $t$ statistic, rather than just trying to memorize formulas.
+@tbl-t-structure-comparison-related adds the related-samples test to the comparison from Chapter 12. Look for the common threads behind the different symbols to understand the structure of $t$, rather than just memorizing formulas.
 
 | | Single-sample $t$ | Independent-samples $t$ | Related-samples $t$ |
 |:--|:--|:--|:--|
@@ -228,7 +224,7 @@ We'll need to know the degrees of freedom for the $t$ test. Here it's $df = n - 
 
 ## A related-samples $t$ test, step by step
 
-So let's run through the familiar hypothesis testing steps with Triplett's five kid racers. Again, the only really new part is how we prepare the data: each child supplies one difference score, and those five differences become the sample we analyze.
+Let's run through the familiar hypothesis testing steps with Triplett's five kid racers, using their five difference scores as our sample.
 
 ### Step 1: State the hypotheses
 
@@ -240,9 +236,7 @@ $$ H_1: \mu_D \ne 0 $$
 
 ### Step 2: Set the decision criteria
 
-Our nondirectional alternative calls for a two-tailed test. The critical regions depend on the degrees of freedom. For the related-samples test, degrees of freedom is $n - 1$, meaning the number of scores we're analyzing minus 1. Remember, we're analyzing the difference scores, not every individual score across the two conditions. So here it would be four (not nine; the ten recorded times produced five difference scores). 
-
-To find the corresponding critical values, we consult the same kind of $t$ table that appeared in Chapter 11. The critical values for a two-tailed $\alpha$ of .05 with four degrees of freedom would be $\pm 2.776$.
+Our nondirectional alternative calls for a two-tailed test. The five difference scores give $df = n - 1 = 4$ (not nine; we count pairs, not individual times). Consulting the $t$ table, the critical values for a two-tailed $\alpha = .05$ with four degrees of freedom are $\pm 2.776$.
 
 ::: {#tbl-related-critical}
 {{< interactive-figure relatedTCriticalTable makeTTable options='{"title":"Critical values for Triplett’s data","df":{"from":2,"to":6},"alphas":[0.1,0.05,0.025,0.01,0.005],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":4,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 2 through 6 degrees of freedom, highlighting the two-tailed .05 critical value of 2.776 at df = 4." >}}
@@ -274,7 +268,7 @@ Our $t = -2.91$ falls below the lower critical value of $-2.776$, so we reject t
 The observed $t = -2.91$ falls just inside the lower critical region of the null $t$ distribution with $df = 4$.
 :::
 
-The corresponding two-tailed $p$-value is approximately $.044$, just below our $\alpha$ of $.05$. The result passes the threshold for significance, but with only five difference scores, there's still considerable uncertainty about the size of the population mean difference, as we'll see in the confidence interval.
+The corresponding two-tailed $p$-value is approximately $.044$, just below our $\alpha$ of $.05$.
 
 ### Step 5: Estimate the effect, interval, and power
 
@@ -294,7 +288,7 @@ The confidence interval works just like the single-sample interval, too, but now
 
 $$ M_D \pm t \times s_{M_D} = -6.2 \pm 2.776(2.131) \approx [-12.12,\ -0.28] $$
 
-The interval ranges from about twelve seconds faster in competition to a fraction of a second faster. That's still a wide range. Notice that it barely excludes zero, agreeing with our two-tailed test's $p$-value of about $.044$, only just squeaking past the $\alpha = .05$ threshold.
+The interval ranges from about twelve seconds faster in competition to a fraction of a second faster. That's still a wide range. Notice that it barely excludes zero, agreeing with our two-tailed test's $p$-value of about $.044$ which only just squeaked past the $\alpha = .05$ threshold.
 
 ::: {#fig-related-ci}
 {{< interactive-figure relatedConfidenceInterval makeIntervalDiagram options='{"distribution":"t","m":-6.2,"s":4.764452,"n":5,"confidence":95,"reference":0,"xDomain":[-15,5],"units":"Mean difference, competition − alone (s)"}' fallback="95% t confidence interval for the mean difference: −12.12 to −0.28 seconds, with point estimate −6.2 seconds. Zero lies just above the interval." >}}
@@ -332,7 +326,7 @@ And second, there's the familiar assumption about normality. As with the single-
 
 ### Interpreting the results
 
-The result we found was "statistically significant," in a direction consistent with social facilitation: better race performance when racing against a competitor. As usual though, we would still need to be cautious in our interpretation. Is social facilitation the only possible explanation for the difference? Certainly not; a statistically significant result doesn't rule out sampling error. We could still be making a Type I error. And the difference only just met the statistical threshold for significance, while the wide confidence interval shows how imprecise our estimate is with just five children. We ought also to be cautious about how much any effect might generalize to other children. (Remember, for our analysis I specifically selected data from five children Triplett specifically classified as "stimulated positively" by competition; I trust you realize that this kind of selection effect is precisely the kind of thing that would prevent us from making trustworthy inferences about a more general population of children.)
+The result was "statistically significant," in a direction consistent with social facilitation: better race performance against a competitor. But as usual, we would still need to be cautious in our interpretation. A statistically significant result doesn't rule out a Type I error, and the wide confidence interval shows how imprecise our estimate is with just five children. We ought also to be careful about generalizing the result to other children. For the data we analyzed, I specifically selected five kids Triplett classified as "stimulated positively" by competition. That selection prevents trustworthy inferences about a more general population of children.
 
 There's also a problem with the particular pairs of scores we analyzed: every child did the alone trial first and the competition trial second. Maybe some of the improvement was just getting better at turning the reel through practice. Or maybe they were getting tired, which could push their times in the other direction. This is an **order effect**: a change in performance or responses caused by the order in which the conditions are experienced. (Triplett anticipated this problem. Each child completed six timed trials, and he varied the sequence of alone and competition trials across two groups. But everyone started alone [@triplett1898dynamogenic]. Our first-pair-only analysis leaves out his attempts to separate practice from competition.)
 
@@ -346,17 +340,15 @@ Triplett gave us an ingenious way to investigate an interesting question, even i
 
 ## What pairing buys
 
-What if we hadn't realized that each row belonged to one child? Let's briefly forget everything we just learned about related samples and subject the same data we just worked with to an independent-samples $t$ test. This treats the two sets of times, for alone and competition, as if they came from different children, and uses Chapter 12's equations and test.
+To finish up, let's briefly forget everything we just learned about related samples, and subject the same data we just worked with to an independent-samples $t$ test, as if we hadn't realized that each row belonged to one child. Let's see what happens using Chapter 12's equations, treating the two sets of times as independent samples.
 
-With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The competition times are sample 1, with variance $s_1^2 = 66.2$; the alone times are sample 2, with $s_2^2 = 131.8$. Pooling them weights each variance by its degrees of freedom:
+With a two-tailed test, $\alpha = .05$, and $df = 5 + 5 - 2 = 8$, our critical $t$ values would be $\pm 2.306$. The competition times constitute sample 1, with $M_1 = 49.4$ and variance $s_1^2 = 66.2$; the alone times are sample 2, with $M_2 = 55.6$ and variance $s_2^2 = 131.8$. The pooled variance weights each variance by its degrees of freedom:
 
 $$ s_p^2 = \frac{df_1 s_1^2 + df_2 s_2^2}{df_1 + df_2} = \frac{4(66.2) + 4(131.8)}{4 + 4} = 99 $$
 
-With equal sample sizes, the pooled variance is just the average of the two. The estimated standard error of the mean difference is $s_{M_1 - M_2} = \sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
+The estimated standard error of the mean difference is $s_{M_1 - M_2} = \sqrt{99/5 + 99/5} \approx 6.29$. And the $t$ statistic works out to $-6.2/6.29 \approx -0.99$, so this calculation would fail to reject the null hypothesis.
 
-We already saw that the correct analysis, treating the scores as related and analyzing the differences, produced a more extreme $t$ statistic, which was sufficient to reject the null hypothesis (despite the lower $df$ and correspondingly more extreme critical $t$ values). By accounting for each child's two scores belonging together, we were able to perform a more powerful test.
-
-Here's what changes when we account for the pairs.
+Here's how that compares with the correct analysis using the pairs we did earlier:
 
 | Quantity | Ignoring the pairs | Using the pairs |
 |:--|--:|--:|
@@ -370,7 +362,7 @@ Here's what changes when we account for the pairs.
 
 : The same scores analyzed with and without their known pairing. The independent-samples calculation is inappropriate for these paired observations. {#tbl-related-comparison}
 
-The mean of the differences is exactly the difference between the sample means, so both numerators are the same. What changes is the variability we used to calculate the denominator. The independent-samples calculation includes how much the children differ in their overall speed. The related-samples calculation uses how much their *changes* differ; it excludes the individual differences that reflect some kids being faster than others and allows the analysis to focus on each child's change on their own terms. Here that's a much smaller number, so we get a smaller standard error and a narrower confidence interval, even though the lower degrees of freedom require a more extreme critical $t$.
+The mean of the differences is exactly the difference between the sample means, so both numerators are the same. What changes is the variability we used to calculate the denominator. The independent-samples calculation includes how much the children differ in their overall speed. The related-samples calculation uses how much their *changes* differ, excluding stable individual differences in overall speed. Here that's a much smaller number, so we get a smaller standard error and a narrower confidence interval, even though the lower degrees of freedom require a more extreme critical $t$.
 
 Obviously which variety of $t$ test we use isn't a choice we make by trying both out and keeping the answer we prefer. My point is that the numbers don't know or care what we subject them to. We have to know where those numbers came from, and what the appropriate statistical tools are. These scores belong in pairs, so our analysis needs to use the pairs. Pairing doesn't guarantee greater power, but it helps when the two scores in each pair do tend to go together, as is the case for our data here.
 
