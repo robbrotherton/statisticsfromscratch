@@ -1108,63 +1108,52 @@
       return { steps, end: t };
     }
 
-    // Each pair's line slides sideways until its first score sits on the
-    // zero guide; its second score then marks the difference. The line drops
-    // into the difference row and leaves that difference dot behind.
+    // The scores stay put; only each pair's connecting line moves. By
+    // default it slides sideways until its first end sits on the zero guide,
+    // then drops straight down into the difference row, flattening so its
+    // horizontal span (the difference) is all that's left. Its far end then
+    // marks the difference: a dot appears there and the line fades. With
+    // differences.order "drop-first", it flattens in place before sliding.
     function slideToDifferences() {
       const g = geometry;
       const schedule = slideSchedule(g.pairs.length).steps;
-      const ghosts = canvas.select(".sr-ghosts").selectAll("g.sr-ghost")
+      const slideFirst = differenceOpts.order !== "drop-first";
+      const ghosts = canvas.select(".sr-ghosts").selectAll("line.sr-ghost-line")
         .data(g.pairs, (d) => d.index)
-        .join((enter) => {
-          const ghost = enter.append("g").attr("class", "sr-ghost");
-          ghost.append("line").attr("class", "sr-ghost-line");
-          ghost.append("circle").attr("class", "sr-dot sr-ghost-first").attr("r", DOT_RADIUS);
-          ghost.append("circle").attr("class", "sr-dot sr-ghost-second").attr("r", DOT_RADIUS);
-          return ghost;
-        });
+        .join("line")
+        .attr("class", "sr-ghost-line");
 
       ghosts.each(function(pair, i) {
-        const ghost = d3.select(this);
-        const color = pair.first.personColor;
-        const shift = g.dx(0) - g.x(pair.first.value);
-        const firstX = g.dx(0);
-        const secondX = g.x(pair.second.value) + shift;
-        const end = { x: g.dx(pair.difference.value), y: pair.difference.y };
+        const line = d3.select(this);
+        const startX = g.x(pair.first.value);
+        const endX = g.x(pair.second.value);
+        const shift = g.dx(0) - startX;
+        const y = pair.difference.y;
         const { delay, slide, hold, drop } = schedule[i];
 
-        ghost.select("line")
-          .attr("stroke", color)
-          .attr("x1", g.x(pair.first.value)).attr("y1", pair.first.y)
-          .attr("x2", g.x(pair.second.value)).attr("y2", pair.second.y)
-          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
-          .attr("x1", firstX).attr("x2", secondX)
-          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
-          .attr("y1", end.y).attr("x2", end.x).attr("y2", end.y)
-          .transition().duration(SLIDE_FADE)
-          .style("opacity", 0);
-        ghost.select(".sr-ghost-first")
-          .attr("fill", color)
-          .attr("cx", g.x(pair.first.value)).attr("cy", pair.first.y)
-          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
-          .attr("cx", firstX)
-          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
-          .attr("cy", end.y)
-          .transition().duration(SLIDE_FADE)
-          .style("opacity", 0);
-        ghost.select(".sr-ghost-second")
-          .attr("fill", color)
-          .attr("cx", g.x(pair.second.value)).attr("cy", pair.second.y)
-          .transition().delay(delay).duration(slide).ease(d3.easeCubicInOut)
-          .attr("cx", secondX)
-          .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
-          .attr("cx", end.x).attr("cy", end.y)
+        let motion = line
+          .attr("stroke", pair.first.personColor)
+          .attr("x1", startX).attr("y1", pair.first.y)
+          .attr("x2", endX).attr("y2", pair.second.y)
+          .transition().delay(delay);
+        motion = slideFirst
+          ? motion.duration(slide).ease(d3.easeCubicInOut)
+            .attr("x1", startX + shift).attr("x2", endX + shift)
+            .transition().delay(hold).duration(drop).ease(d3.easeCubicInOut)
+            .attr("y1", y).attr("y2", y)
+          : motion.duration(drop).ease(d3.easeCubicInOut)
+            .attr("y1", y).attr("y2", y)
+            .transition().delay(hold).duration(slide).ease(d3.easeCubicInOut)
+            .attr("x1", startX + shift).attr("x2", endX + shift);
+        motion
           .on("end", () => {
             canvas.select(".sr-difference-dots").selectAll("circle")
               .filter((d) => d.index === pair.index)
               .style("opacity", 1);
-            ghost.remove();
-          });
+          })
+          .transition().duration(SLIDE_FADE)
+          .style("opacity", 0)
+          .remove();
       });
     }
 
