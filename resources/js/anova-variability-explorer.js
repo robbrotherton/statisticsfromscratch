@@ -193,11 +193,16 @@
     ensureStyles();
     if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
+    const sortValues = bool(opts.sort, true);
     const groups = (Array.isArray(opts.groups) && opts.groups.length >= 2 ? opts.groups : DEFAULT_GROUPS)
-      .map((group, index) => ({
-        name: String(group.name || group.label || `Group ${index + 1}`),
-        values: (Array.isArray(group.values) ? group.values : []).map(Number).filter(Number.isFinite)
-      }))
+      .map((group, index) => {
+        const values = (Array.isArray(group.values) ? group.values : []).map(Number).filter(Number.isFinite);
+        // Sorted values stack each lane's dots top to bottom in x order.
+        return {
+          name: String(group.name || group.label || `Group ${index + 1}`),
+          values: sortValues ? values.sort((a, b) => a - b) : values
+        };
+      })
       .filter((group) => group.values.length);
     const stats = compute(groups);
     const width = 920;
@@ -334,7 +339,7 @@
     }
 
     function targetY(d) {
-      return groupY(d.groupIndex) + (d.index - 2) * 5;
+      return groupY(d.groupIndex) + (d.index - (groups[d.groupIndex].values.length - 1) / 2) * 5;
     }
 
     function renderLanes(animate) {
