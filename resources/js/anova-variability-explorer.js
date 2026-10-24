@@ -112,10 +112,11 @@
         stroke-width: 1.15;
         stroke-opacity: 0.58;
       }
-      .anova-variability-explorer .ave-deviation-weight {
-        font-size: 12px;
-        font-weight: 650;
-        fill: var(--ave-between);
+      .anova-variability-explorer .ave-ghost {
+        fill-opacity: 0.22;
+        stroke-width: 1.25;
+        stroke-opacity: 0.5;
+        stroke-dasharray: 2 2;
       }
       .anova-variability-explorer .ave-transfer-layer {
         pointer-events: none;
@@ -264,6 +265,7 @@
     const lanesLayer = svg.append("g").attr("class", "ave-lanes");
     const deviationLayer = svg.append("g").attr("class", "ave-deviations");
     const meansLayer = svg.append("g").attr("class", "ave-means");
+    const ghostsLayer = svg.append("g").attr("class", "ave-ghosts");
     const dotsLayer = svg.append("g").attr("class", "ave-dots");
     const summaryLayer = svg.append("g").attr("class", "ave-summary");
 
@@ -368,6 +370,27 @@
       labels.exit().remove();
     }
 
+    // For between-groups variability, every score is replaced by its group mean.
+    function dotX(d) {
+      return state.stage === "between" ? x(stats.means[d.groupIndex]) : x(d.value);
+    }
+
+    function renderGhosts(animate) {
+      const ghosts = ghostsLayer.selectAll("circle.ave-ghost")
+        .data(state.stage === "between" ? stats.observations : [], (d) => `${d.groupIndex}-${d.index}`);
+      ghosts.enter().append("circle")
+        .attr("class", "ave-ghost")
+        .attr("r", 6)
+        .attr("cx", (d) => x(d.value))
+        .attr("cy", targetY)
+        .attr("fill", (d) => colors[d.groupIndex % colors.length])
+        .attr("stroke", (d) => colors[d.groupIndex % colors.length])
+        .style("opacity", 0)
+        .transition().duration(animate ? 420 : 0)
+        .style("opacity", 1);
+      ghosts.exit().interrupt().transition().duration(animate ? 260 : 0).style("opacity", 0).remove();
+    }
+
     function renderDots(animate) {
       dotsLayer.selectAll("circle.ave-dot")
         .data(stats.observations, (d) => `${d.groupIndex}-${d.index}`)
@@ -378,7 +401,7 @@
           ? "var(--ave-total)"
           : colors[d.groupIndex % colors.length])
         .transition().duration(animate ? 560 : 0).ease(d3.easeCubicInOut)
-        .attr("cx", (d) => x(d.value))
+        .attr("cx", dotX)
         .attr("cy", targetY);
     }
 
@@ -396,6 +419,7 @@
         }));
       }
       if (state.stage === "between") {
+        // One deviation per group: every score now sits on its group mean and shares it.
         return groups.map((group, i) => ({ groupIndex: i, index: 0, from: stats.means[i], to: stats.grandMean, y: groupY(i), color: "var(--ave-between)", weight: group.values.length }));
       }
       return [];
@@ -429,7 +453,6 @@
       entered.append("rect").attr("class", "ave-deviation-square");
       entered.append("line").attr("class", "ave-deviation");
       entered.append("line").attr("class", "ave-deviation-cap");
-      entered.append("text").attr("class", "ave-deviation-weight").attr("text-anchor", "middle");
       const merged = entered.merge(deviations);
       const square = merged.select(".ave-deviation-square")
         .interrupt()
@@ -481,11 +504,6 @@
         line.attr("x2", (d) => x(d.to));
         cap.style("opacity", 1);
       }
-      merged.select(".ave-deviation-weight")
-        .attr("x", (d) => (x(d.from) + x(d.to)) / 2)
-        .attr("y", (d) => d.y - 9)
-        .text((d) => showSquares && d.weight ? `× ${d.weight}` : "")
-        .style("opacity", showSquares ? 1 : 0);
       merged.interrupt().transition().duration(animate ? 380 : 0).style("opacity", 1);
       deviations.exit().transition().duration(animate ? 180 : 0).style("opacity", 0).remove();
     }
@@ -529,7 +547,7 @@
     function aggregateSquares() {
       return [
         { key: "total", label: "Total", value: stats.ssTotal, color: "var(--ave-total)", reveal: 1, x: panel.x + 22, y: panel.y + 91 },
-        { key: "within", label: "Within", value: stats.ssWithin, color: "var(--ave-within)", reveal: 2, x: panel.x + 22, y: panel.y + 380 },
+        { key: "within", label: "Within", value: stats.ssWithin, color: "var(--ave-within)", reveal: 2, x: panel.x + 22, y: panel.y + 342 },
         { key: "between", label: "Between", value: stats.ssBetween, color: "var(--ave-between)", reveal: 3, x: panel.x + 126, y: panel.y + 342 }
       ];
     }
@@ -596,10 +614,9 @@
       if (!animate || !revealKey) return;
 
       const target = aggregateSquares().find((d) => d.key === revealKey);
-      const baseContributions = deviationData();
-      const contributions = revealKey === "between"
-        ? baseContributions.flatMap((d) => d3.range(d.weight || 1).map((copyIndex) => ({ ...d, copyIndex })))
-        : baseContributions.map((d) => ({ ...d, copyIndex: 0 }));
+      // Each group's single between-groups square is counted once per score in the group.
+      const contributions = deviationData()
+        .flatMap((d) => d3.range(d.weight || 1).map((copyIndex) => ({ ...d, copyIndex })));
       const sumSquare = squaresLayer.selectAll("g.ave-ss-item")
         .filter((d) => d.key === revealKey)
         .select("rect");
@@ -687,7 +704,7 @@
       const subjects = {
         total: "every score and the grand mean",
         within: "every score and its group mean",
-        between: "each group mean and the grand mean"
+        between: "each group mean, standing in for every score in its group, and the grand mean"
       };
       const phases = {
         observe: "showing the relevant scores and means",
@@ -721,6 +738,7 @@
       renderLanes(animate);
       renderDeviations(animate, transitions);
       renderMeans(animate);
+      renderGhosts(animate);
       renderDots(animate);
       renderSquares(animate, revealKey);
       animateContributions(revealKey, animate);
