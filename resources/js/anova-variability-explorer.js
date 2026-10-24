@@ -99,21 +99,22 @@
       .anova-variability-explorer .ave-muted {
         fill: var(--sfs-muted, #68727d);
       }
-      .anova-variability-explorer .ave-axis text { font-size: 13px; }
+      .anova-variability-explorer .ave-axis text { font-size: var(--sfs-figure-tick-size, 0.8125rem); }
+      .anova-variability-explorer .ave-axis .ave-axis-label { fill: currentColor; font-size: var(--sfs-figure-label-size, 0.875rem); }
       .anova-variability-explorer .ave-lane {
         stroke: color-mix(in srgb, var(--sfs-border, #c8cdd2) 70%, transparent);
         stroke-width: 1;
       }
       .anova-variability-explorer .ave-pop-area { opacity: 0.1; }
       .anova-variability-explorer .ave-pop-line { fill: none; stroke-width: 2.2; opacity: 0.75; }
-      .anova-variability-explorer .ave-group-label { font-size: 15px; font-weight: 700; }
+      .anova-variability-explorer .ave-group-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 700; }
       .anova-variability-explorer .ave-dot {
         stroke: var(--bs-body-bg, #fff);
         stroke-width: 2;
       }
       .anova-variability-explorer .ave-mean-line { stroke-width: 2.5; stroke-dasharray: 5 4; }
       .anova-variability-explorer .ave-grand-line { stroke: var(--ave-total); stroke-width: 2.5; stroke-dasharray: 8 5; }
-      .anova-variability-explorer .ave-mean-label { font-size: 13px; font-weight: 650; }
+      .anova-variability-explorer .ave-mean-label { font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
       .anova-variability-explorer .ave-deviation { fill: none; stroke-width: 2; opacity: 0.72; }
       .anova-variability-explorer .ave-deviation-cap { stroke-width: 1.5; opacity: 0.72; }
       .anova-variability-explorer .ave-deviation-square {
@@ -137,18 +138,14 @@
         fill: color-mix(in srgb, var(--sfs-control-bg, #f1f3f5) 62%, transparent);
         stroke: var(--sfs-border, #c8cdd2);
       }
-      .anova-variability-explorer .ave-panel-title { font-size: 15px; font-weight: 750; }
-      .anova-variability-explorer .ave-panel-subtitle { font-size: 12px; fill: var(--sfs-muted, #68727d); }
+      .anova-variability-explorer .ave-panel-title { fill: currentColor; font-size: var(--sfs-figure-title-size, 1rem); font-weight: 750; }
+      .anova-variability-explorer .ave-panel-subtitle { font-size: var(--sfs-figure-small-size, 0.75rem); fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-square { stroke-width: 1.25; }
-      .anova-variability-explorer .ave-ss-label { font-size: 14px; font-weight: 720; }
-      .anova-variability-explorer .ave-ss-value { font-size: 12px; fill: var(--sfs-muted, #68727d); }
-      .anova-variability-explorer .ave-ms-detail,
-      .anova-variability-explorer .ave-cut-label { font-size: 13px; fill: var(--sfs-muted, #68727d); }
-      .anova-variability-explorer .ave-cut-label { font-size: 16px; font-weight: 700; }
-      .anova-variability-explorer .ave-summary-label { font-size: 15px; font-weight: 720; }
-      .anova-variability-explorer .ave-summary-note { font-size: 13px; fill: var(--sfs-muted, #68727d); }
-      .anova-variability-explorer .ave-summary-bar { rx: 5; ry: 5; }
-      .anova-variability-explorer .ave-equation { font-size: 17px; font-weight: 700; }
+      .anova-variability-explorer .ave-ss-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 720; }
+      .anova-variability-explorer .ave-ss-value { font-size: var(--sfs-figure-small-size, 0.75rem); fill: var(--sfs-muted, #68727d); }
+      .anova-variability-explorer .ave-ms-detail { font-size: var(--sfs-figure-note-size, 0.8125rem); fill: var(--sfs-muted, #68727d); }
+      .anova-variability-explorer .ave-cut-label { font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; fill: var(--sfs-muted, #68727d); }
+      .anova-variability-explorer .ave-equation { fill: currentColor; font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; }
       .anova-variability-explorer .ave-calculation-box {
         margin-top: 0.45rem;
         padding: 0.65rem 0.8rem;
@@ -218,10 +215,6 @@
       })
       .filter((group) => group.values.length);
     const stats = compute(groups);
-    const width = 920;
-    const height = 720;
-    const plot = { left: 75, right: 600, top: 76, bottom: 610 };
-    const panel = { x: 635, y: 66, width: 255, height: 540 };
     const colors = [
       "var(--graph-series-1, #0072b2)",
       "var(--graph-series-2, #e69f00)",
@@ -232,14 +225,66 @@
     const rawMax = d3.max(stats.observations, (d) => d.value);
     const xMin = finite(opts.xMin, Math.floor(rawMin - 2));
     const xMax = finite(opts.xMax, Math.ceil(rawMax + 2));
-    const x = d3.scaleLinear().domain([xMin, xMax]).range([plot.left, plot.right]);
-    const groupY = d3.scalePoint().domain(d3.range(groups.length)).range([150, 540]);
-    // Where the total sum of squares sits: in the side panel, or across the whole
+    const x = d3.scaleLinear().domain([xMin, xMax]);
+    const groupY = d3.scalePoint().domain(d3.range(groups.length));
+
+    // Geometry is computed from the width the figure is drawn at, so text keeps its
+    // real size on phones instead of shrinking with a fixed viewBox. Below
+    // COMPACT_BELOW the sums panel moves under the dot plot.
+    const COMPACT_BELOW = 700;
+    const msGap = 10;
+    const longestName = d3.max(groups, (group) => group.name.length) || 6;
+    let width;
+    let height;
+    let compact;
+    let plot;
+    let panel;
+    // Lane furniture: population curve height and baseline, mean-line half-length,
+    // and offsets for the mean label, the group name and the axis label.
+    let lane;
+    // Where the total sum of squares sits: in the sums panel, or across the whole
     // figure once the dot plot gives way to the mean squares.
-    const panelSquare = { x: panel.x + 22, y: panel.y + 150, side: 210 };
-    const wideSquare = { x: 70, y: 190, side: 300 };
+    let panelSquare;
+    let wideSquare;
     // The mean squares stack either side of a midline: between above, within below.
-    const msColumn = { cx: 680, bar: 340, gap: 10 };
+    let msColumn;
+
+    function computeLayout(availableWidth) {
+      width = Math.round(availableWidth);
+      compact = width < COMPACT_BELOW;
+      if (compact) {
+        // The whole tutorial callout has to fit on a phone screen, so everything is
+        // packed tighter: group names sit above their lanes, the lanes are closer,
+        // and the sums panel puts its heading beside the bucket rather than above it.
+        plot = { left: 16, right: width - 16, top: 34, bottom: 262 };
+        groupY.range([72, 222]);
+        lane = { curve: 34, base: 28, meanHalf: 27, meanLabel: 33, name: -34, axisLabel: 36 };
+        const panelSide = Math.min(120, width - 180);
+        panel = { x: 8, y: 310, width: width - 16, height: 30 + panelSide + 14 };
+        panelSquare = { x: panel.x + panel.width - 14 - panelSide, y: panel.y + 30, side: panelSide };
+        // Mean-square steps: the total on the left, the mean-square column on the right.
+        const side = Math.min(130, (width - 80) / 2);
+        wideSquare = { x: 16, y: 76, side };
+        const between = aggregateSquares().find((d) => d.key === "between");
+        const within = aggregateSquares().find((d) => d.key === "within");
+        // Room either side of the midline for a lifted layer or its labelled mean square.
+        const room = (d, labels) => Math.max(side * d.value / stats.ssTotal, areaSide(d.ms, wideSquare) + labels);
+        const bar = Math.max(wideSquare.y + side / 2, room(between, 30) + msGap + 16);
+        msColumn = { cx: width - 28 - side / 2, bar, gap: msGap };
+        height = Math.ceil(Math.max(panel.y + panel.height + 8, bar + msGap + room(within, 44) + 8));
+      } else {
+        plot = { left: 16 + longestName * 8.6 + 12, right: width - 320, top: 76, bottom: 610 };
+        groupY.range([150, 540]);
+        lane = { curve: 49, base: 38, meanHalf: 35, meanLabel: 43, name: 5, axisLabel: 42 };
+        panel = { x: width - 285, y: 66, width: 255, height: 540 };
+        panelSquare = { x: panel.x + 22, y: panel.y + 150, side: 210 };
+        const side = Math.min(300, (width - 208) / 2);
+        wideSquare = { x: 60, y: 340 - side / 2, side };
+        msColumn = { cx: width - 64 - side / 2, bar: 340, gap: msGap };
+        height = 720;
+      }
+      x.range([plot.left, plot.right]);
+    }
 
     const initialStage = normalizeStage(opts.stage);
     const state = {
@@ -261,20 +306,14 @@
 
     const svg = root.append("svg")
       .attr("class", "ave-svg")
-      .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("role", "img");
     svg.append("title").attr("class", "ave-title");
 
     // Everything about the scores themselves, faded out for the mean-square steps.
     const plotGroup = svg.append("g").attr("class", "ave-plot");
-    const axis = plotGroup.append("g")
-      .attr("class", "ave-axis")
-      .attr("transform", `translate(0,${plot.bottom})`)
-      .call(d3.axisBottom(x).ticks(9).tickSizeOuter(0));
-    axis.append("text")
-      .attr("x", (plot.left + plot.right) / 2)
-      .attr("y", 42)
-      .attr("fill", "currentColor")
+    const axis = plotGroup.append("g").attr("class", "ave-axis");
+    const axisLabel = axis.append("text")
+      .attr("class", "ave-axis-label")
       .attr("text-anchor", "middle")
       .text(opts.axisLabel || "Score");
 
@@ -287,17 +326,12 @@
     const summaryLayer = svg.append("g").attr("class", "ave-summary");
 
     const panelGroup = svg.append("g").attr("class", "ave-squares-panel");
-    panelGroup.append("rect")
+    const panelRect = panelGroup.append("rect")
       .attr("class", "ave-panel")
-      .attr("x", panel.x).attr("y", panel.y)
-      .attr("width", panel.width).attr("height", panel.height)
       .attr("rx", 10).attr("ry", 10);
-    panelGroup.append("text")
-      .attr("class", "ave-panel-title")
-      .attr("x", panel.x + 18).attr("y", panel.y + 27);
-    panelGroup.append("text")
-      .attr("class", "ave-panel-subtitle")
-      .attr("x", panel.x + 18).attr("y", panel.y + 47);
+    const heading = panelGroup.append("g").attr("class", "ave-panel-heading");
+    const headingTitle = heading.append("text").attr("class", "ave-panel-title");
+    const headingSubtitle = heading.append("text").attr("class", "ave-panel-subtitle");
     const squaresLayer = panelGroup.append("g").attr("class", "ave-squares");
     const msLayer = svg.append("g").attr("class", "ave-mean-squares");
     const transferLayer = svg.append("g").attr("class", "ave-transfer-layer");
@@ -306,6 +340,39 @@
       .attr("class", "ave-calculation-box")
       .attr("aria-live", "polite")
       .attr("hidden", state.calculations ? null : true);
+
+    // Greedy word wrap to a character budget; the heading is short enough not to need measuring.
+    function wrapWords(text, maxChars) {
+      const lines = [];
+      String(text).split(/\s+/).forEach((word) => {
+        const last = lines[lines.length - 1];
+        if (last && (last + " " + word).length <= maxChars) lines[lines.length - 1] = last + " " + word;
+        else lines.push(word);
+      });
+      return lines;
+    }
+
+    function setLines(textSelection, lines, lineHeight) {
+      textSelection.selectAll("tspan")
+        .data(lines)
+        .join("tspan")
+        .attr("x", 0)
+        .attr("dy", (d, i) => i ? lineHeight : 0)
+        .text((d) => d);
+      return lines.length;
+    }
+
+    // The parts of the figure that only change with its width.
+    function applyLayout() {
+      svg.attr("viewBox", `0 0 ${width} ${height}`);
+      const tickCount = Math.max(3, Math.floor((plot.right - plot.left) / 60));
+      axis.attr("transform", `translate(0,${plot.bottom})`)
+        .call(d3.axisBottom(x).ticks(tickCount).tickSizeOuter(0));
+      axisLabel.attr("x", (plot.left + plot.right) / 2).attr("y", lane.axisLabel);
+      panelRect
+        .attr("x", panel.x).attr("y", panel.y)
+        .attr("width", panel.width).attr("height", panel.height);
+    }
 
     function fmt(value) {
       return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
@@ -329,7 +396,7 @@
     function densityPoints(mean, sd, yBase) {
       const points = d3.range(xMin, xMax + 0.05, 0.1).map((value) => {
         const density = Math.exp(-0.5 * Math.pow((value - mean) / sd, 2));
-        return { x: x(value), y: yBase - density * 49 };
+        return { x: x(value), y: yBase - density * lane.curve };
       });
       return points;
     }
@@ -347,8 +414,8 @@
       const line = d3.line().x((d) => d.x).y((d) => d.y).curve(d3.curveBasis);
       const area = d3.area().x((d) => d.x).y0((d, i, data) => data[0].base).y1((d) => d.y).curve(d3.curveBasis);
       curves.each(function(group, i) {
-        const data = densityPoints(stats.means[i], sd, groupY(i) + 38);
-        data.forEach((d) => { d.base = groupY(i) + 38; });
+        const data = densityPoints(stats.means[i], sd, groupY(i) + lane.base);
+        data.forEach((d) => { d.base = groupY(i) + lane.base; });
         const selection = d3.select(this);
         const curveColor = state.stage === "total" ? "var(--ave-total)" : colors[i % colors.length];
         selection.select(".ave-pop-area").attr("d", area(data)).attr("fill", curveColor);
@@ -379,12 +446,12 @@
         .data(deemphasizeGroups ? [] : groups, (d) => d.name);
       labels.join("text")
         .attr("class", "ave-group-label")
-        .attr("x", plot.left - 12)
+        .attr("x", compact ? plot.right : plot.left - 12)
         .attr("text-anchor", "end")
         .attr("fill", (d, i) => colors[i % colors.length])
         .text((d) => d.name)
-        .transition().duration(animate ? 520 : 0)
-        .attr("y", (d, i) => groupY(i) + 5);
+        // Lanes never move between steps, so a returning label is placed, not slid in.
+        .attr("y", (d, i) => groupY(i) + lane.name);
       labels.exit().remove();
     }
 
@@ -538,11 +605,12 @@
       meanMerged.select("line")
         .attr("stroke", (d) => colors[d.i % colors.length])
         .attr("x1", (d) => x(d.mean)).attr("x2", (d) => x(d.mean))
-        .attr("y1", (d) => groupY(d.i) - 35).attr("y2", (d) => groupY(d.i) + 35);
+        .attr("y1", (d) => groupY(d.i) - lane.meanHalf).attr("y2", (d) => groupY(d.i) + lane.meanHalf);
       meanMerged.select("text")
         .attr("fill", (d) => colors[d.i % colors.length])
-        .attr("x", (d) => x(d.mean)).attr("y", (d) => groupY(d.i) - 43)
-        .text("group mean");
+        .attr("x", (d) => x(d.mean)).attr("y", (d) => groupY(d.i) - lane.meanLabel)
+        // On a phone the group names sit above the lanes, where these labels would collide with them.
+        .text(compact ? "" : "group mean");
       meanMerged.transition().duration(animate ? 320 : 0).style("opacity", state.stage === "populations" ? 0.7 : 1);
       means.exit().transition().duration(animate ? 160 : 0).style("opacity", 0).remove();
 
@@ -621,20 +689,22 @@
       const layout = squareLayout();
       const duration = animate ? 760 : 0;
       const stageIndex = STAGES.indexOf(state.stage);
-      const title = panelGroup.select(".ave-panel-title");
-      const subtitle = panelGroup.select(".ave-panel-subtitle");
-      title.text("Sums of squares");
-      subtitle.text(stageIndex === 0
+      const subtitleText = stageIndex === 0
         ? "The squared deviations will collect here"
         : stageIndex < 4
           ? (state.phase === "sum" ? "Adding the squared deviations" : "Build each squared deviation first")
-          : "Total = between + within");
-      title.interrupt().transition().duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", wide ? layout.x : panel.x + 18)
-        .attr("y", wide ? layout.y - 52 : panel.y + 27);
-      subtitle.interrupt().transition().duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", wide ? layout.x : panel.x + 18)
-        .attr("y", wide ? layout.y - 32 : panel.y + 47);
+          : "Total = between + within";
+      // On a phone the heading sits beside the bucket, so it wraps to the space left of it.
+      const inset = compact ? 14 : 18;
+      const headingWidth = wide ? Infinity
+        : compact ? panelSquare.x - panel.x - 2 * inset : panel.width - 2 * inset;
+      const titleLines = setLines(headingTitle, wrapWords("Sums of squares", headingWidth / 9.2), 19);
+      setLines(headingSubtitle, wrapWords(subtitleText, headingWidth / 6.3), 15);
+      headingSubtitle.attr("y", titleLines * 19 + 1);
+      heading.interrupt().transition().duration(duration).ease(d3.easeCubicInOut)
+        .attr("transform", wide
+          ? `translate(${layout.x},${layout.y - 52})`
+          : `translate(${panel.x + inset},${panel.y + (compact ? 24 : 27)})`);
       panelGroup.select(".ave-panel").interrupt().transition().duration(animate ? 480 : 0)
         .style("opacity", wide ? 0 : 1);
 
@@ -854,7 +924,7 @@
         x: columnX + k * sliceWidth,
         order: Math.abs(k - middle)
       }));
-      const spread = Math.min(6, 48 / Math.max(1, d.df - 1));
+      const spread = Math.min(compact ? 3 : 6, (compact ? 24 : 48) / Math.max(1, d.df - 1));
       // Stacked translucent slices would darken; they fade as they gather so the stack reads as one square.
       const sliceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
       // Planned as absolute times; chained transitions take their delay from the previous one's end.
@@ -880,8 +950,12 @@
 
       transferLayer.append("text")
         .attr("class", "ave-cut-label")
-        .attr("x", columnX + band.width + spread * middle + 14)
-        .attr("y", columnY + band.height / 2 + 5)
+        // On a phone there is no room beside the column, so the label goes on its outer side.
+        .attr("text-anchor", compact ? "middle" : "start")
+        .attr("x", compact ? msColumn.cx : columnX + band.width + spread * middle + 14)
+        .attr("y", compact
+          ? (above ? columnY - 10 : columnY + band.height + 22)
+          : columnY + band.height / 2 + 5)
         .text(`÷ ${d.df}`)
         .style("opacity", 0)
         .transition().delay(cutAt).duration(260).style("opacity", 1)
@@ -916,7 +990,8 @@
 
     function renderComparison(animate) {
       summaryLayer.selectAll("*").interrupt().remove();
-      if (comparePhaseIndex() !== 0) return;
+      // On a phone the panel subtitle carries "Total = between + within" instead.
+      if (comparePhaseIndex() !== 0 || compact) return;
 
       summaryLayer.append("text")
         .attr("class", "ave-equation")
@@ -1038,6 +1113,8 @@
       applyTutorialAction
     };
 
+    computeLayout(920);
+    applyLayout();
     render({ animate: false });
 
     if (window.interactiveFigure) {
@@ -1051,6 +1128,24 @@
         applyAction: applyTutorialAction,
         startOpen: bool(opts.controlsOpen, false)
       });
+      if (typeof window.interactiveFigure.observeResponsiveLayout === "function") {
+        window.interactiveFigure.observeResponsiveLayout({
+          root: rootNode,
+          container: rootNode,
+          minimumWidth: 300,
+          maximumWidth: 928,
+          widthStep: 4,
+          onLayout(layout) {
+            if (Math.round(layout.width) === width) return;
+            if (typeof window.interactiveFigure.cancelTransitions === "function") {
+              window.interactiveFigure.cancelTransitions(rootNode);
+            }
+            computeLayout(layout.width);
+            applyLayout();
+            render({ animate: false });
+          }
+        });
+      }
     }
 
     return rootNode;
