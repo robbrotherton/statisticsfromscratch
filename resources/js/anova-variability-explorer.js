@@ -3,7 +3,7 @@
 
   const STAGES = ["populations", "total", "within", "between", "compare"];
   const PHASES = ["observe", "deviations", "squares", "sum"];
-  const COMPARE_PHASES = ["partition", "ms-between", "ms-within", "f"];
+  const COMPARE_PHASES = ["partition", "ms-between", "ms-within"];
   const DEFAULT_GROUPS = [
     { name: "Group A", values: [3, 5, 6, 7, 9] },
     { name: "Group B", values: [7, 9, 10, 11, 13] },
@@ -52,8 +52,7 @@
       summed: "sum",
       compare: "partition",
       "ms-b": "ms-between",
-      "ms-w": "ms-within",
-      ratio: "f"
+      "ms-w": "ms-within"
     };
     const normalized = aliases[key] || key;
     return PHASES.includes(normalized) || COMPARE_PHASES.includes(normalized) ? normalized : fallback;
@@ -146,7 +145,6 @@
       .anova-variability-explorer .ave-ms-detail,
       .anova-variability-explorer .ave-cut-label { font-size: 13px; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-cut-label { font-size: 16px; font-weight: 700; }
-      .anova-variability-explorer .ave-fraction-bar { stroke: currentColor; stroke-width: 2; }
       .anova-variability-explorer .ave-summary-label { font-size: 15px; font-weight: 720; }
       .anova-variability-explorer .ave-summary-note { font-size: 13px; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-summary-bar { rx: 5; ry: 5; }
@@ -240,7 +238,7 @@
     // figure once the dot plot gives way to the mean squares.
     const panelSquare = { x: panel.x + 22, y: panel.y + 150, side: 210 };
     const wideSquare = { x: 70, y: 190, side: 300 };
-    // The mean squares stack either side of a fraction bar: between above, within below.
+    // The mean squares stack either side of a midline: between above, within below.
     const msColumn = { cx: 680, bar: 340, gap: 10 };
 
     const initialStage = normalizeStage(opts.stage);
@@ -564,11 +562,12 @@
       grand.exit().transition().duration(animate ? 160 : 0).style("opacity", 0).remove();
     }
 
+    // Within pours in first and settles at the bottom; between fills the rest of the total.
     function aggregateSquares() {
       return [
-        { key: "total", label: "Total", value: stats.ssTotal, color: "var(--ave-total)", reveal: 1 },
-        { key: "between", label: "Between", value: stats.ssBetween, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 1 },
-        { key: "within", label: "Within", value: stats.ssWithin, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 2 }
+        { key: "total", label: "Total", value: stats.ssTotal, base: 0, color: "var(--ave-total)", reveal: 1 },
+        { key: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 1 },
+        { key: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 2 }
       ];
     }
 
@@ -597,23 +596,24 @@
       return layout.side * Math.sqrt(Math.max(0, value) / stats.ssTotal);
     }
 
-    // The total is a square; between and within are bands that fill it from the left and right.
-    function ssGeometry(key, value, layout) {
-      if (key === "total") {
-        const side = areaSide(value, layout);
-        return { x: layout.x, y: layout.y, width: side, height: side };
-      }
-      const width = layout.side * value / stats.ssTotal;
-      return {
-        x: key === "within" ? layout.x + layout.side - width : layout.x,
-        y: layout.y,
-        width,
-        height: layout.side
-      };
+    // The total square is a container that each sum fills from the bottom up, like a level rising.
+    function ssGeometry(d, value, layout) {
+      const top = layout.y + layout.side * (1 - (d.base + value) / stats.ssTotal);
+      return { x: layout.x, y: top, width: layout.side, height: layout.side * value / stats.ssTotal };
     }
+
+    const pour = { stagger: 150, flyDuration: 560, dropDuration: 240, settleDuration: 260 };
+    // Every sum receives one piece per score (between sends each group's square once per score).
+    const pourDuration = 80 + (stats.N - 1) * pour.stagger + pour.flyDuration + pour.dropDuration + pour.settleDuration;
 
     function isLifted(d) {
       return Boolean(d.msPhase) && comparePhaseIndex() >= d.msPhase;
+    }
+
+    function setRect(selection, geometry) {
+      return selection
+        .attr("x", geometry.x).attr("y", geometry.y)
+        .attr("width", geometry.width).attr("height", geometry.height);
     }
 
     function renderSquares(animate, revealKey, liftDelay) {
@@ -639,36 +639,45 @@
         .style("opacity", wide ? 0 : 1);
 
       squaresLayer.selectAll("*").interrupt().interrupt("ghost");
+      const container = squaresLayer.selectAll("rect.ave-ss-container")
+        .data(aggregateRevealLevel() >= 1 ? [layout] : []);
+      container.enter().insert("rect", ":first-child")
+        .attr("class", "ave-ss-container ave-square")
+        .attr("fill", "none").attr("stroke", "var(--ave-total)").attr("stroke-width", 1.5)
+        .attr("x", layout.x).attr("y", layout.y).attr("width", layout.side).attr("height", layout.side)
+        .style("opacity", 0)
+        .merge(container)
+        .transition().duration(duration).ease(d3.easeCubicInOut)
+        .attr("x", layout.x).attr("y", layout.y).attr("width", layout.side).attr("height", layout.side)
+        .style("opacity", 1);
+      container.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
+
       const data = aggregateSquares().filter((d) => aggregateRevealLevel() >= d.reveal);
       const items = squaresLayer.selectAll("g.ave-ss-item").data(data, (d) => d.key);
       const entered = items.enter().append("g").attr("class", "ave-ss-item");
       entered.append("rect")
         .attr("class", "ave-square")
         .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
-        .each(function(d) {
-          const start = ssGeometry(d.key, 0, layout);
-          d3.select(this).attr("x", start.x).attr("y", start.y).attr("width", start.width).attr("height", start.height);
-        });
+        .each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
       entered.append("text").attr("class", "ave-ss-label").style("opacity", 0);
       entered.append("text").attr("class", "ave-ss-value").style("opacity", 0);
       const merged = entered.merge(items);
 
+      // The total is the fill itself; the container draws its outline.
       const sumRects = merged.select("rect")
-        .attr("fill", (d) => d.color).attr("stroke", (d) => d.color);
-      // The sum being revealed starts empty; animateContributions grows it as each piece arrives.
+        .attr("fill", (d) => d.color)
+        .attr("stroke", (d) => d.key === "total" ? "none" : d.color);
+      // The sum being revealed starts empty; animateContributions raises it as each piece lands.
       const driven = (d) => animate && d.key === revealKey;
-      sumRects.filter(driven).each(function(d) {
-        const start = ssGeometry(d.key, 0, layout);
-        d3.select(this).attr("x", start.x).attr("y", start.y).attr("width", start.width).attr("height", start.height);
-      });
+      sumRects.filter(driven).each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
       sumRects.filter((d) => !driven(d))
         .transition()
         .duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", (d) => ssGeometry(d.key, d.value, layout).x)
-        .attr("y", (d) => ssGeometry(d.key, d.value, layout).y)
-        .attr("width", (d) => ssGeometry(d.key, d.value, layout).width)
-        .attr("height", (d) => ssGeometry(d.key, d.value, layout).height);
-      // A band lifted out to become a mean square leaves its outline behind in the total.
+        .attr("x", (d) => ssGeometry(d, d.value, layout).x)
+        .attr("y", (d) => ssGeometry(d, d.value, layout).y)
+        .attr("width", (d) => ssGeometry(d, d.value, layout).width)
+        .attr("height", (d) => ssGeometry(d, d.value, layout).height);
+      // A layer lifted out to become a mean square leaves its outline behind in the total.
       sumRects.transition("ghost")
         .delay(animate ? liftDelay : 0)
         .duration(animate ? 420 : 0)
@@ -676,23 +685,28 @@
         .attr("stroke-opacity", (d) => isLifted(d) ? 0.55 : 1)
         .attr("stroke-dasharray", (d) => isLifted(d) ? "4 3" : null);
 
-      // Total is labelled above its square; the bands below, at their own edges.
-      const labelX = (d) => d.key === "within" ? layout.x + layout.side : layout.x;
-      const labelY = (d) => d.key === "total" ? layout.y - 10 : layout.y + layout.side + 20;
-      const anchor = (d) => d.key === "within" ? "end" : "start";
+      // Total is labelled above the container; each layer inside its own top-left corner.
+      // A layer's label waits for its pour to finish so it never floats above an empty space.
+      const labelY = (d) => d.key === "total" ? layout.y - 10 : ssGeometry(d, d.value, layout).y + 18;
+      const labelDelay = (d) => driven(d) && d.key !== "total" ? pourDuration : 0;
+      const labelX = (d) => d.key === "total" ? layout.x : layout.x + 8;
+      const valueX = (d) => d.key === "total" ? layout.x + layout.side : layout.x + 8;
+      const valueY = (d) => d.key === "total" ? layout.y - 10 : labelY(d) + 16;
+      entered.select(".ave-ss-label").attr("x", labelX).attr("y", labelY);
+      entered.select(".ave-ss-value").attr("x", valueX).attr("y", valueY);
       merged.select(".ave-ss-label")
         .attr("fill", (d) => d.color)
-        .attr("text-anchor", anchor)
         .text((d) => d.label)
-        .transition().duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", labelX).attr("y", labelY)
+        .transition().delay(labelDelay).duration(duration).ease(d3.easeCubicInOut)
+        .attr("x", labelX)
+        .attr("y", labelY)
         .style("opacity", 1);
       merged.select(".ave-ss-value")
-        .attr("text-anchor", (d) => d.key === "total" ? "end" : anchor(d))
+        .attr("text-anchor", (d) => d.key === "total" ? "end" : "start")
         .text((d) => state.calculations ? `SS = ${fmt(d.value)}` : "")
-        .transition().duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", (d) => d.key === "total" ? layout.x + layout.side : labelX(d))
-        .attr("y", (d) => d.key === "total" ? layout.y - 10 : labelY(d) + 16)
+        .transition().delay(labelDelay).duration(duration).ease(d3.easeCubicInOut)
+        .attr("x", valueX)
+        .attr("y", valueY)
         .style("opacity", state.calculations ? 1 : 0);
       items.exit()
         .transition().duration(animate ? 220 : 0)
@@ -700,6 +714,8 @@
         .remove();
     }
 
+    // Pour each squared deviation into the container: it flies to the mouth, drops to the
+    // surface, and spreads flat across it as the level rises by exactly its area.
     function animateContributions(revealKey, animate) {
       transferLayer.selectAll("*").interrupt().remove();
       if (!animate || !revealKey) return;
@@ -714,36 +730,18 @@
       if (!target || !contributions.length) return;
 
       const layout = panelSquare;
-      // Each piece shrinks to the panel's scale, so it keeps its share of the area,
-      // and docks on the edge the sum is about to grow into.
       let running = 0;
       contributions.forEach((d) => {
         const squared = Math.pow(d.from - d.to, 2);
-        const before = ssGeometry(revealKey, running, layout);
+        const surface = ssGeometry(target, running, layout).y;
         running += squared;
-        const after = ssGeometry(revealKey, running, layout);
-        const side = areaSide(squared, layout);
-        d.sum = after;
-        if (revealKey === "total") {
-          d.dock = { x: after.x + after.width - side, y: after.y + after.height - side, side };
-          d.spread = after;
-        } else {
-          // A band grows sideways, so the piece pours into the thin slice it adds.
-          const growing = revealKey === "within" ? after.x : after.x + after.width;
-          d.dock = {
-            x: revealKey === "within" ? growing : growing - side,
-            y: layout.y + (layout.side - side) / 2,
-            side
-          };
-          d.spread = {
-            x: revealKey === "within" ? after.x : before.x + before.width,
-            y: after.y,
-            width: Math.abs(after.width - before.width),
-            height: after.height
-          };
-        }
+        d.side = areaSide(squared, layout);
+        d.mouth = { x: layout.x + (layout.side - d.side) / 2, y: layout.y - d.side - 6 };
+        d.landY = surface - d.side;
+        d.sum = ssGeometry(target, running, layout);
+        d.film = { y: d.sum.y, height: surface - d.sum.y };
       });
-      const mergeDuration = 280;
+      const { stagger, flyDuration, dropDuration, settleDuration } = pour;
 
       transferLayer.selectAll("rect.ave-transfer-square")
         .data(contributions, (d) => `${d.groupIndex}-${d.index}-${d.copyIndex}`)
@@ -758,38 +756,39 @@
         .attr("width", (d) => deviationSquareGeometry(d).side)
         .attr("height", (d) => deviationSquareGeometry(d).side)
         .transition()
-        .delay((d, i) => 80 + i * 95)
-        .duration(640)
+        .delay((d, i) => 80 + i * stagger)
+        .duration(flyDuration)
         .ease(d3.easeCubicInOut)
-        .attr("x", (d) => d.dock.x)
-        .attr("y", (d) => d.dock.y)
-        .attr("width", (d) => d.dock.side)
-        .attr("height", (d) => d.dock.side)
+        .attr("x", (d) => d.mouth.x)
+        .attr("y", (d) => d.mouth.y)
+        .attr("width", (d) => d.side)
+        .attr("height", (d) => d.side)
         .attr("fill", target.color)
         .attr("stroke", target.color)
         .attr("fill-opacity", 0.3)
         .attr("stroke-opacity", 0.85)
         .transition()
-        .duration(mergeDuration)
+        .duration(dropDuration)
+        .ease(d3.easeQuadIn)
+        .attr("y", (d) => d.landY)
+        .transition()
+        .duration(settleDuration)
         .ease(d3.easeCubicOut)
         .on("start", (d) => {
-          // Grow the sum by this piece's area while the piece spreads into it.
-          sumRect.transition().duration(mergeDuration).ease(d3.easeCubicOut)
-            .attr("x", d.sum.x)
+          sumRect.transition().duration(settleDuration).ease(d3.easeCubicOut)
             .attr("y", d.sum.y)
-            .attr("width", d.sum.width)
             .attr("height", d.sum.height);
         })
-        .attr("x", (d) => d.spread.x)
-        .attr("y", (d) => d.spread.y)
-        .attr("width", (d) => d.spread.width)
-        .attr("height", (d) => d.spread.height)
+        .attr("x", layout.x)
+        .attr("y", (d) => d.film.y)
+        .attr("width", layout.side)
+        .attr("height", (d) => d.film.height)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
         .remove();
     }
 
-    // Each mean square sits against the fraction bar: between above it, within below.
+    // Each mean square sits in a column: between above the midline, within below.
     function msGeometry(d) {
       const side = areaSide(d.ms, wideSquare);
       return {
@@ -805,7 +804,7 @@
         : `SS ${d.key} ÷ ${d.df}`;
     }
 
-    function renderMeanSquares(animate, revealKey, delay) {
+    function renderMeanSquares(animate, revealKey) {
       msLayer.selectAll("*").interrupt();
       const phase = comparePhaseIndex();
       const data = aggregateSquares().filter((d) => d.msPhase && phase >= d.msPhase);
@@ -835,40 +834,27 @@
         .style("opacity", 1);
       merged.filter((d) => animate && d.key === revealKey).style("opacity", 0);
       items.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
-
-      const barHalf = d3.max(data, (d) => msGeometry(d).side / 2 + 24) || 0;
-      const fraction = msLayer.selectAll("g.ave-fraction").data(phase >= 3 ? [barHalf] : []);
-      const fractionEnter = fraction.enter().append("g").attr("class", "ave-fraction").style("opacity", 0);
-      fractionEnter.append("line").attr("class", "ave-fraction-bar");
-      fractionEnter.append("text").attr("class", "ave-equation").attr("text-anchor", "end");
-      const fractionMerged = fractionEnter.merge(fraction);
-      fractionMerged.select("line")
-        .attr("x1", (d) => msColumn.cx - d).attr("x2", (d) => msColumn.cx + d)
-        .attr("y1", msColumn.bar).attr("y2", msColumn.bar);
-      fractionMerged.select("text")
-        .attr("x", (d) => msColumn.cx - d - 14).attr("y", msColumn.bar + 6)
-        .text("F =");
-      fractionMerged.transition().delay(animate ? delay : 0).duration(animate ? 400 : 0).style("opacity", 1);
-      fraction.exit().transition().duration(animate ? 200 : 0).style("opacity", 0).remove();
     }
 
-    // Lift a band out of the total, cut it into df equal slices, stack the slices
+    // Lift a layer out of the total, cut it into df equal slices, stack the slices
     // (they are all the same size, so the stack is one share), and square it up.
     function animateMeanSquare(revealKey, delay) {
       const d = aggregateSquares().find((item) => item.key === revealKey);
       if (!d) return;
-      const band = ssGeometry(d.key, d.value, wideSquare);
+      const band = ssGeometry(d, d.value, wideSquare);
       const target = msGeometry(d);
       const above = d.key === "between";
       const columnX = msColumn.cx - band.width / 2;
       const columnY = above ? msColumn.bar - msColumn.gap - band.height : msColumn.bar + msColumn.gap;
-      const stripHeight = band.height / d.df;
-      // k counts slices away from the bar, so slice 0 is the one the others stack onto.
-      const strips = d3.range(d.df).map((k) => ({
+      const sliceWidth = band.width / d.df;
+      const middle = (d.df - 1) / 2;
+      // The slices stack onto the middle of the column, outermost slices travelling furthest.
+      const slices = d3.range(d.df).map((k) => ({
         k,
-        y: above ? columnY + band.height - (k + 1) * stripHeight : columnY + k * stripHeight
+        x: columnX + k * sliceWidth,
+        order: Math.abs(k - middle)
       }));
-      const stackY = strips[0].y;
+      const stackX = msColumn.cx - sliceWidth / 2;
       const spread = Math.min(6, 48 / Math.max(1, d.df - 1));
       // Stacked translucent slices darken; while they square up they ease back to one square's shade.
       const sliceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
@@ -878,14 +864,14 @@
       const stackStart = cutAt + 520;
       const stackDuration = 620;
       const stagger = Math.min(45, 360 / d.df);
-      const morphStart = stackStart + stackDuration + (d.df - 1) * stagger + 160;
+      const lastOrder = d3.max(slices, (s) => s.order);
+      const morphStart = stackStart + stackDuration + lastOrder * stagger + 160;
 
       transferLayer.append("rect")
         .attr("class", "ave-transfer-square")
         .attr("fill", d.color).attr("stroke", d.color)
         .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
-        .attr("x", band.x).attr("y", band.y)
-        .attr("width", band.width).attr("height", band.height)
+        .call(setRect, band)
         .style("opacity", 0)
         .transition().delay(delay).duration(0).style("opacity", 1)
         .transition().duration(liftDuration).ease(d3.easeCubicInOut)
@@ -895,7 +881,7 @@
 
       transferLayer.append("text")
         .attr("class", "ave-cut-label")
-        .attr("x", columnX + band.width + 14)
+        .attr("x", columnX + band.width + spread * middle + 14)
         .attr("y", columnY + band.height / 2 + 5)
         .text(`÷ ${d.df}`)
         .style("opacity", 0)
@@ -904,21 +890,21 @@
         .remove();
 
       transferLayer.selectAll("rect.ave-slice")
-        .data(strips)
+        .data(slices)
         .join("rect")
         .attr("class", "ave-slice ave-transfer-square")
         .attr("fill", d.color).attr("stroke", d.color)
         .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
-        .attr("x", columnX).attr("y", (s) => s.y)
-        .attr("width", band.width).attr("height", stripHeight)
+        .attr("x", (s) => s.x).attr("y", columnY)
+        .attr("width", sliceWidth).attr("height", band.height)
         .style("opacity", 0)
         .transition().delay(cutAt).duration(0).style("opacity", 1)
         .transition().delay(100).duration(320).ease(d3.easeCubicOut)
-        .attr("y", (s) => s.y + (above ? -1 : 1) * s.k * spread)
-        .transition().delay((s) => stackStart - (cutAt + 420) + s.k * stagger)
+        .attr("x", (s) => s.x + (s.k - middle) * spread)
+        .transition().delay((s) => stackStart - (cutAt + 420) + (lastOrder - s.order) * stagger)
         .duration(stackDuration).ease(d3.easeCubicInOut)
-        .attr("y", stackY)
-        .transition().delay((s) => morphStart - (stackStart + s.k * stagger + stackDuration))
+        .attr("x", stackX)
+        .transition().delay((s) => morphStart - (stackStart + (lastOrder - s.order) * stagger + stackDuration))
         .duration(620).ease(d3.easeCubicInOut)
         .attr("x", target.x).attr("y", target.y)
         .attr("width", target.side).attr("height", target.side)
@@ -930,27 +916,17 @@
         .remove();
     }
 
-    function renderComparison(animate, delay) {
+    function renderComparison(animate) {
       summaryLayer.selectAll("*").interrupt().remove();
-      const phase = comparePhaseIndex();
-      if (phase !== 0 && phase !== 3) return;
+      if (comparePhaseIndex() !== 0) return;
 
-      const text = phase === 0
-        ? (state.calculations
-          ? `${fmt(stats.ssTotal)} = ${fmt(stats.ssBetween)} + ${fmt(stats.ssWithin)}`
-          : "Total variability = between groups + within groups")
-        : (state.calculations
-          ? `F = ${fmt(stats.msBetween)} ÷ ${fmt(stats.msWithin)} = ${fmt(stats.f)}`
-          : "F = MS between ÷ MS within");
       summaryLayer.append("text")
         .attr("class", "ave-equation")
-        .attr("x", phase === 0 ? (plot.left + plot.right) / 2 : msColumn.cx)
-        .attr("y", phase === 0 ? 680 : 690)
+        .attr("x", (plot.left + plot.right) / 2).attr("y", 680)
         .attr("text-anchor", "middle")
-        .text(text)
-        .style("opacity", animate ? 0 : 1)
-        .transition().delay(animate ? delay : 0).duration(animate ? 400 : 0)
-        .style("opacity", 1);
+        .text(state.calculations
+          ? `${fmt(stats.ssTotal)} = ${fmt(stats.ssBetween)} + ${fmt(stats.ssWithin)}`
+          : "Total variability = between groups + within groups");
     }
 
     function stageDescription() {
@@ -959,10 +935,9 @@
       }
       if (state.stage === "compare") {
         return {
-          partition: "The total sum of squares, filled exactly by a between-groups band and a within-groups band.",
-          "ms-between": `The between-groups band cut into ${stats.dfBetween} equal slices, stacked into one square: the between-groups mean square.`,
-          "ms-within": `The within-groups band cut into ${stats.dfWithin} equal slices, stacked into one square: the within-groups mean square.`,
-          f: "The between-groups mean square over the within-groups mean square: the F ratio."
+          partition: "The total sum of squares, filled exactly by a within-groups layer with a between-groups layer on top.",
+          "ms-between": `The between-groups layer cut into ${stats.dfBetween} equal slices, stacked into one square: the between-groups mean square.`,
+          "ms-within": `The within-groups layer cut into ${stats.dfWithin} equal slices, stacked into one square: the within-groups mean square.`
         }[state.phase];
       }
       const subjects = {
@@ -1015,10 +990,10 @@
       renderGhosts(animate);
       renderDots(animate);
       renderSquares(animate, revealKey, layoutDelay);
-      renderMeanSquares(animate, msKey, layoutDelay);
+      renderMeanSquares(animate, msKey);
       animateContributions(revealKey, animate);
       if (msKey) animateMeanSquare(msKey, layoutDelay);
-      renderComparison(animate, layoutDelay);
+      renderComparison(animate);
       updateCalculationBox();
       lastRenderedStage = state.stage;
       lastRenderedPhase = state.phase;
