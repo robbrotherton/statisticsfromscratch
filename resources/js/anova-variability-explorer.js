@@ -569,11 +569,14 @@
         .attr("fill", (d) => d.color)
         .text((d) => d.label)
         .transition().duration(animate ? 300 : 0).style("opacity", 1);
-      merged.select("rect")
+      const sumRects = merged.select("rect")
         .attr("x", (d) => d.x).attr("y", (d) => d.y)
-        .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
+        .attr("fill", (d) => d.color).attr("stroke", (d) => d.color);
+      // The square being revealed starts empty; animateContributions grows it as each piece arrives.
+      const driven = (d) => animate && d.key === revealKey;
+      sumRects.filter(driven).attr("width", 0).attr("height", 0);
+      sumRects.filter((d) => !driven(d))
         .transition()
-        .delay((d) => animate && d.key === revealKey ? 360 : 0)
         .duration(animate ? 760 : 0).ease(d3.easeCubicOut)
         .attr("width", (d) => aggregateSquareScale(d.value))
         .attr("height", (d) => aggregateSquareScale(d.value));
@@ -597,14 +600,26 @@
       const contributions = revealKey === "between"
         ? baseContributions.flatMap((d) => d3.range(d.weight || 1).map((copyIndex) => ({ ...d, copyIndex })))
         : baseContributions.map((d) => ({ ...d, copyIndex: 0 }));
-      if (!target || !contributions.length) return;
+      const sumSquare = squaresLayer.selectAll("g.ave-ss-item")
+        .filter((d) => d.key === revealKey)
+        .select("rect");
+      if (!target || !contributions.length) {
+        sumSquare
+          .attr("width", target ? aggregateSquareScale(target.value) : 0)
+          .attr("height", target ? aggregateSquareScale(target.value) : 0);
+        return;
+      }
 
-      const targetSide = aggregateSquareScale(target.value);
-      const columns = Math.ceil(Math.sqrt(contributions.length));
-      const rows = Math.ceil(contributions.length / columns);
-      const cellWidth = targetSide / columns;
-      const cellHeight = targetSide / rows;
-      const pieceSide = Math.max(3, Math.min(cellWidth, cellHeight) * 0.72);
+      // Each piece shrinks to the panel's scale, so it keeps its share of the area,
+      // and docks on the corner the sum is about to grow into.
+      let running = 0;
+      contributions.forEach((d) => {
+        const squared = Math.pow(d.from - d.to, 2);
+        running += squared;
+        d.pieceSide = aggregateSquareScale(squared);
+        d.sumSide = aggregateSquareScale(running);
+      });
+      const mergeDuration = 280;
 
       transferLayer.selectAll("rect.ave-transfer-square")
         .data(contributions, (d) => `${d.groupIndex}-${d.index}-${d.copyIndex}`)
@@ -619,19 +634,30 @@
         .attr("width", (d) => deviationSquareGeometry(d).side)
         .attr("height", (d) => deviationSquareGeometry(d).side)
         .transition()
-        .delay((d, i) => 70 + i * 34)
-        .duration(720)
+        .delay((d, i) => 80 + i * 95)
+        .duration(640)
         .ease(d3.easeCubicInOut)
-        .attr("x", (d, i) => target.x + (i % columns) * cellWidth + (cellWidth - pieceSide) / 2)
-        .attr("y", (d, i) => target.y + Math.floor(i / columns) * cellHeight + (cellHeight - pieceSide) / 2)
-        .attr("width", pieceSide)
-        .attr("height", pieceSide)
+        .attr("x", (d) => target.x + d.sumSide - d.pieceSide)
+        .attr("y", (d) => target.y + d.sumSide - d.pieceSide)
+        .attr("width", (d) => d.pieceSide)
+        .attr("height", (d) => d.pieceSide)
         .attr("fill", target.color)
         .attr("stroke", target.color)
-        .attr("fill-opacity", 0.34)
+        .attr("fill-opacity", 0.3)
         .attr("stroke-opacity", 0.85)
         .transition()
-        .duration(260)
+        .duration(mergeDuration)
+        .ease(d3.easeCubicOut)
+        .on("start", (d) => {
+          // Grow the sum by this piece's area while the piece spreads into it.
+          sumSquare.transition().duration(mergeDuration).ease(d3.easeCubicOut)
+            .attr("width", d.sumSide)
+            .attr("height", d.sumSide);
+        })
+        .attr("x", target.x)
+        .attr("y", target.y)
+        .attr("width", (d) => d.sumSide)
+        .attr("height", (d) => d.sumSide)
         .attr("fill-opacity", 0)
         .attr("stroke-opacity", 0)
         .remove();
