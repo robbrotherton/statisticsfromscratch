@@ -854,18 +854,17 @@
         x: columnX + k * sliceWidth,
         order: Math.abs(k - middle)
       }));
-      const stackX = msColumn.cx - sliceWidth / 2;
       const spread = Math.min(6, 48 / Math.max(1, d.df - 1));
-      // Stacked translucent slices darken; while they square up they ease back to one square's shade.
+      // Stacked translucent slices would darken; they fade as they gather so the stack reads as one square.
       const sliceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
       // Planned as absolute times; chained transitions take their delay from the previous one's end.
       const liftDuration = 650;
       const cutAt = delay + liftDuration;
       const stackStart = cutAt + 520;
-      const stackDuration = 620;
+      const stackDuration = 760;
       const stagger = Math.min(45, 360 / d.df);
       const lastOrder = d3.max(slices, (s) => s.order);
-      const morphStart = stackStart + stackDuration + lastOrder * stagger + 160;
+      let landed = 0;
 
       transferLayer.append("rect")
         .attr("class", "ave-transfer-square")
@@ -886,7 +885,7 @@
         .text(`÷ ${d.df}`)
         .style("opacity", 0)
         .transition().delay(cutAt).duration(260).style("opacity", 1)
-        .transition().delay(morphStart - cutAt - 260).duration(300).style("opacity", 0)
+        .transition().delay(stackStart - cutAt - 260).duration(300).style("opacity", 0)
         .remove();
 
       transferLayer.selectAll("rect.ave-slice")
@@ -901,16 +900,15 @@
         .transition().delay(cutAt).duration(0).style("opacity", 1)
         .transition().delay(100).duration(320).ease(d3.easeCubicOut)
         .attr("x", (s) => s.x + (s.k - middle) * spread)
+        // Gathering and squaring up are one move, so the change of shape isn't a separate event.
         .transition().delay((s) => stackStart - (cutAt + 420) + (lastOrder - s.order) * stagger)
         .duration(stackDuration).ease(d3.easeCubicInOut)
-        .attr("x", stackX)
-        .transition().delay((s) => morphStart - (stackStart + (lastOrder - s.order) * stagger + stackDuration))
-        .duration(620).ease(d3.easeCubicInOut)
         .attr("x", target.x).attr("y", target.y)
         .attr("width", target.side).attr("height", target.side)
         .attr("fill-opacity", sliceOpacity)
-        .on("end", (s) => {
-          if (s.k !== 0) return;
+        .on("end", () => {
+          landed += 1;
+          if (landed < d.df) return;
           msLayer.selectAll("g.ave-ms-item").filter((item) => item.key === revealKey).style("opacity", 1);
         })
         .remove();
