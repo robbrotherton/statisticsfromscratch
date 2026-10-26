@@ -158,6 +158,10 @@ local manifest = {
     file = "resources/js/anova-variability-explorer.js",
     deps = { "d3", "interactive-figure-tools" }
   },
+  ["t-squared"] = {
+    file = "resources/js/t-squared.js",
+    deps = { "d3", "stat-helpers", "interactive-figure-tools" }
+  },
   ["score-rows"] = {
     file = "resources/js/score-rows.js",
     deps = { "d3", "interactive-figure-tools", "span-marks" }

@@ -4,6 +4,7 @@ interactive-scripts:
   - distribution-generator
   - critical-table-generator
   - anova-variability-explorer
+  - t-squared
 ---
 
 {{< interactive-figure anovaCover makeDistributionFamilyCover options='{"renderer":"webgl","distribution":"f","df1":{"from":5,"to":30},"df2":{"from":5,"to":30},"pairing":"zip","xDomain":[0,3],"points":301,"strokeWidth":1.35,"opacity":0.9,"colorCycle":26,"chroma":100,"luminance":65,"animation":"draw","duration":1300,"ease":"cubic-in","stagger":"spread","delaySpread":1700,"fallback":{"animate":false},"performance":true,"ariaLabel":"Animated family of F distribution curves revealed from left to right"}' fallback="Animated family of F distribution curves." >}}
@@ -366,12 +367,43 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 
 {{< include quizzes/14-anova-f-distribution.qmd >}}
 
-<!-- FIGURE: the t² → F explorer (plan §2.3; new module, e.g. t-squared.js). Steps 1-4 only:
+<!-- FIGURE: the t² → F explorer (plan §2.3; t-squared.js). Steps 1-4 only:
      t(6) with ±2.447 shaded; fold onto |t|; square, so the axis stretches and the curve becomes
      F(1, 6) with the cut at 5.99; observed t = −3.15 lands at F = 9.91, same p (.020). Step 5 of the plan
      (df1 = 2, 3, ...: no longer the square of anything) moves to Part 2, Step 2.
+     The step text is all placeholder. The last step replays the whole transformation so the
+     observed t can be followed to its F; "replay": false there would just show it at F.
      History tie-in, one sentence: Fisher's 1924 paper presented Student's t as a special case of
      his general distribution, which is this figure. -->
+
+::::: {#act-t-squared .callout-tip .interactive}
+## Squaring *t* into *F*
+
+{{< interactive-figure tSquaredExplorer makeTSquaredExplorer options='{"df":6,"alpha":0.05,"tObserved":-3.14786,"stage":"t","showObserved":false,"maxWidth":"42rem"}' fallback="The null t distribution with 6 degrees of freedom folds over at zero, so its two 2.5% tails lie together, then its axis is squared. The result is the F distribution with 1 and 6 degrees of freedom: the critical value 2.447 becomes 5.99, still cutting off 5%, and the observed t of −3.15 becomes F = 9.91." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="t" data-action='{"stage":"t","show-observed":false,"animate":false}'}
+[PLACEHOLDER: the null t(6) from Ch 12, both 2.5% tails beyond ±2.447.]
+:::
+
+::: {.tutorial-step data-title="Fold" data-action='{"stage":"fold","show-observed":false,"animate":true}'}
+[PLACEHOLDER: the negative half turns over onto the positive half. The sign is gone, and the two 2.5% tails stack into one 5% tail.]
+:::
+
+::: {.tutorial-step data-title="Extend" data-action='{"stage":"extend","show-observed":false,"animate":true}'}
+[PLACEHOLDER: make room. The axis runs out to 16 so the squared values have somewhere to go; nothing about the values has changed yet. Landmarks at 1, 2 and 3.]
+:::
+
+::: {.tutorial-step data-title="Square" data-action='{"stage":"square","show-observed":false,"animate":true}'}
+[PLACEHOLDER: square every value, with the axis held still. 1 stays put, 2 moves out to 4, 3 to 9, and values below 1 move in towards 0. The curve is now F(1, 6), and the cut lands at 2.447² = 5.99, still 5%.]
+:::
+
+::: {.tutorial-step data-title="Observed" data-action='{"stage":"square","show-observed":true,"replay":true,"animate":true}'}
+[PLACEHOLDER: our t = −3.15 makes the same trip and lands at F = 9.91. Same tail area, same p = .020.]
+:::
+::::
+
+:::::
 
 {{< include quizzes/14-anova-learning-checks.qmd >}}
 
@@ -594,8 +626,9 @@ If this is the case, the numerator will be bigger than the denominator because i
      and F). Here: F(2, 9) is the first F that isn't the square of a t. That's step 5 of the t² → F
      figure (plan §2.3), done here with the existing curve below rather than in the new figure.
      df2 = 9 is now in makeFTable. The table still opens on (3, 10) to match the example lookup in
-     the prose; ours is (2, 9): F_crit = 4.26. Switch the example to (2, 9), or keep (3, 10) as a
-     generic example and add our lookup in Step 4.
+     the prose; ours is (2, 9): F_crit = 4.26, now shown in Step 4's figure. If the example below
+     switches to (2, 9), change the table's "selected" to {"df1":2,"df2":9}; nothing else changes.
+     Either way, F(1, 6) = 5.99 is in the table too, so a reader can check the t² → F cut.
      FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct. -->
 
 How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
@@ -647,10 +680,15 @@ And here's the completed summary table:
 ### Step 4: Make a Decision
 
 <!-- FIX: state the critical value and the comparison: F(2, 9) = 8.38 > 4.26, p = .009.
-     FIGURE: null F(2, 9) curve with critical and observed markers (makeDistributionGraph, options
-     only), matching Ch 11-13's Step 4. -->
+     The figure below matches Ch 11-13's Step 4; its caption follows Ch 12's wording. -->
 
 As usual, step four is to make our decision. And as usual, we compare the test statistic that we just calculated — the $F$ ratio in this case — to the critical value that we looked up in the table. And so in this case, our $F$ ratio is statistically significant. That tells us there is a difference among the conditions somewhere.
+
+::: {#fig-anova-decision}
+{{< interactive-figure anovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":9,"title":"Null distribution: F(2, 9)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,10],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.256495,"label":"4.26","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":8.384615,"label":"F = 8.38","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 9 degrees of freedom. The rejection region lies above 4.26; the observed F of 8.38 is in the rejection region." >}}
+
+The observed $F = 8.38$ falls beyond the critical value of the null $F$ distribution with $df = 2$ and $9$.
+:::
 
 ## Effect Size: $\eta^2$
 
