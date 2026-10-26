@@ -220,24 +220,29 @@ window.makeAnovaTwoEstimates = function(opts) {
     const axisY = lanesBottom + 4;
     const lanesEnd = axisY + 44;
     // Estimates sit to the right of the lanes, or below them on a phone.
-    // There they get a short strip sized for the usual squares: σ² and the
-    // estimates around it. A square bigger than the strip spills a little
-    // past it, behind the title and labels (capped at sideCap), instead of
-    // pushing everything below it down.
+    // There each square gets most of its half of the width, in a strip sized
+    // for the usual squares: σ² and the estimates around it. A square bigger
+    // than the strip spills past it, behind the title and labels (capped at
+    // sideCap), instead of pushing everything below it down.
     const estLeft = wide ? lanesRight + 36 : 12;
     const estRight = width - 12;
     const estTop = wide ? top : lanesEnd + 16;
-    const maxSide = wide ? Math.max(60, Math.min((estRight - estLeft - 24) / 2, 170)) : 100;
-    const estBase = estTop + (wide ? 40 + maxSide : 92);
-    const estMid = estBase - (wide ? maxSide / 2 : 42);
-    const sideCap = wide ? maxSide + 24 : 104;
+    const maxSide = wide
+      ? Math.max(60, Math.min((estRight - estLeft - 24) / 2, 170))
+      : Math.max(60, Math.min(140, Math.min((estRight - estLeft) / 2, 160) - 12));
+    const estBase = estTop + (wide ? 40 + maxSide : 26 + maxSide * 0.66);
+    const estMid = estBase - (wide ? maxSide / 2 : maxSide * 0.36);
+    const sideCap = maxSide + (wide ? 24 : 8);
     const estEnd = estBase + (wide ? 64 : 44);
     const trackerTop = Math.max(lanesEnd, estEnd) + 18;
     // On a phone the sample count shares the tracker's label row.
     const trackerPlotTop = trackerTop + (wide ? 34 : 14);
     const trackerBase = trackerTop + (wide ? 190 : 140);
     const height = trackerBase + 50;
-    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, maxSide, sideCap, estBase, estMid, trackerTop, trackerPlotTop, trackerBase, height, plotLeft: 12, plotRight: width - 12 };
+    // On a phone the figure stops under the estimates until the tracker is
+    // shown, rather than holding its empty space.
+    const shortHeight = wide ? height : Math.ceil(estEnd + 6);
+    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, maxSide, sideCap, estBase, estMid, trackerTop, trackerPlotTop, trackerBase, height, shortHeight, plotLeft: 12, plotRight: width - 12 };
   }
 
   function laneY(g) {
@@ -342,6 +347,29 @@ window.makeAnovaTwoEstimates = function(opts) {
     });
   }
 
+  // The one change of height (on a phone, when the tracker arrives or
+  // leaves) is eased rather than jumped. Shrinking waits for the tracker to
+  // fade, since the SVG doesn't clip it.
+  const heightMs = 520;
+  const revealMs = 280;
+  function setHeight(next, animate) {
+    svg.interrupt("height");
+    const viewBox = svg.attr("viewBox");
+    const from = viewBox ? Number(viewBox.split(/[ ,]+/)[3]) : next;
+    if (!animate || from === next) {
+      svg.attr("viewBox", [0, 0, width, next]);
+      return;
+    }
+    svg.transition("height")
+      .delay(next < from ? revealMs : 0)
+      .duration(heightMs)
+      .ease(d3.easeCubicInOut)
+      .attrTween("viewBox", () => {
+        const h = d3.interpolateNumber(from, next);
+        return (t) => `0 0 ${width} ${h(t)}`;
+      });
+  }
+
   // mode: "none" (snap), "morph" (same sample, the σ² outline splitting or
   // rejoining), "swap" (new settings: the old sample fades out and a new one
   // drops in), "sample" (a new sample drops in), or "fast" (one frame of a
@@ -357,7 +385,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     const ts = swap ? (selection) => selection : t;
     svg.selectAll(".ate-ghost").interrupt().remove();
     if (swap) leaveGhosts();
-    svg.attr("viewBox", [0, 0, width, L.height]);
+    setHeight(state.showTracker ? L.height : L.shortHeight, mode !== "none" && mode !== "fast");
     x.range([L.lanesLeft, L.lanesRight]);
 
     const groups = core.scores(zFor(state.samples), { mu, effect: state.effect, sd: state.sd });
@@ -625,7 +653,8 @@ window.makeAnovaTwoEstimates = function(opts) {
       else if (paramsChanged) mode = "swap";
       // The σ² outline splitting in two (or rejoining) is a morph.
       else if (state.showEstimates !== estimatesWereShown) mode = "morph";
-      else if (state.showTracker && !trackerWasShown) mode = "record";
+      // Showing or hiding the tracker (and, on a phone, the height that goes with it).
+      else if (state.showTracker !== trackerWasShown) mode = "record";
     }
     render(mode);
     notifyValueChange();

@@ -254,24 +254,34 @@
       compact = width < COMPACT_BELOW;
       if (compact) {
         // The whole tutorial callout has to fit on a phone screen, so everything is
-        // packed tighter: group names sit above their lanes, the lanes are closer,
-        // and the sums panel puts its heading beside the bucket rather than above it.
-        plot = { left: 16, right: width - 16, top: 34, bottom: 262 };
-        groupY.range([72, 222]);
+        // packed tighter: group names sit above their lanes, two lanes sit closer
+        // than three, and the sums panel's heading runs above a centred bucket.
+        const laneTop = 68;
+        const laneBottom = laneTop + (groups.length === 2 ? 128 : 150);
+        plot = { left: 16, right: width - 16, top: 34, bottom: laneBottom + 40 };
+        groupY.range([laneTop, laneBottom]);
         lane = { curve: 34, base: 28, meanHalf: 27, meanLabel: 33, name: -34, axisLabel: 36 };
-        const panelSide = Math.min(120, width - 180);
-        panel = { x: 8, y: 310, width: width - 16, height: 30 + panelSide + 14 };
-        panelSquare = { x: panel.x + panel.width - 14 - panelSide, y: panel.y + 30, side: panelSide };
-        // Mean-square steps: the total on the left, the mean-square column on the right.
-        const side = Math.min(130, (width - 80) / 2);
-        wideSquare = { x: 16, y: 76, side };
+        const panelSide = Math.min(136, width - 64);
+        panel = { x: 8, y: plot.bottom + 48, width: width - 16, height: 74 + panelSide + 14 };
+        panelSquare = { x: (width - panelSide) / 2, y: panel.y + 74, side: panelSide };
+        height = panel.y + panel.height + 8;
+        // Mean-square steps: one centred column in the same height, the total on top
+        // and the mean squares below it, between above the midline and within below.
+        // Each layer lifts straight down out of the total into its place.
         const between = aggregateSquares().find((d) => d.key === "between");
         const within = aggregateSquares().find((d) => d.key === "within");
-        // Room either side of the midline for a lifted layer or its labelled mean square.
-        const room = (d, labels) => Math.max(side * d.value / stats.ssTotal, areaSide(d.ms, wideSquare) + labels);
-        const bar = Math.max(wideSquare.y + side / 2, room(between, 30) + msGap + 16);
-        msColumn = { cx: width - 28 - side / 2, bar, gap: msGap };
-        height = Math.ceil(Math.max(panel.y + panel.height + 8, bar + msGap + room(within, 44) + 8));
+        const top = 70;
+        // Room for a lifted layer or its mean square, whichever is taller, plus labels.
+        const reach = (d, side) => Math.max(side * d.value / stats.ssTotal, areaSide(d.ms, { side }));
+        const layoutFor = (side) => {
+          const bar = top + side + 48 + reach(between, side) + msGap;
+          const withinRoom = Math.max(side * within.value / stats.ssTotal + 28, areaSide(within.ms, { side }) + 44);
+          return { side, bar, bottom: bar + msGap + withinRoom + 6 };
+        };
+        let fit = layoutFor(Math.min(220, width - 40));
+        while (fit.side > 60 && fit.bottom > height) fit = layoutFor(fit.side - 2);
+        wideSquare = { x: (width - fit.side) / 2, y: top, side: fit.side };
+        msColumn = { cx: width / 2, bar: fit.bar, gap: msGap };
       } else {
         plot = { left: 16 + longestName * 8.6 + 12, right: width - 320, top: 76, bottom: 610 };
         groupY.range([150, 540]);
@@ -446,8 +456,10 @@
         .data(deemphasizeGroups ? [] : groups, (d) => d.name);
       labels.join("text")
         .attr("class", "ave-group-label")
-        .attr("x", compact ? plot.right : plot.left - 12)
-        .attr("text-anchor", "end")
+        // On a phone the names sit above the lanes' left ends, clear of the squares that
+        // grow up from the lane below.
+        .attr("x", compact ? plot.left : plot.left - 12)
+        .attr("text-anchor", compact ? "start" : "end")
         .attr("fill", (d, i) => colors[i % colors.length])
         .text((d) => d.name)
         // Lanes never move between steps, so a returning label is placed, not slid in.
@@ -694,10 +706,8 @@
         : stageIndex < 4
           ? (state.phase === "sum" ? "Adding the squared deviations" : "Build each squared deviation first")
           : "Total = between + within";
-      // On a phone the heading sits beside the bucket, so it wraps to the space left of it.
       const inset = compact ? 14 : 18;
-      const headingWidth = wide ? Infinity
-        : compact ? panelSquare.x - panel.x - 2 * inset : panel.width - 2 * inset;
+      const headingWidth = wide ? Infinity : panel.width - 2 * inset;
       const titleLines = setLines(headingTitle, wrapWords("Sums of squares", headingWidth / 9.2), 19);
       setLines(headingSubtitle, wrapWords(subtitleText, headingWidth / 6.3), 15);
       headingSubtitle.attr("y", titleLines * 19 + 1);
