@@ -358,34 +358,34 @@ And one last new piece of terminology here: in the context of ANOVA, we refer to
 ::::: {#act-two-estimates .callout-tip .interactive}
 ## Two estimates of the same variance
 
-{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
+{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
+::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
 [PLACEHOLDER: suppose the bite makes no difference. Both groups are samples from one population (the grey curves are identical). The dots are one sample of four kids per group.]
 :::
 
-::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
 [PLACEHOLDER: the dashed outline is the population's variance, σ², fixed by the population (not computed from the sample). Two ways to estimate it from the sample: MS within from the red spreads inside each group; MS between from the purple arms, how far the group means sit from the grand mean, counted n times.]
 :::
 
-::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
 [PLACEHOLDER: this sample's F, 1,233 / 1,503 = 0.82, goes into a tracker as its first entry.]
 :::
 
-::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
 [PLACEHOLDER: a new sample from the same population. Both estimates wobble around the outline, independently of each other: sometimes between is bigger, sometimes within. The purple one jumps around more (it rests on one piece of information; red pools six). Its F joins the tracker.]
 :::
 
-::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
 [PLACEHOLDER: 200 samples. The Fs pile up mostly below 1, with a long right tail: the same F(1, 6) shape as the t² figure, drawn over the blocks. Half the Fs are below 0.52; the line at 1 is where the two estimates agree, not the middle of the pile. The skew comes from the jumpy numerator.]
 :::
 
-::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
 [PLACEHOLDER: the same samples from a more spread-out population. The outline grows and both squares grow with it, by exactly the same factor, so not one F changes.]
 :::
 
-::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
 [PLACEHOLDER: now the bites really differ: two populations, 40 ms apart. Within is untouched; between grows past the outline, and the Fs move out into the tail.]
 :::
 ::::
@@ -449,43 +449,49 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 
 {{< include quizzes/14-anova-f-distribution.qmd >}}
 
-<!-- FIGURE: the t² → F explorer (plan §2.3; t-squared.js). Steps 1-4 only:
-     t(6) with ±2.447 shaded; fold onto |t|; square, so the axis stretches and the curve becomes
-     F(1, 6) with the cut at 5.99; observed t = −3.15 lands at F = 9.91, same p (.020). Step 5 of the plan
-     (df1 = 2, 3, ...: no longer the square of anything) moves to Part 2, Step 2.
-     The step text is all placeholder. The last step replays the whole transformation so the
-     observed t can be followed to its F; "replay": false there would just show it at F.
+<!-- FIGURE: the t² → F explorer (plan §2.3; t-squared.js). Squaring does two things, one step
+     each: drop the sign (the negative half turns over; −1, −2, −3 land on 1, 2, 3 and the pairs
+     read ±1, ±2, ±3; the two 2.5% tails stack into 5% beyond ±2.447), then square the size (the
+     axis first grows to 16, then values move: ±1 stays, ±2 → 4, ±3 → 9, below 1 crowds towards 0;
+     the curve is F(1, 6) and the cut lands at 5.99). The figure is generic: our own t and F are
+     the static pair after it. Step 5 of the plan (df1 = 2, 3, ...: no longer the square of
+     anything) moves to Part 2, Step 2.
+     The step text is all placeholder.
      History tie-in, one sentence: Fisher's 1924 paper presented Student's t as a special case of
      his general distribution, which is this figure. -->
 
 ::::: {#act-t-squared .callout-tip .interactive}
 ## Squaring *t* into *F*
 
-{{< interactive-figure tSquaredExplorer makeTSquaredExplorer options='{"df":6,"alpha":0.05,"tObserved":-3.14786,"stage":"t","showObserved":false,"maxWidth":"42rem"}' fallback="The null t distribution with 6 degrees of freedom folds over at zero, so its two 2.5% tails lie together, then its axis is squared. The result is the F distribution with 1 and 6 degrees of freedom: the critical value 2.447 becomes 5.99, still cutting off 5%, and the observed t of −3.15 becomes F = 9.91." >}}
+{{< interactive-figure tSquaredExplorer makeTSquaredExplorer options='{"df":6,"alpha":0.05,"stage":"t","maxWidth":"42rem"}' fallback="The null t distribution with 6 degrees of freedom is squared in two steps. First the sign is dropped: the negative half turns over onto the positive half, so −2 lands on 2 and the two 2.5% tails lie together beyond ±2.447. Then each value is squared: ±1 stays at 1, ±2 moves to 4 and ±3 to 9. The result is the F distribution with 1 and 6 degrees of freedom, with the critical value 2.447 now at 5.99, still cutting off 5%." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="t" data-action='{"stage":"t","show-observed":false,"animate":false}'}
-[PLACEHOLDER: the null t(6) from Ch 12, both 2.5% tails beyond ±2.447.]
+::: {.tutorial-step data-title="t" data-action='{"stage":"t","animate":false}'}
+[PLACEHOLDER: the null t(6) from Ch 12, both 2.5% tails beyond ±2.447. Paired landmarks at ±1, ±2, ±3.]
 :::
 
-::: {.tutorial-step data-title="Fold" data-action='{"stage":"fold","show-observed":false,"animate":true}'}
-[PLACEHOLDER: the negative half turns over onto the positive half. The sign is gone, and the two 2.5% tails stack into one 5% tail.]
+::: {.tutorial-step data-title="Sign" data-action='{"stage":"fold","animate":true}'}
+[PLACEHOLDER: squaring does two things. First, it drops the sign: (−2)² and 2² are both 4. So the negative half turns over onto the positive half, −2 lands on 2, and the two 2.5% tails stack into one 5% tail beyond ±2.447.]
 :::
 
-::: {.tutorial-step data-title="Extend" data-action='{"stage":"extend","show-observed":false,"animate":true}'}
-[PLACEHOLDER: make room. The axis runs out to 16 so the squared values have somewhere to go; nothing about the values has changed yet. Landmarks at 1, 2 and 3.]
-:::
-
-::: {.tutorial-step data-title="Square" data-action='{"stage":"square","show-observed":false,"animate":true}'}
-[PLACEHOLDER: square every value, with the axis held still. 1 stays put, 2 moves out to 4, 3 to 9, and values below 1 move in towards 0. The curve is now F(1, 6), and the cut lands at 2.447² = 5.99, still 5%.]
-:::
-
-::: {.tutorial-step data-title="Observed" data-action='{"stage":"square","show-observed":true,"replay":true,"animate":true}'}
-[PLACEHOLDER: our t = −3.15 makes the same trip and lands at F = 9.91. Same tail area, same p = .020.]
+::: {.tutorial-step data-title="Size" data-action='{"stage":"square","animate":true}'}
+[PLACEHOLDER: second, it squares the size. The axis runs out to 16 to make room, then every value moves to its square: ±1 stays put, ±2 moves out to 4, ±3 to 9, and values below 1 move in towards 0. The curve is now F(1, 6), and the cut lands at 2.447² = 5.99, still 5%.]
 :::
 ::::
 
 :::::
+
+[PLACEHOLDER: "So for our data..." lead-in to the static pair: t = −3.15 on t(6) and F = 9.91 on F(1, 6), the same transformation, the same p = .020.]
+
+:::: {#fig-t-squared-observed}
+::: {.sfs-figure-row .sfs-figure-row-wide}
+{{< interactive-figure tSquaredObservedT makeTSquaredExplorer options='{"df":6,"tObserved":-3.14786,"stage":"t","showObserved":true,"shade":"p","landmarks":[],"controls":false}' fallback="Null t distribution with 6 degrees of freedom. The observed t of −3.15 is marked, and p = .020 is shaded: .010 beyond −3.15 and .010 beyond +3.15." >}}
+
+{{< interactive-figure tSquaredObservedF makeTSquaredExplorer options='{"df":6,"tObserved":-3.14786,"stage":"square","showObserved":true,"shade":"p","landmarks":[],"controls":false}' fallback="F distribution with 1 and 6 degrees of freedom. The observed F of 9.91 is marked, and p = .020 is shaded in the single tail beyond it." >}}
+:::
+
+[PLACEHOLDER: caption.]
+::::
 
 {{< include quizzes/14-anova-learning-checks.qmd >}}
 

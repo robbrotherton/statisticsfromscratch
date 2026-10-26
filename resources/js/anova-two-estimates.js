@@ -83,6 +83,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     effect: finite(opts.effect, 0),
     sd: sdReference,
     samples: Math.max(1, Math.min(maxSamples, Math.round(finite(opts.samples, 1)))),
+    showSigma: opts.showSigma === true,
     showEstimates: opts.showEstimates !== false,
     showTracker: opts.showTracker === true,
     showCurve: opts.showCurve === true
@@ -93,8 +94,8 @@ window.makeAnovaTwoEstimates = function(opts) {
     if (!zCache.has(s)) zCache.set(s, core.standardScores(seed, s, k, n));
     return zCache.get(s);
   }
-  function summaryFor(s) {
-    return core.summarize(core.scores(zFor(s), { mu, effect: state.effect, sd: state.sd }));
+  function summaryFor(s, effect = state.effect) {
+    return core.summarize(core.scores(zFor(s), { mu, effect, sd: state.sd }));
   }
 
   const fFormat = d3.format(".2f");
@@ -148,10 +149,11 @@ window.makeAnovaTwoEstimates = function(opts) {
     .anova-two-estimates .ate-ms-label.is-within { fill: var(--ate-within); }
     .anova-two-estimates .ate-ms-value { fill: var(--sfs-muted, #68727d); font-size: var(--sfs-figure-small-size, 0.75rem); font-variant-numeric: tabular-nums; }
     .anova-two-estimates .ate-f { font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; font-variant-numeric: tabular-nums; }
-    /* The newest F and its block share one accent, so the reader can see
-       which block this sample added. Not Ch 7's red: red means within here. */
+    .anova-two-estimates .ate-bar { fill: var(--graph-block-fill, var(--sfs-text, currentColor)); opacity: 0.86; shape-rendering: crispEdges; }
+    /* The newest F and its slice share one accent, so the reader can see
+       where this sample landed. Not Ch 7's red: red means within here. */
     .anova-two-estimates .ate-f,
-    .anova-two-estimates.sfs-sampling-figure .bcs-block.is-current { fill: var(--sfs-accent, #2c7fb8); }
+    .anova-two-estimates .ate-bar.is-current { fill: var(--sfs-accent, #2c7fb8); opacity: 1; }
     .anova-two-estimates .ate-f-curve { fill: none; stroke: var(--sfs-null-color, currentColor); stroke-width: 2; }
   `);
 
@@ -159,52 +161,57 @@ window.makeAnovaTwoEstimates = function(opts) {
   const svg = chartWrap.append("svg").attr("class", "sfs-svg sfs-graph").attr("role", "img");
   const svgTitle = svg.append("title");
 
+  // The estimates go first so that, on a phone, a square too big for its
+  // strip grows up behind the axis label rather than over it.
+  const estimatesLayer = svg.append("g").attr("class", "sfs-if-reveal").attr("aria-hidden", "true");
   const laneLayer = svg.append("g");
   const axisLayer = svg.append("g").attr("class", "ate-axis").attr("aria-hidden", "true");
   const axisLabel = svg.append("text").attr("class", "ate-axis-label").attr("text-anchor", "middle").text(opts.axisLabel || "Score");
-  const estimatesLayer = svg.append("g").attr("class", "sfs-if-reveal").attr("aria-hidden", "true");
   const trackerClipId = `ate-clip-${Math.round(Math.random() * 1e9)}`;
   const trackerClip = svg.append("defs").append("clipPath").attr("id", trackerClipId).append("rect");
   const trackerGroup = svg.append("g").attr("class", "sfs-if-reveal");
 
   const x = d3.scaleLinear().domain([xMin, xMax]);
   const fx = d3.scaleLinear().domain([0, fMax]);
-  // The histogram reads baseY from this object each time it updates, so
-  // draw() keeps it current; the other positions are placed directly.
-  const histogramOptions = {
-    x: fx,
-    plotLeft: 0,
-    plotRight: 0,
-    labelY: 0,
-    noteY: 0,
-    baseY: 0,
-    label: opts.trackerLabel || "F from each sample",
-    axisLabel: "F",
-    blockGap: 1
-  };
-  const histogram = visuals.createBlockHistogram(trackerGroup, histogramOptions);
+  // The tracker is a plain histogram of F, styled like Chapter 7's tracker
+  // panels, with its dashed line at F = 1. Each bar leaves off the newest
+  // sample, which sits on top of its bar as a slice in the accent colour.
+  const trackerLabel = trackerGroup.append("text").attr("class", "bcs-panel-label").text(opts.trackerLabel || "F from each sample");
+  const trackerNote = trackerGroup.append("text").attr("class", "bcs-panel-note");
+  const oneLine = trackerGroup.append("line").attr("class", "bcs-mu-line");
+  const barsLayer = trackerGroup.append("g");
+  const currentBar = trackerGroup.append("rect").attr("class", "ate-bar is-current");
+  const trackerAxis = trackerGroup.append("g").attr("class", "bcs-axis sfs-axis");
+  const trackerAxisLabel = trackerGroup.append("text").attr("class", "bcs-panel-note").attr("text-anchor", "middle").text("F");
   const curvePath = trackerGroup.append("path").attr("class", "ate-f-curve sfs-if-reveal").attr("clip-path", `url(#${trackerClipId})`);
 
-  // Estimates panel: an outline of σ² behind each mean square.
-  const estimatesTitle = estimatesLayer.append("text").attr("class", "ate-panel-title").text(opts.estimatesLabel || "Two estimates of σ²");
+  // Estimates panel: an outline of σ² around each mean square, both centred
+  // on one point. The outline is drawn over the square so it shows through a
+  // bigger one; the title and F come last so a large square never covers them.
+  // Before the estimates arrive, σ² is shown alone: both outlines sit on one
+  // spot, and they split apart when the mean squares join them.
   const estimateGroups = ["between", "within"].map((kind) => {
     const g = estimatesLayer.append("g");
+    const square = g.append("rect").attr("class", `ate-square is-${kind}`);
     const sigma = g.append("rect").attr("class", "ate-sigma");
     const sigmaLabel = g.append("text").attr("class", "ate-sigma-label").attr("text-anchor", "end").text("σ²");
-    const square = g.append("rect").attr("class", `ate-square is-${kind}`);
-    const label = g.append("text").attr("class", `ate-ms-label is-${kind}`).attr("text-anchor", "middle").text(kind === "between" ? "MS between" : "MS within");
-    const value = g.append("text").attr("class", "ate-ms-value").attr("text-anchor", "middle");
-    return { kind, g, sigma, sigmaLabel, square, label, value };
+    const text = g.append("g");
+    const label = text.append("text").attr("class", `ate-ms-label is-${kind}`).attr("text-anchor", "middle").text(kind === "between" ? "MS between" : "MS within");
+    const value = text.append("text").attr("class", "ate-ms-value").attr("text-anchor", "middle");
+    return { kind, g, sigma, sigmaLabel, square, text, label, value };
   });
-  const fText = estimatesLayer.append("text").attr("class", "ate-f").attr("text-anchor", "middle");
+  const sigmaTitle = estimatesLayer.append("text").attr("class", "ate-panel-title").text(opts.sigmaLabel || "Population variance");
+  const sigmaValue = estimatesLayer.append("text").attr("class", "ate-ms-value").attr("text-anchor", "middle");
+  const estimatesTitle = estimatesLayer.append("text").attr("class", "ate-panel-title").text(opts.estimatesLabel || "Two estimates of σ²");
+  const fText = estimatesLayer.append("text").attr("class", "ate-f");
 
   let width = finite(opts.width, 760);
   let layout = null;
 
   function computeLayout() {
     const wide = width >= 620;
-    const laneH = wide ? 76 : 68;
-    const top = 16;
+    const laneH = wide ? 76 : 64;
+    const top = wide ? 16 : 6;
     const labelW = wide ? 96 : 0;
     const lanesLeft = wide ? labelW + 8 : 12;
     const lanesRight = wide ? Math.round(width * 0.6) : width - 12;
@@ -213,16 +220,24 @@ window.makeAnovaTwoEstimates = function(opts) {
     const axisY = lanesBottom + 4;
     const lanesEnd = axisY + 44;
     // Estimates sit to the right of the lanes, or below them on a phone.
+    // There they get a short strip sized for the usual squares: σ² and the
+    // estimates around it. A square bigger than the strip spills a little
+    // past it, behind the title and labels (capped at sideCap), instead of
+    // pushing everything below it down.
     const estLeft = wide ? lanesRight + 36 : 12;
     const estRight = width - 12;
-    const estTop = wide ? top : lanesEnd + 14;
-    const maxSide = Math.max(60, Math.min((estRight - estLeft - 24) / 2, wide ? 170 : 150));
-    const estBase = estTop + 40 + maxSide;
-    const estEnd = estBase + 64;
+    const estTop = wide ? top : lanesEnd + 16;
+    const maxSide = wide ? Math.max(60, Math.min((estRight - estLeft - 24) / 2, 170)) : 100;
+    const estBase = estTop + (wide ? 40 + maxSide : 92);
+    const estMid = estBase - (wide ? maxSide / 2 : 42);
+    const sideCap = wide ? maxSide + 24 : 104;
+    const estEnd = estBase + (wide ? 64 : 44);
     const trackerTop = Math.max(lanesEnd, estEnd) + 18;
-    const trackerBase = trackerTop + (wide ? 190 : 170);
+    // On a phone the sample count shares the tracker's label row.
+    const trackerPlotTop = trackerTop + (wide ? 34 : 14);
+    const trackerBase = trackerTop + (wide ? 190 : 140);
     const height = trackerBase + 50;
-    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, maxSide, estBase, trackerTop, trackerBase, height, plotLeft: 12, plotRight: width - 12 };
+    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, maxSide, sideCap, estBase, estMid, trackerTop, trackerPlotTop, trackerBase, height, plotLeft: 12, plotRight: width - 12 };
   }
 
   function laneY(g) {
@@ -256,17 +271,20 @@ window.makeAnovaTwoEstimates = function(opts) {
     });
   }
 
-  function trackerRecords(count) {
-    const counts = new Map();
-    const records = [];
+  // Counts per bin of the first `count` samples' Fs, and the newest one's bin.
+  // `effect` defaults to the current one.
+  function trackerCounts(count, effect) {
+    const bins = Math.round(fMax / binWidth);
+    const counts = new Array(bins).fill(0);
+    const fs = [];
+    let newestBin = 0;
     for (let s = 1; s <= count; s += 1) {
-      const f = summaryFor(s).f;
-      const bin = Math.min(Math.floor(Math.max(0, f) / binWidth), Math.round(fMax / binWidth) - 1);
-      const stackIndex = counts.get(bin) || 0;
-      counts.set(bin, stackIndex + 1);
-      records.push({ index: s - 1, bin: (bin + 0.5) * binWidth, stackIndex, mean: Math.min(f, fMax) });
+      const f = summaryFor(s, effect).f;
+      newestBin = Math.min(Math.floor(Math.max(0, f) / binWidth), bins - 1);
+      counts[newestBin] += 1;
+      fs.push(f);
     }
-    return { records, maxStack: Math.max(1, ...counts.values()) };
+    return { counts, fs, newestBin, maxCount: Math.max(1, ...counts) };
   }
 
   function describe(summary) {
@@ -302,13 +320,43 @@ window.makeAnovaTwoEstimates = function(opts) {
       window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }
 
-  // mode: "none" (snap), "morph" (same sample, new parameters), "sample"
-  // (a new sample drops in), or "fast" (one frame of a fast run).
+  // A change of settings starts the sampling over, so it should not look
+  // continuous. The old sample, its estimates and the tracker are left as
+  // copies that fade out, while the populations and σ² reshape; the new
+  // sample arrives once they have settled.
+  const fadeOutMs = 300;
+  const arriveMs = 900;
+  function sampleParts() {
+    return laneLayer.selectAll(".ate-sample").nodes()
+      .concat(estimateGroups.flatMap((est) => [est.square.node(), est.text.node()]))
+      .concat([fText.node(), trackerNote.node(), barsLayer.node(), currentBar.node(), curvePath.node()]);
+  }
+  function leaveGhosts() {
+    sampleParts().forEach((node) => {
+      const copy = node.cloneNode(true);
+      // Not an .ate-sample any more, so draw() never selects into a copy.
+      copy.classList.remove("ate-sample");
+      copy.classList.add("ate-ghost");
+      node.parentNode.insertBefore(copy, node);
+      d3.select(copy).transition().duration(fadeOutMs).style("opacity", 0).remove();
+    });
+  }
+
+  // mode: "none" (snap), "morph" (same sample, the σ² outline splitting or
+  // rejoining), "swap" (new settings: the old sample fades out and a new one
+  // drops in), "sample" (a new sample drops in), or "fast" (one frame of a
+  // fast run).
   function draw(mode) {
     layout = computeLayout();
     const L = layout;
-    const duration = mode === "morph" ? 900 : mode === "sample" ? 550 : 0;
+    const swap = mode === "swap";
+    const duration = mode === "morph" || swap ? 900 : mode === "sample" ? 550 : 0;
     const t = (selection) => duration ? selection.transition().duration(duration).ease(d3.easeCubicInOut) : selection;
+    // Parts of the old sample are hidden in a swap, so they move straight to
+    // their new places.
+    const ts = swap ? (selection) => selection : t;
+    svg.selectAll(".ate-ghost").interrupt().remove();
+    if (swap) leaveGhosts();
     svg.attr("viewBox", [0, 0, width, L.height]);
     x.range([L.lanesLeft, L.lanesRight]);
 
@@ -325,10 +373,11 @@ window.makeAnovaTwoEstimates = function(opts) {
         pop.append("path").attr("class", "ate-pop-line");
         g.append("line").attr("class", "ate-lane");
         g.append("text").attr("class", "ate-group-label");
-        g.append("g").attr("class", "ate-within-layer");
-        g.append("line").attr("class", "ate-arm");
-        g.append("line").attr("class", "ate-mean-line");
-        g.append("g").attr("class", "ate-dot-layer");
+        const sample = g.append("g").attr("class", "ate-sample");
+        sample.append("g").attr("class", "ate-within-layer");
+        sample.append("line").attr("class", "ate-arm");
+        sample.append("line").attr("class", "ate-mean-line");
+        sample.append("g").attr("class", "ate-dot-layer");
         return g;
       });
     const area = d3.area().x((d) => d.x).y0((d) => d.base).y1((d) => d.y);
@@ -351,108 +400,151 @@ window.makeAnovaTwoEstimates = function(opts) {
         .style("fill", color)
         .text(names[g]);
 
+      const sample = lane.select(".ate-sample");
       const mean = summary.means[g];
-      t(lane.select(".ate-mean-line")).attr("x1", x(mean)).attr("x2", x(mean)).attr("y1", y - 24).attr("y2", y + 22).style("stroke", color);
-      t(lane.select(".ate-arm")).attr("x1", x(summary.grandMean)).attr("x2", x(mean)).attr("y1", y + 16).attr("y2", y + 16);
+      ts(sample.select(".ate-mean-line")).attr("x1", x(mean)).attr("x2", x(mean)).attr("y1", y - 24).attr("y2", y + 22).style("stroke", color);
+      ts(sample.select(".ate-arm")).attr("x1", x(summary.grandMean)).attr("x2", x(mean)).attr("y1", y + 16).attr("y2", y + 16);
 
       const dots = stackDots(groups[g], g);
-      const within = lane.select(".ate-within-layer").selectAll("line").data(dots, (d) => d.i)
+      const within = sample.select(".ate-within-layer").selectAll("line").data(dots, (d) => d.i)
         .join("line").attr("class", "ate-within-line");
-      t(within).attr("x1", (d) => x(d.value)).attr("x2", x(mean)).attr("y1", (d) => d.y).attr("y2", (d) => d.y);
+      ts(within).attr("x1", (d) => x(d.value)).attr("x2", x(mean)).attr("y1", (d) => d.y).attr("y2", (d) => d.y);
 
-      const circles = lane.select(".ate-dot-layer").selectAll("circle").data(dots, (d) => d.i)
+      const circles = sample.select(".ate-dot-layer").selectAll("circle").data(dots, (d) => d.i)
         .join("circle").attr("class", "ate-dot").attr("r", 6).style("fill", color);
-      if (mode === "sample") {
+      if (mode === "sample" || swap) {
         // A new sample: each score drops into its lane from the population.
+        const start = swap ? arriveMs : 0;
         circles.interrupt().attr("cx", (d) => x(d.value)).attr("cy", (d) => d.y - L.laneH * 0.5).style("opacity", 0)
-          .transition().delay((d) => d.i * 60).duration(380).ease(d3.easeQuadIn)
+          .transition().delay((d) => start + d.i * 60).duration(380).ease(d3.easeQuadIn)
           .attr("cy", (d) => d.y).style("opacity", 1);
       } else {
-        t(circles.interrupt().style("opacity", 1)).attr("cx", (d) => x(d.value)).attr("cy", (d) => d.y);
+        ts(circles.interrupt().style("opacity", 1)).attr("cx", (d) => x(d.value)).attr("cy", (d) => d.y);
       }
     });
 
-    const grand = laneLayer.selectAll("line.ate-grand-line").data([0]).join("line").attr("class", "ate-grand-line");
-    t(grand).attr("x1", x(summary.grandMean)).attr("x2", x(summary.grandMean)).attr("y1", L.laneTop - 6).attr("y2", L.lanesBottom);
+    const grandGroup = laneLayer.selectAll("g.ate-grand").data([0]).join("g").attr("class", "ate-grand ate-sample");
+    const grand = grandGroup.selectAll("line").data([0]).join("line").attr("class", "ate-grand-line");
+    ts(grand).attr("x1", x(summary.grandMean)).attr("x2", x(summary.grandMean)).attr("y1", L.laneTop - 6).attr("y2", L.lanesBottom);
 
     axisLayer.attr("transform", `translate(0,${L.axisY})`)
       .call(d3.axisBottom(x).ticks(Math.max(3, Math.floor((L.lanesRight - L.lanesLeft) / 70))).tickSizeOuter(0));
     axisLabel.attr("x", (L.lanesLeft + L.lanesRight) / 2).attr("y", L.axisY + 38);
 
-    // Estimates: each square sits on the same baseline as its σ² outline.
+    // Estimates: each square shares its σ² outline's centre.
     const sigmaSide = sideFor(state.sd ** 2);
-    const colW = (L.estRight - L.estLeft) / 2;
+    // On a wider phone layout the pair stays together in the middle.
+    const colW = Math.min((L.estRight - L.estLeft) / 2, 160);
+    const colsLeft = (L.estLeft + L.estRight) / 2 - colW;
+    const estMidX = (L.estLeft + L.estRight) / 2;
+    sigmaTitle.attr("x", L.estLeft).attr("y", L.estTop + 4);
     estimatesTitle.attr("x", L.estLeft).attr("y", L.estTop + 4);
+    sigmaValue.attr("x", estMidX).attr("y", L.estMid + sigmaSide / 2 + 18).text(`σ² = ${msFormat(state.sd ** 2)}`);
     estimateGroups.forEach((est, i) => {
-      const cx = L.estLeft + colW * (i + 0.5);
+      const cx = state.showEstimates ? colsLeft + colW * (i + 0.5) : estMidX;
       const ms = est.kind === "between" ? summary.msBetween : summary.msWithin;
-      const side = Math.min(sideFor(ms), L.maxSide + 24);
-      t(est.sigma).attr("x", cx - sigmaSide / 2).attr("y", L.estBase - sigmaSide).attr("width", sigmaSide).attr("height", sigmaSide);
-      t(est.sigmaLabel).attr("x", cx + sigmaSide / 2 - 3).attr("y", L.estBase - sigmaSide - 4);
-      t(est.square).attr("x", cx - side / 2).attr("y", L.estBase - side).attr("width", side).attr("height", side);
-      est.label.attr("x", cx).attr("y", L.estBase + 20);
-      est.value.attr("x", cx).attr("y", L.estBase + 36).text(msFormat(ms));
+      const side = Math.min(sideFor(ms), L.sideCap);
+      t(est.sigma).attr("x", cx - sigmaSide / 2).attr("y", L.estMid - sigmaSide / 2).attr("width", sigmaSide).attr("height", sigmaSide);
+      t(est.sigmaLabel).attr("x", cx + sigmaSide / 2 - 3).attr("y", L.estMid - sigmaSide / 2 - 4);
+      ts(est.square).attr("x", cx - side / 2).attr("y", L.estMid - side / 2).attr("width", side).attr("height", side);
+      est.label.attr("x", cx).attr("y", L.estBase + (L.wide ? 20 : 24));
+      est.value.attr("x", cx).attr("y", L.estBase + (L.wide ? 36 : 39)).text(msFormat(ms));
     });
-    fText.attr("x", (L.estLeft + L.estRight) / 2).attr("y", L.estBase + 58).text(`F = ${fFormat(summary.f)}`);
+    // F goes under the squares beside the lanes, and at the end of the title
+    // row on a phone.
+    fText
+      .attr("x", L.wide ? (L.estLeft + L.estRight) / 2 : L.estRight)
+      .attr("y", L.wide ? L.estBase + 58 : L.estTop + 4)
+      .attr("text-anchor", L.wide ? "middle" : "end")
+      .text(`F = ${fFormat(summary.f)}`);
 
-    // Tracker: Chapter 7's block histogram, with its dashed line at F = 1.
+    // Tracker: a histogram of the Fs so far.
     fx.range([L.plotLeft + 8, L.plotRight - 8]);
-    const { records, maxStack } = trackerRecords(state.samples);
-    // During a run the scale is set by the count the run will reach, so
-    // blocks that have landed never need to shrink.
-    const scaleStack = target > state.samples ? trackerRecords(target).maxStack : maxStack;
-    const band = L.trackerBase - L.trackerTop - 50;
+    const { counts, fs, newestBin } = trackerCounts(state.samples);
+    // The height scale is set by the count a run will reach, so bars never
+    // shrink as it goes, and by the no-difference histogram, so a real effect
+    // or more spread leaves the scale and the F curve where they were: only
+    // the bars move. The current counts are checked too, so no bar can
+    // outgrow the panel.
+    const scaleTo = Math.max(target, state.samples);
+    const scaleCount = Math.max(trackerCounts(scaleTo, 0).maxCount, trackerCounts(scaleTo).maxCount);
+    const band = L.trackerBase - L.trackerPlotTop - 16;
     const binPx = fx(binWidth) - fx(0);
-    const unitHeight = Math.min(binPx, band / scaleStack);
-    histogram.layer.selectAll(".bcs-panel-label").attr("x", L.plotLeft).attr("y", L.trackerTop + 4);
-    histogram.layer.selectAll(".bcs-panel-note").filter(function() { return !this.getAttribute("text-anchor"); })
-      .attr("x", L.plotLeft).attr("y", L.trackerTop + 24);
-    histogram.layer.select(".bcs-mu-line").attr("y1", L.trackerTop + 34).attr("y2", L.trackerBase + 5);
-    histogram.layer.select(".bcs-axis").attr("transform", `translate(0,${L.trackerBase})`);
-    histogram.layer.selectAll(".bcs-panel-note[text-anchor='middle']").attr("x", (L.plotLeft + L.plotRight) / 2).attr("y", L.trackerBase + 42);
-    histogramOptions.baseY = L.trackerBase;
-    histogram.update(records, records.length, { mean: 1 }, {
-      binWidth,
-      unitHeight,
-      note: `${records.length} ${records.length === 1 ? "sample" : "samples"}`,
-      // No falling boxes: an F has no position it falls from, so the
-      // histogram just grows where the new value belongs.
-      fall: false,
-      tickValues: d3.range(0, fMax + 0.01, fMax > 10 ? 5 : 1).concat([1]).sort((a, b) => a - b),
-      tickFormat: (v) => v === fMax ? `${v}+` : d3.format("~g")(v)
-    });
+    const unitHeight = Math.min(binPx, band / scaleCount);
+    trackerLabel.attr("x", L.plotLeft).attr("y", L.trackerTop + 4);
+    // On a phone the count shares the label row.
+    trackerNote
+      .attr("x", L.wide ? L.plotLeft : L.plotRight)
+      .attr("y", L.trackerTop + (L.wide ? 24 : 4))
+      .attr("text-anchor", L.wide ? null : "end")
+      .text(`${fs.length} ${fs.length === 1 ? "sample" : "samples"}`);
+    oneLine.attr("x1", fx(1)).attr("x2", fx(1)).attr("y1", L.trackerPlotTop).attr("y2", L.trackerBase + 5);
+    trackerAxis.attr("transform", `translate(0,${L.trackerBase})`)
+      .call(d3.axisBottom(fx).tickSizeOuter(0)
+        .tickValues(d3.range(0, fMax + 0.01, fMax > 10 ? 5 : 1).concat([1]).sort((a, b) => a - b))
+        .tickFormat((v) => v === fMax ? `${v}+` : d3.format("~g")(v)));
+    trackerAxis.selectAll("text").attr("dy", "1em");
+    trackerAxisLabel.attr("x", (L.plotLeft + L.plotRight) / 2).attr("y", L.trackerBase + 42);
 
+    // Bars leave out the newest sample; its slice sits on top of its bar.
+    const barW = Math.max(1, binPx - 1);
+    const below = counts.map((c, bin) => c - (fs.length && bin === newestBin ? 1 : 0));
+    const bars = barsLayer.selectAll("rect").data(below).join("rect").attr("class", "ate-bar");
+    ts(bars)
+      .attr("x", (c, bin) => fx(bin * binWidth) + 0.5)
+      .attr("width", barW)
+      .attr("y", (c) => L.trackerBase - c * unitHeight)
+      .attr("height", (c) => c * unitHeight);
+    // A slice under 2.5 px is hard to see, so a thin one is drawn taller,
+    // reaching down into its bar rather than above it.
+    const sliceTop = L.trackerBase - counts[newestBin] * unitHeight;
+    const sliceH = Math.max(unitHeight, 2.5);
+    currentBar.interrupt().attr("display", fs.length ? null : "none");
     if (mode === "sample" || mode === "record") {
-      const cell = histogram.layer.selectAll(".bcs-block.is-current");
-      const h = +cell.attr("height");
-      const y = +cell.attr("y");
-      cell.attr("y", y + h).attr("height", 0)
+      currentBar.attr("x", fx(newestBin * binWidth) + 0.5).attr("width", barW)
+        .attr("y", sliceTop + sliceH).attr("height", 0)
         .transition().delay(mode === "sample" ? 450 : 150).duration(320).ease(d3.easeCubicOut)
-        .attr("y", y).attr("height", h);
+        .attr("y", sliceTop).attr("height", sliceH);
+    } else {
+      currentBar.attr("x", fx(newestBin * binWidth) + 0.5).attr("width", barW)
+        .attr("y", sliceTop).attr("height", sliceH);
     }
 
-    // The null F distribution, scaled to the blocks: count per bin = samples
+    // The null F distribution, scaled to the bars: count per bin = samples
     // × bin width × density.
-    trackerClip.attr("x", L.plotLeft).attr("y", L.trackerTop + 34).attr("width", L.plotRight - L.plotLeft).attr("height", L.trackerBase - L.trackerTop - 34);
+    trackerClip.attr("x", L.plotLeft).attr("y", L.trackerPlotTop).attr("width", L.plotRight - L.plotLeft).attr("height", L.trackerBase - L.trackerPlotTop);
     const curveData = d3.range(0.02, fMax, 0.05).map((f) => ({
       x: fx(f),
-      y: L.trackerBase - records.length * binWidth * stats.f.pdf(f, dfBetween, dfWithin) * unitHeight
+      y: L.trackerBase - fs.length * binWidth * stats.f.pdf(f, dfBetween, dfWithin) * unitHeight
     }));
     curvePath.attr("d", d3.line().x((d) => d.x).y((d) => d.y)(curveData));
+
+    // Named, so the runtime's cancel (which stops unnamed transitions) leaves
+    // it alone; any draw that is not a swap clears it.
+    const arriving = d3.selectAll(sampleParts()).interrupt("arrive");
+    if (swap) {
+      arriving.style("opacity", 0)
+        .transition("arrive").delay(arriveMs).duration(250).style("opacity", 1)
+        .on("end", function() { this.style.opacity = ""; });
+    } else {
+      arriving.style("opacity", null);
+    }
 
     const reveal = window.interactiveFigure && window.interactiveFigure.setRevealVisible;
     const animate = mode !== "none" && mode !== "fast";
     if (reveal) {
-      reveal(estimatesLayer, state.showEstimates, { root: rootNode, animate });
+      reveal(estimatesLayer, state.showSigma || state.showEstimates, { root: rootNode, animate });
+      const estimateParts = estimateGroups.flatMap((est) => [est.square.node(), est.text.node()]).concat([estimatesTitle.node(), fText.node()]);
+      reveal(estimateParts, state.showEstimates, { root: rootNode, animate });
+      reveal([sigmaTitle.node(), sigmaValue.node()], !state.showEstimates, { root: rootNode, animate });
       reveal(trackerGroup, state.showTracker, { root: rootNode, animate });
-      reveal(histogram.layer, state.showTracker, { root: rootNode, animate });
       reveal(curvePath, state.showTracker && state.showCurve, { root: rootNode, animate });
     }
 
     const description = describe(summary);
     svg.attr("aria-label", description);
     svgTitle.text(description);
-    setValue(summary, records.map((r, i) => summaryFor(i + 1).f));
+    setValue(summary, fs);
   }
 
   function notifyValueChange() {
@@ -473,18 +565,31 @@ window.makeAnovaTwoEstimates = function(opts) {
     timer = null;
   }
 
+  function startRun() {
+    timer = d3.interval(() => {
+      state.samples += 1;
+      draw("fast");
+      if (state.samples >= target) {
+        stopTimer();
+        notifyValueChange();
+      }
+    }, 45);
+  }
+
   function render(mode) {
     renders += 1;
     stopTimer();
+    if (mode === "restart") {
+      // Start the samples over: the old ones fade, the first new sample
+      // drops in once the populations have reshaped, then the run refills
+      // the tracker.
+      state.samples = 1;
+      draw("swap");
+      timer = d3.timeout(startRun, arriveMs + 600);
+      return;
+    }
     if (mode === "run" && target > state.samples + 1) {
-      timer = d3.interval(() => {
-        state.samples += 1;
-        draw("fast");
-        if (state.samples >= target) {
-          stopTimer();
-          notifyValueChange();
-        }
-      }, 45);
+      startRun();
       return;
     }
     state.samples = target;
@@ -495,8 +600,10 @@ window.makeAnovaTwoEstimates = function(opts) {
     action = action || {};
     const before = { effect: state.effect, sd: state.sd };
     const trackerWasShown = state.showTracker;
+    const estimatesWereShown = state.showEstimates;
     if ("effect" in action) state.effect = finite(action.effect, state.effect);
     if ("sd" in action) state.sd = Math.max(1, finite(action.sd, state.sd));
+    if ("show-sigma" in action) state.showSigma = Boolean(action["show-sigma"]);
     if ("show-estimates" in action) state.showEstimates = Boolean(action["show-estimates"]);
     if ("show-tracker" in action) state.showTracker = Boolean(action["show-tracker"]);
     if ("show-curve" in action) state.showCurve = Boolean(action["show-curve"]);
@@ -512,8 +619,12 @@ window.makeAnovaTwoEstimates = function(opts) {
     const paramsChanged = before.effect !== state.effect || before.sd !== state.sd;
     let mode = "none";
     if (animate) {
-      if (target > previous) mode = "run";
-      else if (paramsChanged) mode = "morph";
+      // "restart" retakes every sample from the first, under the new settings.
+      if (action.restart === true && target > 1) mode = "restart";
+      else if (target > previous) mode = "run";
+      else if (paramsChanged) mode = "swap";
+      // The σ² outline splitting in two (or rejoining) is a morph.
+      else if (state.showEstimates !== estimatesWereShown) mode = "morph";
       else if (state.showTracker && !trackerWasShown) mode = "record";
     }
     render(mode);

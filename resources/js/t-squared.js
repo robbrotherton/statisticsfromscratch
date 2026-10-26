@@ -1,6 +1,10 @@
-// Chapter 14's t² → F figure: the null t distribution folds onto |t|, then
-// its axis is squared, and the curve that results is F(1, df). The critical
-// region keeps its 5% at every frame, and the observed t rides along to its F.
+// Chapter 14's t² → F figure. Squaring does two things, shown one at a time:
+// it drops the sign, so the negative half of the null t distribution turns
+// over onto the positive half (−2 and +2 both head for 4), then it squares
+// the size, and the curve that results is F(1, df). The critical region keeps
+// its 5% at every frame. With controls: false and a fixed stage, the same
+// figure draws the static t and F panels for the chapter's own data, shading
+// p beyond the observed value instead of α beyond the critical one.
 //
 // The whole transformation is one number, the timeline position T:
 //   0 → 1  flip   the negative half turns over like a page
@@ -72,9 +76,15 @@ window.makeTSquaredExplorer = function(opts) {
   const yTop = 2 * window.sfsStats.tPdf(0, df) * 1.15;
   // Milliseconds spent in each unit of T: flip, stack, zoom, extend, square.
   const PHASE_MS = [1200, 650, 650, 1000, 2400];
-  // Whole values of |t| that travel to their squares, so "2 moves out to 4"
-  // can be watched rather than inferred.
-  const LANDMARKS = (opts.landmarks || [1, 2, 3]).map(Number).filter((u) => u > 0 && u <= uMax);
+  // Whole values that travel to their squares in pairs, so "−2 and 2 both
+  // end up at 4" can be watched rather than inferred.
+  const LANDMARKS = (opts.landmarks || [1, 2, 3]).map(Number).filter((u) => u > 0 && u <= uMax)
+    .flatMap((u) => [-u, u]);
+  // "p" shades the p value beyond the observed t instead of α beyond the
+  // critical value, and drops the critical lines.
+  const shadeP = opts.shade === "p" && tObserved !== null;
+  const cut = shadeP ? Math.abs(tObserved) : crit.t;
+  const pObserved = tObserved === null ? null : geometry.pTwoTailed(tObserved, df);
 
   const state = {
     stage: geometry.STAGES[opts.stage] !== undefined ? opts.stage : "t",
@@ -87,6 +97,9 @@ window.makeTSquaredExplorer = function(opts) {
   const fF = d3.format(".2f");
   const fObs = d3.format(".2f");
   const fPercent = (value) => `${d3.format("~g")(value * 100)}%`;
+  // A p value in APA style: no leading zero.
+  const fP = (value) => d3.format(".3f")(value).replace(/^0/, "");
+  const fShare = (value) => shadeP ? fP(value) : fPercent(value);
   const fTick = d3.format("~g");
   // A travelling landmark counts up as it goes: whole numbers stay whole,
   // values passing between them show one decimal.
@@ -204,6 +217,7 @@ window.makeTSquaredExplorer = function(opts) {
   }
   const leftCritical = marker("tsq-critical");
   const rightCritical = marker("tsq-critical");
+  const mirror = marker("tsq-observed");
   const observed = marker("tsq-observed");
   const leftTailLabel = markerLayer.append("text").attr("class", "tsq-tail-label").attr("text-anchor", "end");
   const rightTailLabel = markerLayer.append("text").attr("class", "tsq-tail-label").attr("text-anchor", "start");
@@ -218,7 +232,7 @@ window.makeTSquaredExplorer = function(opts) {
   // Denser near 0, where the squared curve climbs steeply.
   const N = 260;
   const uGrid = d3.range(N + 1).map((i) => uMax * Math.pow(i / N, 1.6));
-  const tailGrid = d3.range(81).map((i) => crit.t + (uMax - crit.t) * i / 80);
+  const tailGrid = d3.range(81).map((i) => cut + (uMax - cut) * i / 80);
 
   // One half of the curve. side is +1 for the positive half; the negative half
   // turns over through side = -1 → 1. base lifts it onto the positive half.
@@ -236,7 +250,8 @@ window.makeTSquaredExplorer = function(opts) {
   const baseLine = d3.line().x((d) => x(d.x)).y((d) => y(d.y0));
 
   // What the title and axis call the curve. Extending the axis changes
-  // nothing about the values, so it is still |t| until they are squared.
+  // nothing about the values, so it is still t without its sign until they
+  // are squared.
   function stageAt(T) {
     const ph = geometry.phases(T);
     if (ph.flip < 0.5) return "t";
@@ -244,6 +259,11 @@ window.makeTSquaredExplorer = function(opts) {
   }
 
   function describe(stage) {
+    if (shadeP) {
+      return stage === "square"
+        ? `The F distribution with 1 and ${df} degrees of freedom. The observed F of ${fF(tObserved * tObserved)} has p = ${fP(pObserved)} beyond it, in one tail.`
+        : `Null t distribution with ${df} degrees of freedom. The observed t of ${fObs(tObserved)} has p = ${fP(pObserved)}: ${fP(pObserved / 2)} beyond ±${fObs(Math.abs(tObserved))} in each tail.`;
+    }
     const obs = state.showObserved
       ? (stage === "square"
         ? ` The observed F of ${fF(tObserved * tObserved)} lies beyond it.`
@@ -254,9 +274,9 @@ window.makeTSquaredExplorer = function(opts) {
     }
     if (stage === "fold") {
       const room = state.stage === "extend" ? ` The axis runs to ${fTick(uMax * uMax)}, leaving room for the squared values.` : "";
-      return `The t distribution folded at zero, so its two tails lie together beyond ${fT(crit.t)}, ${fPercent(alpha)} in all.${room}${obs}`;
+      return `The t distribution with its sign dropped: the negative half lies on the positive half, so the two tails lie together beyond ±${fT(crit.t)}, ${fPercent(alpha)} in all.${room}${obs}`;
     }
-    return `The folded t distribution with its axis squared: the F distribution with 1 and ${df} degrees of freedom, with ${fPercent(alpha)} shaded beyond ${fF(crit.f)}.${obs}`;
+    return `The t distribution squared: the F distribution with 1 and ${df} degrees of freedom, with ${fPercent(alpha)} shaded beyond ${fF(crit.f)}.${obs}`;
   }
 
   function setValue() {
@@ -269,7 +289,7 @@ window.makeTSquaredExplorer = function(opts) {
       fCritical: crit.f,
       tObserved,
       fObserved: tObserved === null ? null : tObserved * tObserved,
-      p: tObserved === null ? null : geometry.pTwoTailed(tObserved, df)
+      p: pObserved
     };
   }
 
@@ -279,8 +299,12 @@ window.makeTSquaredExplorer = function(opts) {
     // A page turning over: its far edge swings through zero.
     const side = -Math.cos(Math.PI * ph.flip);
     // Labels on the turning half fade as it rises edge-on, so its negative
-    // numbers never pile up at 0 or land on the positive side.
+    // numbers never pile up at 0 or land on the positive side. Its lines and
+    // dots fade only while edge-on, then land on their positive partners.
     const leftFade = Math.max(0, Math.min(1, -side * 1.5));
+    const edgeFade = Math.min(1, Math.abs(side) * 1.5);
+    // Once the sign is gone, a pair is one value written with ±.
+    const unsigned = ph.flip >= 0.5 && ph.square === 0;
 
     const plotHeight = Math.round(Math.max(160, Math.min(250, width * 0.4)));
     const baselineY = margin.top + plotHeight;
@@ -326,8 +350,9 @@ window.makeTSquaredExplorer = function(opts) {
     tickJoin.attr("transform", (d) => `translate(${x(d)},${baselineY})`);
     tickJoin.select("text").text((d) => d < 0 ? minus(fTick(-d)) : fTick(d));
 
-    // Landmarks appear once the axis has room and travel when squared:
-    // 1 stays put, 2 moves out to 4, 3 to 9.
+    // Landmarks come in pairs. The negative one rides the turning half and
+    // lands on its partner, and the pair travels on together when squared:
+    // ±1 stays put, ±2 moves out to 4, ±3 to 9.
     const landmarkJoin = landmarkLayer.selectAll("g")
       .data(LANDMARKS, (d) => d)
       .join((enter) => {
@@ -337,31 +362,45 @@ window.makeTSquaredExplorer = function(opts) {
         return g;
       });
     landmarkJoin
-      .attr("transform", (u) => `translate(${x(Math.pow(u, p))},${baselineY})`)
-      .style("opacity", ph.extend);
-    landmarkJoin.select("text").text((u) => fLandmark(Math.pow(u, p)));
+      .attr("transform", (v) => `translate(${x((v < 0 ? side : 1) * Math.pow(Math.abs(v), p))},${baselineY})`)
+      .style("opacity", (v) => v < 0 ? edgeFade : 1);
+    landmarkJoin.select("text")
+      .style("opacity", (v) => v < 0 ? leftFade : 1)
+      .text((v) => {
+        if (v < 0) return minus(fTick(-v));
+        if (ph.flip < 0.5) return fTick(v);
+        return unsigned ? `±${fTick(v)}` : fLandmark(Math.pow(v, p));
+      });
 
     const stage = stageAt(T);
     axisTitle
       .attr("x", (plotLeft + plotRight) / 2)
       .attr("y", baselineY + 42)
-      .text(stage === "t" ? "t statistic" : stage === "fold" ? "|t|" : "F ratio (t²)");
+      .text(stage === "t" ? "t statistic" : stage === "fold" ? "Size of t" : "F ratio (t²)");
     title
       .attr("x", plotLeft)
       .attr("y", 18)
-      .text(stage === "t" ? `t(${df})` : stage === "fold" ? `|t|, df = ${df}` : `F(1, ${df})`);
+      .text(stage === "t" ? `t(${df})` : stage === "fold" ? `t(${df}), sign dropped` : `F(1, ${df})`);
 
     const markerTop = margin.top + plotHeight * 0.12;
-    function placeMarker(g, value, label, opacity) {
+    function placeMarker(g, value, label, opacity, labelOpacity) {
       const px = x(value);
       g.style("opacity", opacity);
       g.select("line").attr("x1", px).attr("x2", px).attr("y1", baselineY).attr("y2", markerTop);
-      g.select("text").attr("x", px).attr("y", markerTop - 6).text(label);
+      g.select("text").attr("x", px).attr("y", markerTop - 6).text(label)
+        .style("opacity", labelOpacity === undefined ? 1 : labelOpacity);
     }
+    // The negative critical line lands on the positive one, so after the
+    // turn one line, labelled ±, stands for both.
     const critValue = Math.pow(crit.t, p);
     const critLabel = ph.square < 0.5 ? fT(critValue) : fF(critValue);
-    placeMarker(rightCritical, critValue, ph.flip < 0.5 ? `+${critLabel}` : critLabel, 1);
-    placeMarker(leftCritical, side * critValue, minus(critLabel), leftFade);
+    const critSign = ph.flip < 0.5 ? "+" : unsigned ? "±" : "";
+    const critOpacity = shadeP ? 0 : 1;
+    placeMarker(rightCritical, critValue, `${critSign}${critLabel}`, critOpacity);
+    // With p shaded, the observed value's mirror image marks where the other
+    // tail starts, until the two tails stack.
+    placeMarker(mirror, Math.pow(cut, p), `+${fObs(cut)}`, shadeP && ph.flip < 0.5 ? 0.6 : 0);
+    placeMarker(leftCritical, side * critValue, minus(critLabel), critOpacity * edgeFade, leftFade);
 
     if (tObserved !== null) {
       const u = Math.abs(tObserved);
@@ -374,23 +413,26 @@ window.makeTSquaredExplorer = function(opts) {
       placeMarker(observed, valueX, label, state.showObserved ? 1 : 0);
     }
 
-    // Each tail's share sits just outside its critical line. After the
-    // stack, one label carries both.
-    const labelY = (value, stacked) => {
-      const h = geometry.halfDensity(crit.t, p, df) * (stacked ? 2 : 1);
-      return Math.max(margin.top + 14, y(h) - 10);
+    // Each tail's share sits just outside its cut, and above the landmark
+    // labels near the baseline. After the stack, one label carries both.
+    const labelY = (stacked) => {
+      const h = geometry.halfDensity(cut, p, df) * (stacked ? 2 : 1);
+      const clear = LANDMARKS.length ? baselineY - 28 : baselineY;
+      return Math.max(margin.top + 14, Math.min(clear, y(h) - 10));
     };
+    const share = shadeP ? pObserved : alpha;
+    const cutValue = Math.pow(cut, p);
     const merged = ph.stack >= 0.5;
     rightTailLabel
-      .attr("x", x(critValue) + 6)
-      .attr("y", labelY(critValue, merged))
-      .text(fPercent(merged ? alpha : alpha / 2));
+      .attr("x", x(cutValue) + 6)
+      .attr("y", labelY(merged))
+      .text(fShare(merged ? share : share / 2));
     leftTailLabel
-      .attr("x", x(side * critValue) + (side < 0 ? -6 : 6))
+      .attr("x", x(side * cutValue) + (side < 0 ? -6 : 6))
       .attr("text-anchor", side < 0 ? "end" : "start")
-      .attr("y", labelY(critValue, false))
+      .attr("y", labelY(false))
       .style("opacity", merged ? 0 : leftFade)
-      .text(fPercent(alpha / 2));
+      .text(fShare(share / 2));
 
     const description = describe(stage);
     svg.attr("aria-label", description);
@@ -423,12 +465,12 @@ window.makeTSquaredExplorer = function(opts) {
   let renders = 0;
   let mounted = false;
 
-  function render(animate, from) {
+  function render(animate) {
     renders += 1;
     const target = geometry.STAGES[state.stage];
     setValue();
     svg.interrupt();
-    const start = from === undefined ? state.T : from;
+    const start = state.T;
     if (!animate || start === target) {
       state.T = target;
       draw(target);
@@ -460,10 +502,7 @@ window.makeTSquaredExplorer = function(opts) {
     if (Object.prototype.hasOwnProperty.call(action, "show-observed")) {
       state.showObserved = Boolean(action["show-observed"]) && tObserved !== null;
     }
-    const animate = mounted && action.animate !== false && motionAllows(true);
-    // A replay runs the whole transformation again from t, so the observed
-    // value can be followed from start to end.
-    render(animate, animate && action.replay === true ? 0 : undefined);
+    render(mounted && action.animate !== false && motionAllows(true));
     notifyValueChange();
   }
 
@@ -496,9 +535,10 @@ window.makeTSquaredExplorer = function(opts) {
     mounted = true;
   }
 
-  if (window.interactiveFigure) {
+  if (window.interactiveFigure && opts.controls !== false) {
     // No reader controls: the figure is a stepped explanation, and wrap()
-    // needs a controls node only to claim the tutorial.
+    // needs a controls node only to claim the tutorial. The static panels
+    // have no tutorial, so they skip it.
     const controls = root.insert("div", ":first-child").attr("class", "tsq-controls").node();
     window.interactiveFigure.wrap({
       root: rootNode,

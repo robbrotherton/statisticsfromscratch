@@ -53,6 +53,5 @@ test("every tutorial step names a stage the figure knows", () => {
   assert.ok(steps.length > 0);
   for (const { action } of steps) {
     assert.ok(Object.hasOwn(tsq.STAGES, action.stage), `unknown stage ${action.stage}`);
-    assert.equal(typeof action["show-observed"], "boolean");
   }
 });
