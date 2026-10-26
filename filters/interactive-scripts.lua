@@ -158,6 +158,10 @@ local manifest = {
     file = "resources/js/anova-variability-explorer.js",
     deps = { "d3", "interactive-figure-tools" }
   },
+  ["anova-two-estimates"] = {
+    file = "resources/js/anova-two-estimates.js",
+    deps = { "d3", "stat-helpers", "sampling-core", "sampling-visuals", "interactive-figure-tools" }
+  },
   ["t-squared"] = {
     file = "resources/js/t-squared.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }

@@ -5,6 +5,7 @@ interactive-scripts:
   - critical-table-generator
   - anova-variability-explorer
   - t-squared
+  - anova-two-estimates
 ---
 
 {{< interactive-figure anovaCover makeDistributionFamilyCover options='{"renderer":"webgl","distribution":"f","df1":{"from":5,"to":30},"df2":{"from":5,"to":30},"pairing":"zip","xDomain":[0,3],"points":301,"strokeWidth":1.35,"opacity":0.9,"colorCycle":26,"chroma":100,"luminance":65,"animation":"draw","duration":1300,"ease":"cubic-in","stagger":"spread","delaySpread":1700,"fallback":{"animate":false},"performance":true,"ariaLabel":"Animated family of F distribution curves revealed from left to right"}' fallback="Animated family of F distribution curves." >}}
@@ -177,10 +178,14 @@ So now we can reformulate a new conceptual equation. If we take the variability 
      of four. The Between steps still need the slide-to-the-mean framing (plan §2.6). The MS placeholders and the Partition step's F ending are still open; MS and F aren't
      defined yet at this point in the text, so either the steps introduce them or the two MS
      steps move to their own small instance after "Mean squares" below.
-     FIGURE (optional, plan §2.2 folded in): a "bracket" phase in the between stage. Draw the t
-     numerator as a blue bracket between the two means, then split it at the grand mean into the
-     two arms. This replaces the separate score-rows bridge tutorial. It needs a new explorer phase
-     that is shown only for two groups. -->
+     BRACKET SPLIT (plan §2.2; decided 2026-10-26: a text note, no new figure). The Between
+     "Deviations" step already draws the two arms, so its step text just needs to tie them back to
+     Ch 12's bracket:
+       - the grand mean sits exactly halfway between 189 and 274, at 231.5, so each mean is 42.5 ms
+         from it: the two arms are the two halves of the 85 ms difference;
+       - squaring each arm and counting it n times: 2 × 4 × 42.5² = 14,450 = n(M1 − M2)²/2, which
+         is SS_between written in terms of t's numerator (sets up "it's all squares");
+       - with two groups the halves are always equal, so two arms carry one df. Part 2 breaks this. -->
 
 ::::: {#act-anova-viz .callout-tip .interactive}
 ## Seeing the logic of ANOVA
@@ -314,9 +319,78 @@ And one last new piece of terminology here: in the context of ANOVA, we refer to
        small sample from a sampling distribution with variance σ²/n (Ch 7), so n × (variance of
        the means) estimates σ² as well. This is also the second explanation of "count each square
        n times": each mean stands for n scores, and multiplying by n undoes the /n.
-     - Two estimates of one thing give a ratio near 1. A treatment effect pushes the means apart
-       and inflates only the between estimate.
-     - Here: 14,450 vs 1,458.3. -->
+     - A treatment effect pushes the means apart and inflates only the between estimate.
+     - Here: 14,450 vs 1,458.3.
+     Points worked out 2026-10-26 (numbers from the figure's simulation, 20,000 null samples):
+     - What σ² is: the population's variance, a fixed property of the population (in the figure,
+       σ = 36 ms, σ² = 1,296), not anything computed from the sample. It's what both mean squares
+       are trying to estimate. (SS_total / df_total is a third, redundant estimate: a df-weighted
+       blend of the other two.)
+     - On average, both equal σ² (simulated: 1.00 × σ² each), but only while the null is true.
+       MS_within averages σ² whatever the population means are; MS_between averages σ² PLUS a term
+       for how far apart the population means really are. That added term is the treatment effect.
+     - They vary independently (simulated correlation 0.00): with normal scores, where a group's
+       mean lands says nothing about how spread out its scores are. So a sample can easily have a
+       big between and a small within, or the reverse.
+     - They aren't equally reliable. Each is built from df independent pieces of information, and
+       a variance estimate from ν pieces has an SD of √(2/ν) × σ². Here:
+         MS_between: df = 1 (two mirror-image arms = one piece)   SD 1.41 σ² (simulated 1.45)
+         MS_within:  df = 6 (eight scores, minus one per group)   SD 0.58 σ² (simulated 0.57)
+       Estimating σ² from MS_between with two groups is like estimating a population's spread from
+       just two scores. MS_within is Ch 12's pooled variance, and pooling more pieces steadies it.
+     - So "two estimates of one thing give a ratio near 1" needs care. A jumpy numerator over a
+       steadier denominator makes F skewed: for F(1, 6) the median is 0.52 and the mean 1.5. The
+       line at F = 1 marks where the two estimates agree, not the middle of the pile. This is the
+       second answer to the skew riddle (see the note at the skew paragraph below).
+     FIGURE: #act-two-estimates below (built 2026-10-26; step text is placeholder).
+     - Sliders for effect and spread, as in the psychstats ANOVA visualizer, but the group means
+       carry chance as well as the effect. In the old visualizer, effect 0 put every mean exactly on
+       the grand mean, so MS_between = 0 and between = treatment only, which is the "cancels out"
+       model this section replaces.
+     - Each sample is reshaped rather than redrawn when spread or effect changes, so more spread
+       leaves every F exactly unchanged, and a real effect leaves MS_within exactly unchanged.
+     - In the figure the purple square visibly jumps around more than the red one: the
+       reliability point above, on screen.
+     - Optional Part 2 mount with three groups (options only): its histogram becomes F(2, 9), the
+       origin story the t² → F figure can't give once df1 > 1, and the purple square is steadier
+       (df = 2). -->
+
+::::: {#act-two-estimates .callout-tip .interactive}
+## Two estimates of the same variance
+
+{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
+[PLACEHOLDER: suppose the bite makes no difference. Both groups are samples from one population (the grey curves are identical). The dots are one sample of four kids per group.]
+:::
+
+::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: the dashed outline is the population's variance, σ², fixed by the population (not computed from the sample). Two ways to estimate it from the sample: MS within from the red spreads inside each group; MS between from the purple arms, how far the group means sit from the grand mean, counted n times.]
+:::
+
+::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: this sample's F, 1,233 / 1,503 = 0.82, goes into a tracker as its first entry.]
+:::
+
+::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: a new sample from the same population. Both estimates wobble around the outline, independently of each other: sometimes between is bigger, sometimes within. The purple one jumps around more (it rests on one piece of information; red pools six). Its F joins the tracker.]
+:::
+
+::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: 200 samples. The Fs pile up mostly below 1, with a long right tail: the same F(1, 6) shape as the t² figure, drawn over the blocks. Half the Fs are below 0.52; the line at 1 is where the two estimates agree, not the middle of the pile. The skew comes from the jumpy numerator.]
+:::
+
+::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: the same samples from a more spread-out population. The outline grows and both squares grow with it, by exactly the same factor, so not one F changes.]
+:::
+
+::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: now the bites really differ: two populations, 40 ms apart. Within is untouched; between grows past the outline, and the Fs move out into the tail.]
+:::
+::::
+
+:::::
 
 ## The $F$ Ratio
 
@@ -362,6 +436,14 @@ Maybe you can think of why this is the case. Remember that variance is the avera
 <!-- PLAN: moved from Step 2. Its riddle (why is F skewed and always positive?) is answered by the
      t² → F figure straight after it, so it now sits just before that figure (plan §2.3). Step 2
      keeps the table. -->
+
+<!-- PLAN (2026-10-26): the riddle now has two answers in the chapter, and they agree.
+     (1) Squaring: F(1, df) is a folded, squared t, so both tails land on the right and values below
+         1 crowd towards 0 (the t² → F figure below).
+     (2) Unequal reliability: the numerator is a variance estimate from few pieces (df1), the
+         denominator from many (df2), so F is a jumpy number over a steadier one (Two Estimates
+         above). Answer (2) is the one that generalizes to df1 > 1, so Part 2's F(2, 9) can call
+         back to it. -->
 
 And it's worth just noting here that unlike the normal and $t$ distributions we've seen before, the distributions for $F$ are not symmetrical; all the values are positive and the distributions are positively skewed — if you can think of why that might be.
 
@@ -471,7 +553,25 @@ But how can we be sure whether any differences are statistically significant? Ou
      error rate stays in Post-Hoc Tests, which gets a callback here.
      FIX: "those three error rates would accumulate". Give the number: about .12 for three groups of
      4 under the null (simulated), and say why it's below 1 − .95³ = .14: the three tests share
-     data, so they aren't independent. Optional: a small simulation figure or quiz. -->
+     data, so they aren't independent. Optional: a small simulation figure or quiz.
+     The explanation (worked out 2026-10-26; simulated, 200,000 null experiments, three groups of
+     4, three ordinary pooled t tests at .05):
+       - adding the three .05s is right, but it measures something else: the average NUMBER of
+         errors per experiment, which really is .15 (simulated: 0.151);
+       - the familywise rate counts EXPERIMENTS with at least one error, and an experiment with two
+         errors is counted twice in the sum but is still only one experiment that went wrong;
+       - per 1,000 null experiments:
+                                        independent tests   our three tests (shared groups)
+           total errors                       150                    150
+           experiments with 1 error           136                     97
+           experiments with 2+ errors           7                     26
+           experiments with any error         143                    124
+       - even independent tests stop short of .15 (the occasional double error: 1 − .95³ = .143);
+         ours overlap more because they share groups. If group A happens to draw unusually fast
+         kids, A–B and A–C both tend to come out significant from the same fluke. The same 150
+         errors crowd into fewer experiments.
+       - the rate still grows with more groups (6 tests for 4 groups, 10 for 5), which is the point
+         the paragraph needs; the exact figure is secondary. -->
 
 Maybe you're thinking, "Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the $t$ test? Why couldn't we just start with the $t$ tests? Why bother with the ANOVA at all?" And you're not wrong. The reason why we have to go through this whole ANOVA procedure, and we don't just dive right in with the pairwise tests, is that with more than two groups, we have to run more than one test to compare all those means. With three groups, there are three comparisons to make: A to B, A to C, and B to C. And if we just did three regular $t$ tests, our alpha would grow larger than 0.05. Each test would have its own Type I error rate defined by its alpha level, and so those three error rates would accumulate, giving us an experiment-wise alpha that was greater than 0.05.
 
@@ -485,6 +585,11 @@ Maybe you're thinking, "Why do we go through this whole song and dance just to e
        brief), building on Part 1's "two arms, one df";
      - within: each group still loses one df to its own mean: N − k = 9;
      - MS_between = 21,800 / 2 = 10,900; MS_within = 11,700 / 9 = 1,300; F(2, 9) = 8.38.
+     - df as information (callback to Two Estimates): two arms are now two independent pieces, so
+       MS_between is a steadier estimate than with two groups (SD √(2/2) = 1.0 σ², down from 1.41).
+       Adding kids per group does NOT help it: each mean gets more precise, but multiplying by n
+       undoes that, so the estimate still rests on k means and df_between stays k − 1 whatever n is.
+       Only more groups help it. More kids helps MS_within, whose df is N − k.
      The step text is all placeholder. If the whole tutorial reads better than the shortened one,
      copy the Part 1 steps in instead. -->
 
@@ -575,7 +680,10 @@ The table summarizes the symbols we use, some of which are new here. $k$ refers 
 
 <!-- PLAN: moved above Computational Formulas so the main route reads SS → df → MS → table.
      DRAFT: tie each rule to the explorer: k − 1 (the arms balance), N − k (each group pays one df for
-     its own mean), N − 1. They add up the way the SS do: 2 + 9 = 11. -->
+     its own mean), N − 1. They add up the way the SS do: 2 + 9 = 11.
+     Also worth one line: df counts the independent pieces of information behind each estimate,
+     so it says how much to trust it (Two Estimates: SD √(2/df) × σ²). That's why there are two df
+     to look up, and why df_between depends only on the number of groups, never on n. -->
 
 For degrees of freedom, $df_{total}$ is $N$ — the total number of scores in the study — minus one. $df_{within}$ is the total number of scores minus the number of treatment conditions. And $df_{between}$ is the number of conditions minus one.
 
@@ -629,7 +737,11 @@ If this is the case, the numerator will be bigger than the denominator because i
      the prose; ours is (2, 9): F_crit = 4.26, now shown in Step 4's figure. If the example below
      switches to (2, 9), change the table's "selected" to {"df1":2,"df2":9}; nothing else changes.
      Either way, F(1, 6) = 5.99 is in the table too, so a reader can check the t² → F cut.
-     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct. -->
+     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct.
+     Why each (df1, df2) pair has its own shape: df1 sets how jumpy the numerator is and df2 how
+     jumpy the denominator is (Two Estimates). F(1, 6) is extremely skewed (one-piece numerator);
+     F(2, 9) less so; with many groups and many scores both estimates are steady and F tightens
+     into a hump near 1. That's the family of curves the chapter cover animates. -->
 
 How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
 
@@ -694,7 +806,11 @@ The observed $F = 8.38$ falls beyond the critical value of the null $F$ distribu
 
 <!-- FIX: Chs 12-13 never introduce r², only d (plan §2.4). Either introduce η² on its own terms or
      add r² to Ch 12. Part 1's "ms² have no everyday meaning" point is the natural lead-in: a
-     proportion of the bucket. (Part 1's two-group version: 14,450 / 23,200 = .62.) -->
+     proportion of the bucket. (Part 1's two-group version: 14,450 / 23,200 = .62.)
+     Make it concrete with a callback to the explorers' Partition step: η² is the share of the
+     bucket's height that the between layer fills. Part 2: 21,800 / 33,500 = .65. If a picture is
+     wanted here, a static mount of the three-group explorer at "compare"/"partition" needs no
+     new code. -->
 
 Since we got a significant test statistic, we want to know the effect size. For ANOVA, our measure of effect size is called eta squared ($\eta^2$). This reflects the percentage of variance accounted for by the treatment effect. Now, maybe that sounds familiar — this is the same concept as $r^2$, another measure of effect size that we introduced in the context of the $t$ test previously, which reflects the proportion of variance explained by the treatment effect. For ANOVA, we find $\eta^2$ by dividing $SS_{between}$ by $SS_{total}$.
 
