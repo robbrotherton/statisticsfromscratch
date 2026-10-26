@@ -40,7 +40,7 @@ interactive-scripts:
        8. The no-bite baseline; why ANOVA; why not three t tests; terminology (factor, levels).
        9. The explorer again with three groups, then the general df rules.
       10. Calculating F: the same definitional equations, notation, the summary table. The
-          computational formulas are in a collapsed callout.
+          computational formulas (and T, G) are a footnote under Sums of squares, as in Ch 4.
       11. Steps 1-4, effect size, post-hoc tests, then reporting (so the report can include the
           Tukey result), assumptions, looking ahead.
      Running data: spider bites (plan §2.5). Part 1 uses radioactive vs ordinary bite (n = 4 each):
@@ -275,20 +275,21 @@ The squared distances add up. Total variability partitions exactly into **betwee
      explorer's three stages written down, in the explorer's order (total, within, between), so
      the visual logic and the maths are the same thing. The equations sum over any number of
      groups, so Part 2 reuses them unchanged.
-     Notation to settle: GM for the grand mean (Ch 12-13 have no grand-mean symbol yet).
+     Notation (settled 2026-10-26): M_grand for the grand mean; plain M for "each group's mean" inside a sum; M_1, M_2, M_3 for particular groups, as in Ch 12.
      FIX: the lead-in paragraph promises variance (SS ÷ df), but this section now stops at SS;
      the ÷ df half belongs to "Mean squares and the F ratio". The three paragraphs after the
      equations were three subsections (Total / Within / Between variance); condense them to a
      line or two each of gloss on the equations, or cut them if the step text carries the words.
-     Two-group numbers: GM = 231.5; SS_total = 23,200; SS_within = 3,488 + 5,262 = 8,750;
+     Two-group numbers: M_grand = 231.5; SS_total = 23,200; SS_within = 3,488 + 5,262 = 8,750;
      SS_between = 4(−42.5)² + 4(42.5)² = 14,450; 14,450 + 8,750 = 23,200. -->
 
-So how do we actually quantify these different sources of variability in the data? You'll be glad to know there's nothing mathematically new about this. We can use tools we've already learned about. We'll just apply them in slightly new ways. More specifically, we're going to use variance, which you'll remember we find by dividing $SS$, the sum of squared deviations, by $df$, degrees of freedom.
+So how do we actually quantify these different sources of variability in the data? You'll be glad to know there's nothing mathematically new about this. We can use tools we've already learned about. We'll just apply them in slightly new ways. More specifically, we're going to use variance, which you'll remember we find by dividing $SS$, the sum of squared deviations, by $df$, degrees of freedom.[^anova-computational]
+
 $$
 \begin{align}
-SS_{total} &= \Sigma (X - GM)^2 = 23{,}200 \\
+SS_{total} &= \Sigma (X - M_{grand})^2 = 23{,}200 \\
 SS_{within} &= \Sigma (X - M)^2 = 3{,}488 + 5{,}262 = 8{,}750 \\
-SS_{between} &= \Sigma n(M - GM)^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
+SS_{between} &= \Sigma n(M - M_{grand})^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
 \end{align}
 $$
 
@@ -298,18 +299,48 @@ $$
 First we can think about the total variability in the data. Again, here we ignore any distinction between groups. We just take every score we've recorded as a single set of numbers. And to find the total variability in all those numbers, we find the sum of squared deviations of all those scores from what we'll call a grand mean, which refers to the mean of all scores, again ignoring the different groups. The $df_{total}$ is uppercase $N$ minus one, meaning the total number of scores minus one. Again, I encourage you to double check my sums, but for these eight scores, we get 23,200 over 7 for an answer of 3,314.3 for the total variance.
 
 Next, we'll work out the variance within groups. For this, we find the sum of squared deviations for each individual group from its own respective group mean, and then we add up those sum of squares values. So we denote this as $\Sigma SS$ — the sum of sums of squares for each treatment. To find the variance, we divide by the sum of the degrees of freedom for each treatment. And for each treatment, degrees of freedom is lowercase $n$ minus one, meaning the number of scores in that treatment minus one.
+
 <!-- FIX: finds SS_between by subtraction, which contradicts the explorer, where it is built
      directly from the two arms (the equation above). Subtraction can stay as a check: "and it
      fills the rest of the bucket". The "7 minus 6" df half belongs to the next section. -->
 
 Now, to find the variance between groups. The easiest way, if we already calculated the sum of squares and degrees of freedom values for total and within-groups variability, is to subtract within from total to get between. That's because the values for between and within must add up to the total. That's the whole idea — that we're partitioning the total variability into these two components. So subtracting within from total gets us between. Here that works out to 23,200 minus 8,750 over 7 minus 6.
 
+<!-- PLAN: computational formulas demoted to a footnote (decision 4, settled 2026-10-26), with Ch 4's
+     footnote as the callback. T and G live only here now: the T/G sentence moved here verbatim
+     from the notation paragraph, and the notation table and quiz dropped them. With the spider data
+     the shortcut is no shortcut: ΣX² = 777,512, G²/N = 744,012, Σ(T²/n) = 765,812.
+     FIX: lecture residue ("like two years ago"); "Remember ... when we learned" can point to Ch 4's
+     footnote; "more efficient ... so many variance components" no longer matches the main route.
+     The marker sits on the Sums of squares lead-in for now; it can move with that rewrite. -->
+
+[^anova-computational]: Uppercase $T$ refers to a treatment total, the sum of scores within a treatment condition, and $G$ refers to the grand total, the sum of all the scores across all conditions of the study.
+
+    The reason it's useful to work out the $T$s for each condition and $G$ is that we can then use the computational version of the sum of squares equation. Remember all those — like two years ago — when we learned about calculating sums of squares? We've mostly been using the definitional approach since then to work things out first, calculating the deviations, then squared deviations, then the sum of squares. But the computational approach can be a little more efficient, which is useful here, since there are so many variance components to work out.
+
+    The computational formula for $SS_{total}$ is $\Sigma X^2$ — the sum of all squared scores — minus $G^2 / N$. Then for $SS_{within}$, we work it out for each condition and then sum our answers. And if we know those, we can work out $SS_{between}$ by subtraction. But there is a computational equation for that if we want to work it out directly: it's $\Sigma (T^2 / n)$ for each condition, minus $G^2 / N$.
+
 ## Mean squares and the $F$ ratio
 
 <!-- PLAN: merges the old "Mean Squares" and "The F Ratio". Order:
-     1. df for two groups. DRAFT: 7 = 1 + 6, and df adds up the way SS does. df_within = 6 is
-        Ch 12's n1 + n2 − 2. df_between = 1: the two arms are mirror images, so once you know one,
-        you know the other. That's one free number. Keep it at that; Part 2 generalizes to k − 1.
+     1. df, as an explicit callback (revised 2026-10-26, Rob: list the df equations here, with
+        symbols). k and N are introduced here, where they're first needed; Part 2's notation table
+        just collects them.
+        - Callback: Ch 4's cards (once the mean is known, the last card is determined, so the
+          deviations around a mean sum to zero and one is never free). Ch 4 even promises this
+          moment: "Later, in ANOVA, we'll split variability into several sums of squares, each with
+          its own df." Ch 11 and Ch 12 repeat the rule.
+        - One rule covers all three: count the values that vary, then subtract one for each mean
+          they're measured around.
+            total:   N scores around 1 mean (M_grand)      N − 1 = 7   (exactly Ch 4's n − 1)
+            within:  N scores around k means (one each)    N − k = 6   (Ch 12's n1 + n2 − 2)
+            between: k means around 1 mean (M_grand)       k − 1 = 1
+        - The explorer shows the between case: the two arms are mirror images, so once you know
+          one, you know the other. (Strictly, the arms balance when each is counted n times;
+          with equal n that's just "they balance".) Part 2's third arm breaks the mirror but not
+          the balance.
+        - They add up the way SS does: 1 + 6 = 7, and (k − 1) + (N − k) = N − 1.
+        - Optional, for Two Estimates later: df counts the independent pieces behind each estimate.
      2. Worth one sentence: SS and df add up, but the variances don't (3,314.3 is not
         14,450 + 1,458.3), so the total "variance" is usually not computed at all. That's why the
         partition is done in sums of squares.
@@ -317,6 +348,18 @@ Now, to find the variance between groups. The easiest way, if we already calcula
      4. MS_within is exactly Ch 12's s_p² (the pooled-variance paragraph, moved here from the old
         "Within-groups variance"). MS_between = SS_between = 14,450, since df is 1.
      5. F = 14,450 / 1,458.3 = 9.91, and history part 2 (naming F). -->
+
+<!-- DRAFT: the df equations, in the same order as the SS block. Needs a lead-in that introduces k
+     (number of groups) and N (total number of scores). Note that Ch 4 used N for a population's
+     size; here it is the total number of scores in the study. -->
+
+$$
+\begin{align}
+df_{total} &= N - 1 = 8 - 1 = 7 \\
+df_{within} &= N - k = 8 - 2 = 6 \\
+df_{between} &= k - 1 = 2 - 1 = 1
+\end{align}
+$$
 
 And one last new piece of terminology here: in the context of ANOVA, we refer to variance as the "mean square" ($MS$), because as you remember, a variance is just the average squared deviation — the mean square. So we need $MS_{between}$ and $MS_{within}$, both of which we find by dividing the relevant sum of squares by the relevant degrees of freedom. And then we divide $MS_{between}$ by $MS_{within}$ to find the $F$ ratio.
 
@@ -701,10 +744,12 @@ The "levels" are the individual treatments that make up a factor. So here we hav
 
 ### Degrees of Freedom
 
-<!-- PLAN (2026-10-26 reorder): moved up from "Calculating the F Ratio" to sit beside the
-     three-group explorer, whose arms show k − 1. The general df rules live here, once.
-     DRAFT: tie each rule to the explorer: k − 1 (the arms balance), N − k (each group pays one df for
-     its own mean), N − 1. They add up the way the SS do: 2 + 9 = 11.
+<!-- PLAN (revised 2026-10-26): the symbols and the rule ("values minus the means they're measured
+     around") now arrive in Part 1's "Mean squares and the F ratio". This is the reprise with k = 3:
+     11 = 2 + 9. What's new: three arms that aren't mirror images any more but still balance, so
+     knowing two arms gives you the third.
+     FIX: the paragraph below states the three rules as if new. It can shrink to a callback with the
+     three-group numbers.
      Also worth one line: df counts the independent pieces of information behind each estimate,
      so it says how much to trust it (Two Estimates: SD √(2/df) × σ²). That's why there are two df
      to look up, and why df_between depends only on the number of groups, never on n. -->
@@ -724,24 +769,24 @@ So calculating the $F$ ratio involves these steps. First, deal with all those su
 <!-- FIX: lecture residue ("at the start of this lecture"; "I'm including this as a reference"
      with the reference slide missing). The reference block can now be the three definitional
      equations from Part 1 plus the df rules, i.e. the summary table's recipe.
-     PLAN: T and G exist only for the computational formulas. If those are demoted, T and G go with
-     them into that callout, and the notation table shrinks to k, n, N, M and the grand mean.
-     The notation quiz asks about T and G (two of its questions), so it moves or changes with
-     them. -->
+     PLAN (2026-10-26): T and G went with the computational formulas into the footnote under Sums
+     of squares; the table now has M and M_grand rows instead ("grand mean ... the mean of all
+     scores" is from the Sums of squares paragraph). The notation quiz lost its T and G questions.
+     FIX: the paragraph below should now introduce M_1, M_2 ... and M_grand. -->
 
 We've already calculated an $F$ ratio at the start of this lecture, so if you followed that, you already know how to do this. But I'm including this as a reference for the equations we use for each component of the variability along the way.
 
 {{< include quizzes/14-anova-notation-learning-checks.qmd >}}
 
-The table summarizes the symbols we use, some of which are new here. $k$ refers to the number of treatment conditions, and of course each condition has its own $n$, the number of scores in that condition, which we refer to with a lowercase $n$ with a subscripted number or letter or label for each condition. Uppercase $N$ is the total number of scores recorded in the entire study. Uppercase $T$ refers to a treatment total, the sum of scores within a treatment condition, and $G$ refers to the grand total, the sum of all the scores across all conditions of the study.
+The table summarizes the symbols we use, some of which are new here. $k$ refers to the number of treatment conditions, and of course each condition has its own $n$, the number of scores in that condition, which we refer to with a lowercase $n$ with a subscripted number or letter or label for each condition. Uppercase $N$ is the total number of scores recorded in the entire study.
 
 | Symbol | Meaning |
 |:--|:--|
 | $k$ | Number of treatment conditions |
 | $n_1, n_2, \dots$ | Number of scores in each treatment |
 | $N$ | Total number of scores in the study |
-| $T_1, T_2, \dots$ | Sum of scores ($\Sigma X$) for each treatment |
-| $G$ | Grand total of all scores in the study |
+| $M_1, M_2, \dots$ | Mean of each treatment |
+| $M_{grand}$ | Grand mean: the mean of all scores |
 
 : ANOVA notation. {#tbl-anova-notation}
 
@@ -763,22 +808,6 @@ Because there are so many parts to this, it can be useful to use a summary table
 | Total | | | | |
 
 : A blank ANOVA summary table. {#tbl-anova-summary-blank}
-
-::: {.callout-note collapse="true"}
-## Computational Formulas
-
-<!-- PLAN: demoted to a collapsed callout (decision 4, settled 2026-10-26). Frame it as an algebraic
-     rearrangement that gives the same SS without computing deviations. With the spider data it's
-     no shortcut: ΣX² = 777,512, G²/N = 744,012, Σ(T²/n) = 765,812. If T and G leave the notation
-     table, define them here instead.
-     FIX: lecture residue ("like two years ago"); "more efficient ... since there are so many
-     variance components" no longer matches the main route. -->
-
-The reason it's useful to work out the $T$s for each condition and $G$ is that we can then use the computational version of the sum of squares equation. Remember all those — like two years ago — when we learned about calculating sums of squares? We've mostly been using the definitional approach since then to work things out first, calculating the deviations, then squared deviations, then the sum of squares. But the computational approach can be a little more efficient, which is useful here, since there are so many variance components to work out.
-
-The computational formula for $SS_{total}$ is $\Sigma X^2$ — the sum of all squared scores — minus $G^2 / N$. Then for $SS_{within}$, we work it out for each condition and then sum our answers. And if we know those, we can work out $SS_{between}$ by subtraction. But there is a computational equation for that if we want to work it out directly: it's $\Sigma (T^2 / n)$ for each condition, minus $G^2 / N$.
-
-:::
 
 ## Hypothesis testing with ANOVA
 
@@ -817,16 +846,17 @@ An excerpt of the $F$ table, with the critical value for $df = 2$ and $9$ highli
 ### Step 3: Calculate the Test Statistic
 
 <!-- PLAN: definitional route (decision 4), the same equations as Part 1's "Sums of squares".
-     GM = 249; the arms are −60, +25, +35.
-     FIX: the ingredients sentence still lists T, G and ΣX², which this route doesn't use; it needs
-     the grand mean and the three group means instead. -->
+     M_grand = 249; the arms are −60, +25, +35.
+     FIX: the ingredients sentence lost its T, G and ΣX² (cut 2026-10-26: T = 756, 1096, 1136;
+     G = 2988; ΣX² = 777,512); it needs the three group means and M_grand = 249 instead. -->
 
-Step three is to calculate the test statistic, the $F$ ratio, using the equations that I showed before. For our spider-bite data, the ingredients are: $N = 12$ scores in total, $n = 4$ per condition, $k = 3$ conditions, treatment totals $T_{radioactive} = 756$, $T_{ordinary} = 1096$, and $T_{none} = 1136$, a grand total of $G = 2988$, and a sum of squared scores of $\Sigma X^2 = 777{,}512$.
+Step three is to calculate the test statistic, the $F$ ratio, using the equations that I showed before. For our spider-bite data, the ingredients are: $N = 12$ scores in total, $n = 4$ per condition, $k = 3$ conditions.
+
 $$
 \begin{align}
-SS_{total} &= \Sigma (X - GM)^2 = 33{,}500 \\
+SS_{total} &= \Sigma (X - M_{grand})^2 = 33{,}500 \\
 SS_{within} &= \Sigma (X - M)^2 \\ &= 3{,}488 + 5{,}262 + 2{,}950 = 11{,}700 \\
-SS_{between} &= \Sigma n(M - GM)^2 \\ &= 4(-60)^2 + 4(25)^2 + 4(35)^2 = 21{,}800
+SS_{between} &= \Sigma n(M - M_{grand})^2 \\ &= 4(-60)^2 + 4(25)^2 + 4(35)^2 = 21{,}800
 \end{align}
 $$
 
