@@ -17,27 +17,32 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-<!-- PLAN (structural pass, 2026-10-26): the chapter is in two halves.
+<!-- PLAN (structural pass, 2026-10-26; reordered the same day, plan §2.1 "Second structural
+     pass"): each idea is stated once, in its familiar form first, and the figures carry the
+     concepts. The pass cut or moved the repeated material (CUT notes keep the cut wording).
 
-     PART 1: TWO GROUPS, TWO WAYS (conceptual). The chapter stays with two groups (radioactive bite vs
-     ordinary bite) until the reader has seen the same data analysed both ways.
-       1. t recap: the difference is a subtraction, in ms, with a sign. It needs exactly two means.
-       2. What feeds the numerator and the denominator (treatment + chance / chance).
-       3. Fisher's way in: variability, partitioned (history, part 1).
-       4. Three kinds of variability, then the explorer with two groups (definitional, visual).
-       5. The components written down: the definitional SS equations, which are the pictures written
-          down. df only as far as Ch 12 already took it, plus "two arms = one df".
-       6. Mean squares; two estimates of sigma squared; the F ratio (history, part 2: naming F).
-       7. F = t squared: numerically, algebraically ("it's all squares"), then visually (t² → F
-          figure). What F gives up (units, sign, two tails) and what it gains (any number of groups).
+     PART 1: TWO GROUPS, TWO WAYS (conceptual). Radioactive bite vs ordinary bite.
+       1. Opener.
+       2. t recap: units, sign, needs exactly two means. "Sources of variability" is the chapter's
+          one prose statement of treatment + chance over chance, framed as a question.
+       3. Partitioning variability: Fisher's way in (history, part 1), then the explorer, which
+          carries total / within / between and the reasons for each, and runs through to the two
+          mean squares. The definitional SS equations follow as the pictures written down.
+       4. Mean squares and the F ratio: two-group df, MS_within = Ch 12's pooled variance,
+          MS_between = SS_between (df 1), F = 9.91, history part 2 (naming F).
+       5. F and t: F = t² numerically, "it's all squares", the skew riddle, the t² → F figure. The
+          reader trusts F first because it is t², and they already trust t.
+       6. Two estimates of the same variance: what F measures in its own right, with no subtraction
+          anywhere, which is what lets it go beyond two groups. Ends on df as reliability, so the
+          F table (two df) follows.
+       7. Summary so far: the hinge.
      PART 2: THREE GROUPS (practical).
-       8. Adding the no-bite group: a baseline, to tell whether the radioactive bite sped kids up or the
-          ordinary bite slowed them down. Subtraction breaks. Why not three t tests?
-       9. The explorer again with three groups: three arms that aren't mirror images, so df = k - 1.
-      10. Terminology, notation, the general df rules, the summary table. Computational formulas
-          demoted.
-      11. Steps 1-4, effect size, reporting, post-hoc tests, assumptions, looking ahead.
-
+       8. The no-bite baseline; why ANOVA; why not three t tests; terminology (factor, levels).
+       9. The explorer again with three groups, then the general df rules.
+      10. Calculating F: the same definitional equations, notation, the summary table. The
+          computational formulas are in a collapsed callout.
+      11. Steps 1-4, effect size, post-hoc tests, then reporting (so the report can include the
+          Tukey result), assumptions, looking ahead.
      Running data: spider bites (plan §2.5). Part 1 uses radioactive vs ordinary bite (n = 4 each):
      M = 189 vs 274; s_p² = 1458.3; t(6) = -3.15, p = .020; SS_total 23,200 = 14,450 + 8,750;
      F(1, 6) = 9.91. Part 2 adds the no-bite group (M = 284): F(2, 9) = 8.38.
@@ -110,9 +115,10 @@ So what contributes to the variability between groups? In other words, why might
 The denominator, on the other hand, is all chance. Remember, the standard error quantifies the variability of the sampling distribution. It's the standard deviation of all possible samples of a given size drawn from a population. So there is no treatment effect there. It's pure chance: the variability between groups we'd expect to see by chance alone.
 
 <!-- FIX: "chance ... algebraically simplifies out" is inaccurate; a ratio doesn't cancel a random
-     quantity (plan §1, spine idea 2). The replacement idea arrives in "Two estimates of the same
-     variance" below, so this paragraph can just set up the question: how big is treatment + chance
-     compared with chance? -->
+     quantity (plan §1, spine idea 2). This is now the chapter's only prose statement of
+     treatment + chance over chance (the explorer's Within and Between steps call back to it, and
+     "Two estimates of the same variance" gives the accurate version), so it can end on the
+     question: how big is treatment + chance compared with chance? -->
 
 So a conceptual distillation of the equation would be treatment plus chance over chance. Having chance in both the numerator and denominator, it algebraically simplifies out, leaving us with a $t$ statistic that quantifies how much of a treatment effect there seems to be over and above chance differences.
 
@@ -137,47 +143,50 @@ So a conceptual distillation of the equation would be treatment plus chance over
 
 So now let's start thinking in terms of variability more generally, and especially what factors contribute to different kinds of variability.
 
-### Total variability
+<!-- CUT (2026-10-26 reorder): the Total / Between / Within subsections and "A new conceptual
+     equation". They were the first of three walks through the trio (prose, explorer,
+     calculations) and restated "Sources of variability" twice. The explorer now carries the trio.
+     The paragraphs, verbatim, as a quarry for the step text, labelled with the step each fits:
 
-There's the total variability in the data. We have eight scores here and they're all different from one another. If we could quantify that overall variability among the scores we've recorded, that would tell us the total variability in the data due to any source.
+     [Total · Observe]
+     There's the total variability in the data. We have eight scores here and they're all different from one another. If we could quantify that overall variability among the scores we've recorded, that would tell us the total variability in the data due to any source.
 
-### Between-groups variability
+     [Between · Observe]
+     But we can think about more specific types of variability. There's the variability between groups. Again, with two samples, we can most obviously see this as the simple difference between those means, but put more generally we're quantifying how variable those group means are.
 
-But we can think about more specific types of variability. There's the variability between groups. Again, with two samples, we can most obviously see this as the simple difference between those means, but put more generally we're quantifying how variable those group means are.
+     [Between · Observe or Deviations]
+     So let's think again about what might cause that kind of variability. It's exactly as we said for the numerator of the $t$ equation. Groups may vary from one another because a treatment effect differently affected the groups' average scores, or they may vary because of chance alone — the sampling error that causes one sample to be different from the next.
 
-<!-- DRAFT: the spine idea 1 sentence belongs here or in the explorer's Between steps. With two
-     equal groups, each mean sits exactly half the gap from the grand mean (±42.5 ms here). The
-     difference and the two deviations carry the same information, so a difference is a special
-     case of a deviation. -->
+     [Within · Observe]
+     There is another kind of variability we could think about here: the variability within each group. That means taking each sample on its own terms. How variable are the scores within those respective groups? Are they very widely spread or closely clustered together?
 
-So let's think again about what might cause that kind of variability. It's exactly as we said for the numerator of the $t$ equation. Groups may vary from one another because a treatment effect differently affected the groups' average scores, or they may vary because of chance alone — the sampling error that causes one sample to be different from the next.
+     [Within · Deviations]
+     Now, why would scores vary within groups? It can't be because of a treatment effect. The treatment only differs between groups, not within them. Here we're just looking within each group on its own terms. So if we quantify the variability among scores within groups, all we're seeing is variability due to chance differences among scores.
 
-### Within-groups variability
+     [none: the cancel-out framing, superseded by Two estimates]
+     So now we can reformulate a new conceptual equation. If we take the variability between groups and divide it by the variability within groups, this is equivalent to dividing treatment variability plus chance variability by chance variability alone. And so as a conceptual ratio, the chance differences cancel out and the answer will reveal the extent of variability caused by the treatment alone. And as you realize, this is exactly the same conceptual form we ended up with for the $t$ statistic. It achieves the same goal, but in a slightly different way.
+     Notes that went with them:
+     - DRAFT (was under Between): with two equal groups, each mean sits exactly half the gap from
+       the grand mean (±42.5 ms here). The difference and the two deviations carry the same
+       information, so a difference is a special case of a deviation. (Also in BRACKET SPLIT below.)
+     - FIX (was under Within): "It can't be because of a treatment effect" needs the condition
+       "if everyone in a group gets the same treatment" (plan §2.4). -->
 
-There is another kind of variability we could think about here: the variability within each group. That means taking each sample on its own terms. How variable are the scores within those respective groups? Are they very widely spread or closely clustered together?
-
-<!-- FIX: "It can't be because of a treatment effect" needs the condition "if everyone in a group
-     gets the same treatment" (plan §2.4). -->
-
-Now, why would scores vary within groups? It can't be because of a treatment effect. The treatment only differs between groups, not within them. Here we're just looking within each group on its own terms. So if we quantify the variability among scores within groups, all we're seeing is variability due to chance differences among scores.
-
-### A new conceptual equation
-
-<!-- FIX: "the chance differences cancel out" again (see above). Keep the point that this is the
-     same conceptual form as t. -->
-
-So now we can reformulate a new conceptual equation. If we take the variability between groups and divide it by the variability within groups, this is equivalent to dividing treatment variability plus chance variability by chance variability alone. And so as a conceptual ratio, the chance differences cancel out and the answer will reveal the extent of variability caused by the treatment alone. And as you realize, this is exactly the same conceptual form we ended up with for the $t$ statistic. It achieves the same goal, but in a slightly different way.
-
-<!-- PLAN: the explorer now runs on the two Part 1 groups (radioactive vs ordinary). With two groups:
+<!-- PLAN: the explorer now carries the trio on its own. With two groups:
      - the between stage shows two mirror-image arms of 42.5 ms, so df_between = 1 is visible, not
        asserted;
-     - the MS between step "slices" into one piece, so MS_between = SS_between, which is a point
-       worth one sentence;
+     - the MS between step "slices" into one piece, so MS_between = SS_between;
      - the MS within step slices into 6, and the result is Ch 12's pooled variance, 1,458.3.
-     The step text below is from the three-group version, with its counts changed to two groups
-     of four. The Between steps still need the slide-to-the-mean framing (plan §2.6). The MS placeholders and the Partition step's F ending are still open; MS and F aren't
-     defined yet at this point in the text, so either the steps introduce them or the two MS
-     steps move to their own small instance after "Mean squares" below.
+     STEP TEXT still to do:
+     (a) the reasons, one sentence each, from the CUT quarry above: Within, everyone got the same
+         treatment, so only chance; Between, treatment + chance (a callback to "Sources of
+         variability");
+     (b) the slide-to-the-mean framing for the Between steps (plan §2.6);
+     (c) optional: each stage's Sum step ends on its equation, so the block after the figure is a
+         recap rather than news (Rob, 2026-10-24: equations in the step text, visuals plain);
+     (d) decision 1b settled as one run, end to end: the two MS steps introduce df and "mean
+         square" in a sentence each, and "Mean squares and the F ratio" formalizes them. The
+         Partition step's "crux of the F ratio" works as a forward pointer.
      BRACKET SPLIT (plan §2.2; decided 2026-10-26: a text note, no new figure). The Between
      "Deviations" step already draws the two arms, so its step text just needs to tie them back to
      Ch 12's bracket:
@@ -250,7 +259,7 @@ The squared distances add up. Total variability partitions exactly into **betwee
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-[PLACEHOLDER: MS between step. The between band lifts out of the total, is cut into df~between~ equal slices, and the slices stack into one square.]
+[PLACEHOLDER: MS between step. The between band lifts out of the total, is cut into df~between~ equal slices, and the slices stack into one square. With two groups there is one slice. This step introduces df and "mean square" in a sentence; the prose formalizes them after the figure.]
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
@@ -260,151 +269,74 @@ The squared distances add up. Total variability partitions exactly into **betwee
 
 :::::
 
-### Calculating the Components of Variance
+### Sums of squares
 
-<!-- PLAN: definitional formulas throughout (plan decision 4, now recommended). Each equation is the
-     explorer stage it follows, written down, so "the visual logic" and "the maths" are the same
-     thing and there's no mismatch to explain. The equations are general (they sum over however
-     many groups there are), so Part 2 reuses them unchanged; only the df rules get generalized
-     there.
-     DRAFT equations to add, one per subsection, with GM for the grand mean (notation to settle;
-     Ch 12-13 have no grand-mean symbol yet):
-       SS_total   = Σ (X − GM)²
-       SS_within  = Σ (X − M)²   summed within each group, then across groups  (= Σ SS)
-       SS_between = Σ n (M − GM)²
-     Two-group numbers: GM = 231.5; SS_total = 23,200 (df 7); SS_within = 3,488 + 5,262 = 8,750
-     (df 6); SS_between = 4(−42.5)² + 4(42.5)² = 14,450 (df 1); 14,450 + 8,750 = 23,200. -->
+<!-- PLAN: definitional formulas throughout (decision 4, settled 2026-10-26). This block is the
+     explorer's three stages written down, in the explorer's order (total, within, between), so
+     the visual logic and the maths are the same thing. The equations sum over any number of
+     groups, so Part 2 reuses them unchanged.
+     Notation to settle: GM for the grand mean (Ch 12-13 have no grand-mean symbol yet).
+     FIX: the lead-in paragraph promises variance (SS ÷ df), but this section now stops at SS;
+     the ÷ df half belongs to "Mean squares and the F ratio". The three paragraphs after the
+     equations were three subsections (Total / Within / Between variance); condense them to a
+     line or two each of gloss on the equations, or cut them if the step text carries the words.
+     Two-group numbers: GM = 231.5; SS_total = 23,200; SS_within = 3,488 + 5,262 = 8,750;
+     SS_between = 4(−42.5)² + 4(42.5)² = 14,450; 14,450 + 8,750 = 23,200. -->
 
 So how do we actually quantify these different sources of variability in the data? You'll be glad to know there's nothing mathematically new about this. We can use tools we've already learned about. We'll just apply them in slightly new ways. More specifically, we're going to use variance, which you'll remember we find by dividing $SS$, the sum of squared deviations, by $df$, degrees of freedom.
+$$
+\begin{align}
+SS_{total} &= \Sigma (X - GM)^2 = 23{,}200 \\
+SS_{within} &= \Sigma (X - M)^2 = 3{,}488 + 5{,}262 = 8{,}750 \\
+SS_{between} &= \Sigma n(M - GM)^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
+\end{align}
+$$
 
-### Total variance
-
-<!-- PLAN: worth one sentence: SS and df add up, but the variances don't (3,314.3 is not
-     14,450 + 1,458.3), so the total "variance" is usually not computed at all. That's why the
-     partition is done in sums of squares. -->
+<!-- FIX: the second half computes a total variance (23,200 / 7 = 3,314.3) that is never used. Keep
+     the grand mean and df_total = N − 1; drop the variance. -->
 
 First we can think about the total variability in the data. Again, here we ignore any distinction between groups. We just take every score we've recorded as a single set of numbers. And to find the total variability in all those numbers, we find the sum of squared deviations of all those scores from what we'll call a grand mean, which refers to the mean of all scores, again ignoring the different groups. The $df_{total}$ is uppercase $N$ minus one, meaning the total number of scores minus one. Again, I encourage you to double check my sums, but for these eight scores, we get 23,200 over 7 for an answer of 3,314.3 for the total variance.
 
-### Within-groups variance
-
-<!-- PLAN: payoff to land: this is exactly Ch 12's s_p² from the recap above. -->
-
 Next, we'll work out the variance within groups. For this, we find the sum of squared deviations for each individual group from its own respective group mean, and then we add up those sum of squares values. So we denote this as $\Sigma SS$ — the sum of sums of squares for each treatment. To find the variance, we divide by the sum of the degrees of freedom for each treatment. And for each treatment, degrees of freedom is lowercase $n$ minus one, meaning the number of scores in that treatment minus one.
-
-Again, this is not a new procedure; we've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
-
-### Between-groups variance
-
-<!-- FIX: this finds SS_between by subtraction. With the definitional formula it can be computed
-     directly from the two arms, which matches the explorer: 4 × 42.5² twice = 14,450. Subtraction
-     can stay as a check ("and it fills the rest of the bucket").
-     DRAFT: df_between = 1. The two arms are mirror images: once you know one, you know the other.
-     That's one free number, so one degree of freedom. Keep it at that; Part 2 generalizes to
-     k − 1. -->
+<!-- FIX: finds SS_between by subtraction, which contradicts the explorer, where it is built
+     directly from the two arms (the equation above). Subtraction can stay as a check: "and it
+     fills the rest of the bucket". The "7 minus 6" df half belongs to the next section. -->
 
 Now, to find the variance between groups. The easiest way, if we already calculated the sum of squares and degrees of freedom values for total and within-groups variability, is to subtract within from total to get between. That's because the values for between and within must add up to the total. That's the whole idea — that we're partitioning the total variability into these two components. So subtracting within from total gets us between. Here that works out to 23,200 minus 8,750 over 7 minus 6.
 
-### Mean Squares
+## Mean squares and the $F$ ratio
 
-<!-- PLAN: moved up from the Part 2 "Calculating the F Ratio" section, because F = MS_between /
-     MS_within is needed in Part 1. The paragraph's last sentence already defines F. -->
+<!-- PLAN: merges the old "Mean Squares" and "The F Ratio". Order:
+     1. df for two groups. DRAFT: 7 = 1 + 6, and df adds up the way SS does. df_within = 6 is
+        Ch 12's n1 + n2 − 2. df_between = 1: the two arms are mirror images, so once you know one,
+        you know the other. That's one free number. Keep it at that; Part 2 generalizes to k − 1.
+     2. Worth one sentence: SS and df add up, but the variances don't (3,314.3 is not
+        14,450 + 1,458.3), so the total "variance" is usually not computed at all. That's why the
+        partition is done in sums of squares.
+     3. Mean square (the paragraph below), with the explorer's MS steps as the picture.
+     4. MS_within is exactly Ch 12's s_p² (the pooled-variance paragraph, moved here from the old
+        "Within-groups variance"). MS_between = SS_between = 14,450, since df is 1.
+     5. F = 14,450 / 1,458.3 = 9.91, and history part 2 (naming F). -->
 
 And one last new piece of terminology here: in the context of ANOVA, we refer to variance as the "mean square" ($MS$), because as you remember, a variance is just the average squared deviation — the mean square. So we need $MS_{between}$ and $MS_{within}$, both of which we find by dividing the relevant sum of squares by the relevant degrees of freedom. And then we divide $MS_{between}$ by $MS_{within}$ to find the $F$ ratio.
 
-### Two Estimates of the Same Variance
-
-<!-- PLAN: new section, working title. Spine idea 2 (plan §1), which replaces "chance cancels out".
-     - MS_within estimates σ² from the spread inside groups (Ch 12's pooled variance).
-     - MS_between estimates σ² from how spread out the means are. Under the null the means are a
-       small sample from a sampling distribution with variance σ²/n (Ch 7), so n × (variance of
-       the means) estimates σ² as well. This is also the second explanation of "count each square
-       n times": each mean stands for n scores, and multiplying by n undoes the /n.
-     - A treatment effect pushes the means apart and inflates only the between estimate.
-     - Here: 14,450 vs 1,458.3.
-     Points worked out 2026-10-26 (numbers from the figure's simulation, 20,000 null samples):
-     - What σ² is: the population's variance, a fixed property of the population (in the figure,
-       σ = 36 ms, σ² = 1,296), not anything computed from the sample. It's what both mean squares
-       are trying to estimate. (SS_total / df_total is a third, redundant estimate: a df-weighted
-       blend of the other two.)
-     - On average, both equal σ² (simulated: 1.00 × σ² each), but only while the null is true.
-       MS_within averages σ² whatever the population means are; MS_between averages σ² PLUS a term
-       for how far apart the population means really are. That added term is the treatment effect.
-     - They vary independently (simulated correlation 0.00): with normal scores, where a group's
-       mean lands says nothing about how spread out its scores are. So a sample can easily have a
-       big between and a small within, or the reverse.
-     - They aren't equally reliable. Each is built from df independent pieces of information, and
-       a variance estimate from ν pieces has an SD of √(2/ν) × σ². Here:
-         MS_between: df = 1 (two mirror-image arms = one piece)   SD 1.41 σ² (simulated 1.45)
-         MS_within:  df = 6 (eight scores, minus one per group)   SD 0.58 σ² (simulated 0.57)
-       Estimating σ² from MS_between with two groups is like estimating a population's spread from
-       just two scores. MS_within is Ch 12's pooled variance, and pooling more pieces steadies it.
-     - So "two estimates of one thing give a ratio near 1" needs care. A jumpy numerator over a
-       steadier denominator makes F skewed: for F(1, 6) the median is 0.52 and the mean 1.5. The
-       line at F = 1 marks where the two estimates agree, not the middle of the pile. This is the
-       second answer to the skew riddle (see the note at the skew paragraph below).
-     FIGURE: #act-two-estimates below (built 2026-10-26; step text is placeholder).
-     - Sliders for effect and spread, as in the psychstats ANOVA visualizer, but the group means
-       carry chance as well as the effect. In the old visualizer, effect 0 put every mean exactly on
-       the grand mean, so MS_between = 0 and between = treatment only, which is the "cancels out"
-       model this section replaces.
-     - Each sample is reshaped rather than redrawn when spread or effect changes, so more spread
-       leaves every F exactly unchanged, and a real effect leaves MS_within exactly unchanged.
-     - In the figure the purple square visibly jumps around more than the red one: the
-       reliability point above, on screen.
-     - Optional Part 2 mount with three groups (options only): its histogram becomes F(2, 9), the
-       origin story the t² → F figure can't give once df1 > 1, and the purple square is steadier
-       (df = 2). -->
-
-::::: {#act-two-estimates .callout-tip .interactive}
-## Two estimates of the same variance
-
-{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
-[PLACEHOLDER: suppose the bite makes no difference. Both groups are samples from one population (the grey curves are identical). The dots are one sample of four kids per group.]
-:::
-
-::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: the dashed outline is the population's variance, σ², fixed by the population (not computed from the sample). Two ways to estimate it from the sample: MS within from the red spreads inside each group; MS between from the purple arms, how far the group means sit from the grand mean, counted n times.]
-:::
-
-::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: this sample's F, 1,233 / 1,503 = 0.82, goes into a tracker as its first entry.]
-:::
-
-::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: a new sample from the same population. Both estimates wobble around the outline, independently of each other: sometimes between is bigger, sometimes within. The purple one jumps around more (it rests on one piece of information; red pools six). Its F joins the tracker.]
-:::
-
-::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: 200 samples. The Fs pile up mostly below 1, with a long right tail: the same F(1, 6) shape as the t² figure, drawn over the blocks. Half the Fs are below 0.52; the line at 1 is where the two estimates agree, not the middle of the pile. The skew comes from the jumpy numerator.]
-:::
-
-::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: the same samples from a more spread-out population. The outline grows and both squares grow with it, by exactly the same factor, so not one F changes.]
-:::
-
-::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: now the bites really differ: two populations, 40 ms apart. Within is untouched; between grows past the outline, and the Fs move out into the tail.]
-:::
-::::
-
-:::::
-
-## The $F$ Ratio
+Again, this is not a new procedure; we've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
 
 <!-- FIX: "named after its inventor ... who developed this concept". Fisher worked with
      z = ½ ln F; Snedecor tabulated the ratio itself and called it F in Fisher's honour (plan §5;
      Snedecor 1934 vs 1937 still to verify). History, part 2 of 2, can go here or under F = t².
-     FIX: the second paragraph's "treatment effect plus chance over chance" repeats the cancel-out
-     framing; the two-estimates section above now carries that job. -->
+     The paragraph that repeated "treatment effect plus chance over chance" is cut (CUT note below);
+     "Two estimates of the same variance" carries that job. -->
 
 So now we can come back to where we started. We wanted to partition the variance in the data into between-groups variance and within-groups variance. By finding the different kinds of sums of squares and degrees of freedom and dividing them to find the different variances, we end up for this little dataset with 14,450 over 1,458.3 for an answer of 9.91. And so this is the ANOVA, the analysis of variance procedure. And this is our new statistic. It's called the $F$ ratio. It's named after its inventor, Sir Ronald Fisher, who developed this concept in the 1920s.
+<!-- CUT (2026-10-26 reorder): the paragraph after this restated treatment + chance over chance a
+     fourth time. "Two estimates of the same variance" does that job now:
+     "Like I said before, it is conceptually related to the $t$ statistic. It achieves the same
+     thing: constructing a ratio of treatment effect plus chance differences over chance alone, to
+     get a ratio of how much more of a difference seems to be coming from the treatment effect than
+     we would expect to see by chance alone." -->
 
-Like I said before, it is conceptually related to the $t$ statistic. It achieves the same thing: constructing a ratio of treatment effect plus chance differences over chance alone, to get a ratio of how much more of a difference seems to be coming from the treatment effect than we would expect to see by chance alone.
-
-### From $t$ to $F$
+## $F$ and $t$
 
 <!-- FIX: rounding. t = −3.148 and F = 9.909, but a reader squaring the rounded −3.15 gets 9.92.
      Either give t to three decimals here, or say "about 9.9". The sign also needs a word: the
@@ -441,8 +373,8 @@ Maybe you can think of why this is the case. Remember that variance is the avera
      (1) Squaring: F(1, df) is a folded, squared t, so both tails land on the right and values below
          1 crowd towards 0 (the t² → F figure below).
      (2) Unequal reliability: the numerator is a variance estimate from few pieces (df1), the
-         denominator from many (df2), so F is a jumpy number over a steadier one (Two Estimates
-         above). Answer (2) is the one that generalizes to df1 > 1, so Part 2's F(2, 9) can call
+         denominator from many (df2), so F is a jumpy number over a steadier one (Two Estimates,
+         the next section). Answer (2) is the one that generalizes to df1 > 1, so Part 2's F(2, 9) can call
          back to it. -->
 
 And it's worth just noting here that unlike the normal and $t$ distributions we've seen before, the distributions for $F$ are not symmetrical; all the values are positive and the distributions are positively skewed — if you can think of why that might be.
@@ -493,17 +425,105 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 [PLACEHOLDER: caption.]
 ::::
 
+## Two Estimates of the Same Variance
+
+<!-- PLAN (2026-10-26 reorder): moved after F = t². The reader first trusts F because it is t²;
+     this section says what F measures without t, which is what lets it go beyond two groups. F is
+     already defined (Mean squares and the F ratio), so the figure's "Record F" step needs no
+     introduction. The section should end on reliability: each estimate rests on its own number of
+     pieces, its df, which is why the F table below needs two. -->
+
+<!-- PLAN: new section, working title. Spine idea 2 (plan §1), which replaces "chance cancels out".
+     - MS_within estimates σ² from the spread inside groups (Ch 12's pooled variance).
+     - MS_between estimates σ² from how spread out the means are. Under the null the means are a
+       small sample from a sampling distribution with variance σ²/n (Ch 7), so n × (variance of
+       the means) estimates σ² as well. This is also the second explanation of "count each square
+       n times": each mean stands for n scores, and multiplying by n undoes the /n.
+     - A treatment effect pushes the means apart and inflates only the between estimate.
+     - Here: 14,450 vs 1,458.3.
+     Points worked out 2026-10-26 (numbers from the figure's simulation, 20,000 null samples):
+     - What σ² is: the population's variance, a fixed property of the population (in the figure,
+       σ = 36 ms, σ² = 1,296), not anything computed from the sample. It's what both mean squares
+       are trying to estimate. (SS_total / df_total is a third, redundant estimate: a df-weighted
+       blend of the other two.)
+     - On average, both equal σ² (simulated: 1.00 × σ² each), but only while the null is true.
+       MS_within averages σ² whatever the population means are; MS_between averages σ² PLUS a term
+       for how far apart the population means really are. That added term is the treatment effect.
+     - They vary independently (simulated correlation 0.00): with normal scores, where a group's
+       mean lands says nothing about how spread out its scores are. So a sample can easily have a
+       big between and a small within, or the reverse.
+     - They aren't equally reliable. Each is built from df independent pieces of information, and
+       a variance estimate from ν pieces has an SD of √(2/ν) × σ². Here:
+         MS_between: df = 1 (two mirror-image arms = one piece)   SD 1.41 σ² (simulated 1.45)
+         MS_within:  df = 6 (eight scores, minus one per group)   SD 0.58 σ² (simulated 0.57)
+       Estimating σ² from MS_between with two groups is like estimating a population's spread from
+       just two scores. MS_within is Ch 12's pooled variance, and pooling more pieces steadies it.
+     - So "two estimates of one thing give a ratio near 1" needs care. A jumpy numerator over a
+       steadier denominator makes F skewed: for F(1, 6) the median is 0.52 and the mean 1.5. The
+       line at F = 1 marks where the two estimates agree, not the middle of the pile. This is the
+       second answer to the skew riddle (see the note at the skew paragraph above).
+     FIGURE: #act-two-estimates below (built 2026-10-26; step text is placeholder).
+     - Sliders for effect and spread, as in the psychstats ANOVA visualizer, but the group means
+       carry chance as well as the effect. In the old visualizer, effect 0 put every mean exactly on
+       the grand mean, so MS_between = 0 and between = treatment only, which is the "cancels out"
+       model this section replaces.
+     - Each sample is reshaped rather than redrawn when spread or effect changes, so more spread
+       leaves every F exactly unchanged, and a real effect leaves MS_within exactly unchanged.
+     - In the figure the purple square visibly jumps around more than the red one: the
+       reliability point above, on screen.
+     - Optional Part 2 mount with three groups (options only): its histogram becomes F(2, 9), the
+       origin story the t² → F figure can't give once df1 > 1, and the purple square is steadier
+       (df = 2). -->
+
+::::: {#act-two-estimates .callout-tip .interactive}
+## Two estimates of the same variance
+
+{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
+[PLACEHOLDER: suppose the bite makes no difference. Both groups are samples from one population (the grey curves are identical). The dots are one sample of four kids per group.]
+:::
+
+::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: the dashed outline is the population's variance, σ², fixed by the population (not computed from the sample). Two ways to estimate it from the sample: MS within from the red spreads inside each group; MS between from the purple arms, how far the group means sit from the grand mean, counted n times.]
+:::
+
+::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: this sample's F, 1,233 / 1,503 = 0.82, goes into a tracker as its first entry.]
+:::
+
+::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+[PLACEHOLDER: a new sample from the same population. Both estimates wobble around the outline, independently of each other: sometimes between is bigger, sometimes within. The purple one jumps around more (it rests on one piece of information; red pools six). Its F joins the tracker.]
+:::
+
+::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: 200 samples. The Fs pile up mostly below 1, with a long right tail: the same F(1, 6) shape as the t² figure, drawn over the blocks. Half the Fs are below 0.52; the line at 1 is where the two estimates agree, not the middle of the pile. The skew comes from the jumpy numerator.]
+:::
+
+::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: the same samples from a more spread-out population. The outline grows and both squares grow with it, by exactly the same factor, so not one F changes.]
+:::
+
+::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+[PLACEHOLDER: now the bites really differ: two populations, 40 ms apart. Within is untouched; between grows past the outline, and the Fs move out into the tail.]
+:::
+::::
+
+:::::
+
 ### The $F$ table
 
 <!-- PLAN (2026-10-26): moved up from Part 2's Step 2, following Ch 11 (the full t table sits in a
-     concept section; each test's Step 2 shows an excerpt). This is where the reader first meets
-     the F distribution, and the table lets them check the t² → F cut: F(1, 6) = 5.99 = 2.447²,
+     concept section; each test's Step 2 shows an excerpt). By now the reader has met F(1, 6)
+     twice (the t² figure and the two-estimates pile), and the table lets them check the t² → F cut: F(1, 6) = 5.99 = 2.447²,
      so the table opens on that cell. Clicking any cell redraws the curve, which shows the table
      works for any pair of df.
      FIX: the two paragraphs below are Step 2's, moved verbatim. They need re-angling: "How much
      larger than one does our F ratio need to be?" assumes a test in progress; here the hook is
      "where does 5.99 come from?". "One for the numerator, one for the denominator" can call
-     back to MS_between (df = 1) and MS_within (df = 6) from Mean Squares.
+     back to the two estimates just above: MS_between (df = 1) and MS_within (df = 6), each with its
+     own df because each rests on its own number of pieces.
      FIX: the worked lookup is F(3, 10) = 3.71, a generic pair. Keep it as the "any values"
      example, or switch it to (1, 6) = 5.99 and drop the generic case to a sentence. Part 1 has
      only df1 = 1, so the other columns are a light foreshadowing of Part 2.
@@ -523,7 +543,7 @@ Critical $F$ values for $\alpha = .05$. Columns give the numerator's degrees of 
 
 {{< include quizzes/14-anova-learning-checks.qmd >}}
 
-### Summary So Far
+## Summary So Far
 
 <!-- PLAN: this becomes the hinge between the halves. Same data, two methods, same answer. What F
      gives up (units, sign) and what it gains (it never needed a subtraction). The last sentence
@@ -609,6 +629,17 @@ But how can we be sure whether any differences are statistically significant? Ou
 
 Maybe you're thinking, "Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the $t$ test? Why couldn't we just start with the $t$ tests? Why bother with the ANOVA at all?" And you're not wrong. The reason why we have to go through this whole ANOVA procedure, and we don't just dive right in with the pairwise tests, is that with more than two groups, we have to run more than one test to compare all those means. With three groups, there are three comparisons to make: A to B, A to C, and B to C. And if we just did three regular $t$ tests, our alpha would grow larger than 0.05. Each test would have its own Type I error rate defined by its alpha level, and so those three error rates would accumulate, giving us an experiment-wise alpha that was greater than 0.05.
 
+### ANOVA Terminology
+
+<!-- PLAN (2026-10-26 reorder): moved up from after the three-group explorer, so the design gets
+     its name right where the third group arrives. -->
+
+<!-- FIX: lecture residue ("a couple of lectures' time", "this lecture"). -->
+
+There's some new terminology that comes with ANOVA. The "factor" refers to the independent variable, the construct which we're manipulating and which designates the groups being compared. For our little example study here, we might label the factor type of spider bite, or bite type for short.
+
+The "levels" are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control — no bite — treatment. When you see this reported in the design section of a journal article, it'll usually be something like "a one-by-three between-participants ANOVA design." The one-by-three refers to the number of factors first and the number of levels of each factor. You can have any number of levels and factors. For example, we'll introduce two-by-two designs in a couple of lectures' time, where we'll have two factors with two conditions each. But for this lecture we'll just focus on the one-by-three between-participants design.
+
 ### Three Groups, the Same Logic
 
 <!-- PLAN: new section, working title. The explorer again, with the third group. It shows only what's
@@ -668,19 +699,23 @@ Maybe you're thinking, "Why do we go through this whole song and dance just to e
 
 :::::
 
-### ANOVA Terminology
+### Degrees of Freedom
 
-<!-- FIX: lecture residue ("a couple of lectures' time", "this lecture"). -->
+<!-- PLAN (2026-10-26 reorder): moved up from "Calculating the F Ratio" to sit beside the
+     three-group explorer, whose arms show k − 1. The general df rules live here, once.
+     DRAFT: tie each rule to the explorer: k − 1 (the arms balance), N − k (each group pays one df for
+     its own mean), N − 1. They add up the way the SS do: 2 + 9 = 11.
+     Also worth one line: df counts the independent pieces of information behind each estimate,
+     so it says how much to trust it (Two Estimates: SD √(2/df) × σ²). That's why there are two df
+     to look up, and why df_between depends only on the number of groups, never on n. -->
 
-There's some new terminology that comes with ANOVA. The "factor" refers to the independent variable, the construct which we're manipulating and which designates the groups being compared. For our little example study here, we might label the factor type of spider bite, or bite type for short.
-
-The "levels" are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control — no bite — treatment. When you see this reported in the design section of a journal article, it'll usually be something like "a one-by-three between-participants ANOVA design." The one-by-three refers to the number of factors first and the number of levels of each factor. You can have any number of levels and factors. For example, we'll introduce two-by-two designs in a couple of lectures' time, where we'll have two factors with two conditions each. But for this lecture we'll just focus on the one-by-three between-participants design.
+For degrees of freedom, $df_{total}$ is $N$ — the total number of scores in the study — minus one. $df_{within}$ is the total number of scores minus the number of treatment conditions. And $df_{between}$ is the number of conditions minus one.
 
 ## Calculating the $F$ Ratio
 
-<!-- PLAN: Mean Squares moved up to Part 1. What's left here is the general case: the same
-     definitional equations as Part 1 (no new formulas), the notation, the general df rules, and
-     the summary table. Part 2 is practical, not "the real equations at last". -->
+<!-- PLAN: what's left here is the reference card: the same definitional equations as Part 1 (no
+     new formulas), notation, and the summary table. The df rules sit with the explorer above.
+     Part 2 is practical, not "the real equations at last". -->
 
 So calculating the $F$ ratio involves these steps. First, deal with all those sums of squares and degrees of freedom. Second, calculate the variances for the numerator and denominator.
 
@@ -710,21 +745,14 @@ The table summarizes the symbols we use, some of which are new here. $k$ refers 
 
 : ANOVA notation. {#tbl-anova-notation}
 
-### Degrees of Freedom
-
-<!-- PLAN: moved above Computational Formulas so the main route reads SS → df → MS → table.
-     DRAFT: tie each rule to the explorer: k − 1 (the arms balance), N − k (each group pays one df for
-     its own mean), N − 1. They add up the way the SS do: 2 + 9 = 11.
-     Also worth one line: df counts the independent pieces of information behind each estimate,
-     so it says how much to trust it (Two Estimates: SD √(2/df) × σ²). That's why there are two df
-     to look up, and why df_between depends only on the number of groups, never on n. -->
-
-For degrees of freedom, $df_{total}$ is $N$ — the total number of scores in the study — minus one. $df_{within}$ is the total number of scores minus the number of treatment conditions. And $df_{between}$ is the number of conditions minus one.
-
 ### The Summary Table
 
 <!-- PLAN: optional component, makeAnovaSourceTable (feature/data-explorer only; plan §2.1). A
      two-group version of the table could also close Part 1. -->
+
+<!-- PLAN (2026-10-26): consider giving this blank table formula cells (SS row by row, df, MS =
+     SS / df, F = MS_between / MS_within): one compact recipe that consolidates the equations, df
+     rules and MS. Step 3 then fills the same table in with numbers. -->
 
 Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the $F$ ratio.
 
@@ -736,18 +764,21 @@ Because there are so many parts to this, it can be useful to use a summary table
 
 : A blank ANOVA summary table. {#tbl-anova-summary-blank}
 
-### Computational Formulas
+::: {.callout-note collapse="true"}
+## Computational Formulas
 
-<!-- PLAN: demote (decision 4). Either cut it or put it in a collapsed callout ("A shortcut for hand
-     calculation"), framed as an algebraic rearrangement that gives the same SS without computing
-     deviations. That keeps the visual/definitional logic as the explanation and the shortcut as an
-     option. With the spider data it's no shortcut: ΣX² = 777,512, G²/N = 744,012,
-     Σ(T²/n) = 765,812.
-     FIX: lecture residue ("like two years ago"). -->
+<!-- PLAN: demoted to a collapsed callout (decision 4, settled 2026-10-26). Frame it as an algebraic
+     rearrangement that gives the same SS without computing deviations. With the spider data it's
+     no shortcut: ΣX² = 777,512, G²/N = 744,012, Σ(T²/n) = 765,812. If T and G leave the notation
+     table, define them here instead.
+     FIX: lecture residue ("like two years ago"); "more efficient ... since there are so many
+     variance components" no longer matches the main route. -->
 
 The reason it's useful to work out the $T$s for each condition and $G$ is that we can then use the computational version of the sum of squares equation. Remember all those — like two years ago — when we learned about calculating sums of squares? We've mostly been using the definitional approach since then to work things out first, calculating the deviations, then squared deviations, then the sum of squares. But the computational approach can be a little more efficient, which is useful here, since there are so many variance components to work out.
 
 The computational formula for $SS_{total}$ is $\Sigma X^2$ — the sum of all squared scores — minus $G^2 / N$. Then for $SS_{within}$, we work it out for each condition and then sum our answers. And if we know those, we can work out $SS_{between}$ by subtraction. But there is a computational equation for that if we want to work it out directly: it's $\Sigma (T^2 / n)$ for each condition, minus $G^2 / N$.
+
+:::
 
 ## Hypothesis testing with ANOVA
 
@@ -785,19 +816,17 @@ An excerpt of the $F$ table, with the critical value for $df = 2$ and $9$ highli
 
 ### Step 3: Calculate the Test Statistic
 
-<!-- FIX: route. The spider numbers are in, but still via the computational formulas, so the cost
-     shows: six-digit ΣX² and G²/N. If decision 4 goes definitional, rewrite as:
-     GM = 249, arms −60, +25, +35; SS_between = 4(60² + 25² + 35²) = 21,800;
-     SS_within = 3,488 + 5,262 + 2,950 = 11,700; SS_total = 33,500.
-     The T and G ingredients in the first sentence then go too. -->
+<!-- PLAN: definitional route (decision 4), the same equations as Part 1's "Sums of squares".
+     GM = 249; the arms are −60, +25, +35.
+     FIX: the ingredients sentence still lists T, G and ΣX², which this route doesn't use; it needs
+     the grand mean and the three group means instead. -->
 
 Step three is to calculate the test statistic, the $F$ ratio, using the equations that I showed before. For our spider-bite data, the ingredients are: $N = 12$ scores in total, $n = 4$ per condition, $k = 3$ conditions, treatment totals $T_{radioactive} = 756$, $T_{ordinary} = 1096$, and $T_{none} = 1136$, a grand total of $G = 2988$, and a sum of squared scores of $\Sigma X^2 = 777{,}512$.
-
 $$
 \begin{align}
-SS_{total} &= \Sigma X^2 - \frac{G^2}{N} \\ &= 777{,}512 - \frac{2988^2}{12} = 33{,}500 \\
-SS_{within} &= \Sigma SS_{each\ treatment} \\ &= 3{,}488 + 5{,}262 + 2{,}950 = 11{,}700 \\
-SS_{between} &= \Sigma \frac{T^2}{n} - \frac{G^2}{N} \\ &= \frac{756^2}{4} + \frac{1096^2}{4} + \frac{1136^2}{4} - \frac{2988^2}{12} = 21{,}800
+SS_{total} &= \Sigma (X - GM)^2 = 33{,}500 \\
+SS_{within} &= \Sigma (X - M)^2 \\ &= 3{,}488 + 5{,}262 + 2{,}950 = 11{,}700 \\
+SS_{between} &= \Sigma n(M - GM)^2 \\ &= 4(-60)^2 + 4(25)^2 + 4(35)^2 = 21{,}800
 \end{align}
 $$
 
@@ -848,14 +877,6 @@ Since we got a significant test statistic, we want to know the effect size. For 
 
 $$\eta^2 = \frac{SS_{between}}{SS_{total}} = \frac{21{,}800}{33{,}500} = 0.65$$
 
-## Reporting and interpreting results
-
-<!-- FIX: match the Ch 11-13 report format (exact p = .009?). -->
-
-And as usual, we need to report the results. And again, this is basically just a list of certain things that we have to report. There are the descriptive statistics — that means the treatment means and standard deviations. We need to state what kind of hypothesis test we performed, whether it revealed a significant difference or not, and we need to report the pertinent values: the $F$ statistic with its degrees of freedom, the $p$ value as less than or greater than alpha, and the effect size $\eta^2$.
-
-> A single-factor, independent-samples ANOVA revealed a significant difference between kids who received a radioactive spider bite ($M = 189$; $SD = 34.10$), an ordinary spider bite ($M = 274$; $SD = 41.88$), and the control condition ($M = 284$; $SD = 31.36$); $F(2, 9) = 8.38$, $p < .05$, $\eta^2 = 0.65$.
-
 ### Post-Hoc Tests
 
 <!-- PLAN: the "Why not just use t tests?" paragraph moved up to Part 2's opening. Call back to it
@@ -895,6 +916,17 @@ $$HSD = q \sqrt{\frac{MS_{within}}{n}} = 3.95 \sqrt{\frac{1{,}300}{4}} = 71.2$$
 That means that we're looking for a difference between groups of more than 71.2 ms in order to say that that difference is statistically significant.
 
 So looking back at the condition means, we can now say that the kids given a radioactive bite were significantly faster than the kids given an ordinary bite, and significantly faster than the control group. But the ordinary bite group did not differ from the control condition.
+
+## Reporting and interpreting results
+
+<!-- FIX: match the Ch 11-13 report format (exact p = .009?).
+     FIX (2026-10-26 reorder): Reporting now follows Post-Hoc Tests, so the report can end with the
+     Tukey result (radioactive faster than both other groups; ordinary vs none not significant),
+     which is where the baseline pays off. -->
+
+And as usual, we need to report the results. And again, this is basically just a list of certain things that we have to report. There are the descriptive statistics — that means the treatment means and standard deviations. We need to state what kind of hypothesis test we performed, whether it revealed a significant difference or not, and we need to report the pertinent values: the $F$ statistic with its degrees of freedom, the $p$ value as less than or greater than alpha, and the effect size $\eta^2$.
+
+> A single-factor, independent-samples ANOVA revealed a significant difference between kids who received a radioactive spider bite ($M = 189$; $SD = 34.10$), an ordinary spider bite ($M = 274$; $SD = 41.88$), and the control condition ($M = 284$; $SD = 31.36$); $F(2, 9) = 8.38$, $p < .05$, $\eta^2 = 0.65$.
 
 ### Assumptions
 
