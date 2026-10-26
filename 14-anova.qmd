@@ -493,6 +493,34 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 [PLACEHOLDER: caption.]
 ::::
 
+### The $F$ table
+
+<!-- PLAN (2026-10-26): moved up from Part 2's Step 2, following Ch 11 (the full t table sits in a
+     concept section; each test's Step 2 shows an excerpt). This is where the reader first meets
+     the F distribution, and the table lets them check the t² → F cut: F(1, 6) = 5.99 = 2.447²,
+     so the table opens on that cell. Clicking any cell redraws the curve, which shows the table
+     works for any pair of df.
+     FIX: the two paragraphs below are Step 2's, moved verbatim. They need re-angling: "How much
+     larger than one does our F ratio need to be?" assumes a test in progress; here the hook is
+     "where does 5.99 come from?". "One for the numerator, one for the denominator" can call
+     back to MS_between (df = 1) and MS_within (df = 6) from Mean Squares.
+     FIX: the worked lookup is F(3, 10) = 3.71, a generic pair. Keep it as the "any values"
+     example, or switch it to (1, 6) = 5.99 and drop the generic case to a sentence. Part 1 has
+     only df1 = 1, so the other columns are a light foreshadowing of Part 2.
+     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct. -->
+
+How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
+
+So as usual, we can refer to a table of critical values for the $F$ distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(3, 10)$ means three degrees of freedom for the numerator and ten for the denominator. So if you want to know the critical value for an alpha of 0.05 and those degrees of freedom, you'd look for the column for three and the row for ten and find the critical value would be 3.71.
+
+::: {#tbl-f-table}
+{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":6},"df2":[1,2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"maxWidth":"46rem","tableMinWidth":"34rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+
+Critical $F$ values for $\alpha = .05$. Columns give the numerator's degrees of freedom, $df_1$; rows give the denominator's, $df_2$.
+:::
+
+{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+
 {{< include quizzes/14-anova-learning-checks.qmd >}}
 
 ## Summary So Far
@@ -736,26 +764,24 @@ If this is the case, the numerator will be bigger than the denominator because i
 
 ### Step 2: Find the Critical Value
 
-<!-- PLAN: the skew paragraph and the F-distribution quiz moved to Part 1 (Relationship Between t
-     and F). Here: F(2, 9) is the first F that isn't the square of a t. That's step 5 of the t² → F
-     figure (plan §2.3), done here with the existing curve below rather than in the new figure.
-     df2 = 9 is now in makeFTable. The table still opens on (3, 10) to match the example lookup in
-     the prose; ours is (2, 9): F_crit = 4.26, now shown in Step 4's figure. If the example below
-     switches to (2, 9), change the table's "selected" to {"df1":2,"df2":9}; nothing else changes.
-     Either way, F(1, 6) = 5.99 is in the table too, so a reader can check the t² → F cut.
-     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct.
+<!-- PLAN (2026-10-26): the full F table moved to Part 1 ("The F table", after the t² → F figure),
+     following Ch 11's precedent (full t table in a concept section, excerpt in the test). Step 2
+     keeps only an excerpt, highlighted on our own (2, 9), as Ch 12-13 do.
+     DRAFT: Step 2 as in Ch 12: α = .05; df_between = k − 1 = 2 and df_within = N − k = 9
+     (callback to Degrees of Freedom); the df2 = 9 row and df1 = 2 column of the F table give
+     4.26; reject the null if F > 4.26. One tail, but non-directional (callback to t² → F).
+     DRAFT: F(2, 9) is the first F in the chapter that isn't the square of a t (plan §2.3 step 5).
      Why each (df1, df2) pair has its own shape: df1 sets how jumpy the numerator is and df2 how
      jumpy the denominator is (Two Estimates). F(1, 6) is extremely skewed (one-piece numerator);
      F(2, 9) less so; with many groups and many scores both estimates are steady and F tightens
-     into a hump near 1. That's the family of curves the chapter cover animates. -->
+     into a hump near 1. That's the family of curves the chapter cover animates. Step 4's figure
+     already draws F(2, 9) with 4.26 marked. -->
 
-How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
+::: {#tbl-anova-critical}
+{{< interactive-figure anovaCriticalTable makeFTable options='{"title":"Critical values for the bite test","alpha":0.05,"df1":{"from":1,"to":4},"df2":{"from":7,"to":11},"tableMinWidth":"0","maxWidth":"32rem","interactive":false,"selected":{"df1":2,"df2":9,"alpha":0.05}}' fallback="F table excerpt for numerator df 1 through 4 and denominator df 7 through 11, highlighting the .05 critical value of 4.26 at F(2, 9)." >}}
 
-So as usual, we can refer to a table of critical values for the $F$ distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(3, 10)$ means three degrees of freedom for the numerator and ten for the denominator. So if you want to know the critical value for an alpha of 0.05 and those degrees of freedom, you'd look for the column for three and the row for ten and find the critical value would be 3.71.
-
-{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":6},"df2":[1,2,3,4,5,6,8,9,10,12,15,20,30],"selected":{"df1":3,"df2":10,"alpha":0.05},"maxWidth":"46rem","tableMinWidth":"34rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
-
-{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+An excerpt of the $F$ table, with the critical value for $df = 2$ and $9$ highlighted.
+:::
 
 ### Step 3: Calculate the Test Statistic
 
