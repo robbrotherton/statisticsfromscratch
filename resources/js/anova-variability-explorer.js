@@ -1004,7 +1004,8 @@
 
     function stageDescription() {
       if (state.stage === "populations") {
-        return "Three groups of sampled scores with different centers and variation among people within each group.";
+        const count = ["Two", "Three", "Four", "Five", "Six"][groups.length - 2] || String(groups.length);
+        return `${count} groups of sampled scores with different centers and variation among people within each group.`;
       }
       if (state.stage === "compare") {
         return {
