@@ -97,7 +97,7 @@ So a conceptual distillation of the $t$ equation gives treatment effect and chan
 
 If we wanted to produce a new kind of ratio with this same structure, how might we do it? Luckily, we already have the tools we need in our toolkit; they just need a little adapting.
 
-## Partitioning variability
+## ANOVA: Analysis of Variance
 
 The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Seely Gosset had laid the goundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
 
@@ -109,7 +109,7 @@ So ANOVA wasn't developed as an extension of the $t$ test approach; it came abou
 
 For the kind of data we're dealing with, we can think in terms of three types of variability in the data:
 
-**Total variability** is the overall variability in the data, ignoring distinctions between groups. All the scores are a bit different from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups (which we're ignoring, but are still present in the data). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
+**Total variability** is the overall variability in the data, ignoring distinctions between groups. All the scores can differ from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups. (We're ignoring the groups for the moment, but they are still present in the data and so will show up in the total variability). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
 
 **Between groups variability** is the variability of the group means. Say group A's mean is a bit lower than the grand mean, and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
 
@@ -121,51 +121,7 @@ All I've really done is restate the conceptual equation, but using the more gene
 
 Before I give you the equations, let's walk through it visually.
 
-<!-- CUT (2026-10-26 reorder): the Total / Between / Within subsections and "A new conceptual
-     equation". They were the first of three walks through the trio (prose, explorer,
-     calculations) and restated "Sources of variability" twice. The explorer now carries the trio.
-     The paragraphs, verbatim, as a quarry for the step text, labelled with the step each fits:
-
-     [Total · Observe]
-     There's the total variability in the data. We have eight scores here and they're all different from one another. If we could quantify that overall variability among the scores we've recorded, that would tell us the total variability in the data due to any source.
-
-     [Between · Observe]
-     But we can think about more specific types of variability. There's the variability between groups. Again, with two samples, we can most obviously see this as the simple difference between those means, but put more generally we're quantifying how variable those group means are.
-
-     [Between · Observe or Deviations]
-     So let's think again about what might cause that kind of variability. It's exactly as we said for the numerator of the $t$ equation. Groups may vary from one another because a treatment effect differently affected the groups' average scores, or they may vary because of chance alone — the sampling error that causes one sample to be different from the next.
-
-     [Within · Observe]
-     There is another kind of variability we could think about here: the variability within each group. That means taking each sample on its own terms. How variable are the scores within those respective groups? Are they very widely spread or closely clustered together?
-
-     [Within · Deviations]
-     Now, why would scores vary within groups? It can't be because of a treatment effect. The treatment only differs between groups, not within them. Here we're just looking within each group on its own terms. So if we quantify the variability among scores within groups, all we're seeing is variability due to chance differences among scores.
-
-     [none: the cancel-out framing, superseded by Two estimates]
-     So now we can reformulate a new conceptual equation. If we take the variability between groups and divide it by the variability within groups, this is equivalent to dividing treatment variability plus chance variability by chance variability alone. And so as a conceptual ratio, the chance differences cancel out and the answer will reveal the extent of variability caused by the treatment alone. And as you realize, this is exactly the same conceptual form we ended up with for the $t$ statistic. It achieves the same goal, but in a slightly different way.
-     Notes that went with them:
-     - DRAFT (was under Between): with two equal groups, each mean sits exactly half the gap from
-       the grand mean (±42.5 ms here). The difference and the two deviations carry the same
-       information, so a difference is a special case of a deviation. (Also in BRACKET SPLIT below.)
-     - FIX (was under Within): "It can't be because of a treatment effect" needs the condition
-       "if everyone in a group gets the same treatment" (plan §2.4). -->
-
-<!-- PLAN: the explorer now carries the trio on its own. With two groups:
-     - the between stage shows two mirror-image arms of 42.5 ms, so df_between = 1 is visible, not
-       asserted;
-     - the MS between step "slices" into one piece, so MS_between = SS_between;
-     - the MS within step slices into 6, and the result is Ch 12's pooled variance, 1,458.3.
-     STEP TEXT still to do:
-     (a) the reasons, one sentence each, from the CUT quarry above: Within, everyone got the same
-         treatment, so only chance; Between, treatment + chance (a callback to "Sources of
-         variability");
-     (b) the slide-to-the-mean framing for the Between steps (plan §2.6);
-     (c) optional: each stage's Sum step ends on its equation, so the block after the figure is a
-         recap rather than news (Rob, 2026-10-24: equations in the step text, visuals plain);
-     (d) decision 1b settled as one run, end to end: the two MS steps introduce df and "mean
-         square" in a sentence each, and "Mean squares and the F ratio" formalizes them. The
-         Partition step's "crux of the F ratio" works as a forward pointer.
-     BRACKET SPLIT (plan §2.2; decided 2026-10-26: a text note, no new figure). The Between
+<!-- BRACKET SPLIT (plan §2.2; decided 2026-10-26: a text note, no new figure). The Between
      "Deviations" step already draws the two arms, so its step text just needs to tie them back to
      Ch 12's bracket:
        - the grand mean sits exactly halfway between 189 and 274, at 231.5, so each mean is 42.5 ms
@@ -197,7 +153,7 @@ Then we turn every deviation into a square. The area of each square is that scor
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Sum" data-action='{"stage":"total","phase":"sum","animate":true}'}
-Then we add the squared deviations together. That's represented by dropping them into the big square representing the **total sum of squares**.
+Then we sum the squared deviations. That's represented by dropping them into the big square representing the **total sum of squares**. Note that the total square is not drawn to scale; I've had to shrink it to fit on the page. The important thing is not so much the size of the total, but the ratio of its parts, as we'll see in a moment.
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Observe" data-action='{"stage":"within","phase":"observe","animate":true}'}
@@ -247,7 +203,7 @@ The squared distances add up. Total variability partitions exactly into **betwee
 
 :::::
 
-### Sums of squares
+### Calculating sums of squares
 
 <!-- PLAN: definitional formulas throughout (decision 4, settled 2026-10-26). This block is the
      explorer's three stages written down, in the explorer's order (total, within, between), so
@@ -261,28 +217,55 @@ The squared distances add up. Total variability partitions exactly into **betwee
      Two-group numbers: M_grand = 231.5; SS_total = 23,200; SS_within = 3,488 + 5,262 = 8,750;
      SS_between = 4(−42.5)² + 4(42.5)² = 14,450; 14,450 + 8,750 = 23,200. -->
 
-So how do we actually quantify these different sources of variability in the data? You'll be glad to know there's nothing mathematically new about this. We can use tools we've already learned about. We'll just apply them in slightly new ways. More specifically, we're going to use variance, which you'll remember we find by dividing $SS$, the sum of squared deviations, by $df$, degrees of freedom.[^anova-computational]
+So how do we actually quantify these different sources of variability in the data? Hopefully you see from stepping through the process visually that we're not really doing anything new. We're using the procedure for calculating the sum of squared deviations that we learned back in Chapter 4. The only difference is that we're applying it in a few different ways, chunking up the data to look at different sources of variability.
+
+Here are the mathematical equations[^anova-computational] describing what we just did in @act-anova-viz.
 
 $$
 \begin{align}
-SS_{total} &= \Sigma (X - M_{grand})^2 = 23{,}200 \\
-SS_{within} &= \Sigma (X - M)^2 = 3{,}488 + 5{,}262 = 8{,}750 \\
-SS_{between} &= \Sigma n(M - M_{grand})^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
+SS_{total} &= \Sigma (X - M_{grand})^2 \\
+SS_{within} &= \Sigma (X - M_{group})^2 \\
+SS_{between} &= \Sigma n(M_{group} - M_{grand})^2
 \end{align}
 $$
 
 <!-- FIX: the second half computes a total variance (23,200 / 7 = 3,314.3) that is never used. Keep
      the grand mean and df_total = N − 1; drop the variance. -->
 
-First we can think about the total variability in the data. Again, here we ignore any distinction between groups. We just take every score we've recorded as a single set of numbers. And to find the total variability in all those numbers, we find the sum of squared deviations of all those scores from what we'll call a grand mean, which refers to the mean of all scores, again ignoring the different groups. The $df_{total}$ is uppercase $N$ minus one, meaning the total number of scores minus one. Again, I encourage you to double check my sums, but for these eight scores, we get 23,200 over 7 for an answer of 3,314.3 for the total variance.
 
-Next, we'll work out the variance within groups. For this, we find the sum of squared deviations for each individual group from its own respective group mean, and then we add up those sum of squares values. So we denote this as $\Sigma SS$ — the sum of sums of squares for each treatment. To find the variance, we divide by the sum of the degrees of freedom for each treatment. And for each treatment, degrees of freedom is lowercase $n$ minus one, meaning the number of scores in that treatment minus one.
+For our set of 8 spider bite scores, this works out to:
 
-<!-- FIX: finds SS_between by subtraction, which contradicts the explorer, where it is built
-     directly from the two arms (the equation above). Subtraction can stay as a check: "and it
-     fills the rest of the bucket". The "7 minus 6" df half belongs to the next section. -->
+$$
+\begin{align}
+SS_{total} &= \Sigma (X - M_{grand})^2 = 23{,}200 \\
+SS_{within} &= \Sigma (X - M_{group})^2 = 3{,}488 + 5{,}262 = 8{,}750 \\
+SS_{between} &= \Sigma n(M - M_{grand})^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
+\end{align}
+$$
 
-Now, to find the variance between groups. The easiest way, if we already calculated the sum of squares and degrees of freedom values for total and within-groups variability, is to subtract within from total to get between. That's because the values for between and within must add up to the total. That's the whole idea — that we're partitioning the total variability into these two components. So subtracting within from total gets us between. Here that works out to 23,200 minus 8,750 over 7 minus 6.
+### Degrees of freedom
+
+In the past, when we've computed a $SS$, the next step has often been to divide it by its degrees of freedom to get a variance. That's precisely what we'll do with the within- and between-groups sums of squares. (We don't need to do it for the total.)
+
+So what are the degrees of freedom for each of these sums of squares? See if you can guess before reading on.
+
+<!-- quiz: ask df for each of the three sums of squares, and then explain why each is what it is. distractors should all be N, N - 1, N - k, k - 1, and k. -->
+
+Even though we won't be using the total variance, it's still useful to know its degrees of freedom. The $df_{total}$ is uppercase $N$ minus one, meaning the total number of scores minus one. For our eight scores, that works out to $8 - 1 = 7$. Why? Because we compute the deviation of all $N$ scores from a single mean, the grand mean. Once we know the grand mean, we can compute the deviation of $N - 1$ scores from it, but the last score's deviation is determined by those $N - 1$ deviations, such that the deviations must sum to zero. So there are only $N - 1$ free values, and thus $df_{total} = N - 1$.
+
+For the within-groups variability, we computed the deviation of each score from its own group mean. So that's $N$ scores, deviatingm from $k$ means. The degrees of freedom for the within-groups variability is $N - k$, meaning the total number of scores minus the number of groups. Once we know the $k$ group means, we can compute the deviation of $N - k$ scores from them, but the last $k$ scores' deviations are determined by those $N - k$ deviations, such that the deviations must sum to zero within each group. So there are only $N - k$ free values, and thus $df_{within} = N - k$.
+
+For the between-groups variability, we computed the deviation of each group mean from the grand mean. So that's $k$ means, deviating from a single grand mean. The degrees of freedom for the between-groups variability is $k - 1$, meaning the total number of groups minus one. Once we know the grand mean, we can compute the deviation of $k - 1$ group means from it, but the last group mean's deviation is determined by those $k - 1$ deviations, such that the deviations must sum to zero. So there are only $k - 1$ free values, and thus $df_{between} = k - 1$.
+
+So for our spider data:
+
+$$
+\begin{align}
+df_{total} &= N - 1 = 8 - 1 = 7 \\
+df_{within} &= N - k = 8 - 2 = 6 \\
+df_{between} &= k - 1 = 2 - 1 = 1
+\end{align}
+$$
 
 <!-- PLAN: computational formulas demoted to a footnote (decision 4, settled 2026-10-26), with Ch 4's
      footnote as the callback. T and G live only here now: the T/G sentence moved here verbatim
@@ -298,7 +281,26 @@ Now, to find the variance between groups. The easiest way, if we already calcula
 
     The computational formula for $SS_{total}$ is $\Sigma X^2$ — the sum of all squared scores — minus $G^2 / N$. Then for $SS_{within}$, we work it out for each condition and then sum our answers. And if we know those, we can work out $SS_{between}$ by subtraction. But there is a computational equation for that if we want to work it out directly: it's $\Sigma (T^2 / n)$ for each condition, minus $G^2 / N$.
 
-## Mean squares and the $F$ ratio
+### Mean squares and the $F$ ratio
+
+So now we have a few values of $SS$, each with a corresponding $df$. What do we get when we divide $SS$ by $df$? We get a variance. And what is a variance, in simpler terms? It quantifies the average squared deviation, the sum divided by the number of free values that went into that sum. In the context of ANOVA, these special variance components get a new name: we call them **mean squares** ($MS$).
+
+So we have $MS_{between}$ and $MS_{within}$, which are the variances of the between-groups and within-groups variability, respectively.
+
+$$ MS_{between} = \frac{SS_{between}}{df_{between}} \qquad MS_{within} = \frac{SS_{within}}{df_{within}} $$
+
+For the spider data, this comes to:
+
+$$ MS_{between} = \frac{14{,}450}{1} = 14{,}450 \qquad MS_{within} = \frac{8{,}750}{6} = 1{,}458.3 $$
+
+As usual, variances are in the original measurement units squared, so these are in milliseconds squared. That's not the most intuitive thing to think about. But like I said, these represent a mean square; look back at the within- and betwee-groups steps of @act-anova-viz, where you see all the squares for each of those steps. These Mean Square values represent the average size of the those squares.
+
+### The $F$ ratio
+
+And now we can form a new ratio, the $F$ ratio. For the independent-samples design we are analyzing here:
+
+$$ F = \frac{MS_{between}}{MS_{within}} $$
+
 
 <!-- PLAN: merges the old "Mean Squares" and "The F Ratio". Order:
      1. df, as an explicit callback (revised 2026-10-26, Rob: list the df equations here, with
@@ -331,15 +333,6 @@ Now, to find the variance between groups. The easiest way, if we already calcula
      (number of groups) and N (total number of scores). Note that Ch 4 used N for a population's
      size; here it is the total number of scores in the study. -->
 
-$$
-\begin{align}
-df_{total} &= N - 1 = 8 - 1 = 7 \\
-df_{within} &= N - k = 8 - 2 = 6 \\
-df_{between} &= k - 1 = 2 - 1 = 1
-\end{align}
-$$
-
-And one last new piece of terminology here: in the context of ANOVA, we refer to variance as the "mean square" ($MS$), because as you remember, a variance is just the average squared deviation — the mean square. So we need $MS_{between}$ and $MS_{within}$, both of which we find by dividing the relevant sum of squares by the relevant degrees of freedom. And then we divide $MS_{between}$ by $MS_{within}$ to find the $F$ ratio.
 
 Again, this is not a new procedure; we've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
 
@@ -357,13 +350,17 @@ So now we can come back to where we started. We wanted to partition the variance
      get a ratio of how much more of a difference seems to be coming from the treatment effect than
      we would expect to see by chance alone." -->
 
-## $F$ and $t$
+### From $t$ to $F$
 
 <!-- FIX: rounding. t = −3.148 and F = 9.909, but a reader squaring the rounded −3.15 gets 9.92.
      Either give t to three decimals here, or say "about 9.9". The sign also needs a word: the
      square root of F gives 3.15, the same as t apart from its sign. -->
 
-And not only are the $t$ statistic and $F$ ratio conceptually related, they are mathematically related. If you square the $t$ value we calculated, you'll find it's 9.91. Or if you prefer, you can find the square root of the $F$ ratio, 9.91, and you'll find it comes to 3.15, the same as $t$.
+Not only are the $t$ statistic and $F$ ratio conceptually related, they are mathematically related. If you square the $t$ value we calculated, you'll find it's 9.91. Or if you prefer, you can find the square root of the $F$ ratio, 9.91, and you'll find it comes to 3.15, the same as $t$.
+
+Did you notice something familiar about $MS_{within}$? We've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
+
+<!-- also mention numerator is half the distance or whatever? -->
 
 {{< include quizzes/14-anova-t-and-f.qmd >}}
 
