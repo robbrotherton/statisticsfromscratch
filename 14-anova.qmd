@@ -133,7 +133,7 @@ Before I give you the equations, let's walk through it visually.
 ::::: {#act-anova-viz .callout-tip .interactive}
 ## Seeing the logic of ANOVA
 
-{{< interactive-figure anovaVariabilityExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"groups":[{"name":"Radioactive","values":[189,161,237,169]},{"name":"Ordinary","values":[310,219,303,264]}],"axisLabel":"Reaction time (ms)","xMin":140,"xMax":340,"populationSd":36}' fallback="Interactive diagram showing two groups of scores, then total, within-groups, and between-groups squared deviations, and finally the comparison at the heart of the F ratio." >}}
+{{< interactive-figure anovaVariabilityExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"groups":[{"name":"Radioactive","values":[189,161,237,169]},{"name":"Ordinary","values":[310,219,303,264]}],"axisLabel":"Reaction time (ms)","xMin":140,"xMax":340,"populationSd":36}' fallback="Interactive diagram showing two groups of scores, then total, within-groups, and between-groups squared deviations." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
@@ -188,17 +188,6 @@ As before, we turn each mean's deviation into a square. I'm just showing one squ
 Because each square represents all four scores that went into its mean, we count each square four times. These copies form the **between-groups sum of squares**, the remaining portion of the total variability.
 :::
 
-::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
-The squared distances add up. Total variability partitions exactly into **between** plus **within**. When between-groups variability is large compared with within-groups variability, the treatment stands out from the background noise. That comparison is the crux of the $F$ ratio.
-:::
-
-::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-[PLACEHOLDER: MS between step. The between band lifts out of the total, is cut into df~between~ equal slices, and the slices stack into one square. With two groups there is one slice. This step introduces df and "mean square" in a sentence; the prose formalizes them after the figure.]
-:::
-
-::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
-[PLACEHOLDER: MS within step. The within band is cut into df~within~ equal slices, which stack into a much smaller square.]
-:::
 ::::
 
 :::::
@@ -244,6 +233,11 @@ SS_{between} &= \Sigma n(M - M_{grand})^2 = 4(-42.5)^2 + 4(42.5)^2 = 14{,}450
 $$
 
 ### Degrees of freedom
+
+<!-- DRAFT: the df equations, in the same order as the SS block. Needs a lead-in that introduces k
+     (number of groups) and N (total number of scores). Note that Ch 4 used N for a population's
+     size; here it is the total number of scores in the study. -->
+
 
 In the past, when we've computed a $SS$, the next step has often been to divide it by its degrees of freedom to get a variance. That's precisely what we'll do with the within- and between-groups sums of squares. (We don't need to do it for the total.)
 
@@ -302,6 +296,35 @@ And now we can form a new ratio, the $F$ ratio. For the independent-samples desi
 $$ F = \frac{MS_{between}}{MS_{within}} $$
 
 
+::::: {#act-anova-ms .callout-tip .interactive}
+## From sums of squares to $F$
+
+{{< interactive-figure anovaMeanSquaresExplorer makeAnovaVariabilityExplorer options='{"stage":"compare","phase":"partition","calculations":false,"controlsOpen":false,"groups":[{"name":"Radioactive","values":[189,161,237,169]},{"name":"Ordinary","values":[310,219,303,264]}],"axisLabel":"Reaction time (ms)","xMin":140,"xMax":340,"populationSd":36}' fallback="Interactive diagram showing the total sum of squares partitioned into between-groups and within-groups layers, which separate into two squares, each then broken into as many equal squares as its degrees of freedom to give the between-groups and within-groups mean squares, which finally stack as a fraction: the F ratio." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":false}'}
+The squared distances add up. Total variability partitions exactly into **between** plus **within**. When between-groups variability is large compared with within-groups variability, the treatment stands out from the background noise. That comparison is the crux of the $F$ ratio.
+:::
+
+::: {.tutorial-step data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
+[PLACEHOLDER: Split step. The two layers part at their boundary, between above and within below, and each becomes a square of the same area: SS~between~ and SS~within~ as squares in their own right.]
+:::
+
+::: {.tutorial-step data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
+[PLACEHOLDER: MS between step. SS~between~ breaks into df~between~ equal squares, and one of them is the mean square. With two groups df~between~ = 1, so the one piece is the whole square: MS~between~ = SS~between~.]
+:::
+
+::: {.tutorial-step data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
+[PLACEHOLDER: MS within step. SS~within~ breaks into df~within~ = 6 equal squares, spread out as a grid, which stack into one much smaller square: MS~within~.]
+:::
+
+::: {.tutorial-step data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
+[PLACEHOLDER: F step. Nothing moves: a bar draws along the boundary the two have kept since the partition, and F is literally one square over the other.]
+:::
+::::
+
+:::::
+
 <!-- PLAN: merges the old "Mean Squares" and "The F Ratio". Order:
      1. df, as an explicit callback (revised 2026-10-26, Rob: list the df equations here, with
         symbols). k and N are introduced here, where they're first needed; Part 2's notation table
@@ -329,28 +352,17 @@ $$ F = \frac{MS_{between}}{MS_{within}} $$
         "Within-groups variance"). MS_between = SS_between = 14,450, since df is 1.
      5. F = 14,450 / 1,458.3 = 9.91, and history part 2 (naming F). -->
 
-<!-- DRAFT: the df equations, in the same order as the SS block. Needs a lead-in that introduces k
-     (number of groups) and N (total number of scores). Note that Ch 4 used N for a population's
-     size; here it is the total number of scores in the study. -->
-
-
-Again, this is not a new procedure; we've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
-
-<!-- FIX: "named after its inventor ... who developed this concept". Fisher worked with
-     z = ½ ln F; Snedecor tabulated the ratio itself and called it F in Fisher's honour (plan §5;
-     Snedecor 1934 vs 1937 still to verify). History, part 2 of 2, can go here or under F = t².
-     The paragraph that repeated "treatment effect plus chance over chance" is cut (CUT note below);
-     "Two estimates of the same variance" carries that job. -->
-
 So now we can come back to where we started. We wanted to partition the variance in the data into between-groups variance and within-groups variance. By finding the different kinds of sums of squares and degrees of freedom and dividing them to find the different variances, we end up for this little dataset with 14,450 over 1,458.3 for an answer of 9.91. And so this is the ANOVA, the analysis of variance procedure. And this is our new statistic. It's called the $F$ ratio. It's named after its inventor, Sir Ronald Fisher, who developed this concept in the 1920s.
+
+
+### From $t$ to $F$
+
 <!-- CUT (2026-10-26 reorder): the paragraph after this restated treatment + chance over chance a
      fourth time. "Two estimates of the same variance" does that job now:
      "Like I said before, it is conceptually related to the $t$ statistic. It achieves the same
      thing: constructing a ratio of treatment effect plus chance differences over chance alone, to
      get a ratio of how much more of a difference seems to be coming from the treatment effect than
      we would expect to see by chance alone." -->
-
-### From $t$ to $F$
 
 <!-- FIX: rounding. t = −3.148 and F = 9.909, but a reader squaring the rounded −3.15 gets 9.92.
      Either give t to three decimals here, or say "about 9.9". The sign also needs a word: the
@@ -359,6 +371,8 @@ So now we can come back to where we started. We wanted to partition the variance
 Not only are the $t$ statistic and $F$ ratio conceptually related, they are mathematically related. If you square the $t$ value we calculated, you'll find it's 9.91. Or if you prefer, you can find the square root of the $F$ ratio, 9.91, and you'll find it comes to 3.15, the same as $t$.
 
 Did you notice something familiar about $MS_{within}$? We've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
+
+Again, this is not a new procedure; we've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
 
 <!-- also mention numerator is half the distance or whatever? -->
 
@@ -443,7 +457,38 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 [PLACEHOLDER: caption.]
 ::::
 
-## Two Estimates of the Same Variance
+## The $F$ distribution(s)
+
+<!-- PLAN (2026-10-26): moved up from Part 2's Step 2, following Ch 11 (the full t table sits in a
+     concept section; each test's Step 2 shows an excerpt). By now the reader has met F(1, 6)
+     twice (the t² figure and the two-estimates pile), and the table lets them check the t² → F cut: F(1, 6) = 5.99 = 2.447²,
+     so the table opens on that cell. Clicking any cell redraws the curve, which shows the table
+     works for any pair of df.
+     FIX: the two paragraphs below are Step 2's, moved verbatim. They need re-angling: "How much
+     larger than one does our F ratio need to be?" assumes a test in progress; here the hook is
+     "where does 5.99 come from?". "One for the numerator, one for the denominator" can call
+     back to the two estimates just above: MS_between (df = 1) and MS_within (df = 6), each with its
+     own df because each rests on its own number of pieces.
+     FIX: the worked lookup is F(3, 10) = 3.71, a generic pair. Keep it as the "any values"
+     example, or switch it to (1, 6) = 5.99 and drop the generic case to a sentence. Part 1 has
+     only df1 = 1, so the other columns are a light foreshadowing of Part 2.
+     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct. -->
+
+How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
+
+So as usual, we can refer to a table of critical values for the $F$ distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(3, 10)$ means three degrees of freedom for the numerator and ten for the denominator. So if you want to know the critical value for an alpha of 0.05 and those degrees of freedom, you'd look for the column for three and the row for ten and find the critical value would be 3.71.
+
+::: {#tbl-f-table}
+{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+
+Critical $F$ values for $\alpha = .05$. Columns give the numerator's degrees of freedom, $df_1$; rows give the denominator's, $df_2$.
+:::
+
+{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+
+{{< include quizzes/14-anova-learning-checks.qmd >}}
+
+### Two Estimates of the Same Variance
 
 <!-- PLAN (2026-10-26 reorder): moved after F = t². The reader first trusts F because it is t²;
      this section says what F measures without t, which is what lets it go beyond two groups. F is
@@ -530,38 +575,7 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 
 :::::
 
-### The $F$ table
-
-<!-- PLAN (2026-10-26): moved up from Part 2's Step 2, following Ch 11 (the full t table sits in a
-     concept section; each test's Step 2 shows an excerpt). By now the reader has met F(1, 6)
-     twice (the t² figure and the two-estimates pile), and the table lets them check the t² → F cut: F(1, 6) = 5.99 = 2.447²,
-     so the table opens on that cell. Clicking any cell redraws the curve, which shows the table
-     works for any pair of df.
-     FIX: the two paragraphs below are Step 2's, moved verbatim. They need re-angling: "How much
-     larger than one does our F ratio need to be?" assumes a test in progress; here the hook is
-     "where does 5.99 come from?". "One for the numerator, one for the denominator" can call
-     back to the two estimates just above: MS_between (df = 1) and MS_within (df = 6), each with its
-     own df because each rests on its own number of pieces.
-     FIX: the worked lookup is F(3, 10) = 3.71, a generic pair. Keep it as the "any values"
-     example, or switch it to (1, 6) = 5.99 and drop the generic case to a sentence. Part 1 has
-     only df1 = 1, so the other columns are a light foreshadowing of Part 2.
-     FIX: the old "[Possible typo: 3.7]" comment can go; 3.71 is correct. -->
-
-How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$).
-
-So as usual, we can refer to a table of critical values for the $F$ distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(3, 10)$ means three degrees of freedom for the numerator and ten for the denominator. So if you want to know the critical value for an alpha of 0.05 and those degrees of freedom, you'd look for the column for three and the row for ten and find the critical value would be 3.71.
-
-::: {#tbl-f-table}
-{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
-
-Critical $F$ values for $\alpha = .05$. Columns give the numerator's degrees of freedom, $df_1$; rows give the denominator's, $df_2$.
-:::
-
-{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
-
-{{< include quizzes/14-anova-learning-checks.qmd >}}
-
-## Summary So Far
+### Summary So Far
 
 <!-- PLAN: this becomes the hinge between the halves. Same data, two methods, same answer. What F
      gives up (units, sign) and what it gains (it never needed a subtraction). The last sentence
@@ -706,12 +720,20 @@ The "levels" are the individual treatments that make up a factor. So here we hav
 [PLACEHOLDER: total = between + within, as with two groups.]
 :::
 
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
+[PLACEHOLDER: between and within part and become squares, as with two groups.]
+:::
+
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-[PLACEHOLDER: two slices this time: df~between~ = k − 1.]
+[PLACEHOLDER: two pieces this time: df~between~ = k − 1.]
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
-[PLACEHOLDER: nine slices: df~within~ = N − k.]
+[PLACEHOLDER: nine pieces, which tile the square exactly as 3 × 3: df~within~ = N − k.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
+[PLACEHOLDER: F(2, 9) = 10,900 / 1,300 = 8.38, as a fraction.]
 :::
 ::::
 

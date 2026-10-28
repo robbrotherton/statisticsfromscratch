@@ -3,7 +3,7 @@
 
   const STAGES = ["populations", "total", "within", "between", "compare"];
   const PHASES = ["observe", "deviations", "squares", "sum"];
-  const COMPARE_PHASES = ["partition", "ms-between", "ms-within"];
+  const COMPARE_PHASES = ["partition", "split", "ms-between", "ms-within", "f"];
   const DEFAULT_GROUPS = [
     { name: "Group A", values: [3, 5, 6, 7, 9] },
     { name: "Group B", values: [7, 9, 10, 11, 13] },
@@ -51,8 +51,11 @@
       aggregate: "sum",
       summed: "sum",
       compare: "partition",
+      separate: "split",
       "ms-b": "ms-between",
-      "ms-w": "ms-within"
+      "ms-w": "ms-within",
+      ratio: "f",
+      "f-ratio": "f"
     };
     const normalized = aliases[key] || key;
     return PHASES.includes(normalized) || COMPARE_PHASES.includes(normalized) ? normalized : fallback;
@@ -232,7 +235,7 @@
     // real size on phones instead of shrinking with a fixed viewBox. Below
     // COMPACT_BELOW the sums panel moves under the dot plot.
     const COMPACT_BELOW = 700;
-    const msGap = 10;
+    const pieceGap = 6;
     const longestName = d3.max(groups, (group) => group.name.length) || 6;
     let width;
     let height;
@@ -242,12 +245,15 @@
     // Lane furniture: population curve height and baseline, mean-line half-length,
     // and offsets for the mean label, the group name and the axis label.
     let lane;
-    // Where the total sum of squares sits: in the sums panel, or across the whole
-    // figure once the dot plot gives way to the mean squares.
+    // Where the total sum of squares sits: in the sums panel, or in the middle of the
+    // figure once the dot plot gives way to the comparison.
     let panelSquare;
     let wideSquare;
-    // The mean squares stack either side of a midline: between above, within below.
-    let msColumn;
+    // The compare stage hangs from one line: the boundary between the two layers of the
+    // total. Between stands above it and within hangs below, across a small gap, from the
+    // partition through to F, where the gap becomes the fraction bar.
+    let midline;
+    let midGap;
 
     function computeLayout(availableWidth) {
       width = Math.round(availableWidth);
@@ -265,34 +271,33 @@
         panel = { x: 8, y: plot.bottom + 48, width: width - 16, height: 74 + panelSide + 14 };
         panelSquare = { x: (width - panelSide) / 2, y: panel.y + 74, side: panelSide };
         height = panel.y + panel.height + 8;
-        // Mean-square steps: one centred column in the same height, the total on top
-        // and the mean squares below it, between above the midline and within below.
-        // Each layer lifts straight down out of the total into its place.
-        const between = aggregateSquares().find((d) => d.key === "between");
-        const within = aggregateSquares().find((d) => d.key === "within");
-        const top = 70;
-        // Room for a lifted layer or its mean square, whichever is taller, plus labels.
-        const reach = (d, side) => Math.max(side * d.value / stats.ssTotal, areaSide(d.ms, { side }));
-        const layoutFor = (side) => {
-          const bar = top + side + 48 + reach(between, side) + msGap;
-          const withinRoom = Math.max(side * within.value / stats.ssTotal + 28, areaSide(within.ms, { side }) + 44);
-          return { side, bar, bottom: bar + msGap + withinRoom + 6 };
-        };
-        let fit = layoutFor(Math.min(220, width - 40));
-        while (fit.side > 60 && fit.bottom > height) fit = layoutFor(fit.side - 2);
-        wideSquare = { x: (width - fit.side) / 2, y: top, side: fit.side };
-        msColumn = { cx: width / 2, bar: fit.bar, gap: msGap };
       } else {
         plot = { left: 16 + longestName * 8.6 + 12, right: width - 320, top: 76, bottom: 610 };
         groupY.range([150, 540]);
         lane = { curve: 49, base: 38, meanHalf: 35, meanLabel: 43, name: 5, axisLabel: 42 };
         panel = { x: width - 285, y: 66, width: 255, height: 540 };
         panelSquare = { x: panel.x + 22, y: panel.y + 150, side: 210 };
-        const side = Math.min(300, (width - 208) / 2);
-        wideSquare = { x: 60, y: 340 - side / 2, side };
-        msColumn = { cx: width - 64 - side / 2, bar: 340, gap: msGap };
         height = 720;
       }
+      // Compare stage: everything centred on one column. The total is sized so that, once
+      // split and cut, between above the line and within below it fit with their labels,
+      // leaving room either side for the "÷ df" label.
+      const margin = compact ? 16 : 40;
+      const cutLabelRoom = compact ? 40 : 64;
+      const labelRoom = 46;
+      midGap = compact ? 10 : 14;
+      const parts = aggregateSquares().filter((d) => d.df);
+      const relative = (d) => Math.sqrt(d.value / stats.ssTotal);
+      const reach = (d, side) => Math.max(relative(d) * side, cutPieces(d, relative(d) * side).height);
+      const widest = (side) => d3.max(parts, (d) => cutPieces(d, relative(d) * side).width);
+      const extent = (side) => d3.sum(parts, (d) => reach(d, side)) + 2 * midGap + 2 * labelRoom;
+      let side = compact ? 240 : 340;
+      while (side > 60 &&
+        (widest(side) > width - 2 * (margin + cutLabelRoom) || extent(side) > height - 2 * margin)) side -= 2;
+      const between = parts.find((d) => d.key === "between");
+      midline = (height - extent(side)) / 2 + labelRoom + reach(between, side) + midGap;
+      // The total's between layer sits directly on the line, its within layer directly under it.
+      wideSquare = { x: (width - side) / 2, y: midline - side * between.value / stats.ssTotal, side };
       x.range([plot.left, plot.right]);
     }
 
@@ -333,7 +338,6 @@
     const meansLayer = plotGroup.append("g").attr("class", "ave-means");
     const ghostsLayer = plotGroup.append("g").attr("class", "ave-ghosts");
     const dotsLayer = plotGroup.append("g").attr("class", "ave-dots");
-    const summaryLayer = svg.append("g").attr("class", "ave-summary");
 
     const panelGroup = svg.append("g").attr("class", "ave-squares-panel");
     const panelRect = panelGroup.append("rect")
@@ -344,6 +348,12 @@
     const headingSubtitle = heading.append("text").attr("class", "ave-panel-subtitle");
     const squaresLayer = panelGroup.append("g").attr("class", "ave-squares");
     const msLayer = svg.append("g").attr("class", "ave-mean-squares");
+    const fractionLayer = svg.append("g").attr("class", "ave-fraction");
+    const fractionBar = fractionLayer.append("line")
+      .attr("stroke", "currentColor").attr("stroke-width", 2.5).attr("stroke-linecap", "round")
+      .style("opacity", 0);
+    const fractionLeft = fractionLayer.append("text").attr("class", "ave-equation").attr("text-anchor", "end").style("opacity", 0);
+    const fractionRight = fractionLayer.append("text").attr("class", "ave-equation").attr("text-anchor", "start").style("opacity", 0);
     const transferLayer = svg.append("g").attr("class", "ave-transfer-layer");
 
     const calculationBox = root.append("div")
@@ -646,8 +656,8 @@
     function aggregateSquares() {
       return [
         { key: "total", label: "Total", value: stats.ssTotal, base: 0, color: "var(--ave-total)", reveal: 1 },
-        { key: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 1 },
-        { key: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 2 }
+        { key: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 2 },
+        { key: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 3 }
       ];
     }
 
@@ -664,7 +674,48 @@
     }
 
     function wideLayout() {
+      return state.stage === "compare";
+    }
+
+    function isSplit() {
       return comparePhaseIndex() >= 1;
+    }
+
+    // Cut a sum of squares of the given side into df pieces of equal area that tile it exactly.
+    // Rows share the pieces out as evenly as they can (6 is 3 + 3, 7 is 4 + 3); each row's
+    // height is its share of the area, so every piece is close to square. Positions are
+    // relative to the square's centre; `spread` is where each piece moves so that, once
+    // squared up, it clears its neighbours. Between's pieces keep standing on the line and
+    // within's keep hanging from it. `width` and `height` are the most room the cut takes.
+    function cutPieces(d, side) {
+      const rows = Math.ceil(d.df / Math.ceil(Math.sqrt(d.df)));
+      const counts = d3.range(rows).map((r) => Math.floor(d.df / rows) + (r < d.df % rows ? 1 : 0));
+      const piece = side / Math.sqrt(d.df);
+      const rowHeights = counts.map((n) => side * n / d.df);
+      const spreadHeights = rowHeights.map((h) => Math.max(h, piece));
+      const spreadTotal = d3.sum(spreadHeights) + (rows - 1) * pieceGap;
+      const hangs = d.key === "within";
+      const cells = [];
+      let cutTop = -side / 2;
+      let spreadTop = hangs ? -side / 2 : side / 2 - spreadTotal;
+      counts.forEach((n, r) => {
+        const w = side / n;
+        const h = rowHeights[r];
+        const stepX = Math.max(w, piece) + pieceGap;
+        d3.range(n).forEach((c) => {
+          cells.push({
+            k: cells.length,
+            cut: { x: -side / 2 + c * w, y: cutTop, w, h },
+            // Squared up, a piece keeps to the edge of its row nearest the line.
+            spread: { x: (c - (n - 1) / 2) * stepX - piece / 2, y: hangs ? spreadTop : spreadTop + spreadHeights[r] - piece },
+            order: Math.hypot(c - (n - 1) / 2, r - (rows - 1) / 2)
+          });
+        });
+        cutTop += h;
+        spreadTop += spreadHeights[r] + pieceGap;
+      });
+      const width = d3.max(counts, (n, r) => n * Math.max(side / n, piece) + (n - 1) * pieceGap);
+      return { cells, piece, width: Math.max(side, width), height: Math.max(side, spreadTotal) };
     }
 
     function squareLayout() {
@@ -682,6 +733,29 @@
       return { x: layout.x, y: top, width: layout.side, height: layout.side * value / stats.ssTotal };
     }
 
+    // Squares either side of the line: between stands on it, within hangs from it.
+    function besideLine(d, side) {
+      return {
+        x: width / 2 - side / 2,
+        y: d.key === "between" ? midline - midGap - side : midline + midGap,
+        width: side,
+        height: side
+      };
+    }
+
+    // Once split, each sum of squares is drawn as a square of the same area.
+    function ssSquareGeometry(d) {
+      return besideLine(d, areaSide(d.value, wideSquare));
+    }
+
+    // Between is labelled above its square, within below, like a fraction's two halves.
+    // `line` 0 is the name, 1 the detail underneath it.
+    function labelYFor(d, geometry, line) {
+      return d.key === "between"
+        ? geometry.y - (line ? 12 : 30)
+        : geometry.y + geometry.height + (line ? 40 : 22);
+    }
+
     const pour = { stagger: 150, flyDuration: 560, dropDuration: 240, settleDuration: 260 };
     // Every sum receives one piece per score (between sends each group's square once per score).
     const pourDuration = 80 + (stats.N - 1) * pour.stagger + pour.flyDuration + pour.dropDuration + pour.settleDuration;
@@ -696,8 +770,9 @@
         .attr("width", geometry.width).attr("height", geometry.height);
     }
 
-    function renderSquares(animate, revealKey, liftDelay) {
+    function renderSquares(animate, revealKey, liftDelay, splitting) {
       const wide = wideLayout();
+      const split = isSplit();
       const layout = squareLayout();
       const duration = animate ? 760 : 0;
       const stageIndex = STAGES.indexOf(state.stage);
@@ -711,14 +786,19 @@
       const titleLines = setLines(headingTitle, wrapWords("Sums of squares", headingWidth / 9.2), 19);
       setLines(headingSubtitle, wrapWords(subtitleText, headingWidth / 6.3), 15);
       headingSubtitle.attr("y", titleLines * 19 + 1);
-      heading.interrupt().transition().duration(duration).ease(d3.easeCubicInOut)
+      // On splitting, the heading clears out before the between square grows into its place.
+      heading.interrupt().transition().duration(splitting ? 240 : duration).ease(d3.easeCubicInOut)
         .attr("transform", wide
           ? `translate(${layout.x},${layout.y - 52})`
-          : `translate(${panel.x + inset},${panel.y + (compact ? 24 : 27)})`);
+          : `translate(${panel.x + inset},${panel.y + (compact ? 24 : 27)})`)
+        .style("opacity", split ? 0 : 1);
       panelGroup.select(".ave-panel").interrupt().transition().duration(animate ? 480 : 0)
         .style("opacity", wide ? 0 : 1);
 
-      squaresLayer.selectAll("*").interrupt().interrupt("ghost");
+      // Splitting is one move: the layers part at the line and square up as they go.
+      const partDuration = splitting ? 420 : 0;
+      const squareDuration = splitting ? 900 : duration;
+      squaresLayer.selectAll("*").interrupt().interrupt("lift");
       const container = squaresLayer.selectAll("rect.ave-ss-container")
         .data(aggregateRevealLevel() >= 1 ? [layout] : []);
       container.enter().insert("rect", ":first-child")
@@ -727,9 +807,9 @@
         .attr("x", layout.x).attr("y", layout.y).attr("width", layout.side).attr("height", layout.side)
         .style("opacity", 0)
         .merge(container)
-        .transition().duration(duration).ease(d3.easeCubicInOut)
+        .transition().duration(splitting ? partDuration : duration).ease(d3.easeCubicInOut)
         .attr("x", layout.x).attr("y", layout.y).attr("width", layout.side).attr("height", layout.side)
-        .style("opacity", 1);
+        .style("opacity", split ? 0 : 1);
       container.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
 
       const data = aggregateSquares().filter((d) => aggregateRevealLevel() >= d.reveal);
@@ -742,7 +822,12 @@
       entered.append("text").attr("class", "ave-ss-label").style("opacity", 0);
       entered.append("text").attr("class", "ave-ss-value").style("opacity", 0);
       const merged = entered.merge(items);
+      // The total has no square of its own once its layers have split away.
+      merged.filter((d) => d.key === "total")
+        .transition().duration(splitting ? partDuration : duration)
+        .style("opacity", split ? 0 : 1);
 
+      const geometry = (d) => split && d.key !== "total" ? ssSquareGeometry(d) : ssGeometry(d, d.value, layout);
       // The total is the fill itself; the container draws its outline.
       const sumRects = merged.select("rect")
         .attr("fill", (d) => d.color)
@@ -752,42 +837,52 @@
       sumRects.filter(driven).each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
       sumRects.filter((d) => !driven(d))
         .transition()
-        .duration(duration).ease(d3.easeCubicInOut)
-        .attr("x", (d) => ssGeometry(d, d.value, layout).x)
-        .attr("y", (d) => ssGeometry(d, d.value, layout).y)
-        .attr("width", (d) => ssGeometry(d, d.value, layout).width)
-        .attr("height", (d) => ssGeometry(d, d.value, layout).height);
-      // A layer lifted out to become a mean square leaves its outline behind in the total.
-      sumRects.transition("ghost")
+        .duration(squareDuration).ease(d3.easeCubicInOut)
+        .attr("x", (d) => geometry(d).x)
+        .attr("y", (d) => geometry(d).y)
+        .attr("width", (d) => geometry(d).width)
+        .attr("height", (d) => geometry(d).height);
+      // A sum broken into its mean square fades as its pieces appear.
+      sumRects.transition("lift")
         .delay(animate ? liftDelay : 0)
         .duration(animate ? 420 : 0)
-        .attr("fill-opacity", (d) => isLifted(d) ? 0.04 : 0.18)
-        .attr("stroke-opacity", (d) => isLifted(d) ? 0.55 : 1)
-        .attr("stroke-dasharray", (d) => isLifted(d) ? "4 3" : null);
+        .style("opacity", (d) => isLifted(d) ? 0 : 1);
 
       // Total is labelled above the container; each layer inside its own top-left corner.
+      // Once split, each sum is labelled above its square, until its mean square takes the spot.
       // A layer's label waits for its pour to finish so it never floats above an empty space.
-      const labelY = (d) => d.key === "total" ? layout.y - 10 : ssGeometry(d, d.value, layout).y + 18;
-      const labelDelay = (d) => driven(d) && d.key !== "total" ? pourDuration : 0;
-      const labelX = (d) => d.key === "total" ? layout.x : layout.x + 8;
-      const valueX = (d) => d.key === "total" ? layout.x + layout.side : layout.x + 8;
-      const valueY = (d) => d.key === "total" ? layout.y - 10 : labelY(d) + 16;
+      const labelY = (d) => split && d.key !== "total"
+        ? labelYFor(d, geometry(d), 0)
+        : d.key === "total" ? layout.y - 10 : ssGeometry(d, d.value, layout).y + 18;
+      const labelDelay = (d) => driven(d) && d.key !== "total"
+        ? pourDuration
+        : splitting ? squareDuration - 200 : 0;
+      const labelX = (d) => split && d.key !== "total" ? width / 2 : d.key === "total" ? layout.x : layout.x + 8;
+      const valueX = (d) => split && d.key !== "total" ? width / 2 : d.key === "total" ? layout.x + layout.side : layout.x + 8;
+      const valueY = (d) => split && d.key !== "total" ? labelYFor(d, geometry(d), 1) : d.key === "total" ? layout.y - 10 : labelY(d) + 16;
+      const labelOpacity = (d) => isLifted(d) || (split && d.key === "total") ? 0 : 1;
       entered.select(".ave-ss-label").attr("x", labelX).attr("y", labelY);
       entered.select(".ave-ss-value").attr("x", valueX).attr("y", valueY);
-      merged.select(".ave-ss-label")
+      const labels = merged.select(".ave-ss-label")
         .attr("fill", (d) => d.color)
-        .text((d) => d.label)
-        .transition().delay(labelDelay).duration(duration).ease(d3.easeCubicInOut)
+        .attr("text-anchor", (d) => split && d.key !== "total" ? "middle" : "start");
+      // Text that is about to move is faded first, so it never slides across the figure.
+      if (splitting) labels.style("opacity", 0);
+      labels
+        .text((d) => split && d.key !== "total" ? `SS ${d.key}` : d.label)
+        .transition().delay(labelDelay).duration(splitting ? 300 : duration).ease(d3.easeCubicInOut)
         .attr("x", labelX)
         .attr("y", labelY)
-        .style("opacity", 1);
-      merged.select(".ave-ss-value")
-        .attr("text-anchor", (d) => d.key === "total" ? "end" : "start")
+        .style("opacity", labelOpacity);
+      const values = merged.select(".ave-ss-value")
+        .attr("text-anchor", (d) => split && d.key !== "total" ? "middle" : d.key === "total" ? "end" : "start");
+      if (splitting) values.style("opacity", 0);
+      values
         .text((d) => state.calculations ? `SS = ${fmt(d.value)}` : "")
-        .transition().delay(labelDelay).duration(duration).ease(d3.easeCubicInOut)
+        .transition().delay(labelDelay).duration(splitting ? 300 : duration).ease(d3.easeCubicInOut)
         .attr("x", valueX)
         .attr("y", valueY)
-        .style("opacity", state.calculations ? 1 : 0);
+        .style("opacity", (d) => state.calculations ? labelOpacity(d) : 0);
       items.exit()
         .transition().duration(animate ? 220 : 0)
         .style("opacity", 0)
@@ -868,14 +963,10 @@
         .remove();
     }
 
-    // Each mean square sits in a column: between above the midline, within below.
+    // Each mean square takes its sum's place by the line, so F needs no further move.
     function msGeometry(d) {
-      const side = areaSide(d.ms, wideSquare);
-      return {
-        x: msColumn.cx - side / 2,
-        y: d.key === "between" ? msColumn.bar - msColumn.gap - side : msColumn.bar + msColumn.gap,
-        side
-      };
+      const geometry = besideLine(d, areaSide(d.ms, wideSquare));
+      return { ...geometry, side: geometry.width };
     }
 
     function msDetail(d) {
@@ -896,17 +987,15 @@
       const merged = entered.merge(items);
       merged.select("rect")
         .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
-        .attr("x", (d) => msGeometry(d).x).attr("y", (d) => msGeometry(d).y)
-        .attr("width", (d) => msGeometry(d).side).attr("height", (d) => msGeometry(d).side);
-      const above = (d) => d.key === "between";
+        .each(function(d) { setRect(d3.select(this), msGeometry(d)); });
       merged.select(".ave-ss-label")
         .attr("fill", (d) => d.color)
-        .attr("x", msColumn.cx)
-        .attr("y", (d) => above(d) ? msGeometry(d).y - 30 : msGeometry(d).y + msGeometry(d).side + 22)
+        .attr("x", width / 2)
+        .attr("y", (d) => labelYFor(d, msGeometry(d), 0))
         .text((d) => `MS ${d.key}`);
       merged.select(".ave-ms-detail")
-        .attr("x", msColumn.cx)
-        .attr("y", (d) => above(d) ? msGeometry(d).y - 12 : msGeometry(d).y + msGeometry(d).side + 40)
+        .attr("x", width / 2)
+        .attr("y", (d) => labelYFor(d, msGeometry(d), 1))
         .text(msDetail);
       // The square being built stays hidden until animateMeanSquare hands it over.
       merged.filter((d) => !(animate && d.key === revealKey))
@@ -916,80 +1005,63 @@
       items.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
     }
 
-    // Lift a layer out of the total, cut it into df equal slices, stack the slices
-    // (they are all the same size, so the stack is one share), and square it up.
+    // Cut a sum of squares into df equal pieces, which part and square up in one move, then
+    // stack back by the line. The pieces are all the same size, so the stack is one share:
+    // the mean square.
     function animateMeanSquare(revealKey, delay) {
       const d = aggregateSquares().find((item) => item.key === revealKey);
       if (!d) return;
-      const band = ssGeometry(d, d.value, wideSquare);
+      const ss = ssSquareGeometry(d);
       const target = msGeometry(d);
-      const above = d.key === "between";
-      const columnX = msColumn.cx - band.width / 2;
-      const columnY = above ? msColumn.bar - msColumn.gap - band.height : msColumn.bar + msColumn.gap;
-      const sliceWidth = band.width / d.df;
-      const middle = (d.df - 1) / 2;
-      // The slices stack onto the middle of the column, outermost slices travelling furthest.
-      const slices = d3.range(d.df).map((k) => ({
-        k,
-        x: columnX + k * sliceWidth,
-        order: Math.abs(k - middle)
-      }));
-      const spread = Math.min(compact ? 3 : 6, (compact ? 24 : 48) / Math.max(1, d.df - 1));
-      // Stacked translucent slices would darken; they fade as they gather so the stack reads as one square.
-      const sliceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
+      const { cells, piece, width: cutWidth } = cutPieces(d, ss.width);
+      const cx = width / 2;
+      const cy = ss.y + ss.height / 2;
+      // Stacked translucent pieces would darken; they fade as they gather so the stack reads as one square.
+      const pieceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
+      const strokeOpacity = 1 - Math.pow(1 - 0.9, 1 / d.df);
       // Planned as absolute times; chained transitions take their delay from the previous one's end.
-      const liftDuration = 650;
-      const cutAt = delay + liftDuration;
-      const stackStart = cutAt + 520;
+      const cutDuration = 420;
+      const spreadAt = delay + cutDuration + 200;
+      const spreadDuration = d.df > 1 ? 720 : 0;
+      const stackStart = spreadAt + spreadDuration + (d.df > 1 ? 450 : 300);
       const stackDuration = 760;
       const stagger = Math.min(45, 360 / d.df);
-      const lastOrder = d3.max(slices, (s) => s.order);
+      const lastOrder = d3.max(cells, (s) => s.order);
       let landed = 0;
-
-      transferLayer.append("rect")
-        .attr("class", "ave-transfer-square")
-        .attr("fill", d.color).attr("stroke", d.color)
-        .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
-        .call(setRect, band)
-        .style("opacity", 0)
-        .transition().delay(delay).duration(0).style("opacity", 1)
-        .transition().duration(liftDuration).ease(d3.easeCubicInOut)
-        .attr("x", columnX).attr("y", columnY)
-        .transition().duration(0)
-        .remove();
+      // The label sits level with the middle of the spread pieces.
+      const spreadMiddle = cy + (d3.min(cells, (s) => s.spread.y) + d3.max(cells, (s) => s.spread.y) + piece) / 2;
 
       transferLayer.append("text")
         .attr("class", "ave-cut-label")
-        // On a phone there is no room beside the column, so the label goes on its outer side.
-        .attr("text-anchor", compact ? "middle" : "start")
-        .attr("x", compact ? msColumn.cx : columnX + band.width + spread * middle + 14)
-        .attr("y", compact
-          ? (above ? columnY - 10 : columnY + band.height + 22)
-          : columnY + band.height / 2 + 5)
+        .attr("text-anchor", "start")
+        .attr("x", cx + cutWidth / 2 + 14)
+        .attr("y", spreadMiddle + 6)
         .text(`÷ ${d.df}`)
         .style("opacity", 0)
-        .transition().delay(cutAt).duration(260).style("opacity", 1)
-        .transition().delay(stackStart - cutAt - 260).duration(300).style("opacity", 0)
+        .transition().delay(delay + 200).duration(260).style("opacity", 1)
+        .transition().delay(stackStart - delay - 460).duration(300).style("opacity", 0)
         .remove();
 
+      // The cut fades in over the sum as the sum itself fades, so the area never flickers.
       transferLayer.selectAll("rect.ave-slice")
-        .data(slices)
+        .data(cells)
         .join("rect")
         .attr("class", "ave-slice ave-transfer-square")
         .attr("fill", d.color).attr("stroke", d.color)
-        .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
-        .attr("x", (s) => s.x).attr("y", columnY)
-        .attr("width", sliceWidth).attr("height", band.height)
-        .style("opacity", 0)
-        .transition().delay(cutAt).duration(0).style("opacity", 1)
-        .transition().delay(100).duration(320).ease(d3.easeCubicOut)
-        .attr("x", (s) => s.x + (s.k - middle) * spread)
-        // Gathering and squaring up are one move, so the change of shape isn't a separate event.
-        .transition().delay((s) => stackStart - (cutAt + 420) + (lastOrder - s.order) * stagger)
+        .attr("stroke-width", 1.5)
+        .attr("fill-opacity", 0).attr("stroke-opacity", 0)
+        .attr("x", (s) => cx + s.cut.x).attr("y", (s) => cy + s.cut.y)
+        .attr("width", (s) => s.cut.w).attr("height", (s) => s.cut.h)
+        .transition().delay(delay).duration(cutDuration)
+        .attr("fill-opacity", 0.18).attr("stroke-opacity", 1)
+        .transition().delay(spreadAt - delay - cutDuration).duration(spreadDuration).ease(d3.easeCubicInOut)
+        .attr("x", (s) => cx + s.spread.x).attr("y", (s) => cy + s.spread.y)
+        .attr("width", piece).attr("height", piece)
+        .transition().delay((s) => stackStart - spreadAt - spreadDuration + (lastOrder - s.order) * stagger)
         .duration(stackDuration).ease(d3.easeCubicInOut)
         .attr("x", target.x).attr("y", target.y)
-        .attr("width", target.side).attr("height", target.side)
-        .attr("fill-opacity", sliceOpacity)
+        .attr("fill-opacity", pieceOpacity)
+        .attr("stroke-opacity", strokeOpacity)
         .on("end", () => {
           landed += 1;
           if (landed < d.df) return;
@@ -998,18 +1070,28 @@
         .remove();
     }
 
-    function renderComparison(animate) {
-      summaryLayer.selectAll("*").interrupt().remove();
-      // On a phone the panel subtitle carries "Total = between + within" instead.
-      if (comparePhaseIndex() !== 0 || compact) return;
-
-      summaryLayer.append("text")
-        .attr("class", "ave-equation")
-        .attr("x", (plot.left + plot.right) / 2).attr("y", 680)
-        .attr("text-anchor", "middle")
-        .text(state.calculations
-          ? `${fmt(stats.ssTotal)} = ${fmt(stats.ssBetween)} + ${fmt(stats.ssWithin)}`
-          : "Total variability = between groups + within groups");
+    // F is the fraction itself: the gap the two have kept since the partition gets its bar.
+    function renderFraction(animate) {
+      const show = state.phase === "f";
+      const cx = width / 2;
+      const half = d3.max(aggregateSquares().filter((d) => d.df), (d) => msGeometry(d).side) / 2 + (compact ? 14 : 22);
+      fractionLayer.selectAll("*").interrupt();
+      fractionLeft
+        .attr("x", cx - half - 14).attr("y", midline + 7)
+        .text("F =");
+      fractionRight
+        .attr("x", cx + half + 14).attr("y", midline + 7)
+        .text(state.calculations ? `= ${fmt(stats.f)}` : "");
+      fractionBar
+        .attr("y1", midline).attr("y2", midline)
+        .attr("x1", cx - (show && animate ? 0 : half))
+        .attr("x2", cx + (show && animate ? 0 : half));
+      const delay = show && animate ? 150 : 0;
+      fractionBar.transition().delay(delay).duration(animate ? 480 : 0).ease(d3.easeCubicOut)
+        .attr("x1", cx - half).attr("x2", cx + half)
+        .style("opacity", show ? 1 : 0);
+      fractionLayer.selectAll("text").transition().delay(show ? delay + 300 : 0).duration(animate ? 300 : 0)
+        .style("opacity", show ? 1 : 0);
     }
 
     function stageDescription() {
@@ -1020,8 +1102,10 @@
       if (state.stage === "compare") {
         return {
           partition: "The total sum of squares, filled exactly by a within-groups layer with a between-groups layer on top.",
-          "ms-between": `The between-groups layer cut into ${stats.dfBetween} equal slices, stacked into one square: the between-groups mean square.`,
-          "ms-within": `The within-groups layer cut into ${stats.dfWithin} equal slices, stacked into one square: the within-groups mean square.`
+          split: "The between-groups and within-groups layers parted at their boundary, between above and within below, each redrawn as a square of the same area.",
+          "ms-between": `The between-groups sum of squares broken into ${stats.dfBetween} equal ${stats.dfBetween === 1 ? "square" : "squares"}; one of them is the between-groups mean square.`,
+          "ms-within": `The within-groups sum of squares broken into ${stats.dfWithin} equal squares; one of them is the within-groups mean square.`,
+          f: "The F ratio drawn as a fraction: a bar along the old boundary, the between-groups mean square above it and the within-groups mean square below."
         }[state.phase];
       }
       const subjects = {
@@ -1061,6 +1145,8 @@
       const msKey = animate && comparePhaseIndex() > previousCompareIndex
         ? { "ms-between": "between", "ms-within": "within" }[state.phase] || null
         : null;
+      const splitting = animate && state.phase === "split" &&
+        lastRenderedStage === "compare" && lastRenderedPhase === "partition";
       // Moving the total out of the panel comes first; the lift waits for it.
       const wasWide = lastRenderedStage === "compare" && COMPARE_PHASES.indexOf(lastRenderedPhase) >= 1;
       const layoutDelay = animate && wideLayout() !== wasWide ? 800 : 0;
@@ -1073,11 +1159,11 @@
       renderMeans(animate);
       renderGhosts(animate);
       renderDots(animate);
-      renderSquares(animate, revealKey, layoutDelay);
+      renderSquares(animate, revealKey, layoutDelay, splitting);
       renderMeanSquares(animate, msKey);
       animateContributions(revealKey, animate);
       if (msKey) animateMeanSquare(msKey, layoutDelay);
-      renderComparison(animate);
+      renderFraction(animate);
       updateCalculationBox();
       lastRenderedStage = state.stage;
       lastRenderedPhase = state.phase;
