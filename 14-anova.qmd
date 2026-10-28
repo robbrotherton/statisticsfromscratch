@@ -54,27 +54,13 @@ interactive-scripts:
 <!-- PART 1: TWO GROUPS, TWO WAYS                                                          -->
 <!-- ===================================================================================== -->
 
-## Introduction
-
-<!-- FIX: lecture residue ("final section of the course"). The last sentences preview the whole
-     chapter; consider whether the intro should promise the two-group comparison first. -->
-
-We're moving into the final section of the course, leaving behind the $t$ statistic and moving on to ANOVA, which stands for analysis of variance. This isn't as radical a departure as it might seem, though. As we'll see, the ANOVA procedure is just a more general version of what we've used the $t$ tests to achieve: analyzing patterns of variability. So here we'll introduce the purpose and logic of ANOVA. We'll discuss the kind of research designs that call for it, and we'll learn to calculate the $F$ statistic which is used for hypothesis testing with ANOVA.
-
-<!-- DRAFT: opener. The new spider study (plan §2.5): inspired by the Ch 8 finding, kids randomly
-     assigned to a radioactive spider bite or an ordinary spider bite, then the humanbenchmark
-     reaction-time test. Peter is in the radioactive group again with his Ch 5 score of 189.
-     Comparing against an ordinary bite controls for being bitten at all. Random assignment matters
-     here (it licenses the causal reading).
-     The no-bite group is held back for Part 2, so don't mention a third group here beyond a hint,
-     if any. -->
+We're leaving behind the $t$ statistic and moving on to ANOVA, which stands for analysis of variance. This isn't as radical a departure as it might seem, though. As we'll see, the ANOVA procedure is just a more general version of what we've used the $t$ tests to achieve: analyzing patterns of variability. So here we'll start by seeing how the $t$ and ANOVA approaches can both be applied to the same two-group comparison.Then we'll discuss how ANOVA lets us move beyond comparing just two groups, and we'll use ANOVA's $F$ statistic to test a hypothesis comparing three groups.
 
 ## Comparing two groups
 
-<!-- FIX: the setup sentence was the snack study's and now carries the spider framing in the
-     same shape. Once the opener above exists, it can shrink to a pointer. -->
+It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. But how do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense. Perhaps being bitten by any old spider would do it.
 
-We'll start by recapping some of the ideas we've already encountered, which foreshadowed the logic of ANOVA. Consider again the independent-samples $t$ statistic, which allowed us to compare two samples. Suppose we have a little study comparing the effects of different spider bites on reaction time. One sample of kids is bitten by a radioactive spider before completing a reaction-time test, and another sample of kids is bitten by an ordinary spider. And we find a mean of 189 ms for the radioactive group and 274 ms for the ordinary group.
+We want to compare the effects of different kinds of spider bites on reaction times, so we set up a little study with two independent samples. One sample of kids is bitten by a radioactive spider, and another sample of kids is bitten by an ordinary spider. Then everyone takes the same reaction time test.
 
 | ☢️ Radioactive bite | 🕷️ Ordinary bite |
 |:--:|:--:|
@@ -86,62 +72,54 @@ We'll start by recapping some of the ideas we've already encountered, which fore
 
 : Reaction times (ms) for the two spider-bite conditions. {#tbl-bites-two}
 
-The conceptual structure of the $t$ statistic was the difference between groups over the difference between groups expected by chance. Specifically, the numerator was the difference between sample means, found by subtracting one from the other. And the denominator was the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance.
+You'll recognize this as a situation where we could use the independent-samples $t$ test. The conceptual structure of the $t$ statistic was the difference between groups over the difference between groups expected by chance. Specifically, the numerator was the difference between sample means, found by subtracting one from the other. And the denominator was the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance.
 
 <!-- Numbers: s_p² = 8,750 / 6 = 1,458.3; SE = √(2 × 1,458.3 / 4) = 27.0; t = −85 / 27.0 = −3.148;
      t_crit(6) = ±2.447; p = .020. -->
 
-For this data, the numerator is 189 minus 274 and the denominator works out to 27.0. You're welcome to double check my work. So the $t$ statistic works out to −3.15. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right.
+For this data, the numerator is $189 - 274 = -85$ and the denominator works out to $27.0$. (You're welcome to double check my work.) So the $t$ statistic is $−3.15$. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right; it exceeds the critical $t$ of $\pm 2.447$ for $df = 6$. So we can reject the null hypothesis that the two populations have the same mean reaction time.
 
-<!-- DRAFT: the points this recap has to land, because Part 1's ending depends on them.
-     (a) Units: the numerator is a difference in the original measurement units. 85 ms faster is a
-         number you can picture, and Ch 12's estimate and CI were in ms too.
-     (b) Sign: t is negative or positive depending on which mean you subtract from which, so it
-         carries the direction, and the test can be two-tailed.
-     (c) Subtraction needs exactly two means. One light foreshadowing line ("hold on to that"), but
-         don't introduce a third group yet; Part 2 does that.
-     Optional FIGURE: a score-rows strip of the two groups with the blue gap bracket and the red
-     pooled span, as in Ch 12's act-spending-rows. It would be a direct visual callback, and the
-     explorer below then splits that bracket at the grand mean (see the FIGURE note there). -->
+Notice a few things about this procedure. For one thing, the numerator is a difference in the original measurement units, miliseconds. You could measure that $85$ms difference on the same stopwatch you'd measure the reaction times themselves. The denominator is in the same units, too, describing the variability of the difference between means in milliseconds. As a ratio, the numerator and denominator have to be in the same units. We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
 
-But the difference between sample means is just one way of quantifying a kind of variability — how much scores varied from one another. It's a convenient way of quantifying variability when we're just dealing with two samples, because subtracting the mean of one from the mean of the other to find the difference is mathematically so easy to do, and calculating the standard error isn't much harder. But it's variability that we're really interested in, not specifically the difference between sample means. And there are other ways of quantifying variability.
+The reason why I'm hammering on these points, which you understand perfectly well by now, is to highlight the fact that the $t$ statistic is just one way of comparing groups. What are we interested in, really? Variability: how much do the group means vary, and how much should we expect them to vary by chance? Subtracting one mean from another is a very convenient way of quantifying variability when we're just dealing with two samples, because it is mathematically so easy to do. But it doesn't generalize to three or more groups. And that's where ANOVA comes in. We have other tools in our toolkit for quantifying variability.
 
 ### Sources of variability
 
-Before we move on to other ways of quantifying variability, let's just analyze this equation conceptually. Again, let's think about what contributes to the numerator and the denominator here.
+Let's analyze the $t$ equation again, conceptually, thinking about what contributes to the numerator and the denominator---what would make each larger or smaller.
 
-So what contributes to the variability between groups? In other words, why might the group means be different? One reason is if there is a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that samples don't perfectly represent the population from which they're drawn. There's always some variability due to sampling error. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So the numerator is composed of any treatment effect plus chance.
+$$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
 
-The denominator, on the other hand, is all chance. Remember, the standard error quantifies the variability of the sampling distribution. It's the standard deviation of all possible samples of a given size drawn from a population. So there is no treatment effect there. It's pure chance: the variability between groups we'd expect to see by chance alone.
+Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect, and error.
 
-<!-- FIX: "chance ... algebraically simplifies out" is inaccurate; a ratio doesn't cancel a random
-     quantity (plan §1, spine idea 2). This is now the chapter's only prose statement of
-     treatment + chance over chance (the explorer's Within and Between steps call back to it, and
-     "Two estimates of the same variance" gives the accurate version), so it can end on the
-     question: how big is treatment + chance compared with chance? -->
+The denominator, on the other hand, is all error. Remember, the standard error quantifies the variability of the sampling distribution. It's the standard deviation of all the mean differences we'd see over the course of repeated sampling. So there is no treatment effect there. It's pure chance.
 
-So a conceptual distillation of the equation would be treatment plus chance over chance. Having chance in both the numerator and denominator, it algebraically simplifies out, leaving us with a $t$ statistic that quantifies how much of a treatment effect there seems to be over and above chance differences.
+So a conceptual distillation of the $t$ equation gives treatment effect and chance in the numerator, and chance in the denominator. By dividing these quantities, the ratio gives a measure of how much treatment effect there seems to be over and above chance differences.
 
-## Partitioning Variability
+If we wanted to produce a new kind of ratio with this same structure, how might we do it? Luckily, we already have the tools we need in our toolkit; they just need a little adapting.
 
-<!-- PLAN: new section, working title. History, part 1 of 2 (plan §5). Keep it to what the
-     pedagogy needs: why anyone would want to look at a difference as variability.
-     - Gosset's t came first (1908). Fisher had already corresponded with Gosset, derived t
-       rigorously, rescaled it and named it (Ch 11 says this, so call back).
-     - Fisher came to ANOVA from a different direction. In genetics he coined "variance" and
-       split it into parts due to different causes (1918; fisher1918relatives is in the bib, never
-       cited). At Rothamsted from 1919, field plots vary for many reasons at once (soil, drainage,
-       fertilizer, variety), so the natural question is how much of the total variation each
-       source accounts for, not "is A different from B?".
-     - The first published ANOVA table: Fisher & Mackenzie (1923), potatoes and manures.
-     - Payoff line: the same two-group question, asked his way: of all the variability in these
-       eight reaction times, how much goes with which group a kid was in?
-     Sources marked [memory] in plan §5.4 need checking before they're cited. Eugenics footnote:
-     decision 8 is still open, and this is the first substantial Fisher passage. -->
+## Partitioning variability
+
+The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Seely Gosset had laid the goundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
+
+Separately, Fisher was also working in the field of genetics. He coined the term "variance" and developed a way of partitioning variance into different components, each due to a different cause, like how much of the varibility in people's heights comes from genetics versus environment [@fisher1918relatives]. A little later, Fisher was applying the technique to agricultural research, asking questions of data like, how much of the variability in crop poduction can be attributed to things like the soil, fertilizer, drainage, and so on, and how much of it is just up to chance. This work brought Fisher and Gosset back together; the first ANOVA table appeared in Gosset's own 1923 paper, On Testing Varieties of Cereals, in a note contributed by Fisher.
+
+So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual millieu. And pretty soon Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical unerpinnings.
 
 ### Three Types of Variability
 
-So now let's start thinking in terms of variability more generally, and especially what factors contribute to different kinds of variability.
+For the kind of data we're dealing with, we can think in terms of three types of variability in the data:
+
+**Total variability** is the overall variability in the data, ignoring distinctions between groups. All the scores are a bit different from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups (which we're ignoring, but are still present in the data). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
+
+**Between groups variability** is the variability of the group means. Say group A's mean is a bit lower than the grand mean, and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
+
+**Within groups variability** is the variability of scores within each group. Why might scores vary within a group? Chance is a factor, as usual. But it can't be because of a treatment effect, since everyone in a group got the same treatment. So within-groups variability isolates chance, much like the denominator of the $t$ statistic.
+
+You see where we're going with this. If we can quantify the total variability in the data, and then partition it into these two sources, between-groups and within-groups varaibility, we can create for ourselves a new ratio, which will conceptually do the same job as the $t$ statistic.
+
+All I've really done is restate the conceptual equation, but using the more general language of "variability", instead of the $t$ statistic's more specific "difference between means." So what do we mean by variability here, actually? Well, we've had the tools all along. Remember variance? It's the sum of squared deviations divided by degrees of freedom. ANOVA is about partitioning variances to quantify the different sources of variability in the data. We learned how to calculate variance for a sample back in Chapter 4. Here we'll learn to weild that same tool more precisely to partition the variability in a dataset into its constituent components.
+
+Before I give you the equations, let's walk through it visually.
 
 <!-- CUT (2026-10-26 reorder): the Total / Between / Within subsections and "A new conceptual
      equation". They were the first of three walks through the trio (prose, explorer,
@@ -203,55 +181,55 @@ So now let's start thinking in terms of variability more generally, and especial
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
-We have two populations, represented here by samples of four scores. People differ within every population, and the populations are centered in different places.
+For our thought experiment, we have two groups: people bitten by radioactive spiders and people bitten by regular spiders. Those groups represent two hypothetical populations, shown as curves. From those populations we obtain our sample data, shown as the 8 dots. In this case, there really is a difference between the populations; the curves have difference centers. But how can we use the samples to establish that difference statistically?
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Observe" data-action='{"stage":"total","phase":"observe","animate":true}'}
-Set group membership aside without moving the scores. For **total variability**, every score is considered relative to the grand mean.
+We'll start by quantifying the **total variability**. To do so, we ignore group membership and compute the mean of every score all together. We'll call this the **grand mean**.
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Deviations" data-action='{"stage":"total","phase":"deviations","animate":true}'}
-Draw each score's **deviation from the grand mean**. Longer lines represent scores that contribute more total variability.
+Now we follow the usual procedure for calculating the sum of squared deviations. We begin by finding each score's **deviation from the grand mean**. Longer lines represent scores that contribute more total variability.
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Squares" data-action='{"stage":"total","phase":"squares","animate":true}'}
-Turn every deviation into the edge of a square. The area of each square is that score's **squared deviation**.
+Then we turn every deviation into a square. The area of each square is that score's **squared deviation**.
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Sum" data-action='{"stage":"total","phase":"sum","animate":true}'}
-Add the squared deviations together. Their copies collect on the right and form the **total sum of squares**.
+Then we add the squared deviations together. That's represented by dropping them into the big square representing the **total sum of squares**.
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Observe" data-action='{"stage":"within","phase":"observe","animate":true}'}
-Bring the groups back into focus. For **within-groups variability**, every score is considered relative to its own group mean.
+Next we'll turn to **within-groups variability**. For this, every score is considered relative to its own group mean. We will follow the same procedure as before, but taking each group separately in turn.
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Deviations" data-action='{"stage":"within","phase":"deviations","animate":true}'}
-Draw each score's deviation from its group mean. These are differences among people who received the same treatment.
+So we draw each score's deviation from its own group mean. Remember, within each group, everyone received the same treatment. So these deviations represent variability due to chance alone, not treatment effects.
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Squares" data-action='{"stage":"within","phase":"squares","animate":true}'}
-Turn those deviations into squares. Together they represent the background variability found inside the groups.
+We square the deviations...
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Sum" data-action='{"stage":"within","phase":"sum","animate":true}'}
-Add these squared deviations to form the **within-groups sum of squares** on the right.
+And now we can sum these squares. We'll drop them into the total box we created before, so we can see the within-groups sum of squared deviation as a portion of the whole. We have partitioned out that component of the variability.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Observe" data-action='{"stage":"between","phase":"observe","animate":true}'}
-Now focus on the group means. For **between-groups variability**, each group mean is considered relative to the grand mean.
+Lastly, we'll compute the **between-groups variability**. We still treat the groups separately, but this time we imagine that there's no within-groups variability at all (since we just calculated it separately). To achive that, we'll picture that every dot gets shifted to its group mean. Then we'll consider their deviations from the grand mean.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Deviations" data-action='{"stage":"between","phase":"deviations","animate":true}'}
-Draw each group mean's deviation from the grand mean. Greater separation among the means produces longer lines.
+Now we see each group mean's deviation from the grand mean. With just two groups, the two means have to be equal distances from that grand mean, in opposite directions; the two deviations have to sum to zero, so they must be equal and opposite. Consider how that constraint might affect the degrees of freedom for the between-groups component of variability.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Squares" data-action='{"stage":"between","phase":"squares","animate":true}'}
-Turn each mean's deviation into a square. Each group mean represents all four scores in that group, not just one score.
+As before, we turn each mean's deviation into a square. I'm just showing one square for each group mean, but each square represents all four scores in that group.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Sum" data-action='{"stage":"between","phase":"sum","animate":true}'}
-Count each square four times, once for every score represented by its mean. These copies form the **between-groups sum of squares**.
+Because each square represents all four scores that went into its mean, we count each square four times. These copies form the **between-groups sum of squares**, the remaining portion of the total variability.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
