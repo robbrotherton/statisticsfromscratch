@@ -57,7 +57,7 @@ test("every tutorial step sets its state absolutely", () => {
   const steps = tutorialSteps(divById(readChapter("14-anova.qmd"), "act-two-estimates"));
   assert.ok(steps.length > 0);
   for (const { action } of steps) {
-    for (const key of ["effect", "sd", "samples", "show-sigma", "show-estimates", "show-tracker", "show-curve"]) {
+    for (const key of ["effect", "sd", "samples", "show-sample", "lanes", "show-sigma", "show-estimates", "show-tracker", "show-curve"]) {
       assert.ok(Object.hasOwn(action, key), `a step leaves ${key} unset`);
     }
     assert.equal(typeof action.samples, "number");

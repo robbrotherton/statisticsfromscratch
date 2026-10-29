@@ -154,13 +154,17 @@ local manifest = {
     file = "resources/js/variance-partition-diagram.js",
     deps = { "d3", "interactive-figure-tools" }
   },
+  ["anova-squares"] = {
+    file = "resources/js/anova-squares.js",
+    deps = { "d3" }
+  },
   ["anova-variability-explorer"] = {
     file = "resources/js/anova-variability-explorer.js",
-    deps = { "d3", "interactive-figure-tools" }
+    deps = { "d3", "interactive-figure-tools", "anova-squares" }
   },
   ["anova-two-estimates"] = {
     file = "resources/js/anova-two-estimates.js",
-    deps = { "d3", "stat-helpers", "sampling-core", "sampling-visuals", "interactive-figure-tools" }
+    deps = { "d3", "stat-helpers", "sampling-core", "sampling-visuals", "interactive-figure-tools", "anova-squares" }
   },
   ["t-squared"] = {
     file = "resources/js/t-squared.js",

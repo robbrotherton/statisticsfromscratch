@@ -138,7 +138,7 @@ As before, we turn each mean's deviation into a square. I'm just showing one squ
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Sum" data-action='{"stage":"between","phase":"sum","animate":true}'}
-Because each square represents all four scores that went into its mean, we count each square four times. (We'll see a deeper reason for this in @sec-anova-two-estimates.) These copies form the **between-groups sum of squares**, the remaining portion of the total variability.
+Because each square represents all four scores that went into its mean, we count each square four times. (We'll see a deeper reason for this in @sec-anova-f-distribution.) These copies form the **between-groups sum of squares**, the remaining portion of the total variability.
 :::
 
 ::::
@@ -269,7 +269,12 @@ The squared distances add up. Total variability partitions exactly into **betwee
 
 As usual, variances are in the original measurement units squared, so these are in milliseconds squared. That's not the most intuitive thing to think about. But as the name says, each one is a mean square: in @act-anova-ms you can see it as the average size of the squares that went into it.
 
-## Two estimates of the same variance {#sec-anova-two-estimates}
+## The $F$ distribution(s) {#sec-anova-f-distribution}
+
+So we've computed a whole new statistic, the $F$-ratio. But to use it in a hypothesis test, we need a distribution for it under the null hypothesis. If the null is true (there is no treatment effect) and we take sample after sample repeatedly, what shape would the distribution of $F$s form?
+
+Let's see!
+
 
 <!-- TODO: prose still to write. Points to make:
      - σ² is the population's variance, a fixed property of the population (in the figure,
@@ -294,42 +299,49 @@ As usual, variances are in the original measurement units squared, so these are 
 ::::: {#act-two-estimates .callout-tip .interactive}
 ## Sampling the two estimates
 
-{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
+{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","leadSamples":[1,2,123],"groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSample":false,"showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
-[PLACEHOLDER: suppose the bite makes no difference. Both groups are samples from one population (the grey curves are identical). The dots are one sample of four kids per group.]
+::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":false,"lanes":"sample","show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
+We're saying the null hypothesis is true: the spider bite makes no difference. So I've drawn two population curves with the same center (and same variability). The population variance is represented as the dashed square. Since there's no treatment effect, that variance reflects the only source of variability, and it will be captured in both the within-groups and between-groups mean squares.
 :::
 
-::: {.tutorial-step data-title="Two estimates" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: the dashed outline is the population's variance, σ², fixed by the population (not computed from the sample). Two ways to estimate it from the sample: MS within from the red spreads inside each group; MS between from the purple arms, how far the group means sit from the grand mean, counted n times.]
+::: {.tutorial-step data-title="MS within" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"within","show-sigma":true,"show-estimates":"within","show-tracker":false,"show-curve":false,"animate":true}'}
+Now we collect two samples, one from each group. (The data is different @tbl-bites-two because here we're simulating repeated sampling under a true null.) First, we can compute $MS_{\text{within}}$ from the deviations of each score from its group mean, just like we did in @act-anova-viz. It comes out pretty close to the population variance, because it is effectively estimating that quantity.
 :::
 
-::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: this sample's F, 1,233 / 1,503 = 0.82, goes into a tracker as its first entry.]
+::: {.tutorial-step data-title="MS between" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"between","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
+Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Dividing the sum of these squares (SS between) by the between-groups degrees of freedom (1) gives $MS_{\text{between}}$. In this case it also comes out close to the population variance, because with no treatment effect, it is also just estimating that same underlying variance.
 :::
 
-::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
-[PLACEHOLDER: a new sample from the same population. Both estimates wobble around the outline, independently of each other: sometimes between is bigger, sometimes within. The purple one jumps around more (it rests on one piece of information; red pools six). Its F joins the tracker.]
+::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+Dividing $MS_{\text{between}}$ by $MS_{\text{within}}$ gives the F statistic for this sample, which in this case is $F = 1,233 / 1,503 = 0.82$. This value is then recorded in the tracker as the first entry. We'll collect a bunch of these and see how they distribute.
 :::
 
-::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: 200 samples. The Fs pile up mostly below 1, with a long right tail: the F(1, 6) distribution, drawn over the blocks. Half the Fs are below 0.52; the line at 1 is where the two estimates agree, not the middle of the pile. The skew comes from the jumpy numerator.]
+::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
+Here's the second set of samples. In this case $MS_{\text{within}}$ came out a little lower than $\sigma^2$, and $MS_{\text{between}}$ a lot lower. Each estimate is independent, and they'll vary like that due to sampling error. The $F$ for these samples comes to $0.20$, which gets added to the tracker at the bottom.
 :::
 
-::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: the same samples from a more spread-out population. The outline grows and both squares grow with it, by exactly the same factor, so not one F changes.]
+::: {.tutorial-step data-title="A third sample" data-action='{"effect":0,"sd":36,"samples":3,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
+The third sample has a relatively big difference between the group means, just by chance. This produces the biggest $F$ so far, at $2.13$. Again, the null is true and there's no real difference, but sometimes sampling error will create an apparent difference by chance.
 :::
 
-::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-[PLACEHOLDER: now the bites really differ: two populations, 40 ms apart. Within is untouched; between grows past the outline, and the Fs move out into the tail.]
+::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+Now we take a bunch more samples, until we have 200 in total. The Fs pile up mostly below 1, with a long right tail. The dashed line at 1 is where the two estimates agree, $MS_{\text{between}} = MS_{\text{within}}$. That's what we'd expect on average, since both of those are estimating the same underlying variance. The skew comes from the jumpy numerator, coupled with the outsized effect of underestimates in the denominator, much like the $t$ ratio, except that here all the $F$ values are positive.
+:::
+
+::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+What if there was more variability in the population? We can increase $\sigma^2$, making the population curves wider and the samples more variable. This leads to some bigger values of both $MS_{\text{between}}$ and $MS_{\text{within}}$, though the $F$ values themselves will still follow the same distribution under the null, because both sides of the ratio are inflated to the same extent on average.
+:::
+
+::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+But what if the null is false, actually? Here I've created a difference between the populations; they really do have difference means. After repeated sampling, the distribution of $F$ stats is shifted to the right, because there is now a real treatment effect contributing to the numerator of the $F$ ratio, but not the denominator. (This is neat to see, but it is no longer a representation of the $F$ distribution under the null.)
 :::
 ::::
 
 :::::
 
-## The $F$ distribution(s)
-
+### The $F$ table
 <!-- FLAG: add a sentence linking this curve to the pile of Fs in @act-two-estimates. -->
 
 How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{between}$) and one for the denominator ($MS_{within}$), since each estimate rests on its own number of pieces of information.
