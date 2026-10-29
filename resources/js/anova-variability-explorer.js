@@ -146,7 +146,6 @@
       .anova-variability-explorer .ave-square { stroke-width: 1.25; }
       .anova-variability-explorer .ave-ss-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 720; }
       .anova-variability-explorer .ave-ss-value { font-size: var(--sfs-figure-small-size, 0.75rem); fill: var(--sfs-muted, #68727d); }
-      .anova-variability-explorer .ave-ms-detail { font-size: var(--sfs-figure-note-size, 0.8125rem); fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-cut-label { font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-equation { fill: currentColor; font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; }
       .anova-variability-explorer .ave-calculation-box {
@@ -207,6 +206,9 @@
     if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
     const sortValues = bool(opts.sort, true);
+    // Without the scores the figure is only the comparison, sized for that alone, so it
+    // never leaves the compare stage.
+    const showScores = bool(opts.scores, true);
     const groups = (Array.isArray(opts.groups) && opts.groups.length >= 2 ? opts.groups : DEFAULT_GROUPS)
       .map((group, index) => {
         const values = (Array.isArray(group.values) ? group.values : []).map(Number).filter(Number.isFinite);
@@ -281,9 +283,11 @@
       }
       // Compare stage: everything centred on one column. The total is sized so that, once
       // split and cut, between above the line and within below it fit with their labels,
-      // leaving room either side for the "÷ df" label.
+      // leaving room either side for the "÷ df" label and F's "= 9.91", and to the left of
+      // the total for its label. Without the scores, the figure is only as tall as this.
       const margin = compact ? 16 : 40;
-      const cutLabelRoom = compact ? 40 : 64;
+      const cutLabelRoom = compact ? 54 : 64;
+      const totalLabelRoom = 26;
       const labelRoom = 46;
       midGap = compact ? 10 : 14;
       const parts = aggregateSquares().filter((d) => d.df);
@@ -291,9 +295,12 @@
       const reach = (d, side) => Math.max(relative(d) * side, cutPieces(d, relative(d) * side).height);
       const widest = (side) => d3.max(parts, (d) => cutPieces(d, relative(d) * side).width);
       const extent = (side) => d3.sum(parts, (d) => reach(d, side)) + 2 * midGap + 2 * labelRoom;
-      let side = compact ? 240 : 340;
-      while (side > 60 &&
-        (widest(side) > width - 2 * (margin + cutLabelRoom) || extent(side) > height - 2 * margin)) side -= 2;
+      const fits = (side) => widest(side) <= width - 2 * (margin + cutLabelRoom) &&
+        side <= width - 2 * (margin + totalLabelRoom) &&
+        (!showScores || extent(side) <= height - 2 * margin);
+      let side = compact ? 240 : 320;
+      while (side > 60 && !fits(side)) side -= 2;
+      if (!showScores) height = Math.ceil(extent(side) + (compact ? 16 : 24));
       const between = parts.find((d) => d.key === "between");
       midline = (height - extent(side)) / 2 + labelRoom + reach(between, side) + midGap;
       // The total's between layer sits directly on the line, its within layer directly under it.
@@ -301,7 +308,11 @@
       x.range([plot.left, plot.right]);
     }
 
-    const initialStage = normalizeStage(opts.stage);
+    function stageFor(value) {
+      return showScores ? normalizeStage(value) : "compare";
+    }
+
+    const initialStage = stageFor(opts.stage);
     const state = {
       stage: initialStage,
       phase: phaseForStage(initialStage, normalizePhase(opts.phase, defaultPhaseForStage(initialStage))),
@@ -348,6 +359,7 @@
     const headingSubtitle = heading.append("text").attr("class", "ave-panel-subtitle");
     const squaresLayer = panelGroup.append("g").attr("class", "ave-squares");
     const msLayer = svg.append("g").attr("class", "ave-mean-squares");
+    const labelsLayer = svg.append("g").attr("class", "ave-labels");
     const fractionLayer = svg.append("g").attr("class", "ave-fraction");
     const fractionBar = fractionLayer.append("line")
       .attr("stroke", "currentColor").attr("stroke-width", 2.5).attr("stroke-linecap", "round")
@@ -394,21 +406,26 @@
         .attr("width", panel.width).attr("height", panel.height);
     }
 
-    function fmt(value) {
-      return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+    // Thousands separators, and no trailing zeros: 14,450, 1,458.3, 9.91.
+    function fmt(value, decimals) {
+      const text = d3.format(`,.${decimals === undefined ? 2 : decimals}f`)(value);
+      return text.includes(".") ? text.replace(/0+$/, "").replace(/\.$/, "") : text;
     }
 
+    // In the compare stage the figure labels its own shapes, and the box would give away
+    // the mean squares and F before the steps reach them.
     function updateCalculationBox() {
-      calculationBox.attr("hidden", state.calculations ? null : true);
-      if (!state.calculations) return;
+      const show = state.calculations && state.stage !== "compare";
+      calculationBox.attr("hidden", show ? null : true);
+      if (!show) return;
       calculationBox.html(`
         <div class="ave-calc-grid">
           <span><strong>SS<sub>total</sub></strong> = ${fmt(stats.ssTotal)}</span>
           <span><strong>SS<sub>within</sub></strong> = ${fmt(stats.ssWithin)}</span>
           <span><strong>SS<sub>between</sub></strong> = ${fmt(stats.ssBetween)}</span>
-          <span><strong>MS<sub>between</sub></strong> = ${fmt(stats.ssBetween)} / ${stats.dfBetween} = ${fmt(stats.msBetween)}</span>
-          <span><strong>MS<sub>within</sub></strong> = ${fmt(stats.ssWithin)} / ${stats.dfWithin} = ${fmt(stats.msWithin)}</span>
-          <span><strong>F</strong> = ${fmt(stats.msBetween)} / ${fmt(stats.msWithin)} = ${fmt(stats.f)}</span>
+          <span><strong>MS<sub>between</sub></strong> = ${fmt(stats.ssBetween)} / ${stats.dfBetween} = ${fmt(stats.msBetween, 1)}</span>
+          <span><strong>MS<sub>within</sub></strong> = ${fmt(stats.ssWithin)} / ${stats.dfWithin} = ${fmt(stats.msWithin, 1)}</span>
+          <span><strong>F</strong> = ${fmt(stats.msBetween, 1)} / ${fmt(stats.msWithin, 1)} = ${fmt(stats.f)}</span>
         </div>
       `);
     }
@@ -748,12 +765,86 @@
       return besideLine(d, areaSide(d.value, wideSquare));
     }
 
-    // Between is labelled above its square, within below, like a fraction's two halves.
-    // `line` 0 is the name, 1 the detail underneath it.
-    function labelYFor(d, geometry, line) {
-      return d.key === "between"
-        ? geometry.y - (line ? 12 : 30)
-        : geometry.y + geometry.height + (line ? 40 : 22);
+    // Every sum has one label for the figure's whole life, so it can travel with its shape.
+    // In the sums panel the layers are labelled inside their top-left corners and the total
+    // above the container. In the comparison, between is labelled above its shape and within
+    // below, like a fraction's two halves, and the total runs up its left side.
+    function labelLines(d) {
+      if (!wideLayout()) return { name: d.label, value: state.calculations ? `SS = ${fmt(d.value)}` : "" };
+      if (d.key === "total") return { name: state.calculations ? `SS total = ${fmt(d.value)}` : "SS total", value: "" };
+      if (isLifted(d)) return { name: `MS ${d.key}`, value: msDetail(d) };
+      return { name: `SS ${d.key}`, value: state.calculations ? fmt(d.value) : "" };
+    }
+
+    // The edge a comparison label keeps to: the total's, then the sum's, then the mean
+    // square's. While the sum is cut, `spread` gives the outer edge of its spread pieces.
+    function labelEdge(d, spread) {
+      const above = d.key === "between";
+      if (!isSplit()) return above ? wideSquare.y : wideSquare.y + wideSquare.side;
+      const sumSide = areaSide(d.value, wideSquare);
+      const reach = spread ? cutPieces(d, sumSide).height : isLifted(d) ? msGeometry(d).height : sumSide;
+      return above ? midline - midGap - reach : midline + midGap + reach;
+    }
+
+    function labelPlacement(d, spread) {
+      const none = "translate(0,0)";
+      if (!wideLayout()) {
+        const layout = panelSquare;
+        if (d.key === "total") {
+          return {
+            transform: none,
+            name: { x: layout.x, y: layout.y - 10, anchor: "start" },
+            value: { x: layout.x + layout.side, y: layout.y - 10, anchor: "end" }
+          };
+        }
+        const top = ssGeometry(d, d.value, layout).y;
+        return {
+          transform: none,
+          name: { x: layout.x + 8, y: top + 18, anchor: "start" },
+          value: { x: layout.x + 8, y: top + 34, anchor: "start" }
+        };
+      }
+      if (d.key === "total") {
+        const x = wideSquare.x - 10;
+        const y = wideSquare.y + wideSquare.side / 2;
+        return {
+          transform: `rotate(-90 ${x} ${y})`,
+          name: { x, y, anchor: "middle" },
+          value: { x, y, anchor: "middle" }
+        };
+      }
+      const edge = labelEdge(d, spread);
+      const cx = width / 2;
+      // Lines read name then value either way; between's stack up away from its shape.
+      if (d.key === "between") {
+        const hasValue = Boolean(labelLines(d).value);
+        return {
+          transform: none,
+          name: { x: cx, y: edge - (hasValue ? 28 : 10), anchor: "middle" },
+          value: { x: cx, y: edge - 10, anchor: "middle" }
+        };
+      }
+      return {
+        transform: none,
+        name: { x: cx, y: edge + 22, anchor: "middle" },
+        value: { x: cx, y: edge + 40, anchor: "middle" }
+      };
+    }
+
+    // Works on a selection or a transition; `withText` false moves a label without rewording
+    // it, and `spread` places it clear of a sum's spread pieces.
+    function placeLabel(target, d, withText, spread) {
+      const p = labelPlacement(d, spread);
+      const lines = labelLines(d);
+      target.attr("transform", p.transform);
+      const name = target.select(".ave-ss-label")
+        .attr("x", p.name.x).attr("y", p.name.y).attr("text-anchor", p.name.anchor);
+      const value = target.select(".ave-ss-value")
+        .attr("x", p.value.x).attr("y", p.value.y).attr("text-anchor", p.value.anchor);
+      if (withText !== false) {
+        name.text(lines.name);
+        value.text(lines.value);
+      }
     }
 
     const pour = { stagger: 150, flyDuration: 560, dropDuration: 240, settleDuration: 260 };
@@ -786,19 +877,17 @@
       const titleLines = setLines(headingTitle, wrapWords("Sums of squares", headingWidth / 9.2), 19);
       setLines(headingSubtitle, wrapWords(subtitleText, headingWidth / 6.3), 15);
       headingSubtitle.attr("y", titleLines * 19 + 1);
-      // On splitting, the heading clears out before the between square grows into its place.
-      heading.interrupt().transition().duration(splitting ? 240 : duration).ease(d3.easeCubicInOut)
-        .attr("transform", wide
-          ? `translate(${layout.x},${layout.y - 52})`
-          : `translate(${panel.x + inset},${panel.y + (compact ? 24 : 27)})`)
-        .style("opacity", split ? 0 : 1);
+      // The heading belongs to the panel; in the comparison the shapes' own labels say it.
+      heading.attr("transform", `translate(${panel.x + inset},${panel.y + (compact ? 24 : 27)})`)
+        .interrupt().transition().duration(animate ? 300 : 0)
+        .style("opacity", wide ? 0 : 1);
       panelGroup.select(".ave-panel").interrupt().transition().duration(animate ? 480 : 0)
         .style("opacity", wide ? 0 : 1);
 
       // Splitting is one move: the layers part at the line and square up as they go.
       const partDuration = splitting ? 420 : 0;
       const squareDuration = splitting ? 900 : duration;
-      squaresLayer.selectAll("*").interrupt().interrupt("lift");
+      squaresLayer.selectAll("*").interrupt().interrupt("lift").interrupt("tint");
       const container = squaresLayer.selectAll("rect.ave-ss-container")
         .data(aggregateRevealLevel() >= 1 ? [layout] : []);
       container.enter().insert("rect", ":first-child")
@@ -819,8 +908,6 @@
         .attr("class", "ave-square")
         .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
         .each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
-      entered.append("text").attr("class", "ave-ss-label").style("opacity", 0);
-      entered.append("text").attr("class", "ave-ss-value").style("opacity", 0);
       const merged = entered.merge(items);
       // The total has no square of its own once its layers have split away.
       merged.filter((d) => d.key === "total")
@@ -847,42 +934,12 @@
         .delay(animate ? liftDelay : 0)
         .duration(animate ? 420 : 0)
         .style("opacity", (d) => isLifted(d) ? 0 : 1);
+      // Once both layers fill the total, its own grey underneath would only tint them.
+      sumRects.filter((d) => d.key === "total").transition("tint")
+        .delay(animate && revealKey === "between" ? pourDuration : 0)
+        .duration(animate ? 400 : 0)
+        .attr("fill-opacity", aggregateRevealLevel() >= 3 ? 0 : 0.18);
 
-      // Total is labelled above the container; each layer inside its own top-left corner.
-      // Once split, each sum is labelled above its square, until its mean square takes the spot.
-      // A layer's label waits for its pour to finish so it never floats above an empty space.
-      const labelY = (d) => split && d.key !== "total"
-        ? labelYFor(d, geometry(d), 0)
-        : d.key === "total" ? layout.y - 10 : ssGeometry(d, d.value, layout).y + 18;
-      const labelDelay = (d) => driven(d) && d.key !== "total"
-        ? pourDuration
-        : splitting ? squareDuration - 200 : 0;
-      const labelX = (d) => split && d.key !== "total" ? width / 2 : d.key === "total" ? layout.x : layout.x + 8;
-      const valueX = (d) => split && d.key !== "total" ? width / 2 : d.key === "total" ? layout.x + layout.side : layout.x + 8;
-      const valueY = (d) => split && d.key !== "total" ? labelYFor(d, geometry(d), 1) : d.key === "total" ? layout.y - 10 : labelY(d) + 16;
-      const labelOpacity = (d) => isLifted(d) || (split && d.key === "total") ? 0 : 1;
-      entered.select(".ave-ss-label").attr("x", labelX).attr("y", labelY);
-      entered.select(".ave-ss-value").attr("x", valueX).attr("y", valueY);
-      const labels = merged.select(".ave-ss-label")
-        .attr("fill", (d) => d.color)
-        .attr("text-anchor", (d) => split && d.key !== "total" ? "middle" : "start");
-      // Text that is about to move is faded first, so it never slides across the figure.
-      if (splitting) labels.style("opacity", 0);
-      labels
-        .text((d) => split && d.key !== "total" ? `SS ${d.key}` : d.label)
-        .transition().delay(labelDelay).duration(splitting ? 300 : duration).ease(d3.easeCubicInOut)
-        .attr("x", labelX)
-        .attr("y", labelY)
-        .style("opacity", labelOpacity);
-      const values = merged.select(".ave-ss-value")
-        .attr("text-anchor", (d) => split && d.key !== "total" ? "middle" : d.key === "total" ? "end" : "start");
-      if (splitting) values.style("opacity", 0);
-      values
-        .text((d) => state.calculations ? `SS = ${fmt(d.value)}` : "")
-        .transition().delay(labelDelay).duration(splitting ? 300 : duration).ease(d3.easeCubicInOut)
-        .attr("x", valueX)
-        .attr("y", valueY)
-        .style("opacity", (d) => state.calculations ? labelOpacity(d) : 0);
       items.exit()
         .transition().duration(animate ? 220 : 0)
         .style("opacity", 0)
@@ -971,7 +1028,7 @@
 
     function msDetail(d) {
       return state.calculations
-        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms)}`
+        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, 1)}`
         : `SS ${d.key} ÷ ${d.df}`;
     }
 
@@ -982,21 +1039,10 @@
       const items = msLayer.selectAll("g.ave-ms-item").data(data, (d) => d.key);
       const entered = items.enter().append("g").attr("class", "ave-ms-item").style("opacity", 0);
       entered.append("rect").attr("class", "ave-square").attr("fill-opacity", 0.18).attr("stroke-width", 1.5);
-      entered.append("text").attr("class", "ave-ss-label").attr("text-anchor", "middle");
-      entered.append("text").attr("class", "ave-ms-detail").attr("text-anchor", "middle");
       const merged = entered.merge(items);
       merged.select("rect")
         .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
         .each(function(d) { setRect(d3.select(this), msGeometry(d)); });
-      merged.select(".ave-ss-label")
-        .attr("fill", (d) => d.color)
-        .attr("x", width / 2)
-        .attr("y", (d) => labelYFor(d, msGeometry(d), 0))
-        .text((d) => `MS ${d.key}`);
-      merged.select(".ave-ms-detail")
-        .attr("x", width / 2)
-        .attr("y", (d) => labelYFor(d, msGeometry(d), 1))
-        .text(msDetail);
       // The square being built stays hidden until animateMeanSquare hands it over.
       merged.filter((d) => !(animate && d.key === revealKey))
         .transition().duration(animate ? 300 : 0)
@@ -1005,30 +1051,42 @@
       items.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
     }
 
-    // Cut a sum of squares into df equal pieces, which part and square up in one move, then
-    // stack back by the line. The pieces are all the same size, so the stack is one share:
-    // the mean square.
-    function animateMeanSquare(revealKey, delay) {
-      const d = aggregateSquares().find((item) => item.key === revealKey);
-      if (!d) return;
+    // Cutting a sum of squares into its mean square, planned once so the pieces and the label
+    // keep the same time. Times are absolute, from the start of the step.
+    function planCut(key, delay) {
+      const d = aggregateSquares().find((item) => item.key === key);
       const ss = ssSquareGeometry(d);
-      const target = msGeometry(d);
       const { cells, piece, width: cutWidth } = cutPieces(d, ss.width);
-      const cx = width / 2;
-      const cy = ss.y + ss.height / 2;
-      // Stacked translucent pieces would darken; they fade as they gather so the stack reads as one square.
-      const pieceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
-      const strokeOpacity = 1 - Math.pow(1 - 0.9, 1 / d.df);
-      // Planned as absolute times; chained transitions take their delay from the previous one's end.
       const cutDuration = 420;
       const spreadAt = delay + cutDuration + 200;
       const spreadDuration = d.df > 1 ? 720 : 0;
       const stackStart = spreadAt + spreadDuration + (d.df > 1 ? 450 : 300);
       const stackDuration = 760;
+      // The outermost pieces set off first, so they all land close together.
       const stagger = Math.min(45, 360 / d.df);
       const lastOrder = d3.max(cells, (s) => s.order);
+      cells.forEach((s) => { s.stackDelay = (lastOrder - s.order) * stagger; });
+      return {
+        d, ss, cells, piece, cutWidth,
+        target: msGeometry(d),
+        cx: width / 2,
+        cy: ss.y + ss.height / 2,
+        delay, cutDuration, spreadAt, spreadDuration, stackStart, stackDuration,
+        landAt: stackStart + d3.max(cells, (s) => s.stackDelay) + stackDuration
+      };
+    }
+
+    // Cut a sum of squares into df equal pieces, which part and square up in one move, then
+    // stack back by the line. The pieces are all the same size, so the stack is one share:
+    // the mean square.
+    function animateMeanSquare(plan) {
+      const { d, cells, piece, cutWidth, target, cx, cy, delay, cutDuration, spreadAt, spreadDuration,
+        stackStart, stackDuration } = plan;
+      // Stacked translucent pieces would darken; they fade as they gather so the stack reads as one square.
+      const pieceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
+      const strokeOpacity = 1 - Math.pow(1 - 0.9, 1 / d.df);
       let landed = 0;
-      // The label sits level with the middle of the spread pieces.
+      // The "÷ df" label sits level with the middle of the spread pieces.
       const spreadMiddle = cy + (d3.min(cells, (s) => s.spread.y) + d3.max(cells, (s) => s.spread.y) + piece) / 2;
 
       transferLayer.append("text")
@@ -1057,7 +1115,7 @@
         .transition().delay(spreadAt - delay - cutDuration).duration(spreadDuration).ease(d3.easeCubicInOut)
         .attr("x", (s) => cx + s.spread.x).attr("y", (s) => cy + s.spread.y)
         .attr("width", piece).attr("height", piece)
-        .transition().delay((s) => stackStart - spreadAt - spreadDuration + (lastOrder - s.order) * stagger)
+        .transition().delay((s) => stackStart - spreadAt - spreadDuration + s.stackDelay)
         .duration(stackDuration).ease(d3.easeCubicInOut)
         .attr("x", target.x).attr("y", target.y)
         .attr("fill-opacity", pieceOpacity)
@@ -1065,22 +1123,75 @@
         .on("end", () => {
           landed += 1;
           if (landed < d.df) return;
-          msLayer.selectAll("g.ave-ms-item").filter((item) => item.key === revealKey).style("opacity", 1);
+          msLayer.selectAll("g.ave-ms-item").filter((item) => item.key === d.key).style("opacity", 1);
         })
         .remove();
+    }
+
+    // Labels move with their shapes. When the layout itself changes (panel to comparison)
+    // they fade out and back rather than fly across the figure, and a label whose sum is
+    // being cut into its mean square rides down with the stack and rewords as it lands.
+    function renderLabels(animate, moves) {
+      labelsLayer.selectAll("*").interrupt().interrupt("reword");
+      const data = aggregateSquares().filter((d) => aggregateRevealLevel() >= d.reveal);
+      const labels = labelsLayer.selectAll("g.ave-label").data(data, (d) => d.key);
+      const entered = labels.enter().append("g").attr("class", "ave-label").style("opacity", 0);
+      entered.append("text").attr("class", "ave-ss-label").attr("fill", (d) => d.color);
+      entered.append("text").attr("class", "ave-ss-value");
+      entered.each(function(d) { placeLabel(d3.select(this), d); });
+      labels.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
+      const merged = entered.merge(labels);
+      // The total's label goes with the total once it has split.
+      const opacity = (d) => isSplit() && d.key === "total" ? 0 : 1;
+
+      merged.each(function(d) {
+        const label = d3.select(this);
+        if (!animate) {
+          placeLabel(label, d);
+          label.style("opacity", opacity(d));
+          return;
+        }
+        if (moves.layoutChanged) {
+          label.transition().duration(200).style("opacity", 0)
+            .transition().duration(0).call(placeLabel, d)
+            .transition().delay(moves.layoutDelay).duration(300).style("opacity", opacity(d));
+          return;
+        }
+        if (moves.cut && moves.cut.d.key === d.key) {
+          // Out with the pieces as they spread, then in with the stack.
+          const { spreadAt, spreadDuration, stackStart, landAt } = moves.cut;
+          label.style("opacity", 1)
+            .transition().delay(spreadAt).duration(spreadDuration).ease(d3.easeCubicInOut)
+            .call(placeLabel, d, false, true)
+            .transition().delay(stackStart - spreadAt - spreadDuration).duration(landAt - stackStart)
+            .ease(d3.easeCubicInOut)
+            .call(placeLabel, d, false);
+          const lines = labelLines(d);
+          label.selectAll("text").transition("reword").delay(landAt - 150).duration(150).style("opacity", 0)
+            .transition().duration(220).style("opacity", 1)
+            .text(function() { return this.classList.contains("ave-ss-label") ? lines.name : lines.value; });
+          return;
+        }
+        // A layer still being poured is labelled once its pour has finished.
+        const delay = d.key === moves.revealKey && d.key !== "total" ? pourDuration : 0;
+        label.transition().delay(delay).duration(moves.splitting ? 900 : 760).ease(d3.easeCubicInOut)
+          .call(placeLabel, d)
+          .style("opacity", opacity(d));
+      });
     }
 
     // F is the fraction itself: the gap the two have kept since the partition gets its bar.
     function renderFraction(animate) {
       const show = state.phase === "f";
       const cx = width / 2;
-      const half = d3.max(aggregateSquares().filter((d) => d.df), (d) => msGeometry(d).side) / 2 + (compact ? 14 : 22);
+      const half = d3.max(aggregateSquares().filter((d) => d.df), (d) => msGeometry(d).side) / 2 + (compact ? 8 : 22);
+      const textGap = compact ? 8 : 14;
       fractionLayer.selectAll("*").interrupt();
       fractionLeft
-        .attr("x", cx - half - 14).attr("y", midline + 7)
+        .attr("x", cx - half - textGap).attr("y", midline + 7)
         .text("F =");
       fractionRight
-        .attr("x", cx + half + 14).attr("y", midline + 7)
+        .attr("x", cx + half + textGap).attr("y", midline + 7)
         .text(state.calculations ? `= ${fmt(stats.f)}` : "");
       fractionBar
         .attr("y1", midline).attr("y2", midline)
@@ -1147,9 +1258,10 @@
         : null;
       const splitting = animate && state.phase === "split" &&
         lastRenderedStage === "compare" && lastRenderedPhase === "partition";
-      // Moving the total out of the panel comes first; the lift waits for it.
-      const wasWide = lastRenderedStage === "compare" && COMPARE_PHASES.indexOf(lastRenderedPhase) >= 1;
-      const layoutDelay = animate && wideLayout() !== wasWide ? 800 : 0;
+      // Moving the total out of the panel comes first; anything after waits for it.
+      const layoutChanged = lastRenderedStage !== null && wideLayout() !== (lastRenderedStage === "compare");
+      const layoutDelay = animate && layoutChanged ? 800 : 0;
+      const cut = msKey ? planCut(msKey, layoutDelay) : null;
       svg.select(".ave-title").text(stageDescription());
       plotGroup.interrupt().transition().duration(animate ? 500 : 0)
         .style("opacity", wideLayout() ? 0 : 1);
@@ -1161,8 +1273,9 @@
       renderDots(animate);
       renderSquares(animate, revealKey, layoutDelay, splitting);
       renderMeanSquares(animate, msKey);
+      renderLabels(animate, { layoutChanged, layoutDelay, cut, splitting, revealKey });
       animateContributions(revealKey, animate);
-      if (msKey) animateMeanSquare(msKey, layoutDelay);
+      if (cut) animateMeanSquare(cut);
       renderFraction(animate);
       updateCalculationBox();
       lastRenderedStage = state.stage;
@@ -1172,7 +1285,7 @@
     function applyTutorialAction(action) {
       if (!action || typeof action !== "object") return;
       if (action.stage !== undefined) {
-        state.stage = normalizeStage(action.stage);
+        state.stage = stageFor(action.stage);
         state.phase = action.phase === undefined
           ? defaultPhaseForStage(state.stage)
           : phaseForStage(state.stage, normalizePhase(action.phase, defaultPhaseForStage(state.stage)));
@@ -1193,7 +1306,7 @@
 
     rootNode.anovaVariabilityExplorer = {
       setStage(stage, animate) {
-        state.stage = normalizeStage(stage);
+        state.stage = stageFor(stage);
         state.phase = defaultPhaseForStage(state.stage);
         render({ animate: animate !== false });
       },
