@@ -299,43 +299,39 @@ Let's see!
 ::::: {#act-two-estimates .callout-tip .interactive}
 ## Sampling the two estimates
 
-{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","leadSamples":[1,2,123],"groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSample":false,"showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. More spread grows both together; a real difference between the populations grows only the between-groups estimate, and F moves away from 1." >}}
+{{< interactive-figure anovaTwoEstimates makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","leadSamples":[1,2,123],"groups":["Radioactive","Ordinary"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSample":false,"showSigma":true,"showEstimates":false,"showTracker":false,"msMax":9000,"fMax":15,"binWidth":0.5}' fallback="Two groups of four reaction times are sampled again and again. When both come from one population, the between-groups and within-groups mean squares both land near the population variance, and their ratio F is usually near or below 1. With more spread in the population, both estimates grow together and the Fs follow the same curve." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="One population" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":false,"lanes":"sample","show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
+::: {.tutorial-step data-title="One population" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":false,"lanes":"sample","show-sigma":true,"show-estimates":false,"show-tracker":false,"show-curve":false,"animate":false}'}
 We're saying the null hypothesis is true: the spider bite makes no difference. So I've drawn two population curves with the same center (and same variability). The population variance is represented as the dashed square. Since there's no treatment effect, that variance reflects the only source of variability in the data, and it will be captured in both the within-groups and between-groups mean squares.
 :::
 
-::: {.tutorial-step data-title="MS within" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"within","show-sigma":true,"show-estimates":"within","show-tracker":false,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="MS within" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"within","show-sigma":true,"show-estimates":"within","show-tracker":false,"show-curve":false,"animate":true}'}
 Now we collect two samples. (The data is different from @tbl-bites-two because here we're simulating repeated sampling under a true null.) First, we can compute $MS_{\text{within}}$ from the deviations of each score from its group mean, just like we did in @act-anova-viz. It comes out pretty close to the population variance, because it is effectively just estimating that quantity (which it would be whether there was a treatment effect or not).
 :::
 
-::: {.tutorial-step data-title="MS between" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"between","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="MS between" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"between","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
 Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Dividing the sum of these squares ($SS_{\text{between}}$) by the between-groups degrees of freedom (1) gives $MS_{\text{between}}$. In this case it also comes out close to the population variance, because with no treatment effect, it is also just estimating that same underlying variance.
 :::
 
-::: {.tutorial-step data-title="Record F" data-action='{"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+::: {.tutorial-step data-title="Record F" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
 Dividing $MS_{\text{between}}$ by $MS_{\text{within}}$ gives the $F$ ratio for this sample, which in this case is $F = 1{,}233 / 1{,}503 = 0.82$. This value is then recorded in the tracker as the first entry. We'll collect a bunch of these and see how they distribute.
 :::
 
-::: {.tutorial-step data-title="Another sample" data-action='{"effect":0,"sd":36,"samples":2,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
+::: {.tutorial-step data-title="Another sample" data-action='{"batch":0,"effect":0,"sd":36,"samples":2,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
 Here's the second set of samples. In this case $MS_{\text{within}}$ came out quite a bit lower than $\sigma^2$, and $MS_{\text{between}}$ a lot lower. The two estimates vary independently of each other, and they'll miss like that due to sampling error. The $F$ for these samples comes to $0.20$, which gets added to the tracker at the bottom.
 :::
 
-::: {.tutorial-step data-title="A third sample" data-action='{"effect":0,"sd":36,"samples":3,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
+::: {.tutorial-step data-title="A third sample" data-action='{"batch":0,"effect":0,"sd":36,"samples":3,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"replay":true,"animate":true}'}
 The third sample has a relatively big difference between the group means, just by chance, and a small $MS_{\text{within}}$, because the scores *within* each group happened to be fairly close together. This produces the biggest $F$ so far, at $2.13$. Again, the null is true and there's no real difference, but sometimes sampling error will create an apparent difference by chance.
 :::
 
-::: {.tutorial-step data-title="Many samples" data-action='{"effect":0,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+::: {.tutorial-step data-title="Many samples" data-action='{"batch":0,"effect":0,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
 Now we take a bunch more samples, until we have 200 in total. The curve drawn over the pile is the mathematical $F$ distribution with 1 and 6 degrees of freedom; the histogram of our 200 $F$s follows it pretty closely. The $F$s pile up mostly below 1, with a long right tail. The skew comes from the jumpy numerator, coupled with the outsized effect of underestimates in the denominator (which gave the $t$ distribution its heavier tails).
 :::
 
-::: {.tutorial-step data-title="More spread" data-action='{"effect":0,"sd":54,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-What if there was more variability in the population? We can increase $\sigma^2$, making the population curves wider and the samples more variable. This leads to some bigger values of both $MS_{\text{between}}$ and $MS_{\text{within}}$, though the $F$ values themselves will still follow the same distribution under the null, because both sides of the ratio are inflated to the same extent on average.
-:::
-
-::: {.tutorial-step data-title="A real difference" data-action='{"effect":40,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-But what if the null is false, actually? Here I've created a difference between the populations; they really do have different means. After repeated sampling, the distribution of $F$ ratios is stretched out to the right, because there is now a real treatment effect contributing to the numerator of the $F$ ratio, but not the denominator. (This is neat to see, but it is no longer a representation of the $F$ distribution under the null.)
+::: {.tutorial-step data-title="More spread" data-action='{"batch":1,"effect":0,"sd":54,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+What if there was more variability in the population? We can increase $\sigma^2$, making the population curves wider, and take 200 new samples. Both $MS_{\text{between}}$ and $MS_{\text{within}}$ come out bigger, since they're now estimating a bigger $\sigma^2$. But the $F$ values still follow the same curve under the null, because both sides of the ratio scale up together.
 :::
 ::::
 
@@ -343,6 +339,20 @@ But what if the null is false, actually? Here I've created a difference between 
 
 ### The $F$ table
 <!-- FLAG: add a sentence linking this curve to the pile of Fs in @act-two-estimates. -->
+<!-- TODO: explain why F isn't 1 on average under the null, and why it gets close with more df
+     (this table, where clicking cells reshapes the curve, is the natural place; the cover animates
+     the same family). Both mean squares average σ², but the average of a ratio isn't the ratio of
+     the averages:
+     - Denominator: misses in MS_within balance out, but dividing by them doesn't. Half of σ²
+       doubles F; 1.5 × σ² only shrinks it to 0.67 (average 1.33, not 1). So the mean is above 1:
+       df2 / (df2 − 2), 1.5 for F(1, 6), approaching 1 as df2 grows.
+     - Numerator: with df1 = 1, MS_between is one squared chance difference, usually small and
+       occasionally huge (half the time under about 0.45σ²). So most Fs are below 1 (median 0.52
+       for F(1, 6)) while a few large ones pull the mean up.
+     - More df steadies both estimates (SD √(2/df) × σ²), so F tightens into a hump near 1. More df1
+       mostly fixes the shape (the pile near 0 lifts into a hump); more df2 mostly pulls in the
+       tail. -->
+
 
 How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{\text{between}}$) and one for the denominator ($MS_{\text{within}}$), since each estimate rests on its own number of pieces of information.
 
@@ -682,6 +692,23 @@ The observed $F = 8.38$ falls beyond the critical value of the null $F$ distribu
 Since we got a significant test statistic, we want to know the effect size. For ANOVA, our measure of effect size is called eta squared ($\eta^2$). This reflects the percentage of variance accounted for by the treatment effect. Now, maybe that sounds familiar — this is the same concept as $r^2$, another measure of effect size that we introduced in the context of the $t$ test previously, which reflects the proportion of variance explained by the treatment effect. For ANOVA, we find $\eta^2$ by dividing $SS_{\text{between}}$ by $SS_{\text{total}}$.
 
 $$\eta^2 = \frac{SS_{\text{between}}}{SS_{\text{total}}} = \frac{21{,}800}{33{,}500} = 0.65$$
+
+<!-- TODO: a power subsection here (like Chs 12-13's Step 5), cut from @act-two-estimates on
+     2026-10-29. A second mount of makeAnovaTwoEstimates can open straight onto a real effect, e.g.
+     options effect 40, batch 2, samples 200, showSample/showEstimates/showTracker/showCurve true.
+     With a 40 ms difference, σ = 36 and n = 4 per group, about 22% of Fs land beyond F(1, 6)'s 5.99,
+     against about 4.5% in the null runs: that 22% is the study's power (Ch 9: the share of the
+     alternative distribution beyond the critical value). The numerator gains a term for the
+     effect; the denominator doesn't, so the pile stretches right of the null curve.
+     Possibly sliders for σ, n per group and the group difference, to show how each moves power
+     (more n also changes df, so the critical value moves too). The figure would need reader
+     controls for that; at present it's step-driven only.
+     The cut step's text, for reuse:
+     "But what if the null is false, actually? Here I've created a difference between the
+     populations; they really do have different means. After repeated sampling, the distribution of
+     $F$ ratios is stretched out to the right, because there is now a real treatment effect
+     contributing to the numerator of the $F$ ratio, but not the denominator. (This is neat to see,
+     but it is no longer a representation of the $F$ distribution under the null.)" -->
 
 ### Post-Hoc Tests
 

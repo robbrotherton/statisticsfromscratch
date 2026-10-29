@@ -11,11 +11,12 @@
 // which is the mean square.
 //
 // The scores are μ + effect·c_g + σ·z, with the z's fixed per sample index.
-// `leadSamples` lists seed indices to show first (the ones the text walks
-// through), and the rest follow in order.
-// So changing σ or the effect reshapes the same sample rather than drawing a
-// new one: more spread scales both mean squares together (F unchanged), and a
-// bigger effect grows only MS between.
+// So changing σ or the effect alone reshapes the same sample rather than
+// drawing a new one: more spread scales both mean squares together (F
+// unchanged), and a bigger effect grows only MS between. A new `batch` is a
+// fresh set of samples from the same seed, for steps that sample again under
+// new settings. In batch 0, `leadSamples` lists seed indices to show first (the
+// ones the text walks through), and the rest follow in order.
 
 // The arithmetic, kept free of the DOM so the tests can check it.
 window.sfsAnovaTwoEstimates = (function() {
@@ -105,6 +106,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     effect: finite(opts.effect, 0),
     sd: sdReference,
     samples: Math.max(1, Math.min(maxSamples, Math.round(finite(opts.samples, 1)))),
+    batch: Math.max(0, Math.round(finite(opts.batch, 0))),
     showSample: opts.showSample !== false,
     lanes: lanesFrom(opts.lanes),
     showSigma: opts.showSigma === true,
@@ -120,8 +122,13 @@ window.makeAnovaTwoEstimates = function(opts) {
   for (let i = 1; order.length < maxSamples; i += 1) if (!lead.includes(i)) order.push(i);
   const zCache = new Map();
   function zFor(s) {
-    if (!zCache.has(s)) zCache.set(s, core.standardScores(seed, order[s - 1], k, n));
-    return zCache.get(s);
+    const key = `${state.batch}:${s}`;
+    if (!zCache.has(key)) {
+      zCache.set(key, state.batch === 0
+        ? core.standardScores(seed, order[s - 1], k, n)
+        : core.standardScores(`${seed}:batch-${state.batch}`, s, k, n));
+    }
+    return zCache.get(key);
   }
   function summaryFor(s, effect = state.effect) {
     return core.summarize(core.scores(zFor(s), { mu, effect, sd: state.sd }));
@@ -882,10 +889,11 @@ window.makeAnovaTwoEstimates = function(opts) {
     const index = context && Number.isInteger(context.index) ? context.index : null;
     const backwards = index !== null && lastStep !== null && index < lastStep;
     if (index !== null) lastStep = index;
-    const before = { effect: state.effect, sd: state.sd, lanes: state.lanes, showSample: state.showSample, shown: { ...state.shown } };
+    const before = { effect: state.effect, sd: state.sd, batch: state.batch, lanes: state.lanes, showSample: state.showSample, shown: { ...state.shown } };
     const trackerWasShown = state.showTracker;
     if ("effect" in action) state.effect = finite(action.effect, state.effect);
     if ("sd" in action) state.sd = Math.max(1, finite(action.sd, state.sd));
+    if ("batch" in action) state.batch = Math.max(0, Math.round(finite(action.batch, state.batch)));
     if ("show-sample" in action) state.showSample = Boolean(action["show-sample"]);
     if ("lanes" in action) state.lanes = lanesFrom(action.lanes);
     if ("show-sigma" in action) state.showSigma = Boolean(action["show-sigma"]);
@@ -901,7 +909,7 @@ window.makeAnovaTwoEstimates = function(opts) {
         : Math.max(1, Math.min(maxSamples, Math.round(finite(action.samples, previous))));
     }
     const animate = mounted && !backwards && action.animate !== false && motionAllows(true);
-    const paramsChanged = before.effect !== state.effect || before.sd !== state.sd;
+    const paramsChanged = before.effect !== state.effect || before.sd !== state.sd || before.batch !== state.batch;
     // A mean square is built only when stepping forward to the step that first
     // shows it, with the lanes showing its deviations.
     const building = ["within", "between"].find((kind) => state.lanes === kind && state.shown[kind] && !before.shown[kind]);
