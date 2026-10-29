@@ -118,24 +118,8 @@
       .anova-variability-explorer .ave-mean-line { stroke-width: 2.5; stroke-dasharray: 5 4; }
       .anova-variability-explorer .ave-grand-line { stroke: var(--ave-total); stroke-width: 2.5; stroke-dasharray: 8 5; }
       .anova-variability-explorer .ave-mean-label { font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
-      .anova-variability-explorer .ave-deviation { fill: none; stroke-width: 2; opacity: 0.72; }
-      .anova-variability-explorer .ave-deviation-cap { stroke-width: 1.5; opacity: 0.72; }
-      .anova-variability-explorer .ave-deviation-square {
-        fill-opacity: 0.075;
-        stroke-width: 1.15;
-        stroke-opacity: 0.58;
-      }
-      .anova-variability-explorer .ave-ghost {
-        fill-opacity: 0.22;
-        stroke-width: 1.25;
-        stroke-opacity: 0.5;
-        stroke-dasharray: 2 2;
-      }
       .anova-variability-explorer .ave-transfer-layer {
         pointer-events: none;
-      }
-      .anova-variability-explorer .ave-transfer-square {
-        stroke-width: 1.25;
       }
       .anova-variability-explorer .ave-panel {
         fill: color-mix(in srgb, var(--sfs-control-bg, #f1f3f5) 62%, transparent);
@@ -146,7 +130,6 @@
       .anova-variability-explorer .ave-square { stroke-width: 1.25; }
       .anova-variability-explorer .ave-ss-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 720; }
       .anova-variability-explorer .ave-ss-value { font-size: var(--sfs-figure-small-size, 0.75rem); fill: var(--sfs-muted, #68727d); }
-      .anova-variability-explorer .ave-cut-label { font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; fill: var(--sfs-muted, #68727d); }
       .anova-variability-explorer .ave-equation { fill: currentColor; font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; }
       .anova-variability-explorer .ave-calculation-box {
         margin-top: 0.45rem;
@@ -203,6 +186,8 @@
   window.makeAnovaVariabilityExplorer = function(opts) {
     opts = opts || {};
     ensureStyles();
+    const squares = window.sfsAnovaSquares;
+    squares.ensureStyles();
     if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
     const sortValues = bool(opts.sort, true);
@@ -237,7 +222,6 @@
     // real size on phones instead of shrinking with a fixed viewBox. Below
     // COMPACT_BELOW the sums panel moves under the dot plot.
     const COMPACT_BELOW = 700;
-    const pieceGap = 6;
     const longestName = d3.max(groups, (group) => group.name.length) || 6;
     let width;
     let height;
@@ -463,7 +447,7 @@
     }
 
     function targetY(d) {
-      return groupY(d.groupIndex) + (d.index - (groups[d.groupIndex].values.length - 1) / 2) * 5;
+      return groupY(d.groupIndex) + squares.laneOffset(d.index, groups[d.groupIndex].values.length);
     }
 
     function renderLanes(animate) {
@@ -500,19 +484,13 @@
     }
 
     function renderGhosts(animate) {
-      const ghosts = ghostsLayer.selectAll("circle.ave-ghost")
-        .data(state.stage === "between" ? stats.observations : [], (d) => `${d.groupIndex}-${d.index}`);
-      ghosts.enter().append("circle")
-        .attr("class", "ave-ghost")
-        .attr("r", 6)
-        .attr("cx", (d) => x(d.value))
-        .attr("cy", targetY)
-        .attr("fill", (d) => colors[d.groupIndex % colors.length])
-        .attr("stroke", (d) => colors[d.groupIndex % colors.length])
-        .style("opacity", 0)
-        .transition().duration(animate ? 420 : 0)
-        .style("opacity", 1);
-      ghosts.exit().interrupt().transition().duration(animate ? 260 : 0).style("opacity", 0).remove();
+      const items = state.stage !== "between" ? [] : stats.observations.map((d) => ({
+        key: `${d.groupIndex}-${d.index}`,
+        x: x(d.value),
+        y: targetY(d),
+        color: colors[d.groupIndex % colors.length]
+      }));
+      squares.renderGhosts(ghostsLayer, items, { animate });
     }
 
     function renderDots(animate) {
@@ -550,15 +528,7 @@
     }
 
     function deviationSquareGeometry(d) {
-      const side = Math.abs(x(d.from) - x(d.to));
-      let y = d.y;
-      if (d.groupIndex === groups.length - 1) y -= side;
-      else if (d.groupIndex !== 0 && d.index % 2 === 0) y -= side;
-      return {
-        x: Math.min(x(d.from), x(d.to)),
-        y,
-        side
-      };
+      return squares.deviationSquare(x(d.from), x(d.to), d.y, d.groupIndex, groups.length, d.index);
     }
 
     function phaseIndex() {
@@ -569,67 +539,20 @@
     function renderDeviations(animate, transitions) {
       transitions = transitions || {};
       const showLines = ["total", "within", "between"].includes(state.stage) && phaseIndex() >= 1;
-      const showSquares = showLines && phaseIndex() >= 2;
-      const data = showLines ? deviationData() : [];
-      const deviations = deviationLayer.selectAll("g.ave-deviation-group")
-        .data(data, (d) => `${d.groupIndex}-${d.index}`);
-      const entered = deviations.enter().append("g").attr("class", "ave-deviation-group").style("opacity", 0);
-      entered.append("rect").attr("class", "ave-deviation-square");
-      entered.append("line").attr("class", "ave-deviation");
-      entered.append("line").attr("class", "ave-deviation-cap");
-      const merged = entered.merge(deviations);
-      const square = merged.select(".ave-deviation-square")
-        .interrupt()
-        .attr("fill", (d) => d.color)
-        .attr("stroke", (d) => d.color)
-        .attr("x", (d) => deviationSquareGeometry(d).x)
-        .attr("width", (d) => deviationSquareGeometry(d).side);
-      if (showSquares && transitions.growSquares) {
-        square
-          .attr("y", (d) => d.y)
-          .attr("height", 0)
-          .style("opacity", 0)
-          .transition().duration(animate ? 620 : 0).ease(d3.easeCubicOut)
-          .attr("y", (d) => deviationSquareGeometry(d).y)
-          .attr("height", (d) => deviationSquareGeometry(d).side)
-          .style("opacity", 1);
-      } else if (showSquares) {
-        square
-          .attr("y", (d) => deviationSquareGeometry(d).y)
-          .attr("height", (d) => deviationSquareGeometry(d).side)
-          .style("opacity", 1);
-      } else {
-        square
-          .attr("y", (d) => d.y)
-          .attr("height", 0)
-          .style("opacity", 0);
-      }
-
-      const line = merged.select(".ave-deviation")
-        .interrupt()
-        .attr("stroke", (d) => d.color)
-        .attr("x1", (d) => x(d.from))
-        .attr("y1", (d) => d.y).attr("y2", (d) => d.y);
-      const cap = merged.select(".ave-deviation-cap")
-        .interrupt()
-        .attr("stroke", (d) => d.color)
-        .attr("x1", (d) => x(d.to)).attr("x2", (d) => x(d.to))
-        .attr("y1", (d) => d.y - 5).attr("y2", (d) => d.y + 5);
-      if (transitions.drawLines) {
-        line
-          .attr("x2", (d) => x(d.from))
-          .transition().duration(animate ? 560 : 0).ease(d3.easeCubicInOut)
-          .attr("x2", (d) => x(d.to));
-        cap
-          .style("opacity", 0)
-          .transition().delay(animate ? 420 : 0).duration(animate ? 180 : 0)
-          .style("opacity", 1);
-      } else {
-        line.attr("x2", (d) => x(d.to));
-        cap.style("opacity", 1);
-      }
-      merged.interrupt().transition().duration(animate ? 380 : 0).style("opacity", 1);
-      deviations.exit().transition().duration(animate ? 180 : 0).style("opacity", 0).remove();
+      const items = (showLines ? deviationData() : []).map((d) => ({
+        key: `${d.groupIndex}-${d.index}`,
+        x1: x(d.from),
+        x2: x(d.to),
+        y: d.y,
+        color: d.color,
+        square: deviationSquareGeometry(d)
+      }));
+      squares.renderDeviations(deviationLayer, items, {
+        animate,
+        squares: showLines && phaseIndex() >= 2,
+        drawLines: transitions.drawLines,
+        growSquares: transitions.growSquares
+      });
     }
 
     function renderMeans(animate) {
@@ -698,41 +621,9 @@
       return comparePhaseIndex() >= 1;
     }
 
-    // Cut a sum of squares of the given side into df pieces of equal area that tile it exactly.
-    // Rows share the pieces out as evenly as they can (6 is 3 + 3, 7 is 4 + 3); each row's
-    // height is its share of the area, so every piece is close to square. Positions are
-    // relative to the square's centre; `spread` is where each piece moves so that, once
-    // squared up, it clears its neighbours. Between's pieces keep standing on the line and
-    // within's keep hanging from it. `width` and `height` are the most room the cut takes.
+    // Between's cut pieces keep standing on the line and within's keep hanging from it.
     function cutPieces(d, side) {
-      const rows = Math.ceil(d.df / Math.ceil(Math.sqrt(d.df)));
-      const counts = d3.range(rows).map((r) => Math.floor(d.df / rows) + (r < d.df % rows ? 1 : 0));
-      const piece = side / Math.sqrt(d.df);
-      const rowHeights = counts.map((n) => side * n / d.df);
-      const spreadHeights = rowHeights.map((h) => Math.max(h, piece));
-      const spreadTotal = d3.sum(spreadHeights) + (rows - 1) * pieceGap;
-      const hangs = d.key === "within";
-      const cells = [];
-      let cutTop = -side / 2;
-      let spreadTop = hangs ? -side / 2 : side / 2 - spreadTotal;
-      counts.forEach((n, r) => {
-        const w = side / n;
-        const h = rowHeights[r];
-        const stepX = Math.max(w, piece) + pieceGap;
-        d3.range(n).forEach((c) => {
-          cells.push({
-            k: cells.length,
-            cut: { x: -side / 2 + c * w, y: cutTop, w, h },
-            // Squared up, a piece keeps to the edge of its row nearest the line.
-            spread: { x: (c - (n - 1) / 2) * stepX - piece / 2, y: hangs ? spreadTop : spreadTop + spreadHeights[r] - piece },
-            order: Math.hypot(c - (n - 1) / 2, r - (rows - 1) / 2)
-          });
-        });
-        cutTop += h;
-        spreadTop += spreadHeights[r] + pieceGap;
-      });
-      const width = d3.max(counts, (n, r) => n * Math.max(side / n, piece) + (n - 1) * pieceGap);
-      return { cells, piece, width: Math.max(side, width), height: Math.max(side, spreadTotal) };
+      return squares.cutPieces(d.df, side, d.key === "within" ? "top" : "bottom");
     }
 
     function squareLayout() {
@@ -847,9 +738,8 @@
       }
     }
 
-    const pour = { stagger: 150, flyDuration: 560, dropDuration: 240, settleDuration: 260 };
     // Every sum receives one piece per score (between sends each group's square once per score).
-    const pourDuration = 80 + (stats.N - 1) * pour.stagger + pour.flyDuration + pour.dropDuration + pour.settleDuration;
+    const pourDuration = squares.pourDuration(stats.N);
 
     function isLifted(d) {
       return Boolean(d.msPhase) && comparePhaseIndex() >= d.msPhase;
@@ -962,62 +852,16 @@
       if (!target || !contributions.length) return;
 
       const layout = panelSquare;
-      let running = 0;
-      contributions.forEach((d) => {
-        const squared = Math.pow(d.from - d.to, 2);
-        const surface = ssGeometry(target, running, layout).y;
-        running += squared;
-        d.side = areaSide(squared, layout);
-        d.mouth = { x: layout.x + (layout.side - d.side) / 2, y: layout.y - d.side - 6 };
-        d.landY = surface - d.side;
-        d.sum = ssGeometry(target, running, layout);
-        d.film = { y: d.sum.y, height: surface - d.sum.y };
+      squares.pour(transferLayer, {
+        pieces: contributions.map((d) => {
+          const value = Math.pow(d.from - d.to, 2);
+          return { from: deviationSquareGeometry(d), side: areaSide(value, layout), value, color: d.color };
+        }),
+        color: target.color,
+        level: (value) => ssGeometry(target, value, layout),
+        mouth: { x: layout.x + layout.side / 2, y: layout.y },
+        sumRect
       });
-      const { stagger, flyDuration, dropDuration, settleDuration } = pour;
-
-      transferLayer.selectAll("rect.ave-transfer-square")
-        .data(contributions, (d) => `${d.groupIndex}-${d.index}-${d.copyIndex}`)
-        .join("rect")
-        .attr("class", "ave-transfer-square")
-        .attr("fill", (d) => d.color)
-        .attr("fill-opacity", 0.16)
-        .attr("stroke", (d) => d.color)
-        .attr("stroke-opacity", 0.75)
-        .attr("x", (d) => deviationSquareGeometry(d).x)
-        .attr("y", (d) => deviationSquareGeometry(d).y)
-        .attr("width", (d) => deviationSquareGeometry(d).side)
-        .attr("height", (d) => deviationSquareGeometry(d).side)
-        .transition()
-        .delay((d, i) => 80 + i * stagger)
-        .duration(flyDuration)
-        .ease(d3.easeCubicInOut)
-        .attr("x", (d) => d.mouth.x)
-        .attr("y", (d) => d.mouth.y)
-        .attr("width", (d) => d.side)
-        .attr("height", (d) => d.side)
-        .attr("fill", target.color)
-        .attr("stroke", target.color)
-        .attr("fill-opacity", 0.3)
-        .attr("stroke-opacity", 0.85)
-        .transition()
-        .duration(dropDuration)
-        .ease(d3.easeQuadIn)
-        .attr("y", (d) => d.landY)
-        .transition()
-        .duration(settleDuration)
-        .ease(d3.easeCubicOut)
-        .on("start", (d) => {
-          sumRect.transition().duration(settleDuration).ease(d3.easeCubicOut)
-            .attr("y", d.sum.y)
-            .attr("height", d.sum.height);
-        })
-        .attr("x", layout.x)
-        .attr("y", (d) => d.film.y)
-        .attr("width", layout.side)
-        .attr("height", (d) => d.film.height)
-        .attr("fill-opacity", 0)
-        .attr("stroke-opacity", 0)
-        .remove();
     }
 
     // Each mean square takes its sum's place by the line, so F needs no further move.
@@ -1056,76 +900,28 @@
     function planCut(key, delay) {
       const d = aggregateSquares().find((item) => item.key === key);
       const ss = ssSquareGeometry(d);
-      const { cells, piece, width: cutWidth } = cutPieces(d, ss.width);
-      const cutDuration = 420;
-      const spreadAt = delay + cutDuration + 200;
-      const spreadDuration = d.df > 1 ? 720 : 0;
-      const stackStart = spreadAt + spreadDuration + (d.df > 1 ? 450 : 300);
-      const stackDuration = 760;
-      // The outermost pieces set off first, so they all land close together.
-      const stagger = Math.min(45, 360 / d.df);
-      const lastOrder = d3.max(cells, (s) => s.order);
-      cells.forEach((s) => { s.stackDelay = (lastOrder - s.order) * stagger; });
-      return {
-        d, ss, cells, piece, cutWidth,
-        target: msGeometry(d),
+      const plan = squares.planCut({
+        df: d.df,
+        side: ss.width,
         cx: width / 2,
         cy: ss.y + ss.height / 2,
-        delay, cutDuration, spreadAt, spreadDuration, stackStart, stackDuration,
-        landAt: stackStart + d3.max(cells, (s) => s.stackDelay) + stackDuration
-      };
+        align: d.key === "within" ? "top" : "bottom",
+        target: msGeometry(d),
+        delay
+      });
+      return { ...plan, d };
     }
 
     // Cut a sum of squares into df equal pieces, which part and square up in one move, then
     // stack back by the line. The pieces are all the same size, so the stack is one share:
     // the mean square.
     function animateMeanSquare(plan) {
-      const { d, cells, piece, cutWidth, target, cx, cy, delay, cutDuration, spreadAt, spreadDuration,
-        stackStart, stackDuration } = plan;
-      // Stacked translucent pieces would darken; they fade as they gather so the stack reads as one square.
-      const pieceOpacity = 1 - Math.pow(1 - 0.18, 1 / d.df);
-      const strokeOpacity = 1 - Math.pow(1 - 0.9, 1 / d.df);
-      let landed = 0;
-      // The "÷ df" label sits level with the middle of the spread pieces.
-      const spreadMiddle = cy + (d3.min(cells, (s) => s.spread.y) + d3.max(cells, (s) => s.spread.y) + piece) / 2;
-
-      transferLayer.append("text")
-        .attr("class", "ave-cut-label")
-        .attr("text-anchor", "start")
-        .attr("x", cx + cutWidth / 2 + 14)
-        .attr("y", spreadMiddle + 6)
-        .text(`÷ ${d.df}`)
-        .style("opacity", 0)
-        .transition().delay(delay + 200).duration(260).style("opacity", 1)
-        .transition().delay(stackStart - delay - 460).duration(300).style("opacity", 0)
-        .remove();
-
-      // The cut fades in over the sum as the sum itself fades, so the area never flickers.
-      transferLayer.selectAll("rect.ave-slice")
-        .data(cells)
-        .join("rect")
-        .attr("class", "ave-slice ave-transfer-square")
-        .attr("fill", d.color).attr("stroke", d.color)
-        .attr("stroke-width", 1.5)
-        .attr("fill-opacity", 0).attr("stroke-opacity", 0)
-        .attr("x", (s) => cx + s.cut.x).attr("y", (s) => cy + s.cut.y)
-        .attr("width", (s) => s.cut.w).attr("height", (s) => s.cut.h)
-        .transition().delay(delay).duration(cutDuration)
-        .attr("fill-opacity", 0.18).attr("stroke-opacity", 1)
-        .transition().delay(spreadAt - delay - cutDuration).duration(spreadDuration).ease(d3.easeCubicInOut)
-        .attr("x", (s) => cx + s.spread.x).attr("y", (s) => cy + s.spread.y)
-        .attr("width", piece).attr("height", piece)
-        .transition().delay((s) => stackStart - spreadAt - spreadDuration + s.stackDelay)
-        .duration(stackDuration).ease(d3.easeCubicInOut)
-        .attr("x", target.x).attr("y", target.y)
-        .attr("fill-opacity", pieceOpacity)
-        .attr("stroke-opacity", strokeOpacity)
-        .on("end", () => {
-          landed += 1;
-          if (landed < d.df) return;
-          msLayer.selectAll("g.ave-ms-item").filter((item) => item.key === d.key).style("opacity", 1);
-        })
-        .remove();
+      squares.animateCut(transferLayer, plan, {
+        color: plan.d.color,
+        onLanded() {
+          msLayer.selectAll("g.ave-ms-item").filter((item) => item.key === plan.d.key).style("opacity", 1);
+        }
+      });
     }
 
     // Labels move with their shapes. When the layout itself changes (panel to comparison)

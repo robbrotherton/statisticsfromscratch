@@ -4,10 +4,19 @@
 // drawn as squares around a dashed outline of the population variance σ².
 // Each sample's F drops into a tracker below, as Chapter 7's sample means do.
 //
+// The first time each mean square is shown, it is built as the ANOVA explorer
+// builds it (the shared drawing is in anova-squares.js): the lanes show every
+// deviation with its square, the squares pour into a sum of squares centred on
+// the mean square's own σ² outline, and the sum is cut into df pieces, one of
+// which is the mean square.
+//
 // The scores are μ + effect·c_g + σ·z, with the z's fixed per sample index.
-// So changing σ or the effect reshapes the same sample rather than drawing a
-// new one: more spread scales both mean squares together (F unchanged), and a
-// bigger effect grows only MS between.
+// So changing σ or the effect alone reshapes the same sample rather than
+// drawing a new one: more spread scales both mean squares together (F
+// unchanged), and a bigger effect grows only MS between. A new `batch` is a
+// fresh set of samples from the same seed, for steps that sample again under
+// new settings. In batch 0, `leadSamples` lists seed indices to show first (the
+// ones the text walks through), and the rest follow in order.
 
 // The arithmetic, kept free of the DOM so the tests can check it.
 window.sfsAnovaTwoEstimates = (function() {
@@ -56,8 +65,10 @@ window.makeAnovaTwoEstimates = function(opts) {
   const core = window.sfsAnovaTwoEstimates;
   const visuals = window.sfsSamplingVisuals;
   const stats = window.sfsStats;
+  const squares = window.sfsAnovaSquares;
   const finite = (value, fallback) => Number.isFinite(Number(value)) ? Number(value) : fallback;
   visuals.ensureStyles();
+  squares.ensureStyles();
 
   const names = Array.isArray(opts.groups) && opts.groups.length >= 2 ? opts.groups.map(String) : ["Group 1", "Group 2"];
   const k = names.length;
@@ -66,8 +77,9 @@ window.makeAnovaTwoEstimates = function(opts) {
   const mu = finite(opts.mu, 250);
   const xMin = finite(opts.xMin, mu - 170);
   const xMax = finite(opts.xMax, mu + 170);
-  // The squares share one area scale across every state, so a mean square
-  // that doubles really is drawn twice as big. msMax fills the panel.
+  // The squares share one area scale across every state, the lanes' own, so a
+  // mean square that doubles really is drawn twice as big. The estimates strip
+  // is sized to hold a square of msMax.
   const msMax = finite(opts.msMax, 12000);
   // The F tracker's axis; larger Fs stack in its last bin.
   const fMax = finite(opts.fMax, 15);
@@ -79,20 +91,44 @@ window.makeAnovaTwoEstimates = function(opts) {
   // Reference spread: population curves are drawn at this σ's full height,
   // and a wider population is a lower one, as a density should be.
   const sdReference = finite(opts.sd, 36);
+  // Which mean squares are shown: true for both, false for neither, or one by name.
+  function estimatesFrom(value) {
+    if (value === "within" || value === "between") return { within: value === "within", between: value === "between" };
+    const all = value !== false;
+    return { within: all, between: all };
+  }
+  // What the lanes show: the sample as usual, or (while a mean square is built)
+  // the explorer's within- or between-groups deviations with their squares.
+  function lanesFrom(value) {
+    return value === "within" || value === "between" ? value : "sample";
+  }
   const state = {
     effect: finite(opts.effect, 0),
     sd: sdReference,
     samples: Math.max(1, Math.min(maxSamples, Math.round(finite(opts.samples, 1)))),
+    batch: Math.max(0, Math.round(finite(opts.batch, 0))),
+    showSample: opts.showSample !== false,
+    lanes: lanesFrom(opts.lanes),
     showSigma: opts.showSigma === true,
-    showEstimates: opts.showEstimates !== false,
+    shown: estimatesFrom(opts.showEstimates),
     showTracker: opts.showTracker === true,
     showCurve: opts.showCurve === true
   };
+  const anyEstimates = () => state.shown.within || state.shown.between;
 
+  const lead = (Array.isArray(opts.leadSamples) ? opts.leadSamples : [])
+    .map(Number).filter((i) => Number.isInteger(i) && i > 0);
+  const order = lead.slice();
+  for (let i = 1; order.length < maxSamples; i += 1) if (!lead.includes(i)) order.push(i);
   const zCache = new Map();
   function zFor(s) {
-    if (!zCache.has(s)) zCache.set(s, core.standardScores(seed, s, k, n));
-    return zCache.get(s);
+    const key = `${state.batch}:${s}`;
+    if (!zCache.has(key)) {
+      zCache.set(key, state.batch === 0
+        ? core.standardScores(seed, order[s - 1], k, n)
+        : core.standardScores(`${seed}:batch-${state.batch}`, s, k, n));
+    }
+    return zCache.get(key);
   }
   function summaryFor(s, effect = state.effect) {
     return core.summarize(core.scores(zFor(s), { mu, effect, sd: state.sd }));
@@ -155,6 +191,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     .anova-two-estimates .ate-f,
     .anova-two-estimates .ate-bar.is-current { fill: var(--sfs-accent, #2c7fb8); opacity: 1; }
     .anova-two-estimates .ate-f-curve { fill: none; stroke: var(--sfs-null-color, currentColor); stroke-width: 2; }
+    .anova-two-estimates .ate-sum-outline { fill: none; stroke-width: 1.5; stroke-dasharray: 4 3; }
   `);
 
   const chartWrap = root.append("div").attr("class", "ate-chart-wrap sfs-chart-wrap");
@@ -190,20 +227,27 @@ window.makeAnovaTwoEstimates = function(opts) {
   // bigger one; the title and F come last so a large square never covers them.
   // Before the estimates arrive, σ² is shown alone: both outlines sit on one
   // spot, and they split apart when the mean squares join them.
+  // A mean square being built is held back (its `hold` group hidden) until its
+  // pieces land; holds are wrappers so they never fight the reveal classes.
   const estimateGroups = ["between", "within"].map((kind) => {
     const g = estimatesLayer.append("g");
-    const square = g.append("rect").attr("class", `ate-square is-${kind}`);
+    const squareHold = g.append("g");
+    const square = squareHold.append("rect").attr("class", `ate-square is-${kind}`);
     const sigma = g.append("rect").attr("class", "ate-sigma");
     const sigmaLabel = g.append("text").attr("class", "ate-sigma-label").attr("text-anchor", "end").text("σ²");
-    const text = g.append("g");
+    const textHold = g.append("g");
+    const text = textHold.append("g");
     const label = text.append("text").attr("class", `ate-ms-label is-${kind}`).attr("text-anchor", "middle").text(kind === "between" ? "MS between" : "MS within");
     const value = text.append("text").attr("class", "ate-ms-value").attr("text-anchor", "middle");
-    return { kind, g, sigma, sigmaLabel, square, text, label, value };
+    return { kind, g, sigma, sigmaLabel, square, text, label, value, holds: [squareHold, textHold] };
   });
   const sigmaTitle = estimatesLayer.append("text").attr("class", "ate-panel-title").text(opts.sigmaLabel || "Population variance");
   const sigmaValue = estimatesLayer.append("text").attr("class", "ate-ms-value").attr("text-anchor", "middle");
   const estimatesTitle = estimatesLayer.append("text").attr("class", "ate-panel-title").text(opts.estimatesLabel || "Two estimates of σ²");
-  const fText = estimatesLayer.append("text").attr("class", "ate-f");
+  const fHold = estimatesLayer.append("g");
+  const fText = fHold.append("text").attr("class", "ate-f");
+  // The pours and cuts that build a mean square, on top of everything.
+  const transferLayer = svg.append("g").attr("class", "anova-transfer");
 
   let width = finite(opts.width, 760);
   let layout = null;
@@ -227,9 +271,14 @@ window.makeAnovaTwoEstimates = function(opts) {
     const estLeft = wide ? lanesRight + 36 : 12;
     const estRight = width - 12;
     const estTop = wide ? top : lanesEnd + 16;
-    const maxSide = wide
-      ? Math.max(60, Math.min((estRight - estLeft - 24) / 2, 170))
-      : Math.max(60, Math.min(140, Math.min((estRight - estLeft) / 2, 160) - 12));
+    // Squares are drawn on the lanes' own scale (a deviation of d ms is a square
+    // d ms on a side), so a square keeps its size from lane to sum to mean square.
+    // The strip is sized for msMax at that scale, or the room there is if less.
+    const unit = (lanesRight - lanesLeft) / (xMax - xMin);
+    const room = wide
+      ? Math.min((estRight - estLeft - 24) / 2, 170)
+      : Math.min(140, Math.min((estRight - estLeft) / 2, 160) - 12);
+    const maxSide = Math.min(room, Math.sqrt(msMax) * unit);
     const estBase = estTop + (wide ? 40 + maxSide : 26 + maxSide * 0.66);
     const estMid = estBase - (wide ? maxSide / 2 : maxSide * 0.36);
     const sideCap = maxSide + (wide ? 24 : 8);
@@ -242,7 +291,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     // On a phone the figure stops under the estimates until the tracker is
     // shown, rather than holding its empty space.
     const shortHeight = wide ? height : Math.ceil(estEnd + 6);
-    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, maxSide, sideCap, estBase, estMid, trackerTop, trackerPlotTop, trackerBase, height, shortHeight, plotLeft: 12, plotRight: width - 12 };
+    return { wide, laneH, top, lanesLeft, lanesRight, laneTop, lanesBottom, axisY, estLeft, estRight, estTop, unit, maxSide, sideCap, estBase, estMid, trackerTop, trackerPlotTop, trackerBase, height, shortHeight, plotLeft: 12, plotRight: width - 12 };
   }
 
   function laneY(g) {
@@ -250,7 +299,7 @@ window.makeAnovaTwoEstimates = function(opts) {
   }
 
   function sideFor(ms) {
-    return layout.maxSide * Math.sqrt(Math.max(0, ms) / msMax);
+    return layout.unit * Math.sqrt(Math.max(0, ms));
   }
 
   function populationPoints(g) {
@@ -265,15 +314,40 @@ window.makeAnovaTwoEstimates = function(opts) {
     }));
   }
 
-  function stackDots(values, g) {
-    const r = 6;
-    const placed = [];
-    return values.map((value, i) => ({ value, i })).sort((a, b) => a.value - b.value).map((d) => {
-      let level = 0;
-      while (placed.some((p) => p.level === level && Math.abs(x(p.value) - x(d.value)) < 2 * r + 1)) level += 1;
-      placed.push({ value: d.value, level });
-      return { g, i: d.i, value: d.value, y: laneY(g) - level * (2 * r + 1) };
-    });
+  // Sorted scores stack top to bottom in x order, a few pixels apart, as in the
+  // ANOVA explorer, so each one's deviation line and square has its own row.
+  function laneDots(values, g) {
+    const ranks = new Map(values.map((value, i) => ({ value, i })).sort((a, b) => a.value - b.value).map((d, rank) => [d.i, rank]));
+    return values.map((value, i) => ({ g, i, rank: ranks.get(i), value, y: laneY(g) + squares.laneOffset(ranks.get(i), values.length) }));
+  }
+
+  // The explorer's deviations for one kind of variability, each with its square:
+  // every score from its group mean, or each group mean from the grand mean (one
+  // square per group, standing in for all n of its scores).
+  function laneDeviations(kind, dotsByLane, summary) {
+    if (kind === "within") {
+      return dotsByLane.flat().map((d) => {
+        const mean = summary.means[d.g];
+        return {
+          key: `${d.g}-${d.i}`, g: d.g, x1: x(d.value), x2: x(mean), y: d.y,
+          color: colors[d.g % colors.length],
+          square: squares.deviationSquare(x(d.value), x(mean), d.y, d.g, k, d.rank),
+          value: (d.value - mean) ** 2, weight: 1
+        };
+      });
+    }
+    if (kind === "between") {
+      return d3.range(k).map((g) => {
+        const mean = summary.means[g];
+        return {
+          key: `${g}-between`, g, x1: x(mean), x2: x(summary.grandMean), y: laneY(g),
+          color: colors[g % colors.length],
+          square: squares.deviationSquare(x(mean), x(summary.grandMean), laneY(g), g, k, 0),
+          value: (mean - summary.grandMean) ** 2, weight: n
+        };
+      });
+    }
+    return [];
   }
 
   // Counts per bin of the first `count` samples' Fs, and the newest one's bin.
@@ -296,6 +370,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     const pops = state.effect === 0
       ? `All ${k} groups are sampled from one population`
       : `The ${k} groups are sampled from populations whose means differ by up to ${d3.format("~g")(state.effect)}`;
+    if (!state.showSample) return `${pops}, with σ = ${d3.format("~g")(state.sd)}, so σ² = ${msFormat(state.sd ** 2)}. No sample has been drawn yet.`;
     return `${pops}, with σ = ${d3.format("~g")(state.sd)}, so σ² = ${msFormat(state.sd ** 2)}. ` +
       `In this sample MS between is ${msFormat(summary.msBetween)} and MS within is ${msFormat(summary.msWithin)}, so F = ${fFormat(summary.f)}. ` +
       (state.showTracker ? `${state.samples} samples so far.` : "");
@@ -370,26 +445,135 @@ window.makeAnovaTwoEstimates = function(opts) {
       });
   }
 
+  // Where a mean square sits in the estimates panel, and its top-left corner.
+  function estimateTarget(kind, summary) {
+    const L = layout;
+    const colW = Math.min((L.estRight - L.estLeft) / 2, 160);
+    const colsLeft = (L.estLeft + L.estRight) / 2 - colW;
+    const i = kind === "between" ? 0 : 1;
+    const cx = anyEstimates() ? colsLeft + colW * (i + 0.5) : (L.estLeft + L.estRight) / 2;
+    const ms = kind === "between" ? summary.msBetween : summary.msWithin;
+    const side = Math.min(sideFor(ms), L.sideCap);
+    return { cx, ms, side, x: cx - side / 2, y: L.estMid - side / 2 };
+  }
+
+  // Building a mean square, timed from the start of its step: the sample drops in
+  // (the first time), the deviations draw (once the last step's have gone), their
+  // squares grow, then pour and cut.
+  function buildTimes(dropping, speed) {
+    const dropEnd = dropping ? 60 * (n - 1) + 380 : 0;
+    const lineDelay = (dropping ? dropEnd : 50) + 250 / speed;
+    const squareDelay = lineDelay + (squares.LINE_DURATION + 250) / speed;
+    return { dropEnd, lineDelay, squareDelay, pourDelay: squareDelay + (squares.SQUARE_DURATION + 350) / speed };
+  }
+
+  // The squares pour into their sum of squares, which builds centred on the mean
+  // square's own σ² outline, so the sum, its cut and the mean square all share one
+  // centre. The sum is then cut into df pieces that stack into the mean square.
+  // Returns when the mean square lands, from the start of the step.
+  function runBuild(kind, devs, summary, times, speed) {
+    const L = layout;
+    const color = kind === "within" ? "var(--ate-within)" : "var(--ate-between)";
+    const ss = kind === "within" ? summary.ssWithin : summary.ssBetween;
+    const df = kind === "within" ? summary.dfWithin : summary.dfBetween;
+    const side = sideFor(ss);
+    const target = estimateTarget(kind, summary);
+    // Centred on the outline wherever there's room; on a narrow screen it moves in
+    // just far enough for the sum and its spread pieces to stay on the page.
+    const half = Math.max(side, squares.cutPieces(df, side).width) / 2;
+    const cx = Math.max(L.plotLeft + half, Math.min(L.plotRight - half, target.cx));
+    const cy = L.estMid;
+    const box = { x: cx - side / 2, y: cy - side / 2 };
+    const level = (value) => ({ x: box.x, y: box.y + side * (1 - value / ss), width: side, height: side * value / ss });
+
+    const sum = transferLayer.append("g").style("opacity", 0);
+    sum.append("rect").attr("class", "ate-sum-outline")
+      .attr("x", box.x).attr("y", box.y).attr("width", side).attr("height", side)
+      .attr("stroke", color);
+    const sumRect = sum.append("rect")
+      .attr("fill", color).attr("fill-opacity", 0.18).attr("stroke", color).attr("stroke-width", 1.5)
+      .attr("x", box.x).attr("y", box.y + side).attr("width", side).attr("height", 0);
+    // Labelled underneath, where the mean square's own label will be.
+    sum.append("text").attr("class", `ate-ms-label is-${kind}`)
+      .attr("text-anchor", "middle")
+      .attr("x", cx).attr("y", box.y + side + 18)
+      .text(`SS ${kind}`);
+    sum.transition().delay(times.pourDelay - 250 / speed).duration(250 / speed).style("opacity", 1);
+
+    const pourEnd = squares.pour(transferLayer, {
+      pieces: devs.flatMap((d) => d3.range(d.weight).map(() => ({ from: d.square, side: sideFor(d.value), value: d.value, color: d.color }))),
+      color,
+      level,
+      mouth: { x: cx, y: box.y },
+      sumRect,
+      delay: times.pourDelay,
+      speed
+    });
+    const plan = squares.planCut({ df, side, cx, cy, target, delay: pourEnd + 300 / speed, speed });
+    sum.transition("cut").delay(plan.delay).duration(plan.cutDuration).style("opacity", 0).remove();
+    squares.animateCut(transferLayer, plan, {
+      color,
+      labelSide: "below",
+      onLanded() {
+        held.delete(kind);
+        const holds = estimateGroups.find((est) => est.kind === kind).holds.concat(held.size ? [] : [fHold]);
+        holds.forEach((hold) => hold.transition().duration(250).style("opacity", 1));
+      }
+    });
+    return plan.landAt;
+  }
+
+  // Mean squares still being built are held hidden, and so is F until both are
+  // in; during a replay the newest F's slice waits too, and the lanes show the
+  // deviations being built rather than the step's own view.
+  let held = new Set();
+  let sliceHeld = false;
+  let lanesOverride = null;
+
   // mode: "none" (snap), "morph" (same sample, the σ² outline splitting or
-  // rejoining), "swap" (new settings: the old sample fades out and a new one
-  // drops in), "sample" (a new sample drops in), or "fast" (one frame of a
-  // fast run).
-  function draw(mode) {
+  // rejoining, or the lanes changing what they show), "build" (a mean square
+  // built: see runBuild; opts.build names it, opts.fresh drops a new sample in
+  // first, opts.speed quickens it), "swap" (new settings: the old sample fades
+  // out and a new one drops in), "sample" (a new sample drops in), "record" (the
+  // tracker arriving), or "fast" (one frame of a fast run). Returns when a
+  // build's mean square lands.
+  let drawnShowSample = null;
+  let drawnTracker = false;
+  // On a phone the tracker arrives with the figure growing to hold it, so it
+  // waits for the room before it fades in.
+  let trackerTimer = null;
+  function draw(mode, opts) {
+    opts = opts || {};
     layout = computeLayout();
     const L = layout;
     const swap = mode === "swap";
-    const duration = mode === "morph" || swap ? 900 : mode === "sample" ? 550 : 0;
+    const build = mode === "build" ? opts.build : null;
+    const speed = opts.speed || 1;
+    const animated = mode !== "none" && mode !== "fast";
+    const duration = mode === "morph" || swap ? 900 : mode === "build" || mode === "record" ? 600 : mode === "sample" ? 550 : 0;
     const t = (selection) => duration ? selection.transition().duration(duration).ease(d3.easeCubicInOut) : selection;
     // Parts of the old sample are hidden in a swap, so they move straight to
     // their new places.
     const ts = swap ? (selection) => selection : t;
     svg.selectAll(".ate-ghost").interrupt().remove();
+    transferLayer.selectAll("*").interrupt().interrupt("cut").remove();
     if (swap) leaveGhosts();
-    setHeight(state.showTracker ? L.height : L.shortHeight, mode !== "none" && mode !== "fast");
+    setHeight(state.showTracker ? L.height : L.shortHeight, animated);
+    const trackerArriving = animated && state.showTracker && !drawnTracker && L.shortHeight !== L.height;
+    if (trackerTimer) trackerTimer.stop();
+    trackerTimer = null;
     x.range([L.lanesLeft, L.lanesRight]);
 
     const groups = core.scores(zFor(state.samples), { mu, effect: state.effect, sd: state.sd });
     const summary = core.summarize(groups);
+    const sampleAppeared = state.showSample && drawnShowSample === false;
+    // A sample dropping in for a build shows only its dots as they fall, and then
+    // the group means; the usual lines stay hidden rather than fading out.
+    const appearing = Boolean(build && (sampleAppeared || opts.fresh));
+    const times = build ? buildTimes(appearing, speed) : null;
+    const lanesNow = lanesOverride || state.lanes;
+    const dotsByLane = d3.range(k).map((g) => laneDots(groups[g], g));
+    const devs = laneDeviations(lanesNow, dotsByLane, summary);
 
     // Lanes: population behind, sample in front.
     const lanes = laneLayer.selectAll("g.ate-lane-group")
@@ -401,7 +585,9 @@ window.makeAnovaTwoEstimates = function(opts) {
         pop.append("path").attr("class", "ate-pop-line");
         g.append("line").attr("class", "ate-lane");
         g.append("text").attr("class", "ate-group-label");
-        const sample = g.append("g").attr("class", "ate-sample");
+        // The hold hides the whole sample before one is drawn.
+        const sample = g.append("g").attr("class", "ate-sample-hold").append("g").attr("class", "ate-sample");
+        sample.append("g").attr("class", "ate-dev-layer");
         sample.append("g").attr("class", "ate-within-layer");
         sample.append("line").attr("class", "ate-arm");
         sample.append("line").attr("class", "ate-mean-line");
@@ -410,6 +596,7 @@ window.makeAnovaTwoEstimates = function(opts) {
       });
     const area = d3.area().x((d) => d.x).y0((d) => d.base).y1((d) => d.y);
     const line = d3.line().x((d) => d.x).y((d) => d.y);
+    const usual = lanesNow === "sample";
     lanes.each(function(g) {
       const lane = d3.select(this);
       const color = colors[g % colors.length];
@@ -428,32 +615,52 @@ window.makeAnovaTwoEstimates = function(opts) {
         .style("fill", color)
         .text(names[g]);
 
+      const now = (selection) => selection;
+      const hold = lane.select(".ate-sample-hold").interrupt();
+      (appearing ? hold : t(hold)).style("opacity", state.showSample ? 1 : 0);
       const sample = lane.select(".ate-sample");
       const mean = summary.means[g];
-      ts(sample.select(".ate-mean-line")).attr("x1", x(mean)).attr("x2", x(mean)).attr("y1", y - 24).attr("y2", y + 22).style("stroke", color);
-      ts(sample.select(".ate-arm")).attr("x1", x(summary.grandMean)).attr("x2", x(mean)).attr("y1", y + 16).attr("y2", y + 16);
+      const meanLine = sample.select(".ate-mean-line").interrupt("appear");
+      (appearing ? now : ts)(meanLine).attr("x1", x(mean)).attr("x2", x(mean)).attr("y1", y - 24).attr("y2", y + 22).style("stroke", color);
+      if (appearing) meanLine.style("opacity", 0).transition("appear").delay(times.dropEnd).duration(300).style("opacity", 1);
+      else meanLine.style("opacity", null);
+      (appearing ? now : ts)(sample.select(".ate-arm")).attr("x1", x(summary.grandMean)).attr("x2", x(mean)).attr("y1", y + 16).attr("y2", y + 16)
+        .style("opacity", usual ? 1 : 0);
 
-      const dots = stackDots(groups[g], g);
+      const dots = dotsByLane[g];
       const within = sample.select(".ate-within-layer").selectAll("line").data(dots, (d) => d.i)
         .join("line").attr("class", "ate-within-line");
       ts(within).attr("x1", (d) => x(d.value)).attr("x2", x(mean)).attr("y1", (d) => d.y).attr("y2", (d) => d.y);
+      (appearing ? now : t)(sample.select(".ate-within-layer")).style("opacity", usual ? 1 : 0);
 
+      squares.renderDeviations(sample.select(".ate-dev-layer"), devs.filter((d) => d.g === g), {
+        animate: animated,
+        squares: true,
+        drawLines: Boolean(build),
+        growSquares: Boolean(build),
+        lineDelay: times && times.lineDelay,
+        squareDelay: times && times.squareDelay,
+        speed
+      });
+      const dotX = (d) => x(d.value);
       const circles = sample.select(".ate-dot-layer").selectAll("circle").data(dots, (d) => d.i)
         .join("circle").attr("class", "ate-dot").attr("r", 6).style("fill", color);
-      if (mode === "sample" || swap) {
+      if (mode === "sample" || swap || appearing) {
         // A new sample: each score drops into its lane from the population.
         const start = swap ? arriveMs : 0;
-        circles.interrupt().attr("cx", (d) => x(d.value)).attr("cy", (d) => d.y - L.laneH * 0.5).style("opacity", 0)
+        circles.interrupt().attr("cx", dotX).attr("cy", (d) => d.y - L.laneH * 0.5).style("opacity", 0)
           .transition().delay((d) => start + d.i * 60).duration(380).ease(d3.easeQuadIn)
           .attr("cy", (d) => d.y).style("opacity", 1);
       } else {
-        ts(circles.interrupt().style("opacity", 1)).attr("cx", (d) => x(d.value)).attr("cy", (d) => d.y);
+        ts(circles.interrupt().style("opacity", 1)).attr("cx", dotX).attr("cy", (d) => d.y);
       }
     });
 
     const grandGroup = laneLayer.selectAll("g.ate-grand").data([0]).join("g").attr("class", "ate-grand ate-sample");
     const grand = grandGroup.selectAll("line").data([0]).join("line").attr("class", "ate-grand-line");
-    ts(grand).attr("x1", x(summary.grandMean)).attr("x2", x(summary.grandMean)).attr("y1", L.laneTop - 6).attr("y2", L.lanesBottom);
+    // Within-groups deviations are measured from the group means alone.
+    ts(grand).attr("x1", x(summary.grandMean)).attr("x2", x(summary.grandMean)).attr("y1", L.laneTop - 6).attr("y2", L.lanesBottom)
+      .style("opacity", state.showSample && lanesNow !== "within" ? 1 : 0);
 
     axisLayer.attr("transform", `translate(0,${L.axisY})`)
       .call(d3.axisBottom(x).ticks(Math.max(3, Math.floor((L.lanesRight - L.lanesLeft) / 70))).tickSizeOuter(0));
@@ -461,23 +668,27 @@ window.makeAnovaTwoEstimates = function(opts) {
 
     // Estimates: each square shares its σ² outline's centre.
     const sigmaSide = sideFor(state.sd ** 2);
-    // On a wider phone layout the pair stays together in the middle.
-    const colW = Math.min((L.estRight - L.estLeft) / 2, 160);
-    const colsLeft = (L.estLeft + L.estRight) / 2 - colW;
     const estMidX = (L.estLeft + L.estRight) / 2;
     sigmaTitle.attr("x", L.estLeft).attr("y", L.estTop + 4);
     estimatesTitle.attr("x", L.estLeft).attr("y", L.estTop + 4);
     sigmaValue.attr("x", estMidX).attr("y", L.estMid + sigmaSide / 2 + 18).text(`σ² = ${msFormat(state.sd ** 2)}`);
-    estimateGroups.forEach((est, i) => {
-      const cx = state.showEstimates ? colsLeft + colW * (i + 0.5) : estMidX;
-      const ms = est.kind === "between" ? summary.msBetween : summary.msWithin;
-      const side = Math.min(sideFor(ms), L.sideCap);
+    // The labels share a row under the strip, moved down under a square that reaches lower.
+    const labelY = Math.max(L.estBase + (L.wide ? 20 : 24),
+      ...estimateGroups.filter((est) => state.shown[est.kind]).map((est) => {
+        const target = estimateTarget(est.kind, summary);
+        return target.y + target.side + 16;
+      }));
+    estimateGroups.forEach((est) => {
+      const target = estimateTarget(est.kind, summary);
+      const cx = target.cx;
       t(est.sigma).attr("x", cx - sigmaSide / 2).attr("y", L.estMid - sigmaSide / 2).attr("width", sigmaSide).attr("height", sigmaSide);
       t(est.sigmaLabel).attr("x", cx + sigmaSide / 2 - 3).attr("y", L.estMid - sigmaSide / 2 - 4);
-      ts(est.square).attr("x", cx - side / 2).attr("y", L.estMid - side / 2).attr("width", side).attr("height", side);
-      est.label.attr("x", cx).attr("y", L.estBase + (L.wide ? 20 : 24));
-      est.value.attr("x", cx).attr("y", L.estBase + (L.wide ? 36 : 39)).text(msFormat(ms));
+      ts(est.square).attr("x", target.x).attr("y", target.y).attr("width", target.side).attr("height", target.side);
+      est.label.attr("x", cx).attr("y", labelY);
+      est.value.attr("x", cx).attr("y", labelY + (L.wide ? 16 : 15)).text(msFormat(target.ms));
+      est.holds.forEach((hold) => hold.interrupt().style("opacity", held.has(est.kind) ? 0 : null));
     });
+    fHold.interrupt().style("opacity", held.size ? 0 : null);
     // F goes under the squares beside the lanes, and at the end of the title
     // row on a phone.
     fText
@@ -527,11 +738,11 @@ window.makeAnovaTwoEstimates = function(opts) {
     // reaching down into its bar rather than above it.
     const sliceTop = L.trackerBase - counts[newestBin] * unitHeight;
     const sliceH = Math.max(unitHeight, 2.5);
-    currentBar.interrupt().attr("display", fs.length ? null : "none");
+    currentBar.interrupt().attr("display", fs.length && !sliceHeld ? null : "none");
     if (mode === "sample" || mode === "record") {
       currentBar.attr("x", fx(newestBin * binWidth) + 0.5).attr("width", barW)
         .attr("y", sliceTop + sliceH).attr("height", 0)
-        .transition().delay(mode === "sample" ? 450 : 150).duration(320).ease(d3.easeCubicOut)
+        .transition().delay(mode === "sample" ? 450 : trackerArriving ? heightMs + revealMs : 150).duration(320).ease(d3.easeCubicOut)
         .attr("y", sliceTop).attr("height", sliceH);
     } else {
       currentBar.attr("x", fx(newestBin * binWidth) + 0.5).attr("width", barW)
@@ -561,18 +772,26 @@ window.makeAnovaTwoEstimates = function(opts) {
     const reveal = window.interactiveFigure && window.interactiveFigure.setRevealVisible;
     const animate = mode !== "none" && mode !== "fast";
     if (reveal) {
-      reveal(estimatesLayer, state.showSigma || state.showEstimates, { root: rootNode, animate });
-      const estimateParts = estimateGroups.flatMap((est) => [est.square.node(), est.text.node()]).concat([estimatesTitle.node(), fText.node()]);
-      reveal(estimateParts, state.showEstimates, { root: rootNode, animate });
-      reveal([sigmaTitle.node(), sigmaValue.node()], !state.showEstimates, { root: rootNode, animate });
-      reveal(trackerGroup, state.showTracker, { root: rootNode, animate });
-      reveal(curvePath, state.showTracker && state.showCurve, { root: rootNode, animate });
+      reveal(estimatesLayer, state.showSigma || anyEstimates(), { root: rootNode, animate });
+      estimateGroups.forEach((est) => reveal([est.square.node(), est.text.node()], state.shown[est.kind], { root: rootNode, animate }));
+      reveal(estimatesTitle, anyEstimates(), { root: rootNode, animate });
+      reveal(fText, state.shown.within && state.shown.between, { root: rootNode, animate });
+      reveal([sigmaTitle.node(), sigmaValue.node()], !anyEstimates(), { root: rootNode, animate });
+      const showTracker = () => {
+        reveal(trackerGroup, state.showTracker, { root: rootNode, animate });
+        reveal(curvePath, state.showTracker && state.showCurve, { root: rootNode, animate });
+      };
+      if (trackerArriving) trackerTimer = d3.timeout(showTracker, heightMs);
+      else showTracker();
     }
 
     const description = describe(summary);
     svg.attr("aria-label", description);
     svgTitle.text(description);
     setValue(summary, fs);
+    drawnShowSample = state.showSample;
+    drawnTracker = state.showTracker;
+    return build ? runBuild(build, devs, summary, times, speed) : 0;
   }
 
   function notifyValueChange() {
@@ -588,9 +807,42 @@ window.makeAnovaTwoEstimates = function(opts) {
   let target = state.samples;
   let renders = 0;
   let mounted = false;
+  let lastStep = null;
   function stopTimer() {
     if (timer) timer.stop();
     timer = null;
+  }
+
+  // A replay's timed phases, so a new step or a cancel can stop them.
+  let sequence = [];
+  function stopSequence() {
+    sequence.forEach((handle) => handle.stop());
+    sequence = [];
+    held = new Set();
+    sliceHeld = false;
+    lanesOverride = null;
+  }
+  function later(ms, fn) {
+    sequence.push(d3.timeout(fn, ms));
+  }
+
+  // A new sample, with both mean squares rebuilt quickly in turn: within, then
+  // between, then the lanes settle back and its F drops into the tracker.
+  const replaySpeed = 2.2;
+  function replay() {
+    held = new Set(["within", "between"]);
+    sliceHeld = true;
+    lanesOverride = "within";
+    const withinLands = draw("build", { build: "within", fresh: true, speed: replaySpeed });
+    later(withinLands + 250, () => {
+      lanesOverride = "between";
+      const betweenLands = draw("build", { build: "between", speed: replaySpeed });
+      later(betweenLands + 300, () => {
+        lanesOverride = null;
+        sliceHeld = false;
+        draw("record");
+      });
+    });
   }
 
   function startRun() {
@@ -604,9 +856,10 @@ window.makeAnovaTwoEstimates = function(opts) {
     }, 45);
   }
 
-  function render(mode) {
+  function render(mode, buildKind) {
     renders += 1;
     stopTimer();
+    stopSequence();
     if (mode === "restart") {
       // Start the samples over: the old ones fade, the first new sample
       // drops in once the populations have reshaped, then the run refills
@@ -621,18 +874,30 @@ window.makeAnovaTwoEstimates = function(opts) {
       return;
     }
     state.samples = target;
-    draw(mode === "run" ? "sample" : mode);
+    if (mode === "replay") {
+      replay();
+      return;
+    }
+    if (mode === "build") held = new Set([buildKind]);
+    draw(mode === "run" ? "sample" : mode, { build: buildKind });
   }
 
-  function applyTutorialAction(action) {
+  function applyTutorialAction(action, context) {
     action = action || {};
-    const before = { effect: state.effect, sd: state.sd };
+    // Stepping backwards shows the step's end state straight away, with nothing
+    // resampled or rebuilt.
+    const index = context && Number.isInteger(context.index) ? context.index : null;
+    const backwards = index !== null && lastStep !== null && index < lastStep;
+    if (index !== null) lastStep = index;
+    const before = { effect: state.effect, sd: state.sd, batch: state.batch, lanes: state.lanes, showSample: state.showSample, shown: { ...state.shown } };
     const trackerWasShown = state.showTracker;
-    const estimatesWereShown = state.showEstimates;
     if ("effect" in action) state.effect = finite(action.effect, state.effect);
     if ("sd" in action) state.sd = Math.max(1, finite(action.sd, state.sd));
+    if ("batch" in action) state.batch = Math.max(0, Math.round(finite(action.batch, state.batch)));
+    if ("show-sample" in action) state.showSample = Boolean(action["show-sample"]);
+    if ("lanes" in action) state.lanes = lanesFrom(action.lanes);
     if ("show-sigma" in action) state.showSigma = Boolean(action["show-sigma"]);
-    if ("show-estimates" in action) state.showEstimates = Boolean(action["show-estimates"]);
+    if ("show-estimates" in action) state.shown = estimatesFrom(action["show-estimates"]);
     if ("show-tracker" in action) state.showTracker = Boolean(action["show-tracker"]);
     if ("show-curve" in action) state.showCurve = Boolean(action["show-curve"]);
     const previous = state.samples;
@@ -643,20 +908,28 @@ window.makeAnovaTwoEstimates = function(opts) {
         ? Math.min(maxSamples, previous + 1)
         : Math.max(1, Math.min(maxSamples, Math.round(finite(action.samples, previous))));
     }
-    const animate = mounted && action.animate !== false && motionAllows(true);
-    const paramsChanged = before.effect !== state.effect || before.sd !== state.sd;
+    const animate = mounted && !backwards && action.animate !== false && motionAllows(true);
+    const paramsChanged = before.effect !== state.effect || before.sd !== state.sd || before.batch !== state.batch;
+    // A mean square is built only when stepping forward to the step that first
+    // shows it, with the lanes showing its deviations.
+    const building = ["within", "between"].find((kind) => state.lanes === kind && state.shown[kind] && !before.shown[kind]);
+    const estimatesChanged = before.shown.within !== state.shown.within || before.shown.between !== state.shown.between;
     let mode = "none";
     if (animate) {
       // "restart" retakes every sample from the first, under the new settings.
       if (action.restart === true && target > 1) mode = "restart";
+      // "replay" shows a single new sample's mean squares being built again.
+      else if (action.replay === true && target === previous + 1) mode = "replay";
       else if (target > previous) mode = "run";
       else if (paramsChanged) mode = "swap";
+      else if (building) mode = "build";
       // The σ² outline splitting in two (or rejoining) is a morph.
-      else if (state.showEstimates !== estimatesWereShown) mode = "morph";
+      else if (estimatesChanged) mode = "morph";
       // Showing or hiding the tracker (and, on a phone, the height that goes with it).
       else if (state.showTracker !== trackerWasShown) mode = "record";
+      else if (state.lanes !== before.lanes || state.showSample !== before.showSample) mode = "morph";
     }
-    render(mode);
+    render(mode, building);
     notifyValueChange();
   }
 
@@ -665,6 +938,7 @@ window.makeAnovaTwoEstimates = function(opts) {
   rootNode.addEventListener("sfs-if:cancel-transitions", () => {
     const seen = renders;
     stopTimer();
+    stopSequence();
     window.requestAnimationFrame(() => {
       if (renders === seen) render("none");
     });
