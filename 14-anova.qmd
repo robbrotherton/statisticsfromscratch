@@ -433,6 +433,30 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 
 And this is basically the hard part over with. If you understand what we've just done — how it relates to the basic concepts we introduced earlier in the course, and to the $t$ statistic, and why it works to quantify the treatment effect — then you'll have a good grasp of the ANOVA procedure. All we need to do next is cover the kind of research that necessitates ANOVA, the terminology that goes along with it, and the nuances of the procedure.
 
+@tbl-anova-notation summarizes the symbols we've introduced, some of which are new here.
+
+| Symbol | Meaning |
+|:--|:--|
+| $k$ | Number of treatment conditions |
+| $n_1, n_2, \dots$ | Number of scores in each treatment |
+| $N$ | Total number of scores in the study |
+| $M_1, M_2, \dots$ | Mean of each treatment |
+| $M_{\text{grand}}$ | Grand mean: the mean of all scores |
+
+: ANOVA notation. {#tbl-anova-notation}
+
+Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the $F$ ratio.
+
+::: {#tbl-anova-summary-blank .sfs-summary-table}
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|:--:|:--:|:--:|:--:|
+| Between treatments | $\Sigma n(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | $\dfrac{SS_{\text{between}}}{df_{\text{between}}}$ | $\dfrac{MS_{\text{between}}}{MS_{\text{within}}}$ |
+| Within treatments | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | $\dfrac{SS_{\text{within}}}{df_{\text{within}}}$ | []{.sfs-na} |
+| Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
+
+A blank ANOVA summary table.
+:::
+
 <!-- ===================================================================================== -->
 <!-- PART 2: THREE GROUPS                                                                  -->
 <!-- ===================================================================================== -->
@@ -447,7 +471,7 @@ Now let's expand our example to see why ANOVA can be so useful. Suppose we're st
 
 So take a look at this little dataset and the group means. Just from eyeballing it, does it look like the radioactive bite sped kids up or did the ordinary bite slow them down?
 
-| ☢️ Radioactive bite | 🕷️ Ordinary bite | 😐 No bite |
+| [🕷️]{.sfs-radioactive} Radioactive bite | 🕷️ Ordinary bite | 😐 No bite |
 |:--:|:--:|:--:|
 | 189 | 310 | 265 |
 | 161 | 219 | 252 |
@@ -539,58 +563,6 @@ The "levels" are the individual treatments that make up a factor. So here we hav
 
 :::::
 
-### Degrees of Freedom
-
-<!-- FIX: the paragraph below states the df rules as if new; Part 1 now introduces them. Shrink to
-     a callback with the three-group numbers (11 = 2 + 9). One line worth adding: df_between
-     depends only on the number of groups, never on n. -->
-
-For degrees of freedom, $df_{\text{total}}$ is $N$ — the total number of scores in the study — minus one. $df_{\text{within}}$ is the total number of scores minus the number of treatment conditions. And $df_{\text{between}}$ is the number of conditions minus one.
-
-## Calculating the $F$ Ratio
-
-So calculating the $F$ ratio involves these steps. First, deal with all those sums of squares and degrees of freedom. Second, calculate the variances for the numerator and denominator.
-
-### Notation and Symbols
-
-<!-- FIX: lecture residue ("at the start of this lecture"; "I'm including this as a reference"
-     with the reference block missing). The reference block could be Part 1's three definitional
-     equations plus the df rules. The paragraph below should introduce M_1, M_2, ... and M_grand,
-     which the table now lists. -->
-
-We've already calculated an $F$ ratio at the start of this lecture, so if you followed that, you already know how to do this. But I'm including this as a reference for the equations we use for each component of the variability along the way.
-
-{{< include quizzes/14-anova-notation-learning-checks.qmd >}}
-
-The table summarizes the symbols we use, some of which are new here. $k$ refers to the number of treatment conditions, and of course each condition has its own $n$, the number of scores in that condition, which we refer to with a lowercase $n$ with a subscripted number or letter or label for each condition. Uppercase $N$ is the total number of scores recorded in the entire study.
-
-| Symbol | Meaning |
-|:--|:--|
-| $k$ | Number of treatment conditions |
-| $n_1, n_2, \dots$ | Number of scores in each treatment |
-| $N$ | Total number of scores in the study |
-| $M_1, M_2, \dots$ | Mean of each treatment |
-| $M_{\text{grand}}$ | Grand mean: the mean of all scores |
-
-: ANOVA notation. {#tbl-anova-notation}
-
-### The Summary Table
-
-<!-- CONSIDER: optional component, makeAnovaSourceTable (feature/data-explorer only). A
-     two-group version of the table could also close Part 1. -->
-
-<!-- CONSIDER: give this blank table formula cells (SS, df, MS = SS / df,
-     F = MS_between / MS_within) as one compact recipe; Step 3 then fills it in with numbers. -->
-
-Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the $F$ ratio.
-
-| Source | $SS$ | $df$ | $MS$ | $F$ |
-|:-------|:--:|:--:|:--:|:--:|
-| Between treatments | | | | |
-| Within treatments | | | | |
-| Total | | | | |
-
-: A blank ANOVA summary table. {#tbl-anova-summary-blank}
 
 ## Hypothesis testing with ANOVA
 
@@ -645,13 +617,15 @@ $$ F = \frac{MS_{\text{between}}}{MS_{\text{within}}} = \frac{10{,}900}{1{,}300}
 
 And here's the completed summary table:
 
+::: {#tbl-anova-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|--:|--:|--:|--:|
 | Between treatments | 21,800 | 2 | 10,900 | 8.38 |
-| Within treatments | 11,700 | 9 | 1,300 | |
-| Total | 33,500 | 11 | | |
+| Within treatments | 11,700 | 9 | 1,300 | []{.sfs-na} |
+| Total | 33,500 | 11 | []{.sfs-na} | []{.sfs-na} |
 
-: Completed ANOVA summary table for the spider-bite example. {#tbl-anova-summary}
+Completed ANOVA summary table for the spider-bite example.
+:::
 
 {{< include quizzes/14-anova-calculate-f.qmd >}}
 
