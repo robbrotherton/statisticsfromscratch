@@ -43,9 +43,9 @@ You'll recognize this as a situation where we could use the independent-samples 
 
 That makes for a $t$ statistic of $−3.15$. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right; it exceeds the critical $t$ of $\pm 2.447$ for $df = 6$. So we can reject the null hypothesis that the two populations have the same mean reaction time.
 
-Notice a few things about this procedure. For one thing, the numerator and denominator are both in the original units of measurement, milliseconds. (They have to be in the same units for the ratio to make sense.) We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
+Notice a few things about this procedure. For one thing, the numerator and denominator are both in the original units of measurement, milliseconds. (They have to be in the same units for the ratio to make sense.) Another consequence of subtracting one mean from the other is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
 
-The reason why I'm reiterating all this is to highlight the fact that the $t$ statistic is just one possible way of comparing groups, not the *only* way. What are we interested in, really? Variability: how much do the group means vary from one another, and how much should we expect them to vary by chance? Subtracting one mean from another to find the difference is a convenient way of quantifying variability when we're just dealing with two samples, because it is mathematically so easy to do. But it doesn't generalize to three or more groups. That's where ANOVA comes in. To begin to see its logic, let's first distill the $t$ statistic down to its conceptual essence.
+The reason why I'm reiterating all this is to highlight the fact that the $t$ statistic is just one possible way of comparing groups, not the *only* way. What are we interested in, really? Variability: how much do the group means vary from one another, and how much should we expect them to vary by chance? Subtracting one mean from another is a convenient way to quantify that difference for two groups. But it doesn't give us a single comparison of three or more means. That's where ANOVA comes in. To begin to see its logic, let's first distill the $t$ statistic down to its conceptual essence.
 
 ### Sources of variability
 
@@ -53,7 +53,7 @@ Let's think about the $t$ equation again, in terms of what contributes to the nu
 
 $$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
 
-Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect, and error.
+Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect, and error. 'Error' here includes all the other reasons people's reaction times differ, apart from the treatment we're comparing.
 
 The denominator, on the other hand, is all error. Remember, the standard error quantifies the variability of the sampling distribution. It's the standard deviation of all the mean differences we'd see over the course of repeated sampling. So there is no treatment effect there. It's pure chance.
 
@@ -75,7 +75,7 @@ So ANOVA wasn't developed as an extension of the $t$ test approach; it came abou
 
 Remember, variance is our measure of variability based on squared deviations from a mean. For the kind of data we're dealing with, we can think in terms of total variance and two components: between-groups variance and within-groups variance. The distinction is which mean we measure deviations from:
 
-**Total variance** measures the overall variability in the data, ignoring distinctions between groups. All the scores can differ from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups. (We're ignoring the groups for the moment, but they are still present in the data and so will show up in the total variability). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
+**Total variance** measures the overall variability in the data, ignoring distinctions between groups. All the scores can differ from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups. And maybe because of chance differences among people, within and between the groups. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
 
 **Between-groups variance** measures how far the group means fall from the overall mean, taking group sizes into account. Say group A's mean is a bit lower than the overall mean of all the scores (the **grand mean**), and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
 
@@ -251,7 +251,7 @@ This gives us our test statistic.
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":false}'}
-Here are the sums of squares we calculated earlier: **between** plus **within** make up the total. But before we compare the two components, we need to divide each by its own degrees of freedom.
+Here are the sums of squares we calculated earlier: **between** plus **within** make up the total. The two sums collect different numbers of freely varying deviations, so their sizes alone aren't a fair comparison. Before we compare them, we divide each by its own degrees of freedom.
 :::
 
 ::: {.tutorial-step data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
@@ -294,7 +294,7 @@ Now we collect two samples. (The data is different from @tbl-bites-two because h
 :::
 
 ::: {.tutorial-step data-title="MS between" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"between","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
-Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Dividing the sum of these squares ($SS_{\text{between}}$) by the between-groups degrees of freedom (1) gives $MS_{\text{between}}$. Why count each squared deviation four times? A mean of four scores has one quarter of the population variance, so multiplying by four puts this estimate back on the scale of the individual scores. With no treatment effect, it estimates the same population variance as $MS_{\text{within}}$.
+Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Why count each squared deviation four times? A mean of four scores has one quarter of the population variance, so multiplying by four puts this estimate back on the scale of the individual scores. With no treatment effect, it estimates the same population variance as $MS_{\text{within}}$. Different calculations, but under the null they're estimating the same thing. That doesn't mean they match in every sample: either estimate can come out larger, so $F$ can fall below or above 1.
 :::
 
 ::: {.tutorial-step data-title="Record F" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
@@ -321,35 +321,48 @@ What if there was more variability in the population? We can increase $\sigma^2$
 :::::
 
 ### The $F$ table
-<!-- TODO: explain why F isn't 1 on average under the null, and why it gets close with more df
-     (this table, where clicking cells reshapes the curve, is the natural place; the cover animates
-     the same family). Both mean squares average σ², but the average of a ratio isn't the ratio of
-     the averages:
-     - Denominator: misses in MS_within balance out, but dividing by them doesn't. Half of σ²
-       doubles F; 1.5 × σ² only shrinks it to 0.67 (average 1.33, not 1). So the mean is above 1:
-       df2 / (df2 − 2), 1.5 for F(1, 6), approaching 1 as df2 grows.
-     - Numerator: with df1 = 1, MS_between is one squared chance difference, usually small and
-       occasionally huge (half the time under about 0.45σ²). So most Fs are below 1 (median 0.52
-       for F(1, 6)) while a few large ones pull the mean up.
-     - More df steadies both estimates (SD √(2/df) × σ²), so F tightens into a hump near 1. More df1
-       mostly fixes the shape (the pile near 0 lifts into a hump); more df2 mostly pulls in the
-       tail. -->
-
 The 200 samples in @act-two-estimates approximate one specific $F$ distribution, the one with 1 and 6 degrees of freedom in its numerator and denominator respectively. But there are many different $F$ distributions, one for each pair of degrees of freedom. The precise shape of the distribution, and therefore the exact value of $F$ that cuts off, say, 5% of the distribution, changes with the degrees of freedom. So like the $t$ distributions, we can use an $F$ table to find the critical values.
 
-An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. Why not just label them $df_{\text{between}}$ and $df_{\text{within}}$? Because the $F$ distribution is used for different types of ANOVA, and is even used for other types of analysis. Other varieties of $F$ will use different variance components for their numerator or denominator, but it always has the same structure.
+An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. We'll use $df_1$ and $df_2$ for the distributions, and $df_{\text{between}}$ and $df_{\text{within}}$ for the components of our ANOVA.
 
-So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.) Try selecting a few cells in @tbl-f-table. Watch how both the curve and the critical value change with the degrees of freedom.
+So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.)
 
 ::: {#tbl-f-table}
-{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"interactive":false,"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="F critical-value table for alpha .05, highlighting 5.99 for 1 and 6 degrees of freedom." >}}
 
 Critical $F$ values for $\alpha = .05$. Columns give the numerator's degrees of freedom, $df_1$; rows give the denominator's, $df_2$.
 :::
 
-{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+::::: {#act-f-distribution-df .callout-tip .interactive}
+## Exploring the $F$ distributions
 
-Our $F$ of 9.91 exceeds the critical value of 5.99, so we reject the null hypothesis. That's the same decision we reached with the $t$ test.
+{{< interactive-figure fDistributionDfExplorer makeFDistributionDfExplorer options='{"df1":1,"df2":6,"title":"","inlineSliders":true,"showControls":["df1","df2"],"reference":false,"style":"minimal","xAxis":true,"axisLabels":true,"yLabel":false,"xLabel":"F ratio","xDomain":[0,8],"yDomain":[0,1.8],"xTickValues":[0,1,2,4,6,8],"color":"var(--sfs-null-color, currentColor)","clipPlot":true,"criticalReadout":true,"shade":{"tail":"right","alpha":0.05,"color":"var(--sfs-critical-color, #c63f3f)","opacity":0.25},"markers":[{"at":1,"label":"F = 1","height":"full","strokeWidth":1.3}],"parameters":[{"key":"df1","tex":"df_1","ariaLabel":"Numerator degrees of freedom","min":1,"max":60,"step":1,"value":1},{"key":"df2","tex":"df_2","ariaLabel":"Denominator degrees of freedom","min":1,"max":60,"step":1,"value":6}],"maxWidth":"42rem","ariaLabel":"Null F distribution with separate sliders for numerator and denominator degrees of freedom"}' fallback="Explore how numerator and denominator degrees of freedom change the null F distribution. A dashed line marks F = 1, where the two mean squares are equal. The highest 5 percent is shaded; its cutoff changes with the degrees of freedom." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="One and six" data-action='{"df1":1,"df2":6,"show-controls":["df1","df2"],"animate":false}'}
+Here's the $F(1, 6)$ curve from our repeated sampling. The dashed line marks $F = 1$, where the two mean squares are equal. But most of these $F$s fall below 1, with a long tail to the right. The highest 5% is shaded, starting at 5.99. The axes stay fixed as we explore; very tall peaks near zero and the far right tail extend beyond the frame.
+:::
+
+::: {.tutorial-step data-title="Steadier denominator" data-action='{"df1":1,"df2":60,"show-controls":["df1","df2"],"animate":true}'}
+First, increase the denominator's degrees of freedom, $df_2$. More degrees of freedom make the within-groups estimate steadier. Very small denominators, which produce very large $F$s, become less common, and the right tail pulls in. But the curve still piles up near zero: the numerator still has just one degree of freedom. Try moving the denominator slider while leaving the numerator at 1.
+:::
+
+::: {.tutorial-step data-title="Steadier numerator" data-action='{"df1":30,"df2":60,"show-controls":["df1","df2"],"animate":true}'}
+Now increase the numerator's degrees of freedom, $df_1$. The between-groups estimate becomes steadier too. The pile near zero becomes a hump, and with both estimates more reliable, their ratio is concentrated closer to 1. Try the numerator slider while keeping the denominator high. Notice that increasing either degrees of freedom doesn't do quite the same thing to the curve.
+:::
+
+::: {.tutorial-step data-title="Why not average 1?" data-action='{"df1":1,"df2":6,"show-controls":["df1","df2"],"animate":true}'}
+Back to $F(1, 6)$. Both mean squares estimate the same variance, but dividing them doesn't make $F$ average 1. Underestimating the denominator has a bigger effect than overestimating it: half the correct value doubles the ratio, whereas one and a half times the correct value only reduces it to two thirds. The large $F$s in the right tail pull the mean up; for this curve, the mean is 1.5.
+:::
+
+::: {.tutorial-step data-title="Explore" data-action='{"df1":30,"df2":30,"show-controls":["df1","df2"],"animate":true}'}
+Use both sliders to explore. With more degrees of freedom in both parts of the ratio, $F$ stays closer to 1 under the null. Watch the critical value too: the shaded right tail always contains 5%, but its cutoff changes with the curve. $F = 1$ is a useful reference for equal mean squares, not a fixed mean or a significance threshold.
+:::
+::::
+
+:::::
+
+Returning to our spider data, with 1 and 6 degrees of freedom, our $F$ of 9.91 exceeds the critical value of 5.99, so we reject the null hypothesis. That's the same decision we reached with the $t$ test.
 
 ### From $t$ to $F$
 
@@ -402,34 +415,7 @@ The same evidence two ways: $t \approx -3.15$ and $F \approx 9.91$. The shaded a
 
 ## Using ANOVA
 
-<!-- TODO: make this the hinge between the halves: same data, two methods, same answer; what F
-     gives up (units, sign) and what it gains (it never needed a subtraction). -->
-
-And this is basically the hard part over with. If you understand what we've just done — how it relates to the basic concepts we introduced earlier in the course, and to the $t$ statistic, and why it works to quantify the treatment effect — then you'll have a good grasp of the ANOVA procedure. All we need to do next is cover the kind of research that necessitates ANOVA, the terminology that goes along with it, and the nuances of the procedure.
-
-@tbl-anova-notation summarizes the symbols we've introduced, some of which are new here.
-
-| Symbol | Meaning |
-|:--|:--|
-| $k$ | Number of treatment conditions |
-| $n_1, n_2, \dots$ | Number of scores in each treatment |
-| $N$ | Total number of scores in the study |
-| $M_1, M_2, \dots$ | Mean of each treatment |
-| $M_{\text{grand}}$ | Grand mean: the mean of all scores |
-
-: ANOVA notation. {#tbl-anova-notation}
-
-Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the $F$ ratio.
-
-::: {#tbl-anova-summary-blank .sfs-summary-table}
-| Source | $SS$ | $df$ | $MS$ | $F$ |
-|:-------|:--:|:--:|:--:|:--:|
-| Between treatments | $\Sigma n(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | $\dfrac{SS_{\text{between}}}{df_{\text{between}}}$ | $\dfrac{MS_{\text{between}}}{MS_{\text{within}}}$ |
-| Within treatments | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | $\dfrac{SS_{\text{within}}}{df_{\text{within}}}$ | []{.sfs-na} |
-| Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
-
-A blank ANOVA summary table.
-:::
+So we've compared the same two groups in two ways, and reached the same answer. Now let's see what ANOVA lets us do that a single $t$ test can't: compare more than two groups.
 
 <!-- ===================================================================================== -->
 <!-- PART 2: THREE GROUPS                                                                  -->
@@ -457,15 +443,17 @@ So take a look at this little dataset and the group means. Just from eyeballing 
 
 {{< include quizzes/14-anova-differences.qmd >}}
 
-<!-- FIX: lecture residue ("over the past few slides"). -->
-
 From eyeballing the data, you probably got a sense of the overall trends. Taking the no-bite condition as our baseline, the ordinary-bite group was a little faster, but not by much. Given the overall variability among scores, it's hard to tell whether that's a real difference or just chance sampling error. But the radioactive-bite kids were way faster than the no-bite condition, and faster than the ordinary-bite condition too. If you had to guess, you'd probably be pretty confident that that is a statistically significant difference.
 
-And what we're doing here intuitively is exactly what we did over the past few slides, looking at how variable scores are within groups and how variable they are between groups to get a sense of how much more of a difference there seems to be between groups than we would expect thanks to sampling error.
+And what we're doing here intuitively is exactly what we did with two groups, looking at how variable scores are within groups and how variable they are between groups to get a sense of how much more of a difference there seems to be between groups than we would expect thanks to sampling error.
 
 ### Why ANOVA Is Needed
 
-But how can we be sure whether any differences are statistically significant? Our old friend the $t$ test can't help us here. It only works when we have at most two samples. The independent-samples $t$ test is based on the simple difference between means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense. So we'll use ANOVA, analysis of variance, and the $F$ ratio, just like we calculated for the two groups before. This is the advantage of ANOVA. It can handle any number of samples, not just two. You might wonder why we can't just run three $t$ tests instead. There's a good reason, which we'll come back to when we get to post-hoc tests.
+But how can we be sure whether any differences are statistically significant? The independent-samples $t$ test is based on the simple difference between two means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense.
+
+This is where analyzing variance pays off. Our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
+
+You might wonder why we can't just run three $t$ tests instead. There's a good reason, which we'll come back to when we get to post-hoc tests.
 
 ### ANOVA Terminology
 
@@ -544,12 +532,9 @@ So let's work through a hypothesis test for our bite type / reaction time exampl
 
 ### Step 1: State the Hypotheses
 
-<!-- FIX: "the denominator is all chance" and "it contains that treatment effect". Call back to
-     Two Estimates of the Same Variance instead: under the null both MS estimate σ², so F ≈ 1. -->
+As usual, we state our hypotheses first. The null here is that all three population means are the same; there is no treatment effect to cause them to differ. If this is true, both mean squares estimate the same population variance, as we saw in @act-two-estimates. Their ratio can still vary considerably from sample to sample; @act-f-distribution-df showed us how the degrees of freedom affect that variation. The alternative hypothesis is that there is a treatment effect, and so at least one population mean differs from one other. Note that they may not all differ from one another; we're just saying that there will be some difference among the conditions somewhere.
 
-As usual, we state our hypotheses first. The null here is that all three population means are the same; there is no treatment effect to cause them to differ. If this is true, the numerator and denominator of the $F$ equation will be approximately the same — there will be as much variability between treatments as there is within — and so we should get an $F$ ratio close to one. The alternative hypothesis is that there is a treatment effect, and so at least one population mean differs from one other. Note that they may not all differ from one another; we're just saying that there will be some difference among the conditions somewhere.
-
-If this is the case, the numerator will be bigger than the denominator because it contains that treatment effect while the denominator is all chance, so $F$ should be noticeably larger than one. For the one-by-three bite type example, the null is that type of spider bite has no effect and there are no differences among the three conditions. The alternative is that bite type does have an effect, and at least one condition will differ from another.
+A treatment effect contributes to the between-groups mean square without increasing the within-groups mean square, so it tends to make $F$ larger. We test whether our observed $F$ is unusually large compared with the null distribution. For the one-by-three bite type example, the null is that type of spider bite has no effect and there are no differences among the three conditions. The alternative is that bite type does have an effect, and at least one condition will differ from another.
 
 ### Step 2: Find the Critical Value
 
@@ -567,6 +552,30 @@ An excerpt of the $F$ table, with the critical value for $df = 2$ and $9$ highli
 :::
 
 ### Step 3: Calculate the Test Statistic
+
+@tbl-anova-notation summarizes the symbols we've introduced, some of which are new here.
+
+| Symbol | Meaning |
+|:--|:--|
+| $k$ | Number of treatment conditions |
+| $n_1, n_2, \dots$ | Number of scores in each treatment |
+| $N$ | Total number of scores in the study |
+| $M_1, M_2, \dots$ | Mean of each treatment |
+| $M_{\text{grand}}$ | Grand mean: the mean of all scores |
+
+: ANOVA notation. {#tbl-anova-notation}
+
+Because there are so many parts to this, it can be useful to use a summary table like this to record the different answers as you go. It has rows for the different sources of variability — between treatments, within treatments, and total — and it has columns for the sums of squares, degrees of freedom, mean squares, and finally the $F$ ratio.
+
+::: {#tbl-anova-summary-blank .sfs-summary-table}
+| Source | $SS$ | $df$ | $MS$ | $F$ |
+|:-------|:--:|:--:|:--:|:--:|
+| Between treatments | $\Sigma n(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | $\dfrac{SS_{\text{between}}}{df_{\text{between}}}$ | $\dfrac{MS_{\text{between}}}{MS_{\text{within}}}$ |
+| Within treatments | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | $\dfrac{SS_{\text{within}}}{df_{\text{within}}}$ | []{.sfs-na} |
+| Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
+
+A blank ANOVA summary table.
+:::
 
 <!-- FIX: the ingredients sentence should list the three group means and M_grand = 249 (arms
      −60, +25, +35). The SS lines below use a bare M; Part 1 now writes M_group. -->

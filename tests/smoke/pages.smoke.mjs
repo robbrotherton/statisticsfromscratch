@@ -297,3 +297,79 @@ for (const viewport of VIEWPORTS) {
     });
   }
 }
+
+// A page load cannot check that the two df controls are independent, that
+// changing a slider cancels a tutorial tween, or that fixed F axes stay fixed.
+for (const viewport of VIEWPORTS) {
+  test(`F degrees-of-freedom tutorial at ${viewport.name} width`, async () => {
+    const context = await browser.newContext({
+      viewport, reducedMotion: viewport.name === "phone" ? "reduce" : "no-preference",
+      colorScheme: viewport.name === "phone" ? "dark" : "light"
+    });
+    const page = await context.newPage();
+    const errors = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+    try {
+      await page.goto(`${origin}/14-anova.html#act-f-distribution-df`, { waitUntil: "load" });
+      const activity = page.locator("#act-f-distribution-df");
+      const root = activity.locator(".distribution-explorer");
+      await root.waitFor();
+      await activity.scrollIntoViewIfNeeded();
+      const numerator = activity.getByRole("slider", { name: "Numerator degrees of freedom" });
+      const denominator = activity.getByRole("slider", { name: "Denominator degrees of freedom" });
+      await numerator.waitFor({ state: "visible" });
+      const initial = await root.evaluate((node) => ({ ...node.value }));
+      assert.equal(initial.df1, 1);
+      assert.equal(initial.df2, 6);
+      assert.ok(Math.abs(initial.critical - 5.9874) < 0.001);
+      const initialHeight = await root.evaluate((node) => node.getBoundingClientRect().height);
+      const referenceX = await activity.locator(".dpe-markers line").first().getAttribute("x1");
+
+      // Start a tween, then immediately override it with a keyboard slider
+      // action. The canceled tween must never overwrite the reader's input.
+      await activity.locator(".sfs-if-tutorial-next").click();
+      await denominator.focus();
+      await denominator.press("Home");
+      await numerator.focus();
+      await numerator.press("End");
+      await page.waitForTimeout(850);
+      let state = await root.evaluate((node) => ({ ...node.value }));
+      assert.equal(state.df1, 60);
+      assert.equal(state.df2, 1);
+      assert.ok(state.critical > state.domain[1]);
+      assert.match(await activity.locator(".dpe-critical-readout").innerText(), /beyond view/);
+      assert.deepEqual(state.domain, initial.domain);
+      assert.deepEqual(state.yDomain, initial.yDomain);
+      assert.equal(await activity.locator(".dpe-markers line").first().getAttribute("x1"), referenceX);
+      assert.ok(Math.abs(await root.evaluate((node) => node.getBoundingClientRect().height) - initialHeight) < 1);
+
+      // More df in both estimates gives the narrow hump; use the analytical
+      // CDF to check the changing cutoff always retains its 5% upper tail.
+      await denominator.focus();
+      await denominator.press("End");
+      const math = await root.evaluate((node) => ({
+        ...node.value,
+        upperTail: 1 - window.sfsStats.fCdf(node.value.critical, node.value.df1, node.value.df2),
+        densityAtOne: window.sfsStats.fPdf(1, node.value.df1, node.value.df2)
+      }));
+      assert.equal(math.df1, 60);
+      assert.equal(math.df2, 60);
+      assert.ok(Math.abs(math.upperTail - 0.05) < 1e-6);
+      assert.ok(math.densityAtOne > 1);
+      assert.ok(await activity.locator(".dpe-curves").getAttribute("clip-path"));
+      assert.ok(!/NaN|Infinity/.test(await activity.locator(".dpe-controlled-curve").getAttribute("d")));
+
+      // Back restores the first tutorial's complete state after exploration.
+      await activity.locator(".sfs-if-tutorial-prev").click();
+      await page.waitForTimeout(850);
+      state = await root.evaluate((node) => ({ ...node.value }));
+      assert.equal(state.df1, 1);
+      assert.equal(state.df2, 6);
+      assert.match(await activity.locator("svg").getAttribute("aria-label"), /F\(1, 6\)/);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1));
+      assert.deepEqual(errors, []);
+    } finally {
+      await context.close();
+    }
+  });
+}
