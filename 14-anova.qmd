@@ -87,7 +87,7 @@ You see where we're going with this. If we can quantify the total variability in
 
 ### Calculating sums of squares
 
-Before I give you the equations, let's walk through it visually.
+So how do we actually calculate the variance components we need? As with our first encounter with variance in Chapter 4, variance requires two things: a sum of squared deviations, and a degrees of freedom to divide it by. So let's start with the sums of squares. Before I give you the equations, let's step through it visually.
 
 ::::: {#act-anova-viz .callout-tip .interactive}
 ## Seeing the logic of ANOVA
@@ -151,7 +151,7 @@ Because each square represents all four scores that went into its mean, we count
 
 :::::
 
-So how do we actually quantify these different sources of variability in the data? Hopefully you see from stepping through the process visually that we're not really doing anything new. We're using the procedure for calculating the sum of squared deviations that we learned back in Chapter 4. The only difference is that we're applying it in a few different ways, chunking up the data to look at different sources of variability.
+Hopefully you see that we're not really doing anything too new. We're using the procedure for calculating the sum of squared deviations that we learned back in Chapter 4. The only difference is that we're applying it in a few different ways, chunking up the data to look at different sources of variability.
 
 Here are the mathematical equations[^anova-computational] describing what we just did in @act-anova-viz.
 
@@ -177,11 +177,9 @@ Notice that for our data, $SS_{\text{total}} = SS_{\text{within}} + SS_{\text{be
 
 ### Degrees of freedom
 
-In the past, when we've computed a $SS$, the next step has often been to divide it by its degrees of freedom to get a variance. That's precisely what we'll do with the within- and between-groups sums of squares.
+Each sum of squares has its own degrees of freedom. A couple of symbols will be useful here. We'll use $k$ to represent the number of groups in the study, and $N$ to represent the *total* number of scores in the study. (In the past we've used $N$ to denote the number of individuals in a population; here it is total scores in the study, to distinguish that total from lowercase $n_{\text{group}}$, the number of scores in each group.) In our spider bite data, we have $k = 2$ groups and $N = 8$ scores.
 
-A couple of symbols will be useful here. We'll use $k$ to represent the number of groups in the study, and $N$ to represent the *total* number of scores in the study. (In the past we've used $N$ to denote the number of individuals in a population; here it is total scores in the study, to distinguish that total from lowercase $n_{\text{group}}$, the number of scores in each group.) In our spider bite data, we have $k = 2$ groups and $N = 8$ scores.
-
-So what are the degrees of freedom for each of these sums of squares? See if you can guess before reading on. A hint: think about how many deviations are used to compute each sum of squares, and how many of those deviations are free to vary in each case.
+Before I tell you the equations for degrees of freedom, see if you can guess. A hint: think about how many deviations are used to compute each sum of squares, and how many of those deviations are free to vary in each case.
 
 <!-- quiz: ask df for each of the three sums of squares, and then explain why each is what it is. distractors should all be N, N - 1, N - k, k - 1, and k. -->
 
@@ -225,6 +223,8 @@ So we have $MS_{\text{between}}$ and $MS_{\text{within}}$, which are the varianc
 
 $$ MS_{\text{between}} = \frac{SS_{\text{between}}}{df_{\text{between}}} \qquad MS_{\text{within}} = \frac{SS_{\text{within}}}{df_{\text{within}}} $$
 
+We only need to compute $MS$ for the between-groups and within-groups variability, since those are the two components that will go into our new ratio; we can ignore the total variance since our whole purpose here is partitioning it into the separate components.
+
 For the spider data, this comes to:
 
 $$ MS_{\text{between}} = \frac{14{,}450}{1} = 14{,}450 \qquad MS_{\text{within}} = \frac{8{,}750}{6} = 1{,}458.3 $$
@@ -240,7 +240,11 @@ $$ F = \frac{MS_{\text{between}}}{MS_{\text{within}}} $$
 
 This new ratio has the same structure as the $t$ statistic: treatment effect plus chance in the numerator, chance alone in the denominator.
 
-For our spider data, finding the different kinds of sums of squares and degrees of freedom and dividing them to find the different variances, we end up with 14,450 over 1,458.3 for an answer of around 9.91. This gives us our test statistic.
+For our spider data we end up with:
+
+$$ F = \frac{14{,}450}{1{,}458.3} \approx 9.91 $$
+
+This gives us our test statistic.
 
 ::::: {#act-anova-ms .callout-tip .interactive}
 ## From sums of squares to $F$
@@ -271,34 +275,11 @@ The squared distances add up. Total variability partitions exactly into **betwee
 
 :::::
 
-As usual, variances are in the original measurement units squared, so these are in milliseconds squared. That's not the most intuitive thing to think about. But as the name says, each one is a mean square: in @act-anova-ms you can see it as the average size of the squares that went into it.
-
 ## The $F$ distribution(s) {#sec-anova-f-distribution}
 
-So we've computed a whole new statistic, the $F$ ratio. But to use it in a hypothesis test, we need a distribution for it under the null hypothesis. If the null is true (there is no treatment effect) and we take sample after sample repeatedly, what shape would the distribution of $F$s form?
+So we've computed a whole new statistic, the $F$ ratio. But to use it in a hypothesis test, we need a distribution for it under the null hypothesis. If the null is true (there is no treatment effect) and we take sample after sample repeatedly, what shape would the distribution of all their $F$s form?
 
 Let's see!
-
-
-<!-- TODO: prose still to write. Points to make:
-     - σ² is the population's variance, a fixed property of the population (in the figure,
-       σ = 36 ms, σ² = 1,296). Both mean squares are estimates of it.
-     - MS_within estimates σ² from the spread inside groups (Ch 12's pooled variance).
-     - MS_between estimates σ² from how spread out the means are. Under the null the means are a
-       small sample from a sampling distribution with variance σ²/n (Ch 7), so n × (variance of
-       the means) estimates σ² as well. This is the deeper reason for "count each square n times"
-       that the first explorer promises.
-     - On average both equal σ², but only under the null. A treatment effect inflates only
-       MS_between. Here: 14,450 vs 1,458.3.
-     - They vary independently, so a sample can have a big between and a small within, or the
-       reverse.
-     - They aren't equally reliable: a variance estimate from df pieces has SD √(2/df) × σ².
-       MS_between (df 1): 1.41 σ²; MS_within (df 6): 0.58 σ². So F is a jumpy number over a
-       steadier one, which makes it skewed: for F(1, 6) the median is 0.52, the mean 1.5. The line
-       at F = 1 is where the estimates agree, not the middle of the pile.
-     - End on df as reliability, which is why the F table needs two df.
-     Figure step text is placeholder. Optional: a three-group mount in Part 2 (options only), whose
-     histogram becomes F(2, 9). -->
 
 ::::: {#act-two-estimates .callout-tip .interactive}
 ## Sampling the two estimates
@@ -357,10 +338,11 @@ What if there was more variability in the population? We can increase $\sigma^2$
        mostly fixes the shape (the pile near 0 lifts into a hump); more df2 mostly pulls in the
        tail. -->
 
+The 200 samples in @act-two-estimates approximate one specific $F$ distriution, the one with 1 and 6 degrees of freedom in its numerator and denominator respectively. But there are many different $F$ distributions, one for each pair of degrees of freedom. The precise shape of the distribution, and therefore the exact value of $F$ that cuts off, say, 5% of of the distribution, changes with the degrees of freedom. So like the $t$ distributions, we can use an $F$ table to find the critical values.
 
-How much larger than one does our $F$ ratio need to be? As before, we have to work out the critical values for the test based on the probabilities of the distribution. And like the $t$ distributions, there is a different $F$ distribution for each value of degrees of freedom. It's even slightly more complicated here because we have two different degrees of freedom values: one for the numerator ($MS_{\text{between}}$) and one for the denominator ($MS_{\text{within}}$), since each estimate rests on its own number of pieces of information.
+An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. Why not just label them $df_{\text{between}}$ and $df_{\text{within}}$? Because the $F$ distribution is used different types of ANOVA, and is even used for other types of analysis. Other variaties of $F$ will use different variance components for their numerator or denominator, but it always has the same structure.
 
-So as usual, we can refer to a table of critical values for the $F$ distributions, and it might look something like this. Since we have two different degrees of freedom to deal with, one will be listed along the top as the columns of the table and the other will be listed as rows. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, which is what we have for the spider data. To find the critical value for an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.)
+So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.)
 
 ::: {#tbl-f-table}
 {{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
