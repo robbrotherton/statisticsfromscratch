@@ -36,3 +36,14 @@ test('the Quarto facade declares every module used by the test loader',()=>{
   assert.equal(typeof context.makeApprovalBlockHistogram,'function');
   assert.equal(typeof context.makeSampleComparisonCover,'function');
 });
+test('estimate bars include zero without cropping their uncertainty intervals',()=>{
+  const positive=Array.from(context.sfsGraphIntervalDomain(rows,undefined,true));
+  assert.equal(positive[0],0);
+  assert.ok(positive[1]>49);
+  assert.throws(()=>context.sfsGraphIntervalDomain(rows,[42,52],true));
+  assert.deepEqual(Array.from(context.sfsGraphIntervalDomain(rows,[0,52],true)),[0,52]);
+  const negative=[{lower:-4,estimate:-3,upper:-2}];
+  const domain=Array.from(context.sfsGraphIntervalDomain(negative,undefined,true));
+  assert.ok(domain[0]<-4);
+  assert.equal(domain[1],0);
+});

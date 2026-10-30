@@ -1,6 +1,7 @@
 ---
 title: "ANOVA"
 interactive-scripts:
+  - graph-generator
   - distribution-generator
   - critical-table-generator
   - anova-variability-explorer
@@ -591,7 +592,7 @@ Completed ANOVA summary table for the spider-bite example.
 
 ### Step 4: Make a Decision
 
-As usual, step four is to make our decision. Our $F = 8.38$ exceeds the critical value of 4.26, so we reject the null hypothesis. The corresponding $p$-value is about $.009$. That tells us there is a difference among the population means somewhere, but not yet which ones differ.
+As usual, step four is to make our decision. Our $F = 8.38$ exceeds the critical value of 4.26, so we reject the null hypothesis. The corresponding $p$-value is about $.009$. That tells us there is a difference among the population means somewhere.
 
 ::: {#fig-anova-decision}
 {{< interactive-figure anovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":9,"title":"Null distribution: F(2, 9)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,10],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.256495,"label":"4.26","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":8.384615,"label":"F = 8.38","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 9 degrees of freedom. The rejection region lies above 4.26; the observed F of 8.38 is in the rejection region." >}}
@@ -601,11 +602,17 @@ The observed $F = 8.38$ falls beyond the critical value of the null $F$ distribu
 
 ### Effect Size: $\eta^2$
 
-As in previous chapters, we want to estimate the effect size whether or not the test is significant. For ANOVA, our measure of effect size is called eta squared ($\eta^2$). This reflects the proportion of the total variability accounted for by differences between the groups. We find $\eta^2$ by dividing $SS_{\text{between}}$ by $SS_{\text{total}}$.
+As in previous chapters, we want to estimate the effect size whether or not the test is significant. For ANOVA, our measure of effect size is called eta squared ($\eta^2$). This reflects the proportion of the total variability accounted for by differences between the groups.
+
+But didn't we just say that sums of squares weren't suitable for comparison, and we needed mean squares instead? For the $F$ ratio, we wanted two estimates on a comparable variance scale, so we divided each sum by its own degrees of freedom. Here we're asking a different question: what share of the total is between groups? The sums already give us a part and its whole. Dividing them by different degrees of freedom would lose that relationship.
+
+So we find $\eta^2$ by dividing $SS_{\text{between}}$ by $SS_{\text{total}}$.
 
 $$\eta^2 = \frac{SS_{\text{between}}}{SS_{\text{total}}} = \frac{21{,}800}{33{,}500} = 0.65$$
 
 So about 65% of the total variability in these scores is between the groups. Think back to the partitioned square in @act-anova-viz-three: $\eta^2$ is the share occupied by the between-groups component.
+
+And although a sum of squares gets bigger as we add more scores, that doesn't automatically make $\eta^2$ bigger. Imagine just copying every score in our dataset once. Both sums would double, but the proportion would stay the same. Like Cohen's $d$, we're describing the size of the differences relative to the spread of the scores, rather than how precisely we've estimated them. It's still an estimate, though: actual new samples will give different values, and $\eta^2$ tends to overestimate the population effect, especially with small samples [@lakens2013calculating].
 
 ### Statistical power
 
@@ -636,15 +643,21 @@ Statistical software can calculate power for ANOVA, or work backwards to find th
 
 ### Post-Hoc Tests
 
-If we got a significant result, maybe you're not quite satisfied yet. After all, we've established that at least one of our conditions is different from at least one other. But we obviously would want to know which one is different from which others. Are they all different from one another? Does just one condition do better or worse than the others? To answer these questions, we need to conduct what are called post-hoc tests. These are more tests that we run after the main ANOVA analysis, if it revealed a significant difference. Here, our post-hoc tests compare two group means at a time. These are called pairwise comparisons — we're comparing pairs of conditions.
+If we got a significant result, maybe you're not quite satisfied yet. After all, we've established that at least one of our conditions is different from at least one other. But we obviously would want to know which one is different from which others. Are they all different from one another? Does just one condition do better or worse than the others?
+
+That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ. To answer those more specific questions, we need to conduct what are called post-hoc tests. These are more tests that we run after the main ANOVA analysis, if it revealed a significant difference. Here, our post-hoc tests compare two group means at a time. These are called pairwise comparisons — we're comparing pairs of conditions.
 
 Maybe you're thinking, "Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the $t$ test? Why couldn't we just start with the $t$ tests?" The problem is the number of tests. With three groups, there are three comparisons to make: A to B, A to C, and B to C. Each ordinary $t$ test at $\alpha = .05$ has its own 5% Type I error rate. Across all three tests, the chance of making at least one Type I error is greater than 5%. This is the **experiment-wise error rate**.
 
-The initial ANOVA gives us one overall test at $\alpha = .05$. If it's significant, we follow up with tests designed to control the error rate across the pairwise comparisons. It's that adjustment, rather than simply running the ANOVA first, that protects the follow-up comparisons.
+The initial omnibus ANOVA gives us one overall test at $\alpha = .05$. If it's significant, we follow up with tests designed to control the error rate across the pairwise comparisons. It's that adjustment, rather than simply running the ANOVA first, that protects the follow-up comparisons.
 
-There's more than one kind of post-hoc test you can do, but we'll just mention one. It's called **Tukey's Honestly Significant Difference** (HSD) test, which is a great name for a test. It allows us to find the minimum difference between pairs of treatment means so that we can say they are significantly different at the level $p < \alpha_{\text{experiment-wise}}$.
+There's more than one kind of post-hoc test you can do, but we'll just mention one. It's called **Tukey's Honestly Significant Difference** (HSD) test, which is a great name for a test. It gives us a minimum difference between group means that counts as significant, while controlling the experiment-wise error rate at our chosen alpha.
 
-The equation to find the honestly significant difference is $HSD = q \cdot \sqrt{MS_{\text{within}} / n}$, where $n$ is the number of scores in each condition (this version assumes equally sized groups). $q$ here is the studentized range statistic, and there are tables to look up its critical values, just like other test statistics.
+Even when the population means are identical, the highest and lowest sample means will usually differ. With more groups, there are more opportunities for a large chance difference. Tukey's cutoff takes that into account when judging all the pairwise comparisons together.
+
+The equation to find the honestly significant difference is $HSD = q \cdot \sqrt{MS_{\text{within}} / n}$, where $n$ is the number of scores in each condition (this version assumes equally sized groups). $q$ here is the studentized range statistic, which is based on that gap between the highest and lowest means relative to chance variability. There are tables to look up its critical values, just like other test statistics.
+
+The pieces should look fairly familiar. $MS_{\text{within}}$ is our pooled estimate of the background variability, using all the groups. Dividing by $n$ and taking the square root puts it on the scale of variability among sample means. More variability makes the required difference larger; more people per group make the means more precise. The critical $q$ accounts for how many means we're comparing and the degrees of freedom of our variance estimate.
 
 Here's a little table: across the top are the number of conditions in your study, and the rows are possible degrees of freedom for the denominator of the $F$ ratio.
 
@@ -664,7 +677,13 @@ So for our little data set, there are three conditions and the degrees of freedo
 
 $$HSD = q \sqrt{\frac{MS_{\text{within}}}{n}} = 3.95 \sqrt{\frac{1{,}300}{4}} = 71.2$$
 
-That means that we're looking for a difference between groups of more than 71.2 ms in order to say that that difference is statistically significant.
+That means that we're looking for an absolute difference between group means of more than 71.2 ms in order to say that that difference is statistically significant. Here's how our three comparisons work out:
+
+| Comparison | Absolute difference | Exceeds 71.2 ms? |
+|:--|--:|:--:|
+| Radioactive bite vs. ordinary bite | 85 ms | Yes |
+| Radioactive bite vs. no bite | 95 ms | Yes |
+| Ordinary bite vs. no bite | 10 ms | No |
 
 So looking back at the condition means, we can now say that the kids given a radioactive bite were significantly faster than the kids given an ordinary bite, and significantly faster than the control group. But the ordinary-bite group did not differ significantly from the control condition.
 
@@ -673,6 +692,16 @@ So looking back at the condition means, we can now say that the kids given a rad
 As usual, we report the descriptive statistics — the group means and standard deviations — along with the kind of test, the $F$ statistic with its degrees of freedom, the $p$-value, and the effect size $\eta^2$. Here we also report the follow-up comparisons, since they tell us which groups differed.
 
 > A single-factor, independent-samples ANOVA revealed a significant difference between kids who received a radioactive spider bite ($M = 189$; $SD = 34.10$), an ordinary spider bite ($M = 274$; $SD = 41.88$), and the control condition ($M = 284$; $SD = 31.36$); $F(2, 9) = 8.38$, $p = .009$, $\eta^2 = 0.65$. Tukey HSD comparisons indicated that the radioactive-bite group was faster than both other groups; the ordinary-bite and control groups did not differ significantly.
+
+We could also show the group means in a graph like @fig-anova-results.
+
+::: {#fig-anova-results}
+{{< interactive-figure anovaResultsGraph makeGraph options='{"type":"interval","orientation":"vertical","mark":"bar","data":[{"label":"Radioactive","estimate":189,"lower":148.218382,"upper":229.781618,"color":"var(--sfs-text, #222)"},{"label":"Ordinary","estimate":274,"lower":233.218382,"upper":314.781618,"color":"var(--sfs-text, #222)"},{"label":"No bite","estimate":284,"lower":243.218382,"upper":324.781618,"color":"var(--sfs-text, #222)"}],"yDomain":[0,350],"yTickValues":[0,100,200,300],"width":640,"height":380,"margin":{"top":22,"right":16,"bottom":65,"left":65},"showValues":false,"labels":{"x":"Bite condition","y":"Mean reaction time (ms)"},"ariaLabel":"Mean reaction times: radioactive bite 189 milliseconds, ordinary bite 274, and no bite 284. Error bars are unadjusted 95 percent confidence intervals for the population means, calculated using the pooled within-groups variance. Four participants per condition."}' fallback="Bar graph of mean reaction times: radioactive bite 189 ms, ordinary bite 274 ms, and no bite 284 ms. The 95% confidence intervals are approximately 148–230, 233–315, and 243–325 ms, respectively." >}}
+
+Mean reaction times in the three bite conditions, with four participants per condition. Error bars are 95% confidence intervals for the population means, calculated using the pooled within-groups variance and 9 degrees of freedom. These intervals are not adjusted for multiple comparisons; their overlap is not a substitute for the Tukey tests reported above.
+:::
+
+This is a common way of presenting group means, but remember that every graph involves choices, as we discussed in Chapters 1 and 2. These bars show the averages and our uncertainty about the population means; they don't show the individual scores. A graph showing those scores would reveal more about how the observations are distributed within each group. Different fields have different conventions, but convention isn't the only consideration. We should also ask what the graph helps us see, and what it leaves out.
 
 Remember why we added the no-bite group. A comparison of radioactive and ordinary bites alone couldn't tell us whether one sped kids up or the other slowed them down. The baseline comparison now gives us evidence that the radioactive bite sped them up. We didn't find evidence that the ordinary bite changed reaction times, though that isn't proof that it has no effect. With only four kids per group, we could easily miss smaller differences.
 
