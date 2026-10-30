@@ -25,7 +25,7 @@ We're leaving behind the $t$ statistic and moving on to ANOVA, which stands for 
 
 ## Comparing two groups
 
-It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. Even if we reject the null hypothesis, we're left with a question of causality. How do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense. Perhaps being bitten by any old spider would affect one's reaction times.
+It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. Even if we reject the null hypothesis, we're left with a question of causality. How do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense? Perhaps being bitten by any old spider would affect one's reaction times.
 
 So now we want to compare the effects of different kinds of spider bites on reaction times. We set up a little study with two independent samples. One set of kids is bitten by a radioactive spider, and another batch is bitten by an ordinary spider. (Don't worry, they all signed the informed consent form.) Then everyone takes the same reaction time test.
 
@@ -39,11 +39,11 @@ So now we want to compare the effects of different kinds of spider bites on reac
 
 : Reaction times (ms) for the two spider-bite conditions. {#tbl-bites-two}
 
-You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$ seconds. And the denominator is the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance: this works out to $27.0$ seconds. (You're welcome to check my math.)
+You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$ milliseconds. And the denominator is the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance: this works out to $27.0$ milliseconds. (You're welcome to check my math.)
 
 That makes for a $t$ statistic of $−3.15$. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right; it exceeds the critical $t$ of $\pm 2.447$ for $df = 6$. So we can reject the null hypothesis that the two populations have the same mean reaction time.
 
-Notice a few things about this procedure. For one thing, the numerator and denominator are both in the original units of measurement, seconds. (They have to be in the same units for the ratio to make sense.) We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
+Notice a few things about this procedure. For one thing, the numerator and denominator are both in the original units of measurement, milliseconds. (They have to be in the same units for the ratio to make sense.) We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
 
 The reason why I'm reiterating all this is to highlight the fact that the $t$ statistic is just one possible way of comparing groups, not the *only* way. What are we interested in, really? Variability: how much do the group means vary from one another, and how much should we expect them to vary by chance? Subtracting one mean from another to find the difference is a convenient way of quantifying variability when we're just dealing with two samples, because it is mathematically so easy to do. But it doesn't generalize to three or more groups. That's where ANOVA comes in. To begin to see its logic, let's first distill the $t$ statistic down to its conceptual essence.
 
@@ -51,37 +51,35 @@ The reason why I'm reiterating all this is to highlight the fact that the $t$ st
 
 Let's think about the $t$ equation again, in terms of what contributes to the numerator and the denominator---what would make each larger or smaller?
 
-<!-- need to follow through on the larger/small idea. more variability in the population will contribute to numerator and denominator; more treatment effect will contribute only to numerator -->
-
 $$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
 
 Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect, and error.
 
 The denominator, on the other hand, is all error. Remember, the standard error quantifies the variability of the sampling distribution. It's the standard deviation of all the mean differences we'd see over the course of repeated sampling. So there is no treatment effect there. It's pure chance.
 
-So a conceptual distillation of the $t$ equation gives treatment effect and chance in the numerator, and chance in the denominator. By dividing these quantities, the ratio gives a measure of how much treatment effect there seems to be over and above chance differences.
+So a conceptual distillation of the $t$ equation gives treatment effect and chance in the numerator, and chance in the denominator. More variability in the populations makes chance differences larger, but it also makes the standard error larger. A treatment effect, on the other hand, contributes to the numerator without increasing the denominator. By dividing these quantities, the ratio gives a measure of how much treatment effect there seems to be over and above chance differences.
 
 If we wanted to produce a new kind of ratio with this same structure, how might we do it?
 
 ## ANOVA: Analysis of Variance
 
-The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Seely Gosset had laid the goundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
+The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Seely Gosset had laid the groundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
 
 <!-- mention that it's funny that standard deviation was established and used first, before variance was named and used in its own right. i guess this would mean mentioning variance earlier, using it instead of the more general talk of variability along the way in the next section? -->
 
-Separately, Fisher was also working in the field of genetics. He coined the term "variance" and developed a way of partitioning variance into different components, each due to a different cause, like how much of the varibility in people's heights comes from genetics versus environment [@fisher1918relatives]. A little later, Fisher was applying the technique to agricultural research, asking questions of data like, how much of the variability in crop poduction can be attributed to things like the soil, fertilizer, drainage, and so on, and how much of it is just up to chance. This work brought Fisher and Gosset back together; the first ANOVA table appeared in Gosset's own 1923 paper, On Testing Varieties of Cereals, in a note contributed by Fisher.
+Separately, Fisher was also working in the field of genetics. He coined the term "variance" and developed a way of partitioning variance into different components, each due to a different cause, like how much of the variability in people's heights comes from genetics versus environment [@fisher1918relatives]. A little later, Fisher was applying the technique to agricultural research, asking questions of data like, how much of the variability in crop production can be attributed to things like the soil, fertilizer, drainage, and so on, and how much of it is just up to chance. This work brought Fisher and Gosset back together; the first ANOVA table appeared in Gosset's own 1923 paper, On Testing Varieties of Cereals, in a note contributed by Fisher.
 
-So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual millieu. And pretty soon Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical unerpinnings.
+So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual milieu. And pretty soon Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical underpinnings.
 
-### Three types of variability
+### Three types of variance
 
-For the kind of data we're dealing with, we can think in terms of three types of variability in the data:
+Remember, variance is our measure of variability based on squared deviations from a mean. For the kind of data we're dealing with, we can think in terms of total variance and two components: between-groups variance and within-groups variance. The distinction is which mean we measure deviations from:
 
-**Total variability** is the overall variability in the data, ignoring distinctions between groups. All the scores can differ from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups. (We're ignoring the groups for the moment, but they are still present in the data and so will show up in the total variability). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
+**Total variance** measures the overall variability in the data, ignoring distinctions between groups. All the scores can differ from one another. Why? Maybe because of treatment effects, pushing the scores apart across the different groups. (We're ignoring the groups for the moment, but they are still present in the data and so will show up in the total variability). And maybe because of chance, pushing scores apart, pushing the groups apart, just generally pushing things around randomly. Total variability, as the name suggests, includes it all. But we can break the total variability down into two components: between-groups variability and within-groups variability.
 
-**Between groups variability** is the variability of the group means. Say group A's mean is a bit lower than the overall mean of all the scores (the **grand mean**), and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
+**Between-groups variance** measures how far the group means fall from the overall mean, taking group sizes into account. Say group A's mean is a bit lower than the overall mean of all the scores (the **grand mean**), and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
 
-**Within groups variability** is the variability of scores within each group. Why might scores vary within a group? Chance is a factor, as usual. But it can't be because of a treatment effect, since everyone in a group got the same treatment. So within-groups variability isolates chance, much like the denominator of the $t$ statistic.
+**Within-groups variance** measures the variability of scores around their own group means. Why might scores vary within a group? Chance is a factor, as usual. But it can't be because of a treatment effect, since everyone in a group got the same treatment. So within-groups variability isolates chance, much like the denominator of the $t$ statistic.
 
 You see where we're going with this. If we can quantify the total variability in the data, and then partition it into these two sources, between-groups and within-groups variability, we can create for ourselves a new ratio, which will conceptually do the same job as the $t$ statistic.
 
@@ -96,7 +94,7 @@ So how do we actually calculate the variance components we need? As with our fir
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
-For our thought experiment, we have two groups: people bitten by radioactive spiders and people bitten by regular spiders. Those groups represent two hypothetical populations, shown as curves. From those populations we obtain our sample data, shown as the 8 dots. In this case, there really is a difference between the populations; the curves have difference centers. But how can we use the samples to establish that difference statistically?
+For our thought experiment, we have two groups: people bitten by radioactive spiders and people bitten by regular spiders. Those groups represent two hypothetical populations, shown as curves. From those populations we obtain our sample data, shown as the 8 dots. In this case, there really is a difference between the populations; the curves have different centers. But how can we use the samples to establish that difference statistically?
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Observe" data-action='{"stage":"total","phase":"observe","animate":true}'}
@@ -128,15 +126,15 @@ We square the deviations...
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Sum" data-action='{"stage":"within","phase":"sum","animate":true}'}
-And now we can sum these squares. We'll drop them into the total box we created before, so we can see the within-groups sum of squared deviation as a portion of the whole. We have partitioned out that component of the variability.
+And now we can sum these squares. We'll drop them into the total box we created before, so we can see the within-groups sum of squared deviations as a portion of the whole. We have partitioned out that component of the variability.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Observe" data-action='{"stage":"between","phase":"observe","animate":true}'}
-Lastly, we'll compute the **between-groups variability**. We still keep track of the groups, but this time we imagine that there's no within-groups variability at all (since we just calculated it separately). To achive that, we'll picture that every dot gets shifted to its group mean. Then we'll consider their deviations from the grand mean.
+Lastly, we'll compute the **between-groups variability**. We still keep track of the groups, but this time we imagine that there's no within-groups variability at all (since we just calculated it separately). To achieve that, we'll picture that every dot gets shifted to its group mean. Then we'll consider their deviations from the grand mean.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Deviations" data-action='{"stage":"between","phase":"deviations","animate":true}'}
-Now we see each group mean's deviation from the grand mean. With just two groups, the two means have to be equal distances from that grand mean, in opposite directions; the two deviations have to sum to zero, so they must be equal and opposite. Consider how that constraint might affect the degrees of freedom for the between-groups component of variability.
+Now we see each group mean's deviation from the grand mean. With two equally sized groups like these, the two means have to be equal distances from that grand mean, in opposite directions; the two deviations have to sum to zero, so they must be equal and opposite. Consider how that constraint might affect the degrees of freedom for the between-groups component of variability.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Squares" data-action='{"stage":"between","phase":"squares","animate":true}'}
@@ -173,7 +171,7 @@ SS_{\text{between}} &= \Sigma n(M_{\text{group}} - M_{\text{grand}})^2 = 4(-42.5
 \end{align}
 $$
 
-Notice that for our data, $SS_{\text{total}} = SS_{\text{within}} + SS_{\text{between}}$. The total is literally the sum of its parts.
+Notice that $SS_{\text{total}} = SS_{\text{within}} + SS_{\text{between}}$. The total is literally the sum of its parts. This holds for any set of groups, not just our spider data. It is the sums of squares that add up this way; each component will have its own degrees of freedom when we turn it into a variance.
 
 ### Degrees of freedom
 
@@ -181,7 +179,7 @@ Each sum of squares has its own degrees of freedom. A couple of symbols will be 
 
 Before I tell you the equations for degrees of freedom, see if you can guess. A hint: think about how many deviations are used to compute each sum of squares, and how many of those deviations are free to vary in each case.
 
-<!-- quiz: ask df for each of the three sums of squares, and then explain why each is what it is. distractors should all be N, N - 1, N - k, k - 1, and k. -->
+{{< include quizzes/14-anova-degrees-of-freedom.qmd >}}
 
 The logic is the same in all three cases. Deviations from a mean must sum to zero, so once all but one of them are known, the last one is determined. Each mean we measure deviations from costs us one degree of freedom.
 
@@ -203,7 +201,7 @@ $$
 
 The degrees of freedom partition just like the sums of squares: $7 = 6 + 1$.
 
-[^anova-computational]: As with the sum of squares back in Chapter 4, there are also computational versions of these formulas. You might see them elsewhere, since they were the standard approach when researchers had to compute things by hand. Remember, the main difference in the computational formula for basic $SS$ was that it involved summing scores ($\Sigma X$), and summing squared scores ($\Sigma X^2$). The ANOVA versions do something very similar, but in a few different ways.They use two new symbols: $T$, a treatment total (the sum of the scores in one condition), and $G$, the grand total (the sum of all the scores in the study).
+[^anova-computational]: As with the sum of squares back in Chapter 4, there are also computational versions of these formulas. You might see them elsewhere, since they were the standard approach when researchers had to compute things by hand. Remember, the main difference in the computational formula for basic $SS$ was that it involved summing scores ($\Sigma X$), and summing squared scores ($\Sigma X^2$). The ANOVA versions do something very similar, but in a few different ways. They use two new symbols: $T$, a treatment total (the sum of the scores in one condition), and $G$, the grand total (the sum of all the scores in the study).
 
     $$
     \begin{align}
@@ -219,11 +217,11 @@ The degrees of freedom partition just like the sums of squares: $7 = 6 + 1$.
 
 So now we have a few values of $SS$, each with a corresponding $df$. Dividing each $SS$ by its $df$ gives a variance: the average squared deviation, the sum divided by the number of free values that went into that sum. In the context of ANOVA, these special variance components get a new name: we call them **mean squares** ($MS$).
 
-So we have $MS_{\text{between}}$ and $MS_{\text{within}}$, which are the variances of the between-groups and within-groups variability, respectively.
+So we have $MS_{\text{between}}$, the between-groups variance, and $MS_{\text{within}}$, the within-groups variance.
 
 $$ MS_{\text{between}} = \frac{SS_{\text{between}}}{df_{\text{between}}} \qquad MS_{\text{within}} = \frac{SS_{\text{within}}}{df_{\text{within}}} $$
 
-We only need to compute $MS$ for the between-groups and within-groups variability, since those are the two components that will go into our new ratio; we can ignore the total variance since our whole purpose here is partitioning it into the separate components.
+We only need to compute $MS$ for the between-groups and within-groups variability, since those are the two components that will go into our new ratio; we can leave the total variance aside now that we have its separate components.
 
 For the spider data, this comes to:
 
@@ -253,23 +251,23 @@ This gives us our test statistic.
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":false}'}
-The squared distances add up. Total variability partitions exactly into **between** plus **within**. When between-groups variability is large compared with within-groups variability, the treatment stands out from the background noise. That comparison is the crux of the $F$ ratio.
+Here are the sums of squares we calculated earlier: **between** plus **within** make up the total. But before we compare the two components, we need to divide each by its own degrees of freedom.
 :::
 
 ::: {.tutorial-step data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
-[PLACEHOLDER: Split step. The two layers part at their boundary, between above and within below, and each becomes a square of the same area: SS~between~ and SS~within~ as squares in their own right.]
+First we separate the two components. Each becomes a square in its own right, keeping the same area it had in the total. These are still sums of squares, not mean squares.
 :::
 
 ::: {.tutorial-step data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-[PLACEHOLDER: MS between step. SS~between~ breaks into df~between~ equal squares, and one of them is the mean square. With two groups df~between~ = 1, so the one piece is the whole square: MS~between~ = SS~between~.]
+To get $MS_{\text{between}}$, we divide the between-groups square into as many equal pieces as its degrees of freedom. Here $df_{\text{between}} = 1$, so there is only one piece: the whole square. The mean square is still 14,450.
 :::
 
 ::: {.tutorial-step data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
-[PLACEHOLDER: MS within step. SS~within~ breaks into df~within~ = 6 equal squares, spread out as a grid, which stack into one much smaller square: MS~within~.]
+For $MS_{\text{within}}$, we divide the within-groups square into six equal pieces. One of those pieces is the mean square: $8{,}750 / 6 = 1{,}458.3$. Notice how much smaller it is than the sum we started with.
 :::
 
 ::: {.tutorial-step data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
-[PLACEHOLDER: F step. Nothing moves: a bar draws along the boundary the two have kept since the partition, and F is literally one square over the other.]
+Now we have one mean square over the other: the $F$ ratio. Compare their areas, not their side lengths. The between-groups mean square is about 9.91 times the within-groups mean square.
 :::
 ::::
 
@@ -296,7 +294,7 @@ Now we collect two samples. (The data is different from @tbl-bites-two because h
 :::
 
 ::: {.tutorial-step data-title="MS between" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"between","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
-Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Dividing the sum of these squares ($SS_{\text{between}}$) by the between-groups degrees of freedom (1) gives $MS_{\text{between}}$. In this case it also comes out close to the population variance, because with no treatment effect, it is also just estimating that same underlying variance.
+Next we compute $MS_{\text{between}}$ from the deviations of the group means from the grand mean, each squared deviation counted $n = 4$ times. Dividing the sum of these squares ($SS_{\text{between}}$) by the between-groups degrees of freedom (1) gives $MS_{\text{between}}$. Why count each squared deviation four times? A mean of four scores has one quarter of the population variance, so multiplying by four puts this estimate back on the scale of the individual scores. With no treatment effect, it estimates the same population variance as $MS_{\text{within}}$.
 :::
 
 ::: {.tutorial-step data-title="Record F" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
@@ -323,7 +321,6 @@ What if there was more variability in the population? We can increase $\sigma^2$
 :::::
 
 ### The $F$ table
-<!-- FLAG: add a sentence linking this curve to the pile of Fs in @act-two-estimates. -->
 <!-- TODO: explain why F isn't 1 on average under the null, and why it gets close with more df
      (this table, where clicking cells reshapes the curve, is the natural place; the cover animates
      the same family). Both mean squares average σ², but the average of a ratio isn't the ratio of
@@ -338,11 +335,11 @@ What if there was more variability in the population? We can increase $\sigma^2$
        mostly fixes the shape (the pile near 0 lifts into a hump); more df2 mostly pulls in the
        tail. -->
 
-The 200 samples in @act-two-estimates approximate one specific $F$ distriution, the one with 1 and 6 degrees of freedom in its numerator and denominator respectively. But there are many different $F$ distributions, one for each pair of degrees of freedom. The precise shape of the distribution, and therefore the exact value of $F$ that cuts off, say, 5% of of the distribution, changes with the degrees of freedom. So like the $t$ distributions, we can use an $F$ table to find the critical values.
+The 200 samples in @act-two-estimates approximate one specific $F$ distribution, the one with 1 and 6 degrees of freedom in its numerator and denominator respectively. But there are many different $F$ distributions, one for each pair of degrees of freedom. The precise shape of the distribution, and therefore the exact value of $F$ that cuts off, say, 5% of the distribution, changes with the degrees of freedom. So like the $t$ distributions, we can use an $F$ table to find the critical values.
 
-An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. Why not just label them $df_{\text{between}}$ and $df_{\text{within}}$? Because the $F$ distribution is used different types of ANOVA, and is even used for other types of analysis. Other variaties of $F$ will use different variance components for their numerator or denominator, but it always has the same structure.
+An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses like this, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. Why not just label them $df_{\text{between}}$ and $df_{\text{within}}$? Because the $F$ distribution is used for different types of ANOVA, and is even used for other types of analysis. Other varieties of $F$ will use different variance components for their numerator or denominator, but it always has the same structure.
 
-So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.)
+So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.) Try selecting a few cells in @tbl-f-table. Watch how both the curve and the critical value change with the degrees of freedom.
 
 ::: {#tbl-f-table}
 {{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
@@ -356,40 +353,17 @@ Our $F$ of 9.91 exceeds the critical value of 5.99, so we reject the null hypoth
 
 ### From $t$ to $F$
 
-<!-- FIX: rounding. t = −3.148 and F = 9.909, but a reader squaring the rounded −3.15 gets 9.92.
-     Either give t to three decimals here, or say "about 9.9". The sign also needs a word: the
-     square root of F gives 3.15, the same as t apart from its sign. -->
+That's no coincidence. For a comparison of two groups like this, $F = t^2$. Our $t$ was about $-3.148$; squaring it gives about $9.91$. Taking the square root of $F$ gets us back to the size of $t$, but not its sign.
 
-That's no coincidence. Not only are the $t$ statistic and $F$ ratio conceptually related, they are mathematically related. If you square the $t$ value we calculated, you'll find it's 9.91. Or if you prefer, you can find the square root of the $F$ ratio, 9.91, and you'll find it comes to 3.15, the same as $t$.
+Did you notice something familiar about $MS_{\text{within}}$? We've already done this in the past. We just knew it by another name: pooled variance. We add the two groups' sums of squares and divide by their combined degrees of freedom: $(3{,}488 + 5{,}262) / (3 + 3) = 1{,}458.3$.
 
-Did you notice something familiar about $MS_{\text{within}}$? We've already done this in the past. We just knew it by another name: pooled variance. When we calculated pooled variance for the independent-samples $t$ statistic, we did exactly this: take each treatment's sum of squares and divide by the degrees of freedom for each treatment to get that pooled variance, the weighted average of each sample's variance. So variance within groups is 3,488 plus 5,262 over three plus three, which gives 1,458.3.
+The $t$ approach turns that pooled variance into a standard error in the original units, to match the difference between means in its numerator. ANOVA keeps things squared: squared deviations in the numerator, and pooled variance in the denominator. With two groups, the result is the square of $t$.
 
 {{< include quizzes/14-anova-t-and-f.qmd >}}
 
-<!-- TODO: "it's all squares" is the point of this section. The paragraph below makes the
-     argument in words but needs the pieces lined up, perhaps in a collapsible "Why exactly?"
-     callout:
-       t numerator    M1 − M2 = −85 ms                 F numerator    MS_between = n(M1 − M2)²/2 = 14,450 ms²
-       t denominator  SE = √(2 s_p²/n) = 27.0 ms       F denominator  MS_within = s_p² = 1,458.3 ms²
-       F = n(M1 − M2)²/2 ÷ s_p² = (M1 − M2)² ÷ (2 s_p²/n) = t².
-     The t approach turns s_p² into a standard error in the original units, to match the
-     subtraction in the numerator; F leaves it squared to match the squared numerator.
-     Consequences to spell out: units (ms² have no everyday meaning, which sets up η²); sign (F
-     can't say which group was faster); tails (both of t's tails land in F's one right tail: same
-     5%, same p); generality (F never needed a subtraction, the hook for Part 2). -->
-
-Maybe you can think of why this is the case. Remember that variance is the average squared deviation. The $t$ statistic kept things in the original units by simply finding the difference between means and the standard error of the mean, which is a kind of standard deviation. And remember that standard deviation is the square root of variance. The ANOVA procedure, instead of finding the difference between means, finds the variance among means. So basically everything was squared along the way here and we never transformed it back into the original units, which is why when we compare just two groups like this, we find that $F = t^2$.
-
-<!-- FLAG: the reader has already seen the skewed pile in @act-two-estimates (the reliability
-     reason), so the riddle below may need to become "we saw F is skewed; here's a second reason"
-     (squaring) rather than an open question. -->
-
-And it's worth just noting here that unlike the normal and $t$ distributions we've seen before, the distributions for $F$ are not symmetrical; all the values are positive and the distributions are positively skewed — if you can think of why that might be.
+Squaring also helps explain the shape of the $F$ distribution we just saw. Both negative and positive $t$ values become nonnegative $F$ values, and large values get pushed farther out. Let's see what happens to the two tails.
 
 {{< include quizzes/14-anova-f-distribution.qmd >}}
-
-<!-- TODO: step text is placeholder. History tie-in, one sentence: Fisher's 1924 paper presented
-     Student's t as a special case of his general distribution. -->
 
 ::::: {#act-t-squared .callout-tip .interactive}
 ## Squaring *t* into *F*
@@ -398,21 +372,21 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="t" data-action='{"stage":"t","animate":false}'}
-[PLACEHOLDER: the null t(6) from Ch 12, both 2.5% tails beyond ±2.447. Paired landmarks at ±1, ±2, ±3.]
+Here is the null $t$ distribution with 6 degrees of freedom. For our two-tailed test with $\alpha = .05$, each tail contains 2.5%, beyond the critical values of $\pm 2.447$.
 :::
 
 ::: {.tutorial-step data-title="Sign" data-action='{"stage":"fold","animate":true}'}
-[PLACEHOLDER: squaring does two things. First, it drops the sign: (−2)² and 2² are both 4. So the negative half turns over onto the positive half, −2 lands on 2, and the two 2.5% tails stack into one 5% tail beyond ±2.447.]
+Squaring does two things. First, it drops the sign: $(-2)^2$ and $2^2$ are both 4. To show that part, we fold the negative half onto the positive half. The two 2.5% tails now lie together beyond 2.447, containing the same 5% of values.
 :::
 
 ::: {.tutorial-step data-title="Size" data-action='{"stage":"square","animate":true}'}
-[PLACEHOLDER: second, it squares the size. The axis runs out to 16 to make room, then every value moves to its square: ±1 stays put, ±2 moves out to 4, ±3 to 9, and values below 1 move in towards 0. The curve is now F(1, 6), and the cut lands at 2.447² = 5.99, still 5%.]
+Second, we square the size. Values at 1 stay put, values at 2 move to 4, and values at 3 move to 9. Values between 0 and 1 move closer to zero. The result is $F(1, 6)$, with the critical value now at $2.447^2 \approx 5.99$. The right tail still contains the same 5%.
 :::
 ::::
 
 :::::
 
-[PLACEHOLDER: "So for our data..." lead-in to the static pair: t = −3.15 on t(6) and F = 9.91 on F(1, 6), the same transformation, the same p = .020.]
+So for our spider data, the two-tailed $t$ test and the ANOVA give the same $p = .020$. Both tails of $t$ become the single right tail of $F$.
 
 :::: {#fig-t-squared-observed}
 ::: {.sfs-figure-row .sfs-figure-row-wide}
@@ -421,7 +395,7 @@ And it's worth just noting here that unlike the normal and $t$ distributions we'
 {{< interactive-figure tSquaredObservedF makeTSquaredExplorer options='{"df":6,"tObserved":-3.14786,"stage":"square","showObserved":true,"shade":"p","landmarks":[],"controls":false}' fallback="F distribution with 1 and 6 degrees of freedom. The observed F of 9.91 is marked, and p = .020 is shaded in the single tail beyond it." >}}
 :::
 
-[PLACEHOLDER: caption.]
+The same evidence two ways: $t \approx -3.15$ and $F \approx 9.91$. The shaded areas give the same $p$ value.
 ::::
 
 {{< include quizzes/14-anova-learning-checks.qmd >}}
