@@ -21,15 +21,15 @@ interactive-scripts:
 <!-- PART 1: TWO GROUPS, TWO WAYS                                                          -->
 <!-- ===================================================================================== -->
 
-We're leaving behind the $t$ statistic and moving on to ANOVA, which stands for analysis of variance. This isn't as radical a departure as it might seem, though. As we'll see, the ANOVA procedure is just a more general version of what we've used the $t$ tests to achieve: analyzing patterns of variability. So here we'll start by seeing how the $t$ and ANOVA approaches can both be applied to the same two-group comparison. Then we'll discuss how ANOVA lets us move beyond comparing just two groups, and we'll use ANOVA's $F$ statistic to test a hypothesis comparing three groups.
+We're leaving behind the $t$ statistic and moving on to ANOVA, which stands for analysis of variance. This isn't as radical a departure as it might seem, though. As we'll see, the ANOVA procedure is just a more general version of what we've used the $t$ tests to achieve. We'll start by seeing how the $t$ and ANOVA approaches can both be applied to the same two-group comparison. Then we'll discuss what ANOVA is good for: allowing us to move beyond comparing just two groups. We'll use ANOVA's $F$ statistic to test a hypothesis comparing three groups.
 
 ## Comparing two groups
 
-It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. We rejected the null; it seemed like perhaps those kids had quicker reaction times than the regular population. But how do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense. Perhaps being bitten by any old spider would do it.
+It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. Even if we reject the null hypothesis, we're left with a question of causality. How do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense. Perhaps being bitten by any old spider would affect one's reaction times.
 
-So now we want to compare the effects of different kinds of spider bites on reaction times. We set up a little study with two independent samples. One sample of kids is bitten by a radioactive spider, and another sample of kids is bitten by an ordinary spider. Then everyone takes the same reaction time test.
+So now we want to compare the effects of different kinds of spider bites on reaction times. We set up a little study with two independent samples. One set of kids is bitten by a radioactive spider, and another batch is bitten by an ordinary spider. (Don't worry, they all signed the informed consent form.) Then everyone takes the same reaction time test.
 
-| ☢️ Radioactive bite | 🕷️ Ordinary bite |
+| [🕷️]{.sfs-radioactive} Radioactive bite | 🕷️ Ordinary bite |
 |:--:|:--:|
 | 189 | 310 |
 | 161 | 219 |
@@ -39,17 +39,19 @@ So now we want to compare the effects of different kinds of spider bites on reac
 
 : Reaction times (ms) for the two spider-bite conditions. {#tbl-bites-two}
 
-You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$. And the denominator is the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance: this works out to $27.0$. (You're welcome to check my math.)
+You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$ seconds. And the denominator is the estimated standard error of the mean difference: the size of difference between means we'd typically see by chance: this works out to $27.0$ seconds. (You're welcome to check my math.)
 
 That makes for a $t$ statistic of $−3.15$. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right; it exceeds the critical $t$ of $\pm 2.447$ for $df = 6$. So we can reject the null hypothesis that the two populations have the same mean reaction time.
 
-Notice a few things about this procedure. For one thing, the numerator is a difference in the original measurement units, miliseconds. You could measure that $85$ms difference on the same stopwatch you'd measure the reaction times themselves. The denominator is in the same units, too, describing the variability of differences between means in milliseconds. As a ratio, the numerator and denominator have to be in the same units. We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
+Notice a few things about this procedure. For one thing, the numerator and denominator are both in the original units of measurement, seconds. (They have to be in the same units for the ratio to make sense.) We get that millisecond numerator because we subtracted one mean from the other; that's something we can only do with exactly two means; it wouldn't work with three. Another consequence of that subtraction is that the resulting $t$ statistic can be positive or negative; it quantifies a difference with a direction, and the test can be two-tailed.
 
-The reason why I'm reiterating all this is to highlight the fact that the $t$ statistic is just one possible way of comparing groups, not the *only* way. What are we interested in, really? Variability: how much do the group means vary from one another, and how much should we expect them to vary by chance? Subtracting one mean from another is a very convenient way of quantifying variability when we're just dealing with two samples, because it is mathematically so easy to do. But it doesn't generalize to three or more groups. That's where ANOVA comes in. To begin to see its logic, let's first distill the $t$ statistic down to its conceptual essence.
+The reason why I'm reiterating all this is to highlight the fact that the $t$ statistic is just one possible way of comparing groups, not the *only* way. What are we interested in, really? Variability: how much do the group means vary from one another, and how much should we expect them to vary by chance? Subtracting one mean from another to find the difference is a convenient way of quantifying variability when we're just dealing with two samples, because it is mathematically so easy to do. But it doesn't generalize to three or more groups. That's where ANOVA comes in. To begin to see its logic, let's first distill the $t$ statistic down to its conceptual essence.
 
 ### Sources of variability
 
-Let's think about the $t$ equation again, in terms of what contributes to the numerator and the denominator---what would make each larger or smaller, in the most general sense.
+Let's think about the $t$ equation again, in terms of what contributes to the numerator and the denominator---what would make each larger or smaller?
+
+<!-- need to follow through on the larger/small idea. more variability in the population will contribute to numerator and denominator; more treatment effect will contribute only to numerator -->
 
 $$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
 
@@ -64,6 +66,8 @@ If we wanted to produce a new kind of ratio with this same structure, how might 
 ## ANOVA: Analysis of Variance
 
 The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Seely Gosset had laid the goundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
+
+<!-- mention that it's funny that standard deviation was established and used first, before variance was named and used in its own right. i guess this would mean mentioning variance earlier, using it instead of the more general talk of variability along the way in the next section? -->
 
 Separately, Fisher was also working in the field of genetics. He coined the term "variance" and developed a way of partitioning variance into different components, each due to a different cause, like how much of the varibility in people's heights comes from genetics versus environment [@fisher1918relatives]. A little later, Fisher was applying the technique to agricultural research, asking questions of data like, how much of the variability in crop poduction can be attributed to things like the soil, fertilizer, drainage, and so on, and how much of it is just up to chance. This work brought Fisher and Gosset back together; the first ANOVA table appeared in Gosset's own 1923 paper, On Testing Varieties of Cereals, in a note contributed by Fisher.
 
@@ -80,6 +84,8 @@ For the kind of data we're dealing with, we can think in terms of three types of
 **Within groups variability** is the variability of scores within each group. Why might scores vary within a group? Chance is a factor, as usual. But it can't be because of a treatment effect, since everyone in a group got the same treatment. So within-groups variability isolates chance, much like the denominator of the $t$ statistic.
 
 You see where we're going with this. If we can quantify the total variability in the data, and then partition it into these two sources, between-groups and within-groups variability, we can create for ourselves a new ratio, which will conceptually do the same job as the $t$ statistic.
+
+### Calculating sums of squares
 
 Before I give you the equations, let's walk through it visually.
 
@@ -144,8 +150,6 @@ Because each square represents all four scores that went into its mean, we count
 ::::
 
 :::::
-
-### Calculating sums of squares
 
 So how do we actually quantify these different sources of variability in the data? Hopefully you see from stepping through the process visually that we're not really doing anything new. We're using the procedure for calculating the sum of squared deviations that we learned back in Chapter 4. The only difference is that we're applying it in a few different ways, chunking up the data to look at different sources of variability.
 
