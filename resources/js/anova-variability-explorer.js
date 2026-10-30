@@ -220,8 +220,9 @@
 
     // Geometry is computed from the width the figure is drawn at, so text keeps its
     // real size on phones instead of shrinking with a fixed viewBox. Below
-    // COMPACT_BELOW the sums panel moves under the dot plot.
-    const COMPACT_BELOW = 700;
+    // COMPACT_BELOW the sums panel moves under the dot plot; desktop tutorials, about
+    // 600-620px wide inside their callouts, stay side by side.
+    const COMPACT_BELOW = 600;
     const longestName = d3.max(groups, (group) => group.name.length) || 6;
     let width;
     let height;
@@ -258,12 +259,25 @@
         panelSquare = { x: (width - panelSide) / 2, y: panel.y + 74, side: panelSide };
         height = panel.y + panel.height + 8;
       } else {
-        plot = { left: 16 + longestName * 8.6 + 12, right: width - 320, top: 76, bottom: 610 };
-        groupY.range([150, 540]);
+        // Lanes sit as close as their own furniture and their largest deviation squares
+        // allow, so two groups don't spread over the height that three would need.
+        // The sums panel gives up some width on a narrow page so the dot plot keeps enough.
+        const panelWidth = Math.round(Math.max(200, Math.min(255, width * 0.33)));
+        plot = { left: 16 + longestName * 8.6 + 12, right: width - panelWidth - 65, top: 44 };
         lane = { curve: 49, base: 38, meanHalf: 35, meanLabel: 43, name: 5, axisLabel: 42 };
-        panel = { x: width - 285, y: 66, width: 255, height: 540 };
-        panelSquare = { x: panel.x + 22, y: panel.y + 150, side: 210 };
-        height = 720;
+        x.range([plot.left, plot.right]);
+        const reach = laneReach();
+        const above = (i) => Math.max(lane.meanLabel + 14, reach[i].up + 10);
+        const below = (i) => Math.max(lane.base + 6, reach[i].down + 10);
+        const step = laneStep(lane.base + 6 + lane.meanLabel + 14);
+        const laneTop = plot.top + above(0);
+        const laneBottom = laneTop + step * (groups.length - 1);
+        groupY.range([laneTop, laneBottom]);
+        plot.bottom = laneBottom + below(groups.length - 1);
+        panel = { x: width - panelWidth - 30, y: plot.top - 10, width: panelWidth };
+        panelSquare = { x: panel.x + 22, y: panel.y + 100, side: panelWidth - 44 };
+        panel.height = panelSquare.y + panelSquare.side + 22 - panel.y;
+        height = Math.ceil(Math.max(plot.bottom + lane.axisLabel + 14, panel.y + panel.height + 8));
       }
       // Compare stage: everything centred on one column. The total is sized so that, once
       // split and cut, between above the line and within below it fit with their labels,
@@ -282,7 +296,7 @@
       const fits = (side) => widest(side) <= width - 2 * (margin + cutLabelRoom) &&
         side <= width - 2 * (margin + totalLabelRoom) &&
         (!showScores || extent(side) <= height - 2 * margin);
-      let side = compact ? 240 : 320;
+      let side = compact ? 240 : 270;
       while (side > 60 && !fits(side)) side -= 2;
       if (!showScores) height = Math.ceil(extent(side) + (compact ? 16 : 24));
       const between = parts.find((d) => d.key === "between");
@@ -507,11 +521,12 @@
         .attr("cy", targetY);
     }
 
-    function deviationData() {
-      if (state.stage === "total") {
+    function deviationData(stage) {
+      stage = stage || state.stage;
+      if (stage === "total") {
         return stats.observations.map((d) => ({ ...d, from: d.value, to: stats.grandMean, y: targetY(d), color: "var(--ave-total)" }));
       }
-      if (state.stage === "within") {
+      if (stage === "within") {
         return stats.observations.map((d) => ({
           ...d,
           from: d.value,
@@ -520,7 +535,7 @@
           color: colors[d.groupIndex % colors.length]
         }));
       }
-      if (state.stage === "between") {
+      if (stage === "between") {
         // One deviation per group: every score now sits on its group mean and shares it.
         return groups.map((group, i) => ({ groupIndex: i, index: 0, from: stats.means[i], to: stats.grandMean, y: groupY(i), color: "var(--ave-between)", weight: group.values.length }));
       }
@@ -529,6 +544,42 @@
 
     function deviationSquareGeometry(d) {
       return squares.deviationSquare(x(d.from), x(d.to), d.y, d.groupIndex, groups.length, d.index);
+    }
+
+    // How far each lane's deviation squares (and dots) reach above and below its line, over
+    // every stage, at the current x scale.
+    function laneReach() {
+      groupY.range([0, 0]);
+      const reach = groups.map(() => ({ up: 6, down: 6 }));
+      ["total", "within", "between"].forEach((stage) => deviationData(stage).forEach((d) => {
+        const square = deviationSquareGeometry(d);
+        const r = reach[d.groupIndex];
+        r.up = Math.max(r.up, -square.y, 6 - d.y);
+        r.down = Math.max(r.down, square.y + square.side, d.y + 6);
+      }));
+      return reach;
+    }
+
+    // The smallest distance between lanes at which, in every stage, no square reaches past
+    // the next lane's dots, and, once groups matter, no two squares from neighbouring lanes
+    // overlap. (In the total stage every score is one grey pool, so overlap there is
+    // harmless, and allowing it keeps three lanes from spreading far apart.) Squares from
+    // neighbouring lanes may share height where they don't share x. Call after laneReach.
+    function laneStep(minimum) {
+      let step = minimum;
+      ["total", "within", "between"].forEach((stage) => {
+        const placed = deviationData(stage).map((d) => ({ lane: d.groupIndex, ...deviationSquareGeometry(d) }));
+        placed.forEach((a) => {
+          if (a.lane < groups.length - 1) step = Math.max(step, a.y + a.side + 14);
+          if (a.lane > 0) step = Math.max(step, 14 - a.y);
+          if (stage === "total") return;
+          placed.forEach((b) => {
+            if (b.lane !== a.lane + 1 || a.x >= b.x + b.side || b.x >= a.x + a.side) return;
+            step = Math.max(step, a.y + a.side - b.y + 6);
+          });
+        });
+      });
+      return step;
     }
 
     function phaseIndex() {
@@ -1137,7 +1188,9 @@
       if (typeof window.interactiveFigure.observeResponsiveLayout === "function") {
         window.interactiveFigure.observeResponsiveLayout({
           root: rootNode,
-          container: rootNode,
+          // The SVG's own content box: beside side arrows the tutorial pads it, and drawing
+          // to the root's width would shrink everything, text included, to fit.
+          container: svg.node(),
           minimumWidth: 300,
           maximumWidth: 928,
           widthStep: 4,
