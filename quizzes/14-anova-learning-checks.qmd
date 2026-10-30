@@ -1,57 +1,100 @@
 ```{.quiz-yaml}
 id: 14_anova_learning_checks
-title: >
-  Learning Checks
+title: "Learning Checks: From t to F"
 questions:
-  - id: t_positive_negative
-    type: true-false
-    prompt: >
-      A t statistic can be either positive or negative.
-    answer: true
-    explanation: >
-      The sign indicates the direction of the mean difference.
-
-  - id: flexible_statistic
+  - id: shift_one_group
     type: multiple-choice
     prompt: >
-      Which statistic, t or F, is more flexible in the sense of applying to a wider
-      range of design contexts?
+      Suppose we add 20 ms to every score in the ordinary-bite group,
+      leaving the radioactive-bite scores alone. Which sum of squares
+      must stay the same?
     options:
-      - text: >
-          F
+      - text: $SS_{\text{total}}$
+      - text: $SS_{\text{between}}$
+      - text: $SS_{\text{within}}$
         correct: true
-      - text: >
-          t
-      - text: >
-          They are identical in every design
-      - text: >
-          Neither can compare means
     explanation: >
-      ANOVA and F ratios can extend to more than two groups and multiple factors.
+      Every ordinary-bite score and its group mean move together, so the
+      deviations within that group don't change. Neither do those in the
+      other group. The group means move farther apart, increasing the
+      between-groups and total sums of squares.
 
-  - id: t_and_f_relation
+  - id: ss_to_f
+    type: numeric
+    prompt: >
+      Another study has two independent groups of five people.
+      $SS_{\text{between}} = 180$ and $SS_{\text{within}} = 240$.
+      Calculate $F$.
+    answer: 6
+    tolerance: 0.01
+    hint: >
+      Find each component's degrees of freedom before comparing the mean squares.
+    explanation: >
+      $N = 10$ and $k = 2$, so $df_{\text{between}} = 1$ and
+      $df_{\text{within}} = 8$. The mean squares are $180/1 = 180$
+      and $240/8 = 30$, giving $F = 180/30 = 6$.
+      Dividing the sums directly would give $0.75$, comparing quantities
+      that haven't been adjusted for their different degrees of freedom.
+    diagnostics:
+      - id: between_df
+        type: numeric
+        prompt: What is the between-groups df?
+        answer: 1
+        tolerance: 0
+        explanation: $k - 1 = 2 - 1 = 1$.
+      - id: within_df
+        type: numeric
+        prompt: What is the within-groups df?
+        answer: 8
+        tolerance: 0
+        explanation: $N - k = 10 - 2 = 8$.
+      - id: within_ms
+        type: numeric
+        prompt: What is the within-groups mean square?
+        answer: 30
+        tolerance: 0.01
+        explanation: $SS_{\text{within}}/df_{\text{within}} = 240/8 = 30$.
+
+  - id: null_ratio
     type: multiple-choice
     prompt: >
-      When comparing exactly two groups with equivalent assumptions, how are t and F
-      related?
+      Under the null hypothesis, both mean squares estimate the same
+      population variance. What does that imply about repeated samples?
     options:
-      - text: >
-          $F = t^2$
+      - text: Every sample gives $F = 1$.
+      - text: The mean of the F values must be exactly 1.
+      - text: The F values vary, following the null distribution for their df.
         correct: true
-      - text: >
-          $t = F^2$
-      - text: >
-          $F = t / 2$
-      - text: >
-          They are unrelated
     explanation: >
-      The two tests are mathematically equivalent for two groups.
+      Estimating the same variance doesn't make the estimates equal in
+      every sample, or make their ratio average 1. For example, the
+      $F(1, 6)$ distribution has a mean of 1.5.
 
-  - id: f_positive_negative
-    type: true-false
+  - id: t_squared_transfer
+    type: free-response
     prompt: >
-      An F statistic can be positive or negative.
-    answer: false
+      A pooled independent-samples $t$ test gives $t(8) = -2.50$.
+      For the same data and assumptions, what would the two-group ANOVA's
+      $F$ and its two degrees of freedom be? Would its p-value match the
+      one-tailed or the two-tailed t test? What information does F lose?
+    answer: >
+      $F(1, 8) = (-2.50)^2 = 6.25$. Its p-value matches the two-tailed
+      $t$ test: both tails of $t$ become the right tail of $F$.
+      Squaring loses the sign, so $F$ doesn't say which mean is higher.
+
+  - id: zero_f
+    type: multiple-choice
+    prompt: >
+      Two groups have exactly the same sample mean, but scores vary
+      within each group. What is F?
+    options:
+      - text: 0
+        correct: true
+      - text: 1
+      - text: It can't be calculated.
     explanation: >
-      F is a ratio of variances, and variances cannot be negative.
+      The between-groups sum of squares and mean square are zero.
+      Dividing zero by a positive within-groups mean square gives
+      $F = 0$. Individual scores needn't all be identical, and identical
+      sample means don't prove identical population means.
 ```

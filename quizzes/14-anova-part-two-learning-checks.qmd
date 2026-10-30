@@ -1,0 +1,133 @@
+```{.quiz-yaml}
+id: 14_anova_part_two_learning_checks
+title: "Learning Checks: Using ANOVA"
+questions:
+  - id: design_and_hypothesis
+    type: free-response
+    prompt: >
+      A researcher randomly assigns 18 people to study in silence, with
+      music, or with conversation in the background, then gives each
+      person one memory test. Identify the factor and its levels, and
+      state the null and alternative hypotheses for a one-way ANOVA.
+    answer: >
+      The factor is background sound, with three levels: silence, music,
+      and conversation. $H_0: \mu_{\text{silence}} = \mu_{\text{music}} = \mu_{\text{conversation}}$.
+      $H_1$: At least one population mean differs from another; it doesn't require all three to differ.
+      The groups are independent because each person contributes a score
+      in just one condition and there are no matched pairs.
+
+  - id: calculate_three_group_f
+    type: numeric
+    prompt: >
+      For that study, $SS_{\text{total}} = 240$ and
+      $SS_{\text{within}} = 150$. Calculate F.
+    answer: 4.5
+    tolerance: 0.01
+    hints:
+      - Find the between-groups sum of squares using the partition of the total.
+      - Use $k = 3$ and $N = 18$ to find the two degrees of freedom.
+    explanation: >
+      $SS_{\text{between}} = 240 - 150 = 90$.
+      $df_{\text{between}} = 2$ and $df_{\text{within}} = 15$,
+      giving $MS_{\text{between}} = 45$ and $MS_{\text{within}} = 10$.
+      So $F(2, 15) = 45/10 = 4.50$.
+    diagnostics:
+      - id: between_ss
+        type: numeric
+        prompt: What is the between-groups sum of squares?
+        answer: 90
+        tolerance: 0.01
+        explanation: $240 - 150 = 90$.
+      - id: between_ms
+        type: numeric
+        prompt: What is the between-groups mean square?
+        answer: 45
+        tolerance: 0.01
+        explanation: $90/(3 - 1) = 45$.
+      - id: within_ms
+        type: numeric
+        prompt: What is the within-groups mean square?
+        answer: 10
+        tolerance: 0.01
+        explanation: $150/(18 - 3) = 10$.
+
+  - id: interpret_test_and_effect
+    type: free-response
+    prompt: >
+      Continue with the memory study. The critical value is 3.68 at
+      $\alpha = .05$. What decision would you make? Calculate and
+      interpret eta squared. Do these results identify which sound
+      conditions differ?
+    answer: >
+      $F = 4.50$ exceeds 3.68, so we reject the null hypothesis.
+      $\eta^2 = 90/240 = .375$: 37.5% of the variability in these
+      sample scores is between conditions. This is a sample estimate,
+      not the percentage of people affected or a known population
+      proportion. Neither F nor eta squared identifies which pairs differ.
+
+  - id: experiment_wise_error
+    type: multiple-choice
+    prompt: >
+      Why use Tukey's adjustment for the three pairwise comparisons,
+      rather than three ordinary t tests at $\alpha = .05$?
+    options:
+      - text: To control the chance of at least one Type I error across the comparisons.
+        correct: true
+      - text: To make each pairwise comparison more likely to be significant.
+      - text: To prevent Type II errors across the comparisons.
+    explanation: >
+      Testing each pair at .05 makes the chance of at least one false
+      positive across the comparisons greater than .05. Tukey's method
+      controls that combined error rate. Running ANOVA first isn't
+      itself the adjustment, and the protection doesn't eliminate errors.
+
+  - id: baseline_and_uncertainty
+    type: free-response
+    prompt: >
+      Return to our spider-bite study. Tukey's threshold was 71.2 ms.
+      The radioactive-bite mean was 95 ms below the no-bite mean;
+      the ordinary-bite mean was 10 ms below it. Which baseline
+      comparisons are significant? Does this establish that ordinary
+      bites have no effect? What supports a causal interpretation?
+    answer: >
+      Radioactive versus no bite is significant because 95 exceeds 71.2;
+      ordinary versus no bite is not because 10 doesn't. We have evidence
+      that radioactive bites sped reaction times relative to no bite,
+      but haven't proved ordinary bites have no effect. Four people per
+      group could miss smaller differences. Random assignment supports
+      the causal interpretation; the ANOVA alone doesn't establish it.
+
+  - id: prospective_power
+    type: free-response
+    prompt: >
+      In the power tutorial, all 200 studies sampled populations with
+      genuinely different means, but only about 23% rejected the null.
+      What happened in the other studies? For a future study, what
+      would you specify to plan for 80% power?
+    answer: >
+      The other studies made Type II errors: they missed a real
+      difference. The 23% is a simulation estimate of power, not the
+      probability that the null is false. To plan the next study, we'd
+      specify the number of groups, differences worth detecting,
+      within-group variability, alpha, and target power, then use
+      software to find the sample size per group. We wouldn't plug in
+      the observed means merely to calculate observed power.
+
+  - id: assumption_and_design
+    type: multiple-choice
+    prompt: >
+      Which study fits the independent-samples ANOVA developed here?
+      The outcome is a quantitative memory score. Assume the population
+      scores in each condition are approximately normal with equal variances.
+    options:
+      - text: Different, unrelated people each take one test in one of three conditions.
+        correct: true
+      - text: The same people each take a test in all three conditions.
+      - text: People are matched into trios, with one person per condition.
+    explanation: >
+      This chapter's version assumes independent observations.
+      Repeated measurements or matching link the scores, so we need
+      an analysis that accounts for those links. Normality concerns
+      scores within each population; homogeneity concerns the population
+      variances, not whether the observed sample variances match exactly.
+```
