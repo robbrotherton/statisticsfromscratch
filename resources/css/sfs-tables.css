@@ -162,3 +162,54 @@ body.quarto-dark .sfs-decision-table {
   background: var(--sfs-highlight-bg);
 }
 
+
+/* ANOVA summary tables (ch. 14-16) are worksheets, not data, so they swap
+   the rules for a thin grid. Cells that never take a value hold an empty
+   []{.sfs-na} marker and drop their borders; a neighboring cell still draws
+   the shared edge, so the outline steps around them. Blank cells without
+   the marker keep their borders, to be filled in. */
+.sfs-summary-table table.table {
+  border-top: 0;
+  border-bottom: 0;
+}
+
+.sfs-summary-table table.table thead {
+  border-bottom: 0;
+}
+
+.sfs-summary-table table.table > :not(caption) > * > * {
+  border: 1px solid var(--sfs-table-rule-color);
+  padding: 0.5rem 0.75rem;
+}
+
+.sfs-summary-table table.table > :not(caption) > * > :has(> .sfs-na) {
+  border: 0;
+}
+
+/* Radioactive glow for the 🕷️ header in the spider-bite tables (ch. 14).
+   Color emoji ignore `color`, so the glyph is made transparent and a
+   zero-offset text-shadow repaints its silhouette red. drop-shadow then
+   follows that shape for the glow. */
+.sfs-radioactive {
+  color: transparent;
+  text-shadow: 0 0 0 #e0201b;
+  display: inline-block;
+  animation: sfs-radioactive-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes sfs-radioactive-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 1px #7dff4a) drop-shadow(0 0 3px #39ff14);
+  }
+  50% {
+    filter: drop-shadow(0 0 3px #b6ff8a) drop-shadow(0 0 12px #39ff14)
+      drop-shadow(0 0 20px #2bd40f);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfs-radioactive {
+    animation: none;
+    filter: drop-shadow(0 0 2px #7dff4a) drop-shadow(0 0 6px #39ff14);
+  }
+}

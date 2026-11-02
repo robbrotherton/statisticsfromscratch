@@ -67,3 +67,11 @@ in that orientation. Horizontal remains the default and uses `xDomain`.
 Vertical plots keep a minimum height of 280px on narrow screens. Per-row
 colors can use the book tokens, e.g. `var(--graph-series-1, #0072b2)` and
 `var(--graph-series-4, #d55e00)`.
+
+Set `mark: 'bar'` on an interval graph to draw each estimate as a bar from
+zero, retaining the explicit uncertainty limits. Works in either orientation.
+The domain then includes zero as well as every interval; an explicit domain
+that excludes the baseline is rejected. This does not change frequency bars
+or calculate confidence intervals. For a conventional mean-and-CI figure,
+use `orientation: 'vertical'`, `showValues: false`, and explain the limits and
+sample sizes in the figure caption.

@@ -3751,6 +3751,8 @@ sfsDistributionExplorerYDomain = (type, opts = {}) => {
   return null;
 }
 
+sfsDistributionExplorerClipId = 0;
+
 makeDistributionParameterExplorer = function(opts = {}) {
   sfsDistributionEnsureStyles();
 
@@ -3833,6 +3835,10 @@ makeDistributionParameterExplorer = function(opts = {}) {
     ? root.append("p").attr("class", "dpe-interval-readout sfs-readout-value") : null;
   const chartWrap = root.append("div")
     .attr("class", "dpe-chart-wrap sfs-chart-wrap");
+  const criticalReadout = opts.criticalReadout
+    ? root.append("p").attr("class", "dpe-critical-readout sfs-readout-value")
+      .style("text-align", "center").style("margin", "0.25rem 0 0")
+      .style("min-height", "2.8rem").style("line-height", "1.4rem") : null;
 
   // Compare probability beyond fixed cutoffs, rather than moving each
   // distribution's cutoffs to keep its tail area constant.
@@ -3923,6 +3929,16 @@ makeDistributionParameterExplorer = function(opts = {}) {
     .attr("class", "dpe-shades");
   const curveLayer = svg.append("g")
     .attr("class", "dpe-curves");
+  // Keep fixed axes honest when an F curve rises beyond the frame near zero.
+  const plotClip = opts.clipPlot ? svg.append("defs").append("clipPath")
+    .attr("id", `dpe-clip-${sfsDistributionExplorerClipId++}`) : null;
+  const plotClipRect = plotClip ? plotClip.append("rect") : null;
+  if (plotClip) {
+    const url = `url(#${plotClip.attr("id")})`;
+    curveLayer.attr("clip-path", url);
+    shadeLayer.attr("clip-path", url);
+  }
+  const markerLayer = svg.append("g").attr("class", "dpe-markers");
   const tailMarkers = compareTails ? svg.append("g")
     .attr("class", "dpe-tail-markers")
     .selectAll("line").data([-tailCutoff, tailCutoff]).join("line")
@@ -4011,6 +4027,13 @@ makeDistributionParameterExplorer = function(opts = {}) {
       distribution: dist,
       data: sfsDistributionCurveData(dist, domain, points)
     }));
+    if (plotClip) curveData.forEach(({ distribution: dist, data }) => {
+      if (dist.type === "f" && dist.df1 < 2 && data[0].x === dist.location) {
+        // The density is infinite at zero, not zero. Start just inside the
+        // support, above the clip, rather than drawing a false spike from 0.
+        data[0] = { x: dist.location + 1e-8, y: sfsDistributionPdf(dist, dist.location + 1e-8), distribution: dist };
+      }
+    });
     const shadeOptions = tailsShown ? Object.assign({}, opts, {
       shade: distributions.flatMap((dist) => [
         { distribution: dist.key, to: -tailCutoff, color: dist.color, opacity: 0.24 },
@@ -4021,6 +4044,19 @@ makeDistributionParameterExplorer = function(opts = {}) {
         color: "var(--sfs-confidence-color, #2f6f9f)", opacity: 0.3 }
     }) : opts;
     const shadeItems = sfsDistributionShadeItems(shadeOptions, distributions, domain);
+    const markers = sfsDistributionMarkerItems(opts, distributions, domain);
+    // The cutoff still exists when its entire tail is outside the frame
+    // (the shade helper intentionally omits those empty visible segments).
+    const controlled = distributions.find((dist) => dist.role === "controlled");
+    const critical = criticalReadout ? sfsDistributionQuantile(controlled,
+      1 - sfsDistributionProbability(sfsDistributionAsArray(opts.shade)[0] || {}, 0.05)) : null;
+    if (criticalReadout && critical >= domain[0] && critical <= domain[1]) {
+      markers.push({
+        x: critical, index: "critical", height: 0.45,
+        color: "var(--sfs-critical-color, #c63f3f)", strokeWidth: 1.3,
+        dash: "", label: d3.format(".2f")(critical)
+      });
+    }
     const explicitY = sfsDistributionExplorerYDomain(type, opts);
     const yMax = d3.max(curveData, (series) => d3.max(series.data, (d) => d.y)) || 1;
     const yDomain = explicitY || [0, yMax * 1.12];
@@ -4030,6 +4066,8 @@ makeDistributionParameterExplorer = function(opts = {}) {
       domain,
       curveData,
       shadeItems,
+      markers,
+      critical,
       tailAreas: compareTails ? distributions.map((dist) => ({
         key: dist.key, label: dist.name || dist.label,
         probability: sfsDistributionCdf(dist, -tailCutoff) + 1 - sfsDistributionCdf(dist, tailCutoff)
@@ -4052,6 +4090,7 @@ makeDistributionParameterExplorer = function(opts = {}) {
       domain: plot.domain.slice(),
       yDomain: plot.yDomain.slice()
     });
+    if (criticalReadout) rootNode.value.critical = plot.critical;
   }
 
   function notifyValueChange() {
@@ -4197,6 +4236,9 @@ makeDistributionParameterExplorer = function(opts = {}) {
 
     x.domain(plot.domain);
     y.domain(plot.yDomain).nice();
+    if (plotClipRect) plotClipRect.attr("x", margin.left).attr("y", margin.top)
+      .attr("width", width - margin.left - margin.right)
+      .attr("height", height - margin.top - margin.bottom);
 
     if (axisChanged || !lastRender) drawAxes(plot);
 
@@ -4257,6 +4299,33 @@ makeDistributionParameterExplorer = function(opts = {}) {
     }
 
     paths.exit().remove();
+
+    const markers = markerLayer.selectAll("g").data(plot.markers, (d) => d.index);
+    const markerEnter = markers.enter().append("g");
+    markerEnter.append("line");
+    markerEnter.append("text").attr("class", "sfs-graph-label");
+    markers.merge(markerEnter).each(function(d) {
+      const group = d3.select(this);
+      const top = d.height === "full" ? margin.top : typeof d.height === "number"
+        ? y(0) - d.height * (y(0) - margin.top) : Math.max(margin.top, y(d.y));
+      group.select("line").attr("x1", x(d.x)).attr("x2", x(d.x))
+        .attr("y1", y(0)).attr("y2", top).attr("stroke", d.color)
+        .attr("stroke-width", d.strokeWidth).attr("stroke-dasharray", d.dash)
+        .attr("vector-effect", "non-scaling-stroke");
+      group.select("text").attr("x", x(d.x)).attr("y", top - 8)
+        .attr("text-anchor", "middle").style("fill", d.color).text(d.label || "");
+    });
+    markers.exit().remove();
+
+    if (criticalReadout) {
+      const dist = plot.distributions.find((item) => item.role === "controlled");
+      const critical = plot.critical;
+      const beyond = critical > plot.domain[1];
+      const summary = `${sfsDistributionExplorerLabel(dist, opts)} · ${d3.format(".0%")(1 - sfsDistributionCdf(dist, critical))} above ${d3.format(".2f")(critical)}${beyond ? " (beyond view)" : ""}`;
+      criticalReadout.text(summary);
+      const description = `${opts.ariaLabel || "Interactive distribution"}. ${summary}. The dashed line marks F = 1, where the mean squares are equal; it is not the distribution's mean. The right tail continues beyond the plotted range.`;
+      svg.attr("aria-label", description).select("title").text(description);
+    }
 
     if (intervalLayer) {
       const { from, to } = plot.shadeItems[0];
