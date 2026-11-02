@@ -15,7 +15,14 @@
 // drawing a new one: more spread scales both mean squares together (F
 // unchanged), and a bigger effect grows only MS between. A new `batch` is a
 // fresh set of samples from the same seed, for steps that sample again under
-// new settings. In batch 0, `leadSamples` lists seed indices to show first (the
+// new settings. A step can also change `n`, the scores per group; that is a new
+// set of samples too. `current` keeps an earlier sample in the lanes while
+// the tracker holds them all, so a step can show a whole null distribution
+// around the one sample the text is about.
+//
+// With `splitCritical`, the tracker's bars are split at the .05 critical
+// value, in the book's power colours: past it is red under the null (Type I
+// errors) and purple under a real effect (power); short of it is grey. In batch 0, `leadSamples` lists seed indices to show first (the
 // ones the text walks through), and the rest follow in order.
 
 // The arithmetic, kept free of the DOM so the tests can check it.
@@ -72,7 +79,7 @@ window.makeAnovaTwoEstimates = function(opts) {
 
   const names = Array.isArray(opts.groups) && opts.groups.length >= 2 ? opts.groups.map(String) : ["Group 1", "Group 2"];
   const k = names.length;
-  const n = Math.max(2, Math.round(finite(opts.n, 4)));
+  const nFrom = (value, fallback) => Math.max(2, Math.round(finite(value, fallback)));
   const seed = String(opts.seed || "anova-two-estimates-v1");
   const mu = finite(opts.mu, 250);
   const xMin = finite(opts.xMin, mu - 170);
@@ -84,9 +91,12 @@ window.makeAnovaTwoEstimates = function(opts) {
   // The F tracker's axis; larger Fs stack in its last bin.
   const fMax = finite(opts.fMax, 15);
   const binWidth = finite(opts.binWidth, 0.5);
+  // The fewest samples the tracker's height scale allows for, so a step that
+  // starts a new histogram from one sample draws it at the scale it will fill.
+  const trackerScale = Math.max(1, Math.round(finite(opts.trackerScale, 1)));
   const maxSamples = Math.max(1, Math.round(finite(opts.maxSamples, 400)));
   const dfBetween = k - 1;
-  const dfWithin = k * (n - 1);
+  const dfWithin = () => k * (state.n - 1);
 
   // Reference spread: population curves are drawn at this σ's full height,
   // and a wider population is a lower one, as a density should be.
@@ -103,6 +113,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     return value === "within" || value === "between" ? value : "sample";
   }
   const state = {
+    n: nFrom(opts.n, 4),
     effect: finite(opts.effect, 0),
     sd: sdReference,
     samples: Math.max(1, Math.min(maxSamples, Math.round(finite(opts.samples, 1)))),
@@ -112,9 +123,14 @@ window.makeAnovaTwoEstimates = function(opts) {
     showSigma: opts.showSigma === true,
     shown: estimatesFrom(opts.showEstimates),
     showTracker: opts.showTracker === true,
-    showCurve: opts.showCurve === true
+    showCurve: opts.showCurve === true,
+    current: null
   };
   const anyEstimates = () => state.shown.within || state.shown.between;
+  const splitCritical = opts.splitCritical === true;
+  const critical = () => stats.f.inv(0.95, dfBetween, dfWithin());
+  // The sample in the lanes: `current` if a step names one, else the newest.
+  const shownIndex = () => state.current ? Math.min(state.current, state.samples) : state.samples;
 
   const lead = (Array.isArray(opts.leadSamples) ? opts.leadSamples : [])
     .map(Number).filter((i) => Number.isInteger(i) && i > 0);
@@ -122,11 +138,11 @@ window.makeAnovaTwoEstimates = function(opts) {
   for (let i = 1; order.length < maxSamples; i += 1) if (!lead.includes(i)) order.push(i);
   const zCache = new Map();
   function zFor(s) {
-    const key = `${state.batch}:${s}`;
+    const key = `${state.batch}:${state.n}:${s}`;
     if (!zCache.has(key)) {
       zCache.set(key, state.batch === 0
-        ? core.standardScores(seed, order[s - 1], k, n)
-        : core.standardScores(`${seed}:batch-${state.batch}`, s, k, n));
+        ? core.standardScores(seed, order[s - 1], k, state.n)
+        : core.standardScores(`${seed}:batch-${state.batch}`, s, k, state.n));
     }
     return zCache.get(key);
   }
@@ -190,6 +206,12 @@ window.makeAnovaTwoEstimates = function(opts) {
        where this sample landed. Not Ch 7's red: red means within here. */
     .anova-two-estimates .ate-f,
     .anova-two-estimates .ate-bar.is-current { fill: var(--sfs-accent, #2c7fb8); opacity: 1; }
+    .anova-two-estimates .ate-bar.is-hi { fill: var(--sfs-critical-color, #c63f3f); }
+    .anova-two-estimates.has-effect .ate-bar.is-hi { fill: var(--sfs-power-color, #7654b5); }
+    .anova-two-estimates .ate-bar.is-lo { fill: var(--sfs-neutral-color, #7b818a); }
+    .anova-two-estimates .ate-bar.is-lo, .anova-two-estimates .ate-bar.is-hi { transition: fill 600ms ease; }
+    .anova-two-estimates .ate-critical { stroke: var(--sfs-critical-color, #c63f3f); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .anova-two-estimates .ate-critical-label { fill: var(--sfs-critical-color, #c63f3f); font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 700; font-variant-numeric: tabular-nums; }
     .anova-two-estimates .ate-f-curve { fill: none; stroke: var(--sfs-null-color, currentColor); stroke-width: 2; }
     .anova-two-estimates .ate-sum-outline { fill: none; stroke-width: 1.5; stroke-dasharray: 4 3; }
   `);
@@ -217,6 +239,8 @@ window.makeAnovaTwoEstimates = function(opts) {
   const trackerNote = trackerGroup.append("text").attr("class", "bcs-panel-note");
   const oneLine = trackerGroup.append("line").attr("class", "bcs-mu-line");
   const barsLayer = trackerGroup.append("g");
+  const criticalLine = trackerGroup.append("line").attr("class", "ate-critical").attr("display", splitCritical ? null : "none");
+  const criticalLabel = trackerGroup.append("text").attr("class", "ate-critical-label").attr("display", splitCritical ? null : "none");
   const currentBar = trackerGroup.append("rect").attr("class", "ate-bar is-current");
   const trackerAxis = trackerGroup.append("g").attr("class", "bcs-axis sfs-axis");
   const trackerAxisLabel = trackerGroup.append("text").attr("class", "bcs-panel-note").attr("text-anchor", "middle").text("F");
@@ -316,9 +340,12 @@ window.makeAnovaTwoEstimates = function(opts) {
 
   // Sorted scores stack top to bottom in x order, a few pixels apart, as in the
   // ANOVA explorer, so each one's deviation line and square has its own row.
+  // A big group is squeezed to keep its stack inside its lane.
   function laneDots(values, g) {
     const ranks = new Map(values.map((value, i) => ({ value, i })).sort((a, b) => a.value - b.value).map((d, rank) => [d.i, rank]));
-    return values.map((value, i) => ({ g, i, rank: ranks.get(i), value, y: laneY(g) + squares.laneOffset(ranks.get(i), values.length) }));
+    const span = Math.abs(squares.laneOffset(0, values.length)) * 2;
+    const squeeze = span ? Math.min(1, layout.laneH * 0.4 / span) : 1;
+    return values.map((value, i) => ({ g, i, rank: ranks.get(i), value, y: laneY(g) + squeeze * squares.laneOffset(ranks.get(i), values.length) }));
   }
 
   // The explorer's deviations for one kind of variability, each with its square:
@@ -343,7 +370,7 @@ window.makeAnovaTwoEstimates = function(opts) {
           key: `${g}-between`, g, x1: x(mean), x2: x(summary.grandMean), y: laneY(g),
           color: colors[g % colors.length],
           square: squares.deviationSquare(x(mean), x(summary.grandMean), laneY(g), g, k, 0),
-          value: (mean - summary.grandMean) ** 2, weight: n
+          value: (mean - summary.grandMean) ** 2, weight: state.n
         };
       });
     }
@@ -357,10 +384,12 @@ window.makeAnovaTwoEstimates = function(opts) {
     const counts = new Array(bins).fill(0);
     const fs = [];
     let newestBin = 0;
+    const shown = Math.min(shownIndex(), count);
     for (let s = 1; s <= count; s += 1) {
       const f = summaryFor(s, effect).f;
-      newestBin = Math.min(Math.floor(Math.max(0, f) / binWidth), bins - 1);
-      counts[newestBin] += 1;
+      const bin = Math.min(Math.floor(Math.max(0, f) / binWidth), bins - 1);
+      if (s === shown) newestBin = bin;
+      counts[bin] += 1;
       fs.push(f);
     }
     return { counts, fs, newestBin, maxCount: Math.max(1, ...counts) };
@@ -380,14 +409,17 @@ window.makeAnovaTwoEstimates = function(opts) {
     rootNode.value = {
       effect: state.effect,
       sd: state.sd,
+      sample: shownIndex(),
       sigma2: state.sd ** 2,
+      n: state.n,
       samples: state.samples,
       msBetween: summary.msBetween,
       msWithin: summary.msWithin,
       f: summary.f,
       dfBetween,
-      dfWithin,
-      shareAboveCritical: fs.length ? fs.filter((f) => f > stats.f.inv(0.95, dfBetween, dfWithin)).length / fs.length : null
+      dfWithin: dfWithin(),
+      critical: critical(),
+      shareAboveCritical: fs.length ? fs.filter((f) => f > critical()).length / fs.length : null
     };
   }
 
@@ -461,7 +493,7 @@ window.makeAnovaTwoEstimates = function(opts) {
   // (the first time), the deviations draw (once the last step's have gone), their
   // squares grow, then pour and cut.
   function buildTimes(dropping, speed) {
-    const dropEnd = dropping ? 60 * (n - 1) + 380 : 0;
+    const dropEnd = dropping ? 60 * (state.n - 1) + 380 : 0;
     const lineDelay = (dropping ? dropEnd : 50) + 250 / speed;
     const squareDelay = lineDelay + (squares.LINE_DURATION + 250) / speed;
     return { dropEnd, lineDelay, squareDelay, pourDelay: squareDelay + (squares.SQUARE_DURATION + 350) / speed };
@@ -564,7 +596,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     trackerTimer = null;
     x.range([L.lanesLeft, L.lanesRight]);
 
-    const groups = core.scores(zFor(state.samples), { mu, effect: state.effect, sd: state.sd });
+    const groups = core.scores(zFor(shownIndex()), { mu, effect: state.effect, sd: state.sd });
     const summary = core.summarize(groups);
     const sampleAppeared = state.showSample && drawnShowSample === false;
     // A sample dropping in for a build shows only its dots as they fall, and then
@@ -644,7 +676,7 @@ window.makeAnovaTwoEstimates = function(opts) {
       });
       const dotX = (d) => x(d.value);
       const circles = sample.select(".ate-dot-layer").selectAll("circle").data(dots, (d) => d.i)
-        .join("circle").attr("class", "ate-dot").attr("r", 6).style("fill", color);
+        .join("circle").attr("class", "ate-dot").attr("r", state.n > 8 ? 4.5 : 6).style("fill", color);
       if (mode === "sample" || swap || appearing) {
         // A new sample: each score drops into its lane from the population.
         const start = swap ? arriveMs : 0;
@@ -705,7 +737,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     // or more spread leaves the scale and the F curve where they were: only
     // the bars move. The current counts are checked too, so no bar can
     // outgrow the panel.
-    const scaleTo = Math.max(target, state.samples);
+    const scaleTo = Math.max(target, state.samples, trackerScale);
     const scaleCount = Math.max(trackerCounts(scaleTo, 0).maxCount, trackerCounts(scaleTo).maxCount);
     const band = L.trackerBase - L.trackerPlotTop - 16;
     const binPx = fx(binWidth) - fx(0);
@@ -728,12 +760,31 @@ window.makeAnovaTwoEstimates = function(opts) {
     // Bars leave out the newest sample; its slice sits on top of its bar.
     const barW = Math.max(1, binPx - 1);
     const below = counts.map((c, bin) => c - (fs.length && bin === newestBin ? 1 : 0));
-    const bars = barsLayer.selectAll("rect").data(below).join("rect").attr("class", "ate-bar");
+    // Split at the critical value, the bar that straddles it is cut in two
+    // at the line, so the colours change exactly where rejection starts.
+    const cut = splitCritical ? critical() : Infinity;
+    const segments = below.flatMap((c, bin) => {
+      const x0 = bin * binWidth;
+      const x1 = x0 + binWidth;
+      if (x1 <= cut) return [{ key: `${bin}`, c, x0, x1, part: "lo" }];
+      if (x0 >= cut) return [{ key: `${bin}`, c, x0, x1, part: "hi" }];
+      return [{ key: `${bin}`, c, x0, x1: cut, part: "lo" }, { key: `${bin}-hi`, c, x0: cut, x1, part: "hi" }];
+    });
+    rootNode.classList.toggle("has-effect", state.effect !== 0);
+    const bars = barsLayer.selectAll("rect").data(segments, (d) => d.key).join("rect")
+      .attr("class", (d) => splitCritical ? `ate-bar is-${d.part}` : "ate-bar");
+    // A bar's last pixel is its gap, unless the next piece of the same bin follows.
     ts(bars)
-      .attr("x", (c, bin) => fx(bin * binWidth) + 0.5)
-      .attr("width", barW)
-      .attr("y", (c) => L.trackerBase - c * unitHeight)
-      .attr("height", (c) => c * unitHeight);
+      .attr("x", (d) => fx(d.x0) + (d.x0 % binWidth ? 0 : 0.5))
+      .attr("width", (d) => Math.max(0.5, fx(d.x1) - fx(d.x0) - (d.x1 === cut ? 0 : 1)))
+      .attr("y", (d) => L.trackerBase - d.c * unitHeight)
+      .attr("height", (d) => d.c * unitHeight);
+    if (splitCritical) {
+      const cx = fx(cut);
+      criticalLine.attr("x1", cx).attr("x2", cx).attr("y1", L.trackerPlotTop).attr("y2", L.trackerBase + 5);
+      // In the strip the bars leave clear at the top, beside its line.
+      criticalLabel.attr("x", cx + 4).attr("y", L.trackerPlotTop + 10).text(fFormat(cut));
+    }
     // A slice under 2.5 px is hard to see, so a thin one is drawn taller,
     // reaching down into its bar rather than above it.
     const sliceTop = L.trackerBase - counts[newestBin] * unitHeight;
@@ -754,7 +805,7 @@ window.makeAnovaTwoEstimates = function(opts) {
     trackerClip.attr("x", L.plotLeft).attr("y", L.trackerPlotTop).attr("width", L.plotRight - L.plotLeft).attr("height", L.trackerBase - L.trackerPlotTop);
     const curveData = d3.range(0.02, fMax, 0.05).map((f) => ({
       x: fx(f),
-      y: L.trackerBase - fs.length * binWidth * stats.f.pdf(f, dfBetween, dfWithin) * unitHeight
+      y: L.trackerBase - fs.length * binWidth * stats.f.pdf(f, dfBetween, dfWithin()) * unitHeight
     }));
     curvePath.attr("d", d3.line().x((d) => d.x).y((d) => d.y)(curveData));
 
@@ -849,10 +900,9 @@ window.makeAnovaTwoEstimates = function(opts) {
     timer = d3.interval(() => {
       state.samples += 1;
       draw("fast");
-      if (state.samples >= target) {
-        stopTimer();
-        notifyValueChange();
-      }
+      // The text's share of rejections counts along with the bars.
+      notifyValueChange();
+      if (state.samples >= target) stopTimer();
     }, 45);
   }
 
@@ -889,8 +939,9 @@ window.makeAnovaTwoEstimates = function(opts) {
     const index = context && Number.isInteger(context.index) ? context.index : null;
     const backwards = index !== null && lastStep !== null && index < lastStep;
     if (index !== null) lastStep = index;
-    const before = { effect: state.effect, sd: state.sd, batch: state.batch, lanes: state.lanes, showSample: state.showSample, shown: { ...state.shown } };
+    const before = { n: state.n, effect: state.effect, sd: state.sd, batch: state.batch, lanes: state.lanes, showSample: state.showSample, shown: { ...state.shown } };
     const trackerWasShown = state.showTracker;
+    if ("n" in action) state.n = nFrom(action.n, state.n);
     if ("effect" in action) state.effect = finite(action.effect, state.effect);
     if ("sd" in action) state.sd = Math.max(1, finite(action.sd, state.sd));
     if ("batch" in action) state.batch = Math.max(0, Math.round(finite(action.batch, state.batch)));
@@ -900,6 +951,8 @@ window.makeAnovaTwoEstimates = function(opts) {
     if ("show-estimates" in action) state.shown = estimatesFrom(action["show-estimates"]);
     if ("show-tracker" in action) state.showTracker = Boolean(action["show-tracker"]);
     if ("show-curve" in action) state.showCurve = Boolean(action["show-curve"]);
+    // Every step names its own lanes sample, or follows the newest.
+    state.current = Number.isInteger(action.current) && action.current > 0 ? action.current : null;
     const previous = state.samples;
     if ("samples" in action) {
       // "next" belongs to a data-repeat-action only; every step itself names
@@ -909,7 +962,7 @@ window.makeAnovaTwoEstimates = function(opts) {
         : Math.max(1, Math.min(maxSamples, Math.round(finite(action.samples, previous))));
     }
     const animate = mounted && !backwards && action.animate !== false && motionAllows(true);
-    const paramsChanged = before.effect !== state.effect || before.sd !== state.sd || before.batch !== state.batch;
+    const paramsChanged = before.n !== state.n || before.effect !== state.effect || before.sd !== state.sd || before.batch !== state.batch;
     // A mean square is built only when stepping forward to the step that first
     // shows it, with the lanes showing its deviations.
     const building = ["within", "between"].find((kind) => state.lanes === kind && state.shown[kind] && !before.shown[kind]);

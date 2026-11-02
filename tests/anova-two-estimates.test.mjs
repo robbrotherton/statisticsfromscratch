@@ -63,3 +63,32 @@ test("every tutorial step sets its state absolutely", () => {
     assert.equal(typeof action.samples, "number");
   }
 });
+
+test("every power step sets its state absolutely, including n", () => {
+  const steps = tutorialSteps(divById(readChapter("14-anova.qmd"), "act-anova-power"));
+  assert.ok(steps.length > 0);
+  for (const { action } of steps) {
+    for (const key of ["batch", "n", "effect", "sd", "samples", "show-sample", "lanes", "show-sigma", "show-estimates", "show-tracker", "show-curve"]) {
+      assert.ok(Object.hasOwn(action, key), `a step leaves ${key} unset`);
+    }
+  }
+});
+
+test("a larger n per group raises the rejection rate to near the exact power", () => {
+  const stats = context.window.sfsStats;
+  const share = (n, seed) => {
+    const critical = stats.f.inv(0.95, 2, 3 * (n - 1));
+    let hits = 0;
+    for (let s = 1; s <= 200; s += 1) {
+      const z = core.standardScores(seed, s, 3, n);
+      if (core.summarize(core.scores(z, { mu: 230, effect: 40, sd: 36 })).f > critical) hits += 1;
+    }
+    return hits / 200;
+  };
+  const small = share(4, "power-check");
+  const large = share(17, "power-check");
+  assert.ok(large > small);
+  // Exact power is 20.5% at n = 4 and 80.9% at n = 17; 200 samples land within a few points.
+  assert.ok(Math.abs(small - 0.205) < 0.1);
+  assert.ok(Math.abs(large - 0.809) < 0.1);
+});

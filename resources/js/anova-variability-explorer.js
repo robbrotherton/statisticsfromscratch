@@ -602,7 +602,9 @@
         animate,
         squares: showLines && phaseIndex() >= 2,
         drawLines: transitions.drawLines,
-        growSquares: transitions.growSquares
+        growSquares: transitions.growSquares,
+        lineDelay: transitions.lineDelay,
+        squareDelay: transitions.squareDelay
       });
     }
 
@@ -802,7 +804,7 @@
         .attr("width", geometry.width).attr("height", geometry.height);
     }
 
-    function renderSquares(animate, revealKey, liftDelay, splitting) {
+    function renderSquares(animate, revealKey, liftDelay, splitting, pourDelay) {
       const wide = wideLayout();
       const split = isSplit();
       const layout = squareLayout();
@@ -877,7 +879,7 @@
         .style("opacity", (d) => isLifted(d) ? 0 : 1);
       // Once both layers fill the total, its own grey underneath would only tint them.
       sumRects.filter((d) => d.key === "total").transition("tint")
-        .delay(animate && revealKey === "between" ? pourDuration : 0)
+        .delay(animate && revealKey === "between" ? (pourDelay || 0) + pourDuration : 0)
         .duration(animate ? 400 : 0)
         .attr("fill-opacity", aggregateRevealLevel() >= 3 ? 0 : 0.18);
 
@@ -889,7 +891,7 @@
 
     // Pour each squared deviation into the container: it flies to the mouth, drops to the
     // surface, and spreads flat across it as the level rises by exactly its area.
-    function animateContributions(revealKey, animate) {
+    function animateContributions(revealKey, animate, delay) {
       transferLayer.selectAll("*").interrupt().remove();
       if (!animate || !revealKey) return;
 
@@ -911,7 +913,8 @@
         color: target.color,
         level: (value) => ssGeometry(target, value, layout),
         mouth: { x: layout.x + layout.side / 2, y: layout.y },
-        sumRect
+        sumRect,
+        delay
       });
     }
 
@@ -1020,7 +1023,7 @@
           return;
         }
         // A layer still being poured is labelled once its pour has finished.
-        const delay = d.key === moves.revealKey && d.key !== "total" ? pourDuration : 0;
+        const delay = d.key === moves.revealKey && d.key !== "total" ? (moves.pourDelay || 0) + pourDuration : 0;
         label.transition().delay(delay).duration(moves.splitting ? 900 : 760).ease(d3.easeCubicInOut)
           .call(placeLabel, d)
           .style("opacity", opacity(d));
@@ -1098,6 +1101,15 @@
       const revealKey = animate && state.phase === "sum" && (!sameStage || lastRenderedPhase !== "sum")
         ? state.stage
         : null;
+      // A step that skips phases plays them in turn: after a new stage's dots and means
+      // settle, the deviations draw, then their squares grow, then they pour into the sum.
+      transitions.lineDelay = transitions.drawLines && !sameStage ? 800 : 0;
+      transitions.squareDelay = transitions.drawLines && transitions.growSquares
+        ? transitions.lineDelay + squares.LINE_DURATION + 250
+        : 0;
+      const pourDelay = revealKey && transitions.growSquares
+        ? transitions.squareDelay + squares.SQUARE_DURATION + 350
+        : 0;
       // Mean squares build only when stepping forward into their phase.
       const previousCompareIndex = sameStage ? COMPARE_PHASES.indexOf(lastRenderedPhase) : -1;
       const msKey = animate && comparePhaseIndex() > previousCompareIndex
@@ -1118,10 +1130,10 @@
       renderMeans(animate);
       renderGhosts(animate);
       renderDots(animate);
-      renderSquares(animate, revealKey, layoutDelay, splitting);
+      renderSquares(animate, revealKey, layoutDelay, splitting, pourDelay);
       renderMeanSquares(animate, msKey);
-      renderLabels(animate, { layoutChanged, layoutDelay, cut, splitting, revealKey });
-      animateContributions(revealKey, animate);
+      renderLabels(animate, { layoutChanged, layoutDelay, cut, splitting, revealKey, pourDelay });
+      animateContributions(revealKey, animate, pourDelay);
       if (cut) animateMeanSquare(cut);
       renderFraction(animate);
       updateCalculationBox();

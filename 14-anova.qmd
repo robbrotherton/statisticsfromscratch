@@ -40,7 +40,7 @@ So now we want to compare the effects of different kinds of spider bites on reac
 
 : Reaction times (ms) for the two spider-bite conditions. {#tbl-bites-two}
 
-You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$ milliseconds. And the denominator is the estimated standard error of the mean difference, the size of difference between means we'd typically see by chance. This works out to $27.0$ milliseconds. (You're welcome to check my math.)
+You'll recognize this as a situation where we could use the independent-samples $t$ test. The numerator is the difference between sample means, found by subtracting one from the other: $189 - 274 = -85$ milliseconds. We can pool the sample's variances to get $s_p^2 = 1458.3$. The denominator is the estimated standard error of the mean difference, the size of difference between means we'd typically see by chance. This works out to $27.0$ milliseconds. (You're welcome to check my math.)
 
 That makes for a $t$ statistic of $-3.15$. Since you're pretty familiar with $t$ distributions by now, you might guess that that's big enough of a $t$ value to be statistically significant. And you'd be right; it falls below the lower critical value of $-2.447$ for $df = 6$. So we can reject the null hypothesis that the two populations have the same mean reaction time.
 
@@ -433,17 +433,17 @@ The same evidence two ways: $t \approx -3.15$ and $F \approx 9.91$. The shaded a
 
 {{< include quizzes/14-anova-learning-checks.qmd >}}
 
-## Using ANOVA
+
+
+## Comparing more than two groups
 
 So we've compared the same two groups in two ways, and reached the same answer. Now let's see what ANOVA lets us do that a single $t$ test can't: compare more than two groups.
 
-<!-- ===================================================================================== -->
-<!-- PART 2: THREE GROUPS                                                                  -->
-<!-- ===================================================================================== -->
+Suppose we're still interested in the effects of different kinds of spider bites, but we've had another realization. Our two group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by a regular spider, but what does that mean? Perhaps the radioactive bite makes kids faster. Or maybe the ordinary bite slows them down. Or maybe both! How could we tell the difference?
 
-### Comparing more than two groups
+With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
 
-Suppose we're still interested in the effects of different kinds of spider bites, but we want to include a control condition where kids take the test without having been bitten at all. Without the control condition, all we could say was that radioactive-bite kids were faster than ordinary-bite kids. But we want to know if the radioactive bite makes kids faster or the ordinary bite makes them slower as compared to nothing at all, just not being bitten. For that, we need a baseline performance to compare both treatment groups to. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
+Without the control condition, all we could say was that radioactive-bite kids were faster than ordinary-bite kids. But we want to know if the radioactive bite makes kids faster or the ordinary bite makes them slower as compared to nothing at all, just not being bitten. For that, we need a baseline performance to compare both treatment groups to. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
 
 So take a look at this little dataset and the group means. Just from eyeballing it, does it look like the radioactive bite sped kids up or did the ordinary bite slow them down?
 
@@ -484,43 +484,41 @@ Before we work through the formal hypothesis test, @act-anova-viz-three previews
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
-The no-bite group joins the two groups from before. We now have 12 scores in three groups. We'll use the same procedure, but focus on what changes when we add that third group.
+The no-bite group joins the two groups from before. We now have 12 scores in three groups. We'll use the same procedure, to see how it accommodates that third group.
 :::
 
-::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Observe" data-action='{"stage":"between","phase":"observe","animate":true}'}
-We can calculate the total and within-groups sums of squares just as before; those parts are already shown in the box. To find the between-groups component, we shift each score to its group mean, removing the within-groups differences from view.
+::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Total" data-action='{"stage":"total","phase":"sum","animate":true}'}
+We start with the grand mean, at $249$ ms for all 12 scores together. Each score's deviation from that grand mean is drawn, squared, and poured into the total sum of squares.
 :::
 
-::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Deviations" data-action='{"stage":"between","phase":"deviations","animate":true}'}
-The grand mean is now 249 ms. The three group means deviate from it by −60, +25, and +35 ms. They aren't mirror images any more, but they still balance: the deviations sum to zero. Once two are known, the third is determined, leaving two degrees of freedom.
+::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Within" data-action='{"stage":"within","phase":"sum","animate":true}'}
+Next we can see the within-groups sum of squares as a proportion of the total. Each score's deviation from its *own group mean* is drawn, squared, and poured into the within-groups total.
 :::
 
-::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Squares" data-action='{"stage":"between","phase":"squares","animate":true}'}
-As before, we square each group mean's deviation from the grand mean. Each square represents four scores, because we still have four kids in each group.
-:::
+::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Between" data-action='{"stage":"between","phase":"sum","animate":true}'}
+Now back to the grand mean, but instead of looking at each score's deviation, we just look at how far each group mean is from that grand mean. We square those three deviations, and count each square four time, because each group mean represents four scores.
 
-::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Sum" data-action='{"stage":"between","phase":"sum","animate":true}'}
-Counting each square four times gives $SS_{\text{between}} = 21{,}800$. These squares fill the remaining portion of the total.
+Note that the group-mean deviations aren't mirror images like they were with just two groups, but they still balance: the deviations sum to zero. Once two are known, the third is determined, leaving two degrees of freedom.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
-The total still partitions exactly into between plus within: $33{,}500 = 21{,}800 + 11{,}700$. Adding another group changes the numbers, but not the relationship.
+Now we have the total sum of squared deviations partitioned exactly into between plus within. Adding another group didn't require us to change the fundamental approach at all.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
-Now we separate the two sums of squares. To compare them, we need to divide each by its own degrees of freedom, just as before.
+As before, we separate the two sums of squares. To compare them, we need to divide each by its own degrees of freedom.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-With three groups, $df_{\text{between}} = k - 1 = 2$. So we divide the between-groups square into two equal pieces. One piece is the mean square: $21{,}800 / 2 = 10{,}900$.
+With three groups, $df_{\text{between}} = k - 1 = 2$. So we divide the between-groups square into two equal pieces. That gives the mean square, $MS_{\text{between}}$.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
-Within each group, one deviation is determined by the other three. Across three groups, that leaves $df_{\text{within}} = N - k = 9$. Dividing the within-groups square into nine pieces gives $MS_{\text{within}} = 11{,}700 / 9 = 1{,}300$.
+Within each group, one deviation is determined by the other three. Across three groups, that leaves $df_{\text{within}} = N - k = 9$. Dividing the within-groups square into nine pieces gives $MS_{\text{within}}.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
-Finally, we compare the mean squares: $F = 10{,}900 / 1{,}300 \approx 8.38$. The between-groups mean square is about 8.38 times the within-groups mean square. To judge that ratio, we need the null $F$ distribution with 2 and 9 degrees of freedom.
+Finally, we compare the mean squares. The numerator looks quite a bit bigger than the denominator here; $F$ should be quite large. Of course to formally judge it we'll need to compute the precise numbers and compare the answer against the null $F$ distribution with 2 and 9 degrees of freedom.
 :::
 ::::
 
@@ -676,19 +674,24 @@ The logic of statistical power is the same as in previous chapters. If there rea
 ::::: {#act-anova-power .callout-tip .interactive}
 ## When the means really differ
 
-{{< interactive-figure anovaPowerExplorer makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","estimatesLabel":"Mean squares","groups":["Radioactive","Ordinary","No bite"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"batch":0,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSample":true,"showSigma":true,"showEstimates":true,"showTracker":false,"showCurve":false,"msMax":12000,"fMax":15,"binWidth":0.5}' fallback="Three groups of four reaction times are sampled first with equal population means, then with hypothetical population means of 210, 230, and 250 ms. With a real difference, the between-groups mean square tends to increase while the within-groups mean square is unchanged. Repeated sampling estimates power as the proportion of F values above the null critical value of 4.26." >}}
+{{< interactive-figure anovaPowerExplorer makeAnovaTwoEstimates options='{"seed":"anova-two-estimates-v18","estimatesLabel":"Mean squares","splitCritical":true,"trackerScale":200,"groups":["Radioactive","Ordinary","No bite"],"n":4,"mu":230,"sd":36,"effect":0,"samples":1,"batch":0,"xMin":60,"xMax":400,"axisLabel":"Reaction time (ms)","showSample":true,"showSigma":true,"showEstimates":true,"showTracker":false,"showCurve":false,"msMax":12000,"fMax":15,"binWidth":0.5}' fallback="Three groups of four reaction times are sampled first with equal population means, then with hypothetical population means of 210, 230, and 250 ms. With a real difference, the between-groups mean square tends to increase while the within-groups mean square is unchanged. Repeated sampling estimates power as the proportion of F values above the null critical value of 4.26." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="No difference" data-action='{"batch":0,"effect":0,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":false}'}
-Here are three groups of four kids, sampled from populations with the same mean and standard deviation. Both mean squares estimate the population variance. This is the null situation we've already explored; any differences among the sample means are just sampling error.
+::: {.tutorial-step data-title="No difference" data-action='{"batch":0,"n":4,"effect":0,"sd":36,"samples":200,"current":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":false}'}
+Here are three groups of four kids, sampled from populations with exactly the same mean and standard deviation. Both mean squares estimate the population variance. This is the null situation we've already explored; any differences among the sample means are just sampling error. The distribution of $F$ ratios obtained from 200 simulated samples is shown in the histogram. It follows the null $F$ distribution with 2 and 9 degrees of freedom, and about 5% of the samples fall beyond the critical value of 4.26, which is where we would reject the null.
 :::
 
-::: {.tutorial-step data-title="A real difference" data-action='{"batch":0,"effect":40,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":false,"show-curve":false,"animate":true}'}
-But what if the null is false, actually? Here I've created hypothetical population means of 210, 230, and 250 ms. The scores within each group shift together, so their deviations from their own mean don't change. The within-groups mean square stays the same, but the between-groups mean square now reflects a real difference as well as sampling error.
+::: {.tutorial-step data-title="A real difference" data-action='{"batch":0,"n":4,"effect":40,"sd":36,"samples":1,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":false,"animate":true}'}
+<!-- FIX: the tracker now stays up here: the null histogram fades out and this one sample's F lands alone (F = 6.03, past 4.26, so purple). Step 3 adds the other 199. -->
+But what if the null is false, actually? Here I've created hypothetical population means of 210, 230, and 250 ms. The within-groups mean square stays the same size, because the variability within each group is unchanged, but the between-groups mean square now reflects a real difference as well as sampling error. For our first sample, $F = 6.03$, which exceeds the critical value of 4.26, so we would reject the null.
 :::
 
-::: {.tutorial-step data-title="Repeated studies" data-action='{"batch":0,"effect":40,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-Now we repeat the study 200 times with those same population differences. The histogram now represents sampling under a real effect, stretching to the right of the null curve, which stays in place for comparison. We still reject whenever $F > 4.26$. In this run, {{< interactive-value anovaPowerExplorer.shareAboveCritical format=".0%" >}} of studies reject the null. That estimates the **power** of the overall ANOVA for these population differences: the long-run proportion of studies that would detect some difference among the means. The rest miss a real effect, making Type II errors.
+::: {.tutorial-step data-title="Repeated studies" data-action='{"batch":0,"n":4,"effect":40,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
+Now we repeat the study 200 times with those same population differences. The histogram now represents sampling under a real effect, with the null curve staying for comparison (we still reject whenever $F > 4.26$). In this set of 200 samples, around 23% reject the null. That estimates the **power** of the overall ANOVA for these population differences and sample sizes: the long-run proportion of studies that would detect some difference among the means. The rest miss a real effect, making Type II errors.
+:::
+
+::: {.tutorial-step data-title="80% power" data-action='{"batch":3,"n":17,"effect":40,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"restart":true,"animate":true}'}
+If we wanted to bring our power up to, say, .80, we can increase the number of participants per group. Here I've increased it to 17 per group, which gives us an estimated power of about 80%. The null curve narrows slightly and the critical value drops to 3.19 because of the changed $df_{\text{within}}$.
 :::
 ::::
 
