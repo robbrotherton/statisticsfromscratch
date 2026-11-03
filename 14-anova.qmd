@@ -80,7 +80,6 @@ The key is the idea of partitioning variance into different components. Remember
 
 See where we're going with this? If we can partition the total variability into these two components, we can create for ourselves a new statistic. Dividing the between-groups variance by within-groups variance will produce a new ratio with the same structure as the $t$ statistic: treatment effect plus chance in the numerator, chance alone in the denominator.
 
-
 ### Sums of squares
 
 So how do we actually calculate the variance components we need? As with our first encounter with variance in Chapter 4, variance requires two things: a sum of squared deviations, and degrees of freedom to divide it by. So let's start with the sums of squares. Before I give you the equations, let's step through it visually.
@@ -365,7 +364,7 @@ Here's the $F(1, 6)$ curve. Most of these $F$s fall below 1, with a long tail to
 :::
 
 ::: {.tutorial-step data-title="Steadier denominator" data-action='{"df1":1,"df2":58,"show-controls":["df1","df2"],"animate":true}'}
-If we had the same two-group design but with more participants, say 20 in each group, we would have a different $df$ for the denominator: $df_2 = 58$. The curve changes a little: very large $F$s become less common, so the tail flattens a bit, more of the curve is below $F = 1$, and the critical $F$ that cuts off the top 5% is reduced from $5.99$ to $4.00$. Drag the $df_2$ slider to see how changing the denominator's degrees of freedom affects the curve and its critical value.
+If we had the same two-group design but with more participants, say 30 in each group, we would have a different $df$ for the denominator: $df_2 = 58$. The curve changes a little: very large $F$s become less common, so the tail flattens a bit, more of the curve is below $F = 1$, and the critical $F$ that cuts off the top 5% is reduced from $5.99$ to $4.01$. Drag the $df_2$ slider to see how changing the denominator's degrees of freedom affects the curve and its critical value.
 :::
 
 ::: {.tutorial-step data-title="Steadier numerator" data-action='{"df1":30,"df2":58,"show-controls":["df1","df2"],"animate":true}'}
@@ -497,11 +496,11 @@ As before, we separate the two sums of squares. To compare them, we need to divi
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS between" data-action='{"stage":"compare","phase":"ms-between","animate":true}'}
-With three groups, $df_{\text{between}} = k - 1 = 2$. So we divide the between-groups square in two to give the mean square, $MS_{\text{between}}$.
+With three groups, $df_{\text{between}} = k - 1 = 2$. So we divide the between-groups square into two equal pieces. One piece is the mean square, $MS_{\text{between}}$.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="MS within" data-action='{"stage":"compare","phase":"ms-within","animate":true}'}
-Within each group, one deviation is determined by the other three. Across three groups, that leaves $df_{\text{within}} = N - k = 9$. Dividing the within-groups square into nine pieces gives $MS_{\text{within}}$.
+Within each group, one deviation is determined by the other three. Across three groups, that leaves $df_{\text{within}} = N - k = 9$. We divide the within-groups square into nine equal pieces; one piece is $MS_{\text{within}}$.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
@@ -629,13 +628,13 @@ So about 65% of the total variability in these scores is between the groups. We 
 
 Now that we have a significant result, maybe you're not quite satisfied yet. After all, we've established that at least one of our conditions is different from at least one other. But which conditions differ?
 
-That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ. To answer those more specific questions, we need to conduct what are called post-hoc tests. These are more tests that we run after the main ANOVA analysis, if it revealed a significant difference. Here, our post-hoc tests compare two group means at a time. These are called **pairwise comparisons**.
+That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ, which is obviously something we'd want to know. So we'll follow our significant ANOVA with what are called **post-hoc tests**, comparing two group means at a time. These are called **pairwise comparisons**.
 
 {{< include quizzes/14-anova-omnibus-check.qmd >}}
 
 Maybe you're thinking, "Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the $t$ test? Why couldn't we just start with the $t$ tests?" The problem is the number of tests. With three groups, there are three comparisons to make: A to B, A to C, and B to C. Each ordinary $t$ test at $\alpha = .05$ has its own 5% Type I error rate. Across all three tests, the chance of making at least one Type I error is greater than 5%: about 14% if the tests were independent ($1 - .95^3$). This is the **experiment-wise error rate**.
 
-The initial omnibus ANOVA performs one overall test at $\alpha = .05$. If it's significant, we follow up with tests designed to control the error rate as we make the pairwise comparisons.
+The initial omnibus ANOVA performs one overall test at $\alpha = .05$. For our follow-up comparisons, we use tests designed to control the error rate across the pairwise comparisons.
 
 There's more than one kind of post-hoc test you can do, but we'll just mention one. It's called **Tukey's Honestly Significant Difference** (HSD) test, which is a great name for a test. It gives us a minimum difference between group means that counts as significant, while controlling the experiment-wise error rate at our chosen alpha.
 
