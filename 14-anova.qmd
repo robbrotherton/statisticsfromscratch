@@ -66,7 +66,7 @@ Separately, Fisher was also working in the field of genetics. He coined the term
 
 So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual milieu. Pretty soon, Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical underpinnings.
 
-There's a funny historical quirk here. Standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Pearson had used the name "standard deviation" back in 1894 [@pearson1894evolution]. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was what we could do by keeping things squared, rather than taking square roots to shoehorn things into the original units of measurement (as the denominator of the $t$ statistic does). The more mathematically primitive procedure lets us do more.
+There's a funny historical quirk here. Standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Pearson had used the name "standard deviation" back in 1894 [@pearson1894evolution]. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was showing what we could do by keeping things squared, rather than taking square roots to shoehorn things into the original units of measurement (as the denominator of the $t$ statistic does). The more mathematically primitive procedure lets us do more.
 
 ### Three types of variance
 
@@ -82,7 +82,7 @@ See where we're going with this? If we can partition the total variability into 
 
 ### Sums of squares
 
-So how do we actually calculate the variance components we need? As with our first encounter with variance in Chapter 4, variance requires two things: a sum of squared deviations, and degrees of freedom to divide it by. So let's start with the sums of squares. Before I give you the equations, let's step through it visually.
+So how do we actually calculate the variance components we need? A variance requires two things: a sum of squared deviations, and degrees of freedom to divide it by. So let's start with the sums of squares. Before I give you the equations, let's step through it visually.
 
 ::::: {#act-anova-viz .callout-tip .interactive}
 ## Seeing the logic of ANOVA
@@ -327,7 +327,7 @@ The third sample has a relatively big difference between the group means, just b
 :::
 
 ::: {.tutorial-step data-title="Many samples" data-action='{"batch":0,"effect":0,"sd":36,"samples":200,"show-sample":true,"lanes":"sample","show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
-Now we take a bunch more samples, until we have 200 in total. The curve drawn over the pile is the mathematical $F$ distribution with 1 and 6 degrees of freedom; the histogram of our 200 $F$s follows it pretty closely. The $F$s pile up mostly below 1, with a long right tail. The skew comes from the numerator, which with just one degree of freedom is usually small but occasionally large, coupled with the outsized effect of underestimates in the denominator (which gave the $t$ distribution its heavier tails).
+Now we take a bunch more samples, until we have 200 in total. The curve drawn over the pile is the mathematical $F$ distribution with 1 and 6 degrees of freedom; the histogram of our 200 $F$s follows it pretty closely. The $F$s pile up mostly below 1, with a long right tail. The skew comes from the numerator. With just one degree of freedom, it is usually small but occasionally very large. This combines with the outsized effect of underestimates in the denominator (which gave the $t$ distribution its heavier tails) to produce the long tail.
 :::
 
 ::: {.tutorial-step data-title="More spread" data-action='{"batch":1,"effect":0,"sd":54,"samples":200,"show-sample":true,"lanes":"sample","restart":true,"show-sigma":true,"show-estimates":true,"show-tracker":true,"show-curve":true,"animate":true}'}
@@ -395,7 +395,7 @@ Here's the null $t$ distribution with 6 degrees of freedom. For our two-tailed t
 :::
 
 ::: {.tutorial-step data-title="Sign" data-action='{"stage":"fold","animate":true}'}
-Squaring does two things at the same time, but we'll show them separately here. First, it drops the sign: $(-2)^2$ and $2^2$ are both 4. To show that visually, we fold the negative half onto the positive half. The dashed line shows this part of the original $t$ curve; the fold has doubled it. The two 2.5% tails got combined, so the region beyond 2.447 now holds 5% of the distribution.
+Squaring does two things at the same time, but we'll show them separately here. First, it drops the sign: $(-2)^2$ and $2^2$ are both 4. To show that visually, we fold the negative half onto the positive half. The dashed line shows the positive part of the original $t$ curve; the fold has doubled it. The two 2.5% tails got combined, so the region beyond 2.447 now holds 5% of the distribution.
 :::
 
 ::: {.tutorial-step data-title="Size" data-action='{"stage":"square","animate":true}'}
@@ -425,7 +425,7 @@ The same data analyzed two ways: $t \approx -3.15$ and $F \approx 9.91$. The sha
 
 So we've compared the same two groups in two ways, and reached the same answer. Now let's see what ANOVA lets us do that a single $t$ test can't: compare more than two groups.
 
-Suppose we're still interested in the effects of different kinds of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes kids faster. Or maybe the ordinary bite slows them down. Or maybe both! How could we tell the difference?
+Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes kids faster. Or maybe the ordinary bite slows them down. Or maybe both! Or maybe both bites sped up reactions, but the radioactive bite moreso than the ordinary bite. How can we tell what's really going on?
 
 With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
 
@@ -441,11 +441,11 @@ So take a look at this little dataset and the group means. Just from eyeballing 
 
 : Reaction times (ms) for the three spider-bite conditions. {#tbl-bites-three}
 
-From eyeballing the data, you probably got a sense of the overall trends. Taking the no-bite condition as our baseline, the ordinary-bite group was a little faster, but not by much. Given the overall variability among scores, it's hard to tell whether that's a real difference or just chance sampling error. But the radioactive-bite kids were way faster than the no-bite group, and faster than the ordinary-bite group too.
+You probably got a sense of the overall trends just from looking at the data and means. Taking the no-bite condition as our baseline, the ordinary-bite group was a little faster, but not by much. Given the overall variability among scores, it's hard to tell whether that's a real difference or just chance sampling error. But the radioactive-bite kids were way faster than the no-bite group, and faster than the ordinary-bite group too.
 
 ### Why ANOVA is needed
 
-But how can we be sure whether any differences are statistically significant? The independent-samples $t$ test is based on the simple difference between two means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense.
+But how can we judge any differences as statistically significant? The independent-samples $t$ test is based on the simple difference between two means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense.
 
 This is where analyzing variance pays off. Our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
 
@@ -453,7 +453,7 @@ You might wonder why we can't just run three $t$ tests instead. There's a good r
 
 ### ANOVA terminology
 
-There's some new terminology that comes with ANOVA. The **factor** refers to the independent variable that designates the groups being compared. For our little example study here, we might label the factor type of spider bite, or bite type for short.
+There's some new terminology that comes with ANOVA. The **factor** refers to the independent variable that designates the groups being compared. For our little example study here, we might label the factor *type of spider bite*, or *bite type* for short.
 
 The **levels** are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control---no bite---treatment. So our study calls for a **single-factor, independent-samples ANOVA**: one factor with three levels, and independent groups at each level. (You'll also often see this called a *one-way* ANOVA, including in statistical software.) You can have any number of levels and factors. For example, we'll introduce two-by-two designs in Chapter 16, where we'll have two factors with two levels each. But for this chapter we'll stick to a single factor.
 
@@ -624,7 +624,7 @@ So about 65% of the total variability in these scores is between the groups. We 
 
 Now that we have a significant result, maybe you're not quite satisfied yet. After all, we've established that at least one of our conditions is different from at least one other. But which conditions differ?
 
-That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ, which is obviously something we'd want to know. So we'll follow our significant ANOVA with what are called **post-hoc tests**, comparing two group means at a time. These are called **pairwise comparisons**.
+That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ, which is obviously something we'd want to know. So we'll follow our significant ANOVA with **post-hoc tests**, additional tests comparing two group means at a time. These are called **pairwise comparisons**.
 
 {{< include quizzes/14-anova-omnibus-check.qmd >}}
 
@@ -723,7 +723,7 @@ And a significant result isn't proof that a difference exists or that it was cau
 
 ### Assumptions
 
-For ANOVA to be an appropriate analysis, the outcome needs to be a quantitative variable (same as the $z$ and $t$ tests). Here that's reaction time. The factor, bite type, is categorical; that design allows us to compare scores across conditions.
+For ANOVA to be an appropriate analysis, the outcome needs to be a quantitative variable (same as the $z$ and $t$ tests). Here that's reaction time. The factor, bite type, is categorical. This design allows us to compare scores across conditions.
 
 ANOVA shares the independent-samples $t$ test's underlying assumptions: observations are independent (both within and between groups); the populations which produced our samples are approximately normal; and their variances are equal (the homogeneity of variance assumption).[^anova-welch]
 
