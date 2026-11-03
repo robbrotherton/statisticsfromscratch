@@ -66,7 +66,7 @@ Separately, Fisher was also working in the field of genetics. He coined the term
 
 So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual milieu. Pretty soon, Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical underpinnings.
 
-There's a funny historical quirk here. Standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Pearson had used the name "standard deviation" back in 1894 [@pearson1894evolution]. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was showing what we could do by keeping things squared, rather than taking square roots to shoehorn things into the original units of measurement (as the denominator of the $t$ statistic does). The more mathematically primitive procedure lets us do more.
+There's a funny historical quirk here. Standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Pearson had used the name "standard deviation" back in 1894 [@pearson1894evolution]. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was to show what we could do by keeping things squared, rather than taking square roots to shoehorn things into the original units of measurement (as the denominator of the $t$ statistic does). The more mathematically primitive procedure lets us do more.
 
 ### Three types of variance
 
@@ -425,7 +425,7 @@ The same data analyzed two ways: $t \approx -3.15$ and $F \approx 9.91$. The sha
 
 So we've compared the same two groups in two ways, and reached the same answer. Now let's see what ANOVA lets us do that a single $t$ test can't: compare more than two groups.
 
-Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes kids faster. Or maybe the ordinary bite slows them down. Or maybe both! Or maybe both bites sped up reactions, but the radioactive bite moreso than the ordinary bite. How can we tell what's really going on?
+Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes kids faster, or maybe the ordinary bite slows them down, or both! Or maybe both bites sped up reactions, but the radioactive bite more so than the ordinary bite. How can we tell what's really going on?
 
 With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
 
@@ -441,11 +441,14 @@ So take a look at this little dataset and the group means. Just from eyeballing 
 
 : Reaction times (ms) for the three spider-bite conditions. {#tbl-bites-three}
 
-You probably got a sense of the overall trends just from looking at the data and means. Taking the no-bite condition as our baseline, the ordinary-bite group was a little faster, but not by much. Given the overall variability among scores, it's hard to tell whether that's a real difference or just chance sampling error. But the radioactive-bite kids were way faster than the no-bite group, and faster than the ordinary-bite group too.
+How can we judge whether any differences are statistically significant here? The independent-samples $t$ test is based on the simple difference between two means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense.
+
+So what did you do as you eyeballed the data? You probably noticed that the radioactive-bite group was way faster than the no-bite group, on average, and faster than the ordinary-bite group too. The ordinary-bite group was a little faster than no bite, but not by much. 
+So how much of a difference is enough? It depends on the varaibility in the data in general. The individual scores overlap quite a bit, especially the ordinary-bite and no-bite groups; not so much the radioactive group.
+
+Talking through the patterns of variability in the data like this, we're essentially doing an informal ANOVA. The $t$ test can't do the job, but analysis of variance can.
 
 ### Why ANOVA is needed
-
-But how can we judge any differences as statistically significant? The independent-samples $t$ test is based on the simple difference between two means, subtracting one from the other. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense.
 
 This is where analyzing variance pays off. Our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
 
