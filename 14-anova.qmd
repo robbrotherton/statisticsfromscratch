@@ -425,7 +425,7 @@ The same data analyzed two ways: $t \approx -3.15$ and $F \approx 9.91$. The sha
 
 So we've compared the same two groups in two ways, and reached the same answer. Now let's see what ANOVA lets us do that a single $t$ test can't: compare more than two groups.
 
-Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes kids faster, or maybe the ordinary bite slows them down, or both! Or maybe both bites sped up reactions, but the radioactive bite more so than the ordinary bite. How can we tell what's really going on?
+Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes people faster, or maybe the ordinary bite slows them down, or both! Or maybe both bites speed up reactions, but the radioactive bite more so than the ordinary bite. How can we tell what's really going on?
 
 With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
 
@@ -441,13 +441,13 @@ So take a look at this little dataset and the group means. Just from eyeballing 
 
 : Reaction times (ms) for the three spider-bite conditions. {#tbl-bites-three}
 
-What did you do as you eyeballed the data? You probably noticed that the radioactive-bite group was way faster than the no-bite group, on average, and faster than the ordinary-bite group too. The ordinary-bite group was a little faster than no bite, but not by much.
+You probably noticed that the radioactive-bite group was way faster than the no-bite group, on average, and faster than the ordinary-bite group too. The ordinary-bite group was a little faster than no bite, but not by much.
 
 So how much of a difference is enough? The independent-samples $t$ test starts by subtracting one mean from another. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense. How can we consider differences among all the groups at once?
 
 Perhaps you also noticed the variability in the data in general. The individual scores overlap quite a bit, especially the ordinary-bite and no-bite groups; not so much the radioactive-bite group. Talking through the patterns of variability like this, we're essentially doing an informal ANOVA. The $t$ test can't do the job, but analysis of variance can.
 
-Our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
+More formally, our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
 
 (You might wonder why we can't just run three $t$ tests one after another instead. There's a good reason, which we'll come back to when we get to post-hoc tests.)
 
@@ -455,7 +455,7 @@ Our question is still about means, but we can quantify how far all three means f
 
 There's some new terminology that comes with ANOVA. The **factor** refers to the independent variable that designates the groups being compared. For our little example study here, we might label the factor *type of spider bite*, or *bite type* for short.
 
-The **levels** are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control---no bite---treatment. So our study calls for a **single-factor, independent-samples ANOVA**: one factor with three levels, and independent groups at each level. (You'll also often see this called a *one-way* ANOVA, including in statistical software.) You can have any number of levels and factors. For example, we'll introduce two-by-two designs in Chapter 16, where we'll have two factors with two levels each. But for this chapter we'll stick to a single factor.
+The **levels** are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control---no bite---treatment. So our study calls for a **single-factor, independent-samples ANOVA**: one factor with three levels, and independent groups at each level. (You'll also often see this called a *one-way* ANOVA.) You can have any number of levels and factors. For example, we'll introduce two-by-two designs in Chapter 16, where we'll have two factors with two levels each. But for this chapter we'll stick to a single factor.
 
 ### Three groups, the same logic
 
@@ -502,7 +502,7 @@ Within each group, one deviation is determined by the other three. Across three 
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
-Finally, we compare the mean squares. The numerator looks quite a bit bigger than the denominator here; $F$ should be quite large. Of course, to formally judge it we'll need to compute the precise numbers and compare the answer against the null $F$ distribution with 2 and 9 degrees of freedom.
+Finally, we compare the mean squares. The numerator looks quite a bit bigger than the denominator here; $F$ should be quite large. To formally judge it we'll need to compute the precise numbers and compare the answer against the null $F$ distribution with 2 and 9 degrees of freedom.
 :::
 ::::
 
@@ -519,7 +519,7 @@ As usual, we state our hypotheses first. The null here is that all three populat
 
 $$ H_0: \mu_{\text{radioactive}} = \mu_{\text{ordinary}} = \mu_{\text{no bite}} $$
 
-$H_1$: At least one population mean differs from another. That doesn't mean they all differ; we're just saying that there is some difference among the conditions somewhere.
+$H_1$: At least one population mean differs from another. That doesn't mean they *all* differ from one another, necessarily; we're just saying that there is some difference among the conditions somewhere.
 
 If the null is true, both mean squares estimate the same population variance, as we saw in @act-two-estimates. Their ratio can still vary considerably from sample to sample; @act-f-distribution-df showed us how the degrees of freedom affect that variation.
 
@@ -539,7 +539,7 @@ An excerpt of the $F$ table, with the critical value for $df = 2$ and $9$ highli
 
 ### Step 3: Collect and analyze the data
 
-Step three is to calculate the test statistic, the $F$ ratio. With so many parts to keep track of along the way, it can be useful to organize the answers in a summary table, with rows for the components of variability and columns for the different quantities. @tbl-anova-summary-blank shows the equations for each element, which we'll fill in with the answers once we have computed them.
+Now we're ready to calculate the test statistic, the $F$ ratio. With so many parts to keep track of along the way, it can be useful to organize the answers in a summary table, with rows for the components of variability and columns for the different quantities. @tbl-anova-summary-blank shows the equations for each element, which we'll fill in with the answers once we have computed them.
 
 ::: {#tbl-anova-summary-blank .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
@@ -612,7 +612,7 @@ $$\eta^2 = \frac{SS_{\text{between}}}{SS_{\text{total}}} $$
 
 But didn't I say earlier that we can't compare sums of squares, that we needed to compare mean squares instead? Well, that was necessary for the $F$ ratio. We divided each sum by its own degrees of freedom to adjust for the fact that those variance estimates were made up of different numbers of deviations, producing mean squares that we could fairly compare with one another in the $F$ ratio.
 
-For $\eta^2$, though, we don't need a fair comparison in the same sense. Like Cohen's $d$, $\eta^2$ describes the size of the differences relative to the spread of the scores, rather than how precisely we've estimated them. $\eta^2$ answers a simpler question: of all the variability in the data, what share is due to differences between the groups? The sums of squares already give us a part and its whole. Dividing them by different degrees of freedom would lose that proportional relationship.
+For $\eta^2$, though, we don't need a fair comparison in the same sense. Like Cohen's $d$, $\eta^2$ describes the size of the differences relative to the spread of the scores, rather than how precisely we've estimated them. So $\eta^2$ answers a simpler question than $F$: of all the variability in the data, what share is due to differences between the groups? $SS_{\text{total}}$ gives us the whole, and $SS_{\text{between}}$ gives us a part.
 
 So for the spider data:
 
