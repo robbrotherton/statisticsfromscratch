@@ -22,9 +22,9 @@ We're leaving behind the $t$ statistic and moving on to ANOVA, which stands for 
 
 ## Comparing two groups
 
-It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research on the effects of spider bites on reaction times. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. Even if we reject the null hypothesis, we're left with a question of causality. How do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense? Perhaps being bitten by any old spider would affect one's reaction times.
+It's been a while since we talked about Spider-Man. Back in Chapter 5 we imagined testing Peter Parker's reaction times following a radioactive spider bite, and in Chapter 8 we tested a hypothesis using the $z$ test and a sample of three Spider-People. Now let's suppose we want to do some more research. We've had an important realization about our findings from Chapter 8: we only tested a single sample of kids who had all been bitten by the same kind of radioactive spider. Even if we reject the null hypothesis, we're left with a question of causality. How do we know that the *radioactivity* was the thing that led to their apparent Spidey-Sense? Perhaps being bitten by any old spider would affect one's reaction times.
 
-So now we want to compare the effects of different kinds of spider bites on reaction times. We set up a little study with two independent samples. One set of kids is bitten by a radioactive spider, and another batch is bitten by an ordinary spider. (Don't worry, they all signed the informed consent form.) Then everyone takes the same reaction time test.
+So now we want to compare the effects of different kinds of spider bites on reaction times. We set up a little study with two independent samples. One group of participants is bitten by a radioactive spider, and another batch is bitten by an ordinary spider. (Don't worry, they all signed the informed consent form.) Then everyone takes the same reaction time test.
 
 | [🕷️]{.sfs-radioactive} Radioactive bite | 🕷️ Ordinary bite |
 |:--:|:--:|
@@ -50,15 +50,15 @@ Let's think about the $t$ equation again, in terms of what contributes to the nu
 
 $$ t = \frac{(M_1 - M_2) - (\mu_1 - \mu_2)}{s_{M_1 - M_2}} $$
 
-Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. We know, thanks to sampling error, that any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect and chance. ('Chance' here includes sampling error and any of the other reasons people's reaction times differ, apart from the treatment we're comparing. In the next chapter we'll be a bit more specific about that.)
+Starting with the numerator, why might the group means be different from one another? In other words, what contributes to the variability between groups? One contributor would be a real treatment effect. The treatment effect causes an increase or decrease in people's scores, which causes the groups to have different averages. But a second reason the groups might differ is pure chance. Thanks to sampling error, any given sample mean needn't be exactly equal to that of its population. So even if two samples are drawn from identical populations, there may be some difference between them due to chance. So let's say the numerator is composed of any treatment effect and chance. ('Chance' here includes sampling error and any of the other reasons people's reaction times differ, apart from the treatment we're comparing. In the next chapter we'll be a bit more specific about that.)
 
-The denominator, on the other hand, is all error. Remember, the standard error quantifies the variability of the sampling distribution under the null hypothesis. It's the standard deviation of all the mean differences we'd see over the course of repeated sampling, assuming there's no treatment effect.
+The denominator, on the other hand, is all chance. Remember, the standard error quantifies the variability of the sampling distribution under the null hypothesis. It's the standard deviation of all the mean differences we'd see over the course of repeated sampling, assuming there's no treatment effect.
 
 So a conceptual distillation of the $t$ equation gives treatment effect and chance in the numerator, and just chance in the denominator. More variability in the populations increases the role of chance in both numerator and denominator. A treatment effect, on the other hand, contributes to the numerator *without* increasing the denominator. By dividing these quantities, the ratio gives a measure of how much treatment effect there seems to be over and above chance differences.
 
 If we wanted to produce a new kind of ratio with this same structure, how might we do it?
 
-## ANOVA: Analysis of variance
+## Analysis of variance
 
 The solution came from Ronald Fisher. I mentioned him in passing in Chapter 11, when we talked about the $t$ statistic. William Sealy Gosset had laid the groundwork for the $t$ statistic, but it was Fisher who formalized it and gave it the name we use today. So Fisher was well aware of the $t$ statistic as a tool for comparing two groups.
 
@@ -66,11 +66,11 @@ Separately, Fisher was also working in the field of genetics. He coined the term
 
 So ANOVA wasn't developed as an extension of the $t$ test approach; it came about separately but out of the same intellectual milieu. Pretty soon, Fisher unified the approaches under a coherent statistical framework, formalizing the common mathematical underpinnings.
 
-There's a funny historical quirk here. Standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Pearson had used the name "standard deviation" back in 1894 [@pearson1894evolution]. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was to show what we could do by keeping things squared, rather than taking square roots to shoehorn things into the original units of measurement (as the denominator of the $t$ statistic does). The more mathematically primitive procedure lets us do more.
+Variance, you'll remember is something we first encountered in Chapter 4, as a step along the way to calculating the standard deviation. It's a funny quirk of history that standard deviation was already well established before Fisher gave variance its name and treated it as a measure worth studying in its own right. Mathematically, that seems backwards: standard deviation is the square root of variance, so variance is a mathematical precursor to standard deviation. Fisher's insight was to show what we could do by keeping things squared, rather than shoehorning things back into the original units of measurement by taking the square root(as the denominator of the $t$ statistic does).
 
 ### Three types of variance
 
-The key is the idea of partitioning variance into different components. Remember, variance is our measure of variability based on squared deviations from a mean. We can produce different types of variance by considering different deviations from different means. For the kind of data we're dealing with, we can think in terms of total variance and two components: between-groups variance and within-groups variance.
+The key is the idea of partitioning variance into different components. Remember, variance is based on squared deviations from a mean. We can produce different types of variance by considering different deviations from different means. For the kind of data we're dealing with, we can think in terms of partitioning the total variance into two components: between-groups variance and within-groups variance.
 
 **Total variance** measures the overall variability in the data. We treat the scores as one single set, find the **grand mean** of them all together, and look at the squared deviation of each score from that grand mean. Why might scores deviate from that mean? Maybe because of a treatment effect pushing the scores apart across the different groups. And maybe because of chance differences among people, within and between the groups. The total variability, as the name suggests, will capture it all.
 
@@ -78,7 +78,7 @@ The key is the idea of partitioning variance into different components. Remember
 
 **Between-groups variance** measures how far the individual group means fall from the grand mean. Say group A's mean is a bit lower than the overall mean of all the scores, and group B's mean is a bit higher. Why might that be? Maybe there's a real treatment effect pushing them apart. Or maybe it's just chance. Both factors contribute, much like the numerator of the $t$ statistic.
 
-See where we're going with this? If we can partition the total variability into these two components, we can create for ourselves a new statistic. Dividing the between-groups variance by the within-groups variance will produce a new ratio with the same structure as the $t$ statistic: treatment effect plus chance in the numerator, chance alone in the denominator.
+See where we're going with this? If we can partition the total variability into these two components, we can create for ourselves a new statistic. Dividing the between-groups variance by the within-groups variance will produce a ratio with the same conceptual structure as the $t$ statistic: treatment effect plus chance in the numerator, chance alone in the denominator.
 
 ### Sums of squares
 
@@ -170,7 +170,7 @@ SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand
 \end{align}
 $$
 
-The first two equations sum over every score, using deviations from the grand mean in the case of $SS_{\text{total}}$ and from the relevant group mean in the case of $SS_{\text{within}}$. The between-groups equation sums the squared deviation of each group mean from the grand mean, with each squared deviation multiplied by that group's number of scores, $n_{\text{group}}$.
+The first two equations involve every score, summing squared deviations from the grand mean in the case of $SS_{\text{total}}$ and from the relevant group mean in the case of $SS_{\text{within}}$. The between-groups equation sums the squared deviation of each group mean from the grand mean, with each squared deviation multiplied by that group's number of scores, $n_{\text{group}}$.
 
 For our 8 spider-bite scores in @tbl-bites-two, the grand mean is 231.5 ms, so this works out to:
 
@@ -210,7 +210,7 @@ df_{\text{between}} &= k - 1 = 2 - 1 = 1
 \end{align}
 $$
 
-The degrees of freedom partition just like the sums of squares: $7 = 6 + 1$.
+The degrees of freedom partition just like the sums of squares: $df_{\text{total}} = df_{\text{within}} + df_{\text{between}}$, or $7 = 6 + 1$.
 
 [^anova-computational]: As with the sum of squares back in Chapter 4, there are also computational versions of these formulas. You might see them elsewhere, since they were the standard approach when researchers had to compute things by hand. Remember, the main difference in the computational formula for basic $SS$ was that it involved summing scores ($\Sigma X$) and summing squared scores ($\Sigma X^2$). The ANOVA versions do something very similar, but in a few different ways. They use two new symbols: $T$, a treatment total (the sum of the scores in one condition), and $G$, the grand total (the sum of all the scores in the study).
 
@@ -226,7 +226,7 @@ The degrees of freedom partition just like the sums of squares: $7 = 6 + 1$.
 
 ### Mean squares
 
-So now we have a few values of $SS$, each with a corresponding $df$. Dividing each $SS$ by its $df$ gives a variance. In the context of ANOVA, these variance components get a new name: **mean squares** ($MS$). It's a helpful name; their values represent the average squared deviations, the sum of squared deviations divided by the number of deviations which were free to vary.
+So now we have a few values of $SS$, each with a corresponding $df$. Dividing each $SS$ by its $df$ gives a variance. In the context of ANOVA, these variance components get a new name: **mean squares** ($MS$). It's a helpful name; their values represent the average squared deviation of each component, the sum of squared deviations divided by the number of deviations which were free to vary.
 
 So we have $MS_{\text{between}}$, the between-groups variance, and $MS_{\text{within}}$, the within-groups variance.
 
@@ -343,9 +343,9 @@ What if there was more variability in the population? We can increase $\sigma^2$
 
 The 200 samples in @act-two-estimates approximate one specific $F$ distribution, the one with 1 and 6 degrees of freedom in its numerator and denominator respectively. But there are many different $F$ distributions, one for each pair of degrees of freedom. The precise shape of the distribution, and therefore the exact value of $F$ that cuts off, say, 5% of the distribution, changes with the degrees of freedom. So, as with the $t$ distributions, we can use an $F$ table to find the critical values.
 
-An $F$ table will generally look something like @tbl-f-table. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data. We'll use $df_1$ and $df_2$ for the distributions, and $df_{\text{between}}$ and $df_{\text{within}}$ for the components of our ANOVA.
+An $F$ table will generally look something like @tbl-f-table. The whole table gives values for an alpha of $\alpha = .05$; we'd need a different table for a different alpha. Since we have two different degrees of freedom to deal with, one is listed along the top as the columns of the table---usually for the numerator, and labeled $df_{\text{numerator}}$ or just $df_1$. The other will be listed as rows, labeled $df_{\text{denominator}}$ or $df_2$. When you see $F$ with the degrees of freedom in parentheses, it's always in the order of numerator first and then denominator. So $F(1, 6)$ means one degree of freedom for the numerator and six for the denominator, as in the two-group spider data.
 
-So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for one and the row for six, and find that the critical value is 5.99. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of 3.71.)
+So to find the critical value for our spider test, with an alpha of .05, you'd look for the column for $1$ and the row for $6$, and find that the critical value is $5.99$. (Any other pair works the same way: $F(3, 10)$, for example, has a critical value of $3.71$.)
 
 ::: {#tbl-f-table}
 {{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":4},"df2":[2,3,4,5,6,7,8,9,10,12,15,20,30],"interactive":false,"selected":{"df1":1,"df2":6,"alpha":0.05},"tableMinWidth":"0","maxWidth":"32rem"}' fallback="F critical-value table for alpha .05, highlighting 5.99 for 1 and 6 degrees of freedom." >}}
@@ -380,7 +380,7 @@ Returning to our spider data, with 1 and 6 degrees of freedom, our $F$ of 9.91 e
 
 That's no coincidence; the two statistical treatments of the same data don't just produce outcomes in the same ballpark. For two independent groups, using the pooled $t$ test and this ANOVA, there is a precise relationship: $F = t^2$. Our $t$ was about $-3.148$; squaring it gives about $9.91$. Alternatively, taking the square root of $F$ gets us back to the size of $t$ (but not its sign).
 
-Did you notice something familiar about $MS_{\text{within}}$? We've already done this in the past. We just knew it by another name: pooled variance. We add the two groups' sums of squares and divide by their combined degrees of freedom: $(3{,}488 + 5{,}262) / (3 + 3) = 1{,}458.3$. The $t$ statistic turns that pooled variance into a standard error in the original units, to match the difference between means in its numerator. ANOVA keeps things squared. Likewise, with two groups, its numerator, $MS_{\text{between}}$, captures the same difference between means as $t$'s numerator, but squared and scaled by the group sizes to give the mean square.
+Did you notice something familiar about $MS_{\text{within}}$? We've already done this in the past. We just knew it by another name: pooled variance. We add the two groups' sums of squares and divide by their combined degrees of freedom: $(3{,}488 + 5{,}262) / (3 + 3) = 1{,}458.3$. The $t$ statistic turns that pooled variance into a standard error in the original units, to match the difference between means in its numerator. ANOVA leaves it squared. Likewise, with two groups, its numerator, $MS_{\text{between}}$, captures the same difference between means as $t$'s numerator, but squared and scaled by the group sizes to give the mean square.
 
 This squared correspondence also helps explain the shape of the $F$ distribution we saw in step 1 of @act-f-distribution-df. Since for two independent groups, $F = t^2$, the whole $F$ distribution is literally the corresponding $t$ distribution squared. As a result, negative $t$ values become positive $F$ values, and large values get pushed farther out. @act-t-squared shows the transformation.
 
@@ -427,9 +427,9 @@ So we've compared the same two groups in two ways, and reached the same answer. 
 
 Suppose we're still interested in the effects of spider bites, but we've had another realization. Our two-group comparison might have established a difference between the group bitten by a radioactive spider and the group bitten by an ordinary spider, but what does that mean? Perhaps the radioactive bite makes people faster, or maybe the ordinary bite slows them down, or both! Or maybe both bites speed up reactions, but the radioactive bite more so than the ordinary bite. How can we tell what's really going on?
 
-With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. We'll randomly assign kids to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.
+With just two groups, we can't. But there is a simple solution. We'll include a third group in the comparison: a control condition, where kids take the test without having been bitten at all. This will offer a baseline against which we can compare both treatment groups, looking for an increase or decrease in average performance. (We'll randomly assign our participants to the three conditions, so preexisting differences among the kids aren't systematically tied to bite type.)
 
-So take a look at this little dataset and the group means. Just from eyeballing it, does it look like the radioactive bite sped kids up or did the ordinary bite slow them down?
+So take a look at this little dataset and the group means. Just from eyeballing it, does it look like the radioactive bite sped kids up? How about the ordinary bite?
 
 | [🕷️]{.sfs-radioactive} Radioactive bite | 🕷️ Ordinary bite | 😐 No bite |
 |:--:|:--:|:--:|
@@ -443,9 +443,9 @@ So take a look at this little dataset and the group means. Just from eyeballing 
 
 You probably noticed that the radioactive-bite group was way faster than the no-bite group, on average, and faster than the ordinary-bite group too. The ordinary-bite group was a little faster than no bite, but not by much.
 
-So how much of a difference is enough? The independent-samples $t$ test starts by subtracting one mean from another. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense. How can we consider differences among all the groups at once?
+So how much of a difference is enough? The independent-samples $t$ test starts by subtracting one mean from another. But we can't just do 189 minus 274 minus 284 here. That wouldn't make any sense. How can we consider differences among all the groups at once? The $t$ test can't do the job, but analysis of variance can.
 
-Perhaps you also noticed the variability in the data in general. The individual scores overlap quite a bit, especially the ordinary-bite and no-bite groups; not so much the radioactive-bite group. Talking through the patterns of variability like this, we're essentially doing an informal ANOVA. The $t$ test can't do the job, but analysis of variance can.
+Perhaps you also noticed the variability in the data in general. The individual scores overlap quite a bit, especially the ordinary-bite and no-bite groups; not so much the radioactive-bite group. Talking through the patterns of variability like this, we're essentially doing an informal ANOVA, comparing variances within groups and between groups.
 
 More formally, our question is still about means, but we can quantify how far all three means fall from the grand mean, just as we did with two. The between-groups variance captures those differences, and the within-groups variance gives us a comparison based on how much scores vary even among people receiving the same treatment. So we can form the same $F$ ratio as before. We never needed to subtract one group mean from another, so adding a third group doesn't change the logic.
 
@@ -455,7 +455,9 @@ More formally, our question is still about means, but we can quantify how far al
 
 There's some new terminology that comes with ANOVA. The **factor** refers to the independent variable that designates the groups being compared. For our little example study here, we might label the factor *type of spider bite*, or *bite type* for short.
 
-The **levels** are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control---no bite---treatment. So our study calls for a **single-factor, independent-samples ANOVA**: one factor with three levels, and independent groups at each level. (You'll also often see this called a *one-way* ANOVA.) You can have any number of levels and factors. For example, we'll introduce two-by-two designs in Chapter 16, where we'll have two factors with two levels each. But for this chapter we'll stick to a single factor.
+The **levels** are the individual treatments that make up a factor. So here we have three levels of our bite type factor: the radioactive bite treatment, the ordinary bite treatment, and the control---no bite---treatment.
+
+So our study calls for a **single-factor, independent-samples ANOVA**: one factor with three levels, and independent groups at each level. (You'll also sometimes see this called a *one-way* ANOVA.) ANOVA can accommodate any number of levels and factors. For example, we'll introduce two-by-two designs in Chapter 16, where we'll have two factors with two levels each. But for this chapter we'll stick to a single factor.
 
 ### Three groups, the same logic
 
@@ -519,11 +521,9 @@ As usual, we state our hypotheses first. The null here is that all three populat
 
 $$ H_0: \mu_{\text{radioactive}} = \mu_{\text{ordinary}} = \mu_{\text{no bite}} $$
 
-$H_1$: At least one population mean differs from another. That doesn't mean they *all* differ from one another, necessarily; we're just saying that there is some difference among the conditions somewhere.
+$H_1$: At least one population mean differs from another. That doesn't mean they *all* differ from one another, necessarily. We're just saying that there is some difference among the conditions somewhere.
 
-If the null is true, both mean squares estimate the same population variance, as we saw in @act-two-estimates. Their ratio can still vary considerably from sample to sample; @act-f-distribution-df showed us how the degrees of freedom affect that variation.
-
-A treatment effect contributes to the between-groups mean square without increasing the within-groups mean square, so it tends to make $F$ larger. We test whether our observed $F$ is unusually large compared with the null distribution.
+If the null is true, both mean squares estimate the same population variance, as we saw in @act-two-estimates. Their ratio can still vary considerably from sample to sample; @act-f-distribution-df showed us how the degrees of freedom affect that variation. A treatment effect contributes to the between-groups mean square without increasing the within-groups mean square, so it tends to make $F$ larger. We test whether our observed $F$ is unusually large compared with the null distribution.
 
 ### Step 2: Set the decision criteria
 
@@ -551,7 +551,51 @@ Now we're ready to calculate the test statistic, the $F$ ratio. With so many par
 An ANOVA summary table, showing each equation.
 :::
 
-This is the arithmetic behind @act-anova-viz-three. For our spider-bite data, the ingredients are: $N = 12$ scores in total, $n_{\text{group}} = 4$ per condition, and $k = 3$ conditions. The group means are 189, 274, and 284 ms, and the grand mean is 249 ms.
+Now, time for some sums. This is the arithmetic behind @act-anova-viz-three. For our spider-bite data, the ingredients are: $N = 12$ scores in total, $n_{\text{group}} = 4$ per condition, and $k = 3$ conditions. The group means are 189, 274, and 284 ms, and the grand mean is 249 ms.
+
+Just as we did in Chapter 4, we can lay out each squared deviation in a table before adding them up. @tbl-anova-squared-deviations uses the grand mean for the total column, each score's own group mean for the within-groups column, and the group mean minus the grand mean for the between-groups column.
+
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| Condition          | Score, $X$ | Total: $(X-M_{\text{grand}})^2$ | Within: $(X-M_{\text{group}})^2$ | Between: $(M_{\text{group}}-M_{\text{grand}})^2$ |
++====================+============+=================================+==================================+==================================================+
+| Radioactive bite   | $189$      | $(189-249)^2=3{,}600$           | $(189-189)^2=0$                  | $(189-249)^2=3{,}600$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $161$      | $(161-249)^2=7{,}744$           | $(161-189)^2=784$                | $(189-249)^2=3{,}600$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $237$      | $(237-249)^2=144$               | $(237-189)^2=2{,}304$            | $(189-249)^2=3{,}600$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $169$      | $(169-249)^2=6{,}400$           | $(169-189)^2=400$                | $(189-249)^2=3{,}600$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| $M_{\text{radioactive}}=189$    |                                 |                                  |                                                  |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| Ordinary bite      | $310$      | $(310-249)^2=3{,}721$           | $(310-274)^2=1{,}296$            | $(274-249)^2=625$                                |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $219$      | $(219-249)^2=900$               | $(219-274)^2=3{,}025$            | $(274-249)^2=625$                                |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $303$      | $(303-249)^2=2{,}916$           | $(303-274)^2=841$                | $(274-249)^2=625$                                |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $264$      | $(264-249)^2=225$               | $(264-274)^2=100$                | $(274-249)^2=625$                                |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| $M_{\text{ordinary}}=274$       |                                 |                                  |                                                  |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| No bite            | $265$      | $(265-249)^2=256$               | $(265-284)^2=361$                | $(284-249)^2=1{,}225$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $252$      | $(252-249)^2=9$                 | $(252-284)^2=1{,}024$            | $(284-249)^2=1{,}225$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $298$      | $(298-249)^2=2{,}401$           | $(298-284)^2=196$                | $(284-249)^2=1{,}225$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+|                    | $321$      | $(321-249)^2=5{,}184$           | $(321-284)^2=1{,}369$            | $(284-249)^2=1{,}225$                            |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| $M_{\text{no bite}}=284$        |                                 |                                  |                                                  |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+| **Sum of squares** |            | $SS_{\text{total}}=33{,}500$    | $SS_{\text{within}}=11{,}700$    | $SS_{\text{between}}=21{,}800$                   |
++--------------------+------------+---------------------------------+----------------------------------+--------------------------------------------------+
+
+: Squared deviations and their sums for the three spider-bite conditions. {#tbl-anova-squared-deviations}
+
+The between-groups calculation repeats once for each score in the group. With four scores per group, each group-mean squared deviation appears four times; this is why the compact formula multiplies each one by $n_{\text{group}}$. The column sums satisfy $SS_{\text{total}} = SS_{\text{within}} + SS_{\text{between}}$, although the individual rows generally do not.
+
+Adding the squared deviations gives us:
 
 $$
 \begin{align}
@@ -626,7 +670,7 @@ Now that we have a significant result, maybe you're not quite satisfied yet. Aft
 
 That's the limitation of an **omnibus test**, which is what ANOVA is: it tests the means together, telling us whether there is evidence of any difference among them. It doesn't tell us which means differ, which is obviously something we'd want to know. So we'll follow our significant ANOVA with **post-hoc tests**, additional tests comparing two group means at a time. These are called **pairwise comparisons**.
 
-{{< include quizzes/14-anova-omnibus-check.qmd >}}
+<!-- {{< include quizzes/14-anova-omnibus-check.qmd >}} -->
 
 Maybe you're thinking, "Why do we go through this whole song and dance just to end up doing pairwise comparisons again, like we did with the $t$ test? Why couldn't we just start with the $t$ tests?" The problem is the number of tests. With three groups, there are three comparisons to make: A to B, A to C, and B to C. Each ordinary $t$ test at $\alpha = .05$ has its own 5% Type I error rate. Across all three tests, the chance of making at least one Type I error is greater than 5%: about 14% if the tests were independent ($1 - .95^3$). This is the **experiment-wise error rate**.
 
@@ -636,11 +680,11 @@ There's more than one kind of post-hoc test you can do, but we'll just mention o
 
 Even when the population means are identical, the sample means will usually differ a bit due to sampling error. With more groups, there are more opportunities for a large chance difference. Tukey's cutoff takes that into account when judging all the pairwise comparisons together.
 
-The equation to find the honestly significant difference is $HSD = q \cdot \sqrt{MS_{\text{within}} / n}$, where $n$ is the number of scores in each condition (this version assumes equally sized groups). $q$ here is the studentized range statistic, which is based on the gap between the highest and lowest means relative to chance variability. There are tables to look up its critical values, just like other test statistics.
+The equation to find the honestly significant difference is:
 
-The pieces should look familiar. $MS_{\text{within}}$ is our pooled estimate of the background variability, using all the groups. Dividing by $n$ and taking the square root puts it on the scale of variability among sample means. More variability makes the required difference larger; more people per group make the means more precise. The critical $q$ accounts for how many means we're comparing and the degrees of freedom of our variance estimate.
+$$ HSD = q \cdot \sqrt{MS_{\text{within}} / n} $$
 
-Here's a little table: across the top is the number of conditions in your study, and the rows are possible degrees of freedom for the denominator of the $F$ ratio.
+In this equation, $q$ is the studentized range statistic, which is based on the gap between the highest and lowest means relative to chance variability. There are tables to look up its critical values, like the one in @tbl-q-values. Across the top is the number of conditions in your study, and the rows are possible degrees of freedom for the denominator of the $F$ ratio.
 
 | $df$ | 2 | 3 | 4 | 5 | 6 |
 |--:|--:|--:|--:|--:|--:|
@@ -653,6 +697,8 @@ Here's a little table: across the top is the number of conditions in your study,
 | 10 | 3.15 | 3.88 | 4.33 | 4.65 | 4.91 |
 
 : Critical values of the studentized range statistic $q$ for $\alpha = .05$, by number of conditions (columns) and $df$ for the denominator (rows). {#tbl-q-values}
+
+The other pieces of the equation should look familiar. $n$ is the number of scores in each condition (this version assumes equally sized groups). $MS_{\text{within}}$ is our pooled estimate of the background variability, using all the groups. Dividing by $n$ and taking the square root puts it on the scale of variability among sample means. More variability makes the required difference larger; more people per group make the means more precise. The critical $q$ accounts for how many means we're comparing and the degrees of freedom of our variance estimate.
 
 So for our little dataset, there are three conditions and the degrees of freedom for the denominator were nine, so our $q$ value is 3.95.
 
@@ -723,9 +769,9 @@ And a significant result isn't proof that a difference exists or that it was cau
 
 ### Assumptions
 
-For ANOVA to be an appropriate analysis, the outcome needs to be a quantitative variable (same as the $z$ and $t$ tests). Here that's reaction time. The factor, bite type, is categorical. This design allows us to compare scores across conditions.
+Finally, it's worth spelling out the conditions and assumptions for ANOVA to be an appropriate analysis. Design-wise, the thing that is measured and compared needs to be a quantitative variable (same as the $z$ and $t$ tests). Here that's reaction time. The factor, bite type, is categorical. This design allows us to compare scores across conditions.
 
-ANOVA shares the independent-samples $t$ test's underlying assumptions: observations are independent (both within and between groups); the populations which produced our samples are approximately normal; and their variances are equal (the homogeneity of variance assumption).[^anova-welch]
+ANOVA also shares the independent-samples $t$ test's underlying assumptions: observations are independent (both within and between groups); the populations which produced our samples are approximately normal; and their variances are equal (the homogeneity of variance assumption).[^anova-welch]
 
 [^anova-welch]: Just as there is a Welch version of the independent-samples $t$ test, there is a Welch ANOVA that doesn't assume equal population variances.
 
