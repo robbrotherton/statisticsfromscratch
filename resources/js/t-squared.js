@@ -326,10 +326,11 @@ window.makeTSquaredExplorer = function(opts) {
     leftCurve.attr("d", line(left));
     // Once the halves stack, the positive half's own curve is the seam
     // between them: the dashed edge where one 2.5% sits on the other.
+    // Fade that seam as we square, leaving just the final F density.
     rightCurve
       .attr("d", ph.stack > 0 ? baseLine(left) : line(right))
       .classed("tsq-seam", ph.stack > 0)
-      .style("opacity", ph.stack > 0 ? 0.45 : 1);
+      .style("opacity", ph.stack > 0 ? 0.45 * (1 - ph.square) : 1);
 
     baseline.attr("x1", plotLeft).attr("x2", plotRight).attr("y1", baselineY).attr("y2", baselineY);
 
