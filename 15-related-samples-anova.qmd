@@ -1,7 +1,8 @@
 ---
 title: "Related-samples ANOVA"
 interactive-scripts:
-  - variance-partition-diagram
+  - anova-variability-explorer
+  - critical-table-generator
   - distribution-generator
 ---
 
@@ -16,7 +17,11 @@ interactive-scripts:
 
 <!-- PLAN (structural pass, 2026-11-05). This chapter's one new idea: the same scores can be partitioned further when we know whose they are. Pull people out of the denominator and the same numbers give a far larger F.
 Skeleton: same numbers, two analyses → where the individual differences go → the modified F → SS and df → third condition → steps 1-5 → reporting, interpreting, assumptions. Should end up much shorter than Chapter 14; don't re-explain the partition, F, or the F table.
-DATA NOT YET CHANGED. The snack table is a stand-in. It no longer appears in Chapter 14, so every "same data" sentence below is false until the data is decided. Recommendation and numbers are in the private structural-pass note. -->
+FIGURE DONE (2026-11-05): the partition tutorial below is the explorer in people mode, on the six children. Its step text is [ROB: ...] placeholders, and the PLAN comment under it has the reasoning.
+DATA (swapped in 2026-11-05). Two Triplett tables, both real. Chapter 13's five (Alone, Competition) stay for "Same numbers, different analysis" and the recovery of t, whose numbers are in the DRAFT comments. The step-by-step uses six children from Triplett's Table I, tbl-related-anova-data. All numbers are checked; the rejected options are in the private structural-pass note.
+LABELS (2026-11-05): symbols follow Chapter 14 and the explorer: SS_between, SS_within, SS_people, SS_error, M_group, M_person. Words: between groups, within groups, between people (decided by Rob, 2026-11-05), the same as Chapter 14, so don't switch to "treatments". "Between-participants design" stays as the name of the design. A group here means a group of scores, grouped by condition, and the people step regroups them by person.
+DRAFT (gap): a sentence where "group" first strains, since there's one group of people here: we've been grouping scores by condition, now we group them by person.
+DRAFT (gap, footnote on other names): other books say SS_subjects or SS_between subjects. In a matched-subjects design each "person" is a matched set, with n counting sets, as Chapter 13's n counted pairs. Statisticians' general word is a block; Fisher's randomized blocks are the optional aside (plan §3.5, verify sources first). -->
 
 In Chapter 14 we introduced the independent-samples ANOVA for use with between-participants designs. In this chapter we'll introduce another variant, the related-samples ANOVA. Conceptually, there's really nothing new here. Just like the related-samples $t$ test, this is for use with within-participants or matched-subjects designs. We'll just need to examine some of the new sources of variance that we can partition differently here by virtue of the related-samples design.
 
@@ -49,133 +54,248 @@ So conceptually, to be more specific about things, the independent-samples $F$ r
 ::::: {#act-related-partition .callout-tip .interactive}
 ## Where the individual differences go
 
-{{< interactive-figure relatedPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed"}' fallback="Diagram partitioning total variability into between-treatments and within-groups variance. For related samples, individual differences drop out of the between-treatments component, so the within-groups variance is further partitioned into error variance (sampling error) and between-subjects variance (individual differences), and the F ratio uses mean square error as its denominator." >}}
+{{< interactive-figure relatedAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"people":["Violet","Howard","Inez","Mary W.","Bertha","Lucile"],"groups":[{"name":"First alone","values":[54,42,37,56,56,52]},{"name":"Later alone","values":[45,39,36,53,49,50]},{"name":"Competition","values":[43,36,35,46,48,43]}],"axisLabel":"Time (seconds)","personColors":[0,4,1,3,7,5],"xMin":30,"xMax":60,"populationSd":6.75}' fallback="Interactive diagram of six children timed in three conditions. The scores regroup into one row per child, each child's scores slide to that child's mean, and the squared deviations fill a people layer at the bottom of the within-groups sum of squares. What remains above it is error, and only the between-groups and error layers are divided by their degrees of freedom." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Independent samples" data-action='{"preset":"independent-detailed","emphasize":"none","animate":false}'}
-For independent samples, treatment effect, sampling error, and individual differences all contribute to the variance between groups; sampling error and individual differences contribute within groups. The chance sources appear in both parts of the $F$ ratio, so they cancel out.
+::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
+[ROB: The six children's times in their three conditions. Same layout as Chapter 14.]
 :::
 
-::: {.tutorial-step data-title="The problem" data-action='{"preset":"related-problem","emphasize":"ind-diff"}'}
-A related-samples design eliminates individual differences *between* treatments — it's the same (or matched) people in every condition. But they still lurk within groups, so the usual ratio is unbalanced: individual differences sit in the denominator with nothing to cancel them in the numerator.
+::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Total" data-action='{"stage":"total","phase":"sum","animate":true}'}
+[ROB: Total sum of squares, as in Chapter 14.]
 :::
 
-::: {.tutorial-step data-title="The solution" data-action='{"preset":"related","emphasize":"ind-diff"}'}
-So we partition the within-groups variance itself, splitting the individual differences (between-subjects variance) apart from the sampling error (error variance).
+::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Within" data-action='{"stage":"within","phase":"sum","animate":true}'}
+[ROB: Within, as in Chapter 14. Every child appears once in every lane, so child-to-child differences are all in here.]
 :::
 
-::: {.tutorial-step data-title="A balanced ratio" data-action='{"preset":"related","emphasize":"none"}'}
-Using $MS_{\text{error}}$ as the denominator restores the balance: treatment effect plus sampling error over sampling error alone. The individual differences are out of the equation entirely, giving us a more powerful test.
+::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Between" data-action='{"stage":"between","phase":"sum","animate":true}'}
+[ROB: Between, as in Chapter 14. The bucket is full. So far this is the independent analysis.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Recolour" data-action='{"stage":"people","phase":"recolour","animate":true}'}
+[ROB: We know whose scores these are. Same dots, same places, now coloured by child instead of by condition.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Rows" data-action='{"stage":"people","phase":"rows","animate":true}'}
+[ROB: The lanes regroup into one row per child, so each row is one colour, as each lane was in Chapter 14.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Averages" data-action='{"stage":"people","phase":"observe","animate":true}'}
+[ROB: Each child's scores are treated as that child's own mean, the same move as Between with children as the groups. The real scores stay put; the ghosts are the stand-ins.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Deviations" data-action='{"stage":"people","phase":"deviations","animate":true}'}
+[ROB: One deviation per child, from their mean to the grand mean.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Squares" data-action='{"stage":"people","phase":"squares","animate":true}'}
+[ROB: One square per child.]
+:::
+
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Sum" data-action='{"stage":"people","phase":"sum","animate":true}'}
+[ROB: Each square counts three times, once per condition, and settles at the bottom of Within. SS people 636.44. The slot left above it isn't named yet.]
+:::
+
+::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="Centre" data-action='{"stage":"centre","phase":"shift","animate":true}'}
+[ROB: Each child's average slides to the grand mean, carrying adjusted copies of their three scores with it; the real scores fade away, since these aren't real times any more. Their brown square shrinks to nothing: that's the kind of variability we're removing from consideration.]
+:::
+
+::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="Lanes" data-action='{"stage":"centre","phase":"lanes","animate":true}'}
+[ROB: The centred scores go back to their condition lanes. The spread around each condition mean has shrunk.]
+:::
+
+::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="What's left" data-action='{"stage":"centre","phase":"squares","animate":true}'}
+[ROB: What's left around each condition mean, as squares.]
+:::
+
+::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="Error" data-action='{"stage":"centre","phase":"sum","animate":true}'}
+[ROB: Those squares fill the slot exactly: this is SS error, 47.22. We could also have found it by simple subtraction, 683.67 - 636.44.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
+[ROB: The bucket: between, error, people.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
+[ROB: Between and error lift out. People stay behind in the total.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
+[ROB: Same move as Chapter 14: each sum divided by its df, then F. MS between is unchanged from the independent analysis; MS error is SS error over df error = (k - 1)(n - 1) = 10. F(2, 10) = 18.72, against 1.94 for the independent analysis.]
 :::
 ::::
 
 :::::
 
+<!-- PLAN (centring steps, 2026-11-05): implemented and staying; the step text and prose are still to write. What the steps show and what the prose has to say. Numbers checked.
+     What centring is. Each score is grand mean + condition effect + person effect + leftover. Centring subtracts the person effect: X - M_person + M_grand. Each child's three scores shift by the same amount (Inez +9.56, Violet -1.78, Mary W -6.11), so the differences among one child's scores don't change, and neither do the condition means (49.50, 45.33, 41.83). So the numerator is untouched and only child-to-child differences go: first alone's spread goes from 37-56 to 46.6-52.2.
+     The calculation. Each centred score's deviation from its condition mean is X - M_person - M_condition + M_grand. Violet, first alone: 54 - 47.33 + 45.56 = 52.22, and 52.22 - 49.50 = 2.72. Square all 18 and add: 47.22. That's the same number as SS_within - SS_people = 683.67 - 636.44, by a different route, so the prose can give subtraction as the quick way and this as what it means. The two agree because each within deviation is the person deviation plus the leftover, and the leftovers sum to zero for each child.
+     What error is. How far the children fail to respond to the conditions in the same way (the person x condition interaction). If every child changed by exactly the same amount, every leftover and SS_error would be zero. This is also the FIX below about "only sampling error".
+     Links to make. It's the ANOVA version of Chapter 13's difference score, which removed each child's overall speed by subtracting. With two conditions, SS_error = SS_D / 2 (Chapter 13's five: 90.8 / 2 = 45.4). The leftovers sum to zero along each lane and across each child, which is why df_error is (k - 1)(n - 1) = 10 and not 17.
+     Why the original dots disappear here, and only here. Everywhere else the rule is that real scores stay in view, faded, because a mean-aligned dot is a stand-in ("pretend everyone is exactly average for this grouping"). Centring is different. A stand-in is one way of reading a real score; a centred score is a new, adjusted number. Nobody ran these times: Inez never ran a 46. Keeping the originals on screen had them competing with the outlines and invited comparing two different quantities. So the original dots fade as the outlines take over, stay hidden through the Lanes, What's left and Error steps, and come back if the reader steps back.
+     So the prose must say plainly that from here we're no longer looking at the children's actual times, but at a mathematical adjustment of them, and why that's legitimate: it's what removing each child's overall speed means. Otherwise readers may think scores really changed, which is what the rest of the figure works to avoid. -->
+
+<!-- CUT (act-related-partition, replaced by the tutorial above, Rob 2026-11-05; plan §3.3). Kept verbatim as a quarry. The diagram itself, makeVariancePartitionDiagram with the presets independent-detailed, related-problem and related, may survive as a static image; its script is no longer loaded here.
+     Fallback text: Diagram partitioning total variability into between-treatments and within-groups variance. For related samples, individual differences drop out of the between-treatments component, so the within-groups variance is further partitioned into error variance (sampling error) and between-subjects variance (individual differences), and the F ratio uses mean square error as its denominator.
+     Step "Independent samples": For independent samples, treatment effect, sampling error, and individual differences all contribute to the variance between groups; sampling error and individual differences contribute within groups. The chance sources appear in both parts of the $F$ ratio, so they cancel out.
+     Step "The problem": A related-samples design eliminates individual differences *between* treatments — it's the same (or matched) people in every condition. But they still lurk within groups, so the usual ratio is unbalanced: individual differences sit in the denominator with nothing to cancel them in the numerator.
+     Step "The solution": So we partition the within-groups variance itself, splitting the individual differences (between-subjects variance) apart from the sampling error (error variance).
+     Step "A balanced ratio": Using $MS_{\text{error}}$ as the denominator restores the balance: treatment effect plus sampling error over sampling error alone. The individual differences are out of the equation entirely, giving us a more powerful test.
+-->
+
 ### Removing individual differences
 
 <!-- FIX: "error variance consists only of sampling error" isn't right. The residual also includes people responding differently to the conditions (person × condition variability). -->
-<!-- FIX: naming. Chapter 14 settled on "between groups" and Chapter 13 on "participants". Decide on the labels here: between treatments/conditions, and between subjects/participants/people ($SS_{\text{people}}$ is shortest). The partition diagram's labels would need to follow. -->
 <!-- FIX: section partly repeats the callout above it. Trim once the prose is revised. -->
 
-With the related-samples ANOVA, we start out the same, partitioning the total variance into variance between treatments and variance within treatments. Any treatment effect still contributes to variance between groups and not within groups. Sampling error still contributes to both differences between and within groups. But like I said, individual differences are eliminated as a potential source of variability between groups by virtue of the design — it's the same people or matched subjects in each group. So the individuals do not differ between groups. But of course, they do still differ within groups. So individual differences are a potential source of within-group variance.
+With the related-samples ANOVA, we start out the same, partitioning the total variance into variance between groups and variance within groups. Any treatment effect still contributes to variance between groups and not within groups. Sampling error still contributes to both differences between and within groups. But like I said, individual differences are eliminated as a potential source of variability between groups by virtue of the design — it's the same people or matched subjects in each group. So the individuals do not differ between groups. But of course, they do still differ within groups. So individual differences are a potential source of within-group variance.
 
 So if we use the same numerator and denominator here as for the independent-samples ANOVA, the ratio wouldn't be balanced anymore. We'd have treatment plus error in the numerator and error plus individual differences in the denominator. So those different sources of variability would contribute differently to the numerator and denominator and wouldn't cancel out nicely in the ratio like they did before.
 
-This would be a problem. And so with related samples, we have a little extra work to do, because, happily, we can partition out the variance in the denominator, separating the sampling error and the individual differences. We will partition that within-group variance into two components: error variance, labeled $MS_{\text{error}}$, and between-subjects variance, $MS_{\text{between subjects}}$. As the name suggests, the error variance consists only of sampling error and the between-subjects variance consists only of the individual differences. We'll see how exactly we're able to quantify these different sources in a moment.
+This would be a problem. And so with related samples, we have a little extra work to do, because, happily, we can partition out the variance in the denominator, separating the sampling error and the individual differences. We will partition that within-group variance into two components: error variance, labeled $MS_{\text{error}}$, and between-people variance, $MS_{\text{people}}$. As the name suggests, the error variance consists only of sampling error and the between-people variance consists only of the individual differences. We'll see how exactly we're able to quantify these different sources in a moment.
 
 ### The modified $F$ ratio
 
-But note that we have a slightly different label for the variance between groups now. We call it "mean square between treatments" to distinguish it from this new component, mean square between subjects. So we will still use the same numerator, $MS_{\text{between treatments}}$, but we're going to use a different denominator for the $F$ ratio: $MS_{\text{error}}$. So conceptually, the balance is restored to our equation. The individual differences are removed from the numerator simply by virtue of the design. And now we've removed them from the denominator by partitioning out the individual differences. Our ratio consists of any treatment effect plus sampling error in the numerator, and sampling error alone in the denominator. Now, as before, the ratio effectively cancels out the error, quantifying any treatment effect.
+We will still use the same numerator, $MS_{\text{between}}$, but we're going to use a different denominator for the $F$ ratio: $MS_{\text{error}}$. So conceptually, the balance is restored to our equation. The individual differences are removed from the numerator simply by virtue of the design. And now we've removed them from the denominator by partitioning out the individual differences. Our ratio consists of any treatment effect plus sampling error in the numerator, and sampling error alone in the denominator. Now, as before, the ratio effectively cancels out the error, quantifying any treatment effect.
 
 ## Sums of squares and degrees of freedom
 
-<!-- FIX: computational formula ($P$, $G$, $T$, ISSUES #5). The book is definitional now: $SS_{\text{people}} = \Sigma k(M_{\text{person}} - M_{\text{grand}})^2$, same form as $SS_{\text{between}}$ with person means in place of group means, which is what the centering figure shows. Add $df_{\text{error}} = (k - 1)(n - 1)$ explicitly; it's only reached by subtraction at present. The computational version can go in a footnote like Chapter 14's. -->
+So here's how we calculate this modified $F$ ratio for related-samples data. We start with the sums of squares and degrees of freedom. And the total, between-groups, and within-groups components are exactly the same as they were for the independent-samples designs.
 
-So here's how we calculate this modified $F$ ratio for related-samples data. We start with the sums of squares and degrees of freedom. And the total, between-treatments, and within components are exactly the same as they were for the independent-samples designs.
+Then we get to the two new components for between-people and error variability. The equation[^related-computational] for between people has the same form as $SS_{\text{between}}$, with person means in place of group means:
 
-Then we get to the two new components for between-subjects and error variability. The equation for between subjects is $\sum P^2 / k - G^2 / N$. The $P$ here stands for participant totals. Remember, for the between-treatments variability, the equation uses $T$, treatment totals. Those are the sum of scores within each individual treatment group. For between-subjects variability, the idea is the same, but instead of summing scores for each treatment we sum them for each participant. Then we square the participant totals and divide by $k$, the number of treatment conditions, getting an average squared score for each participant across the conditions, much like we got an average squared score for each treatment by dividing the squared treatment totals by the number of scores in each treatment.
+$$ SS_{\text{people}} = \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 $$
 
-The final component, and the one that will become our denominator, is found by subtraction. Anything left over after taking the individual-difference variability out of within-treatments variability is the error variability. So $SS_{\text{error}} = SS_{\text{within}} - SS_{\text{between subjects}}$.
+$M_{\text{person}}$ is the mean of one person's scores across the conditions. Remember, for the between-groups variability, the equation sums the squared deviation of each group mean from the grand mean, with each one multiplied by the number of scores that mean represents. For between-people variability, the idea is the same, but instead of averaging scores for each group we average them for each person. Then we find the squared deviation of each person's mean from the grand mean, and multiply by $k$, the number of conditions, since each person's mean represents $k$ scores.
+
+The final component, and the one that will become our denominator, is what's left. Anything left over after taking the individual-difference variability out of within-groups variability is the error variability, so we can find it by subtraction:
+
+$$ SS_{\text{error}} = SS_{\text{within}} - SS_{\text{people}} $$
+
+Or we can get the same answer directly, from each score's deviation from its group mean once that person's overall deviation from the grand mean has been taken out: $SS_{\text{error}} = \Sigma (X - M_{\text{person}} - M_{\text{group}} + M_{\text{grand}})^2$.
+
+The two new components have degrees of freedom of their own. For $SS_{\text{people}}$, we computed the deviation of each person's mean from the grand mean. So that's $n$ means, deviating from a single grand mean, and $df_{\text{people}} = n - 1$, the number of people minus one. (Since everyone contributes one score to each condition, $n$ is also the number of scores in each condition.) The error degrees of freedom are what's left of $df_{\text{within}}$:
+
+$$ df_{\text{error}} = df_{\text{within}} - df_{\text{people}} = (N - k) - (n - 1) = (k - 1)(n - 1) $$
 
 It's worth taking the time to really understand these equations on a conceptual level. It should hopefully make more sense when we work through an example a little bit later.
+
+[^related-computational]: As in Chapter 14, there's also a computational version of this formula. It uses $P$, a participant total (the sum of the scores for one person), and $G$, the grand total.
+
+    $$ SS_{\text{people}} = \Sigma \frac{P^2}{k} - \frac{G^2}{N} $$
+
+    We'll stick with the definitional formula here too.
 
 ### Mean squares and $F$
 
 <!-- FIX: "making this a more powerful statistic" isn't guaranteed: $df_{\text{error}}$ drops, as Chapter 13 says for $t$. -->
 
-Once we calculate the required sums of squares and degrees of freedom, the rest is easy. We calculate the variances for the numerator and denominator, $MS_{\text{between treatments}}$ and $MS_{\text{error}}$, by dividing the relevant sums of squares by degrees of freedom. And then we calculate the $F$ ratio by dividing the numerator by the denominator. Again, the numerator is exactly the same we would have used for an independent-samples design, $MS_{\text{between treatments}}$. We just have to remember to use the different denominator here, $MS_{\text{error}}$. And the interpretation of the $F$ ratio is exactly the same. The greater than 1 our $F$ ratio is, the more of a treatment effect there appears to be over and above sampling error. And because the denominator excludes an additional source of variability here, it will be smaller, making this a more powerful statistic than the regular independent-samples version.
+Once we calculate the required sums of squares and degrees of freedom, the rest is easy. We calculate the variances for the numerator and denominator, $MS_{\text{between}}$ and $MS_{\text{error}}$, by dividing the relevant sums of squares by degrees of freedom. And then we calculate the $F$ ratio by dividing the numerator by the denominator. Again, the numerator is exactly the same we would have used for an independent-samples design, $MS_{\text{between}}$. We just have to remember to use the different denominator here, $MS_{\text{error}}$.
+
+$$
+\begin{align}
+MS_{\text{between}} &= \frac{SS_{\text{between}}}{df_{\text{between}}} \\
+MS_{\text{error}} &= \frac{SS_{\text{error}}}{df_{\text{error}}}
+\end{align}
+$$
+
+$$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} $$
+
+And the interpretation of the $F$ ratio is exactly the same. The greater than 1 our $F$ ratio is, the more of a treatment effect there appears to be over and above sampling error. And because the denominator excludes an additional source of variability here, it will be smaller, making this a more powerful statistic than the regular independent-samples version.
 
 {{< include quizzes/15-related-anova-partitioning-variance.qmd >}}
 
-<!-- DRAFT (gap): recover the t statistic. For Triplett's two conditions, SS_people = 746.6, SS_error = 45.4, MS_error = 11.35, so F(1, 4) = 96.1 / 11.35 = 8.47 = (-2.91)^2, p = .044, the same as Chapter 13. Critical value 7.71 = 2.776^2. 94% of the within-condition variability was child-to-child.
+<!-- DRAFT (gap): recover the t statistic. For Triplett's two conditions, SS_people = 746.6, SS_error = 45.4, MS_error = 11.35, so F(1, 4) = 96.1 / 11.35 = 8.47 = (-2.91)^2, p = .044, the same as Chapter 13. Critical value 7.71 = 2.776^2. 94% of the within-groups variability was child-to-child.
      The callback runs both ways: the difference score removed each child's overall speed by subtracting; ANOVA removes the same thing by counting it and setting it aside. Make clear this is one result seen twice, not independent confirmation.
      Then a comparison table in the form of tbl-related-comparison, with F in place of t: same SS_between and numerator in both columns; MS 99 vs 11.35; df 8 vs 4; critical 5.32 vs 7.71; F 0.97 vs 8.47; p .353 vs .044.
      Keep Chapter 13's line that the numbers don't know or care what we subject them to, and that we don't pick the test by trying both. -->
 
-<!-- FIGURE: centering each person (plan §3.3). Each child's dots slide until the child's own mean sits on the grand mean, so the between-person spread visibly vanishes. Two conditions: a makeScoreRows stage, continuing act-triplett-pairs. Three: an explorer stage. The bucket version splits the within layer in place into people and error. Decide whether this replaces or precedes act-related-partition; both explain the same move. -->
-
 ## Adding a third condition
 
-<!-- DRAFT (gap): mirrors Chapter 14's "Comparing more than two groups". A third condition resolves an ambiguity in the two-condition result, just as the no-bite group did. There's no longer one difference score to take, so the t test runs out and the partition carries on unchanged. If Triplett's second Alone trial is used, this is where it arrives: did competition speed the kids up, or was it practice? (Chapter 13's order-effect worry.) -->
+<!-- DRAFT (gap): mirrors Chapter 14's "Comparing more than two groups". A third condition resolves an ambiguity in the two-condition result, just as the no-bite group did. About one short paragraph, no methods digression:
+     (1) The loose end: Chapter 13's kids all went alone and then raced, so the gain could be competition, practice, or both.
+     (2) Triplett ran more trials and varied the order. After the first solo trial, some kids raced then went alone; others went alone then raced.
+     (3) So each child has three times. First alone vs later alone shows practice: no race in either. Later alone vs competition shows competition, with order balanced, so practice can't favour either one. This is Chapter 13's counterbalancing in his own data, and it pays off that chapter's "leaves out his attempts to separate practice from competition".
+     (4) One sentence owning the selection: six kids from Table I, three from each order, picked because they show the pattern clearly. Chosen for teaching, like Chapter 13's five; we come back to the full data at the end.
+     (5) There's no longer one difference score to take, so the t test runs out and the partition carries on unchanged. -->
 
 ## A related-samples ANOVA, step by step
 
-<!-- FIX: the snack dataset isn't in Chapter 14 anymore. This intro and "Previously, we treated this..." below get replaced when the data is decided. -->
+<!-- DATA notes: from Triplett's Table I, trials 1-3, rounded as in Chapter 13. Race first = group A (later alone is trial 3, competition trial 2). Alone first = group B (later alone is trial 2, competition trial 3). Violet and Howard are Chapter 13's kids, with the same Alone and Competition times. People are 93% of SS_within. Ignoring the pairs: F(2, 15) = 1.94, p = .178, critical 3.68. Eta squared = .21. -->
 
-So we'll run through a hypothesis test using a related-samples design. In fact, we'll use exactly the same dataset we used in Chapter 14. The idea is we're running a study to test whether giving people different snacks before a test alters their performance. We have three conditions: we either give people a banana, a candy bar, or nothing.
+So we'll run through a hypothesis test using a related-samples design. We'll use Triplett's data again, with six children from one of his tables and three conditions: their first race alone, a later race alone, and a race in competition. @tbl-related-anova-data shows the data.
 
-Previously, we treated this as a between-participants design, assuming we had different people in each sample, and so we used the independent-samples ANOVA. But let's say we've used a within-participants design. Each row represents a single participant who took all three tests at different times, preceded by a different snack each time. So instead of comparing independent samples we're comparing related samples, looking at the variability among each participant's own performance in the three different treatment conditions. So obviously here we'll use the related-samples ANOVA procedure.
+| Child | Order | First alone | Later alone | Competition |
+|:------|:--|--:|--:|--:|
+| Violet F. | Race first | 54 | 45 | 43 |
+| Howard C. | Race first | 42 | 39 | 36 |
+| Inez K. | Race first | 37 | 36 | 35 |
+| Mary W. | Alone first | 56 | 53 | 46 |
+| Bertha A. | Alone first | 56 | 49 | 48 |
+| Lucile W. | Alone first | 52 | 50 | 43 |
+| $M$ | | 49.50 | 45.33 | 41.83 |
+| $SS$ | | 323.50 | 221.33 | 138.83 |
+
+: Times (in seconds) for six children from Triplett's study, in three conditions. {#tbl-related-anova-data}
+
+Each row represents a single child who did all three races. So instead of comparing independent samples we're comparing related samples, looking at the variability among each child's own performance in the three different conditions. So obviously here we'll use the related-samples ANOVA procedure.
 
 ### Step 1: State the hypotheses
 
-As always, we start that hypothesis test by stating our hypotheses. Again, the null here is that all three populations from which we've created these samples have identical means — that $\mu_1 = \mu_2 = \mu_3$. The alternative hypothesis is that at least one condition differs from at least one other.
+As always, we start that hypothesis test by stating our hypotheses. Again, the null here is that all three populations from which we've created these samples have identical means — that $\mu_{\text{first alone}} = \mu_{\text{later alone}} = \mu_{\text{competition}}$. The alternative hypothesis is that at least one condition differs from at least one other.
 
 ### Step 2: Set the decision criteria
 
-<!-- FIGURE: add the F table excerpt (clone tbl-anova-critical in Chapter 14, add critical-table-generator to interactive-scripts) once the data is chosen. -->
+Step two is to determine the critical value for the test, with $\alpha = .05$. And we do so using the same table as before. The only difference is that we need to be aware of the different degrees of freedom for the different denominator. The numerator is the same as before; $df_{\text{between}}$ is $k$, the number of conditions, minus one. We have three conditions, so the degrees of freedom for the numerator here is 2.
 
-Step two is to determine the critical value for the test. And we do so using the same table as before. The only difference is that we need to be aware of the different degrees of freedom for the different denominator. The numerator is the same as before; $df_{\text{between treatments}}$ is $k$, the number of conditions, minus one. We have three conditions, so the degrees of freedom for the numerator here is 2.
+The degrees of freedom for the new denominator, $df_{\text{error}}$, is $df_{\text{within}}$ minus $df_{\text{people}}$, so $N - k$ for degrees of freedom within, minus $n - 1$, the number of people minus one. So here that works out to $18 - 3 = 15$, minus $6 - 1 = 5$. Fifteen minus five gives us ten. In @tbl-related-anova-critical, the column for 2 and the row for 10 give a critical $F$ of 4.10.
 
-The degrees of freedom for the new denominator, $df_{\text{error}}$, is $df_{\text{within}}$ minus $df_{\text{between subjects}}$, so $N - k$ for degrees of freedom within, minus $n - 1$, the number of scores in each group minus one. So here that works out to $9 - 3 = 6$, minus $3 - 1 = 2$. Six minus two gives us four. So our critical value is 6.94.
+::: {#tbl-related-anova-critical}
+{{< interactive-figure relatedAnovaCriticalTable makeFTable options='{"title":"Critical values for the competition test","alpha":0.05,"df1":{"from":1,"to":4},"df2":{"from":8,"to":12},"tableMinWidth":"0","maxWidth":"32rem","interactive":false,"selected":{"df1":2,"df2":10,"alpha":0.05}}' fallback="F table excerpt for numerator df 1 through 4 and denominator df 8 through 12, highlighting the .05 critical value of 4.10 at F(2, 10)." >}}
 
-And like I mentioned when we introduced the related-samples $t$ test, notice that we require a much more extreme critical value to reject the null hypothesis, because of the lower degrees of freedom. But we should have a more powerful test statistic because of the elimination of individual-differences variability.
+An excerpt of the $F$ table, with the critical value for $df = 2$ and $10$ highlighted.
+:::
+
+And like I mentioned when we introduced the related-samples $t$ test, notice that we require a more extreme critical value to reject the null hypothesis than the 3.68 we'd need for $F(2, 15)$, because of the lower degrees of freedom. But we should have a more powerful test statistic because of the elimination of individual-differences variability.
 
 {{< include quizzes/15-related-anova-degrees-of-freedom.qmd >}}
 
 ### Step 3: Collect and analyze the data
 
-<!-- FIX: built on totals and $\Sigma X^2$; go definitional with a squared-deviation table like tbl-anova-squared-deviations, using the chosen data. -->
-
 Step three is to calculate the $F$ ratio for the data. Like the calculations for the independent-samples ANOVA, this is a little labor intensive. But it's worth practicing to make sure you understand how to use each equation and what each component represents.
 
-It's a good idea to use a summary table as you work through this by hand. It's the same as we used in Chapter 14; it just has additional rows for new sources of variance: between subjects and error.
+It's a good idea to use a summary table as you work through this by hand. It's the same as we used in Chapter 14; it just has additional rows for new sources of variance: between people and error. @tbl-related-anova-summary-blank shows the equations for each element.
 
 ::: {#tbl-related-anova-summary-blank .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|:--:|:--:|:--:|:--:|
-| Between treatments | | | | |
-| Within treatments | | | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Between subjects | | | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Error | | | | []{.sfs-na} |
-| Total | | | []{.sfs-na} | []{.sfs-na} |
+| Between groups | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | $\dfrac{SS_{\text{between}}}{df_{\text{between}}}$ | $\dfrac{MS_{\text{between}}}{MS_{\text{error}}}$ |
+| Within groups | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Between people | $\Sigma k(M_{\text{person}} - M_{\text{grand}})^2$ | $n - 1$ | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Error | $SS_{\text{within}} - SS_{\text{people}}$ | $(k - 1)(n - 1)$ | $\dfrac{SS_{\text{error}}}{df_{\text{error}}}$ | []{.sfs-na} |
+| Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
 
-A blank related-samples ANOVA summary table.
+A related-samples ANOVA summary table, showing each equation.
 :::
 
-To save you some trouble, I've already worked on some of what you'll need. This table has the $T$ treatment totals for each condition, and their sums of squares. And I've added a new column for the $P$ participant totals. And for convenience, here are $n$, $k$, uppercase $N$, $G$, and $\Sigma X^2$. Notice that these values are all exactly the same as in Chapter 14 because we're using the same data. Even though I'm giving you these again, it's important to make sure you understand how I arrived at each one. It would be a good idea for you to calculate them yourself, to double check my work and check your understanding.
+To save you some trouble, I've already worked on some of what you'll need. @tbl-related-anova-data has each condition's mean and sum of squares. And for convenience, here are $n$, $k$, $N$, and $M_{\text{grand}}$. Even though I'm giving you these, it's important to make sure you understand how I arrived at each one. It would be a good idea for you to calculate them yourself, to double check my work and check your understanding.
 
-| Person | 🍌 Banana | 🍬 Candy | 😐 Control | $P$ |
-|:--:|:--:|:--:|:--:|:--:|
-| A | 9 | 3 | 5 | 17 |
-| B | 11 | 5 | 6 | 22 |
-| C | 13 | 4 | 7 | 24 |
-| $M$ | 11 | 4 | 6 | |
-| $T$ | 33 | 12 | 18 | |
-| $SS$ | 8 | 2 | 2 | |
+$$n = 6 \qquad k = 3 \qquad N = 18 \qquad M_{\text{grand}} = 45.56$$
 
-: The snack data as a within-participants design, with treatment totals ($T$) and participant totals ($P$). {#tbl-related-anova-data}
+The only new calculation is $SS_{\text{people}}$. @tbl-related-anova-people lays it out, starting from each child's mean across the three conditions. (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
 
-$$n = 3 \qquad k = 3 \qquad N = 9 \qquad G = 63 \qquad \Sigma X^2 = 531$$
+| Child | $M_{\text{person}}$ | Deviation | Squared, times $k$ |
+|:------|--:|--:|--:|
+| Violet F. | 47.33 | 1.78 | 9.48 |
+| Howard C. | 39.00 | $-6.56$ | 128.93 |
+| Inez K. | 36.00 | $-9.56$ | 273.93 |
+| Mary W. | 51.67 | 6.11 | 112.04 |
+| Bertha A. | 51.00 | 5.44 | 88.93 |
+| Lucile W. | 48.33 | 2.78 | 23.15 |
+| $SS_{\text{people}}$ | | | **636.44** |
+
+: Each child's mean, its deviation from the grand mean, and that squared deviation counted once per condition ($k = 3$). Values are rounded; the sum uses unrounded values. {#tbl-related-anova-people}
 
 So remember, you'll need to calculate the sums of squares, degrees of freedom, mean squares, and $F$ ratio.
 
@@ -183,34 +303,56 @@ Here's the full working, so you can check your answers:
 
 $$
 \begin{align}
-SS_{\text{between subjects}} &= \Sigma \frac{P^2}{k} - \frac{G^2}{N} = \frac{17^2}{3} + \frac{22^2}{3} + \frac{24^2}{3} - \frac{63^2}{9} = 8.67 \\
-SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{between subjects}} = 12 - 8.67 = 3.33
+SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 = 860.44 \\
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\ &= 323.50 + 221.33 + 138.83 = 683.67 \\
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\ &= 6(3.94)^2 + 6(-0.22)^2 + 6(-3.72)^2 = 176.78 \\
+SS_{\text{people}} &= \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 \\ &= 9.48 + 128.93 + 273.93 + 112.04 + 88.93 + 23.15 = 636.44 \\
+SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{people}} = 683.67 - 636.44 = 47.22
 \end{align}
 $$
 
 $$
-MS_{\text{between treatments}} = \frac{78}{2} = 39 \qquad
-MS_{\text{error}} = \frac{3.33}{4} = 0.83 \qquad
-F = \frac{39}{0.83} = 46.8
+\begin{align}
+df_{\text{total}} &= N - 1 = 18 - 1 = 17 \\
+df_{\text{within}} &= N - k = 18 - 3 = 15 \\
+df_{\text{between}} &= k - 1 = 3 - 1 = 2 \\
+df_{\text{people}} &= n - 1 = 6 - 1 = 5 \\
+df_{\text{error}} &= (k - 1)(n - 1) = (3 - 1)(6 - 1) = 10
+\end{align}
 $$
+
+$$
+\begin{align}
+MS_{\text{between}} &= \frac{SS_{\text{between}}}{df_{\text{between}}} = \frac{176.78}{2} = 88.39 \\
+MS_{\text{error}} &= \frac{SS_{\text{error}}}{df_{\text{error}}} = \frac{47.22}{10} = 4.72
+\end{align}
+$$
+
+$$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} = \frac{88.39}{4.72} \approx 18.72 $$
+
+And here's the completed summary table:
 
 ::: {#tbl-related-anova-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|--:|--:|--:|--:|
-| Between treatments | 78 | 2 | 39 | 46.8 |
-| Within treatments | 12 | 6 | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Between subjects | 8.67 | 2 | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Error | 3.33 | 4 | 0.83 | []{.sfs-na} |
-| Total | 90 | 8 | []{.sfs-na} | []{.sfs-na} |
+| Between groups | 176.78 | 2 | 88.39 | 18.72 |
+| Within groups | 683.67 | 15 | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Between people | 636.44 | 5 | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Error | 47.22 | 10 | 4.72 | []{.sfs-na} |
+| Total | 860.44 | 17 | []{.sfs-na} | []{.sfs-na} |
 
-Completed related-samples ANOVA summary table for the snack example.
+Completed related-samples ANOVA summary table for the competition example.
 :::
 
 ### Step 4: Make a decision
 
-<!-- FIGURE: add the decision plot (clone fig-anova-decision: makeDistributionGraph, already loaded via distribution-generator). -->
+So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we figured out from the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. So here with our $F$ of 18.72, well beyond the critical value of 4.10, we can comfortably reject the null. There is a significant difference among our three conditions. The corresponding $p$-value is about $.0004$, so $p$ is less than $\alpha$.
 
-So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we figured out from the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. So here with our $F$ of 46.8, we can comfortably reject the null. There is a significant difference among our three treatment conditions. $p$ is less than $\alpha$.
+::: {#fig-related-anova-decision}
+{{< interactive-figure relatedAnovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":10,"title":"Null distribution: F(2, 10)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,20],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.102821,"label":"4.10","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":18.717647,"label":"F = 18.72","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 10 degrees of freedom. The rejection region lies above 4.10; the observed F of 18.72 is far into the rejection region." >}}
+
+The observed $F = 18.72$ falls beyond the critical value of the null $F$ distribution with $df = 2$ and $10$.
+:::
 
 {{< include quizzes/15-related-anova-calculate-f.qmd >}}
 
@@ -220,17 +362,25 @@ So now we've calculated our $F$ ratio, we're ready to make our decision. We comp
 
 <!-- FIX: Chapter 14 reports effect size whether or not the test is significant. "Partial" should be explained against Chapter 14's bucket: a share of what's left once people are set aside. -->
 
-Since we have a significant difference, we next need to determine the effect size. In Chapter 14 we used $\eta^2$. Here we use a slightly different version called partial eta squared, $\eta^2_p$. Rather than just the $SS_{\text{total}}$ for the denominator, it uses $SS_{\text{total}} - SS_{\text{between subjects}}$. That's because we don't have individual differences in the numerator, the $SS_{\text{between treatments}}$, and so we want to get rid of them in the denominator as well. So we call it $\eta^2$ partial to acknowledge that we're quantifying the variability between treatments as a proportion of the partial rather than the total variability in the data. An equivalent form we could put the denominator in is $SS_{\text{between treatments}} + SS_{\text{error}}$. And if you understand why that's the same as $SS_{\text{total}} - SS_{\text{between subjects}}$, that's a good indication that you're grasping this idea of partitioning variance. So here we get an answer of 0.96.
+Since we have a significant difference, we next need to determine the effect size. In Chapter 14 we used $\eta^2$. Here we use a slightly different version called partial eta squared, $\eta^2_p$. Rather than just the $SS_{\text{total}}$ for the denominator, it uses $SS_{\text{total}} - SS_{\text{people}}$. That's because we don't have individual differences in the numerator, the $SS_{\text{between}}$, and so we want to get rid of them in the denominator as well. So we call it $\eta^2$ partial to acknowledge that we're quantifying the variability between groups as a proportion of the partial rather than the total variability in the data. An equivalent form we could put the denominator in is $SS_{\text{between}} + SS_{\text{error}}$. And if you understand why that's the same as $SS_{\text{total}} - SS_{\text{people}}$, that's a good indication that you're grasping this idea of partitioning variance. So here we get an answer of $.79$:
+
+$$\eta^2_p = \frac{SS_{\text{between}}}{SS_{\text{total}} - SS_{\text{people}}} = \frac{176.78}{860.44 - 636.44} = .79$$
 
 #### Post-hoc tests
 
 <!-- FIX: the experiment-wise paragraph below repeats Chapter 14. One sentence is enough. -->
 
-Since the ANOVA revealed a significant difference, is to conduct post-hoc tests to determine where exactly the difference is — which conditions are different from which others. Again, we use the Tukey's HSD equation. First, we have to find the appropriate studentized range statistic, $q$, from a table. It depends on the number of means we're comparing and the degrees of freedom for the denominator of the $F$ ratio. So with three conditions and degrees of freedom of four, $q$ is 5.04.
+Since the ANOVA revealed a significant difference, is to conduct post-hoc tests to determine where exactly the difference is — which conditions are different from which others. Again, we use the Tukey's HSD equation. First, we have to find the appropriate studentized range statistic, $q$, from a table. It depends on the number of means we're comparing and the degrees of freedom for the denominator of the $F$ ratio. So with three conditions and degrees of freedom of ten, $q$ is 3.88.
 
-We then use that value in this equation, multiplying it by the square root of the denominator of the $F$ ratio divided by $n$, the number of scores per condition. Here we get an answer of 2.66, meaning that any difference between condition means of 2.66 or greater will be a significant difference at the $.05$ level.
+We then use that value in this equation, multiplying it by the square root of the denominator of the $F$ ratio divided by $n$, the number of scores per condition. Here we get an answer of 3.44, meaning that any difference between group means of more than 3.44 seconds will be a significant difference at the $.05$ level.
 
-$$HSD = q \sqrt{\frac{MS_{\text{error}}}{n}} = 5.04 \sqrt{\frac{0.83}{3}} = 2.66$$
+$$HSD = q \sqrt{\frac{MS_{\text{error}}}{n}} = 3.88 \sqrt{\frac{4.72}{6}} = 3.44$$
+
+| Comparison | Absolute difference | Exceeds 3.44 seconds? |
+|:--|--:|:--:|
+| First alone vs. later alone | 4.17 seconds | Yes |
+| Later alone vs. competition | 3.50 seconds | Yes |
+| First alone vs. competition | 7.67 seconds | Yes |
 
 And remember, the whole point of doing these post-hoc tests is that we are maintaining our experimentwise alpha at $.05$, even though we're making multiple comparisons, whereas if we just did a bunch of $t$ tests, each with its own alpha of $.05$, we'd end up with a much larger experimentwise alpha rate, meaning a larger chance of having made a Type I false positive error somewhere.
 
@@ -242,15 +392,20 @@ And remember, the whole point of doing these post-hoc tests is that we are maint
 
 So finally, we're ready to report the results and call it a day. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.
 
-> A single-factor, related-samples ANOVA revealed a significant difference in people's test scores when the test was preceded by consumption of a banana ($M = 11.00$; $SD = 2.00$), a candy bar ($M = 4.00$; $SD = 1.00$), and no snack ($M = 6.00$; $SD = 1.00$); $F(2, 4) = 46.8$, $p < .05$, $\eta^2_p = 0.96$. Post-hoc tests using Tukey's HSD revealed that test scores were significantly better following banana consumption than following no snack or candy consumption; the candy condition did not differ significantly from the control condition.
+> In this selected six-child example, a single-factor, related-samples ANOVA revealed a significant difference among children's times on their first race alone ($M = 49.50$, $SD = 8.04$ seconds), a later race alone ($M = 45.33$, $SD = 6.65$ seconds), and a race in competition ($M = 41.83$, $SD = 5.27$ seconds); $F(2, 10) = 18.72$, $p < .001$, $\eta^2_p = .79$. Tukey HSD comparisons indicated that all three conditions differed significantly: children were faster on the later race alone than the first, and faster still in competition.
 
-<!-- FIX: use a critical/p statement matching Chapter 14's report format, and SDs as in Chapter 14. -->
-
-<!-- DRAFT (gap): interpreting. Pointer to Chapter 13's order effects and counterbalancing, not a re-explanation. Fisher's randomized blocks (plan §3.5): a participant in this design is a block of similar soil. Verify sources first. -->
+<!-- DRAFT (gap): interpreting. Pointer to Chapter 13's order effects and counterbalancing, not a re-explanation.
+     Result: practice is real, and competition adds to it (4.17 and 3.50 seconds). That fits Triplett's own reading: the alone-alone gain is "the practice effect", the alone-race gain "the element of competition plus the practice".
+     The honest beat: these six are hand-picked from kids Triplett had already classed as stimulated positively. Same comparison on the real data: all 20 in Table I, practice 3.70 (p = .003) and competition 2.60 (p = .009); all 40 children, practice 3.17 (p < .001) and competition 1.04 (p = .08). Direction holds, practice stays larger, the size shrinks. Selection inflated it. Strube's reanalysis then McHugh's replication, as Chapter 13 ended.
+     Lingering competition, a sentence or two: the race-first kids barely slowed afterwards (2 seconds vs 5 for alone-first; Table I 0.72 vs 4.48). Competition may carry over, or practice may be tapering. Triplett: "succeeding trials alone are not really non-competitive trials." If competition lingers, 3.50 is an underestimate.
+     Caveat for us, not necessarily the page: on unrounded times, later alone vs competition just misses Tukey (3.53 vs HSD 3.58, p = .053; paired 95% CI [0.52, 6.54]).
+     Fisher's randomized blocks (plan §3.5): a participant in this design is a block of similar soil. Verify sources first. -->
 
 ### Assumptions
 
-<!-- DRAFT (gap): point back to Chapter 14; what's new is sphericity (equal variances of the difference scores across pairs of conditions), Mauchly, Greenhouse-Geisser, and why it can't arise with two conditions. Short callout or footnote. -->
+<!-- DRAFT (gap): point back to Chapter 14; what's new is sphericity (equal variances of the difference scores across pairs of conditions), Mauchly, Greenhouse-Geisser, and why it can't arise with two conditions. Short callout or footnote. These six are close to ideal: difference variances 9.8, 7.9 and 10.7, Greenhouse-Geisser epsilon = .97, corrected p = .0005. Chapter 13's five with their third trial are the contrast: epsilon = .59, and the corrected p goes from .049 to .088. -->
+
+<!-- FIX: new learning check. Chapter 13's five with their next trial, all race first (Alone 54, 67, 38, 46, 42; Competition 43, 57, 39, 41, 36; Alone again 45, 55, 43, 39, 39): F(2, 8) = 4.50, critical 4.46, HSD = 6.34, no pair significant. What can an omnibus F tell us, and what can't it? Means 49.4, 43.2, 44.2: did competition wear off, or did practice hide it? Without counterbalancing we can't say. -->
 
 {{< include quizzes/15-related-anova-learning-checks.qmd >}}
 

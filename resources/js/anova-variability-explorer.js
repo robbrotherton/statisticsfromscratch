@@ -2,7 +2,21 @@
   "use strict";
 
   const STAGES = ["populations", "total", "within", "between", "compare"];
+  // With people (repeated measures), two more stages come before the comparison.
+  const PEOPLE_STAGES = ["populations", "total", "within", "between", "people", "centre", "compare"];
   const PHASES = ["observe", "deviations", "squares", "sum"];
+  const PEOPLE_PHASES = ["recolour", "rows", ...PHASES];
+  // Tableau 10, the people palette of Chapter 13's paired figures, without the colours
+  // that mean something else here: red, purple, brown and grey.
+  const PERSON_COLORS = [0, 1, 3, 4, 5, 7];
+  const CENTRE_PHASES = ["shift", "lanes", "deviations", "squares", "sum"];
+  // Real scores stay where they are, this faded, while a stand-in does the work.
+  const DOT_FADED = 0.45;
+  // Stand-ins at a mean stack this much further apart than scores do, so they can be counted.
+  const GHOST_SPREAD = 2.4;
+  // Centring: each person's row sets off this long after the one above, and takes this long.
+  const SHIFT_STAGGER = 140;
+  const SHIFT_DURATION = 1100;
   const COMPARE_PHASES = ["partition", "split", "ms-between", "ms-within", "f"];
   const DEFAULT_GROUPS = [
     { name: "Group A", values: [3, 5, 6, 7, 9] },
@@ -25,11 +39,11 @@
     return Boolean(value);
   }
 
-  function normalizeStage(value) {
+  function normalizeStage(value, stages) {
     const key = String(value || "").trim().toLowerCase().replace(/[\s_]+/g, "-");
-    const aliases = { scores: "populations", population: "populations", groups: "populations", f: "compare", ratio: "compare" };
+    const aliases = { scores: "populations", population: "populations", groups: "populations", f: "compare", ratio: "compare", center: "centre" };
     const normalized = aliases[key] || key;
-    return STAGES.includes(normalized) ? normalized : "populations";
+    return (stages || STAGES).includes(normalized) ? normalized : "populations";
   }
 
   function defaultPhaseForStage(stage) {
@@ -54,16 +68,21 @@
       separate: "split",
       "ms-b": "ms-between",
       "ms-w": "ms-within",
+      recolor: "recolour",
+      "ms-e": "ms-within",
+      "ms-error": "ms-within",
       ratio: "f",
       "f-ratio": "f"
     };
     const normalized = aliases[key] || key;
-    return PHASES.includes(normalized) || COMPARE_PHASES.includes(normalized) ? normalized : fallback;
+    return [...COMPARE_PHASES, ...PEOPLE_PHASES, ...CENTRE_PHASES].includes(normalized)
+      ? normalized
+      : fallback;
   }
 
   // The compare stage has its own phases; the other stages use PHASES.
   function phaseForStage(stage, phase) {
-    const valid = stage === "compare" ? COMPARE_PHASES : PHASES;
+    const valid = { compare: COMPARE_PHASES, people: PEOPLE_PHASES, centre: CENTRE_PHASES }[stage] || PHASES;
     return valid.includes(phase) ? phase : defaultPhaseForStage(stage);
   }
 
@@ -83,6 +102,7 @@
         --ave-total: var(--sfs-muted, #68727d);
         --ave-within: var(--sfs-current-color, #d1495b);
         --ave-between: var(--sfs-effect-color, #7654b5);
+        --ave-people: var(--sfs-people-color, #8a5a2b);
         width: 100%;
         max-width: var(--ave-max-width, 58rem);
         margin: 0 auto 0.75rem;
@@ -130,6 +150,8 @@
       .anova-variability-explorer .ave-square { stroke-width: 1.25; }
       .anova-variability-explorer .ave-ss-label { font-size: var(--sfs-figure-label-size, 0.875rem); font-weight: 720; }
       .anova-variability-explorer .ave-ss-value { font-size: var(--sfs-figure-small-size, 0.75rem); fill: var(--sfs-muted, #68727d); }
+      .anova-variability-explorer .ave-leader { stroke: currentColor; stroke-width: 1; opacity: 0.6; }
+      .anova-variability-explorer .ave-legend-label { font-size: var(--sfs-figure-small-size, 0.75rem); }
       .anova-variability-explorer .ave-equation { fill: currentColor; font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; }
       .anova-variability-explorer .ave-calculation-box {
         margin-top: 0.45rem;
@@ -165,10 +187,16 @@
     document.head.appendChild(style);
   }
 
-  function compute(groups) {
+  // `rank` is where a score falls in its group's x order, which stacks a lane's dots top
+  // to bottom. Without people the values are already sorted, so it's the index; with them,
+  // the index is who the score belongs to and has to stay put.
+  function compute(groups, people) {
     const observations = [];
     groups.forEach((group, groupIndex) => {
-      group.values.forEach((value, index) => observations.push({ groupIndex, index, value }));
+      const order = d3.range(group.values.length).sort((a, b) => group.values[a] - group.values[b] || a - b);
+      group.values.forEach((value, index) => observations.push({
+        groupIndex, index, value, rank: people ? order.indexOf(index) : index
+      }));
     });
     const N = observations.length;
     const means = groups.map((group) => d3.mean(group.values));
@@ -180,7 +208,29 @@
     const dfWithin = N - groups.length;
     const msBetween = ssBetween / dfBetween;
     const msWithin = ssWithin / dfWithin;
-    return { observations, N, means, grandMean, ssTotal, ssWithin, ssBetween, dfBetween, dfWithin, msBetween, msWithin, f: msBetween / msWithin };
+    const result = { observations, N, means, grandMean, ssTotal, ssWithin, ssBetween, dfBetween, dfWithin, msBetween, msWithin, f: msBetween / msWithin };
+    if (!people) return result;
+    // Same form as SS between, with people in place of groups: each person's mean counts
+    // once per condition. What it leaves of SS within is error.
+    const k = groups.length;
+    const personMeans = people.map((name, i) => d3.mean(groups, (group) => group.values[i]));
+    const ssPeople = k * d3.sum(personMeans, (mean) => Math.pow(mean - grandMean, 2));
+    const ssError = ssWithin - ssPeople;
+    const dfPeople = people.length - 1;
+    const dfError = (k - 1) * dfPeople;
+    const msError = ssError / dfError;
+    return { ...result, personMeans, ssPeople, ssError, dfPeople, dfError, msError, fRelated: msBetween / msError };
+  }
+
+  // Names, one per person, from an option that is either a list of names or `true`.
+  function personNames(option, rawGroups) {
+    if (!option) return null;
+    const counts = rawGroups.map((group) => (Array.isArray(group.values) ? group.values : []).length);
+    if (new Set(counts).size !== 1) throw new Error("makeAnovaVariabilityExplorer: `people` needs one score per person in every group");
+    if (Array.isArray(option) && option.length !== counts[0]) {
+      throw new Error(`makeAnovaVariabilityExplorer: ${option.length} names for ${counts[0]} people`);
+    }
+    return d3.range(counts[0]).map((i) => String(Array.isArray(option) ? option[i] : `Person ${i + 1}`));
   }
 
   window.makeAnovaVariabilityExplorer = function(opts) {
@@ -190,7 +240,13 @@
     squares.ensureStyles();
     if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
-    const sortValues = bool(opts.sort, true);
+    // People make this a repeated-measures figure: the same people, in the same order, in
+    // every group. They need the scores' order, so sorting is off. Without this option,
+    // nothing below changes.
+    const people = personNames(opts.people, Array.isArray(opts.groups) ? opts.groups : DEFAULT_GROUPS);
+    const stageList = people ? PEOPLE_STAGES : STAGES;
+    const buildStages = stageList.filter((stage) => !["populations", "centre", "compare"].includes(stage));
+    const sortValues = !people && bool(opts.sort, true);
     // Without the scores the figure is only the comparison, sized for that alone, so it
     // never leaves the compare stage.
     const showScores = bool(opts.scores, true);
@@ -204,7 +260,7 @@
         };
       })
       .filter((group) => group.values.length);
-    const stats = compute(groups);
+    const stats = compute(groups, people);
     const colors = [
       "var(--graph-series-1, #0072b2)",
       "var(--graph-series-2, #e69f00)",
@@ -217,13 +273,14 @@
     const xMax = finite(opts.xMax, Math.ceil(rawMax + 2));
     const x = d3.scaleLinear().domain([xMin, xMax]);
     const groupY = d3.scalePoint().domain(d3.range(groups.length));
+    const personY = d3.scalePoint().domain(d3.range(people ? people.length : 0));
 
     // Geometry is computed from the width the figure is drawn at, so text keeps its
     // real size on phones instead of shrinking with a fixed viewBox. Below
     // COMPACT_BELOW the sums panel moves under the dot plot; desktop tutorials, about
     // 600-620px wide inside their callouts, stay side by side.
     const COMPACT_BELOW = 600;
-    const longestName = d3.max(groups, (group) => group.name.length) || 6;
+    const longestName = d3.max([...groups.map((group) => group.name), ...(people || [])], (name) => name.length) || 6;
     let width;
     let height;
     let compact;
@@ -241,6 +298,9 @@
     // partition through to F, where the gap becomes the fraction bar.
     let midline;
     let midGap;
+    // The column between and within stand in. People leave the total behind, so with them
+    // it sits to the right of the total; otherwise it's the middle of the figure.
+    let compareCx;
 
     function computeLayout(availableWidth) {
       width = Math.round(availableWidth);
@@ -249,9 +309,12 @@
         // The whole tutorial callout has to fit on a phone screen, so everything is
         // packed tighter: group names sit above their lanes, two lanes sit closer
         // than three, and the sums panel's heading runs above a centred bucket.
-        const laneTop = 68;
-        const laneBottom = laneTop + (groups.length === 2 ? 128 : 150);
-        plot = { left: 16, right: width - 16, top: 34, bottom: laneBottom + 40 };
+        // The people legend can run to two lines above the grand mean's label.
+        const peopleRoom = people ? 18 : 0;
+        const laneTop = 68 + peopleRoom;
+        const laneSpan = groups.length === 2 ? 128 : 150;
+        const laneBottom = laneTop + (people ? Math.max(laneSpan, 40 * (people.length - 1)) : laneSpan);
+        plot = { left: 16, right: width - 16, top: 34 + peopleRoom, bottom: laneBottom + 40 };
         groupY.range([laneTop, laneBottom]);
         lane = { curve: 34, base: 28, meanHalf: 27, meanLabel: 33, name: -34, axisLabel: 36 };
         const panelSide = Math.min(136, width - 64);
@@ -269,7 +332,9 @@
         const reach = laneReach();
         const above = (i) => Math.max(lane.meanLabel + 14, reach[i].up + 10);
         const below = (i) => Math.max(lane.base + 6, reach[i].down + 10);
-        const step = laneStep(lane.base + 6 + lane.meanLabel + 14);
+        // A person's row needs room for its dots and its mean; the lanes make way for the rows.
+        const step = Math.max(laneStep(lane.base + 6 + lane.meanLabel + 14),
+          people ? 44 * (people.length - 1) / (groups.length - 1) : 0);
         const laneTop = plot.top + above(0);
         const laneBottom = laneTop + step * (groups.length - 1);
         groupY.range([laneTop, laneBottom]);
@@ -288,7 +353,7 @@
       const totalLabelRoom = 26;
       const labelRoom = 46;
       midGap = compact ? 10 : 14;
-      const parts = aggregateSquares().filter((d) => d.df);
+      const parts = aggregateSquares(true).filter((d) => d.df);
       const relative = (d) => Math.sqrt(d.value / stats.ssTotal);
       const reach = (d, side) => Math.max(relative(d) * side, cutPieces(d, relative(d) * side).height);
       const widest = (side) => d3.max(parts, (d) => cutPieces(d, relative(d) * side).width);
@@ -296,18 +361,36 @@
       const fits = (side) => widest(side) <= width - 2 * (margin + cutLabelRoom) &&
         side <= width - 2 * (margin + totalLabelRoom) &&
         (!showScores || extent(side) <= height - 2 * margin);
-      let side = compact ? 240 : 270;
-      while (side > 60 && !fits(side)) side -= 2;
-      if (!showScores) height = Math.ceil(extent(side) + (compact ? 16 : 24));
       const between = parts.find((d) => d.key === "between");
-      midline = (height - extent(side)) / 2 + labelRoom + reach(between, side) + midGap;
-      // The total's between layer sits directly on the line, its within layer directly under it.
-      wideSquare = { x: (width - side) / 2, y: midline - side * between.value / stats.ssTotal, side };
+      const residual = parts.find((d) => d.key === "within");
+      const share = between.value / stats.ssTotal;
+      const leftEdge = margin + totalLabelRoom;
+      const columnLeft = (side) => leftEdge + side + (compact ? 18 : 30);
+      // Room for the column's widest shape and for the name above it.
+      const columnWidth = (side) => Math.max(widest(side), 84);
+      const above = (side) => Math.max(side * share, reach(between, side) + midGap + labelRoom);
+      const below = (side) => Math.max(side * (1 - share), reach(residual, side) + midGap + labelRoom);
+      const fitsBeside = (side) => columnLeft(side) + columnWidth(side) + cutLabelRoom <= width - margin &&
+        above(side) + below(side) <= height - 2 * margin;
+      let side = compact ? 240 : 270;
+      while (side > 60 && !(people ? fitsBeside(side) : fits(side))) side -= 2;
+      if (people) {
+        midline = (height - above(side) - below(side)) / 2 + above(side);
+        compareCx = columnLeft(side) + columnWidth(side) / 2;
+        wideSquare = { x: leftEdge, y: midline - side * share, side };
+      } else {
+        if (!showScores) height = Math.ceil(extent(side) + (compact ? 16 : 24));
+        midline = (height - extent(side)) / 2 + labelRoom + reach(between, side) + midGap;
+        compareCx = width / 2;
+        // The total's between layer sits directly on the line, its within layer directly under it.
+        wideSquare = { x: (width - side) / 2, y: midline - side * share, side };
+      }
       x.range([plot.left, plot.right]);
+      personY.range(groupY.range());
     }
 
     function stageFor(value) {
-      return showScores ? normalizeStage(value) : "compare";
+      return showScores ? normalizeStage(value, stageList) : "compare";
     }
 
     const initialStage = stageFor(opts.stage);
@@ -345,8 +428,11 @@
     const lanesLayer = plotGroup.append("g").attr("class", "ave-lanes");
     const deviationLayer = plotGroup.append("g").attr("class", "ave-deviations");
     const meansLayer = plotGroup.append("g").attr("class", "ave-means");
-    const ghostsLayer = plotGroup.append("g").attr("class", "ave-ghosts");
     const dotsLayer = plotGroup.append("g").attr("class", "ave-dots");
+    // Above the scores: while they're in play, the stand-ins are what's being counted.
+    const ghostsLayer = plotGroup.append("g").attr("class", "ave-ghosts");
+    // Says who's who wherever dots wear people's colours outside their rows.
+    const legendLayer = people ? plotGroup.append("g").attr("class", "ave-legend").style("opacity", 0) : null;
 
     const panelGroup = svg.append("g").attr("class", "ave-squares-panel");
     const panelRect = panelGroup.append("rect")
@@ -416,6 +502,22 @@
       const show = state.calculations && state.stage !== "compare";
       calculationBox.attr("hidden", show ? null : true);
       if (!show) return;
+      if (people && aggregateRevealLevel() >= buildStages.length) {
+        // Error and everything that depends on it wait until it has been counted.
+        const counted = errorCounted() ? `
+            <span><strong>SS<sub>error</sub></strong> = ${fmt(stats.ssError)}</span>
+            <span><strong>MS<sub>between</sub></strong> = ${fmt(stats.ssBetween)} / ${stats.dfBetween} = ${fmt(stats.msBetween, 1)}</span>
+            <span><strong>MS<sub>error</sub></strong> = ${fmt(stats.ssError)} / ${stats.dfError} = ${fmt(stats.msError, 1)}</span>
+            <span><strong>F</strong> = ${fmt(stats.msBetween, 1)} / ${fmt(stats.msError, 1)} = ${fmt(stats.fRelated)}</span>` : "";
+        calculationBox.html(`
+          <div class="ave-calc-grid">
+            <span><strong>SS<sub>total</sub></strong> = ${fmt(stats.ssTotal)}</span>
+            <span><strong>SS<sub>between</sub></strong> = ${fmt(stats.ssBetween)}</span>
+            <span><strong>SS<sub>people</sub></strong> = ${fmt(stats.ssPeople)}</span>${counted}
+          </div>
+        `);
+        return;
+      }
       calculationBox.html(`
         <div class="ave-calc-grid">
           <span><strong>SS<sub>total</sub></strong> = ${fmt(stats.ssTotal)}</span>
@@ -457,68 +559,214 @@
         selection.select(".ave-pop-line").attr("d", line(data)).attr("stroke", curveColor);
       });
       curves.interrupt().transition().duration(animate ? 420 : 0)
-        .style("opacity", visible ? 1 : state.stage === "total" ? 0.1 : 0.07);
+        .style("opacity", personColoured() ? 0 : visible ? 1 : state.stage === "total" ? 0.1 : 0.07);
+    }
+
+    // Colour marks the grouping currently in use: none for the total, conditions for the
+    // Chapter 14 stages, and people from the moment they're the question. So people's
+    // rows end up one colour each, as the condition lanes were.
+    function grouping() {
+      if (state.stage === "total") return "none";
+      return state.stage === "people" || state.stage === "centre" ? "person" : "condition";
+    }
+
+    function personColoured() {
+      return grouping() === "person";
+    }
+
+    function personFill(i) {
+      const palette = Array.isArray(opts.personColors) ? opts.personColors : PERSON_COLORS;
+      return d3.schemeTableau10[palette[i % palette.length]];
+    }
+
+    function dotFill(d) {
+      return {
+        none: "var(--ave-total)",
+        condition: colors[d.groupIndex % colors.length],
+        person: personFill(d.index)
+      }[grouping()];
+    }
+
+    // After the recolour, the condition lanes give way to one row per person. People are
+    // centred in their rows, and the scores go back to the lanes after that.
+    function rowsView() {
+      if (state.stage === "centre") return state.phase === "shift";
+      return state.stage === "people" && state.phase !== "recolour";
     }
 
     function targetY(d) {
-      return groupY(d.groupIndex) + squares.laneOffset(d.index, groups[d.groupIndex].values.length);
+      return groupY(d.groupIndex) + squares.laneOffset(d.rank, groups[d.groupIndex].values.length);
     }
 
-    function renderLanes(animate) {
+    // A person's scores stack in condition order within their row.
+    function dotY(d) {
+      return rowsView()
+        ? personY(d.index) + squares.laneOffset(d.groupIndex, groups.length)
+        : targetY(d);
+    }
+
+    // Centring shifts all of a person's scores by the same amount, until their own mean
+    // sits on the grand mean. Differences between their scores don't change.
+    function centredValue(d) {
+      return d.value - stats.personMeans[d.index] + stats.grandMean;
+    }
+
+    function renderLanes(animate, moves) {
       const deemphasizeGroups = state.stage === "total";
-      const laneData = d3.range(groups.length);
+      const rows = rowsView();
+      const laneData = rows ? people.map((name, i) => `person-${i}`) : d3.range(groups.length);
+      const laneY = (d) => rows ? personY(Number(String(d).replace("person-", ""))) : groupY(d);
       const lanes = lanesLayer.selectAll("line.ave-lane").data(laneData, String);
-      lanes.join("line")
+      const swap = moves.crossing ? 420 : 0;
+      lanes.join((enter) => {
+        const line = enter.append("line").attr("y1", laneY).attr("y2", laneY);
+        return people ? line.style("opacity", 0) : line;
+      }, undefined, (exit) => exit.transition().delay(moves.labelsOut).duration(swap).style("opacity", 0).remove())
         .attr("class", "ave-lane")
         .attr("x1", plot.left).attr("x2", plot.right)
-        .transition().duration(animate ? 520 : 0)
-        .attr("y1", (d) => groupY(d))
-        .attr("y2", (d) => groupY(d))
+        .transition().delay(moves.labelsIn).duration(animate ? 520 : 0)
+        .attr("y1", laneY)
+        .attr("y2", laneY)
         .style("opacity", deemphasizeGroups ? 0.42 : 1);
       lanes.exit().remove();
 
       const labels = lanesLayer.selectAll("text.ave-group-label")
-        .data(deemphasizeGroups ? [] : groups, (d) => d.name);
-      labels.join("text")
+        .data(deemphasizeGroups ? [] : rows ? people.map((name) => ({ name })) : groups, (d) => d.name);
+      // With people, names swap one set at a time: the old ones go, then the new ones come.
+      const named = labels.join((enter) => {
+        const text = enter.append("text");
+        return people ? text.style("opacity", 0) : text;
+      }, undefined, (exit) => people
+        ? exit.transition("swap").delay(moves.labelsOut).duration(swap).style("opacity", 0).remove()
+        : exit.remove());
+      named
         .attr("class", "ave-group-label")
         // On a phone the names sit above the lanes' left ends, clear of the squares that
         // grow up from the lane below.
         .attr("x", compact ? plot.left : plot.left - 12)
         .attr("text-anchor", compact ? "start" : "end")
-        .attr("fill", (d, i) => colors[i % colors.length])
+        .attr("fill", (d, i) => {
+          // The palette's yellow and pink are too pale for text as they are.
+          if (rows) return `color-mix(in srgb, ${personFill(i)} 62%, var(--sfs-text, #222))`;
+          return personColoured() ? "currentColor" : colors[i % colors.length];
+        })
         .text((d) => d.name)
         // Lanes never move between steps, so a returning label is placed, not slid in.
-        .attr("y", (d, i) => groupY(i) + lane.name);
-      labels.exit().remove();
+        .attr("y", (d, i) => rows ? personY(i) + (compact ? -9 : 5) : groupY(i) + lane.name);
+      if (people) {
+        named.style("transition", animate ? `fill 600ms ease ${moves.fillDelay}ms` : "none")
+          .transition("swap").delay(moves.labelsIn).duration(swap).style("opacity", 1);
+      }
+      renderLegend(animate, moves);
     }
 
-    // For between-groups variability, every score is replaced by its group mean.
-    function dotX(d) {
-      return state.stage === "between" ? x(stats.means[d.groupIndex]) : x(d.value);
+    function renderLegend(animate, moves) {
+      if (!legendLayer) return;
+      const entryWidth = (name) => 20 + name.length * 7;
+      const room = width - plot.left - 8;
+      const lines = [[]];
+      let used = 0;
+      people.forEach((name, i) => {
+        if (used + entryWidth(name) > room && used > 0) {
+          lines.push([]);
+          used = 0;
+        }
+        lines[lines.length - 1].push({ name, i, left: used });
+        used += entryWidth(name);
+      });
+      const items = lines.flatMap((line, row) => line.map((d) => ({
+        ...d,
+        y: plot.top - 28 - (lines.length - 1 - row) * 16
+      })));
+      const entries = legendLayer.selectAll("g.ave-legend-entry").data(items, (d) => d.i)
+        .join((enter) => {
+          const entry = enter.append("g").attr("class", "ave-legend-entry");
+          entry.append("circle").attr("r", 5);
+          entry.append("text").attr("class", "ave-legend-label").attr("x", 9).attr("y", 4);
+          return entry;
+        })
+        .attr("transform", (d) => `translate(${plot.left + d.left + 5},${d.y})`);
+      entries.select("circle").attr("fill", (d) => personFill(d.i));
+      entries.select("text").attr("fill", "currentColor").text((d) => d.name);
+      const showing = personColoured() && !rowsView();
+      legendLayer.interrupt()
+        .transition().delay(showing ? Math.max(moves.fillDelay, moves.labelsIn) : moves.labelsOut)
+        .duration(animate ? 420 : 0)
+        .style("opacity", showing ? 1 : 0);
     }
 
-    function renderGhosts(animate) {
-      const items = state.stage !== "between" ? [] : stats.observations.map((d) => ({
-        key: `${d.groupIndex}-${d.index}`,
-        x: x(d.value),
-        y: targetY(d),
-        color: colors[d.groupIndex % colors.length]
+    // While a stand-in is in play: for between-groups variability every score is treated
+    // as its group mean, for between-people variability as its person's mean, and centring
+    // treats it as shifted with the person's other scores. Those are fictions, so they're
+    // drawn as ghosts. The scores themselves stay put.
+    function standIn(d) {
+      if (state.stage === "between") return stats.means[d.groupIndex];
+      if (state.stage === "centre") return centredValue(d);
+      if (state.stage === "people" && !["recolour", "rows"].includes(state.phase)) return stats.personMeans[d.index];
+      return null;
+    }
+
+    function hasStandIns() {
+      return standIn({ groupIndex: 0, index: 0, value: 0 }) !== null;
+    }
+
+    // Stand-ins at a mean spread out to be counted: each one is somebody, pretending to be
+    // exactly average. Centred scores keep the place their scores have.
+    function ghostY(d) {
+      if (state.stage === "centre") return dotY(d);
+      return state.stage === "people"
+        ? personY(d.index) + squares.laneOffset(d.groupIndex, groups.length) * GHOST_SPREAD
+        : groupY(d.groupIndex) + squares.laneOffset(d.rank, groups[d.groupIndex].values.length) * GHOST_SPREAD;
+    }
+
+    function renderGhosts(animate, moves) {
+      // Centred outlines are new ones, not the mean's: each person's scores, at their real
+      // spacing, set off together.
+      const prefix = state.stage === "centre" ? "centred-" : "";
+      const items = !hasStandIns() ? [] : stats.observations.map((d) => ({
+        key: `${prefix}${d.groupIndex}-${d.index}`,
+        from: { x: x(d.value), y: dotY(d) },
+        x: x(standIn(d)),
+        y: ghostY(d),
+        color: dotFill(d),
+        delay: moves.shifting ? d.index * SHIFT_STAGGER : 0
       }));
-      squares.renderGhosts(ghostsLayer, items, { animate });
+      squares.renderGhosts(ghostsLayer, items, {
+        animate,
+        riseDelay: moves.shifting ? squares.GHOST_FADE : 0,
+        slide: moves.shifting ? SHIFT_DURATION : undefined,
+        moveDelay: moves.moveAt,
+        moveDuration: moves.crossing ? 1000 : 0
+      });
     }
 
-    function renderDots(animate) {
-      dotsLayer.selectAll("circle.ave-dot")
+    function renderDots(animate, moves) {
+      const faded = hasStandIns();
+      const dots = dotsLayer.selectAll("circle.ave-dot")
         .data(stats.observations, (d) => `${d.groupIndex}-${d.index}`)
         .join("circle")
         .attr("class", "ave-dot")
         .attr("r", 6)
-        .attr("fill", (d) => state.stage === "total"
-          ? "var(--ave-total)"
-          : colors[d.groupIndex % colors.length])
-        .transition().duration(animate ? 560 : 0).ease(d3.easeCubicInOut)
-        .attr("cx", dotX)
-        .attr("cy", targetY);
+        .attr("fill", dotFill);
+      // With people the fill eases between groupings, through CSS because these colours
+      // can be var()s, which d3 can't interpolate.
+      if (people) dots.style("transition", animate ? `fill 600ms ease ${moves.fillDelay}ms` : "none");
+      // Everywhere else the real scores stay in view. Centred scores aren't real times, though,
+      // and the two side by side compete for attention and invite comparisons that mean
+      // nothing, so here the scores hand over to the outlines and stay out of the way.
+      const hidden = state.stage === "centre";
+      dots.transition("fade").delay(moves.shifting ? squares.GHOST_FADE : 0)
+        .duration(animate ? squares.GHOST_FADE : 0)
+        .style("opacity", hidden ? 0 : faded ? DOT_FADED : 1)
+        .on("end", function() {
+          if (faded) return;
+          // Nothing left behind: back to exactly what it was.
+          this.style.removeProperty("opacity");
+          if (!this.getAttribute("style")) this.removeAttribute("style");
+        });
+      dots.transition().delay(moves.crossing ? moves.moveAt : 0).duration(animate ? (moves.crossing ? 1000 : 560) : 0).ease(d3.easeCubicInOut)
+        .attr("cx", (d) => x(d.value))
+        .attr("cy", dotY);
     }
 
     function deviationData(stage) {
@@ -539,11 +787,35 @@
         // One deviation per group: every score now sits on its group mean and shares it.
         return groups.map((group, i) => ({ groupIndex: i, index: 0, from: stats.means[i], to: stats.grandMean, y: groupY(i), color: "var(--ave-between)", weight: group.values.length }));
       }
+      if (stage === "people") {
+        // The same move with people as the groups: one square each, counted once per condition.
+        return people.map((name, i) => ({
+          groupIndex: i,
+          index: 0,
+          // Neighbouring rows' squares reach away from each other, the first row's down.
+          rank: i + 1,
+          lanes: people.length,
+          from: stats.personMeans[i],
+          to: stats.grandMean,
+          y: personY(i),
+          color: "var(--ave-people)",
+          weight: groups.length
+        }));
+      }
+      if (stage === "centre") {
+        return stats.observations.map((d) => ({
+          ...d,
+          from: centredValue(d),
+          to: stats.means[d.groupIndex],
+          y: targetY(d),
+          color: "var(--ave-within)"
+        }));
+      }
       return [];
     }
 
     function deviationSquareGeometry(d) {
-      return squares.deviationSquare(x(d.from), x(d.to), d.y, d.groupIndex, groups.length, d.index);
+      return squares.deviationSquare(x(d.from), x(d.to), d.y, d.groupIndex, d.lanes || groups.length, d.rank === undefined ? d.index : d.rank);
     }
 
     // How far each lane's deviation squares (and dots) reach above and below its line, over
@@ -589,7 +861,7 @@
 
     function renderDeviations(animate, transitions) {
       transitions = transitions || {};
-      const showLines = ["total", "within", "between"].includes(state.stage) && phaseIndex() >= 1;
+      const showLines = ["total", "within", "between", "people", "centre"].includes(state.stage) && phaseIndex() >= 1;
       const items = (showLines ? deviationData() : []).map((d) => ({
         key: `${d.groupIndex}-${d.index}`,
         x1: x(d.from),
@@ -608,25 +880,49 @@
       });
     }
 
-    function renderMeans(animate) {
-      const showGroupMeans = ["within", "between", "compare", "populations"].includes(state.stage);
-      const showGrand = ["total", "between", "compare"].includes(state.stage);
-      const meanData = showGroupMeans ? stats.means.map((mean, i) => ({ mean, i })) : [];
-      const means = meansLayer.selectAll("g.ave-group-mean").data(meanData, (d) => d.i);
+    function renderMeans(animate, moves) {
+      const showGroupMeans = ["within", "between", "compare", "populations", "centre"].includes(state.stage);
+      const showPersonMeans = rowsView() && state.phase !== "rows";
+      const showGrand = ["total", "between", "compare", "centre"].includes(state.stage) || showPersonMeans;
+      // Centring carries each person's mean to the grand mean, and their scores with it.
+      const meanX = (d) => x(d.person && state.stage === "centre" ? stats.grandMean : d.mean);
+      const meanData = showPersonMeans
+        ? stats.personMeans.map((mean, i) => ({ mean, i, person: true }))
+        : showGroupMeans ? stats.means.map((mean, i) => ({ mean, i })) : [];
+      const meanColor = (d) => {
+        if (d.person) return personFill(d.i);
+        return personColoured() ? "var(--ave-total)" : colors[d.i % colors.length];
+      };
+      const meanRowY = (d) => d.person ? personY(d.i) : groupY(d.i);
+      const meanHalf = (d) => d.person ? Math.min(16, personY.step() / 2 - 3) : lane.meanHalf;
+      const meanName = (d) => {
+        if (!d.person) return compact ? "" : "group mean";
+        return d.i === 0 && state.stage === "people" ? "person mean" : "";
+      };
+      const means = meansLayer.selectAll("g.ave-group-mean").data(meanData, (d) => d.person ? `person-${d.i}` : d.i);
       const meanEnter = means.enter().append("g").attr("class", "ave-group-mean").style("opacity", 0);
       meanEnter.append("line").attr("class", "ave-mean-line");
       meanEnter.append("text").attr("class", "ave-mean-label").attr("text-anchor", "middle");
       const meanMerged = meanEnter.merge(means);
-      meanMerged.select("line")
-        .attr("stroke", (d) => colors[d.i % colors.length])
-        .attr("x1", (d) => x(d.mean)).attr("x2", (d) => x(d.mean))
-        .attr("y1", (d) => groupY(d.i) - lane.meanHalf).attr("y2", (d) => groupY(d.i) + lane.meanHalf);
+      const meanLines = meanMerged.select("line").interrupt()
+        .attr("stroke", meanColor)
+        .attr("y1", (d) => meanRowY(d) - meanHalf(d)).attr("y2", (d) => meanRowY(d) + meanHalf(d));
+      if (moves.shifting) {
+        meanLines.transition().delay((d) => moves.shiftAt(d.i)).duration(SHIFT_DURATION).ease(d3.easeCubicInOut)
+          .attr("x1", meanX).attr("x2", meanX);
+      } else {
+        meanLines.attr("x1", meanX).attr("x2", meanX);
+      }
       meanMerged.select("text")
-        .attr("fill", (d) => colors[d.i % colors.length])
-        .attr("x", (d) => x(d.mean)).attr("y", (d) => groupY(d.i) - lane.meanLabel)
+        .attr("fill", meanColor)
+        // A person's mean can sit close to the grand mean, so its label reads away from that line.
+        .attr("text-anchor", (d) => d.person ? "start" : "middle")
+        .attr("x", (d) => x(d.mean) - (d.person ? 6 : 0)).attr("y", (d) => meanRowY(d) - (d.person ? meanHalf(d) + 5 : lane.meanLabel))
         // On a phone the group names sit above the lanes, where these labels would collide with them.
-        .text(compact ? "" : "group mean");
-      meanMerged.transition().duration(animate ? 320 : 0).style("opacity", state.stage === "populations" ? 0.7 : 1);
+        .text(meanName);
+      // Means belonging to where the scores are going wait for them to arrive.
+      meanMerged.transition().delay(moves.crossing ? moves.moveAt + 1000 : 0).duration(animate ? 320 : 0)
+        .style("opacity", state.stage === "populations" ? 0.7 : 1);
       means.exit().transition().duration(animate ? 160 : 0).style("opacity", 0).remove();
 
       const grand = meansLayer.selectAll("g.ave-grand-mean").data(showGrand ? [stats.grandMean] : []);
@@ -646,20 +942,44 @@
     }
 
     // Within pours in first and settles at the bottom; between fills the rest of the total.
-    function aggregateSquares() {
-      return [
+    // With people, the within layer splits in place: people pour in at the bottom of it, and
+    // what's left above them is error. Error then does everything within did, so it keeps
+    // within's key and place in the code. People have no df, so they're never lifted or cut.
+    // `settled` asks for the layers as they end up, whatever the current step.
+    function aggregateSquares(settled) {
+      const layers = [
         { key: "total", label: "Total", value: stats.ssTotal, base: 0, color: "var(--ave-total)", reveal: 1 },
-        { key: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 2 },
-        { key: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 3 }
+        { key: "between", name: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 2 },
+        { key: "within", name: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 3 }
       ];
+      if (!people) return layers;
+      if (settled || peoplePoured()) {
+        Object.assign(layers[2], { name: "error", label: "Error", value: stats.ssError, base: stats.ssPeople, df: stats.dfError, ms: stats.msError });
+      }
+      layers.push({ key: "people", name: "people", label: "People", value: stats.ssPeople, base: 0, color: "var(--ave-people)", reveal: buildStages.length });
+      return layers;
+    }
+
+    function peoplePoured() {
+      return aggregateRevealLevel() >= buildStages.length;
+    }
+
+    // After people pour in, what's left of within is an empty slot with no name. It becomes
+    // error when the centred scores' squares fill it, or by the comparison if they never do.
+    function errorCounted() {
+      return state.stage === "compare" || (state.stage === "centre" && state.phase === "sum");
+    }
+
+    function layerLabelled(d) {
+      if (aggregateRevealLevel() < d.reveal) return false;
+      return !(people && d.key === "within" && peoplePoured() && !errorCounted());
     }
 
     function aggregateRevealLevel() {
-      const stageIndex = STAGES.indexOf(state.stage);
-      if (stageIndex <= 0) return 0;
-      if (stageIndex >= 4) return 3;
-      const priorStages = stageIndex - 1;
-      return priorStages + (state.phase === "sum" ? 1 : 0);
+      if (state.stage === "populations") return 0;
+      const buildIndex = buildStages.indexOf(state.stage);
+      if (buildIndex < 0) return buildStages.length;
+      return buildIndex + (state.phase === "sum" ? 1 : 0);
     }
 
     function comparePhaseIndex() {
@@ -697,7 +1017,7 @@
     // Squares either side of the line: between stands on it, within hangs from it.
     function besideLine(d, side) {
       return {
-        x: width / 2 - side / 2,
+        x: compareCx - side / 2,
         y: d.key === "between" ? midline - midGap - side : midline + midGap,
         width: side,
         height: side
@@ -716,8 +1036,12 @@
     function labelLines(d) {
       if (!wideLayout()) return { name: d.label, value: state.calculations ? `SS = ${fmt(d.value)}` : "" };
       if (d.key === "total") return { name: state.calculations ? `SS total = ${fmt(d.value)}` : "SS total", value: "" };
-      if (isLifted(d)) return { name: `MS ${d.key}`, value: msDetail(d) };
-      return { name: `SS ${d.key}`, value: state.calculations ? fmt(d.value) : "" };
+      if (isLifted(d)) return { name: `MS ${d.name}`, value: msDetail(d) };
+      // Beside the total, or inside it, a label is a single line.
+      if (d.key === "people" || (people && !isSplit())) {
+        return { name: state.calculations ? `SS ${d.name} = ${fmt(d.value)}` : `SS ${d.name}`, value: "" };
+      }
+      return { name: `SS ${d.name}`, value: state.calculations ? fmt(d.value) : "" };
     }
 
     // The edge a comparison label keeps to: the total's, then the sum's, then the mean
@@ -742,6 +1066,19 @@
           };
         }
         const top = ssGeometry(d, d.value, layout).y;
+        // Error is too thin to hold its name, which sits in the top right of the people
+        // layer instead, with a leader up into the layer it names.
+        if (people && d.key === "within" && peoplePoured()) {
+          const sheet = ssGeometry(d, d.value, layout);
+          const under = sheet.y + sheet.height;
+          const right = layout.x + layout.side - 8;
+          return {
+            transform: none,
+            name: { x: right, y: under + 20, anchor: "end" },
+            value: { x: right, y: under + 36, anchor: "end" },
+            leader: { x1: right - 8, y1: under + 7, x2: right - 8, y2: sheet.y + sheet.height / 2 }
+          };
+        }
         return {
           transform: none,
           name: { x: layout.x + 8, y: top + 18, anchor: "start" },
@@ -757,8 +1094,22 @@
           value: { x, y, anchor: "middle" }
         };
       }
+      // People stay in the total, labelled in the corner of their layer.
+      if (d.key === "people") {
+        const top = ssGeometry(d, d.value, wideSquare).y;
+        const left = { x: wideSquare.x + 10, y: top + 22, anchor: "start" };
+        return { transform: none, name: left, value: left };
+      }
+      // Between and error are labelled beside the total until they leave it.
+      if (people && !isSplit()) {
+        const layer = ssGeometry(d, d.value, wideSquare);
+        const mid = layer.y + layer.height / 2;
+        const right = wideSquare.x + wideSquare.side;
+        const beside = { x: right + 18, y: mid + 5, anchor: "start" };
+        return { transform: none, name: beside, value: beside, leader: { x1: right + 2, y1: mid, x2: right + 14, y2: mid } };
+      }
       const edge = labelEdge(d, spread);
-      const cx = width / 2;
+      const cx = compareCx;
       // Lines read name then value either way; between's stack up away from its shape.
       if (d.key === "between") {
         const hasValue = Boolean(labelLines(d).value);
@@ -789,6 +1140,12 @@
         name.text(lines.name);
         value.text(lines.value);
       }
+      if (people) {
+        const end = p.leader || { x1: 0, y1: 0, x2: 0, y2: 0 };
+        target.select(".ave-leader")
+          .attr("x1", end.x1).attr("y1", end.y1).attr("x2", end.x2).attr("y2", end.y2)
+          .style("opacity", p.leader ? 0.6 : 0);
+      }
     }
 
     // Every sum receives one piece per score (between sends each group's square once per score).
@@ -809,12 +1166,11 @@
       const split = isSplit();
       const layout = squareLayout();
       const duration = animate ? 760 : 0;
-      const stageIndex = STAGES.indexOf(state.stage);
-      const subtitleText = stageIndex === 0
+      const subtitleText = state.stage === "populations"
         ? "The squared deviations will collect here"
-        : stageIndex < 4
+        : buildStages.includes(state.stage) || state.stage === "centre"
           ? (state.phase === "sum" ? "Adding the squared deviations" : "Build each squared deviation first")
-          : "Total = between + within";
+          : people ? "Total = between + people + error" : "Total = between + within";
       const inset = compact ? 14 : 18;
       const headingWidth = wide ? Infinity : panel.width - 2 * inset;
       const titleLines = setLines(headingTitle, wrapWords("Sums of squares", headingWidth / 9.2), 19);
@@ -841,7 +1197,7 @@
         .merge(container)
         .transition().duration(splitting ? partDuration : duration).ease(d3.easeCubicInOut)
         .attr("x", layout.x).attr("y", layout.y).attr("width", layout.side).attr("height", layout.side)
-        .style("opacity", split ? 0 : 1);
+        .style("opacity", split && !people ? 0 : 1);
       container.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
 
       const data = aggregateSquares().filter((d) => aggregateRevealLevel() >= d.reveal);
@@ -855,9 +1211,9 @@
       // The total has no square of its own once its layers have split away.
       merged.filter((d) => d.key === "total")
         .transition().duration(splitting ? partDuration : duration)
-        .style("opacity", split ? 0 : 1);
+        .style("opacity", split && !people ? 0 : 1);
 
-      const geometry = (d) => split && d.key !== "total" ? ssSquareGeometry(d) : ssGeometry(d, d.value, layout);
+      const geometry = (d) => split && d.df ? ssSquareGeometry(d) : ssGeometry(d, d.value, layout);
       // The total is the fill itself; the container draws its outline.
       const sumRects = merged.select("rect")
         .attr("fill", (d) => d.color)
@@ -865,13 +1221,24 @@
       // The sum being revealed starts empty; animateContributions raises it as each piece lands.
       const driven = (d) => animate && d.key === revealKey;
       sumRects.filter(driven).each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
-      sumRects.filter((d) => !driven(d))
+      // As people pour in, within stays whole; it gives way as each piece lands.
+      const yielding = (d) => animate && revealKey === "people" && d.key === "within";
+      sumRects.filter(yielding).each(function() { setRect(d3.select(this), wholeWithin(layout)); });
+      sumRects.filter((d) => !driven(d) && !yielding(d))
         .transition()
         .duration(squareDuration).ease(d3.easeCubicInOut)
         .attr("x", (d) => geometry(d).x)
         .attr("y", (d) => geometry(d).y)
         .attr("width", (d) => geometry(d).width)
         .attr("height", (d) => geometry(d).height);
+      // The slot people leave stands empty until the centred scores' squares fill it.
+      if (people) {
+        const emptied = peoplePoured() && !errorCounted();
+        sumRects.filter((d) => d.key === "within").transition("tint")
+          .delay(animate && revealKey === "people" ? (pourDelay || 0) + pourDuration : 0)
+          .duration(animate && emptied ? 500 : 0)
+          .attr("fill-opacity", emptied ? 0.05 : 0.18);
+      }
       // A sum broken into its mean square fades as its pieces appear.
       sumRects.transition("lift")
         .delay(animate ? liftDelay : 0)
@@ -887,6 +1254,10 @@
         .transition().duration(animate ? 220 : 0)
         .style("opacity", 0)
         .remove();
+    }
+
+    function wholeWithin(layout) {
+      return ssGeometry({ base: 0 }, stats.ssWithin, layout);
     }
 
     // Pour each squared deviation into the container: it flies to the mouth, drops to the
@@ -914,7 +1285,12 @@
         level: (value) => ssGeometry(target, value, layout),
         mouth: { x: layout.x + layout.side / 2, y: layout.y },
         sumRect,
-        delay
+        delay,
+        onLand: revealKey === "people" ? (total, duration) => {
+          squaresLayer.selectAll("g.ave-ss-item").filter((d) => d.key === "within").select("rect")
+            .transition().duration(duration).ease(d3.easeCubicOut)
+            .attr("height", wholeWithin(layout).height * (1 - total / stats.ssWithin));
+        } : undefined
       });
     }
 
@@ -927,10 +1303,10 @@
     function msDetail(d) {
       return state.calculations
         ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, 1)}`
-        : `SS ${d.key} ÷ ${d.df}`;
+        : `SS ${d.name} ÷ ${d.df}`;
     }
 
-    function renderMeanSquares(animate, revealKey) {
+    function renderMeanSquares(animate, revealKeys) {
       msLayer.selectAll("*").interrupt();
       const phase = comparePhaseIndex();
       const data = aggregateSquares().filter((d) => d.msPhase && phase >= d.msPhase);
@@ -942,10 +1318,10 @@
         .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
         .each(function(d) { setRect(d3.select(this), msGeometry(d)); });
       // The square being built stays hidden until animateMeanSquare hands it over.
-      merged.filter((d) => !(animate && d.key === revealKey))
+      merged.filter((d) => !(animate && revealKeys.includes(d.key)))
         .transition().duration(animate ? 300 : 0)
         .style("opacity", 1);
-      merged.filter((d) => animate && d.key === revealKey).style("opacity", 0);
+      merged.filter((d) => animate && revealKeys.includes(d.key)).style("opacity", 0);
       items.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
     }
 
@@ -957,7 +1333,7 @@
       const plan = squares.planCut({
         df: d.df,
         side: ss.width,
-        cx: width / 2,
+        cx: compareCx,
         cy: ss.y + ss.height / 2,
         align: d.key === "within" ? "top" : "bottom",
         target: msGeometry(d),
@@ -983,16 +1359,20 @@
     // being cut into its mean square rides down with the stack and rewords as it lands.
     function renderLabels(animate, moves) {
       labelsLayer.selectAll("*").interrupt().interrupt("reword");
-      const data = aggregateSquares().filter((d) => aggregateRevealLevel() >= d.reveal);
+      const data = aggregateSquares().filter(layerLabelled);
       const labels = labelsLayer.selectAll("g.ave-label").data(data, (d) => d.key);
       const entered = labels.enter().append("g").attr("class", "ave-label").style("opacity", 0);
       entered.append("text").attr("class", "ave-ss-label").attr("fill", (d) => d.color);
       entered.append("text").attr("class", "ave-ss-value");
+      if (people) entered.append("line").attr("class", "ave-leader").style("opacity", 0);
       entered.each(function(d) { placeLabel(d3.select(this), d); });
-      labels.exit().transition().duration(animate ? 220 : 0).style("opacity", 0).remove();
+      // Within's name stays until people have finished pouring into it.
+      labels.exit().transition()
+        .delay(animate && moves.revealKey === "people" ? (moves.pourDelay || 0) + pourDuration : 0)
+        .duration(animate ? 220 : 0).style("opacity", 0).remove();
       const merged = entered.merge(labels);
       // The total's label goes with the total once it has split.
-      const opacity = (d) => isSplit() && d.key === "total" ? 0 : 1;
+      const opacity = (d) => isSplit() && !people && d.key === "total" ? 0 : 1;
 
       merged.each(function(d) {
         const label = d3.select(this);
@@ -1007,9 +1387,10 @@
             .transition().delay(moves.layoutDelay).duration(300).style("opacity", opacity(d));
           return;
         }
-        if (moves.cut && moves.cut.d.key === d.key) {
+        const cut = moves.cuts.find((plan) => plan.d.key === d.key);
+        if (cut) {
           // Out with the pieces as they spread, then in with the stack.
-          const { spreadAt, spreadDuration, stackStart, landAt } = moves.cut;
+          const { spreadAt, spreadDuration, stackStart, landAt } = cut;
           label.style("opacity", 1)
             .transition().delay(spreadAt).duration(spreadDuration).ease(d3.easeCubicInOut)
             .call(placeLabel, d, false, true)
@@ -1023,7 +1404,9 @@
           return;
         }
         // A layer still being poured is labelled once its pour has finished.
-        const delay = d.key === moves.revealKey && d.key !== "total" ? (moves.pourDelay || 0) + pourDuration : 0;
+        // Within becomes error as people finish pouring.
+        const poured = d.key === moves.revealKey || (moves.revealKey === "people" && d.key === "within");
+        const delay = poured && d.key !== "total" ? (moves.pourDelay || 0) + pourDuration : 0;
         label.transition().delay(delay).duration(moves.splitting ? 900 : 760).ease(d3.easeCubicInOut)
           .call(placeLabel, d)
           .style("opacity", opacity(d));
@@ -1031,9 +1414,9 @@
     }
 
     // F is the fraction itself: the gap the two have kept since the partition gets its bar.
-    function renderFraction(animate) {
+    function renderFraction(animate, after) {
       const show = state.phase === "f";
-      const cx = width / 2;
+      const cx = compareCx;
       const half = d3.max(aggregateSquares().filter((d) => d.df), (d) => msGeometry(d).side) / 2 + (compact ? 8 : 22);
       const textGap = compact ? 8 : 14;
       fractionLayer.selectAll("*").interrupt();
@@ -1047,7 +1430,7 @@
         .attr("y1", midline).attr("y2", midline)
         .attr("x1", cx - (show && animate ? 0 : half))
         .attr("x2", cx + (show && animate ? 0 : half));
-      const delay = show && animate ? 150 : 0;
+      const delay = show && animate ? 150 + after : 0;
       fractionBar.transition().delay(delay).duration(animate ? 480 : 0).ease(d3.easeCubicOut)
         .attr("x1", cx - half).attr("x2", cx + half)
         .style("opacity", show ? 1 : 0);
@@ -1059,6 +1442,27 @@
       if (state.stage === "populations") {
         const count = ["Two", "Three", "Four", "Five", "Six"][groups.length - 2] || String(groups.length);
         return `${count} groups of sampled scores with different centers and variation among people within each group.`;
+      }
+      if (state.stage === "compare" && people) {
+        return {
+          partition: "The total sum of squares, filled by a people layer at the bottom, an error layer above it and a between-groups layer on top.",
+          split: "The between-groups and error layers leave the total, each redrawn as a square of the same area. The people layer stays behind.",
+          "ms-between": `The between-groups sum of squares broken into ${stats.dfBetween} equal ${stats.dfBetween === 1 ? "square" : "squares"}; one of them is the between-groups mean square.`,
+          "ms-within": `The error sum of squares broken into ${stats.dfError} equal squares; one of them is the error mean square.`,
+          f: "The F ratio drawn as a fraction: the between-groups mean square above a bar and the error mean square below it."
+        }[state.phase];
+      }
+      if (state.stage === "people" && state.phase === "recolour") {
+        return "The same scores in the same places, recoloured so that each person's scores share a colour.";
+      }
+      if (state.stage === "people" && state.phase === "rows") {
+        return "One row per person, each in its own colour.";
+      }
+      if (state.stage === "centre" && state.phase === "shift") {
+        return "Each person's row shifted so that their mean sits on the grand mean, carrying outlines of their three scores with it. Their squared deviations have shrunk to nothing.";
+      }
+      if (state.stage === "centre") {
+        return "Outlines of each person's centred scores, back in the condition lanes, with what's left of each score around its condition mean.";
       }
       if (state.stage === "compare") {
         return {
@@ -1072,7 +1476,8 @@
       const subjects = {
         total: "every score and the grand mean",
         within: "every score and its group mean",
-        between: "each group mean, standing in for every score in its group, and the grand mean"
+        between: "each group mean, standing in for every score in its group, and the grand mean",
+        people: "each person's mean, standing in for all of their scores, and the grand mean"
       };
       const phases = {
         observe: "showing the relevant scores and means",
@@ -1080,11 +1485,59 @@
         squares: "showing each deviation as the edge of a square",
         sum: "collecting the squared deviations into their sum of squares"
       };
-      return `${state.stage} variability: ${phases[state.phase]} for ${subjects[state.stage]}.`;
+      return `${state.stage === "people" ? "between-people" : state.stage} variability: ${phases[state.phase]} for ${subjects[state.stage]}.`;
     }
 
     let lastRenderedStage = null;
     let lastRenderedPhase = null;
+    let lastRows = false;
+    let lastStandIns = false;
+    let lastPersonColoured = false;
+
+    // The order of a change of grouping, one thing at a time: stand-ins fade as the real
+    // scores come back, then the colours change, then the old names go and the new ones
+    // come, and only then do the scores move. Only people change grouping like this.
+    // Each person's squared deviation shrinks to nothing as their mean reaches the grand mean:
+    // centring is what removes it. These stand in for the real squares, which have left.
+    function shrinkPersonSquares(moves) {
+      deviationLayer.selectAll(".ave-shrinking, .ave-shrinking *").interrupt();
+      deviationLayer.selectAll(".ave-shrinking").remove();
+      if (!moves.shifting || !["squares", "sum"].includes(lastRenderedPhase)) return;
+      const rows = deviationLayer.selectAll("g.ave-shrinking").data(deviationData("people"))
+        .enter().append("g").attr("class", "ave-shrinking");
+      const shrink = (selection) => selection.transition()
+        .delay((d) => moves.shiftAt(d.groupIndex)).duration(SHIFT_DURATION).ease(d3.easeCubicInOut);
+      const squaresShown = rows.append("rect").attr("class", "anova-dev-square")
+        .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
+        .each(function(d) {
+          const square = deviationSquareGeometry(d);
+          d3.select(this).attr("x", square.x).attr("y", square.y)
+            .attr("width", square.side).attr("height", square.side);
+        });
+      shrink(squaresShown)
+        .attr("x", (d) => x(d.to)).attr("y", (d) => d.y).attr("width", 0).attr("height", 0);
+      const lines = rows.append("line").attr("class", "anova-dev").attr("stroke", (d) => d.color)
+        .attr("x1", (d) => x(d.from)).attr("x2", (d) => x(d.to))
+        .attr("y1", (d) => d.y).attr("y2", (d) => d.y);
+      shrink(lines).attr("x1", (d) => x(d.to));
+    }
+
+    function planRegrouping(animate) {
+      const clearing = animate && people && lastStandIns && !hasStandIns() ? squares.GHOST_FADE + 100 : 0;
+      const crossing = animate && Boolean(people) && lastRows !== rowsView();
+      const recolouring = animate && Boolean(people) && !lastPersonColoured && personColoured();
+      const shifting = animate && Boolean(people) && state.stage === "centre" && state.phase === "shift" &&
+        lastRenderedStage === "people";
+      return {
+        crossing,
+        shifting,
+        shiftAt: (i) => squares.GHOST_FADE + squares.GHOST_RISE + i * SHIFT_STAGGER,
+        fillDelay: recolouring ? clearing + 150 : 0,
+        labelsOut: crossing ? clearing : 0,
+        labelsIn: crossing ? clearing + 500 : 0,
+        moveAt: crossing ? clearing + 1000 : 0
+      };
+    }
 
     function render(options) {
       options = options || {};
@@ -1098,12 +1551,15 @@
         drawLines: animate && currentPhaseIndex >= 1 && previousPhaseIndex < 1,
         growSquares: animate && currentPhaseIndex >= 2 && previousPhaseIndex < 2
       };
+      // The centred scores' squares fill what's left of within.
       const revealKey = animate && state.phase === "sum" && (!sameStage || lastRenderedPhase !== "sum")
-        ? state.stage
+        ? (state.stage === "centre" ? "within" : state.stage)
         : null;
       // A step that skips phases plays them in turn: after a new stage's dots and means
       // settle, the deviations draw, then their squares grow, then they pour into the sum.
-      transitions.lineDelay = transitions.drawLines && !sameStage ? 800 : 0;
+      // (A ghost has to reach its mean first.)
+      const settled = hasStandIns() ? squares.GHOST_RISE + squares.GHOST_SLIDE + 60 : 800;
+      transitions.lineDelay = transitions.drawLines && !sameStage ? settled : 0;
       transitions.squareDelay = transitions.drawLines && transitions.growSquares
         ? transitions.lineDelay + squares.LINE_DURATION + 250
         : 0;
@@ -1115,30 +1571,40 @@
       const msKey = animate && comparePhaseIndex() > previousCompareIndex
         ? { "ms-between": "between", "ms-within": "within" }[state.phase] || null
         : null;
+      // With people, Chapter 14 has already taught the cut, so going straight from the split
+      // to F makes both cuts at once. F's bar waits for them to land.
+      const cutsTogether = animate && Boolean(people) && state.phase === "f" &&
+        lastRenderedStage === "compare" && lastRenderedPhase === "split";
+      const msKeys = cutsTogether ? ["between", "within"] : msKey ? [msKey] : [];
       const splitting = animate && state.phase === "split" &&
         lastRenderedStage === "compare" && lastRenderedPhase === "partition";
       // Moving the total out of the panel comes first; anything after waits for it.
       const layoutChanged = lastRenderedStage !== null && wideLayout() !== (lastRenderedStage === "compare");
       const layoutDelay = animate && layoutChanged ? 800 : 0;
-      const cut = msKey ? planCut(msKey, layoutDelay) : null;
+      const cuts = msKeys.map((key) => planCut(key, layoutDelay));
       svg.select(".ave-title").text(stageDescription());
       plotGroup.interrupt().transition().duration(animate ? 500 : 0)
         .style("opacity", wideLayout() ? 0 : 1);
       renderPopulations(state.stage === "populations", animate);
-      renderLanes(animate);
+      const regrouping = planRegrouping(animate);
+      renderLanes(animate, regrouping);
       renderDeviations(animate, transitions);
-      renderMeans(animate);
-      renderGhosts(animate);
-      renderDots(animate);
+      shrinkPersonSquares(regrouping);
+      renderMeans(animate, regrouping);
+      renderGhosts(animate, regrouping);
+      renderDots(animate, regrouping);
       renderSquares(animate, revealKey, layoutDelay, splitting, pourDelay);
-      renderMeanSquares(animate, msKey);
-      renderLabels(animate, { layoutChanged, layoutDelay, cut, splitting, revealKey, pourDelay });
+      renderMeanSquares(animate, msKeys);
+      renderLabels(animate, { layoutChanged, layoutDelay, cuts, splitting, revealKey, pourDelay });
       animateContributions(revealKey, animate, pourDelay);
-      if (cut) animateMeanSquare(cut);
-      renderFraction(animate);
+      cuts.forEach(animateMeanSquare);
+      renderFraction(animate, cutsTogether ? d3.max(cuts, (cut) => cut.landAt) + 300 : 0);
       updateCalculationBox();
       lastRenderedStage = state.stage;
       lastRenderedPhase = state.phase;
+      lastRows = rowsView();
+      lastStandIns = hasStandIns();
+      lastPersonColoured = personColoured();
     }
 
     function applyTutorialAction(action) {
