@@ -1,22 +1,71 @@
 ```{.quiz-yaml}
 id: 16_factorial_anova_calculate_2x2
-title: >
-  Calculate 2x2 ANOVA Quiz
+title: Practice a two-by-two ANOVA
 questions:
-  - id: number_of_f_tests
-    type: multiple-choice
-    prompt: >
-      In a two-by-two factorial ANOVA, how many F ratios are usually calculated?
-    options:
-      - text: >
-          Three: Factor A, Factor B, and the interaction
-        correct: true
-      - text: >
-          One: only the interaction
-      - text: >
-          Two: one for each cell
-      - text: >
-          Four: one for each condition
+  - id: practice_2x2_interaction_f
+    type: numeric
+    prompt: |
+      A study randomly assigns 20 people to one of four conditions, 5 per cell,
+      and then gives them a memory test. Here are the cell means:
+
+      <table class="table">
+      <thead><tr><th scope="col"></th><th scope="col" class="text-end">Short night's sleep</th><th scope="col" class="text-end">Full night's sleep</th></tr></thead>
+      <tbody>
+      <tr><td>Decaf</td><td class="text-end">20</td><td class="text-end">28</td></tr>
+      <tr><td>Coffee</td><td class="text-end">26</td><td class="text-end">30</td></tr>
+      </tbody>
+      </table>
+
+      The within-groups mean square is $MS_{\text{within}} = 20$. Calculate the
+      $F$ ratio for the interaction.
+    answer: 1
+    tolerance: 0.01
+    hints:
+      - Find the grand mean and the marginal means for sleep and coffee first.
+      - >
+        Each marginal mean represents 10 scores, and each cell mean represents 5.
+        Find $SS_{\text{between}}$ from the cell means, then take away the two
+        main effects to find the interaction.
     explanation: >
-      A two-factor ANOVA tests two main effects and one interaction.
+      The grand mean is 26. The sleep marginal means are 23 and 29, so
+      $SS_{\text{sleep}} = 10(9) + 10(9) = 180$. The coffee marginal means are
+      24 and 28, so $SS_{\text{coffee}} = 10(4) + 10(4) = 80$. From the cell
+      means, $SS_{\text{between}} = 5(36 + 4 + 0 + 16) = 280$, leaving
+      $SS_{\text{interaction}} = 280 - 180 - 80 = 20$. Each effect has
+      $df = 1$, so $F = 20/20 = 1.00$.
+    diagnostics:
+      - id: ss_sleep
+        type: numeric
+        prompt: What is the sum of squares for sleep?
+        answer: 180
+        tolerance: 0.01
+        explanation: $10(23 - 26)^2 + 10(29 - 26)^2 = 180$.
+      - id: ss_coffee
+        type: numeric
+        prompt: What is the sum of squares for coffee?
+        answer: 80
+        tolerance: 0.01
+        explanation: $10(24 - 26)^2 + 10(28 - 26)^2 = 80$.
+      - id: ss_between
+        type: numeric
+        prompt: What is the between-groups sum of squares?
+        answer: 280
+        tolerance: 0.01
+        explanation: Each of the four cell means has 5 scores, so $5(6^2 + 2^2 + 0^2 + 4^2) = 280$.
+
+  - id: practice_2x2_decision
+    type: free-response
+    prompt: >
+      The critical value for $F(1, 16)$ is 4.49. Calculate the $F$ ratios for
+      the two main effects, then say what you'd conclude about each of the three
+      effects. In the table, coffee seems to help more after a short night
+      (6 points) than after a full night (2 points). Does the ANOVA support that?
+    answer: >
+      $F_{\text{sleep}} = 180/20 = 9.00$, which exceeds 4.49, so there's a
+      significant main effect of sleep: people did better after a full night.
+      $F_{\text{coffee}} = 80/20 = 4.00$ and $F_{\text{interaction}} = 1.00$ don't
+      exceed 4.49. So although the sample lines aren't quite parallel, we don't
+      have good evidence of an interaction. That doesn't establish that the
+      effect of coffee is the same either way, particularly with only 5 people
+      per cell.
 ```

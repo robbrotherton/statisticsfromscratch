@@ -1,14 +1,59 @@
 ```{.quiz-yaml}
 id: 15_related_anova_calculate_f
-title: >
-  Calculate the F-ratio
+title: Practice a related-samples ANOVA
 questions:
-  - id: related_anova_f
+  - id: memory_related_f
     type: numeric
     prompt: >
-      If $MS_{between\ treatments} = 140.4$ and $MS_{error} = 3.0$, what is F?
-    answer: 46.8
-    tolerance: 0.1
+      At the end of Chapter 14 you analyzed a memory study: 18 people studied in
+      silence, with music, or with conversation in the background, with
+      $SS_{\text{total}} = 240$, $SS_{\text{between}} = 90$, and
+      $SS_{\text{within}} = 150$. That gave $F(2, 15) = 4.50$. Now suppose the
+      same 18 scores had come from 6 people who each did all three conditions,
+      and that the differences between those people account for
+      $SS_{\text{between subjects}} = 100$. Calculate the related-samples $F$.
+    answer: 9
+    tolerance: 0.01
+    hints:
+      - Take the between-participants component out of $SS_{\text{within}}$ to find $SS_{\text{error}}$.
+      - The numerator hasn't changed. For the denominator, use $df_{\text{error}} = (k - 1)(n - 1)$.
     explanation: >
-      $F = MS_{between\ treatments} / MS_{error} = 140.4 / 3.0 = 46.8$.
+      $SS_{\text{error}} = 150 - 100 = 50$ and
+      $df_{\text{error}} = (3 - 1)(6 - 1) = 10$, so
+      $MS_{\text{error}} = 5$. The numerator is still
+      $MS_{\text{between}} = 90/2 = 45$. So $F(2, 10) = 45/5 = 9.00$.
+    diagnostics:
+      - id: ss_error
+        type: numeric
+        prompt: What is the error sum of squares?
+        answer: 50
+        tolerance: 0.01
+        explanation: $150 - 100 = 50$.
+      - id: df_error
+        type: numeric
+        prompt: What are the degrees of freedom for the error term?
+        answer: 10
+        tolerance: 0
+        explanation: $(k - 1)(n - 1) = 2 \times 5 = 10$.
+      - id: ms_error
+        type: numeric
+        prompt: What is the error mean square?
+        answer: 5
+        tolerance: 0.01
+        explanation: $50/10 = 5$.
+
+  - id: memory_compare
+    type: free-response
+    prompt: >
+      The critical value was 3.68 for $F(2, 15)$ and is 4.10 for $F(2, 10)$.
+      What changed between the two analyses, and what stayed the same? Why did
+      $F$ double even though the critical value got larger?
+    answer: >
+      The scores, the condition means, and so the numerator stayed the same.
+      The denominator dropped from $MS_{\text{within}} = 10$ to
+      $MS_{\text{error}} = 5$, because the differences between people came out
+      of it. We paid for that with fewer degrees of freedom, so the critical
+      value rose, but here the smaller denominator more than made up for it.
+      The design determines which analysis is appropriate; these are not two
+      options to choose between for the same study.
 ```

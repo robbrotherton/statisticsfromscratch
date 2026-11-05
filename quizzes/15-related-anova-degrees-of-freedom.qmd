@@ -1,23 +1,35 @@
 ```{.quiz-yaml}
 id: 15_related_anova_degrees_of_freedom
-title: >
-  Degrees of Freedom and Critical Value
+title: Degrees of freedom for the error term
 questions:
-  - id: related_anova_df
-    type: multiple-choice
+  - id: related_anova_df_error
+    type: numeric
     prompt: >
-      For a related-samples ANOVA with 3 conditions and 3 participants, what are the
-      numerator and error degrees of freedom described in the chapter?
-    options:
-      - text: >
-          2 and 4
-        correct: true
-      - text: >
-          1 and 8
-      - text: >
-          3 and 10
-      - text: >
-          4 and 2
+      A within-participants study measures 8 people in each of 3 conditions.
+      What are the degrees of freedom for the denominator of the $F$ ratio?
+    answer: 14
+    tolerance: 0
+    hint: >
+      Find the degrees of freedom within conditions, then take out the
+      degrees of freedom used up by the differences between participants.
     explanation: >
-      df between treatments is k - 1 = 2, and df error is 4 in the worked example.
+      There are $N = 24$ scores in $k = 3$ conditions, so
+      $df_{\text{within}} = 24 - 3 = 21$. With 8 participants,
+      $df_{\text{between subjects}} = 8 - 1 = 7$. That leaves
+      $df_{\text{error}} = 21 - 7 = 14$, which is also $(k - 1)(n - 1) = 2 \times 7$.
+      The numerator is unchanged at $df = 2$, so we'd look up $F(2, 14)$.
+      An independent-samples ANOVA on 24 scores would have used $F(2, 21)$.
+    diagnostics:
+      - id: df_within
+        type: numeric
+        prompt: What are the degrees of freedom within conditions?
+        answer: 21
+        tolerance: 0
+        explanation: $N - k = 24 - 3 = 21$.
+      - id: df_people
+        type: numeric
+        prompt: What are the degrees of freedom between participants?
+        answer: 7
+        tolerance: 0
+        explanation: There are 8 participants, so $n - 1 = 7$.
 ```
