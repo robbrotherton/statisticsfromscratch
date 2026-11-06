@@ -110,6 +110,15 @@ test("two conditions recover Chapter 13's t, with options alone", async () => {
   await page.close();
 });
 
+test("the compare stage reads out the related F, not the independent one", async () => {
+  const { page, errors } = await mount({ ...options, stage: "compare", phase: "f", scores: false, calculations: true }, 620);
+  const text = await page.locator("#host").textContent();
+  assert.match(text, /= 18\.72/);
+  assert.doesNotMatch(text, /= 1\.94/);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test("scores keep their owners, whatever order they arrive in", async () => {
   const { page } = await mount(options, 620);
   await go(page, { stage: "people", phase: "rows" });

@@ -20,21 +20,21 @@ questions:
       Suppose people's scores in the different conditions were unrelated:
       knowing how someone did in one condition told you nothing about the others.
       Compared with an independent-samples ANOVA on the same numbers, what would
-      the related-samples ANOVA do?
+      we generally expect from the related-samples ANOVA, as in our scrambled example?
     options:
       - text: Give a much larger $F$, with a smaller critical value
       - text: Give about the same $F$, with a larger critical value
         correct: true
       - text: Give a much smaller $F$, with the same critical value
     hint: >
-      How much is there to take out of the denominator if people don't have
-      stable differences across conditions?
+      Taking out the people component removes both a sum of squares and
+      degrees of freedom. What happens to the mean square in the scrambled example?
     explanation: >
-      If scores don't go together, the between-people component is small,
-      so $MS_{\text{error}}$ stays about the same as $MS_{\text{within}}$. But we
-      still lose degrees of freedom, so the critical value rises. A
-      related-samples analysis is more powerful only when the scores go together,
-      as we saw for the $t$ test in Chapter 13.
+      Without scores going together, taking out the people sum of squares
+      and its degrees of freedom generally leaves $MS_{\text{error}}$ about
+      the same as $MS_{\text{within}}$. But the lower degrees of freedom
+      raise the critical value. The power advantage depends on reducing the
+      mean square enough to compensate, as we saw in Chapter 13.
 
   - id: f_from_t
     type: numeric
@@ -82,4 +82,40 @@ questions:
       that the drinks caused the change. Counterbalancing the order across
       participants, on separate days, would help. The omnibus test also doesn't
       say which conditions differ, so post-hoc tests would be needed.
+
+  - id: omnibus_no_pair
+    type: multiple-choice
+    prompt: >
+      Chapter 13's five children each raced alone, then in competition, then
+      alone again, with mean times of 49.4, 43.2, and 44.2 seconds. A
+      related-samples ANOVA, without a sphericity correction, gives
+      $F(2, 8) = 4.50$, just past the critical value of 4.46. Tukey's HSD is 6.34 seconds, and the three differences
+      between means are 6.2, 5.2, and 1.0 seconds. What should we conclude?
+    options:
+      - text: The omnibus test rejects the null, but no individual pair clears Tukey's threshold
+        correct: true
+      - text: The race alone and the race in competition differ, since that's the largest gap
+      - text: The population means are probably all the same, since no pair is significant
+    explanation: >
+      The omnibus test and Tukey's test ask different questions, so they can
+      disagree, especially near the critical value. The omnibus $F$ can detect a
+      pattern across all three means that no single pair clears on its own.
+      The 6.2-second difference was significant in Chapter 13, but adding
+      a condition changes the pooled error term and degrees of freedom,
+      as well as the number of comparisons we're protecting. This result
+      also passes only by a whisker: applying the Greenhouse–Geisser
+      correction gives $p = .088$, so we'd no longer reject the null.
+
+  - id: wore_off_or_practice
+    type: free-response
+    prompt: >
+      In that same study, times barely slowed when the children went back to
+      racing alone (43.2 to 44.2 seconds). Does that mean the effect of
+      competition lasted? What would you need to know?
+    answer: >
+      We can't say. Maybe competition's effect lingered, or maybe it wore off
+      and further practice hid the slowdown. Every child had the conditions in
+      the same order, so condition and practice are confounded. Counterbalanced
+      orders, like the ones in this chapter's six children, would help us
+      separate them.
 ```

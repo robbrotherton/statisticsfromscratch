@@ -67,6 +67,15 @@ sfsGraphMakeInterval = (opts = {}) => {
   // Marks use local coordinates: the group locates the categorical axis,
   // while the numeric scale supplies the point and both interval endpoints.
   const numeric = vertical ? y : x;
+  // Optional dashed line at a value the intervals are read against, usually zero.
+  if (Number.isFinite(opts.reference)) {
+    const at = numeric(opts.reference);
+    svg.append('line').attr('class', 'sfs-graph-reference')
+      .attr('x1', vertical ? margin.left : at)
+      .attr('x2', vertical ? width - margin.right : at)
+      .attr('y1', vertical ? at : margin.top).attr('y2', vertical ? at : height - margin.bottom)
+      .attr('stroke', 'currentColor').attr('stroke-width', 1.25).attr('stroke-dasharray', '4 4').attr('opacity', 0.6);
+  }
   const marks = svg.append('g').selectAll('g').data(rows).join('g').attr('class', 'sfs-graph-interval-row')
     .attr('transform', row => vertical ? `translate(${x(row.label)},0)` : `translate(0,${y(row.label)})`)
     .style('color', row => row.color || 'var(--graph-series-1, #0072b2)');

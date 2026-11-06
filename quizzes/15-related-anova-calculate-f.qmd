@@ -56,4 +56,61 @@ questions:
       value rose, but here the smaller denominator more than made up for it.
       The design determines which analysis is appropriate; these are not two
       options to choose between for the same study.
+
+  - id: proofreading_people
+    type: numeric
+    prompt: |
+      This time you'll find $SS_{\text{people}}$ yourself. Four people each
+      proofread a page with loud, moderate, and quiet background noise, in a
+      counterbalanced order. (These numbers are made up.) Here are their
+      errors.
+
+      | Person | Loud | Moderate | Quiet |
+      |:--|--:|--:|--:|
+      | 1 | 9 | 7 | 5 |
+      | 2 | 13 | 10 | 7 |
+      | 3 | 6 | 5 | 4 |
+      | 4 | 8 | 6 | 4 |
+      | $M$ | 9 | 7 | 5 |
+
+      The grand mean is 7. Calculate $SS_{\text{people}}$.
+    answer: 42
+    tolerance: 0.01
+    hints:
+      - Average each row to find that person's mean.
+      - Square each person's deviation from the grand mean, add them up, and multiply by $k$, since each person's mean stands for three scores.
+    explanation: >
+      The person means are 7, 10, 5, and 6, so the deviations from the grand
+      mean are 0, 3, $-2$, and $-1$. Their squares add up to
+      $0 + 9 + 4 + 1 = 14$. Each mean stands for $k = 3$ scores, so
+      $SS_{\text{people}} = 3 \times 14 = 42$.
+    diagnostics:
+      - id: person_two_mean
+        type: numeric
+        prompt: What is the mean for person 2?
+        answer: 10
+        tolerance: 0.01
+        explanation: $(13 + 10 + 7)/3 = 10$.
+      - id: sum_before_k
+        type: numeric
+        prompt: What is the sum of the squared deviations, before multiplying by $k$?
+        answer: 14
+        tolerance: 0.01
+        explanation: $0^2 + 3^2 + (-2)^2 + (-1)^2 = 14$.
+
+  - id: proofreading_f
+    type: numeric
+    prompt: >
+      For the same data, $SS_{\text{between}} = 32$ and
+      $SS_{\text{within}} = 46$. Calculate the related-samples $F$.
+    answer: 24
+    tolerance: 0.1
+    hints:
+      - Take your $SS_{\text{people}}$ out of $SS_{\text{within}}$ to find $SS_{\text{error}}$.
+      - For the denominator, $df_{\text{error}} = (k - 1)(n - 1)$.
+    explanation: >
+      $SS_{\text{error}} = 46 - 42 = 4$ and
+      $df_{\text{error}} = (3 - 1)(4 - 1) = 6$, so
+      $MS_{\text{error}} = 4/6 = 0.67$. The numerator is
+      $MS_{\text{between}} = 32/2 = 16$. So $F(2, 6) = 16/0.67 = 24$.
 ```

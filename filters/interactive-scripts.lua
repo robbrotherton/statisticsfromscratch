@@ -166,6 +166,10 @@ local manifest = {
     file = "resources/js/anova-two-estimates.js",
     deps = { "d3", "stat-helpers", "sampling-core", "sampling-visuals", "interactive-figure-tools", "anova-squares" }
   },
+  ["profile-lines"] = {
+    file = "resources/js/profile-lines.js",
+    deps = { "d3", "interactive-figure-tools" }
+  },
   ["t-squared"] = {
     file = "resources/js/t-squared.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }

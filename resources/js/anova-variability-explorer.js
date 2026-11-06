@@ -371,10 +371,11 @@
       const above = (side) => Math.max(side * share, reach(between, side) + midGap + labelRoom);
       const below = (side) => Math.max(side * (1 - share), reach(residual, side) + midGap + labelRoom);
       const fitsBeside = (side) => columnLeft(side) + columnWidth(side) + cutLabelRoom <= width - margin &&
-        above(side) + below(side) <= height - 2 * margin;
+        (!showScores || above(side) + below(side) <= height - 2 * margin);
       let side = compact ? 240 : 270;
       while (side > 60 && !(people ? fitsBeside(side) : fits(side))) side -= 2;
       if (people) {
+        if (!showScores) height = Math.ceil(above(side) + below(side) + (compact ? 16 : 24));
         midline = (height - above(side) - below(side)) / 2 + above(side);
         compareCx = columnLeft(side) + columnWidth(side) / 2;
         wideSquare = { x: leftEdge, y: midline - side * share, side };
@@ -1039,7 +1040,8 @@
       if (isLifted(d)) return { name: `MS ${d.name}`, value: msDetail(d) };
       // Beside the total, or inside it, a label is a single line.
       if (d.key === "people" || (people && !isSplit())) {
-        return { name: state.calculations ? `SS ${d.name} = ${fmt(d.value)}` : `SS ${d.name}`, value: "" };
+        const narrowBucket = people && wideSquare.side < 150;
+        return { name: state.calculations && !narrowBucket ? `SS ${d.name} = ${fmt(d.value)}` : `SS ${d.name}`, value: "" };
       }
       return { name: `SS ${d.name}`, value: state.calculations ? fmt(d.value) : "" };
     }
@@ -1302,7 +1304,7 @@
 
     function msDetail(d) {
       return state.calculations
-        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, 1)}`
+        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, people ? 2 : 1)}`
         : `SS ${d.name} ÷ ${d.df}`;
     }
 
@@ -1425,7 +1427,7 @@
         .text("F =");
       fractionRight
         .attr("x", cx + half + textGap).attr("y", midline + 7)
-        .text(state.calculations ? `= ${fmt(stats.f)}` : "");
+        .text(state.calculations ? `= ${fmt(people ? stats.fRelated : stats.f)}` : "");
       fractionBar
         .attr("y1", midline).attr("y2", midline)
         .attr("x1", cx - (show && animate ? 0 : half))
