@@ -88,13 +88,13 @@ const statistics = (page) => page.evaluate(() => {
 test("the partition matches the worked example", async () => {
   const { page } = await mount(options, 620);
   const s = await statistics(page);
-  near(s.ssPeople, 636.44);
-  near(s.ssError, 47.22);
+  near(s.ssPeople, 601.33);
+  near(s.ssError, 25.87);
   near(s.ssPeople + s.ssError, s.ssWithin, 1e-9);
-  assert.equal(s.dfError, 10);
-  near(s.msError, 4.72);
-  near(s.fRelated, 18.72);
-  near(s.f, 1.94);
+  assert.equal(s.dfError, 8);
+  near(s.msError, 3.23);
+  near(s.fRelated, 24.14);
+  near(s.f, 1.49);
   await page.close();
 });
 
@@ -113,8 +113,8 @@ test("two conditions recover Chapter 13's t, with options alone", async () => {
 test("the compare stage reads out the related F, not the independent one", async () => {
   const { page, errors } = await mount({ ...options, stage: "compare", phase: "f", scores: false, calculations: true }, 620);
   const text = await page.locator("#host").textContent();
-  assert.match(text, /= 18\.72/);
-  assert.doesNotMatch(text, /= 1\.94/);
+  assert.match(text, /= 24\.14/);
+  assert.doesNotMatch(text, /= 1\.49/);
   assert.deepEqual(errors, []);
   await page.close();
 });
@@ -258,7 +258,7 @@ test("centring happens in the rows, carrying each person's mean to the grand mea
   });
   assert.equal(state.ticks.length, options.people.length);
   assert.equal(new Set(state.ticks.map((t) => t.toFixed(3))).size, 1, "every mean on the grand mean");
-  assert.equal(state.ghosts.length, 18);
+  assert.equal(state.ghosts.length, options.people.length * options.groups.length);
   assert.equal(state.squares, 0, "no person's square survives");
   assert.deepEqual(state.rows, options.people);
   await page.close();
@@ -293,7 +293,8 @@ test("both sums are cut at once, and F's bar waits for them", async () => {
   await page.evaluate(() => window.__figure.anovaVariabilityExplorer.applyTutorialAction({ stage: "compare", phase: "f", animate: true }));
   await page.waitForTimeout(900);
   const during = await view();
-  assert.equal(during.pieces, 12, "two pieces of between and ten of error");
+  assert.equal(during.pieces, (options.groups.length - 1) * options.people.length,
+    "one piece per degree of freedom in between and error");
   assert.equal(during.bar, 0);
   await page.waitForTimeout(4000);
   const landed = await view();

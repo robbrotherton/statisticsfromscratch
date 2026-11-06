@@ -22,28 +22,27 @@ In Chapter 14 we introduced the general logic of ANOVA and used its independent-
 
 ## Repeated measures, repeated
 
-We spent Chapter 13 looking at data from a handful of kids who had completed a racing game twice, first alone and then in competition with another kid. We used a related-samples $t$ test to compare the two times via difference scores. The kids were generally a little faster in their second race, the one they did head-to-head with a rival. But we left a loose end. Was it the competition that spurred them to race quicker, or just was it just practice at turning the reel? With just the two races from each kid to compare, we couldn't tell. 
+We spent Chapter 13 looking at data from a handful of kids who had completed a racing game twice, first alone and then in competition with another kid. We used a related-samples $t$ test to compare the two times via difference scores. The kids were generally a little faster in their second race, the one they did head-to-head with a rival. But we left a loose end. Was it the competition that spurred them to race quicker, or was it just practice at turning the reel? With just the two races from each kid to compare, we couldn't tell.
 
-How can we tease apart the different possible explanations? One way would be to add another race; have the kids race alone a second time, and see if they improve again. If they do, that would suggest that practice is helping them. If they don't, that would suggest that competition is helping them.
+What would another race tell us? If the kids raced alone twice before competing, we could see how much they improved before a competitor entered the picture. That would give us more information about practice, though it still wouldn't tell us how much further practice alone would have helped on the third trial.
 
-In fact, Norman Triplett anticipated the problem. He gave each child six timed trials and varied their order. Everyone started alone, but some children then raced against a competitor and went alone again, while others did a second trial alone before racing [@triplett1898dynamogenic]. Here we'll use those first three trials to extend our analysis.
+In fact, Norman Triplett gave each child six timed trials, with different sequences of solo and competition trials [@triplett1898dynamogenic]. Here we'll use the first three trials from five children who all followed the same order: alone, alone, then competition.
 
-@tbl-related-anova-data shows six children, three from each order. (Like the five kids in Chapter 13, I cherry-picked these particular children to make the pattern clear, and rounded their times to whole seconds. This isn't a full reanalysis of Triplett's data.)
+@tbl-related-anova-data shows their times. These are different children from the five in Chapter 13. (As before, I cherry-picked them from the children Triplett classified as positively stimulated to make a useful teaching example, and rounded their times to whole seconds. This isn't a full reanalysis of Triplett's data.)
 
-| Child | Order | First alone | Second alone | Competition |
-|:------|:--|--:|--:|--:|
-| Violet F. | Race first | 54 | 45 | 43 |
-| Howard C. | Race first | 42 | 39 | 36 |
-| Inez K. | Race first | 37 | 36 | 35 |
-| Mary W. | Alone first | 56 | 53 | 46 |
-| Bertha A. | Alone first | 56 | 49 | 48 |
-| Lucile W. | Alone first | 52 | 50 | 43 |
-| $M$ | | 49.50 | 45.33 | 41.83 |
-| $SS$ | | 323.50 | 221.33 | 138.83 |
+| Child | First alone | Second alone | Competition |
+|:------|--:|--:|--:|
+| Stephen M. | 51 | 50 | 43 |
+| Mary W. | 56 | 53 | 46 |
+| Bertha A. | 56 | 49 | 48 |
+| Clyde G. | 36 | 35 | 32 |
+| Lucile W. | 52 | 50 | 43 |
+| $M$ | 50.20 | 47.40 | 42.40 |
+| $SS$ | 272.80 | 201.20 | 153.20 |
 
-: Times (in seconds) for six children from Triplett's study, in three conditions. “Order” refers to the two trials after the first trial alone. {#tbl-related-anova-data}
+: Times (in seconds) for five children from Triplett's study. The columns follow the order of their first three trials. {#tbl-related-anova-data}
 
-Now we have two alone times from each racer to compare, giving us an indication of improvement with practice. And we can compare competition with the second time alone, with the order of those two trials balanced across children. Competition isn't always the later trial, so practice isn't automatically working in its favor. This doesn't solve every problem with order effects, but it gives us more to go on than the first pair of times did.
+Now we have two alone times from each racer to compare, giving us an indication of improvement with practice. And we can compare competition with the second time alone. Competition always comes last in this example, so that comparison still mixes competition with further practice. We'll return to that limitation when we interpret the results.
 
 How do we analyze all three conditions? With two, we simply subtracted each child's pair of times to get one difference score. Here there are three scores per kid, so subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. The only difference between this and what we did in Chapter 14 is the relatedness of the samples. But how can we extend the logic of ANOVA to capture and set aside the differences between children that the related-samples $t$ test removed?
 
@@ -55,7 +54,7 @@ Let's think about this in terms of partitioning the variability in the data. In 
 
 {{< interactive-figure relatedRecapPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent","formula":false,"ariaLabel":"Diagram partitioning total variability into variance between groups, which contains any treatment effect plus chance, and variance within groups, which contains chance alone."}' fallback="Diagram partitioning total variability into variance between groups, which contains any treatment effect plus chance, and variance within groups, which contains chance alone." >}}
 
-Here we can be more specific about some of that chance variability. Look at Inez and Mary W. Inez was faster in every condition. That difference in overall speed contributes to the spread of scores within each condition, but it doesn't explain the differences between conditions: both children appear in all three.
+Here we can be more specific about some of that chance variability. Notice that Clyde demolished the other kids' times. Having one child who's much faster than the others adds a substantial amount of variability within each condition. But Clyde appears in every condition, so his generally faster pace doesn't explain the differences between them.
 
 ### Removing individual differences
 
@@ -67,7 +66,7 @@ This would be a problem. And so with related samples, we have a little extra wor
 
 With independent samples, we could happen to put more fast children in one condition than another. With repeated measures, each condition contains exactly the same children. Their stable differences in overall speed can't push one condition's mean above another's.
 
-But those differences still contribute to the within-groups sum of squares. So we can partition that component further: **between-people variability**, how much the children's overall levels differ, and **error**, what's left after setting those differences aside.
+But those differences still contribute to the within-groups sum of squares. In the second stage of the partition, we separate them out, leaving a much smaller error term for $F$. We split within-groups variability into two components: **between-people variability**, how much the children's overall levels differ, and **error**, what's left after setting those differences aside.
 
 What's left isn't just inaccurate measurement. Children might respond differently to practice or competition, or have a particularly good or bad trial. Those departures from the average pattern remain in the error component.
 
@@ -82,11 +81,11 @@ Let's see how we separate out the people component using the children's actual s
 ::::: {#act-related-partition .callout-tip .interactive}
 ## Where the individual differences go
 
-{{< interactive-figure relatedAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"people":["Violet","Howard","Inez","Mary W.","Bertha","Lucile"],"groups":[{"name":"First alone","values":[54,42,37,56,56,52]},{"name":"Second alone","values":[45,39,36,53,49,50]},{"name":"Competition","values":[43,36,35,46,48,43]}],"axisLabel":"Time (seconds)","personColors":[0,4,1,3,7,5],"xMin":30,"xMax":60,"populationSd":6.75}' fallback="Interactive diagram of six children timed in three conditions. The scores regroup into one row per child, each child's scores slide to that child's mean, and the squared deviations fill a people layer at the bottom of the within-groups sum of squares. What remains above it is error, and only the between-groups and error layers are divided by their degrees of freedom." >}}
+{{< interactive-figure relatedAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"people":["Stephen","Mary W.","Bertha","Clyde","Lucile"],"groups":[{"name":"First alone","values":[51,56,56,36,52]},{"name":"Second alone","values":[50,53,49,35,50]},{"name":"Competition","values":[43,46,48,32,43]}],"axisLabel":"Time (seconds)","personColors":[0,3,7,1,5],"xMin":30,"xMax":60,"populationSd":7.23}' fallback="Interactive diagram of five children timed in three conditions. The scores regroup into one row per child, each child's scores slide to that child's mean, and the squared deviations fill a people layer at the bottom of the within-groups sum of squares. What remains above it is error, and only the between-groups and error layers are divided by their degrees of freedom." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
-Here are the six children's times, grouped by condition. Every child contributes one score to each row.
+Here are the five children's times, grouped by condition. Every child contributes one score to each row.
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Total" data-action='{"stage":"total","phase":"sum","animate":true}'}
@@ -122,7 +121,7 @@ Square each deviation. Larger squares represent children whose overall times wer
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Sum" data-action='{"stage":"people","phase":"sum","animate":true}'}
-Each child's mean represents three scores, so count each square three times. They add up to $SS_{\text{people}} = 636.44$, part of the within-groups variability we already counted.
+Each child's mean represents three scores, so count each square three times. They add up to $SS_{\text{people}} = 601.33$, part of the within-groups variability we already counted.
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="Centre" data-action='{"stage":"centre","phase":"shift","animate":true}'}
@@ -138,7 +137,7 @@ Measure each adjusted score's deviation from its condition mean and square it. T
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Centred" data-title="Error" data-action='{"stage":"centre","phase":"sum","animate":true}'}
-The squares fill the remaining space: $SS_{\text{error}} = 47.22$. We could get the same answer by subtracting $SS_{\text{people}}$ from $SS_{\text{within}}$.
+The squares fill the remaining space: $SS_{\text{error}} = 25.87$. We could get the same answer by subtracting $SS_{\text{people}}$ from $SS_{\text{within}}$.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
@@ -150,13 +149,13 @@ For $F$, we take the between-groups and error components. The people component s
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
-Divide each sum by its degrees of freedom, then divide the mean squares. The numerator is unchanged; the denominator now uses only error. Here $F(2, 10) = 18.72$. Next we'll work through those degrees of freedom and calculations.
+Divide each sum by its degrees of freedom, then divide the mean squares. The numerator is unchanged; the denominator now uses only error. Here $F(2, 8) = 24.14$. Next we'll work through those degrees of freedom and calculations.
 :::
 ::::
 
 :::::
 
-The adjustment in the tutorial is called **centering**. We subtract each child's mean and add the grand mean: $X - M_{\text{person}} + M_{\text{grand}}$. Violet's mean is 1.78 seconds above the grand mean, so we subtract 1.78 from each of her times. Her first time, 54 seconds, becomes 52.22. All three of Violet's scores move by the same amount; their differences stay the same. After doing this for every child, the condition means stay the same too. We've taken out overall speed without taking out the differences we're interested in.
+The adjustment in the tutorial is called **centering**. We subtract each child's mean and add the grand mean: $X - M_{\text{person}} + M_{\text{grand}}$. Stephen's mean is 1.33 seconds above the grand mean, so we subtract 1.33 from each of his times. His first time, 51 seconds, becomes 49.67. All three of Stephen's scores move by the same amount; their differences stay the same. After doing this for every child, the condition means stay the same too. We've taken out overall speed without taking out the differences we're interested in.
 
 ## Sums of squares and degrees of freedom
 
@@ -207,7 +206,7 @@ And the interpretation of the $F$ ratio is exactly the same. A large numerator r
 
 ## A related-samples ANOVA, step by step
 
-So let's run through the hypothesis test for the six children in @tbl-related-anova-data. We'll concentrate on what's different from Chapter 14.
+So let's run through the hypothesis test for the five children in @tbl-related-anova-data. We'll concentrate on what's different from Chapter 14.
 
 ### Step 1: State the hypotheses
 
@@ -217,17 +216,17 @@ As always, we start that hypothesis test by stating our hypotheses. Again, the n
 
 Step two is to determine the critical value for the test, with $\alpha = .05$. We use the same $F$ table as before, with the degrees of freedom for our numerator and new denominator:
 
-$$df_{\text{between}} = k - 1 = 2 \qquad df_{\text{error}} = (k - 1)(n - 1) = 2(5) = 10$$
+$$df_{\text{between}} = k - 1 = 2 \qquad df_{\text{error}} = (k - 1)(n - 1) = 2(4) = 8$$
 
-In @tbl-related-anova-critical, the column for 2 and the row for 10 give a critical $F$ of 4.10.
+In @tbl-related-anova-critical, the column for 2 and the row for 8 give a critical $F$ of 4.46.
 
 ::: {#tbl-related-anova-critical}
-{{< interactive-figure relatedAnovaCriticalTable makeFTable options='{"title":"Critical values for the competition test","alpha":0.05,"df1":{"from":1,"to":4},"df2":{"from":8,"to":12},"tableMinWidth":"0","maxWidth":"32rem","interactive":false,"selected":{"df1":2,"df2":10,"alpha":0.05}}' fallback="F table excerpt for numerator df 1 through 4 and denominator df 8 through 12, highlighting the .05 critical value of 4.10 at F(2, 10)." >}}
+{{< interactive-figure relatedAnovaCriticalTable makeFTable options='{"title":"Critical values for the competition test","alpha":0.05,"df1":{"from":1,"to":4},"df2":{"from":6,"to":10},"tableMinWidth":"0","maxWidth":"32rem","interactive":false,"selected":{"df1":2,"df2":8,"alpha":0.05}}' fallback="F table excerpt for numerator df 1 through 4 and denominator df 6 through 10, highlighting the .05 critical value of 4.46 at F(2, 8)." >}}
 
-An excerpt of the $F$ table, with the critical value for $df = 2$ and $10$ highlighted.
+An excerpt of the $F$ table, with the critical value for $df = 2$ and $8$ highlighted.
 :::
 
-If these 18 scores had come from independent samples, the denominator would have had 15 degrees of freedom and the critical value would have been 3.68. Our lower degrees of freedom mean we need a more extreme $F$ to reject the null, just as we saw with the related-samples $t$ test.
+If these 15 scores had come from independent samples, the denominator would have had 12 degrees of freedom and the critical value would have been 3.89. Our lower degrees of freedom mean we need a more extreme $F$ to reject the null, just as we saw with the related-samples $t$ test.
 
 {{< include quizzes/15-related-anova-degrees-of-freedom.qmd >}}
 
@@ -249,64 +248,56 @@ It's a good idea to use a summary table as you work through this by hand. It's t
 A related-samples ANOVA summary table, showing each equation.
 :::
 
-To save you some trouble, @tbl-related-anova-data gives each condition's mean and sum of squares. Here are $n$, $k$, $N$, and $M_{\text{grand}}$ too. Remember that we have six children but 18 scores. You're welcome to check my math.
+To save you some trouble, @tbl-related-anova-data gives each condition's mean and sum of squares. Here are $n$, $k$, $N$, and $M_{\text{grand}}$ too. Remember that we have five children but 15 scores. You're welcome to check my math.
 
-$$n = 6 \qquad k = 3 \qquad N = 18 \qquad M_{\text{grand}} = 45.56$$
+$$n = 5 \qquad k = 3 \qquad N = 15 \qquad M_{\text{grand}} = 46.67$$
 
 The only new calculation is $SS_{\text{people}}$. @tbl-related-anova-people lays it out, starting from each child's mean across the three conditions. (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
 
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
 | Child                     | Condition         | Score, $X$ | People: $(M_{\text{person}}-M_{\text{grand}})^2$ | Error: $(X-M_{\text{person}}-M_{\text{group}}+M_{\text{grand}})^2$ |
 +===========================+===================+============+==================================================+====================================================================+
-| Violet F.                 | First alone       | $54$       | $1.78^2=3.16$                                    | $2.72^2=7.41$                                                      |
+| Stephen M.                | First alone       | $51$       | $1.33^2=1.78$                                    | $(-0.53)^2=0.28$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $45$       | $1.78^2=3.16$                                    | $(-2.11)^2=4.46$                                                   |
+|                           | Second&nbsp;alone | $50$       | $1.33^2=1.78$                                    | $1.27^2=1.60$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $43$       | $1.78^2=3.16$                                    | $(-0.61)^2=0.37$                                                   |
+|                           | Competition       | $43$       | $1.33^2=1.78$                                    | $(-0.73)^2=0.54$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=47.33$                                  |                                                  |                                                                    |
+| $M_{\text{person}}=48.00$ |                   |            |                                                  |                                                                    |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| Howard C.                 | First alone       | $42$       | $(-6.56)^2=42.98$                                | $(-0.94)^2=0.89$                                                   |
+| Mary W.                   | First alone       | $56$       | $5.00^2=25.00$                                   | $0.80^2=0.64$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $39$       | $(-6.56)^2=42.98$                                | $0.22^2=0.05$                                                      |
+|                           | Second&nbsp;alone | $53$       | $5.00^2=25.00$                                   | $0.60^2=0.36$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $36$       | $(-6.56)^2=42.98$                                | $0.72^2=0.52$                                                      |
+|                           | Competition       | $46$       | $5.00^2=25.00$                                   | $(-1.40)^2=1.96$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=39.00$                                  |                                                  |                                                                    |
+| $M_{\text{person}}=51.67$ |                   |            |                                                  |                                                                    |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| Inez K.                   | First alone       | $37$       | $(-9.56)^2=91.31$                                | $(-2.94)^2=8.67$                                                   |
+| Bertha A.                 | First alone       | $56$       | $4.33^2=18.78$                                   | $1.47^2=2.15$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $36$       | $(-9.56)^2=91.31$                                | $0.22^2=0.05$                                                      |
+|                           | Second&nbsp;alone | $49$       | $4.33^2=18.78$                                   | $(-2.73)^2=7.47$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $35$       | $(-9.56)^2=91.31$                                | $2.72^2=7.41$                                                      |
+|                           | Competition       | $48$       | $4.33^2=18.78$                                   | $1.27^2=1.60$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=36.00$                                  |                                                  |                                                                    |
+| $M_{\text{person}}=51.00$ |                   |            |                                                  |                                                                    |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| Mary W.                   | First alone       | $56$       | $6.11^2=37.35$                                   | $0.39^2=0.15$                                                      |
+| Clyde G.                  | First alone       | $36$       | $(-12.33)^2=152.11$                              | $(-1.87)^2=3.48$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $53$       | $6.11^2=37.35$                                   | $1.56^2=2.42$                                                      |
+|                           | Second&nbsp;alone | $35$       | $(-12.33)^2=152.11$                              | $(-0.07)^2=0.00$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $46$       | $6.11^2=37.35$                                   | $(-1.94)^2=3.78$                                                   |
+|                           | Competition       | $32$       | $(-12.33)^2=152.11$                              | $1.93^2=3.74$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=51.67$                                  |                                                  |                                                                    |
+| $M_{\text{person}}=34.33$ |                   |            |                                                  |                                                                    |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| Bertha A.                 | First alone       | $56$       | $5.44^2=29.64$                                   | $1.06^2=1.11$                                                      |
+| Lucile W.                 | First alone       | $52$       | $1.67^2=2.78$                                    | $0.13^2=0.02$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $49$       | $5.44^2=29.64$                                   | $(-1.78)^2=3.16$                                                   |
+|                           | Second&nbsp;alone | $50$       | $1.67^2=2.78$                                    | $0.93^2=0.87$                                                      |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $48$       | $5.44^2=29.64$                                   | $0.72^2=0.52$                                                      |
+|                           | Competition       | $43$       | $1.67^2=2.78$                                    | $(-1.07)^2=1.14$                                                   |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=51.00$                                  |                                                  |                                                                    |
+| $M_{\text{person}}=48.33$ |                   |            |                                                  |                                                                    |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| Lucile W.                 | First alone       | $52$       | $2.78^2=7.72$                                    | $(-0.28)^2=0.08$                                                   |
-+---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Second&nbsp;alone | $50$       | $2.78^2=7.72$                                    | $1.89^2=3.57$                                                      |
-+---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-|                           | Competition       | $43$       | $2.78^2=7.72$                                    | $(-1.61)^2=2.60$                                                   |
-+---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| $M_{\text{person}}=48.33$                                  |                                                  |                                                                    |
-+---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
-| **Sum of squares**        |                   |            | $SS_{\text{people}}=636.44$                      | $SS_{\text{error}}=47.22$                                          |
+| **Sum of squares**        |                   |            | $SS_{\text{people}}=601.33$                      | $SS_{\text{error}}=25.87$                                          |
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
 
 : Each child's three scores, with the two new squared deviations. Values are rounded; the sums use unrounded values. {#tbl-related-anova-people}
@@ -317,55 +308,55 @@ Here's the full working, so you can check your answers:
 
 $$
 \begin{align}
-SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 = 860.44 \\
-SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\ &= 323.50 + 221.33 + 138.83 = 683.67 \\
-SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\ &= 6(3.94)^2 + 6(-0.22)^2 + 6(-3.72)^2 = 176.78 \\
-SS_{\text{people}} &= \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 \\ &= 9.48 + 128.93 + 273.93 + 112.04 + 88.93 + 23.15 = 636.44 \\
-SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{people}} \approx 683.67 - 636.44 \approx 47.22
+SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 = 783.33 \\
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\ &= 272.80 + 201.20 + 153.20 = 627.20 \\
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\ &= 5(3.53)^2 + 5(0.73)^2 + 5(-4.27)^2 = 156.13 \\
+SS_{\text{people}} &= \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 \\ &= 5.33 + 75.00 + 56.33 + 456.33 + 8.33 = 601.33 \\
+SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{people}} \approx 627.20 - 601.33 \approx 25.87
 \end{align}
 $$
 
 $$
 \begin{align}
-df_{\text{total}} &= N - 1 = 18 - 1 = 17 \\
-df_{\text{within}} &= N - k = 18 - 3 = 15 \\
+df_{\text{total}} &= N - 1 = 15 - 1 = 14 \\
+df_{\text{within}} &= N - k = 15 - 3 = 12 \\
 df_{\text{between}} &= k - 1 = 3 - 1 = 2 \\
-df_{\text{people}} &= n - 1 = 6 - 1 = 5 \\
-df_{\text{error}} &= (k - 1)(n - 1) = (3 - 1)(6 - 1) = 10
+df_{\text{people}} &= n - 1 = 5 - 1 = 4 \\
+df_{\text{error}} &= (k - 1)(n - 1) = (3 - 1)(5 - 1) = 8
 \end{align}
 $$
 
 $$
 \begin{align}
-MS_{\text{between}} &= \frac{SS_{\text{between}}}{df_{\text{between}}} = \frac{176.78}{2} = 88.39 \\
-MS_{\text{error}} &= \frac{SS_{\text{error}}}{df_{\text{error}}} = \frac{47.22}{10} = 4.72
+MS_{\text{between}} &= \frac{SS_{\text{between}}}{df_{\text{between}}} = \frac{156.13}{2} = 78.07 \\
+MS_{\text{error}} &= \frac{SS_{\text{error}}}{df_{\text{error}}} = \frac{25.87}{8} = 3.23
 \end{align}
 $$
 
-$$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} = \frac{88.39}{4.72} \approx 18.72 $$
+$$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} = \frac{78.07}{3.23} \approx 24.14 $$
 
 And here's the completed summary table:
 
 ::: {#tbl-related-anova-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|--:|--:|--:|--:|
-| Between groups | 176.78 | 2 | 88.39 | 18.72 |
-| Within groups | 683.67 | 15 | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Between people | 636.44 | 5 | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Error | 47.22 | 10 | 4.72 | []{.sfs-na} |
-| Total | 860.44 | 17 | []{.sfs-na} | []{.sfs-na} |
+| Between groups | 156.13 | 2 | 78.07 | 24.14 |
+| Within groups | 627.20 | 12 | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Between people | 601.33 | 4 | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Error | 25.87 | 8 | 3.23 | []{.sfs-na} |
+| Total | 783.33 | 14 | []{.sfs-na} | []{.sfs-na} |
 
 Completed related-samples ANOVA summary table for the competition example.
 :::
 
 ### Step 4: Make a decision
 
-So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we figured out from the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. So here with our $F$ of 18.72, well beyond the critical value of 4.10, we can comfortably reject the null. There is a significant difference among our three conditions. The corresponding $p$-value is about $.0004$, so $p$ is less than $\alpha$.
+So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we figured out from the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. So here with our $F$ of 24.14, well beyond the critical value of 4.46, we can comfortably reject the null. There is a significant difference among our three conditions. The corresponding $p$-value is about $.0004$, so $p$ is less than $\alpha$.
 
 ::: {#fig-related-anova-decision}
-{{< interactive-figure relatedAnovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":10,"title":"Null distribution: F(2, 10)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,20],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.102821,"label":"4.10","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":18.717647,"label":"F = 18.72","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 10 degrees of freedom. The rejection region lies above 4.10; the observed F of 18.72 is far into the rejection region." >}}
+{{< interactive-figure relatedAnovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":8,"title":"Null distribution: F(2, 8)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,27],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.45897,"label":"4.46","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":24.14433,"label":"F = 24.14","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 8 degrees of freedom. The rejection region lies above 4.46; the observed F of 24.14 is far into the rejection region." >}}
 
-The observed $F = 18.72$ falls beyond the critical value of the null $F$ distribution with $df = 2$ and $10$.
+The observed $F = 24.14$ falls beyond the critical value of the null $F$ distribution with $df = 2$ and $8$.
 :::
 
 {{< include quizzes/15-related-anova-calculate-f.qmd >}}
@@ -378,27 +369,27 @@ In Chapter 14 we used $\eta^2$, the between-groups sum of squares as a proportio
 
 Think of the bucket again. Leave the people layer behind, and the remaining total is $SS_{\text{between}} + SS_{\text{error}}$. That's the same as $SS_{\text{total}} - SS_{\text{people}}$. So:
 
-$$\eta^2_p = \frac{SS_{\text{between}}}{SS_{\text{between}} + SS_{\text{error}}} = \frac{176.78}{176.78 + 47.22} = .79$$
+$$\eta^2_p = \frac{SS_{\text{between}}}{SS_{\text{between}} + SS_{\text{error}}} = \frac{156.13}{156.13 + 25.87} = .86$$
 
-About 79% of that remaining variability is between conditions. Ordinary $\eta^2$ would still be possible, but would give a different answer, $.21$, because it includes the large people component in the denominator. So be careful comparing effect sizes: the partial and ordinary versions describe different shares of the data's variability.
+About 86% of that remaining variability is between conditions. Ordinary $\eta^2$ would still be possible, but would give a different answer, $.20$, because it includes the large people component in the denominator. So be careful comparing effect sizes: the partial and ordinary versions describe different shares of the data's variability.
 
 #### Post-hoc tests
 
 The ANOVA tells us the population means aren't all equal, but not which ones differ. We can follow it with Tukey's HSD, as in Chapter 14, protecting our experimentwise $\alpha$ while comparing all three pairs.
 
-The procedure is the same, but we use $MS_{\text{error}}$ and its degrees of freedom. With three means and $df_{\text{error}} = 10$, the studentized range statistic is $q = 3.88$. And $n = 6$, the number of scores in each condition:
+The procedure is the same, but we use $MS_{\text{error}}$ and its degrees of freedom. With three means and $df_{\text{error}} = 8$, the studentized range statistic is $q = 4.04$. And $n = 5$, the number of scores in each condition:
 
-$$HSD = q \sqrt{\frac{MS_{\text{error}}}{n}} = 3.88 \sqrt{\frac{4.72}{6}} = 3.44$$
+$$HSD = q \sqrt{\frac{MS_{\text{error}}}{n}} = 4.04 \sqrt{\frac{3.23}{5}} \approx 3.25$$
 
-Any difference between means greater than 3.44 seconds is significant at the $.05$ level. This pooled-error comparison relies on an assumption called sphericity, which we'll explain shortly.
+Any difference between means greater than 3.25 seconds is significant at the $.05$ level. This pooled-error comparison relies on an assumption called sphericity, which we'll explain shortly.
 
-| Comparison | Absolute difference | Exceeds 3.44 seconds? |
+| Comparison | Absolute difference | Exceeds 3.25 seconds? |
 |:--|--:|:--:|
-| First alone vs. second alone | 4.17 seconds | Yes |
-| Second alone vs. competition | 3.50 seconds | Yes |
-| First alone vs. competition | 7.67 seconds | Yes |
+| First alone vs. second alone | 2.80 seconds | No |
+| Second alone vs. competition | 5.00 seconds | Yes |
+| First alone vs. competition | 7.80 seconds | Yes |
 
-All three gaps exceed the HSD. In this example, children were faster on their second trial alone than their first, and faster still in competition.
+The two gaps involving competition exceed the HSD, but the gap between the solo trials doesn't. The children improved by an average of 2.80 seconds before competing, and by another 5.00 seconds when competition began. Only the comparisons involving competition are significant.
 
 #### Statistical power
 
@@ -410,39 +401,43 @@ For planning a future study, we'd need an estimate of how variable the within-pe
 
 So finally, we're ready to report the results. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.
 
-> In this selected six-child example, a single-factor, related-samples ANOVA revealed a significant difference among children's times on their first race alone ($M = 49.50$, $SD = 8.04$ seconds), a second race alone ($M = 45.33$, $SD = 6.65$ seconds), and a race in competition ($M = 41.83$, $SD = 5.27$ seconds); $F(2, 10) = 18.72$, $p < .001$, $\eta^2_p = .79$. Tukey HSD comparisons indicated that all three conditions differed significantly: children were faster on the second race alone than the first, and faster still in competition.
+> In this selected five-child example, a single-factor, related-samples ANOVA revealed a significant difference among children's times on their first race alone ($M = 50.20$, $SD = 8.26$ seconds), a second race alone ($M = 47.40$, $SD = 7.09$ seconds), and a race in competition ($M = 42.40$, $SD = 6.19$ seconds); $F(2, 8) = 24.14$, $p < .001$, $\eta^2_p = .86$. Tukey HSD comparisons indicated that children were significantly faster in competition than on either solo trial. The two solo trials did not differ significantly.
 
-But if you graphed the condition means in the usual way, the result might look surprising. The confidence intervals in @fig-related-results overlap, even though all three comparisons were significant.
+But if you graphed the condition means in the usual way, the result might look surprising. The confidence intervals in @fig-related-results overlap, even though both comparisons involving competition were significant.
 
 ::: {#fig-related-results}
-{{< interactive-figure relatedResultsGraph makeGraph options='{"type":"interval","orientation":"vertical","mark":"bar","data":[{"label":"First alone","estimate":49.5,"lower":41.0587,"upper":57.9413,"color":"var(--sfs-text, #222)"},{"label":"Second alone","estimate":45.33,"lower":38.3511,"upper":52.3156,"color":"var(--sfs-text, #222)"},{"label":"Competition","estimate":41.83,"lower":36.3034,"upper":47.3632,"color":"var(--sfs-text, #222)"}],"yDomain":[0,60],"yTickValues":[0,20,40,60],"width":640,"height":380,"margin":{"top":22,"right":16,"bottom":65,"left":65},"showValues":false,"labels":{"x":"Condition","y":"Mean time (seconds)"},"ariaLabel":"Mean times: first alone 49.50 seconds, second alone 45.33, and competition 41.83. Error bars are 95 percent confidence intervals for the mean of each condition, calculated from the standard deviation of that condition. All three intervals overlap."}' fallback="A bar graph of mean times: first alone 49.50, second alone 45.33, competition 41.83 seconds, with 95 percent confidence intervals that all overlap." >}}
+{{< interactive-figure relatedResultsGraph makeGraph options='{"type":"interval","orientation":"vertical","mark":"bar","data":[{"label":"First alone","estimate":50.2,"lower":39.9459,"upper":60.4541,"color":"var(--sfs-text, #222)"},{"label":"Second alone","estimate":47.4,"lower":38.5938,"upper":56.2062,"color":"var(--sfs-text, #222)"},{"label":"Competition","estimate":42.4,"lower":34.7157,"upper":50.0843,"color":"var(--sfs-text, #222)"}],"yDomain":[0,70],"yTickValues":[0,20,40,60],"width":640,"height":380,"margin":{"top":22,"right":16,"bottom":65,"left":65},"showValues":false,"labels":{"x":"Condition","y":"Mean time (seconds)"},"ariaLabel":"Mean times: first alone 50.20 seconds, second alone 47.40, and competition 42.40. Error bars are 95 percent confidence intervals for each condition mean, calculated from its own standard deviation. All three intervals overlap."}' fallback="Mean times: first alone 50.20 seconds, second alone 47.40, and competition 42.40. Error bars are 95 percent confidence intervals for each condition mean, calculated from its own standard deviation. All three intervals overlap." >}}
 
-A bar graph showing average times in the three conditions. Error bars are 95% confidence intervals for each condition's mean, each calculated from that condition's own standard deviation ($df = 5$).
+A bar graph showing average times in the three conditions. Error bars are 95% confidence intervals for each condition's mean, each calculated from that condition's own standard deviation ($df = 4$).
 :::
 
 Those intervals describe uncertainty about each condition's mean separately. They still reflect how much the children differ from one another. They don't show how consistently each child's time changed.
 
-@fig-related-profiles makes that visible. Each line follows one child across the conditions. Every line falls at both steps, even though the children start at quite different levels. (The conditions are arranged in the same order for everyone on the graph; they weren't all experienced in that order.)
+@fig-related-profiles makes that visible. Each line follows one child across the conditions. Every line falls at both steps, even though the children start at quite different levels. The graph follows the order in which all five children experienced the conditions.
 
 ::: {#fig-related-profiles}
-{{< interactive-figure relatedProfileLines makeProfileLines options='{"categories":["First alone","Second alone","Competition"],"series":[{"name":"Violet","color":0,"values":[54,45,43]},{"name":"Howard","color":4,"values":[42,39,36]},{"name":"Inez","color":1,"values":[37,36,35]},{"name":"Mary W.","color":3,"values":[56,53,46]},{"name":"Bertha","color":7,"values":[56,49,48]},{"name":"Lucile","color":5,"values":[52,50,43]}],"yDomain":[30,60],"yLabel":"Time (seconds)","xLabel":"Condition","ariaLabel":"One line per child across the three conditions. Every line falls from first alone to second alone and again to competition, and the lines stay in much the same order."}' fallback="One line per child across the three conditions. Every line falls at each step." >}}
+{{< interactive-figure relatedProfileLines makeProfileLines options='{"categories":["First alone","Second alone","Competition"],"series":[{"name":"Stephen","color":0,"values":[51,50,43]},{"name":"Mary W.","color":3,"values":[56,53,46]},{"name":"Bertha","color":7,"values":[56,49,48]},{"name":"Clyde","color":1,"values":[36,35,32]},{"name":"Lucile","color":5,"values":[52,50,43]}],"yDomain":[30,60],"yLabel":"Time (seconds)","xLabel":"Condition","ariaLabel":"One line per child across the three conditions. Every line falls from first alone to second alone and again to competition, and the lines stay in much the same order."}' fallback="One line per child across the three conditions. Every line falls at each step." >}}
 
 The same data, with one line for each child.
 :::
 
-To put confidence intervals around the changes themselves, we can use the difference scores for each pair of conditions, just as in Chapter 13. Now the differences in overall speed are out of the picture. All three intervals in @fig-related-differences exclude zero. These are ordinary 95% paired intervals, though, not adjusted for multiple comparisons like Tukey's test.
+To put confidence intervals around the changes themselves, we can use the difference scores for each pair of conditions, just as in Chapter 13. Now the differences in overall speed are out of the picture. The interval for the solo-to-solo change in @fig-related-differences includes zero; the two involving competition don't. These are ordinary 95% paired intervals, though, not adjusted for multiple comparisons like Tukey's test. They also use each pair's own variability rather than the pooled error term, so they needn't always agree with Tukey's decisions.
 
 ::: {#fig-related-differences}
-{{< interactive-figure relatedDifferencesGraph makeGraph options='{"type":"interval","orientation":"horizontal","data":[{"label":"First to second alone","estimate":-4.1667,"lower":-7.4463,"upper":-0.887},{"label":"Second to competition","estimate":-3.5,"lower":-6.4496,"upper":-0.5504},{"label":"First to competition","estimate":-7.6667,"lower":-11.0941,"upper":-4.2392}],"xDomain":[-12,2],"xTickValues":[-12,-8,-4,0],"reference":0,"margin":{"left":164},"width":640,"height":240,"showValues":false,"labels":{"x":"Mean change in time (seconds)"},"ariaLabel":"Mean changes with 95 percent confidence intervals: first alone to second alone, minus 4.17 seconds, from minus 7.45 to minus 0.89; second alone to competition, minus 3.50, from minus 6.45 to minus 0.55; first alone to competition, minus 7.67, from minus 11.09 to minus 4.24. All three intervals lie below zero."}' fallback="Three 95 percent confidence intervals for mean changes in time: first alone to second alone, minus 7.45 to minus 0.89 seconds; second alone to competition, minus 6.45 to minus 0.55; first alone to competition, minus 11.09 to minus 4.24. All lie below zero." >}}
+{{< interactive-figure relatedDifferencesGraph makeGraph options='{"type":"interval","orientation":"horizontal","data":[{"label":"First to second alone","estimate":-2.8,"lower":-5.8917,"upper":0.2917},{"label":"Second to competition","estimate":-5,"lower":-8.512,"upper":-1.488},{"label":"First to competition","estimate":-7.8,"lower":-10.6314,"upper":-4.9686}],"xDomain":[-12,2],"xTickValues":[-12,-8,-4,0],"reference":0,"margin":{"left":164},"width":640,"height":240,"showValues":false,"labels":{"x":"Mean change in time (seconds)"},"ariaLabel":"Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero."}' fallback="Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero." >}}
 
 95% confidence intervals for the mean change between each pair of conditions, calculated from each pair's difference scores as in @fig-related-ci. These intervals aren't adjusted for multiple comparisons.
 :::
 
 ### Interpreting the results
 
-The pattern fits the idea that practice helps, with an additional benefit from competition. But these are six deliberately selected children from the part of Triplett's table labeled “stimulated positively.” Across all 40 children, the first-to-second-alone improvement averages about 3.2 seconds, and the gap between second alone and competition about 1.0 second. Our six make the pattern particularly easy to see; they don't establish its size in the wider population.
+The larger improvement when competition began fits the idea that a rival helped the children speed up. But a nonsignificant solo-to-solo comparison doesn't mean practice had no effect. And a significant change after a nonsignificant one doesn't establish that the two changes differ. The times suggest a story; the tests haven't proved that story.
 
-Counterbalancing helps with the practice problem we encountered in Chapter 13, but competing could also have effects that linger into a later trial alone. Triplett noticed this himself: children sometimes kept trying to beat their own or their competitor's earlier time even when racing alone [@triplett1898dynamogenic]. The second alone time isn't necessarily free of competition's influence. As usual, the design matters as much as the calculation.
+There's also the order problem. Both solo trials came before any competition, so their difference can't reflect a lingering effect of racing against someone. But competition always came third. We don't know how fast these children would have gone on a third trial alone. Further practice could explain some or all of the improvement we attributed to competition.
+
+Triplett varied the order across children, as we saw in Chapter 13. Including both orders would help keep competition from always benefiting from coming later, though competing might itself affect a subsequent solo trial [@triplett1898dynamogenic]. We've used just one order to keep the worked example easy to follow; that makes its causal interpretation more limited.
+
+Finally, these are five deliberately selected children from the part of Triplett's table labeled “stimulated positively.” Across all 20 children who followed this same order, the first-to-second-alone improvement averages 3.36 seconds, and the next improvement, when competition begins, 2.47 seconds. Our five make a particular pattern easy to see; they don't establish its size or significance in the wider population. As usual, the design and the selection of data matter as much as the calculation.
 
 ### Assumptions
 
@@ -450,9 +445,9 @@ The same basic considerations apply as before, with some changes for related sam
 
 With three or more conditions, we also need **sphericity**: the population variances of the difference scores should be the same for every pair of conditions. Put concretely, children's first-to-second-alone changes should be about as variable as their alone-to-competition changes. We're using one pooled error term for all those comparisons, so it needs to represent them reasonably well.
 
-Our six children's difference variances are 9.8, 7.9, and 10.7, fairly similar. When sphericity doesn't hold, the usual test can reject the null too often. Software can apply a correction, such as Greenhouse–Geisser, which adjusts the degrees of freedom and $p$-value without changing $F$ itself.[^related-sphericity] With only two conditions, there's just one set of difference scores, so sphericity isn't an issue.
+Our five children's difference variances are 6.2, 8.0, and 5.2, fairly similar. When sphericity doesn't hold, the usual test can reject the null too often. Software can apply a correction, such as Greenhouse–Geisser, which adjusts the degrees of freedom and $p$-value without changing $F$ itself.[^related-sphericity] With only two conditions, there's just one set of difference scores, so sphericity isn't an issue.
 
-[^related-sphericity]: Software often provides Mauchly's test of sphericity, though a nonsignificant result doesn't guarantee the assumption holds, especially with a small sample. Greenhouse–Geisser uses a value called epsilon to adjust the degrees of freedom; values near 1 indicate little adjustment. Here epsilon is $.97$ and the corrected $p$ is about $.0005$, so the decision is unchanged. Follow-up comparisons also need an appropriate method if sphericity is doubtful.
+[^related-sphericity]: Software often provides Mauchly's test of sphericity, though a nonsignificant result doesn't guarantee the assumption holds, especially with a small sample. Greenhouse–Geisser uses a value called epsilon to adjust the degrees of freedom; values near 1 indicate little adjustment. Here epsilon is $.94$ and the corrected $p$ is about $.0006$, so the decision is unchanged. Follow-up comparisons also need an appropriate method if sphericity is doubtful.
 
 ## Back to two conditions
 
