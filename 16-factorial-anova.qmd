@@ -162,28 +162,28 @@ Here Factor A had no effect on people in level one of Factor B, but it did have 
 
 <!-- FIX: partial repeat with the callout below; "chance variability" and "the variance expected if there is no treatment effect" should match Chapter 14's two-estimates wording. Each effect in a 2×2 has df = 1, so each F is a squared t, which is a one-line callback to Chapter 14 worth making. -->
 
-So for each of those three hypotheses, we calculate an $F$ ratio. Though the math will differ slightly, because we'll be partitioning variance differently, the $F$ ratios all follow the same conceptual structure. We're comparing the variance between treatments to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$ test and the other ANOVAs we've learned. But there's really nothing new here, just a more nuanced application of the basic concepts.
+So for each of those three hypotheses, we calculate an $F$ ratio. Though the math will differ slightly, because we'll be partitioning variance differently, the $F$ ratios all follow the same conceptual structure. We're comparing the variance between groups to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$ test and the other ANOVAs we've learned. But there's really nothing new here, just a more nuanced application of the basic concepts.
 
-Calculating the various components required for those three $F$ ratios works just like any other ANOVA. Conceptually, we're partitioning the total variance in the data into different sources, just as before. It starts out the same as every other ANOVA. We separate out the total variance into variance between groups, the mean square between, and variance within groups, mean square within.
+Calculating the various components required for those three $F$ ratios works just like any other ANOVA. Conceptually, we're partitioning the total variance in the data into different sources, just as before. It starts out the same as every other ANOVA. We separate the total variability into variability between groups and variability within groups, each measured by its sum of squares. Here each cell of the table is a group, so our 2×2 design has four groups.
 
-Now here, assuming we're just using between-participants factors, we don't need to divide up the variance within groups. Instead, we want to think about the different sources of between-group variance. We want to separate between-group variability associated with Factor A exclusively and between-group variability associated with Factor B exclusively. And knowing both of those, anything left over — any between-group variability not accounted for by those main effects of Factor A and Factor B — must be due to the interaction between Factors A and B.
+Now here, assuming we're just using between-participants factors, we don't need to divide up the variance within groups. Instead, we want to think about the different sources of between-groups variability. We want to separate between-groups variability associated with Factor A exclusively and between-groups variability associated with Factor B exclusively. And knowing both of those, anything left over — any between-groups variability not accounted for by those main effects of Factor A and Factor B — must be due to the interaction between Factors A and B.
 
 ::::: {#act-factorial-partition .callout-tip .interactive}
 ## Partitioning variance in a factorial design
 
-{{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","stage":"split"}' fallback="Diagram partitioning total variability into between-treatments and within-groups variance, with the between-treatments variance further partitioned into Factor A, Factor B, and the A-by-B interaction. Each of those three components is compared against the within-groups variance in its own F ratio." >}}
+{{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","stage":"split"}' fallback="Diagram partitioning the total sum of squares into between-groups and within-groups variability, with the between-groups variability further partitioned into Factor A, Factor B, and the A-by-B interaction. Each of those three components has its mean square compared against the within-groups mean square in its own F ratio." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Between and within" data-action='{"stage":"split","animate":false}'}
-It starts out the same as every other ANOVA: the total variance separates into variance between groups and variance within groups.
+It starts out the same as every other ANOVA: the total variability separates into variability between groups and variability within groups.
 :::
 
 ::: {.tutorial-step data-title="Subdividing between" data-action='{"stage":"subdivide"}'}
-With between-participants factors, it's the *between-groups* variance we subdivide: the part associated with Factor A, the part associated with Factor B, and whatever is left over — the interaction.
+With between-participants factors, it's the *between-groups* variability we subdivide: the part associated with Factor A, the part associated with Factor B, and whatever is left over — the interaction.
 :::
 
 ::: {.tutorial-step data-title="Three F ratios" data-action='{"stage":"formula"}'}
-Each component gets its own $F$ ratio, always compared against the same denominator: the variance within groups, our estimate of chance variability.
+Each component gets its own $F$ ratio, always compared against the same denominator: the mean square within groups, our estimate of chance variability. As always, we get each mean square by dividing a sum of squares by its degrees of freedom.
 :::
 ::::
 
@@ -193,7 +193,7 @@ Each component gets its own $F$ ratio, always compared against the same denomina
 
 <!-- FIX: computational formulas (ISSUES #5). Go definitional: $SS_A$ uses column means, $SS_B$ row means, in the same form as $SS_{\text{between}}$ (each marginal mean's squared deviation from the grand mean, times the number of scores behind it). $SS_{\text{interaction}}$ can stay as the remainder, but should also be tied to the residuals from the additive prediction. -->
 
-So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variance that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
+So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variability that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
 
 So the equations for between and within groups $SS$ and $df$ are exactly the same as before. The new equations here are for the main effects and interaction. And as long as we're thinking about the data in a two-by-two table like I've shown you, then we can think in terms of columns and rows.
 
@@ -236,11 +236,11 @@ Again, there are a lot of values to keep track of while you calculate this, so f
 ::: {#tbl-factorial-summary-blank .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|:--:|:--:|:--:|:--:|
-| Between treatments | | | []{.sfs-na} | []{.sfs-na} |
+| Between groups | | | []{.sfs-na} | []{.sfs-na} |
 | &emsp;Factor A | | | | |
 | &emsp;Factor B | | | | |
 | &emsp;A × B interaction | | | | |
-| Within treatments | | | | []{.sfs-na} |
+| Within groups | | | | []{.sfs-na} |
 | Total | | | []{.sfs-na} | []{.sfs-na} |
 
 A blank factorial ANOVA summary table.
@@ -270,11 +270,11 @@ Here's the completed summary table so you can check your work:
 ::: {#tbl-factorial-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|--:|--:|--:|--:|
-| Between treatments | 39.69 | 3 | []{.sfs-na} | []{.sfs-na} |
+| Between groups | 39.69 | 3 | []{.sfs-na} | []{.sfs-na} |
 | &emsp;Snack type (A) | 14.06 | 1 | 14.06 | 21.77 |
 | &emsp;Test type (B) | 3.06 | 1 | 3.06 | 4.74 |
 | &emsp;A × B interaction | 22.56 | 1 | 22.56 | 34.94 |
-| Within treatments | 7.75 | 12 | 0.65 | []{.sfs-na} |
+| Within groups | 7.75 | 12 | 0.65 | []{.sfs-na} |
 | Total | 47.44 | 15 | []{.sfs-na} | []{.sfs-na} |
 
 Completed factorial ANOVA summary table for the snack × test example.

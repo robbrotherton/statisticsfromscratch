@@ -69,7 +69,7 @@ vpdNormalizeStage = (value, fallback) => {
 }
 
 // --- Minimal math labels ------------------------------------------------
-// Node labels need statistical symbols like MS_{between treatments}. Rather
+// Node labels need statistical symbols like SS_{between}. Rather
 // than unicode subscripts (no letters like b/w available), parse a tiny
 // TeX-like syntax into tspans: base text italic in the math font, _{...}
 // subscripts smaller and lowered in roman.
@@ -137,19 +137,19 @@ vpdAnovaCommonNodes = (variant) => {
     {
       id: "total",
       x: 480, y: vpdRow.r0.y, width: 300, height: vpdRow.r0.h,
-      lines: ["Total variability", "in the data"],
+      lines: ["Total variability", "$SS_{total}$"],
       stage: "total", tone: "total", sources: []
     },
     {
       id: "between",
       x: related ? 205 : 245, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
-      lines: ["Variance between", "groups", "$MS_{between}$"],
+      lines: ["Variability", "between groups", "$SS_{between}$"],
       parent: "total", stage: "split", tone: "between"
     },
     {
       id: "within",
       x: related ? 665 : 715, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
-      lines: ["Variance within", "groups", "$MS_{within}$"],
+      lines: ["Variability", "within groups", "$SS_{within}$"],
       parent: "total", stage: "split", tone: "within"
     }
   ];
@@ -166,9 +166,10 @@ vpdPresetSpecs = {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
         concept: { num: ["treatment", "chance"], den: ["chance"] }
       },
-      alt: "Partitioning diagram: total variability splits into variance " +
-        "between groups (treatment effect plus chance) and variance within " +
-        "groups (chance alone); their ratio is the F statistic."
+      alt: "Partitioning diagram: the total sum of squares splits into " +
+        "variability between groups (treatment effect plus chance) and " +
+        "variability within groups (chance alone); the ratio of their mean " +
+        "squares is the F statistic."
     };
   },
 
@@ -182,11 +183,11 @@ vpdPresetSpecs = {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
         concept: { num: ["treatment", "error", "ind-diff"], den: ["error", "ind-diff"] }
       },
-      alt: "Partitioning diagram for an independent-samples ANOVA: variance " +
-        "between groups contains treatment effect, sampling error, and " +
-        "individual differences; variance within groups contains sampling " +
-        "error and individual differences. The chance sources balance out " +
-        "in the F ratio."
+      alt: "Partitioning diagram for an independent-samples ANOVA: " +
+        "variability between groups contains treatment effect, sampling " +
+        "error, and individual differences; variability within groups " +
+        "contains sampling error and individual differences. The chance " +
+        "sources balance out in the F ratio."
     };
   },
 
@@ -201,8 +202,8 @@ vpdPresetSpecs = {
         concept: { num: ["treatment", "error"], den: ["error", "ind-diff"] }
       },
       alt: "Partitioning diagram showing the related-samples problem: the " +
-        "design removes individual differences from variance between " +
-        "groups, but they remain in variance within groups, so the " +
+        "design removes individual differences from variability between " +
+        "groups, but they remain in variability within groups, so the " +
         "usual F ratio is unbalanced."
     };
   },
@@ -215,14 +216,14 @@ vpdPresetSpecs = {
       {
         id: "error",
         x: 545, y: vpdRow.r2.y, width: 220, height: vpdRow.r2.h,
-        lines: ["Error", "$MS_{error}$"],
+        lines: ["Error", "$SS_{error}$"],
         parent: "within", stage: "subdivide", tone: "within",
         sources: ["remaining"]
       },
       {
         id: "between-people",
         x: 805, y: vpdRow.r2.y, width: 260, height: vpdRow.r2.h,
-        lines: ["Between people", "$MS_{people}$"],
+        lines: ["Between people", "$SS_{people}$"],
         parent: "within", stage: "subdivide", tone: "people",
         sources: ["ind-diff"]
       }
@@ -233,10 +234,10 @@ vpdPresetSpecs = {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{error}" }],
         concept: { num: ["treatment", "remaining"], den: ["remaining"] }
       },
-      alt: "Partitioning diagram for a related-samples ANOVA: variance " +
+      alt: "Partitioning diagram for a related-samples ANOVA: variability " +
         "within groups contains remaining chance and individual differences, " +
-        "and is further partitioned into variance between people " +
-        "(individual differences) and error variance (remaining chance). " +
+        "and is further partitioned into variability between people " +
+        "(individual differences) and error (remaining chance). " +
         "The F ratio uses mean square error as its denominator."
     };
   },
@@ -251,19 +252,19 @@ vpdPresetSpecs = {
       {
         id: "factor-a",
         x: 145, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
-        lines: ["Factor A", "$MS_A$"],
+        lines: ["Factor A", "$SS_A$"],
         parent: "between", stage: "subdivide", tone: "between", sources: []
       },
       {
         id: "factor-b",
         x: 400, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
-        lines: ["Factor B", "$MS_B$"],
+        lines: ["Factor B", "$SS_B$"],
         parent: "between", stage: "subdivide", tone: "between", sources: []
       },
       {
         id: "interaction",
         x: 655, y: vpdRow.r2.y, width: 240, height: vpdRow.r2.h,
-        lines: ["A × B interaction", "$MS_{A×B}$"],
+        lines: ["A × B interaction", "$SS_{A×B}$"],
         parent: "between", stage: "subdivide", tone: "between", sources: []
       }
     );
@@ -276,9 +277,9 @@ vpdPresetSpecs = {
           { f: "F_{A×B}", num: "MS_{A×B}", den: "MS_{within}" }
         ]
       },
-      alt: "Partitioning diagram for a factorial ANOVA: variance between " +
-        "treatments is further partitioned into Factor A, Factor B, and the " +
-        "A by B interaction, each of which is compared against variance " +
+      alt: "Partitioning diagram for a factorial ANOVA: variability between " +
+        "groups is further partitioned into Factor A, Factor B, and the " +
+        "A by B interaction, each of which is compared against variability " +
         "within groups in its own F ratio."
     };
   },
@@ -339,9 +340,9 @@ vpdFormulaRowStep = 104
 vpdSourceLineStep = 24
 
 vpdCompactLines = {
-  "between": ["Variance", "between groups", "$MS_{between}$"],
-  "within": ["Variance", "within groups", "$MS_{within}$"],
-  "interaction": ["A × B", "interaction", "$MS_{A×B}$"],
+  "between": ["Variability", "between groups", "$SS_{between}$"],
+  "within": ["Variability", "within groups", "$SS_{within}$"],
+  "interaction": ["A × B", "interaction", "$SS_{A×B}$"],
   "regression": ["Predictable", "variability", "$SS_{regression}$"],
   "residual": ["Unpredictable", "variability", "$SS_{residual}$"]
 }
