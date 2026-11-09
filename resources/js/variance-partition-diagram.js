@@ -35,6 +35,10 @@ vpdPrefersReducedMotion = () => {
 // the ANOVA explorer: purple for the effect, red for chance, brown for people.
 vpdSourceCatalog = {
   "treatment": { label: "Treatment effect", color: "var(--sfs-effect-color, #7654b5)" },
+  "treatments": { label: "Treatment effects", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-a": { label: "Main effect", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-b": { label: "Main effect", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-ab": { label: "Interaction", color: "var(--sfs-effect-color, #7654b5)" },
   "chance": { label: "Chance", color: "var(--sfs-current-color, #d1495b)" },
   "error": { label: "Sampling error", color: "var(--sfs-current-color, #d1495b)" },
   "remaining": { label: "Remaining chance", color: "var(--sfs-current-color, #d1495b)" },
@@ -244,28 +248,30 @@ vpdPresetSpecs = {
 
   "factorial": () => {
     const nodes = vpdAnovaCommonNodes("factorial");
+    // Each part of between holds its own effect, if there is one, plus chance; within holds
+    // chance alone, which is why each part is compared with it.
     nodes[1].x = 350;
-    nodes[1].sources = [];
+    nodes[1].sources = ["treatments", "chance"];
     nodes[2].x = 780;
-    nodes[2].sources = [];
+    nodes[2].sources = ["chance"];
     nodes.push(
       {
         id: "factor-a",
         x: 145, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
         lines: ["Factor A", "$SS_A$"],
-        parent: "between", stage: "subdivide", tone: "between", sources: []
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-a", "chance"]
       },
       {
         id: "factor-b",
         x: 400, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
         lines: ["Factor B", "$SS_B$"],
-        parent: "between", stage: "subdivide", tone: "between", sources: []
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-b", "chance"]
       },
       {
         id: "interaction",
         x: 655, y: vpdRow.r2.y, width: 240, height: vpdRow.r2.h,
         lines: ["A × B interaction", "$SS_{A×B}$"],
-        parent: "between", stage: "subdivide", tone: "between", sources: []
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-ab", "chance"]
       }
     );
     return {
@@ -278,9 +284,10 @@ vpdPresetSpecs = {
         ]
       },
       alt: "Partitioning diagram for a factorial ANOVA: variability between " +
-        "groups is further partitioned into Factor A, Factor B, and the " +
-        "A by B interaction, each of which is compared against variability " +
-        "within groups in its own F ratio."
+        "groups (treatment effects plus chance) is further partitioned into " +
+        "Factor A, Factor B, and the A by B interaction, each holding its own " +
+        "effect plus chance. Each is compared against variability within " +
+        "groups (chance alone) in its own F ratio."
     };
   },
 

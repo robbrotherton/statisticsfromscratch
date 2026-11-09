@@ -4,6 +4,16 @@
   const STAGES = ["populations", "total", "within", "between", "compare"];
   // With people (repeated measures), two more stages come before the comparison.
   const PEOPLE_STAGES = ["populations", "total", "within", "between", "people", "centre", "compare"];
+  // With two crossed factors (Chapter 16), between groups splits into each factor and the
+  // interaction. Each factor is a regrouping, like people; the interaction is what's left.
+  const FACTOR_STAGES = ["populations", "total", "within", "between", "factor-a", "factor-b", "interaction", "compare"];
+  const FACTOR_KEYS = ["factor-a", "factor-b"];
+  // Okabe-Ito colours the cells don't use, for the first factor's levels; the second
+  // factor's match the interaction plot's lines.
+  const LEVEL_COLORS = [
+    ["var(--graph-series-6, #56b4e9)", "var(--graph-series-5, #cc79a7)"],
+    ["var(--graph-series-1, #0072b2)", "var(--graph-series-2, #e69f00)"]
+  ];
   const PHASES = ["observe", "deviations", "squares", "sum"];
   const PEOPLE_PHASES = ["recolour", "rows", ...PHASES];
   // Tableau 10, the people palette of Chapter 13's paired figures, without the colours
@@ -41,7 +51,7 @@
 
   function normalizeStage(value, stages) {
     const key = String(value || "").trim().toLowerCase().replace(/[\s_]+/g, "-");
-    const aliases = { scores: "populations", population: "populations", groups: "populations", f: "compare", ratio: "compare", center: "centre" };
+    const aliases = { scores: "populations", population: "populations", groups: "populations", f: "compare", ratio: "compare", center: "centre", a: "factor-a", b: "factor-b" };
     const normalized = aliases[key] || key;
     return (stages || STAGES).includes(normalized) ? normalized : "populations";
   }
@@ -82,7 +92,7 @@
 
   // The compare stage has its own phases; the other stages use PHASES.
   function phaseForStage(stage, phase) {
-    const valid = { compare: COMPARE_PHASES, people: PEOPLE_PHASES, centre: CENTRE_PHASES }[stage] || PHASES;
+    const valid = { compare: COMPARE_PHASES, people: PEOPLE_PHASES, "factor-a": PEOPLE_PHASES, "factor-b": PEOPLE_PHASES, centre: CENTRE_PHASES }[stage] || PHASES;
     return valid.includes(phase) ? phase : defaultPhaseForStage(stage);
   }
 
@@ -190,7 +200,95 @@
   // `rank` is where a score falls in its group's x order, which stacks a lane's dots top
   // to bottom. Without people the values are already sorted, so it's the index; with them,
   // the index is who the score belongs to and has to stay put.
-  function compute(groups, people) {
+  function compute(groups, people, design) {
+    const result = computeOneWay(groups, people);
+    return design ? { ...result, ...computeFactorial(groups, design, result) } : result;
+  }
+
+  // Each factor's level means (marginal means), and the cell means the two factors predict
+  // with no interaction: level of A + level of B - grand mean. SS for a factor has the same
+  // form as SS between, with its levels as the groups; the interaction is what's left of
+  // SS between, which is also the squared departures of the cell means from that prediction.
+  // That holds for equal cell sizes, which `factorDesign` insists on.
+  function computeFactorial(groups, design, oneWay) {
+    const { observations, grandMean, ssBetween, means, msWithin, dfWithin } = oneWay;
+    const levelStats = design.factors.map((factor, f) => {
+      const levelMeans = factor.levels.map((level, l) =>
+        d3.mean(observations.filter((d) => groups[d.groupIndex].levels[f] === l), (d) => d.value));
+      const counts = factor.levels.map((level, l) =>
+        observations.filter((d) => groups[d.groupIndex].levels[f] === l).length);
+      const ss = d3.sum(levelMeans, (mean, l) => counts[l] * Math.pow(mean - grandMean, 2));
+      const df = factor.levels.length - 1;
+      return { levelMeans, counts, ss, df, ms: ss / df, f: ss / df / msWithin };
+    });
+    const predicted = groups.map((group) =>
+      levelStats[0].levelMeans[group.levels[0]] + levelStats[1].levelMeans[group.levels[1]] - grandMean);
+    const ssInteraction = ssBetween - levelStats[0].ss - levelStats[1].ss;
+    const dfInteraction = levelStats[0].df * levelStats[1].df;
+    const msInteraction = ssInteraction / dfInteraction;
+    // Each observation's place among the scores of its level, for each factor, so a level's
+    // row stacks its dots in x order as a lane does.
+    const levelRanks = design.factors.map((factor, f) => {
+      const ranks = new Map();
+      factor.levels.forEach((level, l) => {
+        observations.filter((d) => groups[d.groupIndex].levels[f] === l)
+          .sort((a, b) => a.value - b.value || a.groupIndex - b.groupIndex || a.index - b.index)
+          .forEach((d, rank) => ranks.set(d, rank));
+      });
+      return ranks;
+    });
+    return {
+      levelStats, predicted, levelRanks, ssInteraction, dfInteraction, msInteraction,
+      fInteraction: msInteraction / msWithin,
+      interactionCheck: d3.sum(groups, (group, i) => group.values.length * Math.pow(means[i] - predicted[i], 2)),
+      dfWithin
+    };
+  }
+
+  // Two crossed factors: `factors` names them and their levels, and each group (a cell)
+  // says which level of each it belongs to. Returns null without the option.
+  function factorDesign(option, rawGroups) {
+    if (!option) return null;
+    if (!Array.isArray(option) || option.length !== 2) {
+      throw new Error("makeAnovaVariabilityExplorer: `factors` needs exactly two factors");
+    }
+    const factors = option.map((factor, f) => {
+      const levels = (Array.isArray(factor.levels) ? factor.levels : []).map(String);
+      if (levels.length < 2) throw new Error(`makeAnovaVariabilityExplorer: factor ${f + 1} needs at least two levels`);
+      const name = String(factor.name || `Factor ${"AB"[f]}`);
+      return {
+        key: FACTOR_KEYS[f],
+        label: name,
+        name: String(factor.shortName || name.toLowerCase()),
+        levels,
+        colors: Array.isArray(factor.colors) ? factor.colors : LEVEL_COLORS[f]
+      };
+    });
+    const cells = new Set();
+    const sizes = new Set();
+    rawGroups.forEach((group, i) => {
+      const levels = Array.isArray(group.levels) ? group.levels.map(Number) : [];
+      if (levels.length !== 2 || levels.some((l, f) => !(l >= 0 && l < factors[f].levels.length))) {
+        throw new Error(`makeAnovaVariabilityExplorer: group ${i + 1} needs \`levels\`, one per factor`);
+      }
+      cells.add(levels.join("-"));
+      sizes.add((Array.isArray(group.values) ? group.values : []).length);
+    });
+    if (cells.size !== rawGroups.length || cells.size !== factors[0].levels.length * factors[1].levels.length) {
+      throw new Error("makeAnovaVariabilityExplorer: `factors` needs exactly one group per cell");
+    }
+    if (sizes.size !== 1) throw new Error("makeAnovaVariabilityExplorer: every cell needs the same number of scores");
+    return {
+      factors,
+      interaction: {
+        key: "between",
+        label: `${factors[0].label} × ${factors[1].name}`,
+        name: `${factors[0].name} × ${factors[1].name}`
+      }
+    };
+  }
+
+  function computeOneWay(groups, people) {
     const observations = [];
     groups.forEach((group, groupIndex) => {
       const order = d3.range(group.values.length).sort((a, b) => group.values[a] - group.values[b] || a - b);
@@ -244,7 +342,12 @@
     // every group. They need the scores' order, so sorting is off. Without this option,
     // nothing below changes.
     const people = personNames(opts.people, Array.isArray(opts.groups) ? opts.groups : DEFAULT_GROUPS);
-    const stageList = people ? PEOPLE_STAGES : STAGES;
+    // Two crossed factors make this a factorial figure. Without the option, nothing below changes.
+    const design = people ? null : factorDesign(opts.factors, Array.isArray(opts.groups) ? opts.groups : []);
+    const factors = design ? design.factors : [];
+    // People and factors both regroup the scores: recolour, then move to new rows.
+    const regroups = Boolean(people || design);
+    const stageList = people ? PEOPLE_STAGES : design ? FACTOR_STAGES : STAGES;
     const buildStages = stageList.filter((stage) => !["populations", "centre", "compare"].includes(stage));
     const sortValues = !people && bool(opts.sort, true);
     // Without the scores the figure is only the comparison, sized for that alone, so it
@@ -254,13 +357,21 @@
       .map((group, index) => {
         const values = (Array.isArray(group.values) ? group.values : []).map(Number).filter(Number.isFinite);
         // Sorted values stack each lane's dots top to bottom in x order.
-        return {
+        const cell = {
           name: String(group.name || group.label || `Group ${index + 1}`),
           values: sortValues ? values.sort((a, b) => a - b) : values
         };
+        if (design) {
+          cell.levels = group.levels.map(Number);
+          // A cell is named by its two levels, one to a line, unless it has a name of its own.
+          if (!group.name && !group.label) {
+            cell.name = cell.levels.map((l, f) => factors[f].levels[l]).join("\n");
+          }
+        }
+        return cell;
       })
       .filter((group) => group.values.length);
-    const stats = compute(groups, people);
+    const stats = compute(groups, people, design);
     const colors = [
       "var(--graph-series-1, #0072b2)",
       "var(--graph-series-2, #e69f00)",
@@ -274,13 +385,17 @@
     const x = d3.scaleLinear().domain([xMin, xMax]);
     const groupY = d3.scalePoint().domain(d3.range(groups.length));
     const personY = d3.scalePoint().domain(d3.range(people ? people.length : 0));
+    // A factor's levels each get a row, spread over the lanes' height.
+    const levelY = d3.scalePoint().domain(d3.range(design ? d3.max(factors, (factor) => factor.levels.length) : 0));
 
     // Geometry is computed from the width the figure is drawn at, so text keeps its
     // real size on phones instead of shrinking with a fixed viewBox. Below
     // COMPACT_BELOW the sums panel moves under the dot plot; desktop tutorials, about
     // 600-620px wide inside their callouts, stay side by side.
     const COMPACT_BELOW = 600;
-    const longestName = d3.max([...groups.map((group) => group.name), ...(people || [])], (name) => name.length) || 6;
+    // A name can run to two lines; its longest line sets the room for it.
+    const longestName = d3.max([...groups.map((group) => group.name), ...(people || []), ...factors.flatMap((factor) => factor.levels)],
+      (name) => d3.max(name.split("\n"), (line) => line.length)) || 6;
     let width;
     let height;
     let compact;
@@ -310,9 +425,9 @@
         // packed tighter: group names sit above their lanes, two lanes sit closer
         // than three, and the sums panel's heading runs above a centred bucket.
         // The people legend can run to two lines above the grand mean's label.
-        const peopleRoom = people ? 18 : 0;
+        const peopleRoom = regroups ? 18 : 0;
         const laneTop = 68 + peopleRoom;
-        const laneSpan = groups.length === 2 ? 128 : 150;
+        const laneSpan = groups.length === 2 ? 128 : groups.length === 3 ? 150 : 250;
         const laneBottom = laneTop + (people ? Math.max(laneSpan, 40 * (people.length - 1)) : laneSpan);
         plot = { left: 16, right: width - 16, top: 34 + peopleRoom, bottom: laneBottom + 40 };
         groupY.range([laneTop, laneBottom]);
@@ -372,6 +487,13 @@
       const below = (side) => Math.max(side * (1 - share), reach(residual, side) + midGap + labelRoom);
       const fitsBeside = (side) => columnLeft(side) + columnWidth(side) + cutLabelRoom <= width - margin &&
         (!showScores || above(side) + below(side) <= height - 2 * margin);
+      if (design) {
+        layoutFactorial({ margin, leftEdge, labelRoom, cutLabelRoom });
+        x.range([plot.left, plot.right]);
+        personY.range(groupY.range());
+        levelY.range(groupY.range());
+        return;
+      }
       let side = compact ? 240 : 270;
       while (side > 60 && !(people ? fitsBeside(side) : fits(side))) side -= 2;
       if (people) {
@@ -388,6 +510,57 @@
       }
       x.range([plot.left, plot.right]);
       personY.range(groupY.range());
+    }
+
+    // Factorial comparison. The total stands at the left, its layers labelled beside it,
+    // until they split: the two factors and the interaction stand in a row on the line, and
+    // within hangs under the middle one. Each of the three is a numerator over the same
+    // denominator, so at F the within mean square is copied under the other two.
+    // `numeratorX` maps each numerator's key to its centre.
+    let numeratorX = {};
+    let numeratorGap;
+    const NUMERATOR_KEYS = ["factor-a", "factor-b", "between"];
+
+    function layoutFactorial({ margin, leftEdge, labelRoom, cutLabelRoom }) {
+      const parts = aggregateSquares(true).filter((d) => d.df);
+      const byKey = (key) => parts.find((d) => d.key === key);
+      const relative = (d) => Math.sqrt(d.value / stats.ssTotal);
+      const share = stats.ssBetween / stats.ssTotal;
+      const within = byKey("within");
+      // Room for "÷ 1" between the numerators as they're cut.
+      numeratorGap = compact ? 36 : 44;
+      const fRow = 24;
+      const rowWidth = (side) => d3.sum(NUMERATOR_KEYS, (key) => relative(byKey(key)) * side) + 2 * numeratorGap;
+      const tallest = (side) => d3.max(NUMERATOR_KEYS, (key) => relative(byKey(key)) * side);
+      const withinReach = (side) => Math.max(relative(within) * side, cutPieces(within, relative(within) * side).height);
+      const above = (side) => Math.max(side * share, tallest(side) + midGap + labelRoom);
+      const below = (side) => Math.max(side * (1 - share), withinReach(side) + midGap + labelRoom + fRow);
+      // The layers' names stand beside the total, so it leaves them room on the right.
+      const besideRoom = (compact ? 7.2 : 7.8) * (3 + d3.max(parts, (d) => d.name.length)) + 18;
+      const fitsFactorial = (side) => leftEdge + side + besideRoom <= width - 8 &&
+        rowWidth(side) + cutLabelRoom <= width - 2 * margin &&
+        cutPieces(within, relative(within) * side).width <= width - 2 * (margin + cutLabelRoom) &&
+        (!showScores || above(side) + below(side) <= height - 2 * margin);
+      let side = compact ? 240 : 270;
+      while (side > 60 && !fitsFactorial(side)) side -= 2;
+      if (!showScores) height = Math.ceil(above(side) + below(side) + (compact ? 16 : 24));
+      midline = (height - above(side) - below(side)) / 2 + above(side);
+      wideSquare = { x: leftEdge, y: midline - side * share, side };
+      // The row is centred, leaving the last numerator's "÷ 1" room on the right.
+      let left = (width - rowWidth(side) - cutLabelRoom) / 2 + cutLabelRoom / 2;
+      numeratorX = {};
+      NUMERATOR_KEYS.forEach((key) => {
+        const w = relative(byKey(key)) * side;
+        numeratorX[key] = left + w / 2;
+        left += w + numeratorGap;
+      });
+      compareCx = numeratorX["factor-b"];
+    }
+
+    // Where a part of the comparison stands: numerators by their own centre, within under
+    // the middle one. Without factors, everything shares one column.
+    function partCx(d) {
+      return design && numeratorX[d.key] !== undefined ? numeratorX[d.key] : compareCx;
     }
 
     function stageFor(value) {
@@ -433,7 +606,7 @@
     // Above the scores: while they're in play, the stand-ins are what's being counted.
     const ghostsLayer = plotGroup.append("g").attr("class", "ave-ghosts");
     // Says who's who wherever dots wear people's colours outside their rows.
-    const legendLayer = people ? plotGroup.append("g").attr("class", "ave-legend").style("opacity", 0) : null;
+    const legendLayer = regroups ? plotGroup.append("g").attr("class", "ave-legend").style("opacity", 0) : null;
 
     const panelGroup = svg.append("g").attr("class", "ave-squares-panel");
     const panelRect = panelGroup.append("rect")
@@ -503,6 +676,24 @@
       const show = state.calculations && state.stage !== "compare";
       calculationBox.attr("hidden", show ? null : true);
       if (!show) return;
+      if (design) {
+        // Each sum appears once it has been counted, and the mean squares and Fs with the last.
+        const ss = (label, value) => `<span><strong>SS<sub>${label}</sub></strong> = ${fmt(value)}</span>`;
+        const parts = [ss("total", stats.ssTotal), ss("within", stats.ssWithin), ss("between", stats.ssBetween)];
+        factors.forEach((factor, f) => {
+          if (factorPoured(factor.key)) parts.push(ss(factor.name, stats.levelStats[f].ss));
+        });
+        if (interactionCounted()) {
+          parts.push(ss(design.interaction.name, stats.ssInteraction));
+          const msWithin = `${fmt(stats.msWithin, 2)}`;
+          factors.forEach((factor, f) => {
+            parts.push(`<span><strong>F<sub>${factor.name}</sub></strong> = ${fmt(stats.levelStats[f].ms, 2)} / ${msWithin} = ${fmt(stats.levelStats[f].f)}</span>`);
+          });
+          parts.push(`<span><strong>F<sub>${design.interaction.name}</sub></strong> = ${fmt(stats.msInteraction, 2)} / ${msWithin} = ${fmt(stats.fInteraction)}</span>`);
+        }
+        calculationBox.html(`<div class="ave-calc-grid">${parts.join("")}</div>`);
+        return;
+      }
       if (people && aggregateRevealLevel() >= buildStages.length) {
         // Error and everything that depends on it wait until it has been counted.
         const counted = errorCounted() ? `
@@ -560,7 +751,7 @@
         selection.select(".ave-pop-line").attr("d", line(data)).attr("stroke", curveColor);
       });
       curves.interrupt().transition().duration(animate ? 420 : 0)
-        .style("opacity", personColoured() ? 0 : visible ? 1 : state.stage === "total" ? 0.1 : 0.07);
+        .style("opacity", regrouped() ? 0 : visible ? 1 : state.stage === "total" ? 0.1 : 0.07);
     }
 
     // Colour marks the grouping currently in use: none for the total, conditions for the
@@ -568,11 +759,31 @@
     // rows end up one colour each, as the condition lanes were.
     function grouping() {
       if (state.stage === "total") return "none";
+      if (FACTOR_KEYS.includes(state.stage)) return state.stage;
       return state.stage === "people" || state.stage === "centre" ? "person" : "condition";
     }
 
     function personColoured() {
       return grouping() === "person";
+    }
+
+    // The factor the scores are grouped by in this stage, if any.
+    function activeFactor() {
+      return design ? FACTOR_KEYS.indexOf(state.stage) : -1;
+    }
+
+    function levelOf(d, f) {
+      return groups[d.groupIndex].levels[f];
+    }
+
+    // Grouped by something other than the cells: people, or one factor's levels.
+    function regrouped() {
+      return !["none", "condition"].includes(grouping());
+    }
+
+    function levelFill(f, level) {
+      const palette = factors[f].colors;
+      return palette[level % palette.length];
     }
 
     function personFill(i) {
@@ -581,6 +792,8 @@
     }
 
     function dotFill(d) {
+      const f = activeFactor();
+      if (f >= 0) return levelFill(f, levelOf(d, f));
       return {
         none: "var(--ave-total)",
         condition: colors[d.groupIndex % colors.length],
@@ -589,10 +802,23 @@
     }
 
     // After the recolour, the condition lanes give way to one row per person. People are
-    // centred in their rows, and the scores go back to the lanes after that.
+    // centred in their rows, and the scores go back to the lanes after that. A factor's
+    // levels get a row each in the same way.
     function rowsView() {
       if (state.stage === "centre") return state.phase === "shift";
-      return state.stage === "people" && state.phase !== "recolour";
+      return (state.stage === "people" || activeFactor() >= 0) && state.phase !== "recolour";
+    }
+
+    // Which rows the scores are in, so a move from one factor's rows to the other's counts
+    // as a regrouping too.
+    function rowsKey() {
+      return rowsView() ? grouping() : "lanes";
+    }
+
+    // A level's row holds every score at that level, stacked in x order.
+    function levelRowY(d, f, spread) {
+      const count = stats.levelStats[f].counts[levelOf(d, f)];
+      return levelY(levelOf(d, f)) + squares.laneOffset(stats.levelRanks[f].get(d), count) * (spread || 1);
     }
 
     function targetY(d) {
@@ -601,6 +827,7 @@
 
     // A person's scores stack in condition order within their row.
     function dotY(d) {
+      if (rowsView() && activeFactor() >= 0) return levelRowY(d, activeFactor());
       return rowsView()
         ? personY(d.index) + squares.laneOffset(d.groupIndex, groups.length)
         : targetY(d);
@@ -615,13 +842,20 @@
     function renderLanes(animate, moves) {
       const deemphasizeGroups = state.stage === "total";
       const rows = rowsView();
-      const laneData = rows ? people.map((name, i) => `person-${i}`) : d3.range(groups.length);
-      const laneY = (d) => rows ? personY(Number(String(d).replace("person-", ""))) : groupY(d);
+      const f = activeFactor();
+      const levelRows = rows && f >= 0;
+      const laneData = levelRows ? factors[f].levels.map((level, i) => `${factors[f].key}-${i}`)
+        : rows ? people.map((name, i) => `person-${i}`) : d3.range(groups.length);
+      const laneY = (d) => {
+        if (!rows) return groupY(d);
+        const i = Number(String(d).replace(/^.*-/, ""));
+        return levelRows ? levelY(i) : personY(i);
+      };
       const lanes = lanesLayer.selectAll("line.ave-lane").data(laneData, String);
       const swap = moves.crossing ? 420 : 0;
       lanes.join((enter) => {
         const line = enter.append("line").attr("y1", laneY).attr("y2", laneY);
-        return people ? line.style("opacity", 0) : line;
+        return regroups ? line.style("opacity", 0) : line;
       }, undefined, (exit) => exit.transition().delay(moves.labelsOut).duration(swap).style("opacity", 0).remove())
         .attr("class", "ave-lane")
         .attr("x1", plot.left).attr("x2", plot.right)
@@ -631,13 +865,16 @@
         .style("opacity", deemphasizeGroups ? 0.42 : 1);
       lanes.exit().remove();
 
+      const labelData = deemphasizeGroups ? []
+        : levelRows ? factors[f].levels.map((name, level) => ({ name, level, key: `${factors[f].key}-${level}` }))
+        : rows ? people.map((name) => ({ name })) : groups;
       const labels = lanesLayer.selectAll("text.ave-group-label")
-        .data(deemphasizeGroups ? [] : rows ? people.map((name) => ({ name })) : groups, (d) => d.name);
-      // With people, names swap one set at a time: the old ones go, then the new ones come.
+        .data(labelData, (d) => d.key || d.name);
+      // With people or factors, names swap one set at a time: the old ones go, then the new ones come.
       const named = labels.join((enter) => {
         const text = enter.append("text");
-        return people ? text.style("opacity", 0) : text;
-      }, undefined, (exit) => people
+        return regroups ? text.style("opacity", 0) : text;
+      }, undefined, (exit) => regroups
         ? exit.transition("swap").delay(moves.labelsOut).duration(swap).style("opacity", 0).remove()
         : exit.remove());
       named
@@ -648,18 +885,44 @@
         .attr("text-anchor", compact ? "start" : "end")
         .attr("fill", (d, i) => {
           // The palette's yellow and pink are too pale for text as they are.
+          if (levelRows) return `color-mix(in srgb, ${levelFill(f, d.level)} 62%, var(--sfs-text, #222))`;
           if (rows) return `color-mix(in srgb, ${personFill(i)} 62%, var(--sfs-text, #222))`;
+          if (f >= 0) return "currentColor";
           return personColoured() ? "currentColor" : colors[i % colors.length];
         })
-        .text((d) => d.name)
         // Lanes never move between steps, so a returning label is placed, not slid in.
-        .attr("y", (d, i) => rows ? personY(i) + (compact ? -9 : 5) : groupY(i) + lane.name);
-      if (people) {
+        .attr("y", (d, i) => {
+          if (levelRows) return levelY(d.level) + (compact ? -9 : 5);
+          return rows ? personY(i) + (compact ? -9 : 5) : groupY(i) + lane.name;
+        });
+      if (design) {
+        // Names can sit over a neighbouring lane's squares on a phone, so they keep a halo.
+        named.style("paint-order", "stroke").style("stroke", "var(--bs-body-bg, #fff)")
+          .style("stroke-width", "3px").style("stroke-linejoin", "round");
+        // A cell's name is its two levels: one to a line beside the lane, one line above it on a phone.
+        named.each(function(d) {
+          const lines = String(d.name).split("\n");
+          const text = d3.select(this).text(null);
+          if (compact || lines.length === 1) {
+            text.text(lines.join(", "));
+            return;
+          }
+          text.selectAll("tspan").data(lines).join("tspan")
+            .attr("x", compact ? plot.left : plot.left - 12)
+            .attr("dy", (line, i) => i ? "1.15em" : `${-0.575 * (lines.length - 1)}em`)
+            .text((line) => line);
+        });
+      } else {
+        named.text((d) => d.name);
+      }
+      if (regroups) {
         named.style("transition", animate ? `fill 600ms ease ${moves.fillDelay}ms` : "none")
           .transition("swap").delay(moves.labelsIn).duration(swap).style("opacity", 1);
       }
       renderLegend(animate, moves);
     }
+
+    let legendFactor = 0;
 
     function renderLegend(animate, moves) {
       if (!legendLayer) return;
@@ -667,7 +930,13 @@
       const room = width - plot.left - 8;
       const lines = [[]];
       let used = 0;
-      people.forEach((name, i) => {
+      // With factors, the legend names the levels of the factor in use, and keeps the last
+      // one's while it fades.
+      const f = activeFactor();
+      if (design && f >= 0) legendFactor = f;
+      const names = design ? factors[legendFactor].levels : people;
+      const fill = (i) => design ? levelFill(legendFactor, i) : personFill(i);
+      names.forEach((name, i) => {
         if (used + entryWidth(name) > room && used > 0) {
           lines.push([]);
           used = 0;
@@ -687,9 +956,9 @@
           return entry;
         })
         .attr("transform", (d) => `translate(${plot.left + d.left + 5},${d.y})`);
-      entries.select("circle").attr("fill", (d) => personFill(d.i));
+      entries.select("circle").attr("fill", (d) => fill(d.i));
       entries.select("text").attr("fill", "currentColor").text((d) => d.name);
-      const showing = personColoured() && !rowsView();
+      const showing = (design ? f >= 0 : personColoured()) && !rowsView();
       legendLayer.interrupt()
         .transition().delay(showing ? Math.max(moves.fillDelay, moves.labelsIn) : moves.labelsOut)
         .duration(animate ? 420 : 0)
@@ -701,20 +970,24 @@
     // treats it as shifted with the person's other scores. Those are fictions, so they're
     // drawn as ghosts. The scores themselves stay put.
     function standIn(d) {
-      if (state.stage === "between") return stats.means[d.groupIndex];
+      if (state.stage === "between" || state.stage === "interaction") return stats.means[d.groupIndex];
+      const f = activeFactor();
+      if (f >= 0) return ["recolour", "rows"].includes(state.phase) ? null : stats.levelStats[f].levelMeans[levelOf(d, f)];
       if (state.stage === "centre") return centredValue(d);
       if (state.stage === "people" && !["recolour", "rows"].includes(state.phase)) return stats.personMeans[d.index];
       return null;
     }
 
     function hasStandIns() {
-      return standIn({ groupIndex: 0, index: 0, value: 0 }) !== null;
+      return standIn(stats.observations[0]) !== null;
     }
 
     // Stand-ins at a mean spread out to be counted: each one is somebody, pretending to be
     // exactly average. Centred scores keep the place their scores have.
     function ghostY(d) {
       if (state.stage === "centre") return dotY(d);
+      // A level's eight or more stand-ins spread less than a lane's few, to stay in their row.
+      if (activeFactor() >= 0) return levelRowY(d, activeFactor(), 1.6);
       return state.stage === "people"
         ? personY(d.index) + squares.laneOffset(d.groupIndex, groups.length) * GHOST_SPREAD
         : groupY(d.groupIndex) + squares.laneOffset(d.rank, groups[d.groupIndex].values.length) * GHOST_SPREAD;
@@ -751,7 +1024,7 @@
         .attr("fill", dotFill);
       // With people the fill eases between groupings, through CSS because these colours
       // can be var()s, which d3 can't interpolate.
-      if (people) dots.style("transition", animate ? `fill 600ms ease ${moves.fillDelay}ms` : "none");
+      if (regroups) dots.style("transition", animate ? `fill 600ms ease ${moves.fillDelay}ms` : "none");
       // Everywhere else the real scores stay in view. Centred scores aren't real times, though,
       // and the two side by side compete for attention and invite comparisons that mean
       // nothing, so here the scores hand over to the outlines and stay out of the way.
@@ -801,6 +1074,36 @@
           y: personY(i),
           color: "var(--ave-people)",
           weight: groups.length
+        }));
+      }
+      const f = FACTOR_KEYS.indexOf(stage);
+      if (design && f >= 0) {
+        // The same move again, with a factor's levels as the groups: one square per level,
+        // counted once for every score at that level.
+        const level = stats.levelStats[f];
+        return factors[f].levels.map((name, i) => ({
+          groupIndex: i,
+          index: 0,
+          rank: i,
+          lanes: factors[f].levels.length,
+          from: level.levelMeans[i],
+          to: stats.grandMean,
+          y: levelY(i),
+          color: "var(--ave-between)",
+          weight: level.counts[i]
+        }));
+      }
+      if (stage === "interaction") {
+        // Each cell mean against the mean the two factors alone predict for it, counted once
+        // per score in the cell.
+        return groups.map((group, i) => ({
+          groupIndex: i,
+          index: 0,
+          from: stats.means[i],
+          to: stats.predicted[i],
+          y: groupY(i),
+          color: "var(--ave-between)",
+          weight: group.values.length
         }));
       }
       if (stage === "centre") {
@@ -862,7 +1165,7 @@
 
     function renderDeviations(animate, transitions) {
       transitions = transitions || {};
-      const showLines = ["total", "within", "between", "people", "centre"].includes(state.stage) && phaseIndex() >= 1;
+      const showLines = ["total", "within", "between", "people", "centre", "factor-a", "factor-b", "interaction"].includes(state.stage) && phaseIndex() >= 1;
       const items = (showLines ? deviationData() : []).map((d) => ({
         key: `${d.groupIndex}-${d.index}`,
         x1: x(d.from),
@@ -882,25 +1185,46 @@
     }
 
     function renderMeans(animate, moves) {
-      const showGroupMeans = ["within", "between", "compare", "populations", "centre"].includes(state.stage);
-      const showPersonMeans = rowsView() && state.phase !== "rows";
-      const showGrand = ["total", "between", "compare", "centre"].includes(state.stage) || showPersonMeans;
+      const f = activeFactor();
+      const showGroupMeans = ["within", "between", "compare", "populations", "centre", "interaction"].includes(state.stage);
+      const showPersonMeans = rowsView() && state.phase !== "rows" && f < 0;
+      const showLevelMeans = rowsView() && state.phase !== "rows" && f >= 0;
+      const showGrand = ["total", "between", "compare", "centre"].includes(state.stage) || showPersonMeans || showLevelMeans;
       // Centring carries each person's mean to the grand mean, and their scores with it.
       const meanX = (d) => x(d.person && state.stage === "centre" ? stats.grandMean : d.mean);
-      const meanData = showPersonMeans
-        ? stats.personMeans.map((mean, i) => ({ mean, i, person: true }))
-        : showGroupMeans ? stats.means.map((mean, i) => ({ mean, i })) : [];
+      const meanData = showLevelMeans
+        ? stats.levelStats[f].levelMeans.map((mean, i) => ({ mean, i, level: f }))
+        : showPersonMeans
+          ? stats.personMeans.map((mean, i) => ({ mean, i, person: true }))
+          : showGroupMeans ? stats.means.map((mean, i) => ({ mean, i })) : [];
+      // In the interaction stage, each cell also shows the mean the two factors predict for it.
+      if (state.stage === "interaction") {
+        stats.predicted.forEach((mean, i) => meanData.push({ mean, i, prediction: true }));
+      }
       const meanColor = (d) => {
+        if (d.prediction) return "var(--ave-between)";
+        if (d.level !== undefined) return levelFill(d.level, d.i);
         if (d.person) return personFill(d.i);
-        return personColoured() ? "var(--ave-total)" : colors[d.i % colors.length];
+        return regrouped() ? "var(--ave-total)" : colors[d.i % colors.length];
       };
-      const meanRowY = (d) => d.person ? personY(d.i) : groupY(d.i);
-      const meanHalf = (d) => d.person ? Math.min(16, personY.step() / 2 - 3) : lane.meanHalf;
+      const meanRowY = (d) => d.level !== undefined ? levelY(d.i) : d.person ? personY(d.i) : groupY(d.i);
+      const meanHalf = (d) => {
+        if (d.level !== undefined) return lane.meanHalf;
+        return d.person ? Math.min(16, personY.step() / 2 - 3) : lane.meanHalf;
+      };
       const meanName = (d) => {
+        if (d.prediction) return d.i === 0 && !compact ? "prediction" : "";
+        if (d.level !== undefined) return d.i === 0 && !compact ? `${factors[d.level].name} mean` : "";
+        if (state.stage === "interaction") return d.i === 0 && !compact ? "cell mean" : "";
         if (!d.person) return compact ? "" : "group mean";
         return d.i === 0 && state.stage === "people" ? "person mean" : "";
       };
-      const means = meansLayer.selectAll("g.ave-group-mean").data(meanData, (d) => d.person ? `person-${d.i}` : d.i);
+      const meanKey = (d) => {
+        if (d.prediction) return `prediction-${d.i}`;
+        if (d.level !== undefined) return `level-${d.level}-${d.i}`;
+        return d.person ? `person-${d.i}` : d.i;
+      };
+      const means = meansLayer.selectAll("g.ave-group-mean").data(meanData, meanKey);
       const meanEnter = means.enter().append("g").attr("class", "ave-group-mean").style("opacity", 0);
       meanEnter.append("line").attr("class", "ave-mean-line");
       meanEnter.append("text").attr("class", "ave-mean-label").attr("text-anchor", "middle");
@@ -914,11 +1238,24 @@
       } else {
         meanLines.attr("x1", meanX).attr("x2", meanX);
       }
+      // A prediction is drawn finer than a mean, so the two read apart.
+      if (design) meanLines.style("stroke-dasharray", (d) => d.prediction ? "2 3" : null);
+      // A cell's mean and its prediction sit close together, so their labels read away
+      // from each other: which way depends on which is higher.
+      const apart = (d) => {
+        if (state.stage !== "interaction") return 0;
+        const lower = stats.predicted[d.i] < stats.means[d.i];
+        return (d.prediction === lower) ? -1 : 1;
+      };
       meanMerged.select("text")
         .attr("fill", meanColor)
         // A person's mean can sit close to the grand mean, so its label reads away from that line.
-        .attr("text-anchor", (d) => d.person ? "start" : "middle")
-        .attr("x", (d) => x(d.mean) - (d.person ? 6 : 0)).attr("y", (d) => meanRowY(d) - (d.person ? meanHalf(d) + 5 : lane.meanLabel))
+        .attr("text-anchor", (d) => {
+          if (apart(d)) return apart(d) < 0 ? "end" : "start";
+          return d.person ? "start" : "middle";
+        })
+        .attr("x", (d) => x(d.mean) - (d.person ? 6 : 0) + apart(d) * 4)
+        .attr("y", (d) => meanRowY(d) - (d.person ? meanHalf(d) + 5 : lane.meanLabel))
         // On a phone the group names sit above the lanes, where these labels would collide with them.
         .text(meanName);
       // Means belonging to where the scores are going wait for them to arrive.
@@ -953,12 +1290,54 @@
         { key: "between", name: "between", label: "Between", value: stats.ssBetween, base: stats.ssWithin, color: "var(--ave-between)", reveal: 3, df: stats.dfBetween, ms: stats.msBetween, msPhase: 2 },
         { key: "within", name: "within", label: "Within", value: stats.ssWithin, base: 0, color: "var(--ave-within)", reveal: 2, df: stats.dfWithin, ms: stats.msWithin, msPhase: 3 }
       ];
+      if (design) return factorialLayers(layers, settled);
       if (!people) return layers;
       if (settled || peoplePoured()) {
         Object.assign(layers[2], { name: "error", label: "Error", value: stats.ssError, base: stats.ssPeople, df: stats.dfError, ms: stats.msError });
       }
       layers.push({ key: "people", name: "people", label: "People", value: stats.ssPeople, base: 0, color: "var(--ave-people)", reveal: buildStages.length });
       return layers;
+    }
+
+    // With factors, between splits in place, as within does for people: each factor pours
+    // in at the bottom of it, on top of within, and what's left above them is the
+    // interaction. That remainder does everything between did, so it keeps between's key.
+    // Both factors and the interaction are numerators, so they all have df.
+    function factorialLayers(layers, settled) {
+      const between = layers[1];
+      let base = stats.ssWithin;
+      factors.forEach((factor, f) => {
+        const level = stats.levelStats[f];
+        layers.push({
+          key: factor.key, name: factor.name, label: factor.label, value: level.ss, base,
+          color: "var(--ave-between)", fillOpacity: f ? 0.12 : 0.26,
+          reveal: buildStages.indexOf(factor.key) + 1, df: level.df, ms: level.ms, msPhase: 2
+        });
+        if (settled || factorPoured(factor.key)) {
+          base += level.ss;
+          Object.assign(between, { base, value: stats.ssBetween - (base - stats.ssWithin) });
+        }
+      });
+      if (settled || factorPoured("factor-b")) {
+        Object.assign(between, { name: design.interaction.name, label: design.interaction.label, ms: stats.msInteraction, df: stats.dfInteraction });
+      }
+      return layers;
+    }
+
+    function factorPoured(key) {
+      return aggregateRevealLevel() > buildStages.indexOf(key);
+    }
+
+    // Between as it stood before a factor poured into it, which then gives way as it lands.
+    function betweenBefore(key) {
+      const before = factors.slice(0, FACTOR_KEYS.indexOf(key)).reduce((sum, factor, f) => sum + stats.levelStats[f].ss, 0);
+      return { base: stats.ssWithin + before, value: stats.ssBetween - before };
+    }
+
+    // After both factors pour in, what's left of between is an empty slot with no name. It
+    // becomes the interaction when the cells' departures from the prediction fill it.
+    function interactionCounted() {
+      return state.stage === "compare" || (state.stage === "interaction" && state.phase === "sum");
     }
 
     function peoplePoured() {
@@ -973,6 +1352,7 @@
 
     function layerLabelled(d) {
       if (aggregateRevealLevel() < d.reveal) return false;
+      if (design && d.key === "between") return !factorPoured("factor-a") || interactionCounted();
       return !(people && d.key === "within" && peoplePoured() && !errorCounted());
     }
 
@@ -1018,8 +1398,8 @@
     // Squares either side of the line: between stands on it, within hangs from it.
     function besideLine(d, side) {
       return {
-        x: compareCx - side / 2,
-        y: d.key === "between" ? midline - midGap - side : midline + midGap,
+        x: partCx(d) - side / 2,
+        y: d.key !== "within" ? midline - midGap - side : midline + midGap,
         width: side,
         height: side
       };
@@ -1039,9 +1419,13 @@
       if (d.key === "total") return { name: state.calculations ? `SS total = ${fmt(d.value)}` : "SS total", value: "" };
       if (isLifted(d)) return { name: `MS ${d.name}`, value: msDetail(d) };
       // Beside the total, or inside it, a label is a single line.
-      if (d.key === "people" || (people && !isSplit())) {
-        const narrowBucket = people && wideSquare.side < 150;
-        return { name: state.calculations && !narrowBucket ? `SS ${d.name} = ${fmt(d.value)}` : `SS ${d.name}`, value: "" };
+      if (d.key === "people" || (regroups && !isSplit())) {
+        const withValue = `SS ${d.name} = ${fmt(d.value)}`;
+        // A name beside the total keeps its value only if both fit before the edge.
+        const narrowBucket = design
+          ? wideSquare.x + wideSquare.side + 18 + withValue.length * (compact ? 7.2 : 7.8) > width - 8
+          : regroups && wideSquare.side < 150;
+        return { name: state.calculations && !narrowBucket ? withValue : `SS ${d.name}`, value: "" };
       }
       return { name: `SS ${d.name}`, value: state.calculations ? fmt(d.value) : "" };
     }
@@ -1049,7 +1433,7 @@
     // The edge a comparison label keeps to: the total's, then the sum's, then the mean
     // square's. While the sum is cut, `spread` gives the outer edge of its spread pieces.
     function labelEdge(d, spread) {
-      const above = d.key === "between";
+      const above = d.key === "between" || FACTOR_KEYS.includes(d.key);
       if (!isSplit()) return above ? wideSquare.y : wideSquare.y + wideSquare.side;
       const sumSide = areaSide(d.value, wideSquare);
       const reach = spread ? cutPieces(d, sumSide).height : isLifted(d) ? msGeometry(d).height : sumSide;
@@ -1070,7 +1454,8 @@
         const top = ssGeometry(d, d.value, layout).y;
         // Error is too thin to hold its name, which sits in the top right of the people
         // layer instead, with a leader up into the layer it names.
-        if (people && d.key === "within" && peoplePoured()) {
+        // So is the second factor, often, which sits in the top right of the first's layer.
+        if ((people && d.key === "within" && peoplePoured()) || (design && d.key === "factor-b")) {
           const sheet = ssGeometry(d, d.value, layout);
           const under = sheet.y + sheet.height;
           const right = layout.x + layout.side - 8;
@@ -1102,8 +1487,9 @@
         const left = { x: wideSquare.x + 10, y: top + 22, anchor: "start" };
         return { transform: none, name: left, value: left };
       }
-      // Between and error are labelled beside the total until they leave it.
-      if (people && !isSplit()) {
+      // Between and error are labelled beside the total until they leave it, as are the
+      // factors, the interaction and within.
+      if (regroups && !isSplit()) {
         const layer = ssGeometry(d, d.value, wideSquare);
         const mid = layer.y + layer.height / 2;
         const right = wideSquare.x + wideSquare.side;
@@ -1111,9 +1497,9 @@
         return { transform: none, name: beside, value: beside, leader: { x1: right + 2, y1: mid, x2: right + 14, y2: mid } };
       }
       const edge = labelEdge(d, spread);
-      const cx = compareCx;
+      const cx = partCx(d);
       // Lines read name then value either way; between's stack up away from its shape.
-      if (d.key === "between") {
+      if (d.key === "between" || FACTOR_KEYS.includes(d.key)) {
         const hasValue = Boolean(labelLines(d).value);
         return {
           transform: none,
@@ -1142,7 +1528,7 @@
         name.text(lines.name);
         value.text(lines.value);
       }
-      if (people) {
+      if (regroups) {
         const end = p.leader || { x1: 0, y1: 0, x2: 0, y2: 0 };
         target.select(".ave-leader")
           .attr("x1", end.x1).attr("y1", end.y1).attr("x2", end.x2).attr("y2", end.y2)
@@ -1207,7 +1593,7 @@
       const entered = items.enter().append("g").attr("class", "ave-ss-item");
       entered.append("rect")
         .attr("class", "ave-square")
-        .attr("fill-opacity", 0.18).attr("stroke-width", 1.5)
+        .attr("fill-opacity", (d) => d.fillOpacity || 0.18).attr("stroke-width", 1.5)
         .each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
       const merged = entered.merge(items);
       // The total has no square of its own once its layers have split away.
@@ -1224,8 +1610,11 @@
       const driven = (d) => animate && d.key === revealKey;
       sumRects.filter(driven).each(function(d) { setRect(d3.select(this), ssGeometry(d, 0, layout)); });
       // As people pour in, within stays whole; it gives way as each piece lands.
-      const yielding = (d) => animate && revealKey === "people" && d.key === "within";
-      sumRects.filter(yielding).each(function() { setRect(d3.select(this), wholeWithin(layout)); });
+      const yielding = (d) => animate && ((revealKey === "people" && d.key === "within") ||
+        (design && FACTOR_KEYS.includes(revealKey) && d.key === "between"));
+      sumRects.filter(yielding).each(function() {
+        setRect(d3.select(this), design ? betweenBeforeGeometry(revealKey, layout) : wholeWithin(layout));
+      });
       sumRects.filter((d) => !driven(d) && !yielding(d))
         .transition()
         .duration(squareDuration).ease(d3.easeCubicInOut)
@@ -1238,6 +1627,14 @@
         const emptied = peoplePoured() && !errorCounted();
         sumRects.filter((d) => d.key === "within").transition("tint")
           .delay(animate && revealKey === "people" ? (pourDelay || 0) + pourDuration : 0)
+          .duration(animate && emptied ? 500 : 0)
+          .attr("fill-opacity", emptied ? 0.05 : 0.18);
+      }
+      // Likewise the slot the factors leave in between, until the interaction fills it.
+      if (design) {
+        const emptied = factorPoured("factor-a") && !interactionCounted();
+        sumRects.filter((d) => d.key === "between").transition("tint")
+          .delay(animate && FACTOR_KEYS.includes(revealKey) ? (pourDelay || 0) + pourDuration : 0)
           .duration(animate && emptied ? 500 : 0)
           .attr("fill-opacity", emptied ? 0.05 : 0.18);
       }
@@ -1260,6 +1657,11 @@
 
     function wholeWithin(layout) {
       return ssGeometry({ base: 0 }, stats.ssWithin, layout);
+    }
+
+    function betweenBeforeGeometry(key, layout) {
+      const before = betweenBefore(key);
+      return ssGeometry({ base: before.base }, before.value, layout);
     }
 
     // Pour each squared deviation into the container: it flies to the mouth, drops to the
@@ -1292,6 +1694,12 @@
           squaresLayer.selectAll("g.ave-ss-item").filter((d) => d.key === "within").select("rect")
             .transition().duration(duration).ease(d3.easeCubicOut)
             .attr("height", wholeWithin(layout).height * (1 - total / stats.ssWithin));
+        } : design && FACTOR_KEYS.includes(revealKey) ? (total, duration) => {
+          // Between gives way from the bottom as the factor rises into it.
+          const before = betweenBefore(revealKey);
+          squaresLayer.selectAll("g.ave-ss-item").filter((d) => d.key === "between").select("rect")
+            .transition().duration(duration).ease(d3.easeCubicOut)
+            .attr("height", betweenBeforeGeometry(revealKey, layout).height * (1 - total / before.value));
         } : undefined
       });
     }
@@ -1304,7 +1712,7 @@
 
     function msDetail(d) {
       return state.calculations
-        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, people ? 2 : 1)}`
+        ? `${fmt(d.value)} ÷ ${d.df} = ${fmt(d.ms, regroups ? 2 : 1)}`
         : `SS ${d.name} ÷ ${d.df}`;
     }
 
@@ -1335,7 +1743,7 @@
       const plan = squares.planCut({
         df: d.df,
         side: ss.width,
-        cx: compareCx,
+        cx: partCx(d),
         cy: ss.y + ss.height / 2,
         align: d.key === "within" ? "top" : "bottom",
         target: msGeometry(d),
@@ -1366,11 +1774,11 @@
       const entered = labels.enter().append("g").attr("class", "ave-label").style("opacity", 0);
       entered.append("text").attr("class", "ave-ss-label").attr("fill", (d) => d.color);
       entered.append("text").attr("class", "ave-ss-value");
-      if (people) entered.append("line").attr("class", "ave-leader").style("opacity", 0);
+      if (regroups) entered.append("line").attr("class", "ave-leader").style("opacity", 0);
       entered.each(function(d) { placeLabel(d3.select(this), d); });
       // Within's name stays until people have finished pouring into it.
       labels.exit().transition()
-        .delay(animate && moves.revealKey === "people" ? (moves.pourDelay || 0) + pourDuration : 0)
+        .delay(animate && (moves.revealKey === "people" || (design && FACTOR_KEYS.includes(moves.revealKey))) ? (moves.pourDelay || 0) + pourDuration : 0)
         .duration(animate ? 220 : 0).style("opacity", 0).remove();
       const merged = entered.merge(labels);
       // The total's label goes with the total once it has split.
@@ -1407,7 +1815,8 @@
         }
         // A layer still being poured is labelled once its pour has finished.
         // Within becomes error as people finish pouring.
-        const poured = d.key === moves.revealKey || (moves.revealKey === "people" && d.key === "within");
+        const poured = d.key === moves.revealKey || (moves.revealKey === "people" && d.key === "within") ||
+          (design && FACTOR_KEYS.includes(moves.revealKey) && d.key === "between");
         const delay = poured && d.key !== "total" ? (moves.pourDelay || 0) + pourDuration : 0;
         label.transition().delay(delay).duration(moves.splitting ? 900 : 760).ease(d3.easeCubicInOut)
           .call(placeLabel, d)
@@ -1416,7 +1825,65 @@
     }
 
     // F is the fraction itself: the gap the two have kept since the partition gets its bar.
+    // With factors there are three fractions over one denominator. The within mean square
+    // stands under the middle numerator; dashed copies of it slide out under the other two,
+    // since it's the same quantity used three times. Each F's value goes under its fraction.
+    function renderFactorialFraction(animate, after) {
+      const show = state.phase === "f";
+      const within = aggregateSquares().find((d) => d.key === "within");
+      const denominator = msGeometry(within);
+      const fValue = { "factor-a": stats.levelStats[0].f, "factor-b": stats.levelStats[1].f, between: stats.fInteraction };
+      const items = NUMERATOR_KEYS.map((key) => {
+        const d = aggregateSquares().find((item) => item.key === key);
+        const half = Math.max(msGeometry(d).side, denominator.side) / 2 + (compact ? 6 : 10);
+        return { key, cx: numeratorX[key], half };
+      });
+      const delay = show && animate ? 150 + after : 0;
+      fractionLayer.selectAll("*").interrupt();
+      const bars = fractionLayer.selectAll("line.ave-factor-bar").data(show ? items : [], (d) => d.key);
+      bars.enter().append("line").attr("class", "ave-factor-bar")
+        .attr("stroke", "currentColor").attr("stroke-width", 2.5).attr("stroke-linecap", "round")
+        .attr("y1", midline).attr("y2", midline)
+        .attr("x1", (d) => d.cx).attr("x2", (d) => d.cx)
+        .merge(bars)
+        .transition().delay(delay).duration(animate ? 480 : 0).ease(d3.easeCubicOut)
+        .attr("x1", (d) => d.cx - d.half).attr("x2", (d) => d.cx + d.half)
+        .attr("y1", midline).attr("y2", midline);
+      bars.exit().transition().duration(animate ? 200 : 0).style("opacity", 0).remove();
+
+      const copies = fractionLayer.selectAll("rect.ave-denominator-copy")
+        .data(show ? items.filter((d) => d.key !== "factor-b") : [], (d) => d.key);
+      copies.enter().append("rect").attr("class", "ave-denominator-copy ave-square")
+        .attr("fill", "none").attr("stroke", "var(--ave-within)").attr("stroke-width", 1.5)
+        .attr("stroke-dasharray", "4 3")
+        .attr("x", denominator.x).attr("y", denominator.y)
+        .attr("width", denominator.side).attr("height", denominator.side)
+        .style("opacity", 0)
+        .merge(copies)
+        .transition().delay(delay + (animate ? 300 : 0)).duration(animate ? 700 : 0).ease(d3.easeCubicInOut)
+        .attr("x", (d) => d.cx - denominator.side / 2).attr("y", denominator.y)
+        .attr("width", denominator.side).attr("height", denominator.side)
+        .style("opacity", 1);
+      copies.exit().transition().duration(animate ? 200 : 0).style("opacity", 0).remove();
+
+      // Under the within label in the middle, and level with it either side.
+      const labelY = denominator.y + denominator.side + (compact ? 58 : 64);
+      const values = fractionLayer.selectAll("text.ave-factor-f").data(show ? items : [], (d) => d.key);
+      values.enter().append("text").attr("class", "ave-equation ave-factor-f").attr("text-anchor", "middle")
+        .style("opacity", 0)
+        .merge(values)
+        .attr("x", (d) => d.cx).attr("y", labelY)
+        .text((d) => state.calculations ? `F = ${fmt(fValue[d.key])}` : "F")
+        .transition().delay(delay + (animate ? 700 : 0)).duration(animate ? 300 : 0)
+        .style("opacity", 1);
+      values.exit().transition().duration(animate ? 200 : 0).style("opacity", 0).remove();
+    }
+
     function renderFraction(animate, after) {
+      if (design) {
+        renderFactorialFraction(animate, after);
+        return;
+      }
       const show = state.phase === "f";
       const cx = compareCx;
       const half = d3.max(aggregateSquares().filter((d) => d.df), (d) => msGeometry(d).side) / 2 + (compact ? 8 : 22);
@@ -1440,10 +1907,53 @@
         .style("opacity", show ? 1 : 0);
     }
 
+    // What the factorial stages show, for the figure's title. Stages shared with Chapter 14
+    // fall through to the usual descriptions.
+    function factorialDescription() {
+      const [a, b] = factors;
+      const f = activeFactor();
+      if (state.stage === "populations") {
+        return `Four groups of sampled scores, one for each combination of ${a.name} and ${b.name}.`;
+      }
+      if (f >= 0) {
+        const factor = factors[f];
+        return {
+          recolour: `The same scores in the same places, recoloured by ${factor.name}: ${factor.levels.join(" or ")}.`,
+          rows: `One row for each level of ${factor.name}, holding every score at that level.`,
+          observe: `Each ${factor.name} mean, standing in for every score at its level, and the grand mean.`,
+          deviations: `Each ${factor.name} mean's deviation from the grand mean.`,
+          squares: `Each ${factor.name} mean's deviation from the grand mean drawn as a square.`,
+          sum: `The squared deviations for ${factor.name}, one per score, collected at the bottom of the between-groups layer.`
+        }[state.phase];
+      }
+      if (state.stage === "interaction") {
+        return {
+          observe: `Each group's mean, and the mean that ${a.name} and ${b.name} alone would predict for it.`,
+          deviations: "Each group mean's distance from its prediction.",
+          squares: "Each group mean's distance from its prediction drawn as a square.",
+          sum: "The squared distances from the predictions, one per score, filling what's left of the between-groups layer: the interaction."
+        }[state.phase];
+      }
+      if (state.stage === "compare") {
+        return {
+          partition: `The total sum of squares, filled by a within-groups layer, then ${a.name}, ${b.name} and their interaction.`,
+          split: `The ${a.name}, ${b.name} and interaction layers in a row above a line, and within groups below it, each redrawn as a square of the same area.`,
+          "ms-between": `The ${a.name}, ${b.name} and interaction sums of squares, each divided by its degrees of freedom to give its mean square.`,
+          "ms-within": `The within-groups sum of squares broken into ${stats.dfWithin} equal squares; one of them is the within-groups mean square.`,
+          f: "Three F ratios, each with the within-groups mean square as its denominator."
+        }[state.phase];
+      }
+      return null;
+    }
+
     function stageDescription() {
       if (state.stage === "populations") {
         const count = ["Two", "Three", "Four", "Five", "Six"][groups.length - 2] || String(groups.length);
         return `${count} groups of sampled scores with different centers and variation among people within each group.`;
+      }
+      if (design) {
+        const description = factorialDescription();
+        if (description) return description;
       }
       if (state.stage === "compare" && people) {
         return {
@@ -1492,7 +2002,8 @@
 
     let lastRenderedStage = null;
     let lastRenderedPhase = null;
-    let lastRows = false;
+    let lastRowsKey = "lanes";
+    let lastGrouping = null;
     let lastStandIns = false;
     let lastPersonColoured = false;
 
@@ -1525,9 +2036,13 @@
     }
 
     function planRegrouping(animate) {
-      const clearing = animate && people && lastStandIns && !hasStandIns() ? squares.GHOST_FADE + 100 : 0;
-      const crossing = animate && Boolean(people) && lastRows !== rowsView();
-      const recolouring = animate && Boolean(people) && !lastPersonColoured && personColoured();
+      const clearing = animate && regroups && lastStandIns && !hasStandIns() ? squares.GHOST_FADE + 100 : 0;
+      // From one set of rows to another (lanes, people, or either factor's levels) is a move.
+      const crossing = animate && regroups && lastRowsKey !== rowsKey();
+      // With factors, any change into a new grouping recolours first.
+      const recolouring = animate && (design
+        ? lastGrouping !== grouping() && regrouped()
+        : Boolean(people) && !lastPersonColoured && personColoured());
       const shifting = animate && Boolean(people) && state.stage === "centre" && state.phase === "shift" &&
         lastRenderedStage === "people";
       return {
@@ -1555,7 +2070,7 @@
       };
       // The centred scores' squares fill what's left of within.
       const revealKey = animate && state.phase === "sum" && (!sameStage || lastRenderedPhase !== "sum")
-        ? (state.stage === "centre" ? "within" : state.stage)
+        ? ({ centre: "within", interaction: "between" }[state.stage] || state.stage)
         : null;
       // A step that skips phases plays them in turn: after a new stage's dots and means
       // settle, the deviations draw, then their squares grow, then they pour into the sum.
@@ -1573,11 +2088,13 @@
       const msKey = animate && comparePhaseIndex() > previousCompareIndex
         ? { "ms-between": "between", "ms-within": "within" }[state.phase] || null
         : null;
+      // With factors, the three numerators are cut together.
+      const keysFor = (key) => design && key === "between" ? NUMERATOR_KEYS : [key];
       // With people, Chapter 14 has already taught the cut, so going straight from the split
       // to F makes both cuts at once. F's bar waits for them to land.
-      const cutsTogether = animate && Boolean(people) && state.phase === "f" &&
+      const cutsTogether = animate && regroups && state.phase === "f" &&
         lastRenderedStage === "compare" && lastRenderedPhase === "split";
-      const msKeys = cutsTogether ? ["between", "within"] : msKey ? [msKey] : [];
+      const msKeys = cutsTogether ? [...keysFor("between"), "within"] : msKey ? keysFor(msKey) : [];
       const splitting = animate && state.phase === "split" &&
         lastRenderedStage === "compare" && lastRenderedPhase === "partition";
       // Moving the total out of the panel comes first; anything after waits for it.
@@ -1604,7 +2121,8 @@
       updateCalculationBox();
       lastRenderedStage = state.stage;
       lastRenderedPhase = state.phase;
-      lastRows = rowsView();
+      lastRowsKey = rowsKey();
+      lastGrouping = grouping();
       lastStandIns = hasStandIns();
       lastPersonColoured = personColoured();
     }

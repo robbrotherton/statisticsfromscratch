@@ -3,6 +3,7 @@ title: "Factorial ANOVA"
 interactive-scripts:
   - interaction-plot
   - variance-partition-diagram
+  - anova-variability-explorer
   - critical-table-generator
   - distribution-generator
 ---
@@ -160,7 +161,7 @@ Here Factor A had no effect on people in level one of Factor B, but it did have 
 
 ## Partitioning variance
 
-<!-- FIX: partial repeat with the callout below; "chance variability" and "the variance expected if there is no treatment effect" should match Chapter 14's two-estimates wording. Each effect in a 2×2 has df = 1, so each F is a squared t, which is a one-line callback to Chapter 14 worth making. -->
+<!-- FIX: "chance variability" and "the variance expected if there is no treatment effect" should match Chapter 14's two-estimates wording. Each effect in a 2×2 has df = 1, so each F is a squared t, which is a one-line callback to Chapter 14 worth making. -->
 
 So for each of those three hypotheses, we calculate an $F$ ratio. Though the math will differ slightly, because we'll be partitioning variance differently, the $F$ ratios all follow the same conceptual structure. We're comparing the variance between groups to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$ test and the other ANOVAs we've learned. But there's really nothing new here, just a more nuanced application of the basic concepts.
 
@@ -168,22 +169,90 @@ Calculating the various components required for those three $F$ ratios works jus
 
 Now here, assuming we're just using between-participants factors, we don't need to divide up the variance within groups. Instead, we want to think about the different sources of between-groups variability. We want to separate between-groups variability associated with Factor A exclusively and between-groups variability associated with Factor B exclusively. And knowing both of those, anything left over — any between-groups variability not accounted for by those main effects of Factor A and Factor B — must be due to the interaction between Factors A and B.
 
-::::: {#act-factorial-partition .callout-tip .interactive}
-## Partitioning variance in a factorial design
+::: {#fig-partitioning-factorial}
+{{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains treatment effects and chance, and variability within groups, which contains chance. The between-groups variability is further partitioned into Factor A, Factor B, and the A-by-B interaction, each containing its own main effect or interaction plus chance."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains treatment effects and chance, and variability within groups, which contains chance. The between-groups variability is further partitioned into Factor A, Factor B, and the A-by-B interaction, each containing its own main effect or interaction plus chance." >}}
+:::
 
-{{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","stage":"split"}' fallback="Diagram partitioning the total sum of squares into between-groups and within-groups variability, with the between-groups variability further partitioned into Factor A, Factor B, and the A-by-B interaction. Each of those three components has its mean square compared against the within-groups mean square in its own F ratio." >}}
+Each component gets its own $F$ ratio, always compared against the same denominator: the mean square within groups, our estimate of chance variability. As always, we get each mean square by dividing a sum of squares by its degrees of freedom.
+
+$$
+\begin{aligned}
+F_A &= \frac{MS_A}{MS_{\text{within}}} \\[1.5ex]
+F_B &= \frac{MS_B}{MS_{\text{within}}} \\[1.5ex]
+F_{A \times B} &= \frac{MS_{A \times B}}{MS_{\text{within}}}
+\end{aligned}
+$$
+
+<!-- PLAN: the explorer tutorial below runs Chapter 14's and 15's visual on the snack × test data (tbl-factorial-data). Total, within and between are one step each, since Chapter 14 taught them; the new parts are the two factors (regrouped like Chapter 15's people) and the interaction (cell means against the additive prediction, filling what's left of between). Step text is Rob's to write; each [ROB: …] says what the step shows. When the data changes, only the options change. -->
+
+::::: {#act-factorial-anova-viz .callout-tip .interactive}
+## Where each effect goes
+
+{{< interactive-figure factorialAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"factors":[{"name":"Snack","levels":["Banana","Candy"]},{"name":"Test","levels":["Math","Reaction time"]}],"groups":[{"levels":[0,0],"values":[7,9,8,9]},{"levels":[1,0],"values":[5,3,4,4]},{"levels":[0,1],"values":[5,4,6,5]},{"levels":[1,1],"values":[6,6,5,5]}],"axisLabel":"Test score","xMin":2,"xMax":10,"populationSd":0.8}' fallback="Interactive diagram of the snack-by-test scores in four groups. Total, within-groups and between-groups sums of squares are built as in Chapter 14. The scores are then regrouped by snack type and by test type, and each factor's squared deviations pour into the bottom of the between-groups layer. What's left of that layer is filled by each group mean's squared distance from the mean the two factors alone predict: the interaction. Finally the snack, test and interaction mean squares each sit over the within-groups mean square as three F ratios." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Between and within" data-action='{"stage":"split","animate":false}'}
-It starts out the same as every other ANOVA: the total variability separates into variability between groups and variability within groups.
+::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
+[ROB: the four groups of scores, one lane per cell of the table, colored by group.]
 :::
 
-::: {.tutorial-step data-title="Subdividing between" data-action='{"stage":"subdivide"}'}
-With between-participants factors, it's the *between-groups* variability we subdivide: the part associated with Factor A, the part associated with Factor B, and whatever is left over — the interaction.
+::: {.tutorial-step data-major="familiar" data-major-title="As before" data-title="Total" data-action='{"stage":"total","phase":"sum","animate":true}'}
+[ROB: SS total, as in Chapter 14: every score's squared deviation from the grand mean, poured into the bucket. One step, since it's familiar.]
 :::
 
-::: {.tutorial-step data-title="Three F ratios" data-action='{"stage":"formula"}'}
-Each component gets its own $F$ ratio, always compared against the same denominator: the mean square within groups, our estimate of chance variability. As always, we get each mean square by dividing a sum of squares by its degrees of freedom.
+::: {.tutorial-step data-major="familiar" data-major-title="As before" data-title="Within" data-action='{"stage":"within","phase":"sum","animate":true}'}
+[ROB: SS within, as before: deviations from each group's own mean. Each cell is a group. This is the denominator's sum of squares, and it won't be split.]
+:::
+
+::: {.tutorial-step data-major="familiar" data-major-title="As before" data-title="Between" data-action='{"stage":"between","phase":"sum","animate":true}'}
+[ROB: SS between, as before: each group mean stands in for its scores. Everything the snack and test conditions did is in this layer; the rest of the tutorial splits it up.]
+:::
+
+::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Recolor" data-action='{"stage":"factor-a","phase":"recolour","animate":true}'}
+[ROB: new part. Same scores, same places, recolored by snack type only, ignoring the test. Color marks the grouping in use, as with Chapter 15's people.]
+:::
+
+::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Rows" data-action='{"stage":"factor-a","phase":"rows","animate":true}'}
+[ROB: everyone who had a banana in one row, everyone who had candy in the other, whatever test they did. Eight scores per row.]
+:::
+
+::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Squares" data-action='{"stage":"factor-a","phase":"squares","animate":true}'}
+[ROB: each score stands in as its snack mean (a marginal mean). One deviation from the grand mean per level, drawn as a square. Same move as between groups and between people.]
+:::
+
+::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Sum" data-action='{"stage":"factor-a","phase":"sum","animate":true}'}
+[ROB: each square counted eight times, once per score at that level, pours in at the bottom of the between layer, which gives way above it. SS snack is part of SS between.]
+:::
+
+::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Recolor" data-action='{"stage":"factor-b","phase":"recolour","animate":true}'}
+[ROB: now the other factor. Back in their groups, recolored by test type, ignoring the snack.]
+:::
+
+::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Rows" data-action='{"stage":"factor-b","phase":"rows","animate":true}'}
+[ROB: math in one row, reaction time in the other.]
+:::
+
+::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Sum" data-action='{"stage":"factor-b","phase":"sum","animate":true}'}
+[ROB: the same move as for snack, in one step: test means, squares, eight copies each, poured in above SS snack. A thin layer: the two test means are close. Note the empty slot left above it, still part of between but not yet named.]
+:::
+
+::: {.tutorial-step data-major="interaction" data-major-title="Interaction" data-title="Prediction" data-action='{"stage":"interaction","phase":"observe","animate":true}'}
+[ROB: back to the four groups. Each group's mean, and beside it a dotted line: what snack and test alone would predict for that group (snack mean + test mean − grand mean). Parallel lines on an interaction plot would put every group mean on its prediction.]
+:::
+
+::: {.tutorial-step data-major="interaction" data-major-title="Interaction" data-title="Sum" data-action='{"stage":"interaction","phase":"sum","animate":true}'}
+[ROB: each group mean's distance from its prediction, squared, counted four times, fills the empty slot exactly. That's the interaction: what's left of between once both main effects are out, shown rather than only subtracted. Here every distance is the same size, as in any 2×2.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
+[ROB: the full bucket: within, snack, test and the interaction, adding up to SS total.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
+[ROB: the three numerators stand in a row; within hangs below.]
+:::
+
+::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
+[ROB: each sum divided by its df. Each factor and the interaction has df = 1 in a 2×2, so each mean square is its sum of squares; within is cut into 12. The same within mean square is the denominator of all three Fs, hence the dashed copies.]
 :::
 ::::
 
