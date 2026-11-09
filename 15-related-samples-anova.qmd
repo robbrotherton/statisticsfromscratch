@@ -153,9 +153,9 @@ As usual, we divide each sum by its degrees of freedom to get the mean squares. 
 
 ### Sums of squares and degrees of freedom
 
-So here's how we calculate this modified $F$ ratio for related-samples data.
+So here's how we calculate this modified $F$ ratio for related-samples data.[^related-complete]
 
-<!-- NOTE: move this to parenthetical or footnote. These formulas assume a complete set of scores: each person contributes one score in every condition. If someone misses a condition, we can't simply leave that cell blank and carry on with the same calculation. -->
+[^related-complete]: These formulas assume a complete set of scores: each person contributes one score in every condition. If someone misses a condition, we can't simply leave that cell blank and carry on with the same calculation.
 
 As @act-related-partition showed, the first stage of the analysis is identical to the independent-samples ANOVA we conducted in Chapter 14. The equations for $SS_{\text{total}}$, $SS_{\text{between}}$, and $SS_{\text{within}}$ are the same, and the degrees of freedom for each component are the same as well.
 
@@ -173,19 +173,29 @@ Or, as @act-related-partition showed, we can get the same answer directly, from 
 
 $$ SS_{\text{error}} = \Sigma (X - M_{\text{person}} - M_{\text{group}} + M_{\text{grand}})^2 $$
 
-For each score, subtract that child's mean and add the grand mean: $X - M_{\text{person}} + M_{\text{grand}}$. Stephen's mean is 1.33 seconds above the grand mean, so we subtract 1.33 from each of his times. His first time, 51 seconds, becomes 49.67. All three of Stephen's scores move by the same amount; their differences stay the same. Then we find the deviation from the group mean, by subtracting it from the adjusted score. We've taken out overall speed without taking out the differences we're interested in, the varaibility of scores around the group mean. Squaring and adding those deviations gives the error sum of squares.
+For each score, subtract that child's mean and add the grand mean: $X - M_{\text{person}} + M_{\text{grand}}$. Stephen's mean is 1.33 seconds above the grand mean, so we subtract 1.33 from each of his times. His first time, 51 seconds, becomes 49.67. All three of Stephen's scores move by the same amount; their differences stay the same. Then we find the deviation from the group mean, by subtracting it from the adjusted score. We've taken out overall speed without taking out the differences we're interested in, the variability of scores around the group mean. Squaring and adding those deviations gives the error sum of squares.
 
 The two new components have degrees of freedom of their own. For $SS_{\text{people}}$, we computed the deviation of each person's mean from the grand mean. So that's $n$ means, deviating from a single grand mean: $df_{\text{people}} = n - 1$.[^related-matched]
 
-Remeber that degrees of freedom are partitioned just like the sums of squares, so we can find $df_{\text{error}}$ by subtracting the degrees of freedom for the between-people component from the degrees of freedom for the within-groups component.
+Remember that degrees of freedom are partitioned just like the sums of squares, so we can find $df_{\text{error}}$ by subtracting the degrees of freedom for the between-people component from the degrees of freedom for the within-groups component:
 
-$$ df_{\text{error}} = df_{\text{within}} - df_{\text{people}} $$
+$$
+\begin{aligned}
+df_{\text{error}} &= df_{\text{within}} - df_{\text{people}} \\
+&= (N - k) - (n - 1)
+\end{aligned}
+$$
 
-If you wanted to figure out the error degrees of freedom directly, you could do it the same way we did for $SS_{\text{error}}$: each person's mean is a constraint on their scores, so we lose one degree of freedom per person.
+Why subtract $n - 1$, rather than one for every person? The condition means have already used up $k$ degrees of freedom, leaving $N - k$ within groups. Now we're accounting for how far each person's mean is from the grand mean. Those deviations must add up to zero, so once we know $n - 1$ of them, the last is fixed. Accounting for the people component therefore uses another $n - 1$ degrees of freedom. For our five children and three conditions, that leaves $(15 - 3) - (5 - 1) = 8$ for error.
 
-<!-- explain this better -->
+Since each of the $n$ people contributes $k$ scores, $N = nk$. Substituting that into the equation gives a shorter way to write the same thing:
 
-$$ df_{\text{error}} = (N - k) - (n - 1) = (k - 1)(n - 1) $$
+$$
+\begin{aligned}
+df_{\text{error}} &= (nk - k) - (n - 1) \\
+&= (k - 1)(n - 1)
+\end{aligned}
+$$
 
 [^related-matched]: In a matched-subjects design, we do the same calculation with matched sets in place of people. Each set contributes one score per condition, and $n$ counts sets. Other books may call the between-people component “between subjects” or “between participants.”
 
@@ -266,21 +276,88 @@ A related-samples ANOVA summary table, showing each equation.
 
 To save you some trouble, @tbl-related-anova-data gives each condition's mean and sum of squares. Here are $n$, $k$, $N$, and $M_{\text{grand}}$ too. Remember that we have five children but 15 scores.
 
-$$n = 5 \qquad k = 3 \qquad N = 15 \qquad M_{\text{grand}} = 46.67$$
+(I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
 
-<!-- include SS_between groups and SS_within groups calculations -->
+$$
+\begin{gathered}
+n = 5 \qquad k = 3 \qquad N = 15 \\
+M_{\text{grand}} = 46.67
+\end{gathered}
+$$
 
-The only new component we need to calculate is $SS_{\text{people}}$, since we can then find error by subtraction. The People column of @tbl-related-anova-people shows each child's mean and the squared deviation of that mean from the grand mean. Each kid's three rows get the same value, which is why the mathematical arrangement of multiplying the one squared deviation by $k$ works.
+First, the familiar components. Squaring each score's deviation from the grand mean and adding them gives the total sum of squares:
 
-<!-- show k(dev)^2 peron equation -->
+$$ SS_{\text{total}} = \Sigma (X - M_{\text{grand}})^2 = 783.33 $$
 
-Then we can find $SS_{\text{error}}$ by subtracting $SS_{\text{people}}$ from $SS_{\text{within}}$.
+$$ df_{\text{total}} = N - 1 = 15 - 1 = 14 $$
 
-<!-- show equation -->
+For within groups, we can just add the three condition sums of squares from @tbl-related-anova-data:
+
+$$
+\begin{aligned}
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\
+&= 272.80 + 201.20 + 153.20 \\
+&= 627.20
+\end{aligned}
+$$
+
+$$ df_{\text{within}} = N - k = 15 - 3 = 12 $$
+
+For between groups, we find each condition mean's deviation from the grand mean, square it, and multiply by the five scores it represents:
+
+$$
+\begin{aligned}
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\
+&\approx 5(3.53)^2 + 5(0.73)^2 \\
+&\quad {}+ 5(-4.27)^2 \\
+&\approx 156.13
+\end{aligned}
+$$
+
+$$ df_{\text{between}} = k - 1 = 3 - 1 = 2 $$
+
+Now for the new component, $SS_{\text{people}}$. The People column of @tbl-related-anova-people shows each child's mean and the squared deviation of that mean from the grand mean. Each kid's three rows get the same value, which is why multiplying the one squared deviation by $k$ works. For Stephen, for example:
+
+$$
+\begin{gathered}
+k(M_{\text{person}} - M_{\text{grand}})^2 \\
+= 3(48.00 - 46.67)^2 \approx 5.33
+\end{gathered}
+$$
+
+Doing the same for each of the other children and adding the five contributions gives:
+
+$$
+\begin{aligned}
+SS_{\text{people}} &= \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 \\
+&\approx 5.33 + 75.00 + 56.33 \\
+&\quad {}+ 456.33 + 8.33 \\
+&\approx 601.33
+\end{aligned}
+$$
+
+$$ df_{\text{people}} = n - 1 = 5 - 1 = 4 $$
+
+Then we can find $SS_{\text{error}}$ by subtracting $SS_{\text{people}}$ from $SS_{\text{within}}$:
+
+$$
+\begin{aligned}
+SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{people}} \\
+&\approx 627.20 - 601.33 \\
+&\approx 25.87
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+df_{\text{error}} &= df_{\text{within}} - df_{\text{people}} \\
+&= 12 - 4 = 8
+\end{aligned}
+$$
 
 But let's also see how one of those error squares comes from an individual score. In the tutorial, Stephen's first time went from 51 to 49.67 seconds after we removed his difference in overall speed. The first-alone mean stayed at 50.20. So his adjusted score is $49.67 - 50.20 = -0.53$ seconds from that condition's mean. This remaining deviation is called a **residual**; squaring it gives about 0.28.
 
-That's what the longer expression in @tbl-related-anova-people does: $X - M_{\text{person}} + M_{\text{grand}}$ adjusts the score, and subtracting $M_{\text{group}}$ gives the residual. The table shows both the people squares and these error squares for every score. (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
+That's what the longer expression in @tbl-related-anova-people does: $X - M_{\text{person}} + M_{\text{grand}}$ adjusts the score, and subtracting $M_{\text{group}}$ gives the residual. The table shows both the people squares and these error squares for every score.
 
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
 | Child                     | Condition         | Score, $X$ | People: $(M_{\text{person}}-M_{\text{grand}})^2$ | Error: $(X-M_{\text{person}}-M_{\text{group}}+M_{\text{grand}})^2$ |
@@ -331,29 +408,7 @@ That's what the longer expression in @tbl-related-anova-people does: $X - M_{\te
 : Each child's three scores, with the two new squared deviations. Values are rounded; the sums use unrounded values. {#tbl-related-anova-people}
 
 
-Here's the full working, so you can check your answers:
-
-<!-- break this up and move the parts above -->
-
-$$
-\begin{align}
-SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 = 783.33 \\
-SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\ &= 272.80 + 201.20 + 153.20 = 627.20 \\
-SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\ &= 5(3.53)^2 + 5(0.73)^2 + 5(-4.27)^2 = 156.13 \\
-SS_{\text{people}} &= \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 \\ &= 5.33 + 75.00 + 56.33 + 456.33 + 8.33 = 601.33 \\
-SS_{\text{error}} &= SS_{\text{within}} - SS_{\text{people}} \approx 627.20 - 601.33 \approx 25.87
-\end{align}
-$$
-
-$$
-\begin{align}
-df_{\text{total}} &= N - 1 = 15 - 1 = 14 \\
-df_{\text{within}} &= N - k = 15 - 3 = 12 \\
-df_{\text{between}} &= k - 1 = 3 - 1 = 2 \\
-df_{\text{people}} &= n - 1 = 5 - 1 = 4 \\
-df_{\text{error}} &= (k - 1)(n - 1) = (3 - 1)(5 - 1) = 8
-\end{align}
-$$
+Now we have all the sums of squares and their degrees of freedom. To get the two mean squares for our $F$ ratio, we divide each relevant sum of squares by its degrees of freedom:
 
 $$
 \begin{align}
@@ -361,6 +416,8 @@ MS_{\text{between}} &= \frac{SS_{\text{between}}}{df_{\text{between}}} = \frac{1
 MS_{\text{error}} &= \frac{SS_{\text{error}}}{df_{\text{error}}} = \frac{25.87}{8} = 3.23
 \end{align}
 $$
+
+Finally, we divide the between-groups mean square by the error mean square:
 
 $$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} = \frac{78.07}{3.23} \approx 24.14 $$
 
