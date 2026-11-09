@@ -208,7 +208,9 @@ $$
 
 $$ F = \frac{MS_{\text{between}}}{MS_{\text{error}}} $$
 
-The interpretation of the $F$ ratio is also the same as with independent samples. A large numerator relative to the denominator is evidence against the null hypothesis. Setting aside differences between people can make the denominator smaller, giving us a more powerful test. It isn't guaranteed, though. We'll come back to that tradeoff at the end.
+The interpretation of the $F$ ratio is also the same as with independent samples. A large numerator relative to the denominator is evidence against the null hypothesis. Setting aside differences between people can make the denominator smaller, giving us a more powerful test. It isn't guaranteed, though. We'll come back to that tradeoff when we consider power in Step 5.
+
+By the way, with just two conditions, the related-samples ANOVA gives $F = t^2$, with the same $p$-value as the corresponding two-tailed related-samples $t$ test. Just as in Chapter 14, we're expressing the same evidence in a different way.
 
 {{< include quizzes/15-related-anova-partitioning-variance.qmd >}}
 
@@ -426,6 +428,14 @@ So a difference between means greater than 3.25 seconds is significant at the $.
 
 The two gaps involving competition exceed the HSD, but the gap between the solo trials doesn't. The children improved by an average of 2.80 seconds before competing, and by another 5.00 seconds when competition began. Only the comparisons involving competition are significant.
 
+#### Statistical power
+
+As before, statistical power is the probability of detecting a difference among the population means when there really is one. Accounting for individual differences can help, but a related-samples design doesn't automatically give us more power. The advantage depends on how much the scores go together across conditions.
+
+Think of Clyde again. He's fast in every race, so separating out differences in overall speed removes a lot of the within-groups variability. That can give us a much smaller denominator than we'd get by treating the same scores as independent. But separating out the people component also costs degrees of freedom, which raises the critical $F$. The reduction in error needs to be enough to compensate. If people's scores in the different conditions weren't related, we'd generally end up with a similar error mean square to the independent-samples analysis, but fewer degrees of freedom and less power. As in Chapter 13, the design tells us which analysis to use; we don't try both and keep whichever gives the result we prefer.
+
+Statistical software can calculate power for a related-samples ANOVA, or work backwards to estimate how many participants we'd need for a target such as 80% power. We need to specify differences worth detecting, estimate the variability and how strongly scores go together across conditions, and choose an alpha level. The math is beyond the scope of this book, but the purpose is familiar: planning a study with a good chance of detecting an effect we care about.
+
 ## Reporting and interpreting results
 
 So finally, we're ready to report the results. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.
@@ -434,118 +444,33 @@ So finally, we're ready to report the results. As usual, you need descriptives f
 
 What kind of graph would work best to visualize results like these? We mentioned in Chapter 14 that bar graphs with error bars are common, but they can emphasize some features of the data and can hide others. A simple bar graph showing condition means with confidence intervals wouldn't convey the relatedness of the scores. Really we're interested in how consistently each child's time changed across the conditions, rather than treating the conditions as independent.
 
-But if you graphed the condition means in the usual way, the result might look surprising. The confidence intervals in @fig-related-results overlap, even though both comparisons involving competition were significant.
-
-::: {#fig-related-results}
-{{< interactive-figure relatedResultsGraph makeGraph options='{"type":"interval","orientation":"vertical","mark":"bar","data":[{"label":"First alone","estimate":50.2,"lower":39.9459,"upper":60.4541,"color":"var(--sfs-text, #222)"},{"label":"Second alone","estimate":47.4,"lower":38.5938,"upper":56.2062,"color":"var(--sfs-text, #222)"},{"label":"Competition","estimate":42.4,"lower":34.7157,"upper":50.0843,"color":"var(--sfs-text, #222)"}],"yDomain":[0,70],"yTickValues":[0,20,40,60],"width":640,"height":380,"margin":{"top":22,"right":16,"bottom":65,"left":65},"showValues":false,"labels":{"x":"Condition","y":"Mean time (seconds)"},"ariaLabel":"Mean times: first alone 50.20 seconds, second alone 47.40, and competition 42.40. Error bars are 95 percent confidence intervals for each condition mean, calculated from its own standard deviation. All three intervals overlap."}' fallback="Mean times: first alone 50.20 seconds, second alone 47.40, and competition 42.40. Error bars are 95 percent confidence intervals for each condition mean, calculated from its own standard deviation. All three intervals overlap." >}}
-
-A bar graph showing average times in the three conditions. Error bars are 95% confidence intervals for each condition's mean, each calculated from that condition's own standard deviation ($df = 4$).
-:::
-
-Those intervals describe uncertainty about each condition's mean separately. They still reflect how much the children differ from one another. They don't show how consistently each child's time changed.
-
-@fig-related-profiles makes that visible. Each line follows one child across the conditions. Every line falls at both steps, even though the children start at quite different levels. The graph follows the order in which all five children experienced the conditions.
+@fig-related-profiles emphasizes that. Each colored line follows one child across the races. Every line falls at both steps, even though the children start at quite different levels. The dashed line shows the condition means: 50.20, 47.40, and 42.40 seconds. Lower times mean faster performances. So this shows more of the raw data and variability, along with the aggregate averages. But note that it leaves out confidence intervals, so it's important to put togeher the visual representation and the statistical results when reporting.
 
 ::: {#fig-related-profiles}
-{{< interactive-figure relatedProfileLines makeProfileLines options='{"categories":["First alone","Second alone","Competition"],"series":[{"name":"Stephen","color":0,"values":[51,50,43]},{"name":"Mary W.","color":3,"values":[56,53,46]},{"name":"Bertha","color":7,"values":[56,49,48]},{"name":"Clyde","color":1,"values":[36,35,32]},{"name":"Lucile","color":5,"values":[52,50,43]}],"yDomain":[30,60],"yLabel":"Time (seconds)","xLabel":"Condition","ariaLabel":"One line per child across the three conditions. Every line falls from first alone to second alone and again to competition, and the lines stay in much the same order."}' fallback="One line per child across the three conditions. Every line falls at each step." >}}
+{{< interactive-figure relatedProfileLines makeProfileLines options='{"categories":["First alone","Second alone","Competition"],"series":[{"name":"Stephen","color":0,"values":[51,50,43]},{"name":"Mary W.","color":3,"values":[56,53,46]},{"name":"Bertha","color":7,"values":[56,49,48]},{"name":"Clyde","color":1,"values":[36,35,32]},{"name":"Lucile","color":5,"values":[52,50,43]}],"showMean":true,"yDomain":[30,60],"yLabel":"Time (seconds)","xLabel":"Condition","ariaLabel":"One line per child across the three conditions. Every child’s line falls from first alone to second alone and again to competition. A bold dashed average line falls from 50.20 to 47.40 to 42.40 seconds."}' fallback="One line per child across the three conditions. Every line falls at each step. The bold dashed average line falls from 50.20 to 47.40 to 42.40 seconds." >}}
 
-The same data, with one line for each child.
-:::
-
-To put confidence intervals around the changes themselves, we can use the difference scores for each pair of conditions, just as in Chapter 13. Now the differences in overall speed are out of the picture. The interval for the solo-to-solo change in @fig-related-differences includes zero; the two involving competition don't. These are ordinary 95% paired intervals, though, not adjusted for multiple comparisons like Tukey's test. They also use each pair's own variability rather than the pooled error term, so they needn't always agree with Tukey's decisions.
-
-For example, subtracting each child's second-alone time from their competition time gives differences of $-7$, $-7$, $-1$, $-3$, and $-7$ seconds. Their mean is $M_D = -5.00$ and their standard deviation is $s_D = \sqrt{8} = 2.83$. With five children, the standard error is $s_{M_D} = s_D/\sqrt{n} = 1.26$ seconds. Using the two-tailed critical $t = 2.776$ for $df = 4$, the 95% interval is:
-
-$$M_D \pm t_{\text{critical}}s_{M_D} = -5.00 \pm 2.776\sqrt{\frac{8}{5}} \approx [-8.51, -1.49]$$
-
-The calculation uses unrounded values. Both limits are negative: the interval runs from a decrease of 8.51 seconds to a decrease of 1.49 seconds.
-
-::: {#fig-related-differences}
-{{< interactive-figure relatedDifferencesGraph makeGraph options='{"type":"interval","orientation":"horizontal","data":[{"label":"First to second alone","estimate":-2.8,"lower":-5.8917,"upper":0.2917},{"label":"Second to competition","estimate":-5,"lower":-8.512,"upper":-1.488},{"label":"First to competition","estimate":-7.8,"lower":-10.6314,"upper":-4.9686}],"xDomain":[-12,2],"xTickValues":[-12,-8,-4,0],"reference":0,"margin":{"left":164},"width":640,"height":240,"showValues":false,"labels":{"x":"Mean change in time (seconds)"},"ariaLabel":"Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero."}' fallback="Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero." >}}
-
-95% confidence intervals for the mean change between each pair of conditions, calculated from each pair's difference scores as in @fig-related-ci. These intervals aren't adjusted for multiple comparisons.
+Times for each child, with a bold dashed line showing the average in each condition.
 :::
 
 ### Interpreting the results
 
-The larger improvement when competition began fits the idea that a rival helped the children speed up. But a nonsignificant solo-to-solo comparison doesn't mean practice had no effect. And a significant change after a nonsignificant one doesn't establish that the two changes differ. The times suggest a story; the tests haven't proved that story.
+So what has this analysis told us? The larger improvement when competition began fits the idea that a rival helped the children speed up. But a nonsignificant solo-to-solo comparison doesn't mean practice had no effect. And a significant change after a nonsignificant one doesn't establish that the two changes differ. The times suggest a story; the tests haven't proved that story.
 
-There's also the order problem. Both solo trials came before any competition, so their difference can't reflect a lingering effect of racing against someone. But competition always came third. We don't know how fast these children would have gone on a third trial alone. Further practice could explain some or all of the improvement we attributed to competition.
+There's also the order problem. Competition always came third for this set of kids. We don't know how fast these children would have gone on a third trial alone. Further practice could explain some or all of the improvement we attributed to competition. I used one fixed order to keep the worked example easy to follow but it makes causal interpretation more limited.
 
-Triplett varied the order across children, as we saw in Chapter 13. Including both orders would help keep competition from always benefiting from coming later, though competing might itself affect a subsequent solo trial [@triplett1898dynamogenic]. We've used just one order to keep the worked example easy to follow; that makes its causal interpretation more limited.
+Triplett varied the order across children. Including both orders would help keep competition from always benefiting from coming later, though competing might itself affect a subsequent solo trial---Triplett mentioned that the faster performance some children showed in competition endured into their later alone races, as if the rival unlocked some potential that didn't go away when the competition was over  [@triplett1898dynamogenic]. 
 
-Finally, these are five deliberately selected children from the part of Triplett's table labeled “stimulated positively.” Across all 20 children who followed this same order, the first-to-second-alone improvement averages 3.36 seconds, and the next improvement, when competition begins, 2.47 seconds. Our five make a particular pattern easy to see; they don't establish its size or significance in the wider population. As usual, the design and the selection of data matter as much as the calculation.
-
-<!-- (This isn't a perfect solution, since the third race would still be after two solo races, but it would give us more information than we had before.)
-That would give us more information about practice, though it still wouldn't tell us how much further practice alone would have helped on the third trial. -->
+Lastly, I feel I should remind you that these are five deliberately selected children from those Triplett labeled “stimulated positively.” I picked them to make a satisfying dataset to work with, but it's not reflective of trends in Triplett's full data set. As I mentioned in Chapter 13, modern reanalysis of Triplett's reported data does not establish any conclusive effects of social facilitation.
 
 ### Assumptions
 
-The same basic considerations apply as before, with some changes for related samples. We expect scores from the same child to be related; different children's responses should be independent of one another. And as with the related-samples $t$ test, normality concerns the within-person differences we're analyzing, rather than simply the scores in each condition.
+The same basic considerations apply as in our previous use of ANOVA, with some additional considerations for related samples. We expect scores from the same child to be related, but different children's responses should be independent of one another. And as with the related-samples $t$ test, normality concerns the within-person differences we're analyzing, rather than simply the scores in each condition.
 
 With three or more conditions, we also need **sphericity**: the population variances of the difference scores should be the same for every pair of conditions. This is different from Chapter 14's homogeneity of variance assumption: here we're comparing the variances of the *differences*, rather than the variances of the scores in each condition. Put concretely, children's first-to-second-alone changes should be about as variable as their second-alone-to-competition changes and their first-alone-to-competition changes. We're using one pooled error term for all those comparisons, so it needs to represent them reasonably well.
 
 Our five children's difference variances are 6.2 for first to second alone, 8.0 for second alone to competition, and 5.2 for first alone to competition. Those are fairly similar. When sphericity doesn't hold, the usual test can reject the null too often. Software can apply a correction, such as Greenhouse–Geisser, which adjusts the degrees of freedom and $p$-value without changing $F$ itself.[^related-sphericity] With only two conditions, there's just one set of difference scores, so sphericity isn't an issue.
 
 [^related-sphericity]: Software often provides Mauchly's test of sphericity, though a nonsignificant result doesn't guarantee the assumption holds, especially with a small sample. Greenhouse–Geisser uses a value called epsilon to adjust the degrees of freedom; values near 1 indicate little adjustment. Here epsilon is $.94$ and the corrected $p$ is about $.0006$, so the decision is unchanged. Follow-up comparisons also need an appropriate method if sphericity is doubtful.
-
-## Back to two conditions
-
-To finish, let's return to the five children and two conditions from Chapter 13, in @tbl-triplett. We analyzed those times with a related-samples $t$ test, and then saw what would happen if we ignored the pairs and used an independent-samples test. What happens if we use ANOVA instead?
-
-Just what you might expect after Chapter 14: $F = t^2$. Ignoring the pairs gives $F(1, 8) = 0.97$, the square of the independent-samples $t$ before rounding. Using the pairs gives $F(1, 4) = 8.47$, the square of our related-samples $t$. Each has the same $p$-value as its corresponding two-tailed $t$ test. We're expressing the same evidence in a different way, not getting a second confirmation of it.
-
-### The advantages of treating scores as related
-
-Compare the first two columns of @tbl-related-analyses. The condition means haven't changed, so neither has the numerator. But almost all the within-groups variability turns out to be between children. Taking it out leaves a much smaller error component. Even after allowing for the lost degrees of freedom, the denominator falls from 99 to 11.35, and $F$ grows from 0.97 to 8.47.
-
-The two approaches remove the same differences in overall speed. The $t$ test does it by subtracting each child's two times; ANOVA identifies a separate people component. With two conditions, its error sum of squares is exactly half the sum of squares of the difference scores: $90.8/2 = 45.4$.
-
-| | Ignoring the pairs | Using the pairs | Pairs scrambled |
-|:--|--:|--:|--:|
-| $SS_{\text{between}}$ | 96.10 | 96.10 | 96.10 |
-| $SS_{\text{within}}$ | 792.00 | 792.00 | 792.00 |
-| $SS_{\text{people}}$ | | 746.60 | 397.60 |
-| $SS$ in the denominator | 792.00 | 45.40 | 394.40 |
-| $df$ in the denominator | 8 | 4 | 4 |
-| $MS$ in the denominator | 99.00 | 11.35 | 98.60 |
-| Critical $F$ | 5.32 | 7.71 | 7.71 |
-| $F$ | 0.97 | 8.47 | 0.97 |
-| $t$ | $-0.99$ | $-2.91$ | $-0.99$ |
-| $p$ | .353 | .044 | .379 |
-
-: The same scores analyzed three ways. The independent-samples calculation ignores the known pairing; the scrambled pairs are artificial. {#tbl-related-analyses}
-
-### What if scores aren't related?
-
-Why does using the pairs help so much here? Because the children's scores go together: a child who was fast alone tended to be fast in competition too. If their scores didn't go together, there would be much less to gain.
-
-Let's deliberately scramble the competition times, as in @tbl-related-scrambled. These aren't real pairings anymore. But each column still contains exactly the same scores, so its mean and spread haven't changed. Anything the independent-samples calculation can see is unchanged.
-
-| Child | Alone | Competition |
-|:------|--:|--:|
-| A | 54 | 57 |
-| B | 67 | 36 |
-| C | 38 | 39 |
-| D | 46 | 43 |
-| E | 42 | 41 |
-| $M$ | 49.4 | 43.2 |
-
-: The times from Chapter 13, with the competition column scrambled so that the two columns no longer go together. {#tbl-related-scrambled}
-
-Now look at the last column of @tbl-related-analyses. The people sum of squares is much smaller. It isn't zero: even randomly grouped scores have different averages. But once we've divided by the new degrees of freedom, $MS_{\text{error}} = 98.60$, almost the same as the original $MS_{\text{within}} = 99$. Our $F$ is back to about 0.97, while the critical value is still higher because of the lower degrees of freedom.
-
-@fig-related-buckets shows the two partitions. With the real pairs, the people layer takes up most of the within-groups variability. With scrambled pairs, it leaves much more error behind.
-
-::: {#fig-related-buckets}
-{{< interactive-figure relatedBucketReal makeAnovaVariabilityExplorer options='{"stage":"compare","phase":"f","scores":false,"calculations":true,"controlsOpen":false,"groups":[{"name":"Alone","values":[54,67,38,46,42]},{"name":"Competition","values":[43,57,39,41,36]}],"people":["Child A","Child B","Child C","Child D","Child E"],"axisLabel":"Time (seconds)","xMin":30,"xMax":72}' fallback="The partition for Chapter 13's five children: a thick between-people layer stays in the total, leaving a thin error layer, so the between-groups mean square is far larger than the error mean square." >}}
-
-{{< interactive-figure relatedBucketScrambled makeAnovaVariabilityExplorer options='{"stage":"compare","phase":"f","scores":false,"calculations":true,"controlsOpen":false,"groups":[{"name":"Alone","values":[54,67,38,46,42]},{"name":"Competition","values":[57,36,39,43,41]}],"people":["Child A","Child B","Child C","Child D","Child E"],"axisLabel":"Time (seconds)","xMin":30,"xMax":72}' fallback="The partition for the scrambled scores: the same total and between-groups layers, but a much thinner between-people layer, leaving a thick error layer, so the two mean squares are about the same size." >}}
-
-The real pairs (top) and the scrambled pairs (bottom).
-:::
-
-So a related-samples design doesn't automatically make a test more powerful. It helps when the related scores tend to go together, reducing the relevant variability enough to compensate for the lost degrees of freedom. And as in Chapter 13, this isn't an invitation to try both analyses and keep the result we prefer. The design tells us which calculation is appropriate; the comparison shows why that matters.
 
 {{< include quizzes/15-related-anova-learning-checks.qmd >}}
 

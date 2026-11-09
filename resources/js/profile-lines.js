@@ -26,7 +26,14 @@ sfsProfileLabelPositions = (ys, gap) => {
 makeProfileLines = function(opts) {
   opts = opts || {};
   const categories = (opts.categories || []).map(String);
-  const series = opts.series || [];
+  const individuals = opts.series || [];
+  const series = opts.showMean && individuals.length
+    ? [...individuals, {
+      name: "Average",
+      isMean: true,
+      values: categories.map((_, i) => d3.mean(individuals, (d) => d.values[i]))
+    }]
+    : individuals;
   const values = series.flatMap((d) => d.values);
   const yDomain = Array.isArray(opts.yDomain) ? opts.yDomain : d3.extent(values);
   const preferredWidth = 640;
@@ -58,7 +65,7 @@ makeProfileLines = function(opts) {
     const margin = { top: 14, right: compact ? 62 : 74, bottom: 54, left: compact ? 50 : 60 };
     const x = d3.scalePoint().domain(categories).range([margin.left + 12, width - margin.right - 8]);
     const y = d3.scaleLinear().domain(yDomain).range([height - margin.bottom, margin.top]);
-    const color = (d) => d3.schemeTableau10[d.color];
+    const color = (d) => d.isMean ? "var(--sfs-text, #222)" : d3.schemeTableau10[d.color];
     const line = d3.line().x((v, i) => x(categories[i])).y((v) => y(v));
 
     svg.selectAll("*").remove();
@@ -79,10 +86,13 @@ makeProfileLines = function(opts) {
 
     const people = svg.selectAll("g.pl-person").data(series).join("g").attr("class", "pl-person");
     people.append("path").attr("d", (d) => line(d.values))
-      .attr("fill", "none").attr("stroke", color).attr("stroke-width", 2.25);
+      .attr("fill", "none").attr("stroke", color).attr("stroke-width", (d) => d.isMean ? 3.5 : 2.25)
+      .attr("stroke-dasharray", (d) => d.isMean ? "7 5" : null);
     people.selectAll("circle").data((d) => d.values.map((v, i) => ({ v, i, d }))).join("circle")
       .attr("cx", (p) => x(categories[p.i])).attr("cy", (p) => y(p.v)).attr("r", 4)
-      .attr("fill", (p) => color(p.d));
+      .attr("fill", (p) => color(p.d))
+      .attr("stroke", (p) => p.d.isMean ? "var(--sfs-bg, #fff)" : null)
+      .attr("stroke-width", (p) => p.d.isMean ? 1.5 : null);
 
     const ends = series.map((d) => y(d.values[d.values.length - 1]));
     const labelY = sfsProfileLabelPositions(ends, 15);
