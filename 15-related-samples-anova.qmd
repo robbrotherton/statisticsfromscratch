@@ -18,15 +18,15 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has different varieties that can be applied in different situations. In this chapter we'll introduce the **related-samples ANOVA**, also called a one-way repeated-measures ANOVA. Just like the related-samples $t$ test, this is for use with within-participants or matched-subjects designs. The logic of $F$ is the same; what's new is how we account for differences between people.
+In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has varieties for different situations. In this chapter we'll introduce the **related-samples ANOVA**, also called a one-way repeated-measures ANOVA. Just like the related-samples $t$ test, this is for within-participants or matched-subjects designs. The logic of $F$ is the same; what's new is how we account for differences between people.
 
 ## Repeated measures, repeated
 
-We spent Chapter 13 looking at data from a handful of kids who had completed a racing game twice, first alone and then against another kid. We used a related-samples $t$ test to compare the two times via difference scores, subtracting each kid's alone-race time from their competition time. The kids were generally a little faster racing against a rival. But we left a loose end. Was it the *competition* that spurred them to race quicker, or was it perhaps just practice at turning the reel? With just the two races from each kid to compare, and the competition race always coming after the solo race, we couldn't tell.
+We spent Chapter 13 looking at data from a handful of kids who had completed a racing game twice, first alone and then against another kid. We used a related-samples $t$ test to compare the two times via difference scores, subtracting each kid's alone-race time from their competition time. The kids were generally a little faster racing against a rival. But we left a loose end. Was it the *competition* that spurred them to race quicker, or was it just practice at turning the reel? With just two races from each kid, and competition always coming after the solo race, we couldn't tell.
 
-What might we do to tease apart the possible effects of practice and competition? One idea is to add another race. If the kids raced alone *twice* before competing, we could see how much they improved from one solo race to the next, where practice is arguably the only explanation for a consistent difference. We'd then ask whether the competition trial brought any additional improvement. It's not a perfect solution; improvement in the third race could still be down to practice. But to the extent that any improvement in that third race seems to be more than we'd expect from just practice, that would fit with the social facilitation boost of racing against a competitor.
+What might we do to tease apart the possible effects of practice and competition? One idea is to add another race. If the kids raced alone *twice* before competing, we could see how much they improved from one solo race to the next, where practice is arguably the only explanation for a consistent difference. We'd then ask whether the competition trial brought any additional improvement. It's not a perfect solution; improvement in the third race could still be down to practice. But if the improvement seems greater than we'd expect from practice alone, that would fit with the social facilitation boost of racing against a competitor.
 
-In fact, Norman Triplett gave each child six timed trials, with different sequences of solo and competition trials [@triplett1898dynamogenic]. Here we'll use the first three trials from five children who all followed the same order: alone, alone, then competition. @tbl-related-anova-data shows three race times for each of five children from Triplett's reported data. (As before, I cherry-picked them from the group Triplett classified as "stimulated positively" by competition and who completed their first races in this order to make a useful teaching example, and rounded their times to whole seconds. This isn't a full reanalysis of Triplett's data.)
+In fact, Norman Triplett gave each child six timed trials, with different sequences of solo and competition trials [@triplett1898dynamogenic]. Here we'll use the first three trials from five children who all followed the same order: alone, alone, then competition, as shown in @tbl-related-anova-data. (As before, To make a useful teaching example, I cherry-picked children who raced in this order from the group Triplett classified as "stimulated positively" by competition, and rounded their times to whole seconds. This isn't a full reanalysis of Triplett's data.)
 
 | Child | First alone | Second alone | Competition |
 |:------|--:|--:|--:|
@@ -40,25 +40,25 @@ In fact, Norman Triplett gave each child six timed trials, with different sequen
 
 : Times (in seconds) for five children from Triplett's study. The columns follow the order of their first three trials. {#tbl-related-anova-data}
 
-How do we analyze all three conditions? With two scores, we simply subtracted each child's pair of times to get a single difference score. Here there are three scores per kid, making for multiple potential pairwise comparisons. We'll get to those with post-hoc tests, as we did in Chapter 14, but simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. The only difference between this and what we did in Chapter 14 is the relatedness of the samples. The related-samples ANOVA allows us to quantify and set aside the differences between people that make the scores related in the first place.
+How do we analyze all three conditions? With two scores, we simply subtracted each child's pair of times to get a single difference score. Here there are three scores per kid, allowing multiple pairwise comparisons. We'll get to those with post-hoc tests, as we did in Chapter 14, but simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. The only difference between this and what we did in Chapter 14 is the relatedness of the samples. The related-samples ANOVA allows us to quantify and set aside the differences between people that make the scores related in the first place.
 
 {{< include quizzes/15-related-anova-third-condition.qmd >}}
 
 ## Partitioning variance in related samples
 
-Again, the idea is that some kids are just faster overall, some are slower overall. Like, check out Clyde G.'s times in @tbl-related-anova-data. Clyde was not messing around---he totally demolished the other kids' times in every one of his races. How can we extend the ANOVA logic to capture that source of variability in the data, separate from the differences between conditions and any other sources of variability?
+Again, the idea is that some kids are just faster overall, some are slower overall. Like, check out Clyde G.'s times in @tbl-related-anova-data. Clyde was not messing around---he totally demolished the other kids' times in every one of his races. How can we extend the ANOVA logic to separate that source of variability from differences between conditions and other sources?
 
-Let's think in terms of partitioning. In Chapter 14 we split the total sum of squared deviations into between-groups and within-groups components. I said that any treatment effect contributes to differences between groups, while chance contributes both between and within groups. But I was glossing over "chance" there. I said it is made up of sampling error and any of the other reasons people's scores differ. Well, one of those other reasons is what we're talking about here: consistent individual differences between kids. @fig-partitioning-independent labels that separately.
+Let's think in terms of partitioning. In Chapter 14 we split the total sum of squared deviations into between-groups and within-groups components. I said that any treatment effect contributes to differences between groups, while chance contributes both between and within groups. But I was glossing over "chance" there. I said it is made up of sampling error and other reasons people's scores differ. Well, one of those reasons is consistent individual differences between kids. @fig-partitioning-independent labels that separately.
 
 ::: {#fig-partitioning-independent}
 {{< interactive-figure relatedRecapPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences." >}}
 :::
 
-We still just have the split of total into between-groups and within-groups variability. With a between-participants design and independent-samples ANOVA, that's the only split we can make. Individual differences will contribute to within-groups variability, because each group is made up of a bunch of different people. And individual differences are also present in the between-groups variability, because each group is a different set of unrelated participants.
+With a between-participants design and independent-samples ANOVA, we can only split the total into between-groups and within-groups variability. Individual differences will contribute to within-groups variability, because each group is made up of a bunch of different people. And they contribute to between-groups variability, because each group is a different set of unrelated participants.
 
-Using a within-participants design changes this, however. We will still have a bunch of different people within each condition, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and sampling error.
+A within-participants design changes this. We still have a bunch of different people within each condition, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and sampling error.
 
-As a result, we have a slight problem. Our eventual numerator and denominator for the $F$ ratio are no longer conceptually balanced. The numerator contains treatment plus sampling error, while the denominator contains sampling error plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, separating the sampling error and the individual differences and leaving a balanced ratio with individual differences absent from both the numerator and denominator.
+As a result, we have a slight problem. The numerator and denominator for our $F$ ratio are no longer conceptually balanced. The numerator contains treatment plus sampling error, while the denominator contains sampling error plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
 
 To do this, we split the within-groups sum of squares into two components: between-people variability, $SS_{\text{people}}$, and the remaining error, $SS_{\text{error}}$.^[I'm simplifying slightly. Error here isn't necessarily just sampling error, strictly defined, which is why @fig-partitioning-related calls it "remaining chance." Children might respond differently to practice or competition, or have a particularly good or bad trial. Those departures from the average pattern remain in the error component.]
 
@@ -70,7 +70,7 @@ We divide $SS_{\text{error}}$ by its degrees of freedom to get $MS_{\text{error}
 
 ## Calculating related-samples ANOVA
 
-Happily, the math is relatively straightforward. But before we get to the new equations, let's see how we separate out the people component using the data from the five kids in @tbl-related-anova-data. As you'll see, the key is that we group the data in a new way. So far we've grouped scores by condition; when we get to the between-people component in @act-related-partition we'll group them instead by the child they belong to. 
+Happily, the math is relatively straightforward. But before we get to the new equations, let's see how we separate out the people component using the data from the five kids in @tbl-related-anova-data. The key is to regroup the scores: so far we've grouped them by condition; for the between-people component in @act-related-partition we'll group them by child.
 
 ::::: {#act-related-partition .callout-tip .interactive}
 ## Where the individual differences go
@@ -99,7 +99,7 @@ Now for the new part. We will use the relatedness of the scores from each kid to
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Rows" data-action='{"stage":"people","phase":"rows","animate":true}'}
-We'll regroup the scores into one row per child, to make the relatedness more visually obvious. What we'll do next is basically the same as we did to get the between-groups variability, but instead of comparing condition means, we're going to compare the *children's* means.
+We'll regroup the scores into one row per child, to make the relatedness more visually obvious. Next we'll do much the same as we did for between-groups variability, but compare the *children's* means instead of condition means.
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Averages" data-action='{"stage":"people","phase":"observe","animate":true}'}
@@ -117,15 +117,15 @@ Next we square each deviation. Larger squares represent children whose overall t
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Sum" data-action='{"stage":"people","phase":"sum","animate":true}'}
 And finally we add those squares, counting each one three times to represent the child's three scores. They add up to $SS_{\text{people}}$, part of the within-groups variability we already counted.
 
-Now we're basically done. There's a little sliver of unaccounted variability left over. That's the error component. We can find it by simply subtracting the people component from the within-groups component: $SS_{\text{error}} = SS_{\text{within}} - SS_{\text{people}}$. But let's also see how we can get it directly from the scores, to better understand what it represents.
+Now we're basically done. There's a little sliver of unaccounted variability left over. That's the error component. We can find it by subtracting the people component from the within-groups component: $SS_{\text{error}} = SS_{\text{within}} - SS_{\text{people}}$. But let's also see how we can get it directly from the scores, to better understand what it represents.
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="Center" data-action='{"stage":"centre","phase":"shift","animate":true}'}
-To quantify the leftover variability, we shift each kid's cluster of scores so that each child's mean aligns with the grand mean. That's how we remove the already-accounted-for people variability from the data; each child becomes exactly average, all comparable to one another without those pesky individual differences pushing them apart. Notice that Clyde doesn't look exceptional any more. But each kid's three scores still vary from one another. That variation includes the differences between conditions. To find the error, we'll look at how far each adjusted score falls from its condition's mean.
+To quantify the leftover variability, we shift each kid's cluster of scores so that each child's mean aligns with the grand mean. Each child becomes exactly average, without those pesky individual differences pushing them apart. Notice that Clyde doesn't look exceptional any more. But each kid's three scores still vary from one another. That variation includes the differences between conditions. To find the error, we'll look at how far each adjusted score falls from its condition's mean.
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="Lanes" data-action='{"stage":"centre","phase":"lanes","animate":true}'}
-To quantify that leftover error, we put the adjusted scores back into their condition rows. The condition means are unchanged, but the spread around them is much smaller because the children no longer differ in overall speed.
+We put the adjusted scores back into their condition rows. The condition means are unchanged, but the spread around them is much smaller because the children no longer differ in overall speed.
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="What's left" data-action='{"stage":"centre","phase":"squares","animate":true}'}
@@ -141,7 +141,7 @@ Let's put it all together. $SS_{\text{total}}$ now has three parts: between grou
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
-For the $F$ ratio, we take the between-groups and error components. This whole mathematical procedure was necessary to get a denominator that doesn't include individual differences, so we leave those behind and just use the error component we extracted out of the within-groups variability.
+For the $F$ ratio, we take the between-groups and error components. We leave individual differences behind and use only the error component of the within-groups variability as our denominator.
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="F" data-action='{"stage":"compare","phase":"f","animate":true}'}
@@ -157,7 +157,7 @@ So here's how we calculate this modified $F$ ratio for related-samples data.[^re
 
 [^related-complete]: These formulas assume a complete set of scores: each person contributes one score in every condition. If someone misses a condition, we can't simply leave that cell blank and carry on with the same calculation.
 
-As @act-related-partition showed, the first stage of the analysis is identical to the independent-samples ANOVA we conducted in Chapter 14. The equations for $SS_{\text{total}}$, $SS_{\text{between}}$, and $SS_{\text{within}}$ are the same, and the degrees of freedom for each component are the same as well.
+As @act-related-partition showed, the first stage of the analysis is identical to the independent-samples ANOVA we conducted in Chapter 14. The equations and degrees of freedom for $SS_{\text{total}}$, $SS_{\text{between}}$, and $SS_{\text{within}}$ are the same.
 
 The only difference is that we will now split the within-groups variability into two components: between-people and error. The equation[^related-computational] for between people has the same form as $SS_{\text{between}}$, with person means in place of group means:
 
@@ -165,7 +165,7 @@ $$ SS_{\text{people}} = \Sigma k(M_{\text{person}} - M_{\text{grand}})^2 $$
 
 $M_{\text{person}}$ is the mean of one person's scores across the conditions. We square each person's deviation from the grand mean and multiply by $k$, the number of conditions, since each person's mean represents $k$ scores. Then we add them up. Same idea as between groups, just regrouping the scores by person.
 
-The final component, and the one that will become our denominator, is what's left. Anything left over after taking the individual-difference variability out of within-groups variability is the error variability, so it's easiest to find it by subtraction:
+The final component, error, is what's left after taking individual differences out of within-groups variability. It will provide our denominator, and it's easiest to find by subtraction:
 
 $$ SS_{\text{error}} = SS_{\text{within}} - SS_{\text{people}} $$
 
@@ -177,7 +177,7 @@ For each score, subtract that child's mean and add the grand mean: $X - M_{\text
 
 The two new components have degrees of freedom of their own. For $SS_{\text{people}}$, we computed the deviation of each person's mean from the grand mean. Here $n$ is the number of people, so that's $n$ means, deviating from a single grand mean: $df_{\text{people}} = n - 1$.[^related-matched]
 
-Remember that degrees of freedom are partitioned just like the sums of squares, so we can find $df_{\text{error}}$ by subtracting the degrees of freedom for the between-people component from the degrees of freedom for the within-groups component:
+Degrees of freedom are partitioned just like sums of squares, so we can find $df_{\text{error}}$ by subtraction too:
 
 $$
 \begin{aligned}
@@ -207,7 +207,7 @@ $$
 
 ### Mean squares and $F$
 
-Once we calculate the required sums of squares and degrees of freedom, the rest is easy. We calculate the mean squares by dividing each relevant sum of squares by its degrees of freedom. Then we divide the numerator by the denominator to get $F$. The numerator is the same as before; we just have to remember to use $MS_{\text{error}}$ as the denominator, rather than $MS_{\text{within}}$.
+Once we have the sums of squares and degrees of freedom, the rest is easy. We divide each relevant sum of squares by its degrees of freedom to get the mean squares, then take their ratio to get $F$. The numerator is the same as before; the denominator is now $MS_{\text{error}}$, rather than $MS_{\text{within}}$.
 
 $$
 \begin{align}
@@ -258,9 +258,9 @@ Note that if these 15 scores had come from independent samples, the denominator 
 
 ### Step 3: Collect and analyze the data
 
-Step three is to calculate the $F$ ratio for the data. Like the calculations for the independent-samples ANOVA, this is a little labor intensive to do by hand. But it's worth practicing to make sure you understand how to use each equation and what each component represents.
+Calculating $F$ is a little labor-intensive to do by hand, as it was for independent-samples ANOVA. But it's worth practicing to make sure you understand how to use each equation and what each component represents.
 
-It's a good idea to use a summary table as you work through this by hand, like we did in Chapter 14. This one will just have additional rows for new sources of variance: between people and error. @tbl-related-anova-summary-blank shows the equations for each element.
+A summary table helps, as in Chapter 14, with additional rows for between-people and error variability. @tbl-related-anova-summary-blank shows the equations for each element.
 
 ::: {#tbl-related-anova-summary-blank .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
@@ -437,7 +437,7 @@ Completed related-samples ANOVA summary table for the competition example.
 
 ### Step 4: Make a decision
 
-So now we've calculated our $F$ ratio, we're ready to make our decision. We compare it to the critical value we found in the table, and if our $F$ ratio is bigger than the critical value, we reject the null hypothesis. Here with our $F$ of $24.14$, well beyond the critical value of $4.46$, we can reject the null. There is a significant difference among our three conditions. The corresponding $p$-value is about $.0004$, so $p$ is less than $\alpha$.
+So now we compare our $F$ ratio to the critical value. Our $F$ of $24.14$ is well beyond $4.46$, so we reject the null hypothesis. There is a significant difference among our three conditions. The corresponding $p$-value is about $.0004$, so $p$ is less than $\alpha$.
 
 ::: {#fig-related-anova-decision}
 {{< interactive-figure relatedAnovaTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":2,"df2":8,"title":"Null distribution: F(2, 8)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,27],"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.45897,"label":"4.46","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":24.14433,"label":"F = 24.14","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 2 and 8 degrees of freedom. The rejection region lies above 4.46; the observed F of 24.14 is far into the rejection region." >}}
@@ -451,17 +451,17 @@ The observed $F = 24.14$ falls beyond the critical value of the null $F$ distrib
 
 #### Effect size: partial $\eta^2$
 
-In Chapter 14 we used $\eta^2$, the between-groups sum of squares as a proportion of the total. If you picture all the variability in the data as one big bucket, full to the brim, $\eta^2$ gave the proportion of that bucket that was filled by the between-groups variability, as opposed to the within-groups variability.
+In Chapter 14 we used $\eta^2$, the between-groups sum of squares as a proportion of the total. If you picture all the variability in the data as one big bucket, full to the brim, $\eta^2$ gave the proportion filled by between-groups variability.
 
-For related-samples ANOVA, we use **partial eta squared**, $\eta^2_p$. It asks what proportion is between groups once we've set aside the between-people component. We take our full bucket and dump out $SS_{\text{people}}$ first, leaving only the between-groups and error components. Then we ask what proportion of the new total is between groups.
+For related-samples ANOVA, we use **partial eta squared**, $\eta^2_p$. We take our full bucket and dump out $SS_{\text{people}}$ first, leaving only the between-groups and error components. Then we ask what proportion of the new total is between groups.
 
 More mathematically, the remaining total is $SS_{\text{between}} + SS_{\text{error}}$. That's the same as $SS_{\text{total}} - SS_{\text{people}}$. So:
 
 $$\eta^2_p = \frac{SS_{\text{between}}}{SS_{\text{between}} + SS_{\text{error}}} = \frac{156.13}{156.13 + 25.87} = .86$$
 
-About 86% of that remaining variability is between conditions. Ordinary $\eta^2$ would still be possible, but would give a different answer, $.20$, because it includes the large people component in the denominator.
+About 86% of that remaining variability is between conditions. Ordinary $\eta^2$ would give $.20$, because it includes the large people component in the denominator.
 
-Why set the people component aside? Because it isn't something our conditions could ever explain. Clyde is fast in every race; no amount of practice or competition accounts for that. And how big that component is depends on which kids we happened to get. If our five kids had all been about as quick as one another, $SS_{\text{people}}$ would have been much smaller, and ordinary $\eta^2$ much bigger, even with exactly the same effect of the conditions. Partial $\eta^2$ isn't swayed by that.
+Why set the people component aside? Because it isn't something our conditions could ever explain. Clyde is fast in every race; no amount of practice or competition accounts for that. And its size depends on which kids we happened to get. If our five kids had all been about as quick as one another, $SS_{\text{people}}$ would have been much smaller, and ordinary $\eta^2$ much bigger, even with exactly the same effect of the conditions. Partial $\eta^2$ isn't swayed by that.
 
 But it does mean partial $\eta^2$ isn't directly comparable to the $\eta^2$ we calculated in Chapter 14. With independent groups, differences between people stay in the denominator, because we have no way of taking them out. So don't line up our .86 next to Chapter 14's .65 and conclude that competition does more for kids than a radioactive spider bite.
 
@@ -503,13 +503,13 @@ Statistical software can calculate power for a related-samples ANOVA, or work ba
 
 ## Reporting and interpreting results
 
-So finally, we're ready to report the results. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we include a summary of the post-hoc tests stating which conditions differed significantly and nonsignificantly.
+So finally, we're ready to report the results. As usual, you need descriptives for each condition; a statement of what test was performed and whether it was significant; the test statistic itself with degrees of freedom; $p$ compared to $\alpha$; and effect size. And here we summarize which post-hoc comparisons were significant and which weren't.
 
 > In this selected five-child example, a single-factor, related-samples ANOVA revealed a significant difference among children's times on their first race alone ($M = 50.20$, $SD = 8.26$ seconds), a second race alone ($M = 47.40$, $SD = 7.09$ seconds), and a race in competition ($M = 42.40$, $SD = 6.19$ seconds); $F(2, 8) = 24.14$, $p < .001$, $\eta^2_p = .86$. Tukey HSD comparisons indicated that children were significantly faster in competition than on either solo trial. The two solo trials did not differ significantly.
 
-What kind of graph would work best to visualize results like these? We mentioned in Chapter 14 that bar graphs with error bars are common, but they can emphasize some features of the data and can hide others. A simple bar graph showing condition means with confidence intervals wouldn't convey the relatedness of the scores. Really we're interested in how consistently each child's time changed across the conditions, rather than treating the conditions as independent.
+What kind of graph would work best to visualize results like these? As we mentioned in Chapter 14, bar graphs with error bars are common, but they emphasize some features and hide others. A simple bar graph showing condition means with confidence intervals wouldn't convey the relatedness of the scores. Really we're interested in how consistently each child's time changed across the conditions, rather than treating the conditions as independent.
 
-@fig-related-profiles emphasizes that. Each colored line follows one child across the races. Every line falls at both steps, even though the children start at quite different levels. The dashed line shows the condition means: 50.20, 47.40, and 42.40 seconds. Lower times mean faster performances. So this shows more of the raw data and variability, along with the aggregate averages. But note that it leaves out confidence intervals, so it's important to put together the visual representation and the statistical results when reporting.
+@fig-related-profiles emphasizes that. Each colored line follows one child across the races. Every line falls at both steps, even though the children start at quite different levels. The dashed line shows the condition means: 50.20, 47.40, and 42.40 seconds. Lower times mean faster performances. So this shows the individual scores alongside the averages. But it leaves out confidence intervals, so the statistical results still need to accompany it.
 
 ::: {#fig-related-profiles}
 {{< interactive-figure relatedProfileLines makeProfileLines options='{"categories":["First alone","Second alone","Competition"],"series":[{"name":"Stephen","color":0,"values":[51,50,43]},{"name":"Mary W.","color":3,"values":[56,53,46]},{"name":"Bertha","color":7,"values":[56,49,48]},{"name":"Clyde","color":1,"values":[36,35,32]},{"name":"Lucile","color":5,"values":[52,50,43]}],"showMean":true,"yDomain":[30,60],"yLabel":"Time (seconds)","xLabel":"Condition","ariaLabel":"One line per child across the three conditions. Every child’s line falls from first alone to second alone and again to competition. A bold dashed average line falls from 50.20 to 47.40 to 42.40 seconds."}' fallback="One line per child across the three conditions. Every line falls at each step. The bold dashed average line falls from 50.20 to 47.40 to 42.40 seconds." >}}
@@ -529,13 +529,13 @@ So what would a better study look like? First, we'd want to vary the order prope
 
 But that brings its own problem: competing might itself affect a later solo trial. Triplett mentioned that the faster performance some children showed in competition endured into their later alone races, as if the rival unlocked some potential that didn't go away when the competition was over [@triplett1898dynamogenic]. So we might also want more solo races, to map out how much kids improve with practice alone, or a separate group of kids who never compete at all, for comparison. And of course we'd want a lot more than five kids.
 
-Every one of those fixes makes the study bigger, longer, and more complicated to analyze, and each would raise new questions of its own. That's pretty typical. Research questions are rarely settled by one study, or even a handful. Each design rules some explanations out and leaves others standing, and part of interpreting results is being clear about which is which.
+Each fix makes the study bigger, longer, and more complicated to analyze, and raises new questions. That's pretty typical. Research questions are rarely settled by one study, or even a handful. Each design rules some explanations out and leaves others standing, and part of interpreting results is being clear about which is which.
 
-Lastly, I feel I should remind you that these are five deliberately selected children from those Triplett labeled “stimulated positively.” I picked them to make a satisfying dataset to work with, but it's not reflective of trends in Triplett's full dataset. As I mentioned in Chapter 13, modern reanalysis of Triplett's reported data does not establish any conclusive effects of social facilitation.
+Lastly, remember that these are five deliberately selected children from those Triplett labeled “stimulated positively.” I picked them to make a satisfying dataset to work with, but it's not reflective of trends in Triplett's full dataset. As I mentioned in Chapter 13, modern reanalysis of Triplett's reported data does not establish any conclusive effects of social facilitation.
 
 ### Assumptions
 
-The same basic considerations apply as in our previous use of ANOVA, with some additional considerations for related samples. We expect scores from the same child to be related, but different children's responses should be independent of one another. Normality concerns the within-person variability we're analyzing, rather than simply the scores in each condition.
+The same basic considerations apply as in Chapter 14, with some additions for related samples. We expect scores from the same child to be related, but different children's responses should be independent of one another. Normality concerns the within-person variability we're analyzing, rather than simply the scores in each condition.
 
 Remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups to use one pooled estimate. Here we need a similar condition, but it applies to the *difference scores* for every pair of conditions, rather than to the scores in each condition. That requirement is called **sphericity**: the population variances of those difference scores should be the same.
 
