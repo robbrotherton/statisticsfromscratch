@@ -19,27 +19,35 @@ interactive-scripts:
 
 <!-- PLAN (structural pass, 2026-11-05). This chapter's one new idea: the interaction, an effect that depends on another factor, as distinct from main effects. Everything else is Chapter 14 again with the between-groups variance split further.
 Skeleton: it depends → factorial designs → main effects and interactions → reading interaction graphs → partitioning → SS and df → steps 1-5 → reporting, interpreting → design your own. Conceptual first, procedure second, as in Chapter 14. Reading graphs moved up from the end for that reason; those paragraphs were written to follow the calculation, so check the joins.
-DATA NOT YET CHANGED. Snack × test is a stand-in: it no longer extends anything in Chapter 14, and "main effect of test type" compares scores from two different tests. Recommendation and numbers are in the private structural-pass note. -->
+DATA CHANGED 2026-11-09 to maze × audience (invented numbers; the private structural-pass note has them). Factor A is the maze (easy, hard) and Factor B is the audience (alone, watched); scores are times in seconds, four kids per cell. Tables, figures, equations and worked numbers are swapped. Sentences that only needed names and numbers changed were changed in place; prose that only made sense for snacks is in CUT comments with a DRAFT note beside it. Search for DRAFT, FIX and FIGURE to find what still needs writing. -->
 
 Here, we'll introduce the last variant of ANOVA that we'll deal with: the factorial ANOVA, meaning ANOVA used with research designs that have more than one independent variable. This enables us to see not just the effect of a single variable, but how two variables interact. It's slightly more complicated, both conceptually and mathematically, but it's based on the same idea of partitioning variance that we've used in the previous two chapters.
 
 ## It depends
 
-<!-- DRAFT (gap): the opener should lead with a real "it depends" question rather than a generic design. Plan §4.1 leans to social facilitation: Triplett's mixed results, then Zajonc's prediction that an audience helps on easy tasks and hurts on hard ones. Guess-first with a draggable makeInteractionPlot would suit this. The prose below is the existing snack version, moved up. -->
+<!-- DRAFT (gap): the opener. Rob's framing (2026-11-09): present it as based on real research, as in earlier chapters.
+     Beats: Triplett's mixed results (some kids sped up against a rival, some slowed down). Zajonc's answer: it depends on the task. Having others around helps on easy or well-practiced tasks and hurts on hard ones. Zajonc, Heingartner and Herman (1969) tested this with cockroaches in a straight runway and in a maze. Here it's kids doing pencil-and-paper mazes instead, with an aside that I didn't want to spend a chapter talking about cockroaches.
+     Imagine being the kid doing the maze. Now imagine a whole audience watching you do it.
+     Then the design: an easy or a hard maze, alone or watched, time to finish in seconds, each kid in just one of the four conditions. Say the numbers are made up for illustration.
+     Verify before citing: Zajonc et al.'s design and results (the full text hasn't been checked; they had co-acting roaches as well as an audience).
+     FIGURE: the two mazes, easy and hard, each with an animated red line tracing the route as if a kid were drawing it with a marker, one fast and one slower. Could be traced from real attempts on printed mazes. Visual flavor only; nothing for the reader to do. -->
+
+<!-- CUT (snack × test opener; superseded by the maze example). Kept verbatim.
 
 We'll stick with the idea of snacks and test performance. Well, let's complicate things. Maybe we think that a snack could affect test performance, but the effect depends on what kind of test you're doing. Maybe you're doing a math test, something that requires some intellectual effort and flexibility. Or maybe you're doing a physical kind of reaction time test that requires sheer focus and cognitive and physical speed.
 
 It seems plausible that these different kinds of tests could be differently affected by different kinds of snacks. Maybe the banana, with its nutrients and minerals and whatever, promotes the kind of intellectual processing that will help with the math test, but not necessarily the reaction time test. Maybe the candy bar will give you a sugar rush that helps with your reaction times, but not with the focus and processing required for the math test. In short, maybe the snack type and test type will interact. The effect of one will depend on which level of the other you are in. The effect of the snack on your performance will depend on what kind of test you're doing.
+-->
 
 Here's that kind of design with a small sample of data for each condition.
 
-|  |  | **Snack** | |
+|  |  | **Maze** | |
 |---|---|:--:|:--:|
-| | | Banana | Candy |
-| **Test** | Math | 7, 9, 8, 9 | 5, 3, 4, 4 |
-| | Reaction time | 5, 4, 6, 5 | 6, 6, 5, 5 |
+| | | Easy | Hard |
+| **Audience** | Alone | 37, 31, 42, 34 | 41, 34, 45, 40 |
+| | Watched | 28, 32, 21, 31 | 53, 61, 50, 60 |
 
-: Test scores for the 2×2 snack type by test type design. {#tbl-factorial-data}
+: Times (in seconds) to finish the maze for the 2×2 maze by audience design. {#tbl-factorial-data}
 
 ## Factorial designs
 
@@ -70,6 +78,8 @@ We can always find the number of individual groups by multiplying the factorial 
 
 ## Main effects and interactions
 
+<!-- FIX: marginal means are never defined, but the quizzes and the explorer rely on them. Define them here, pointing at the row and column means (tbl-factorial-means in Step 3 has them; it could move up to here). -->
+
 <!-- FIX: "each of the four conditions compared to each of the others" is wrong: in a 2×2 the interaction is a single difference of differences. -->
 
 When it comes to the hypothesis test for a factorial design, we'll actually run several hypothesis tests. For this two-by-two design we'll have three tests. First, the main effects. We test the main effect of Factor A — this asks whether there is an overall difference between the levels of Factor A ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. Second, there's the main effect of Factor B. This is the same idea. We ignore the different groups on Factor A and just pool together everyone on each level of Factor B, and compare those two levels to see if there was an overall difference.
@@ -84,11 +94,63 @@ And third, we're interested in the interaction between A and B. This is the whol
 
 ### Grouping scores for analysis
 
-Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of snack type, we'll be comparing everyone who had a banana against everyone who had a candy bar. And then for the main effect of Factor B, we compare everyone who did a math test with everyone who did the reaction time test. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of Factor B, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
 
 ## Reading interaction graphs
 
 Before we get to the equations, a word about priorities: I'm much less interested in having you memorize all those different variations of variance equations than in making sure you understand the logic of factorial ANOVA on a more conceptual level and that you're able to interpret the pattern of findings that you might see.
+
+<!-- PLAN (2026-11-09): this tutorial and the paragraph after it moved here from Step 4, so the reader sees how an interaction graph is built, on the maze data, before the generic patterns ("Again, Factor A is represented as groups on the x-axis" below had nothing to refer back to). The heading is a placeholder. Step text and the paragraph had names and numbers swapped; the last sentence of each needed more than a swap, so check them. Lower times are faster here, which may need saying.
+     With the maze on the x-axis the lines cross. The DRAFT at the end of this section redraws the same four means with audience on the x-axis, where they don't. -->
+
+### Graphing the four means
+
+::::: {#act-maze-interaction .callout-tip .interactive}
+## Graphing the maze × audience results
+
+{{< interactive-figure
+  mazeInteraction
+  makeInteractionPlot
+  options='{
+    "means": {"a1b1": 36, "a2b1": 40, "a1b2": 28, "a2b2": 56},
+    "factorA": "Maze",
+    "factorB": "Audience",
+    "yLabel": "Mean time (seconds)",
+    "xTickLabels": ["Easy", "Hard"],
+    "seriesLabels": ["Alone", "Watched"],
+    "yDomain": [0, 60],
+    "yTicks": "numeric",
+    "showLines": false,
+    "valueLabels": true
+  }'
+  fallback="Line graph of the four maze-by-audience cell means: for kids working alone, times rise only slightly from the easy maze (36 seconds) to the hard maze (40); for kids being watched, they rise steeply from 28 to 56 seconds, so the two lines cross."
+>}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Cell means" data-action='{"show-lines":false,"highlight":"none","animate":false}'}
+Each dot is the mean time of one of the four groups, placed above its maze condition.
+:::
+
+::: {.tutorial-step data-title="Join the dots" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
+Joining the dots by audience gives one line per level of the other factor: solid for kids working alone, dashed for kids being watched.
+:::
+
+::: {.tutorial-step data-title="Alone" data-action='{"show-lines":true,"highlight":"b1","animate":true}'}
+Working alone, kids took barely any longer on the hard maze than on the easy one — the line is nearly flat.
+:::
+
+::: {.tutorial-step data-title="Watched" data-action='{"show-lines":true,"highlight":"b2","animate":true}'}
+Being watched, kids took much longer on the hard maze than on the easy one — the line climbs steeply.
+:::
+
+::: {.tutorial-step data-title="Interaction" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
+The lines are not parallel: the effect of maze difficulty depends on the audience. That is the interaction.
+:::
+::::
+
+:::::
+
+Each dot represents one of the four group means. The x-axis has the two levels of one factor and the levels of the other factor are represented by different lines, joining up the dots by the levels of that factor. For kids working alone, represented by the solid line, there was barely any difference between the easy maze and the hard maze. But that wasn't the case for kids being watched. For them, represented by the dashed line, the hard maze took much longer than the easy one. Put another way, it looks like being watched made kids faster on the easy maze and slower on the hard maze.
 
 <!-- FIX: "Generic" Factor A/B examples below need main-effect language checked against a sample result: flat lines describe sample means, and significance is a separate question. -->
 
@@ -183,12 +245,14 @@ F_{A \times B} &= \frac{MS_{A \times B}}{MS_{\text{within}}}
 \end{aligned}
 $$
 
-<!-- PLAN: the explorer tutorial below runs Chapter 14's and 15's visual on the snack × test data (tbl-factorial-data). Total, within and between are one step each, since Chapter 14 taught them; the new parts are the two factors (regrouped like Chapter 15's people) and the interaction (cell means against the additive prediction, filling what's left of between). Step text is Rob's to write; each [ROB: …] says what the step shows. When the data changes, only the options change. -->
+<!-- PLAN: the explorer tutorial below runs Chapter 14's and 15's visual on the maze × audience data (tbl-factorial-data). Maze has to be the first factor: the explorer can label a thin second-factor layer (audience, 3% of the total) but not a thin first one. Total, within and between are one step each, since Chapter 14 taught them; the new parts are the two factors (regrouped like Chapter 15's people) and the interaction (cell means against the additive prediction, filling what's left of between). Step text is Rob's to write; each [ROB: …] says what the step shows. When the data changes, only the options change. -->
 
 ::::: {#act-factorial-anova-viz .callout-tip .interactive}
 ## Where each effect goes
 
-{{< interactive-figure factorialAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"factors":[{"name":"Snack","levels":["Banana","Candy"]},{"name":"Test","levels":["Math","Reaction time"]}],"groups":[{"levels":[0,0],"values":[7,9,8,9]},{"levels":[1,0],"values":[5,3,4,4]},{"levels":[0,1],"values":[5,4,6,5]},{"levels":[1,1],"values":[6,6,5,5]}],"axisLabel":"Test score","xMin":2,"xMax":10,"populationSd":0.8}' fallback="Interactive diagram of the snack-by-test scores in four groups. Total, within-groups and between-groups sums of squares are built as in Chapter 14. The scores are then regrouped by snack type and by test type, and each factor's squared deviations pour into the bottom of the between-groups layer. What's left of that layer is filled by each group mean's squared distance from the mean the two factors alone predict: the interaction. Finally the snack, test and interaction mean squares each sit over the within-groups mean square as three F ratios." >}}
+{{< interactive-figure factorialAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"factors":[{"name":"Maze","levels":["Easy","Hard"]},{"name":"Audience","levels":["Alone","Watched"]}],"groups":[{"levels":[0,0],"values":[37,31,42,34]},{"levels":[1,0],"values":[41,34,45,40]},{"levels":[0,1],"values":[28,32,21,31]},{"levels":[1,1],"values":[53,61,50,60]}],"axisLabel":"Time (seconds)","xMin":15,"xMax":65,"populationSd":4.9}' fallback="Interactive diagram of the maze-by-audience times in four groups. Total, within-groups and between-groups sums of squares are built as in Chapter 14. The scores are then regrouped by maze and by audience, and each factor's squared deviations pour into the bottom of the between-groups layer. What's left of that layer is filled by each group mean's squared distance from the mean the two factors alone predict: the interaction. Finally the maze, audience and interaction mean squares each sit over the within-groups mean square as three F ratios." >}}
+
+
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
@@ -204,47 +268,47 @@ $$
 :::
 
 ::: {.tutorial-step data-major="familiar" data-major-title="As before" data-title="Between" data-action='{"stage":"between","phase":"sum","animate":true}'}
-[ROB: SS between, as before: each group mean stands in for its scores. Everything the snack and test conditions did is in this layer; the rest of the tutorial splits it up.]
+[ROB: SS between, as before: each group mean stands in for its scores. Everything the maze and audience conditions did is in this layer; the rest of the tutorial splits it up.]
 :::
 
-::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Recolor" data-action='{"stage":"factor-a","phase":"recolour","animate":true}'}
-[ROB: new part. Same scores, same places, recolored by snack type only, ignoring the test. Color marks the grouping in use, as with Chapter 15's people.]
+::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Recolor" data-action='{"stage":"factor-a","phase":"recolour","animate":true}'}
+[ROB: new part. Same scores, same places, recolored by maze only, ignoring the audience. Color marks the grouping in use, as with Chapter 15's people.]
 :::
 
-::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Rows" data-action='{"stage":"factor-a","phase":"rows","animate":true}'}
-[ROB: everyone who had a banana in one row, everyone who had candy in the other, whatever test they did. Eight scores per row.]
+::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Rows" data-action='{"stage":"factor-a","phase":"rows","animate":true}'}
+[ROB: everyone who did the easy maze in one row, everyone who did the hard maze in the other, watched or not. Eight scores per row.]
 :::
 
-::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Squares" data-action='{"stage":"factor-a","phase":"squares","animate":true}'}
-[ROB: each score stands in as its snack mean (a marginal mean). One deviation from the grand mean per level, drawn as a square. Same move as between groups and between people.]
+::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Squares" data-action='{"stage":"factor-a","phase":"squares","animate":true}'}
+[ROB: each score stands in as its maze mean (a marginal mean: 32 and 48). One deviation from the grand mean per level, drawn as a square. Same move as between groups and between people.]
 :::
 
-::: {.tutorial-step data-major="snack" data-major-title="Snack" data-title="Sum" data-action='{"stage":"factor-a","phase":"sum","animate":true}'}
-[ROB: each square counted eight times, once per score at that level, pours in at the bottom of the between layer, which gives way above it. SS snack is part of SS between.]
+::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Sum" data-action='{"stage":"factor-a","phase":"sum","animate":true}'}
+[ROB: each square counted eight times, once per score at that level, pours in at the bottom of the between layer, which gives way above it. SS maze is part of SS between.]
 :::
 
-::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Recolor" data-action='{"stage":"factor-b","phase":"recolour","animate":true}'}
-[ROB: now the other factor. Back in their groups, recolored by test type, ignoring the snack.]
+::: {.tutorial-step data-major="audience" data-major-title="Audience" data-title="Recolor" data-action='{"stage":"factor-b","phase":"recolour","animate":true}'}
+[ROB: now the other factor. Back in their groups, recolored by audience, ignoring the maze.]
 :::
 
-::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Rows" data-action='{"stage":"factor-b","phase":"rows","animate":true}'}
-[ROB: math in one row, reaction time in the other.]
+::: {.tutorial-step data-major="audience" data-major-title="Audience" data-title="Rows" data-action='{"stage":"factor-b","phase":"rows","animate":true}'}
+[ROB: alone in one row, watched in the other.]
 :::
 
-::: {.tutorial-step data-major="test" data-major-title="Test" data-title="Sum" data-action='{"stage":"factor-b","phase":"sum","animate":true}'}
-[ROB: the same move as for snack, in one step: test means, squares, eight copies each, poured in above SS snack. A thin layer: the two test means are close. Note the empty slot left above it, still part of between but not yet named.]
+::: {.tutorial-step data-major="audience" data-major-title="Audience" data-title="Sum" data-action='{"stage":"factor-b","phase":"sum","animate":true}'}
+[ROB: the same move as for maze, in one step: audience means, squares, eight copies each, poured in above SS maze. A thin layer: the two audience means are close (38 and 42). Note the empty slot left above it, still part of between but not yet named.]
 :::
 
 ::: {.tutorial-step data-major="interaction" data-major-title="Interaction" data-title="Prediction" data-action='{"stage":"interaction","phase":"observe","animate":true}'}
-[ROB: back to the four groups. Each group's mean, and beside it a dotted line: what snack and test alone would predict for that group (snack mean + test mean − grand mean). Parallel lines on an interaction plot would put every group mean on its prediction.]
+[ROB: back to the four groups. Each group's mean, and beside it a dotted line: what maze and audience alone would predict for that group (maze mean + audience mean − grand mean: 30, 46, 34 and 50). Parallel lines on an interaction plot would put every group mean on its prediction.]
 :::
 
 ::: {.tutorial-step data-major="interaction" data-major-title="Interaction" data-title="Sum" data-action='{"stage":"interaction","phase":"sum","animate":true}'}
-[ROB: each group mean's distance from its prediction, squared, counted four times, fills the empty slot exactly. That's the interaction: what's left of between once both main effects are out, shown rather than only subtracted. Here every distance is the same size, as in any 2×2.]
+[ROB: each group mean's distance from its prediction, squared, counted four times, fills the empty slot exactly. That's the interaction: what's left of between once both main effects are out, shown rather than only subtracted. Here every distance is the same size (6 seconds), as in any 2×2.]
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Partition" data-action='{"stage":"compare","phase":"partition","animate":true}'}
-[ROB: the full bucket: within, snack, test and the interaction, adding up to SS total.]
+[ROB: the full bucket: within, maze, audience and the interaction, adding up to SS total.]
 :::
 
 ::: {.tutorial-step data-major="compare" data-major-title="Compare" data-title="Split" data-action='{"stage":"compare","phase":"split","animate":true}'}
@@ -260,7 +324,79 @@ $$
 
 ## Sums of squares and degrees of freedom
 
-<!-- FIX: computational formulas (ISSUES #5). Go definitional: $SS_A$ uses column means, $SS_B$ row means, in the same form as $SS_{\text{between}}$ (each marginal mean's squared deviation from the grand mean, times the number of scores behind it). $SS_{\text{interaction}}$ can stay as the remainder, but should also be tied to the residuals from the additive prediction. -->
+<!-- DRAFT (2026-11-09, written at Rob's request): this section now uses definitional formulas, as Chapters 14 and 15 do (ISSUES #5). The familiar three are restated without comment; the new ones are tied to the steps of act-factorial-anova-viz. Rob's sentences are kept where they still apply. Column and row symbols follow his "columns and rows" wording. The previous version is in the CUT comment at the end of the section. -->
+
+So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variability that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
+
+The equations for the total, within-groups, and between-groups $SS$ and $df$ are exactly the same as in Chapter 14. Just remember that each cell of the table is a group, so here $k = 4$.
+
+$$
+\begin{align}
+SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 \\
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2
+\end{align}
+$$
+
+$$
+\begin{align}
+df_{\text{total}} &= N - 1 \\
+df_{\text{within}} &= N - k \\
+df_{\text{between}} &= k - 1
+\end{align}
+$$
+
+The new equations[^factorial-computational] here are for the main effects and interaction.[^factorial-equal-n] And as long as we're thinking about the data in a two-by-two table like @tbl-factorial-generic, then we can think in terms of columns and rows.
+
+[^factorial-computational]: As in Chapters 14 and 15, there are computational versions of these formulas. They use column totals and row totals in the same way that Chapter 14's used treatment totals. We'll stick with the definitional formulas here too.
+
+[^factorial-equal-n]: These formulas assume that every group has the same number of scores. With unequal group sizes, the pieces no longer add up so neatly, and the analysis gets more complicated.
+
+### Sums of squares for Factor A
+
+In my generic table, I had Factor A at the top of the table, so its two conditions were represented as columns in the table. In @act-factorial-anova-viz, this was the part where we regrouped the scores by maze, ignoring the audience. We find the mean of all the scores in each column, $M_{\text{column}}$, and see how far it falls from the grand mean. Then we square that deviation and multiply it by $n_{\text{column}}$, the number of scores in the column, since each column mean represents that many scores.
+
+$$ SS_A = \Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2 $$
+
+Notice that this is basically the same equation as for the between-groups sum of squares. The difference is that the means represent different sets of scores — scores for each column combined, rather than all four groups separately. It's the same move we made in Chapter 15 when we regrouped the scores by person. And its degrees of freedom are $k_A$, the number of levels for that factor, minus one.
+
+$$ df_A = k_A - 1 $$
+
+### Sums of squares for Factor B
+
+And it's the same logic for the $SS$ for Factor B. In my generic table, Factor B was on the side of the table, so its two conditions were represented as rows. Now we regroup the scores by audience, ignoring the maze. Again, the only new thing about this equation is that the means represent another grouping of scores, the scores for each row combined, and the number of scores in each row.
+
+$$ SS_B = \Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2 $$
+
+$$ df_B = k_B - 1 $$
+
+### The interaction
+
+And then, like I said, the $SS$ and $df$ for the interaction are simply whatever is left over — between-groups variability not already partitioned either into Factor A or Factor B. So we can find those through simple subtraction.
+
+$$
+\begin{align}
+SS_{A \times B} &= SS_{\text{between}} - SS_A - SS_B \\
+df_{A \times B} &= df_{\text{between}} - df_A - df_B
+\end{align}
+$$
+
+For a two-by-two design, that leaves $3 - 1 - 1 = 1$ degree of freedom. More generally, it works out to $(k_A - 1)(k_B - 1)$, much like the error degrees of freedom in Chapter 15.
+
+But, as with the error component in Chapter 15, we can also get the interaction directly from the data, which helps show what it represents. In @act-factorial-anova-viz, each group got a prediction: the mean we'd expect for that group if the two main effects were all that was going on. To make the prediction, we start at the grand mean, then adjust for how far the group's column mean is from the grand mean, and again for its row mean. That simplifies to $M_{\text{column}} + M_{\text{row}} - M_{\text{grand}}$.
+
+The interaction is about how far each group's actual mean falls from that prediction. We square each of those differences and multiply by the number of scores in the group, just as we did for the between-groups sum of squares.
+
+$$
+\begin{aligned}
+SS_{A \times B} = \Sigma n_{\text{group}}(&M_{\text{group}} - M_{\text{column}} \\
+&{}- M_{\text{row}} + M_{\text{grand}})^2
+\end{aligned}
+$$
+
+If there were no interaction at all, every group mean would sit right on its prediction, and this would come to zero. The farther the group means are from where the main effects alone would put them, the bigger the interaction.
+
+<!-- CUT (the computational-formula version of this section, replaced 2026-11-09). Kept verbatim.
 
 So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variability that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
 
@@ -277,42 +413,48 @@ And it's the same logic for the $SS$ for Factor B. In my generic table, Factor B
 ### The interaction
 
 And then, like I said, the $SS$ and $df$ for the interaction are simply whatever is left over — variability not already partitioned either into Factor A or Factor B. So we find those through simple subtraction.
+-->
 
 ## A factorial ANOVA, step by step
 
-So now let's work through a hypothesis test for this design. Here's the little table again for the snack type and task type example. Each cell had just four recorded scores.
+So now let's work through a hypothesis test for this design, using the maze and audience example in @tbl-factorial-data. Each cell had just four recorded scores.
 
 ### Step 1: State the hypotheses
 
-As always, we start with our hypotheses, and we have both a null hypothesis and alternative hypothesis for each of the three tests we're going to do: the main effect of snack type, the main effect of test type, and the interaction. For the main effects, the null hypothesis is just that each level of the factor is equal to the other. The alternative hypothesis is that the levels are not equal to one another. For the interaction, our null hypothesis is that there is no interaction. The alternative is that there is.
+As always, we start with our hypotheses, and we have both a null hypothesis and alternative hypothesis for each of the three tests we're going to do: the main effect of maze difficulty, the main effect of audience, and the interaction. For the main effects, the null hypothesis is just that each level of the factor is equal to the other. The alternative hypothesis is that the levels are not equal to one another. For the interaction, our null hypothesis is that there is no interaction. The alternative is that there is.
+
+<!-- DRAFT (gap): once the difference of differences is in place, the interaction null can be stated with it: the effect of being watched is the same on both mazes. The three hypotheses could also be written in symbols, as in Chapters 14 and 15. -->
 
 ### Step 2: Set the decision criteria
 
-<!-- FIGURE: replace these two with a static excerpt like tbl-anova-critical (df_2 10-14, F(1, 12) highlighted). Chapter 14 already taught the explorable version. Same for a decision plot in Step 4, clone fig-anova-decision: there are three Fs, so mark all three on the F(1, 12) curve. -->
+<!-- DRAFT (gap): Step 2 never gives the numbers. Each numerator has $df = 1$ (two levels minus one; the interaction's is what's left of $df_{\text{between}} = 3$), and $df_{\text{within}} = N - k = 16 - 4 = 12$, so the critical value for all three tests is 4.75.
+     FIX: we're running three tests at .05 each, one chapter after Chapter 14's experiment-wise error rate. A reader may ask; a sentence on the convention would cover it. -->
 
 Step two is to determine the critical value for the test. And we do so using the same $F$ table as before. Strictly speaking, we need three different critical values, one for each of our three hypothesis tests. But here with a two-by-two between-participants design, all three $F$ ratios actually have the same degrees of freedom, both for the numerator and the denominator. That won't always necessarily be the case. The denominator is always the same for all three tests, but the degrees of freedom for the numerator may vary if we have a more complicated design.
 
-{{< interactive-figure fCriticalValueTable makeFTable options='{"title":"F critical values","alpha":0.05,"df1":{"from":1,"to":6},"df2":[1,2,3,4,5,6,8,10,12,15,20,30],"selected":{"df1":1,"df2":12,"alpha":0.05},"maxWidth":"46rem","tableMinWidth":"34rem"}' fallback="Interactive F critical-value table for alpha .05." >}}
+::: {#tbl-factorial-critical}
+{{< interactive-figure factorialCriticalTable makeFTable options='{"title":"Critical values for the maze tests","alpha":0.05,"df1":{"from":1,"to":4},"df2":{"from":10,"to":14},"tableMinWidth":"0","maxWidth":"32rem","interactive":false,"selected":{"df1":1,"df2":12,"alpha":0.05}}' fallback="F table excerpt for numerator df 1 through 4 and denominator df 10 through 14, highlighting the .05 critical value of 4.75 at F(1, 12)." >}}
 
-{{< interactive-figure fCriticalCurve makeDistributionGraph options='{"distribution":"f","df1":{"$value":"fCriticalValueTable.df1"},"df2":{"$value":"fCriticalValueTable.df2"},"title":{"$template":"F(${fCriticalValueTable.df1}, ${fCriticalValueTable.df2})"},"xDomain":[0,8],"xTicks":5,"shade":{"$value":"fCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="F distribution curve with the selected critical region shaded." >}}
+An excerpt of the $F$ table, with the critical value for $df = 1$ and $12$ highlighted.
+:::
 
 ### Step 3: Collect and analyze the data
 
-<!-- FIX: Step 3 needs redoing definitionally with the chosen data ($T$, $G$, $\Sigma X^2$ all go), with cell and marginal means replacing totals, and with a blank summary table showing equations like tbl-anova-summary-blank. Quiz below is independent practice on separate numbers. -->
+<!-- DRAFT (2026-11-09, written at Rob's request): Step 3 is now a definitional worked example, laid out like Chapter 15's. The paragraph introducing the means table is adapted from the one in the CUT comment below. The practice quiz at the end of the step uses separate numbers. -->
 
 Again, there are a lot of values to keep track of while you calculate this, so filling in a summary table as you go is a good idea. Notice the new rows here for Factor A and Factor B and the interaction.
 
 ::: {#tbl-factorial-summary-blank .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|:--:|:--:|:--:|:--:|
-| Between groups | | | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Factor A | | | | |
-| &emsp;Factor B | | | | |
-| &emsp;A × B interaction | | | | |
-| Within groups | | | | []{.sfs-na} |
-| Total | | | []{.sfs-na} | []{.sfs-na} |
+| Between groups | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Factor A | $\Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2$ | $k_A - 1$ | $\dfrac{SS_A}{df_A}$ | $\dfrac{MS_A}{MS_{\text{within}}}$ |
+| &emsp;Factor B | $\Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2$ | $k_B - 1$ | $\dfrac{SS_B}{df_B}$ | $\dfrac{MS_B}{MS_{\text{within}}}$ |
+| &emsp;A × B interaction | $SS_{\text{between}} - SS_A - SS_B$ | $df_{\text{between}} - df_A - df_B$ | $\dfrac{SS_{A \times B}}{df_{A \times B}}$ | $\dfrac{MS_{A \times B}}{MS_{\text{within}}}$ |
+| Within groups | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | $\dfrac{SS_{\text{within}}}{df_{\text{within}}}$ | []{.sfs-na} |
+| Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
 
-A blank factorial ANOVA summary table.
+A factorial ANOVA summary table, showing each equation.
 :::
 
 <!-- CUT (superseded: Chapter 14's summary table already shows the equations; do the same in Step 3 below). Kept verbatim.
@@ -320,33 +462,153 @@ A blank factorial ANOVA summary table.
 As a piece of advice, if you haven't already done this, I'd suggest that for your notes you could also make a version of this table where each cell contains the equation to calculate that piece of the puzzle. So the $SS$ column has each of the sums of squares equations, the $df$ column has how to find each degrees of freedom value, and so on.
 -->
 
+<!-- CUT (described the treatment totals $T$, $G$ and $\Sigma X^2$, which Step 3 no longer uses). Kept verbatim.
+
 Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm gonna give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with its $T$ treatment total, which you'll remember is just the sum of the scores in the group, and its sum of squared deviations. I've also added the $T$-row totals, the sum of scores in each row, and the column totals, the sum of scores in each column. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each condition, $k$ the total number of treatment conditions, $k_A$ and $k_B$, the number of conditions for each factor, $G$, the sum of all recorded scores, and $\Sigma X^2$, the sum of every squared score.
+-->
 
-|  | Banana | Candy | $T_{row}$ |
+Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm going to give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with the group's mean and its sum of squared deviations. I've also added the mean of each row and each column, and the grand mean. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each group, $k$, the total number of groups, and $k_A$ and $k_B$, the number of levels for each factor.
+
+|  | Easy maze | Hard maze | Row mean |
 |:--|:--:|:--:|:--:|
-| Math | $T = 33$; $SS = 2.75$ | $T = 16$; $SS = 2$ | 49 |
-| Reaction time | $T = 20$; $SS = 2$ | $T = 22$; $SS = 1$ | 42 |
-| $T_{col}$ | 53 | 38 | |
+| Alone | $M = 36$; $SS = 66$ | $M = 40$; $SS = 62$ | 38 |
+| Watched | $M = 28$; $SS = 74$ | $M = 56$; $SS = 86$ | 42 |
+| Column mean | 32 | 48 | $M_{\text{grand}} = 40$ |
 
-: Treatment totals and sums of squares for each cell, with row and column totals. {#tbl-factorial-totals}
+: Means and sums of squares for each cell, with the row and column means. {#tbl-factorial-means}
 
-$$N = 16 \qquad n = 4 \qquad k = 4 \qquad k_A = 2 \qquad k_B = 2 \qquad G = 91 \qquad \Sigma X^2 = 565$$
+$$
+\begin{gathered}
+N = 16 \qquad n = 4 \qquad k = 4 \\
+k_A = 2 \qquad k_B = 2
+\end{gathered}
+$$
 
 So see if you can calculate all the pieces of the puzzle and end up with three $F$ ratios for the main effects and the interaction.
+
+Here's how it works out. First, the familiar components. For within groups, we can just add the four groups' sums of squares from @tbl-factorial-means:
+
+$$
+\begin{aligned}
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\
+&= 66 + 62 + 74 + 86 \\
+&= 288
+\end{aligned}
+$$
+
+$$ df_{\text{within}} = N - k = 16 - 4 = 12 $$
+
+For between groups, we find each group mean's deviation from the grand mean, square it, and multiply by the four scores it represents:
+
+$$
+\begin{aligned}
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2 \\
+&= 4(-4)^2 + 4(0)^2 \\
+&\quad {}+ 4(-12)^2 + 4(16)^2 \\
+&= 1{,}664
+\end{aligned}
+$$
+
+$$ df_{\text{between}} = k - 1 = 4 - 1 = 3 $$
+
+Those two add up to the total: $SS_{\text{total}} = 1{,}664 + 288 = 1{,}952$, with $df_{\text{total}} = N - 1 = 15$.
+
+Now for the new components. For the maze factor, we use the column means, 32 and 48 seconds. Each one represents eight scores:
+
+$$
+\begin{aligned}
+SS_A &= \Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2 \\
+&= 8(32 - 40)^2 + 8(48 - 40)^2 \\
+&= 1{,}024
+\end{aligned}
+$$
+
+$$ df_A = k_A - 1 = 2 - 1 = 1 $$
+
+For the audience factor, we do the same with the row means, 38 and 42 seconds:
+
+$$
+\begin{aligned}
+SS_B &= \Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2 \\
+&= 8(38 - 40)^2 + 8(42 - 40)^2 \\
+&= 64
+\end{aligned}
+$$
+
+$$ df_B = k_B - 1 = 2 - 1 = 1 $$
+
+Then we can find the interaction by subtracting both of those from the between-groups component:
+
+$$
+\begin{aligned}
+SS_{A \times B} &= SS_{\text{between}} - SS_A - SS_B \\
+&= 1{,}664 - 1{,}024 - 64 \\
+&= 576
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+df_{A \times B} &= df_{\text{between}} - df_A - df_B \\
+&= 3 - 1 - 1 = 1
+\end{aligned}
+$$
+
+But let's also see how the interaction builds up from the group means. Take the kids who did the easy maze alone. Their column mean is 32 and their row mean is 38, so the prediction is $32 + 38 - 40 = 30$ seconds. Their actual mean was 36 seconds: 6 seconds slower than the main effects alone would suggest. @tbl-factorial-predictions does the same for all four groups.
+
+| Group | $M_{\text{group}}$ | Prediction | Difference |
+|:--|--:|--:|--:|
+| Easy, alone | 36 | $32 + 38 - 40 = 30$ | $6$ |
+| Hard, alone | 40 | $48 + 38 - 40 = 46$ | $-6$ |
+| Easy, watched | 28 | $32 + 42 - 40 = 34$ | $-6$ |
+| Hard, watched | 56 | $48 + 42 - 40 = 50$ | $6$ |
+
+: Each group's mean, the mean predicted from the two main effects alone, and the difference between them. {#tbl-factorial-predictions}
+
+Every group mean is 6 seconds from its prediction, in one direction or the other. (That's always how it goes with a two-by-two design: the four differences come out the same size.) Squaring each difference and multiplying by the four scores in each group gives the same answer as before:
+
+$$
+\begin{aligned}
+SS_{A \times B} &= 4(6)^2 + 4(-6)^2 \\
+&\quad {}+ 4(-6)^2 + 4(6)^2 \\
+&= 576
+\end{aligned}
+$$
+
+Now we have all the sums of squares and their degrees of freedom. Dividing each one by its degrees of freedom gives the mean squares:
+
+$$
+\begin{align}
+MS_A &= \frac{SS_A}{df_A} = \frac{1{,}024}{1} = 1{,}024 \\
+MS_B &= \frac{SS_B}{df_B} = \frac{64}{1} = 64 \\
+MS_{A \times B} &= \frac{SS_{A \times B}}{df_{A \times B}} = \frac{576}{1} = 576 \\
+MS_{\text{within}} &= \frac{SS_{\text{within}}}{df_{\text{within}}} = \frac{288}{12} = 24
+\end{align}
+$$
+
+Finally, we divide each of the three new mean squares by the within-groups mean square:
+
+$$
+\begin{align}
+F_A &= \frac{MS_A}{MS_{\text{within}}} = \frac{1{,}024}{24} \approx 42.67 \\
+F_B &= \frac{MS_B}{MS_{\text{within}}} = \frac{64}{24} \approx 2.67 \\
+F_{A \times B} &= \frac{MS_{A \times B}}{MS_{\text{within}}} = \frac{576}{24} = 24.00
+\end{align}
+$$
 
 Here's the completed summary table so you can check your work:
 
 ::: {#tbl-factorial-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|--:|--:|--:|--:|
-| Between groups | 39.69 | 3 | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Snack type (A) | 14.06 | 1 | 14.06 | 21.77 |
-| &emsp;Test type (B) | 3.06 | 1 | 3.06 | 4.74 |
-| &emsp;A × B interaction | 22.56 | 1 | 22.56 | 34.94 |
-| Within groups | 7.75 | 12 | 0.65 | []{.sfs-na} |
-| Total | 47.44 | 15 | []{.sfs-na} | []{.sfs-na} |
+| Between groups | 1,664 | 3 | []{.sfs-na} | []{.sfs-na} |
+| &emsp;Maze (A) | 1,024 | 1 | 1,024 | 42.67 |
+| &emsp;Audience (B) | 64 | 1 | 64 | 2.67 |
+| &emsp;A × B interaction | 576 | 1 | 576 | 24.00 |
+| Within groups | 288 | 12 | 24 | []{.sfs-na} |
+| Total | 1,952 | 15 | []{.sfs-na} | []{.sfs-na} |
 
-Completed factorial ANOVA summary table for the snack × test example.
+Completed factorial ANOVA summary table for the maze × audience example.
 :::
 
 That's an impressive feat. It's the most mathematically complicated thing that we'll do in this book. It's worth working through the math by hand at least once to reinforce how this kind of ANOVA works behind the scenes.
@@ -357,64 +619,30 @@ That's an impressive feat. It's the most mathematically complicated thing that w
 
 <!-- FIX: "there was no difference between the two test conditions" is accept-the-null language that Chapters 8-13 avoid. "Main effects don't mean too much" overstates; it depends on whether the interaction reverses the effect or only changes its size. -->
 
-Here you should have found that the $F$ ratio was within the critical region for the main effect of snack type (the critical value for $F(1, 12)$ at $\alpha = .05$ is 4.75). It was (just barely) outside the critical region for test type. And within the critical region for the interaction.
+Here you should have found that the $F$ ratio was within the critical region for the main effect of maze difficulty (the critical value for $F(1, 12)$ at $\alpha = .05$ is 4.75). It was outside the critical region for audience. And within the critical region for the interaction.
 
-And what that means is that there was a significant difference between the two snack conditions overall. People did better with a banana, in general, than with a candy bar. But there was no difference between the two test conditions in general. On average, people didn't do any better or worse on the math test than on the reaction time test. But we have a significant interaction, and a significant interaction means that the main effects don't mean too much by themselves, because the interaction tells us that the effect of one factor depends on the level of the other.
+<!-- FIGURE (2026-11-09): new, modeled on Chapter 14's fig-anova-decision, with all three Fs on one curve. Fine on desktop; on a phone the Audience and 4.75 labels sit close together at the left edge. Shorter labels or a narrower x-axis would help if it stays. -->
+
+::: {#fig-factorial-decision}
+{{< interactive-figure factorialTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":1,"df2":12,"title":"Null distribution: F(1, 12)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,45],"yDomain":[0,1],"clipPlot":true,"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":4.747225,"label":"4.75","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.666667,"label":"Audience","height":0.75,"color":"var(--sfs-accent, #2c7fb8)"},{"at":24,"label":"Interaction","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"},{"at":42.666667,"label":"Maze","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 1 and 12 degrees of freedom. The rejection region lies above 4.75. The observed F for audience, 2.67, falls short of it; the observed Fs for the interaction, 24.00, and for maze, 42.67, are far into the rejection region." >}}
+
+The three observed $F$ ratios against the null $F$ distribution with $df = 1$ and $12$. Audience ($F = 2.67$) falls short of the critical value; the interaction ($F = 24.00$) and maze ($F = 42.67$) are well beyond it.
+:::
+
+And what that means is that there was a significant difference between the two maze conditions overall. Kids took longer on the hard maze, in general, than on the easy maze. But there was no difference between the two audience conditions in general. On average, kids didn't do any better or worse being watched than working alone. But we have a significant interaction, and a significant interaction means that the main effects don't mean too much by themselves, because the interaction tells us that the effect of one factor depends on the level of the other.
 
 #### Visualizing the results
 
-This is what I meant by the interaction quantifying patterns of cell means that deviate from what you'd expect based on the main effects. The main effect of snack type suggests that you should generally do better if you eat a banana before any test. But the interaction tells us it isn't quite so simple. Visualizing the results in a line graph shows the trends more clearly.
+<!-- FIX (2026-11-09): the graph tutorial that followed this paragraph moved up to "Reading interaction graphs". The second sentence was about the banana's main effect; it now makes the matching point about audience, which has no significant main effect, so the logic runs the other way round. Check it. The last sentence now points back to the earlier graph.
+     FIGURE: this could be the place for the same four means redrawn with audience on the x-axis (see the DRAFT at the end of "Reading interaction graphs"), where the easy line falls and the hard line rises. -->
 
-::::: {#act-snack-interaction .callout-tip .interactive}
-## Graphing the snack × test results
-
-{{< interactive-figure
-  snackInteraction
-  makeInteractionPlot
-  options='{
-    "means": {"a1b1": 8.25, "a2b1": 4.0, "a1b2": 5.0, "a2b2": 5.5},
-    "factorA": "Snack type",
-    "factorB": "Test type",
-    "yLabel": "Mean test score",
-    "xTickLabels": ["Banana", "Candy"],
-    "seriesLabels": ["Math", "Reaction time"],
-    "yDomain": [0, 10],
-    "yTicks": "numeric",
-    "showLines": false,
-    "valueLabels": true
-  }'
-  fallback="Line graph of the four snack-by-test cell means: math scores fall steeply from banana (8.25) to candy (4.0) while reaction-time scores stay nearly flat (5.0 and 5.5)."
->}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Cell means" data-action='{"show-lines":false,"highlight":"none","animate":false}'}
-Each dot is the mean score of one of the four groups, placed above its snack condition.
-:::
-
-::: {.tutorial-step data-title="Join the dots" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
-Joining the dots by test type gives one line per level of the other factor: solid for the math test, dashed for the reaction time test.
-:::
-
-::: {.tutorial-step data-title="Math test" data-action='{"show-lines":true,"highlight":"math","animate":true}'}
-On the math test, people did much better with a banana than with a candy bar — the line drops steeply.
-:::
-
-::: {.tutorial-step data-title="Reaction time" data-action='{"show-lines":true,"highlight":"reaction","animate":true}'}
-On the reaction time test, the snack barely mattered — the line is nearly flat.
-:::
-
-::: {.tutorial-step data-title="Interaction" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
-The lines are not parallel: the effect of snack type depends on test type. That is the interaction.
-:::
-::::
-
-:::::
-
-Each dot represents one of the four group means. The x-axis has the two levels of one factor and the levels of the other factor are represented by different lines, joining up the dots by the levels of that factor. For the math test, represented by the solid line, people did much better if they had a banana as compared to a candy bar. But that wasn't the case for the reaction time test. For that test, represented by the dashed line, there was barely any difference between the banana and the candy bar at all. Put another way, it looks like the snack type only affected performance on the math test, not the reaction time test.
+This is what I meant by the interaction quantifying patterns of cell means that deviate from what you'd expect based on the main effects. The lack of a main effect of audience suggests that being watched doesn't generally matter. But the interaction tells us it isn't quite so simple. Visualizing the results in a line graph, as in @act-maze-interaction, shows the trends more clearly.
 
 ### Step 5: Estimate the effect and follow up
 
 #### Effect size: partial $\eta^2$
+
+<!-- FIX (2026-11-09): Chapter 15's reason for the partial version (conditions could never explain differences between people) doesn't carry over to a second manipulated factor, so it needs its own reason here. The three values add up to more than 1 (.78 + .18 + .67), which clashes with the bucket picture unless it's explained. Each denominator below is also just that effect's $SS$ plus $SS_{\text{within}}$, which would match the form used in Chapter 15. -->
 
 <!-- FIX: "when we get significant results" conflicts with Chapter 14 (always report effect size). The worked equations label these $\eta^2_A$ etc., while the prose and report call them $\eta^2_p$. -->
 
@@ -424,15 +652,15 @@ In each case, the numerator is the $SS$ for that component of the variability an
 
 $$
 \begin{align}
-\eta^2_A &= \frac{SS_A}{SS_{\text{total}} - SS_B - SS_{A \times B}} = \frac{14.06}{47.44 - 3.06 - 22.56} = 0.64 \\
-\eta^2_B &= \frac{SS_B}{SS_{\text{total}} - SS_A - SS_{A \times B}} = \frac{3.06}{47.44 - 14.06 - 22.56} = 0.28 \\
-\eta^2_{A \times B} &= \frac{SS_{A \times B}}{SS_{\text{total}} - SS_A - SS_B} = \frac{22.56}{47.44 - 14.06 - 3.06} = 0.74
+\eta^2_A &= \frac{SS_A}{SS_{\text{total}} - SS_B - SS_{A \times B}} = \frac{1{,}024}{1{,}952 - 64 - 576} = 0.78 \\
+\eta^2_B &= \frac{SS_B}{SS_{\text{total}} - SS_A - SS_{A \times B}} = \frac{64}{1{,}952 - 1{,}024 - 576} = 0.18 \\
+\eta^2_{A \times B} &= \frac{SS_{A \times B}}{SS_{\text{total}} - SS_A - SS_B} = \frac{576}{1{,}952 - 1{,}024 - 64} = 0.67
 \end{align}
 $$
 
 #### Simple effects
 
-<!-- DRAFT (gap): the follow-up to a significant interaction, in the role post-hoc tests played in Chapters 14 and 15. Test the effect of one factor at each level of the other, using $MS_{\text{within}}$. A short section; this is the natural place to say what the interaction actually means for the research question. -->
+<!-- DRAFT (gap): the follow-up to a significant interaction, in the role post-hoc tests played in Chapters 14 and 15. Test the effect of one factor at each level of the other, using $MS_{\text{within}}$. For these data: on the easy maze, watched kids were 8 seconds faster, $F(1, 12) = 5.33$, $p = .040$; on the hard maze, 16 seconds slower, $F(1, 12) = 21.33$, $p < .001$. A short section; this is the natural place to say what the interaction actually means for the research question. -->
 
 #### Statistical power
 
@@ -444,11 +672,13 @@ $$
 
 And lastly, we report the results. As always, this is a fairly dry, technical statement. For the descriptives, meaning the means for each condition, there are so many to report here that it can get messy doing it in a sentence, so a table or a graph is usually preferred. And you need to mention the type of test you performed, including here specifying what each of the factors was and what the dependent variable — the thing you measured and are comparing — was. And you need to report the test results with $F$ ratios, degrees of freedom, and $p$ value for each of the three tests, including effect size for any significant tests.
 
-> To examine the influence of snack and test type on performance, a 2-factor ANOVA was conducted with test scores as the dependent variable and Snack Type and Test Type as between-participants independent variables. There was no significant main effect of Test Type ($F(1, 12) = 4.74$, $p > .05$). There was, however, a significant main effect of Snack Type ($F(1, 12) = 21.77$, $p < .05$, $\eta^2_p = .64$); overall, performance was superior in the Banana condition. Moreover, there was a significant interaction between Snack Type and Test Type ($F(1, 12) = 34.94$, $p < .05$, $\eta^2_p = .74$); performance on the math test was affected by snack type to a greater extent than performance on the reaction time test.
+<!-- FIX (2026-11-09): names and numbers swapped into the old report. The last clause now describes the pattern in the cell means, which needs the simple effects to back it up. Still to bring into line with Chapters 14 and 15: exact $p$ values (audience $p = .128$; maze and interaction $p < .001$), an effect size for every test (audience $\eta^2_p = .18$), and the descriptives. -->
+
+> To examine the influence of maze difficulty and an audience on performance, a 2-factor ANOVA was conducted with completion times as the dependent variable and Maze Difficulty and Audience as between-participants independent variables. There was no significant main effect of Audience ($F(1, 12) = 2.67$, $p > .05$). There was, however, a significant main effect of Maze Difficulty ($F(1, 12) = 42.67$, $p < .05$, $\eta^2_p = .78$); overall, times were longer on the hard maze. Moreover, there was a significant interaction between Maze Difficulty and Audience ($F(1, 12) = 24.00$, $p < .05$, $\eta^2_p = .67$); being watched went with faster times on the easy maze but slower times on the hard maze.
 
 ### Interpreting the results
 
-<!-- DRAFT (gap): what the pattern means for the question; random assignment and causal language if both factors were manipulated. If the social-facilitation example is used, end on the body of evidence as Chapters 12 and 13 do: Zajonc et al. (1969), then the preregistered replication (Halfmann et al., 2020), which found main effects of task and audience but no interaction. Fisher's factorial argument (plan §4.4) fits here too; verify the quote first. -->
+<!-- DRAFT (gap): what the pattern means for the question; random assignment and causal language if both factors were manipulated. End on the body of evidence as Chapters 12 and 13 do: Zajonc et al. (1969), then the preregistered replication (Halfmann et al., 2020), which found main effects of task and audience but no interaction. Fisher's factorial argument (plan §4.4) fits here too; verify the quote first. -->
 
 ### Assumptions
 
@@ -457,8 +687,6 @@ And lastly, we report the results. As always, this is a fairly dry, technical st
 ## Practice: Design your own example
 
 Again, it's a complicated thing. And maybe it doesn't help that much talking about it in such abstract terms, since Factor A and Factor B don't intuitively mean anything. So I'd like you to come up with an example of your own, or to describe a study you've learned about somewhere else that fits this two-by-two design. It should be a design with two independent variables, each with two levels, and one dependent variable — the measure for which scores are recorded and compared across groups. Anytime I'm thinking about this kind of design, I literally just sketch a little graph like the ones earlier in this chapter with four dots, one for each group's average score — just whether I think it's going to be relatively high or low or in the middle — and then join up the dots to represent the levels of the factors.
-
-<!-- FIX: the last two tutorial steps use identical means, so "Your turn" changes nothing on screen. -->
 
 ::::: {#act-design-interaction .callout-tip .interactive}
 ## Sketch your own two-by-two result
@@ -489,7 +717,7 @@ Sloped parallel lines: main effects of both factors, but no interaction — the 
 Now the lines cross. Both main effects vanish, yet the interaction is as big as it gets.
 :::
 
-::: {.tutorial-step data-title="Your turn" data-action='{"means":{"a1b1":2,"a2b1":8,"a1b2":8,"a2b2":2},"animate":true}'}
+::: {.tutorial-step data-title="Your turn" data-action='{"means":{"a1b1":5,"a2b1":5,"a1b2":5,"a2b2":5},"animate":true}'}
 Sketch the pattern you'd predict for your own study: place each group's mean roughly where you expect it, then join up the dots mentally and ask — are the lines parallel?
 :::
 ::::

@@ -5,67 +5,73 @@ questions:
   - id: practice_2x2_interaction_f
     type: numeric
     prompt: |
-      A study randomly assigns 20 people to one of four conditions, 5 per cell,
-      and then gives them a memory test. Here are the cell means:
+      Suppose another school runs the maze study, again with 4 kids in each of
+      the four conditions. (These numbers are made up too.) Here are the mean
+      times, in seconds:
 
       <table class="table">
-      <thead><tr><th scope="col"></th><th scope="col" class="text-end">Short night's sleep</th><th scope="col" class="text-end">Full night's sleep</th></tr></thead>
+      <thead><tr><th scope="col"></th><th scope="col" class="text-end">Easy maze</th><th scope="col" class="text-end">Hard maze</th></tr></thead>
       <tbody>
-      <tr><td>Decaf</td><td class="text-end">20</td><td class="text-end">28</td></tr>
-      <tr><td>Coffee</td><td class="text-end">26</td><td class="text-end">30</td></tr>
+      <tr><td>Alone</td><td class="text-end">31</td><td class="text-end">43</td></tr>
+      <tr><td>Watched</td><td class="text-end">29</td><td class="text-end">57</td></tr>
       </tbody>
       </table>
 
-      The within-groups mean square is $MS_{\text{within}} = 20$. Calculate the
+      The within-groups mean square is $MS_{\text{within}} = 24$. Calculate the
       $F$ ratio for the interaction.
-    answer: 1
+    answer: 10.67
     tolerance: 0.01
     hints:
-      - Find the grand mean and the marginal means for sleep and coffee first.
+      - Find the grand mean and the marginal means for maze and audience first.
       - >
-        Each marginal mean represents 10 scores, and each cell mean represents 5.
+        Each marginal mean represents 8 scores, and each cell mean represents 4.
         Find $SS_{\text{between}}$ from the cell means, then take away the two
         main effects to find the interaction.
     explanation: >
-      The grand mean is 26. The sleep marginal means are 23 and 29, so
-      $SS_{\text{sleep}} = 10(9) + 10(9) = 180$. The coffee marginal means are
-      24 and 28, so $SS_{\text{coffee}} = 10(4) + 10(4) = 80$. From the cell
-      means, $SS_{\text{between}} = 5(36 + 4 + 0 + 16) = 280$, leaving
-      $SS_{\text{interaction}} = 280 - 180 - 80 = 20$. Each effect has
-      $df = 1$, so $F = 20/20 = 1.00$.
+      The grand mean is 40. The maze marginal means are 30 and 50, so
+      $SS_{\text{maze}} = 8(100) + 8(100) = 1{,}600$. The audience marginal
+      means are 37 and 43, so $SS_{\text{audience}} = 8(9) + 8(9) = 144$. From
+      the cell means, $SS_{\text{between}} = 4(81 + 9 + 121 + 289) = 2{,}000$,
+      leaving $SS_{\text{interaction}} = 2{,}000 - 1{,}600 - 144 = 256$. Each
+      effect has $df = 1$, so $F = 256/24 \approx 10.67$.
     diagnostics:
-      - id: ss_sleep
+      - id: ss_maze
         type: numeric
-        prompt: What is the sum of squares for sleep?
-        answer: 180
+        prompt: What is the sum of squares for maze?
+        answer: 1600
         tolerance: 0.01
-        explanation: $10(23 - 26)^2 + 10(29 - 26)^2 = 180$.
-      - id: ss_coffee
+        explanation: $8(30 - 40)^2 + 8(50 - 40)^2 = 1{,}600$.
+      - id: ss_audience
         type: numeric
-        prompt: What is the sum of squares for coffee?
-        answer: 80
+        prompt: What is the sum of squares for audience?
+        answer: 144
         tolerance: 0.01
-        explanation: $10(24 - 26)^2 + 10(28 - 26)^2 = 80$.
+        explanation: $8(37 - 40)^2 + 8(43 - 40)^2 = 144$.
       - id: ss_between
         type: numeric
         prompt: What is the between-groups sum of squares?
-        answer: 280
+        answer: 2000
         tolerance: 0.01
-        explanation: Each of the four cell means has 5 scores, so $5(6^2 + 2^2 + 0^2 + 4^2) = 280$.
+        explanation: Each of the four cell means has 4 scores, so $4[(-9)^2 + 3^2 + (-11)^2 + 17^2] = 2{,}000$.
 
   - id: practice_2x2_decision
     type: free-response
+    answerLabel: Example answer
     prompt: >
-      The critical value for $F(1, 16)$ is 4.49. Calculate the $F$ ratios for
+      The critical value for $F(1, 12)$ is 4.75. Calculate the $F$ ratios for
       the two main effects, then say what you'd conclude about each of the three
-      effects. In the table, coffee seems to help more after a short night
-      (6 points) than after a full night (2 points). Does the ANOVA support that?
+      effects. On average, the watched kids were 6 seconds slower than the kids
+      working alone. Is "being watched slows kids down" a fair summary of these
+      results?
     answer: >
-      $F_{\text{sleep}} = 180/20 = 9.00$, which exceeds 4.49, so there's a
-      significant main effect of sleep: people did better after a full night.
-      $F_{\text{coffee}} = 80/20 = 4.00$ and $F_{\text{interaction}} = 1.00$ don't
-      exceed 4.49. So although the sample lines aren't quite parallel, we don't
-      have good evidence of an interaction. That doesn't establish that the
-      effect of coffee is the same either way, particularly with only 5 people
-      per cell.
+      $F_{\text{maze}} = 1{,}600/24 = 66.67$ and
+      $F_{\text{audience}} = 144/24 = 6.00$. Both exceed 4.75, and so does the
+      interaction's 10.67, so all three effects are significant. But the main
+      effect of audience averages over the two mazes, and the interaction tells
+      us the effect of being watched isn't the same on both. Watched kids were
+      14 seconds slower on the hard maze and 2 seconds *faster* on the easy
+      one. So the overall slowdown comes from the hard maze. We'd need to
+      compare the audience conditions on each maze separately before saying
+      anything about the easy one; a 2-second difference between two groups of
+      4 kids could easily be chance.
 ```
