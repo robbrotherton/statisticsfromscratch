@@ -87,9 +87,12 @@ local manifest = {
     file = "resources/js/ci-nhst-diagram.js",
     deps = { "d3", "stat-helpers", "interactive-figure-tools" }
   },
+  ["tukey-critical-values"] = {
+    file = "resources/js/tukey-critical-values.js"
+  },
   ["critical-table-generator"] = {
     file = "resources/js/critical-table-generator.js",
-    deps = { "stat-helpers", "interactive-figure-tools" }
+    deps = { "stat-helpers", "interactive-figure-tools", "tukey-critical-values" }
   },
   ["effect-size-examples"] = {
     file = "resources/js/effect-size-examples.js"

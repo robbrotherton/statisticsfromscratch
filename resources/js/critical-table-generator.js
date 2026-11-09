@@ -46,6 +46,7 @@ sfsCriticalTableNormalizeDistribution = (value) => {
   if (["normal", "norm", "gaussian", "z", "z-score", "unit-normal"].includes(key)) return "normal";
   if (["t", "student", "student-t", "student-t-distribution"].includes(key)) return "t";
   if (["f", "f-distribution", "variance-ratio"].includes(key)) return "f";
+  if (["tukey", "q", "studentized-range"].includes(key)) return "tukey";
   return key;
 }
 
@@ -1087,12 +1088,71 @@ sfsCriticalTableF = (opts = {}) => {
   return sfsCriticalTableFinish(rootNode, cellMetas, opts);
 }
 
+sfsCriticalTableTukeyQuantile = (alpha, k, df) => {
+  const row = window.sfsTukeyCriticalValues?.[alpha]?.[df === Infinity ? "Inf" : df];
+  const value = Number.isInteger(k) && k >= 2 && k <= 10 ? row?.[k - 2] : undefined;
+  if (!Number.isFinite(value)) {
+    throw new RangeError(`No Tukey critical value for alpha=${alpha}, k=${k}, df=${df}. Supported: alpha .05 or .01; k 2–10; df 2–30, 40, 60, 120, or Infinity.`);
+  }
+  return value;
+}
+
+sfsCriticalTableTukey = (opts = {}) => {
+  const alpha = sfsCriticalTablePositiveNumber(opts.alpha, 0.05);
+  const ks = sfsCriticalTableSequence(opts.k || opts.nmeans || { from: 2, to: 6 });
+  const dfs = sfsCriticalTableSequence(opts.df || { from: 4, to: 10 });
+  const digits = opts.digits === undefined ? 2 : opts.digits;
+  // Validate the requested coordinates before constructing a partial table.
+  const values = dfs.map((df) => ks.map((k) => sfsCriticalTableTukeyQuantile(alpha, k, df)));
+  const root = sfsCriticalTableBuildRoot(opts, "critical-value-table-tukey");
+  const cellMetas = [];
+  const wrap = sfsCriticalTableApplyTableWrapOptions(root.append("div").attr("class", "cvt-table-wrap"), opts);
+  const table = wrap.append("table").attr("class", "sfs-data-table")
+    .attr("aria-label", opts.ariaLabel || opts.caption || "Tukey studentized range critical value table");
+  if (opts.caption) table.append("caption").text(opts.caption);
+
+  const thead = table.append("thead");
+  const superHeader = thead.append("tr");
+  superHeader.append("th").attr("class", "cvt-header-label").attr("rowspan", 2)
+    .html(opts.alphaHeader || `&alpha; = ${sfsCriticalTableAlphaLabel(alpha)}`);
+  superHeader.append("th").attr("class", "cvt-header-group").attr("scope", "colgroup")
+    .attr("colspan", ks.length).html(opts.kHeader || "Number of conditions, <i>k</i>");
+  const header = thead.append("tr");
+  ks.forEach((k) => header.append("th").attr("scope", "col").text(k));
+
+  const tbody = table.append("tbody");
+  const bodyHeader = tbody.append("tr").attr("class", "cvt-body-header");
+  bodyHeader.append("th").attr("class", "cvt-body-label").attr("scope", "col")
+    .html("Error <i>df</i>");
+  bodyHeader.append("th").attr("class", "cvt-header-group").attr("scope", "colgroup")
+    .attr("colspan", ks.length).html("<i>q</i> critical value");
+
+  dfs.forEach((df, i) => {
+    const rowKey = `df-${df}`;
+    const tr = tbody.append("tr").attr("data-cvt-row-key", rowKey);
+    tr.append("th").attr("scope", "row").text(sfsCriticalTableDfLabel(df));
+    ks.forEach((k, j) => {
+      const critical = values[i][j];
+      const meta = {
+        key: `tukey-${k}-${df}-${alpha}`, rowKey,
+        distribution: "tukey", layout: "critical-values", k, df, alpha,
+        critical, value: critical
+      };
+      cellMetas.push(meta);
+      sfsCriticalTableCellButton(tr.append("td"), meta, sfsCriticalTableFormatNumber(critical, digits), opts);
+    });
+  });
+  sfsCriticalTableAppendNote(root, opts);
+  return sfsCriticalTableFinish(root.node(), cellMetas, opts);
+}
+
 makeCriticalValueTable = (opts = {}) => {
   const distribution = sfsCriticalTableNormalizeDistribution(opts.distribution || opts.type || opts.statistic);
   const layout = sfsCriticalTableNormalizeLayout(opts.layout, distribution);
 
   if (distribution === "t") return sfsCriticalTableT(opts);
   if (distribution === "f") return sfsCriticalTableF(opts);
+  if (distribution === "tukey") return sfsCriticalTableTukey(opts);
   if (layout === "lookup") return sfsCriticalTableNormalLookup(opts);
   return sfsCriticalTableNormalAreas(opts);
 }
@@ -1107,3 +1167,6 @@ makeTTable = (opts = {}) =>
 
 makeFTable = (opts = {}) =>
   makeCriticalValueTable(Object.assign({ distribution: "f" }, opts))
+
+makeTukeyTable = (opts = {}) =>
+  makeCriticalValueTable(Object.assign({ distribution: "tukey" }, opts))

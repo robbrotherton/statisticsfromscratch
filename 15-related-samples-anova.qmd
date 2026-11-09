@@ -18,7 +18,7 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has different varieties that can be applied in different situations. In this chapter we'll introduce the **related-samples ANOVA**. Just like the related-samples $t$ test, this is for use with within-participants or matched-subjects designs. The logic of $F$ is the same; what's new is how we account for differences between people.
+In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has different varieties that can be applied in different situations. In this chapter we'll introduce the **related-samples ANOVA**. Just like the related-samples $t$ test, this is for use with within-participants or matched-subjects designs. For a within-participants design with one factor, you'll also see it called a **one-way repeated-measures ANOVA**. The logic of $F$ is the same; what's new is how we account for differences between people.
 
 ## Repeated measures, repeated
 
@@ -159,7 +159,9 @@ The adjustment in the tutorial is called **centering**. We subtract each child's
 
 ## Sums of squares and degrees of freedom
 
-So here's how we calculate this modified $F$ ratio for related-samples data. We start with the sums of squares and degrees of freedom. And the total, between-groups, and within-groups components are exactly the same as they were for the independent-samples designs.
+So here's how we calculate this modified $F$ ratio for related-samples data. These formulas assume a complete set of scores: each person contributes one score in every condition. If someone misses a condition, we can't simply leave that cell blank and carry on with the same calculation.
+
+We start with the sums of squares and degrees of freedom. And the total, between-groups, and within-groups components are exactly the same as they were for the independent-samples designs.
 
 Then we get to the two new components for between-people and error variability. The equation[^related-computational] for between people has the same form as $SS_{\text{between}}$, with person means in place of group means:
 
@@ -210,7 +212,7 @@ So let's run through the hypothesis test for the five children in @tbl-related-a
 
 ### Step 1: State the hypotheses
 
-As always, we start that hypothesis test by stating our hypotheses. Again, the null here is that all three populations from which we've created these samples have identical means — that $\mu_{\text{first alone}} = \mu_{\text{second alone}} = \mu_{\text{competition}}$. The alternative hypothesis is that at least one condition differs from at least one other.
+As always, we start that hypothesis test by stating our hypotheses. The null here is that the population mean time is the same in all three conditions — that $\mu_{\text{first alone}} = \mu_{\text{second alone}} = \mu_{\text{competition}}$. The alternative hypothesis is that at least one condition differs from at least one other.
 
 ### Step 2: Set the decision criteria
 
@@ -252,7 +254,9 @@ To save you some trouble, @tbl-related-anova-data gives each condition's mean an
 
 $$n = 5 \qquad k = 3 \qquad N = 15 \qquad M_{\text{grand}} = 46.67$$
 
-The only new calculation is $SS_{\text{people}}$. @tbl-related-anova-people lays it out, starting from each child's mean across the three conditions. (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
+The only new component we need to calculate is $SS_{\text{people}}$, since we can then find error by subtraction. But let's also see how one of those error squares comes from an individual score. In the tutorial, Stephen's first time went from 51 to 49.67 seconds after we removed his difference in overall speed. The first-alone mean stayed at 50.20. So his adjusted score is $49.67 - 50.20 = -0.53$ seconds from that condition's mean. This remaining deviation is called a **residual**; squaring it gives about 0.28.
+
+That's what the longer expression in @tbl-related-anova-people does: $X - M_{\text{person}} + M_{\text{grand}}$ adjusts the score, and subtracting $M_{\text{group}}$ gives the residual. The table shows both the people squares and these error squares for every score. (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
 
 +---------------------------+-------------------+------------+--------------------------------------------------+--------------------------------------------------------------------+
 | Child                     | Condition         | Score, $X$ | People: $(M_{\text{person}}-M_{\text{grand}})^2$ | Error: $(X-M_{\text{person}}-M_{\text{group}}+M_{\text{grand}})^2$ |
@@ -377,7 +381,15 @@ About 86% of that remaining variability is between conditions. Ordinary $\eta^2$
 
 The ANOVA tells us the population means aren't all equal, but not which ones differ. We can follow it with Tukey's HSD, as in Chapter 14, protecting our experimentwise $\alpha$ while comparing all three pairs.
 
-The procedure is the same, but we use $MS_{\text{error}}$ and its degrees of freedom. With three means and $df_{\text{error}} = 8$, the studentized range statistic is $q = 4.04$. And $n = 5$, the number of scores in each condition:
+The procedure is the same, but we use $MS_{\text{error}}$ and its degrees of freedom. In @tbl-related-anova-q, find the column for three conditions and the row for $df_{\text{error}} = 8$. Their intersection gives the critical studentized range value, $q = 4.04$, for $\alpha = .05$.
+
+::: {#tbl-related-anova-q}
+{{< interactive-figure relatedAnovaTukeyTable makeTukeyTable options='{"title":"Tukey critical values for the competition test","alpha":0.05,"k":{"from":2,"to":6},"df":{"from":4,"to":10},"tableMinWidth":"0","cellMinWidth":"0","maxWidth":"36rem","interactive":false,"selected":{"k":3,"df":8,"alpha":0.05}}' fallback="Studentized range critical values at alpha .05 for 2 through 6 conditions and error df 4 through 10. The highlighted cell for 3 conditions and 8 error degrees of freedom is q = 4.04." >}}
+
+Critical values of $q$ for $\alpha = .05$. The column gives the number of conditions; the row gives the error degrees of freedom.
+:::
+
+And $n = 5$, the number of scores in each condition:
 
 $$HSD = q \sqrt{\frac{MS_{\text{error}}}{n}} = 4.04 \sqrt{\frac{3.23}{5}} \approx 3.25$$
 
@@ -423,6 +435,12 @@ The same data, with one line for each child.
 
 To put confidence intervals around the changes themselves, we can use the difference scores for each pair of conditions, just as in Chapter 13. Now the differences in overall speed are out of the picture. The interval for the solo-to-solo change in @fig-related-differences includes zero; the two involving competition don't. These are ordinary 95% paired intervals, though, not adjusted for multiple comparisons like Tukey's test. They also use each pair's own variability rather than the pooled error term, so they needn't always agree with Tukey's decisions.
 
+For example, subtracting each child's second-alone time from their competition time gives differences of $-7$, $-7$, $-1$, $-3$, and $-7$ seconds. Their mean is $M_D = -5.00$ and their standard deviation is $s_D = \sqrt{8} = 2.83$. With five children, the standard error is $s_{M_D} = s_D/\sqrt{n} = 1.26$ seconds. Using the two-tailed critical $t = 2.776$ for $df = 4$, the 95% interval is:
+
+$$M_D \pm t_{\text{critical}}s_{M_D} = -5.00 \pm 2.776\sqrt{\frac{8}{5}} \approx [-8.51, -1.49]$$
+
+The calculation uses unrounded values. Both limits are negative: the interval runs from a decrease of 8.51 seconds to a decrease of 1.49 seconds.
+
 ::: {#fig-related-differences}
 {{< interactive-figure relatedDifferencesGraph makeGraph options='{"type":"interval","orientation":"horizontal","data":[{"label":"First to second alone","estimate":-2.8,"lower":-5.8917,"upper":0.2917},{"label":"Second to competition","estimate":-5,"lower":-8.512,"upper":-1.488},{"label":"First to competition","estimate":-7.8,"lower":-10.6314,"upper":-4.9686}],"xDomain":[-12,2],"xTickValues":[-12,-8,-4,0],"reference":0,"margin":{"left":164},"width":640,"height":240,"showValues":false,"labels":{"x":"Mean change in time (seconds)"},"ariaLabel":"Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero."}' fallback="Mean changes with 95 percent confidence intervals: first to second alone, minus 2.80 seconds, from minus 5.89 to 0.29; second alone to competition, minus 5.00, from minus 8.51 to minus 1.49; first alone to competition, minus 7.80, from minus 10.63 to minus 4.97. Only the solo-to-solo interval includes zero." >}}
 
@@ -443,9 +461,9 @@ Finally, these are five deliberately selected children from the part of Triplett
 
 The same basic considerations apply as before, with some changes for related samples. We expect scores from the same child to be related; different children's responses should be independent of one another. And as with the related-samples $t$ test, normality concerns the within-person differences we're analyzing, rather than simply the scores in each condition.
 
-With three or more conditions, we also need **sphericity**: the population variances of the difference scores should be the same for every pair of conditions. Put concretely, children's first-to-second-alone changes should be about as variable as their alone-to-competition changes. We're using one pooled error term for all those comparisons, so it needs to represent them reasonably well.
+With three or more conditions, we also need **sphericity**: the population variances of the difference scores should be the same for every pair of conditions. This is different from Chapter 14's homogeneity of variance assumption: here we're comparing the variances of the *differences*, rather than the variances of the scores in each condition. Put concretely, children's first-to-second-alone changes should be about as variable as their second-alone-to-competition changes and their first-alone-to-competition changes. We're using one pooled error term for all those comparisons, so it needs to represent them reasonably well.
 
-Our five children's difference variances are 6.2, 8.0, and 5.2, fairly similar. When sphericity doesn't hold, the usual test can reject the null too often. Software can apply a correction, such as Greenhouse–Geisser, which adjusts the degrees of freedom and $p$-value without changing $F$ itself.[^related-sphericity] With only two conditions, there's just one set of difference scores, so sphericity isn't an issue.
+Our five children's difference variances are 6.2 for first to second alone, 8.0 for second alone to competition, and 5.2 for first alone to competition. Those are fairly similar. When sphericity doesn't hold, the usual test can reject the null too often. Software can apply a correction, such as Greenhouse–Geisser, which adjusts the degrees of freedom and $p$-value without changing $F$ itself.[^related-sphericity] With only two conditions, there's just one set of difference scores, so sphericity isn't an issue.
 
 [^related-sphericity]: Software often provides Mauchly's test of sphericity, though a nonsignificant result doesn't guarantee the assumption holds, especially with a small sample. Greenhouse–Geisser uses a value called epsilon to adjust the degrees of freedom; values near 1 indicate little adjustment. Here epsilon is $.94$ and the corrected $p$ is about $.0006$, so the decision is unchanged. Follow-up comparisons also need an appropriate method if sphericity is doubtful.
 
