@@ -210,7 +210,7 @@ vpdPresetSpecs = {
   "related": () => {
     const nodes = vpdAnovaCommonNodes("related");
     nodes[1].sources = ["treatment", "remaining"];
-    nodes[2].sources = [];
+    nodes[2].sources = ["remaining", "ind-diff"];
     nodes.push(
       {
         id: "error",
@@ -234,7 +234,8 @@ vpdPresetSpecs = {
         concept: { num: ["treatment", "remaining"], den: ["remaining"] }
       },
       alt: "Partitioning diagram for a related-samples ANOVA: variance " +
-        "within groups is further partitioned into variance between people " +
+        "within groups contains remaining chance and individual differences, " +
+        "and is further partitioned into variance between people " +
         "(individual differences) and error variance (remaining chance). " +
         "The F ratio uses mean square error as its denominator."
     };
@@ -364,7 +365,7 @@ vpdSourceBlocks = (nodes, compactWidth) => nodes
     const entries = node.sources.map((key) => {
       const source = vpdSourceCatalog[key];
       const lines = compactWidth
-        ? vpdWrapSourceLabel(source.label, node.width + 24)
+        ? vpdWrapSourceLabel(source.label, node.width)
         : [source.label];
       const entry = {
         key,
@@ -405,7 +406,7 @@ vpdSourceClearance = (row, nextRow, canvasWidth, bottom) => {
     const left = block.entries[0].x - 10;
     const right = left + 20 + Math.max(...block.entries.map((entry) => entry.width));
     const depth = block.bottom - bottom + 6;
-    clearance = Math.max(clearance, depth + 6);
+    clearance = Math.max(clearance, depth + 48);
     nextRow.forEach((child) => {
       const parent = row.find((node) => node.id === child.parent);
       if (!parent || parent.id === block.nodeId) return;
@@ -803,6 +804,8 @@ makeVariancePartitionDiagram = function(opts) {
   }
 
   function renderLinks(spec, animate, duration, nodesById) {
+    const sourceBottoms = new Map(vpdSourceBlocks(spec.nodes, compactWidth)
+      .map((block) => [block.nodeId, block.bottom]));
     const linkData = spec.nodes
       .filter((node) => node.parent && nodesById.has(node.parent))
       .map((node) => {
@@ -811,7 +814,8 @@ makeVariancePartitionDiagram = function(opts) {
           id: node.id,
           stage: node.stage,
           x1: parent.x,
-          y1: parent.y + parent.height / 2 + 2,
+          y1: Math.max(parent.y + parent.height / 2 + 2,
+            (sourceBottoms.get(parent.id) ?? 0) + 12),
           x2: node.x,
           y2: node.y - node.height / 2 - 2
         };
