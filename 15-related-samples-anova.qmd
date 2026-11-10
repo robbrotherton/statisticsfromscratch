@@ -40,9 +40,9 @@ In fact, Norman Triplett gave each child six timed trials, with different sequen
 
 : Times (in seconds) for five children from Triplett's study. The columns follow the order of their first three trials. {#tbl-related-anova-data}
 
-How do we analyze all three conditions? With two scores, we simply subtracted each child's pair of times to get a single difference score. Here there are three scores per kid, allowing multiple pairwise comparisons. We'll get to those with post-hoc tests, as we did in Chapter 14, but simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA.
-
 {{< include quizzes/15-related-anova-third-condition.qmd >}}
+
+How do we analyze all three conditions? With two scores, we simply subtracted each child's pair of times to get a single difference score. Here there are three scores per kid, allowing multiple pairwise comparisons. We'll get to those with post-hoc tests, as we did in Chapter 14, but simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA.
 
 ## Partitioning variance in related samples
 
@@ -52,11 +52,13 @@ Let's think in terms of partitioning. In Chapter 14 we split the total sum of sq
 
 ::: {#fig-partitioning-independent}
 {{< interactive-figure relatedRecapPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences." >}}
+
+Sources of variability in an independent-samples ANOVA.
 :::
 
 With a between-participants design and independent-samples ANOVA, we can only split the total into between-groups and within-groups variability. Individual differences will contribute to within-groups variability, because each group is made up of a bunch of different people. And they contribute to between-groups variability, because each group is a different set of unrelated participants.
 
-A within-participants design changes this. We still have a bunch of different people within each condition, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and sampling error.
+A within-participants design changes this. We still have a bunch of different people within each group, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and sampling error.
 
 As a result, we have a slight problem. The numerator and denominator for our $F$ ratio are no longer conceptually balanced. The numerator contains treatment plus sampling error, while the denominator contains sampling error plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
 
@@ -64,6 +66,8 @@ To do this, we split the within-groups sum of squares into two components: betwe
 
 ::: {#fig-partitioning-related}
 {{< interactive-figure relatedPartitionDiagram makeVariancePartitionDiagram options='{"preset":"related","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect plus remaining chance, and variability within groups, which contains remaining chance and individual differences and is further partitioned into variability between people, which contains individual differences, and error, which contains the remaining chance."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect plus remaining chance, and variability within groups, which contains remaining chance and individual differences and is further partitioned into variability between people, which contains individual differences, and error, which contains the remaining chance." >}}
+
+Sources of variability in a related-samples ANOVA. Within-groups variability is split into between-people and error components.
 :::
 
 We divide $SS_{\text{error}}$ by its degrees of freedom to get $MS_{\text{error}}$, our new denominator for the related-samples $F$ ratio. We will still use the same numerator, $MS_{\text{between}}$. Under the null hypothesis, both estimate the same remaining variance. A difference between the population means can make the numerator larger, just as before.
@@ -103,7 +107,7 @@ We'll regroup the scores into one row per child, to make the relatedness more vi
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Averages" data-action='{"stage":"people","phase":"observe","animate":true}'}
-Having grouped the scores by child, we find each kid's average across their three scores. If individual differences were the only source of variability---no other chance error at all---then each kid's time would be the same in every race. So we imagine that all three of their scores are equal to their own average time.
+Having grouped the scores by child, we find each kid's average across their three scores. If individual differences were the only source of variability---no differences between groups and no other chance error at all---then each kid's time would be the same in every race. So we imagine that all three of their scores are equal to their own average time.
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Deviations" data-action='{"stage":"people","phase":"deviations","animate":true}'}
@@ -535,7 +539,7 @@ The same sort of considerations apply to ANOVA with related samples as in Chapte
 
 First, there's the assumption of independence. This now applies only between people. We expect scores from the same child to be related across the different conditions, but different children's responses should be independent of one another.
 
-There is an assumption of normality, but it is similariy modified given the relatedness of the observations. It applies to the error variability---the deviations we saw in [step # of @act-whatever]. Those were the deviations left over once differences between people and between conditions are set aside. We don't need scores within each condition to be normally distributed because the analysis removes the between-people variability.
+There is an assumption of normality, but it is similarly modified given the relatedness of the observations. It applies to the error variability---the deviations we saw in the Error steps of @act-related-partition. Those were the deviations left over once differences between people and between conditions are set aside. We don't need scores within each condition to be normally distributed because the analysis removes the between-people variability.
 
 Lastly, remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups. Here we have a similar requirement, but it applies to the *difference scores* for every pair of conditions, rather than to the scores within each condition. The requirement is called **sphericity**: the population variances of those difference scores should be the same. (This wasn't an issue with the related-samples $t$ test because with only two conditions, there's just one set of difference scores, so no different variabilities to compare.)
 
