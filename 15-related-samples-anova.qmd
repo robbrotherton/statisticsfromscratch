@@ -531,17 +531,53 @@ Lastly, remember that I picked these five children to make a satisfying dataset 
 
 ### Assumptions
 
-The same basic considerations apply as in Chapter 14, with some additions for related samples. We expect scores from the same child to be related, but different children's responses should be independent of one another. Normality concerns the within-person variability we're analyzing, rather than simply the scores in each condition.
+The same sort of considerations apply to ANOVA with related samples as in Chapter 14 where we used ANOVA with independent samples. Some slight tweaks are required to accommodate the relatedness of the scores though, much like the assumptions of the related-samples $t$ test.
 
-Remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups to use one pooled estimate. Here we need a similar condition, but it applies to the *difference scores* for every pair of conditions, rather than to the scores in each condition. That requirement is called **sphericity**: the population variances of those difference scores should be the same.
+First, there's the assumption of independence. This only applies within groups. We expect scores from the same child to be related, but different children's responses should be independent of one another.
 
-Why does that matter? Imagine that the children improved by about the same amount from their first solo race to their second. Their solo-to-solo difference scores would be tightly clustered. But suppose competition helped some children enormously and others hardly at all. The solo-to-competition difference scores would be much more spread out. One shared estimate of variability wouldn't represent both kinds of change equally well.
+The assumption of normality likewise concerns the within-person variability we're analyzing, rather than the distribution of raw scores in each condition.
 
-The *average* changes can differ---that's what we're testing. It's the variability around those averages that needs to be comparable. That's separate from normality, which concerns the shape of the distributions rather than their spread.
+Lastly, remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups. Here we have a similar requirement, but it applies to the *difference scores* for every pair of conditions, rather than to the scores within each condition. The requirement is called **sphericity**: the population variances of those difference scores should be the same. (This wasn't an issue with the related-samples $t$ test because with only two conditions, there's just one set of difference scores, so no different variabilities to compare.)
 
-When sphericity doesn't hold, the usual $F$ test can reject the null too often. Statistical software can apply a correction, such as Greenhouse–Geisser, which reduces the degrees of freedom to allow for the unequal variability. The $F$ ratio stays the same, but the critical $F$ rises, making it harder to reject the null. Follow-up comparisons also need an appropriate method if sphericity is doubtful. With only two conditions, there's just one set of difference scores, so there's no need for this extra assumption.
+::: {#fig-sphericity}
 
-For our worked example, software suggests little departure from sphericity in these data, and applying the correction leaves our conclusion unchanged. With only five children, though, that assessment is sensitive to the particular children included. It gives us limited reassurance about whether the assumption holds in the population.
+```{=html}
+<svg class="sfs-sphericity-diagram" viewBox="0 0 560 370" role="img" aria-labelledby="sphericity-title sphericity-desc" style="display:block;width:100%;max-width:34rem;height:auto;margin:0 auto;">
+  <title id="sphericity-title">Sphericity</title>
+  <desc id="sphericity-desc">Three dots, one for each condition (first alone, second alone, and competition), sit in a triangle on a circle. The circle is split into three arcs, one between each pair of conditions. Each arc is labeled with the variance of the difference scores for that pair, and all three arcs are drawn identically to show that the three variances are equal.</desc>
+  <g fill="none" stroke="var(--graph-series-2, #e69f00)" stroke-width="5" stroke-linecap="round">
+    <path d="M 280 90 A 110 110 0 0 1 375.26 255" />
+    <path d="M 375.26 255 A 110 110 0 0 1 184.74 255" />
+    <path d="M 184.74 255 A 110 110 0 0 1 280 90" />
+  </g>
+  <g fill="var(--graph-series-1, #0072b2)" stroke="var(--sfs-bg, #fff)" stroke-width="3">
+    <circle cx="280" cy="90" r="13" />
+    <circle cx="375.26" cy="255" r="13" />
+    <circle cx="184.74" cy="255" r="13" />
+  </g>
+  <g fill="var(--sfs-text, #212529)" font-size="19" font-weight="600">
+    <text x="280" y="64" text-anchor="middle">First alone</text>
+    <text x="397" y="262" text-anchor="start">Second alone</text>
+    <text x="163" y="262" text-anchor="end">Competition</text>
+  </g>
+  <g fill="var(--sfs-text, #212529)" font-size="19">
+    <text x="398" y="134" text-anchor="start">σ²<tspan dy="6" font-size="14">first − second</tspan></text>
+    <text x="280" y="348" text-anchor="middle">σ²<tspan dy="6" font-size="14">second − competition</tspan></text>
+    <text x="162" y="134" text-anchor="end">σ²<tspan dy="6" font-size="14">first − competition</tspan></text>
+  </g>
+</svg>
+```
+
+<!-- Caption placeholder: replace with your own wording. -->
+Sphericity.
+
+:::
+
+In simple terms, sphericity means that we're assuming that people are affected in a roughly consistent way by the different conditions. Imagine that the children improved by about the same amount from their first solo race to their second. The consistency of the differences means that those difference scores would have little variability. But suppose competition helped some children a lot and hindered others. The alone-to-competition difference scores would be much more variable. A single pooled estimate of all that variability wouldn't represent both kinds of change equally well. The *average* changes can differ---a bigger improvement from alone-to-competition versus the first and second alone races, for example. It's the *variability* around those averages that needs to be fairly consistent.
+
+Statistical software can check for unacceptably different variances across the differences and apply a correction. If you see something like "Greenhouse–Geisser" in your output, that's one such correction, which reduces the degrees of freedom to allow for the unequal variability, increasing the critical $F$ required to reject the null to adjust for the violation. Post-hoc tests like Tukey's HSD are also sensitive to sphericity and need to be adjusted if sphericity is questionable.
+
+For our worked example, software would tell you that the sphericity is acceptable, but with so few scores changing one value or adding one more child could change that. As usual, the more data we have, the more reliable not only the estimates of means and things become, but also our assessment of the extent to which assumptions like this are met or violated.
 
 {{< include quizzes/15-related-anova-learning-checks.qmd >}}
 
