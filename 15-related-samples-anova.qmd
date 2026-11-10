@@ -533,51 +533,25 @@ Lastly, remember that I picked these five children to make a satisfying dataset 
 
 The same sort of considerations apply to ANOVA with related samples as in Chapter 14 where we used ANOVA with independent samples. Some slight tweaks are required to accommodate the relatedness of the scores though, much like the assumptions of the related-samples $t$ test.
 
-First, there's the assumption of independence. This only applies within groups. We expect scores from the same child to be related, but different children's responses should be independent of one another.
+First, there's the assumption of independence. This now applies only between people. We expect scores from the same child to be related across the different conditions, but different children's responses should be independent of one another.
 
-The assumption of normality likewise concerns the within-person variability we're analyzing, rather than the distribution of raw scores in each condition.
+The assumption of normality likewise concerns the error component of our analysis---the variability left over once differences between people and between conditions are set aside---rather than the distribution of raw scores in each condition.
 
 Lastly, remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups. Here we have a similar requirement, but it applies to the *difference scores* for every pair of conditions, rather than to the scores within each condition. The requirement is called **sphericity**: the population variances of those difference scores should be the same. (This wasn't an issue with the related-samples $t$ test because with only two conditions, there's just one set of difference scores, so no different variabilities to compare.)
 
 ::: {#fig-sphericity}
 
-```{=html}
-<svg class="sfs-sphericity-diagram" viewBox="0 0 560 370" role="img" aria-labelledby="sphericity-title sphericity-desc" style="display:block;width:100%;max-width:34rem;height:auto;margin:0 auto;">
-  <title id="sphericity-title">Sphericity</title>
-  <desc id="sphericity-desc">Three dots, one for each condition (first alone, second alone, and competition), sit in a triangle on a circle. The circle is split into three arcs, one between each pair of conditions. Each arc is labeled with the variance of the difference scores for that pair, and all three arcs are drawn identically to show that the three variances are equal.</desc>
-  <g fill="none" stroke="var(--graph-series-2, #e69f00)" stroke-width="5" stroke-linecap="round">
-    <path d="M 280 90 A 110 110 0 0 1 375.26 255" />
-    <path d="M 375.26 255 A 110 110 0 0 1 184.74 255" />
-    <path d="M 184.74 255 A 110 110 0 0 1 280 90" />
-  </g>
-  <g fill="var(--graph-series-1, #0072b2)" stroke="var(--sfs-bg, #fff)" stroke-width="3">
-    <circle cx="280" cy="90" r="13" />
-    <circle cx="375.26" cy="255" r="13" />
-    <circle cx="184.74" cy="255" r="13" />
-  </g>
-  <g fill="var(--sfs-text, #212529)" font-size="19" font-weight="600">
-    <text x="280" y="64" text-anchor="middle">First alone</text>
-    <text x="397" y="262" text-anchor="start">Second alone</text>
-    <text x="163" y="262" text-anchor="end">Competition</text>
-  </g>
-  <g fill="var(--sfs-text, #212529)" font-size="19">
-    <text x="398" y="134" text-anchor="start">σ²<tspan dy="6" font-size="14">first − second</tspan></text>
-    <text x="280" y="348" text-anchor="middle">σ²<tspan dy="6" font-size="14">second − competition</tspan></text>
-    <text x="162" y="134" text-anchor="end">σ²<tspan dy="6" font-size="14">first − competition</tspan></text>
-  </g>
-</svg>
-```
+{{< include resources/figures/sphericity.svg >}}
 
-<!-- Caption placeholder: replace with your own wording. -->
-Sphericity.
+An illustrative diagram representing the sphericity assumption. Dots represent the conditions, and dashed lines the difference scores between each pair of conditions.The variability of the sets of difference scores should be roughly equal.
 
 :::
 
-In simple terms, sphericity means that we're assuming that people are affected in a roughly consistent way by the different conditions. Imagine that the children improved by about the same amount from their first solo race to their second. The consistency of the differences means that those difference scores would have little variability. But suppose competition helped some children a lot and hindered others. The alone-to-competition difference scores would be much more variable. A single pooled estimate of all that variability wouldn't represent both kinds of change equally well. The *average* changes can differ---a bigger improvement from alone-to-competition versus the first and second alone races, for example. It's the *variability* around those averages that needs to be fairly consistent.
+In simple terms, sphericity means that we're assuming each change of condition affects people fairly consistently. Imagine that kids uniformly improved by a couple of seconds amount from their first solo race to their second. The consistency of the improvements means that those difference scores would have little variability. But suppose competition helped some children a lot and hindered others. The alone-to-competition difference scores would be much more variable. A single pooled estimate of all that variability wouldn't represent both kinds of change equally well. The *average* changes can differ---a bigger improvement from the second solo race to competition than from the first solo race to the second, for example. It's the spread around those averages that needs to be fairly consistent.
 
-Statistical software can check for unacceptably different variances across the differences and apply a correction. If you see something like "Greenhouse–Geisser" in your output, that's one such correction, which reduces the degrees of freedom to allow for the unequal variability, increasing the critical $F$ required to reject the null to adjust for the violation. Post-hoc tests like Tukey's HSD are also sensitive to sphericity and need to be adjusted if sphericity is questionable.
+Statistical software can check whether the variances of the difference scores are too different. We don't need to get into the specifics here, but if you see the name "Mauchly's test" in your output, it is one common check. When the assumption is violated, software will often also report a correction. "Greenhouse–Geisser" is one, which reduces the degrees of freedom, increasing the critical $F$ required to reject the null to adjust for the violation. Post-hoc tests using Tukey's HSD are also sensitive to sphericity, because they rely on the single pooled $MS_{\text{error}}$. If sphericity is questionable, a common alternative is to compare each pair of conditions with its own related-samples $t$ test, using only that pair's difference scores, with a stricter $\alpha$ to make up for running several tests.
 
-For our worked example, software would tell you that the sphericity is acceptable, but with so few scores changing one value or adding one more child could change that. As usual, the more data we have, the more reliable not only the estimates of means and things become, but also our assessment of the extent to which assumptions like this are met or violated.
+For our worked example, software would tell you that the sphericity is acceptable, but with so few scores, changing one value or adding one more child could easily change that. As usual, the more data we have, the more reliable not only the estimates of means and things become, but also our assessment of the extent to which assumptions like this are met or violated.
 
 {{< include quizzes/15-related-anova-learning-checks.qmd >}}
 
