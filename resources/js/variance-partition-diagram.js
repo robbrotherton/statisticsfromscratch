@@ -179,18 +179,18 @@ vpdPresetSpecs = {
 
   "independent-detailed": () => {
     const nodes = vpdAnovaCommonNodes("independent-detailed");
-    nodes[1].sources = ["treatment", "error", "ind-diff"];
-    nodes[2].sources = ["error", "ind-diff"];
+    nodes[1].sources = ["treatment", "remaining", "ind-diff"];
+    nodes[2].sources = ["remaining", "ind-diff"];
     return {
       nodes,
       formula: {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
-        concept: { num: ["treatment", "error", "ind-diff"], den: ["error", "ind-diff"] }
+        concept: { num: ["treatment", "remaining", "ind-diff"], den: ["remaining", "ind-diff"] }
       },
       alt: "Partitioning diagram for an independent-samples ANOVA: " +
-        "variability between groups contains treatment effect, sampling " +
-        "error, and individual differences; variability within groups " +
-        "contains sampling error and individual differences. The chance " +
+        "variability between groups contains treatment effect, remaining " +
+        "chance, and individual differences; variability within groups " +
+        "contains remaining chance and individual differences. The chance " +
         "sources balance out in the F ratio."
     };
   },

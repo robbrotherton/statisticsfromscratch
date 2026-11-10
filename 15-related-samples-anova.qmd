@@ -42,31 +42,33 @@ In fact, Norman Triplett gave each child six timed trials, with different sequen
 
 How do we analyze all three conditions? With two scores per kid, we simply subtracted each child's pair of times to get a single difference score. Now there are *three* scores per kid; simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. (We'll eventually perform post-hoc tests to look at each pairwise comparison in more detail, as we did in Chapter 14, but ANOVA provides the initial omnibus test.)
 
-First, think about how the independent-samples ANOVA from last chapter would handle this data. It would group them by condition---the columns of @tbl-related-anova-data---and compare the differences between the three column means with the variability within each column. Eyeballing it, it looks like there's a lot of variability within each column. Some kids are faster, some are slower. Like, check out Clyde G.'s times. Clyde was not messing around---he totally demolished the other kids' times in every one of his races. So within each column the times are spread over something like twenty seconds, while the column means are just a few seconds apart.
+First, think about how the independent-samples ANOVA from last chapter would handle this data. It would group them by race type---the columns of @tbl-related-anova-data---and compare the differences between the three column means with the variability within each column: between groups versus within groups. Eyeballing it, it looks like there's a lot of variability within each column. Some kids are faster, some are slower. Like, check out Clyde G.'s times. Clyde was not messing around---he totally demolished the other kids' times in every one of his races. So within each column the times are spread over something like twenty seconds, while the column means are just a few seconds apart.
 
-But what if we read the table a different way: across the rows instead of down the columns. Clyde's three times were 36, 35, and 32 seconds. Grouped like that, his scores hardly vary at all.
+But what if we group the scores a different way: across the table instead of down it, turning each child's three times into a group of their own? Clyde's three times were 36, 35, and 32 seconds. Grouped like that, his scores hardly vary at all.
 
 {{< include quizzes/15-related-anova-columns-and-rows.qmd >}}
 
 ## Partitioning variance in related samples
 
-The idea is that the same 15 scores vary for different reasons, depending on how we group them. Down the columns, a lot of the variability comes from kids like Clyde simply being faster or slower than the others overall. Along the rows, it doesn't. How can we extend the ANOVA logic to separate that source of variability from differences between conditions and other sources?
+The idea is that the same 15 scores vary for different reasons, depending on how we group them. Within each group, a lot of the variability comes from kids like Clyde simply being faster or slower than the others overall. For a child's own group of three times, none of it does. How can we extend the ANOVA logic to separate that source of variability from differences between conditions and other sources?
 
-Let's think in terms of partitioning. In Chapter 14 we split the total sum of squared deviations into between-groups and within-groups components. I said that any treatment effect contributes to differences between groups, while chance contributes both between and within groups. But I was glossing over "chance" there. I said it is made up of sampling error and other reasons people's scores differ. Well, one of those reasons is consistent individual differences between kids. @fig-partitioning-independent labels that separately.
+Let's think in terms of partitioning. In Chapter 14 we split the total sum of squared deviations into between-groups and within-groups components. I said that any treatment effect contributes to differences between groups, while chance contributes both between and within groups. But I was glossing over "chance" there. I said it is made up of sampling error and other reasons people's scores differ. Well, one of those reasons is consistent individual differences between kids. @fig-partitioning-independent labels that separately from the remaining chance.
 
 ::: {#fig-partitioning-independent}
-{{< interactive-figure relatedRecapPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, sampling error, and individual differences, and variability within groups, which contains sampling error and individual differences." >}}
+{{< interactive-figure relatedRecapPartitionDiagram makeVariancePartitionDiagram options='{"preset":"independent-detailed","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, remaining chance, and individual differences, and variability within groups, which contains remaining chance and individual differences."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect, remaining chance, and individual differences, and variability within groups, which contains remaining chance and individual differences." >}}
 
 Sources of variability in an independent-samples ANOVA.
 :::
 
 With a between-participants design and independent-samples ANOVA, we can only split the total into between-groups and within-groups variability. Individual differences will contribute to within-groups variability, because each group is made up of a bunch of different people. And they contribute to between-groups variability, because each group is a different set of unrelated participants.
 
-A within-participants design changes this. We still have a bunch of different people within each group, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and sampling error.
+A within-participants design changes this. We still have a bunch of different people within each group, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and the remaining chance.
 
-As a result, we have a slight problem. The numerator and denominator for our $F$ ratio are no longer conceptually balanced. The numerator contains treatment plus sampling error, while the denominator contains sampling error plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
+As a result, we have a slight problem. The numerator and denominator for our $F$ ratio are no longer conceptually balanced. The numerator contains treatment plus the remaining chance, while the denominator contains the remaining chance plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
 
-To do this, we split the within-groups sum of squares into two components: between-people variability, $SS_{\text{people}}$, and the remaining error, $SS_{\text{error}}$.^[I'm simplifying slightly. Error here isn't necessarily just sampling error, strictly defined, which is why @fig-partitioning-related calls it "remaining chance." Children might respond differently to practice or competition, or have a particularly good or bad trial. Those departures from the average pattern remain in the error component.]
+That's what taking each child's three times as a group achieves. Each kid's mean combines their three different races, so practice and competition can't make one child's mean differ from another's. What makes those means differ is the individual differences in the kids' overall speed. And since none of that is in the between-groups component, it must all be part of the within groups variability, where we quantify and remove it.
+
+So we split the within-groups sum of squares into two components: between-people variability, $SS_{\text{people}}$, and the remaining error, $SS_{\text{error}}$. Error is the variability that's left once we know which child and which race a score belongs to. Children might respond a bit differently to practice or competition, or have a particularly good or bad run. Those departures from the average pattern are what @fig-partitioning-related calls "remaining chance."
 
 ::: {#fig-partitioning-related}
 {{< interactive-figure relatedPartitionDiagram makeVariancePartitionDiagram options='{"preset":"related","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect plus remaining chance, and variability within groups, which contains remaining chance and individual differences and is further partitioned into variability between people, which contains individual differences, and error, which contains the remaining chance."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains any treatment effect plus remaining chance, and variability within groups, which contains remaining chance and individual differences and is further partitioned into variability between people, which contains individual differences, and error, which contains the remaining chance." >}}
@@ -87,7 +89,7 @@ Happily, the math is relatively straightforward. But before we get to the new eq
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
-Here are the five children's times, grouped by condition. Each child contributes one score to each row. For now, the calculations are the same as in Chapter 14, so the dots are colored by race type rather than by child.
+Here are the five children's times, grouped by condition. Each child contributes one score to each group. For now, the calculations are the same as in Chapter 14, so the dots are colored by race type rather than by child.
 :::
 
 ::: {.tutorial-step data-major="total" data-major-title="Total" data-title="Total" data-action='{"stage":"total","phase":"sum","animate":true}'}
@@ -95,7 +97,7 @@ As in Chapter 14, we start with each score's deviation from the grand mean. Squa
 :::
 
 ::: {.tutorial-step data-major="within" data-major-title="Within" data-title="Within" data-action='{"stage":"within","phase":"sum","animate":true}'}
-Measuring deviations from each condition's own mean gives $SS_{\text{within}}$. The spread within each row includes individual differences---the fact that some children are generally faster than others. We'll separate that out in a moment.
+Measuring deviations from each condition's own mean gives $SS_{\text{within}}$. The spread within each group includes individual differences---the fact that some children are generally faster than others. We'll separate that out in a moment.
 :::
 
 ::: {.tutorial-step data-major="between" data-major-title="Between" data-title="Between" data-action='{"stage":"between","phase":"sum","animate":true}'}
@@ -106,8 +108,8 @@ The differences between condition means account for $SS_{\text{between}}$. Becau
 Now for the new part. We will use the relatedness of the scores from each kid to separate the individual-differences part of the within-groups variability. First, we'll just color the dots by child. See Clyde's orange dots, all the way to the left of the others?
 :::
 
-::: {.tutorial-step data-major="people" data-major-title="People" data-title="Rows" data-action='{"stage":"people","phase":"rows","animate":true}'}
-We'll regroup the scores into one row per child, to make the relatedness more visually obvious. Next we'll do much the same as we did for between-groups variability, but compare the *children's* means instead of condition means.
+::: {.tutorial-step data-major="people" data-major-title="People" data-title="Regroup" data-action='{"stage":"people","phase":"rows","animate":true}'}
+We'll regroup the scores, taking each child's three times as a new group, to make the relatedness more visually obvious. Next we'll do much the same as we did for between-groups variability, but compare the *children's* means instead of condition means.
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Averages" data-action='{"stage":"people","phase":"observe","animate":true}'}
@@ -123,7 +125,7 @@ Next we square each deviation. Larger squares represent children whose overall t
 :::
 
 ::: {.tutorial-step data-major="people" data-major-title="People" data-title="Sum" data-action='{"stage":"people","phase":"sum","animate":true}'}
-And finally we add those squares, counting each one three times to represent the child's three scores. They add up to $SS_{\text{people}}$, part of the within-groups variability we already counted.
+And finally we add those squares, counting each one three times to represent the child's three scores. They add up to $SS_{\text{people}}$, part of the within-groups variability we already counted. (It has to be in there: the between-groups component doesn't include individual differences.)
 
 Now we're basically done. There's a little sliver of unaccounted variability left over. That's the error component.
 :::
@@ -132,8 +134,8 @@ Now we're basically done. There's a little sliver of unaccounted variability lef
 To quantify the leftover variability, we shift each kid's cluster of scores so that each child's mean aligns with the grand mean. Each child becomes exactly average, without those pesky individual differences pushing them apart. Notice that Clyde doesn't look exceptional any more. But each kid's three scores still vary from one another. That variation includes the differences between conditions. To find the error, we'll look at how far each adjusted score falls from its condition's mean.
 :::
 
-::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="Lanes" data-action='{"stage":"centre","phase":"lanes","animate":true}'}
-We put the adjusted scores back into their condition rows. The condition means are unchanged, but the spread around them is much smaller because the children no longer differ in overall speed.
+::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="Conditions" data-action='{"stage":"centre","phase":"lanes","animate":true}'}
+We put the adjusted scores back into their condition groups. The condition means are unchanged, but the spread around them is much smaller because the children no longer differ in overall speed.
 :::
 
 ::: {.tutorial-step data-major="centre" data-major-title="Error" data-title="What's left" data-action='{"stage":"centre","phase":"squares","animate":true}'}

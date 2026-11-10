@@ -66,6 +66,37 @@ test("secondary action labels describe what they reveal or hide", () => {
   assert.match(filter, /question\.answerLabel ~= nil and is_blank\(question\.answerLabel\)/);
 });
 
+test("a multiple-select question uses checkboxes and is right only for the exact set", () => {
+  assert.match(filter, /\["multiple-select"\] = true/);
+  assert.match(filter, /"must mark at least one option with correct: true"/);
+  assert.match(filter, /local input_type = multiple and "checkbox" or "radio"/);
+  assert.match(filter, /Select all that apply\./);
+
+  // Pull the grading function out of the runtime and run it.
+  const source = runtime.match(/function gradeQuestion\(question, response\) \{[\s\S]*?\n  \}\n/)[0];
+  const gradeQuestion = runInNewContext(`
+    const QUESTION_TYPES = { multipleSelect: "multiple-select" };
+    const questionType = (question) => question.type;
+    ${source}
+    gradeQuestion;
+  `);
+  const question = {
+    type: "multiple-select",
+    options: [{ correct: true }, {}, { correct: true }],
+  };
+  assert.equal(gradeQuestion(question, ["0", "2"]), true);
+  assert.equal(gradeQuestion(question, ["2", "0"]), true);
+  assert.equal(gradeQuestion(question, ["0"]), false);
+  assert.equal(gradeQuestion(question, ["0", "1", "2"]), false);
+  assert.equal(gradeQuestion(question, []), false);
+
+  // A wrong selection doesn't mark individual options as wrong.
+  assert.match(
+    css,
+    /data-quiz-state="incorrect"\] > \.quiz-control \.quiz-options-multiple \.quiz-choice:has\(input:checked\)::after \{[\s\S]*?content: none;/
+  );
+});
+
 test("quiz layout uses one shared edge and stack spacing token", () => {
   assert.match(css, /--quiz-edge-space:\s*[^;]+;/);
   assert.match(css, /--quiz-stack-space:\s*[^;]+;/);
@@ -224,7 +255,7 @@ test("the shared renderer covers every authored question type", () => {
 
   assert.deepEqual(
     [...types].sort(),
-    ["figure", "free-response", "multiple-choice", "numeric", "true-false"]
+    ["figure", "free-response", "multiple-choice", "multiple-select", "numeric", "true-false"]
   );
 });
 

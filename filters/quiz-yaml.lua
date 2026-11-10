@@ -5,6 +5,7 @@ local QUESTION_TYPES = {
   ["free-response"] = true,
   ["free"] = true,
   ["multiple-choice"] = true,
+  ["multiple-select"] = true,
   ["true-false"] = true,
   ["numeric"] = true,
 }
@@ -298,7 +299,7 @@ local function validate_question(question, path, seen_ids)
   end
 
   if not QUESTION_TYPES[question.type] then
-    validation_error(path .. ".type", "must be free-response, multiple-choice, true-false, numeric, or figure")
+    validation_error(path .. ".type", "must be free-response, multiple-choice, multiple-select, true-false, numeric, or figure")
   end
 
   if question.checkLabel ~= nil and is_blank(question.checkLabel) then
@@ -349,7 +350,7 @@ local function validate_question(question, path, seen_ids)
 
   validate_hints(question, path)
 
-  if question.type == "multiple-choice" then
+  if question.type == "multiple-choice" or question.type == "multiple-select" then
     if not is_array(question.options) or #question.options < 2 then
       validation_error(path .. ".options", "must contain at least two options")
     end
@@ -368,8 +369,12 @@ local function validate_question(question, path, seen_ids)
       end
     end
 
-    if correct_count ~= 1 then
+    if question.type == "multiple-choice" and correct_count ~= 1 then
       validation_error(path .. ".options", "must mark exactly one option with correct: true")
+    end
+
+    if question.type == "multiple-select" and correct_count < 1 then
+      validation_error(path .. ".options", "must mark at least one option with correct: true")
     end
   end
 
@@ -528,6 +533,16 @@ local function answer_html(question)
     return ""
   end
 
+  if question.type == "multiple-select" and type(question.options) == "table" then
+    local items = {}
+    for _, option in ipairs(question.options) do
+      if option.correct == true then
+        table.insert(items, "<li>" .. (option.textHtml or "") .. "</li>")
+      end
+    end
+    return '<ul class="quiz-answer-list">' .. table.concat(items) .. "</ul>"
+  end
+
   if question.type == "true-false" then
     return tostring(question.answer) == "true" and "<p>True</p>" or "<p>False</p>"
   end
@@ -535,12 +550,17 @@ local function answer_html(question)
   return question.answerHtml or ""
 end
 
-local function render_choices(quiz, question, options)
+local function render_choices(quiz, question, options, multiple)
   local name = quiz.id .. "-" .. question.id
+  local input_type = multiple and "checkbox" or "radio"
   local parts = {
-    '<fieldset class="quiz-options">',
+    multiple and '<fieldset class="quiz-options quiz-options-multiple">'
+      or '<fieldset class="quiz-options">',
     '<legend class="visually-hidden">Response options</legend>',
   }
+  if multiple then
+    table.insert(parts, '<p class="quiz-select-note">Select all that apply.</p>')
+  end
 
   for index, option in ipairs(options) do
     local option_id = name .. "-option-" .. index
@@ -551,7 +571,7 @@ local function render_choices(quiz, question, options)
     end
     table.insert(parts,
       '<div class="quiz-choice">'
-      .. '<input type="radio" name="' .. html_escape(name, true)
+      .. '<input type="' .. input_type .. '" name="' .. html_escape(name, true)
       .. '" id="' .. html_escape(option_id, true)
       .. '" value="' .. html_escape(value, true)
       .. '" aria-labelledby="' .. html_escape(text_id, true) .. '">'
@@ -570,6 +590,10 @@ local function render_control(quiz, question)
 
   if question.type == "multiple-choice" then
     return render_choices(quiz, question, question.options or {})
+  end
+
+  if question.type == "multiple-select" then
+    return render_choices(quiz, question, question.options or {}, true)
   end
 
   if question.type == "true-false" then
