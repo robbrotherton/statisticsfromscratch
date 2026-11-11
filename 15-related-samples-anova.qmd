@@ -18,7 +18,7 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has varieties for different situations. In this chapter we'll introduce the **related-samples ANOVA**. Just like the related-samples $t$ test, this is for within-participants or matched-subjects designs. The basic logic is the same as the independent-samples ANOVA. To deal with realted samples, we just extend the idea of partitioning variance to account for differences between people.
+In Chapter 14 we introduced the general logic of ANOVA and used its independent-samples variant to analyze data from a between-participants design. But like the $t$ test, ANOVA has varieties for different situations. In this chapter we'll introduce the **related-samples ANOVA**. Just like the related-samples $t$ test, this is for within-participants or matched-subjects designs. The basic logic is the same as the independent-samples ANOVA. To deal with related samples, we just extend the idea of partitioning variance to account for differences between people.
 
 ## Off to the races, again
 
@@ -38,7 +38,7 @@ In fact, Norman Triplett gave each child six timed trials, with different sequen
 
 : Times (in seconds) for five children from Triplett's study. The columns follow the order of their first three trials. {#tbl-related-anova-data}
 
-With two scores per kid in Chapter 13, we just subtracted one from the other to crate a single difference score. Now each kid has three scores. Simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. We'll eventually perform post-hoc tests to look at each pairwise comparison in more detail, as we did in Chapter 14, but ANOVA provides the initial omnibus test.
+With two scores per kid in Chapter 13, we just subtracted one from the other to create a single difference score. Now each kid has three scores. Simple pairwise subtraction can't handle the whole set of scores in a single test. But you know what can: ANOVA. We'll eventually perform post-hoc tests to look at each pairwise comparison in more detail, as we did in Chapter 14, but ANOVA provides the initial omnibus test.
 
 Let's think about how the independent-samples ANOVA from last chapter would handle this data. It would group them by race type---the columns of @tbl-related-anova-data---and compare the differences between the three column means with the variability within each column: between groups versus within groups. Eyeballing it, it looks like there's a lot of variability within each column. Like, check out Clyde G.'s times. Clyde was not messing around---he totally demolished the other kids' times in every one of his races. So within each column the times are spread over something like twenty seconds, while the column means are just a few seconds apart.
 
@@ -62,7 +62,7 @@ With a between-participants design and independent-samples ANOVA, we can only sp
 
 A within-participants design changes this. We still have a bunch of different people within each group, so individual differences contribute to within-groups variability. Clyde G.'s super-speed makes each group substantially more variable. But now the same people appear in every condition. Whatever it is about Clyde that makes him so much faster than the other kids, he brings it with him in all three races; it is consistent across groups. So the design itself eliminates individual differences as a source of variability between groups. The only things that can make the condition means differ are the treatment effect and the remaining chance.
 
-As a result, we have a slight problem. If we used the same numerator for the $F$ ratio as we did with independent samples, the numerator and denominator would no longer be conceptually balanced. The numerator would represent treatment plus the remaining chance, no indidivual differences. The denominator would represent the remaining chance plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
+As a result, we have a slight problem. If we used the same denominator for the $F$ ratio as we did with independent samples, the numerator and denominator would no longer be conceptually balanced. The numerator would represent treatment plus the remaining chance, no individual differences. The denominator would represent the remaining chance plus individual differences. But the good news is that we can *mathematically* extract those individual differences from the denominator as well, leaving a balanced ratio.
 
 That's what taking each child's three times as a group achieves. It allows us to split the within-groups sum of squares into two components: between-people variability, $SS_{\text{people}}$, and the remaining error, $SS_{\text{error}}$. Error is the variability that's left once we know which child and which race a score belongs to. Children might respond a bit differently to practice or competition, or have a particularly good or bad run. Those departures from the average pattern are what @fig-partitioning-related calls "remaining chance."
 
@@ -317,7 +317,7 @@ $$
 
 (I've rounded the values I'm showing to two decimal places, but the calculations use the unrounded values, so you'll need to do the same if you want your answers to match mine exactly.)
 
-Now for the sums of squares and their degrees of freedom. We'll out the same as with independent samples, calculating the total, between groups, and within groups components.
+Now for the sums of squares and their degrees of freedom. We'll start out the same as with independent samples, calculating the total, between groups, and within groups components.
 
 Squaring each score's deviation from the grand mean and adding them gives the total sum of squares:
 
@@ -497,7 +497,7 @@ If we had used the ordinary $\eta^2$, it would have come to $.20$. The partial $
 
 #### Post-hoc tests
 
-As you know, the ANOVA is an omnibus test: it tells us the population means aren't all equal, but not which ones differ. You'll also recall that Tukey's HSD is one kind of post-hoc test that. It gives us the minimum difference between means that counts as significant, while controlling the chance of at least one Type I error across all the pairwise comparisons. We can use the same approach here, adjusted for the related-samples design.
+As you know, the ANOVA is an omnibus test: it tells us the population means aren't all equal, but not which ones differ. You'll also recall that Tukey's HSD is one kind of post-hoc test. It gives us the minimum difference between means that counts as significant, while controlling the chance of at least one Type I error across all the pairwise comparisons. We can use the same approach here, adjusted for the related-samples design.
 
 In Chapter 14, we used $MS_{\text{within}}$ as part of computing Tukey's HSD, since it was the representation of chance variability used in the denominator of the $F$ ratio. Here we use $MS_{\text{error}}$, because we've set aside differences in the children's overall speed. It's the same adjustment we made for the $F$ ratio. We also use the error degrees of freedom when looking up the critical $q$.
 
@@ -529,7 +529,7 @@ As before, statistical power is the probability of detecting a difference among 
 
 Think about Clyde again. He was faster than the other kids in every race, so separating out differences in overall speed removes a lot of that within-groups variability. That can give us a smaller denominator than we'd get by treating the same scores as independent. (Analyzed as independent samples, these 15 scores give just $F(2, 12) = 1.49$, nowhere near the critical 3.89.) But separating out the people component also costs degrees of freedom, which raises the critical $F$. The reduction in error needs to be enough to compensate. If people's scores in the different conditions weren't related, we'd generally end up with a similar error mean square to the independent-samples analysis, but fewer degrees of freedom and less power. As in Chapter 13, the design tells us which analysis to use; we don't try both and keep whichever gives the result we prefer.
 
-Statistical software can calculate power for a related-samples ANOVA, or work backwards to estimate how many participants we'd need for a target such as 80% power. I don't want to get into the math, but generally speaking, we specify a differences worth detecting, estimate the variability and how strongly scores go together across conditions, and choose an alpha level, then software runs the numbers and tells us how many participants to recruit to achieve the desired power.
+Statistical software can calculate power for a related-samples ANOVA, or work backwards to estimate how many participants we'd need for a target such as 80% power. I don't want to get into the math, but generally speaking, we specify differences worth detecting, estimate the variability and how strongly scores go together across conditions, and choose an alpha level. Then software runs the numbers and tells us how many participants to recruit to achieve the desired power.
 
 ## Reporting and interpreting results
 
@@ -551,7 +551,7 @@ Times for each child, with a bold dashed line showing the average in each condit
 
 How might we interpret the results of our ANOVA and post-hoc tests? At the start of the chapter, I framed the second solo race as a way of teasing apart practice and competition. Do the findings support the idea that competition leads to greater improvement than practice alone? Well, our analysis is suggestive. A nonsignificant solo-to-solo comparison doesn't mean practice had no effect. Maybe it was just too small to reliably detect with five children. But the significant improvement in the competition race compared to either solo race fits the idea that a rival helped the children speed up.
 
-Being critical, though, we can pick holes in the design. A significant change after a nonsignificant one doesn't establish that the two changes differ *from one another*. The question I posed was whether the competition race brought *more* improvement than practice alone would. That's a comparison between the two *changes*---the 2.80-second drop and the 5.00-second drop---and neither the ANOVA nor Tukey's test look at the difference in differences. (There are ways of testing that comparison directly, though it's beyond what we're covering here. With these five kids it wouldn't come close to significance.)
+Being critical, though, we can pick holes in the design. A significant change after a nonsignificant one doesn't establish that the two changes differ *from one another*. The question I posed was whether the competition race brought *more* improvement than practice alone would. That's a comparison between the two *changes*---the 2.80-second drop and the 5.00-second drop---and neither the ANOVA nor Tukey's test looks at the difference in differences. (There are ways of testing that comparison directly, though it's beyond what we're covering here. With these five kids it wouldn't come close to significance.)
 
 There's also the order problem. Competition always came third for these kids, so we don't know how fast they would have gone on a third trial alone. The repeated practice of the solo races could explain some or all of the improvement we attributed to competition.
 
@@ -565,7 +565,7 @@ The same sort of considerations apply to ANOVA with related samples as in Chapte
 
 First, there's the assumption of independence. This now applies only between people, not between conditions. We expect scores from the same child to be related across the different conditions, but different children's responses should be independent of one another.
 
-There is an assumption of normality, but it applies specifically to the error variability---the deviations we saw in the Error steps of @act-related-partition. Those were the deviations left over once differences between people and between conditions were set aside. We don't need scores within each condition to be normally distributed because the analysis removes the between-people variability. Clyde's super-speed skewed the distributions of scores within each condition, but the adjusted-score error deviations were more normal.
+There is an assumption of normality, but it applies specifically to the error variability---the deviations we saw in the Error steps of @act-related-partition. Those were the deviations left over once differences between people and between conditions were set aside. We don't need scores within each condition to be normally distributed because the analysis removes the between-people variability. Clyde's super-speed skewed the distributions of scores within each condition, but the adjusted-score error deviations were more normal-looking.
 
 Lastly, remember Chapter 14's homogeneity of variance assumption: we needed comparable variability across groups. Here we have a similar requirement, but it applies to the *difference scores* for every pair of conditions, rather than to the scores within each condition. The requirement is called **sphericity**: the population variances of those difference scores should be the same. (This wasn't an issue with the related-samples $t$ test because with only two conditions, there's just one set of difference scores, so no different variabilities to compare.)
 
