@@ -12,6 +12,9 @@ window.sfsAnovaSquares = (function() {
   const POUR = { stagger: 150, flyDuration: 560, dropDuration: 240, settleDuration: 260 };
   const LINE_DURATION = 560;
   const SQUARE_DURATION = 620;
+  const GHOST_RISE = 240;
+  const GHOST_SLIDE = 700;
+  const GHOST_FADE = 500;
 
   function ensureStyles() {
     if (document.getElementById("anova-squares-styles")) return;
@@ -21,7 +24,7 @@ window.sfsAnovaSquares = (function() {
       .anova-dev { fill: none; stroke-width: 2; opacity: 0.72; }
       .anova-dev-cap { stroke-width: 1.5; opacity: 0.72; }
       .anova-dev-square { fill-opacity: 0.075; stroke-width: 1.15; stroke-opacity: 0.58; }
-      .anova-ghost { fill-opacity: 0.22; stroke-width: 1.25; stroke-opacity: 0.5; stroke-dasharray: 2 2; }
+      .anova-ghost { fill: none; stroke-width: 1.5; stroke-dasharray: 2 2; }
       .anova-transfer { pointer-events: none; }
       .anova-cut-label { font-size: var(--sfs-figure-title-size, 1rem); font-weight: 700; fill: var(--sfs-muted, #68727d); }
     `;
@@ -97,20 +100,38 @@ window.sfsAnovaSquares = (function() {
     rows.exit().interrupt().transition().duration(animate ? 180 : 0).style("opacity", 0).remove();
   }
 
-  // Dashed rings left where scores were, once they've moved to their group mean.
+  // Dashed outlines for a stand-in: what a score is treated as, not the score. Given `from`,
+  // a new one rises over the score at that position and then slides to its place, so the
+  // score itself never has to move. They fade where they stand when they're done with.
+  // Timings are opts, all optional: `riseDelay`, `slide`, an item's own `delay` before its
+  // slide, and `moveDelay` and `moveDuration` for outlines that stay but change place.
   function renderGhosts(layer, items, opts) {
-    const animate = Boolean(opts && opts.animate);
+    opts = opts || {};
+    const animate = Boolean(opts.animate);
+    const place = (selection, at) => selection.attr("cx", (d) => at(d).x).attr("cy", (d) => at(d).y);
     const ghosts = layer.selectAll("circle.anova-ghost").data(items, (d) => d.key);
-    ghosts.enter().append("circle")
+    const entered = ghosts.enter().append("circle")
       .attr("class", "anova-ghost")
       .attr("r", 6)
       .style("opacity", 0)
-      .merge(ghosts)
-      .attr("cx", (d) => d.x).attr("cy", (d) => d.y)
-      .attr("fill", (d) => d.color).attr("stroke", (d) => d.color)
-      .interrupt().transition().duration(animate ? 420 : 0)
-      .style("opacity", 1);
-    ghosts.exit().interrupt().transition().duration(animate ? 260 : 0).style("opacity", 0).remove();
+      .call(place, (d) => d.from || d);
+    entered.merge(ghosts)
+      .attr("fill", (d) => d.color).attr("stroke", (d) => d.color);
+    ghosts.interrupt().style("opacity", 1);
+    if (animate && opts.moveDuration) {
+      ghosts.transition().delay(opts.moveDelay || 0).duration(opts.moveDuration).ease(d3.easeCubicInOut)
+        .call(place, (d) => d);
+    } else {
+      ghosts.call(place, (d) => d);
+    }
+    if (animate) {
+      entered.transition().delay(opts.riseDelay || 0).duration(GHOST_RISE).style("opacity", 1)
+        .transition().delay((d) => d.delay || 0).duration(opts.slide || GHOST_SLIDE).ease(d3.easeCubicInOut)
+        .call(place, (d) => d);
+    } else {
+      entered.call(place, (d) => d).style("opacity", 1);
+    }
+    ghosts.exit().interrupt().transition().duration(animate ? GHOST_FADE : 0).style("opacity", 0).remove();
   }
 
   function pourDuration(count, speed) {
@@ -122,6 +143,8 @@ window.sfsAnovaSquares = (function() {
   // by exactly its area. Pieces carry key, from {x, y, side}, side (at the sum's scale),
   // value and color. `level(v)` is the rect the sum fills when it holds v; `mouth` is
   // the centre x and top y the pieces drop in from; `sumRect` is raised as each lands.
+  // `onLand(total, duration)`, if given, hears the running total as the level rises, for
+  // anything that has to move with it.
   function pour(layer, opts) {
     const { pieces, color, level, mouth, sumRect } = opts;
     const start = opts.delay || 0;
@@ -134,6 +157,7 @@ window.sfsAnovaSquares = (function() {
     pieces.forEach((d) => {
       const surface = level(running).y;
       running += d.value;
+      d.running = running;
       d.mouthAt = { x: mouth.x - d.side / 2, y: mouth.y - d.side - 6 };
       d.landY = surface - d.side;
       d.sum = level(running);
@@ -164,6 +188,7 @@ window.sfsAnovaSquares = (function() {
       .on("start", (d) => {
         sumRect.transition().duration(settle).ease(d3.easeCubicOut)
           .attr("y", d.sum.y).attr("height", d.sum.height);
+        if (opts.onLand) opts.onLand(d.running, settle);
       })
       .attr("x", (d) => d.sum.x).attr("y", (d) => d.film.y)
       .attr("width", (d) => d.sum.width).attr("height", (d) => d.film.height)
@@ -294,7 +319,7 @@ window.sfsAnovaSquares = (function() {
   }
 
   return {
-    LINE_DURATION, SQUARE_DURATION,
+    LINE_DURATION, SQUARE_DURATION, GHOST_RISE, GHOST_SLIDE, GHOST_FADE,
     ensureStyles, laneOffset, deviationSquare, renderDeviations, renderGhosts,
     pourDuration, pour, cutPieces, planCut, animateCut
   };

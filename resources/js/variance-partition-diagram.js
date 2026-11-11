@@ -31,13 +31,18 @@ vpdPrefersReducedMotion = () => {
 
 // The variance sources keep one fixed identity color each across every ANOVA
 // variant, so "individual differences" looks the same in chapter 14, 15, and
-// 16. Colors are paired with the word labels, never used alone; the neutral
-// gray for chance/error is deliberate (noise reads as gray).
+// 16. Colors are paired with the word labels, never used alone, and they match
+// the ANOVA explorer: purple for the effect, red for chance, brown for people.
 vpdSourceCatalog = {
   "treatment": { label: "Treatment effect", color: "var(--sfs-effect-color, #7654b5)" },
-  "chance": { label: "Chance", color: "var(--sfs-neutral-color, #7b818a)" },
-  "error": { label: "Sampling error", color: "var(--sfs-neutral-color, #7b818a)" },
-  "ind-diff": { label: "Individual differences", color: "var(--sfs-current-color, #d1495b)" }
+  "treatments": { label: "Treatment effects", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-a": { label: "Main effect", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-b": { label: "Main effect", color: "var(--sfs-effect-color, #7654b5)" },
+  "effect-ab": { label: "Interaction", color: "var(--sfs-effect-color, #7654b5)" },
+  "chance": { label: "Chance", color: "var(--sfs-current-color, #d1495b)" },
+  "error": { label: "Sampling error", color: "var(--sfs-current-color, #d1495b)" },
+  "remaining": { label: "Remaining chance", color: "var(--sfs-current-color, #d1495b)" },
+  "ind-diff": { label: "Individual differences", color: "var(--sfs-people-color, #8a5a2b)" }
 }
 
 vpdNormalizeSource = (value) => {
@@ -68,7 +73,7 @@ vpdNormalizeStage = (value, fallback) => {
 }
 
 // --- Minimal math labels ------------------------------------------------
-// Node labels need statistical symbols like MS_{between treatments}. Rather
+// Node labels need statistical symbols like SS_{between}. Rather
 // than unicode subscripts (no letters like b/w available), parse a tiny
 // TeX-like syntax into tspans: base text italic in the math font, _{...}
 // subscripts smaller and lowered in roman.
@@ -131,28 +136,25 @@ vpdRenderMath = (text, expr) => {
 vpdRow = { r0: { y: 64, h: 80 }, r1: { y: 254, h: 116 }, r2: { y: 478, h: 96 } }
 
 vpdAnovaCommonNodes = (variant) => {
-  const betweenTreatments = ["related-problem", "related"].includes(variant);
+  const related = ["related-problem", "related"].includes(variant);
   return [
     {
       id: "total",
       x: 480, y: vpdRow.r0.y, width: 300, height: vpdRow.r0.h,
-      lines: ["Total variability", "in the data"],
-      stage: "total", role: "plain", sources: []
+      lines: ["Total variability", "$SS_{total}$"],
+      stage: "total", tone: "total", sources: []
     },
     {
       id: "between",
-      x: betweenTreatments ? 205 : 245, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
-      lines: betweenTreatments
-        ? ["Variance between", "treatments", "$MS_{between treatments}$"]
-        : ["Variance between", "groups", "$MS_{between}$"],
-      parent: "total", stage: "split", role: "numerator"
+      x: related ? 205 : 245, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
+      lines: ["Variability", "between groups", "$SS_{between}$"],
+      parent: "total", stage: "split", tone: "between"
     },
     {
       id: "within",
-      x: betweenTreatments ? 665 : 715, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
-      lines: ["Variance within", "groups", "$MS_{within}$"],
-      parent: "total", stage: "split",
-      role: variant === "related" ? "plain" : "denominator"
+      x: related ? 665 : 715, y: vpdRow.r1.y, width: 310, height: vpdRow.r1.h,
+      lines: ["Variability", "within groups", "$SS_{within}$"],
+      parent: "total", stage: "split", tone: "within"
     }
   ];
 }
@@ -168,27 +170,28 @@ vpdPresetSpecs = {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
         concept: { num: ["treatment", "chance"], den: ["chance"] }
       },
-      alt: "Partitioning diagram: total variability splits into variance " +
-        "between groups (treatment effect plus chance) and variance within " +
-        "groups (chance alone); their ratio is the F statistic."
+      alt: "Partitioning diagram: the total sum of squares splits into " +
+        "variability between groups (treatment effect plus chance) and " +
+        "variability within groups (chance alone); the ratio of their mean " +
+        "squares is the F statistic."
     };
   },
 
   "independent-detailed": () => {
     const nodes = vpdAnovaCommonNodes("independent-detailed");
-    nodes[1].sources = ["treatment", "error", "ind-diff"];
-    nodes[2].sources = ["error", "ind-diff"];
+    nodes[1].sources = ["treatment", "remaining", "ind-diff"];
+    nodes[2].sources = ["remaining", "ind-diff"];
     return {
       nodes,
       formula: {
         ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
-        concept: { num: ["treatment", "error", "ind-diff"], den: ["error", "ind-diff"] }
+        concept: { num: ["treatment", "remaining", "ind-diff"], den: ["remaining", "ind-diff"] }
       },
-      alt: "Partitioning diagram for an independent-samples ANOVA: variance " +
-        "between groups contains treatment effect, sampling error, and " +
-        "individual differences; variance within groups contains sampling " +
-        "error and individual differences. The chance sources balance out " +
-        "in the F ratio."
+      alt: "Partitioning diagram for an independent-samples ANOVA: " +
+        "variability between groups contains treatment effect, remaining " +
+        "chance, and individual differences; variability within groups " +
+        "contains remaining chance and individual differences. The chance " +
+        "sources balance out in the F ratio."
     };
   },
 
@@ -199,77 +202,78 @@ vpdPresetSpecs = {
     return {
       nodes,
       formula: {
-        ratios: [{ f: "F", num: "MS_{between treatments}", den: "MS_{within}" }],
+        ratios: [{ f: "F", num: "MS_{between}", den: "MS_{within}" }],
         concept: { num: ["treatment", "error"], den: ["error", "ind-diff"] }
       },
       alt: "Partitioning diagram showing the related-samples problem: the " +
-        "design removes individual differences from variance between " +
-        "treatments, but they remain in variance within groups, so the " +
+        "design removes individual differences from variability between " +
+        "groups, but they remain in variability within groups, so the " +
         "usual F ratio is unbalanced."
     };
   },
 
   "related": () => {
     const nodes = vpdAnovaCommonNodes("related");
-    nodes[1].sources = ["treatment", "error"];
-    nodes[2].sources = [];
+    nodes[1].sources = ["treatment", "remaining"];
+    nodes[2].sources = ["remaining", "ind-diff"];
     nodes.push(
       {
         id: "error",
         x: 545, y: vpdRow.r2.y, width: 220, height: vpdRow.r2.h,
-        lines: ["Error", "$MS_{error}$"],
-        parent: "within", stage: "subdivide", role: "denominator",
-        sources: ["error"]
+        lines: ["Error", "$SS_{error}$"],
+        parent: "within", stage: "subdivide", tone: "within",
+        sources: ["remaining"]
       },
       {
-        id: "between-subjects",
+        id: "between-people",
         x: 805, y: vpdRow.r2.y, width: 260, height: vpdRow.r2.h,
-        lines: ["Between subjects", "$MS_{between subjects}$"],
-        parent: "within", stage: "subdivide", role: "plain",
+        lines: ["Between people", "$SS_{people}$"],
+        parent: "within", stage: "subdivide", tone: "people",
         sources: ["ind-diff"]
       }
     );
     return {
       nodes,
       formula: {
-        ratios: [{ f: "F", num: "MS_{between treatments}", den: "MS_{error}" }],
-        concept: { num: ["treatment", "error"], den: ["error"] }
+        ratios: [{ f: "F", num: "MS_{between}", den: "MS_{error}" }],
+        concept: { num: ["treatment", "remaining"], den: ["remaining"] }
       },
-      alt: "Partitioning diagram for a related-samples ANOVA: variance " +
-        "within groups is further partitioned into error variance (sampling " +
-        "error) and between-subjects variance (individual differences). " +
-        "The F ratio uses mean square error as its denominator, restoring " +
-        "the balance."
+      alt: "Partitioning diagram for a related-samples ANOVA: variability " +
+        "within groups contains remaining chance and individual differences, " +
+        "and is further partitioned into variability between people " +
+        "(individual differences) and error (remaining chance). " +
+        "The F ratio uses mean square error as its denominator."
     };
   },
 
   "factorial": () => {
     const nodes = vpdAnovaCommonNodes("factorial");
+    // Each part of between holds its own effect, if there is one, plus chance; within holds
+    // chance alone, which is why each part is compared with it.
     nodes[1].x = 350;
-    nodes[1].sources = [];
+    nodes[1].sources = ["treatments", "chance"];
     nodes[2].x = 780;
-    nodes[2].sources = [];
+    nodes[2].sources = ["chance"];
     nodes.push(
       {
         id: "factor-a",
         x: 145, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
-        lines: ["Factor A", "$MS_A$"],
-        parent: "between", stage: "subdivide", role: "numerator", sources: []
+        lines: ["Factor A", "$SS_A$"],
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-a", "chance"]
       },
       {
         id: "factor-b",
         x: 400, y: vpdRow.r2.y, width: 200, height: vpdRow.r2.h,
-        lines: ["Factor B", "$MS_B$"],
-        parent: "between", stage: "subdivide", role: "numerator", sources: []
+        lines: ["Factor B", "$SS_B$"],
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-b", "chance"]
       },
       {
         id: "interaction",
         x: 655, y: vpdRow.r2.y, width: 240, height: vpdRow.r2.h,
-        lines: ["A × B interaction", "$MS_{A×B}$"],
-        parent: "between", stage: "subdivide", role: "numerator", sources: []
+        lines: ["A × B interaction", "$SS_{A×B}$"],
+        parent: "between", stage: "subdivide", tone: "between", sources: ["effect-ab", "chance"]
       }
     );
-    nodes[1].role = "plain";
     return {
       nodes,
       formula: {
@@ -279,10 +283,11 @@ vpdPresetSpecs = {
           { f: "F_{A×B}", num: "MS_{A×B}", den: "MS_{within}" }
         ]
       },
-      alt: "Partitioning diagram for a factorial ANOVA: variance between " +
-        "treatments is further partitioned into Factor A, Factor B, and the " +
-        "A by B interaction, each of which is compared against variance " +
-        "within groups in its own F ratio."
+      alt: "Partitioning diagram for a factorial ANOVA: variability between " +
+        "groups (treatment effects plus chance) is further partitioned into " +
+        "Factor A, Factor B, and the A by B interaction, each holding its own " +
+        "effect plus chance. Each is compared against variability within " +
+        "groups (chance alone) in its own F ratio."
     };
   },
 
@@ -292,19 +297,19 @@ vpdPresetSpecs = {
         id: "total",
         x: 480, y: vpdRow.r0.y, width: 330, height: 88,
         lines: ["Total variability in Y", "$SS_Y$"],
-        stage: "total", role: "plain", sources: []
+        stage: "total", sources: []
       },
       {
         id: "regression",
         x: 245, y: 250, width: 330, height: 92,
         lines: ["Predictable variability", "$SS_{regression}$"],
-        parent: "total", stage: "split", role: "numerator", sources: []
+        parent: "total", stage: "split", tone: "between", sources: []
       },
       {
         id: "residual",
         x: 715, y: 250, width: 340, height: 92,
         lines: ["Unpredictable variability", "$SS_{residual}$"],
-        parent: "total", stage: "split", role: "denominator", sources: []
+        parent: "total", stage: "split", tone: "neutral", sources: []
       }
     ],
     formula: {
@@ -329,6 +334,152 @@ vpdNormalizePreset = (value) => {
   return "independent";
 }
 
+// --- Narrow layout ---------------------------------------------------------
+// Scaling the 960-wide canvas down to a phone leaves 6-8px text. Below
+// vpdCompactBelow the canvas instead matches the space available at a fixed
+// scale, so font sizes stop tracking the width, and the nodes are placed in
+// rows to fit it.
+
+vpdCanvasWidth = 960
+vpdCompactBelow = 600
+vpdCompactScale = 0.66
+vpdFormulaRowStep = 104
+vpdSourceLineStep = 24
+
+vpdCompactLines = {
+  "between": ["Variability", "between groups", "$SS_{between}$"],
+  "within": ["Variability", "within groups", "$SS_{within}$"],
+  "interaction": ["A × B", "interaction", "$SS_{A×B}$"],
+  "regression": ["Predictable", "variability", "$SS_{regression}$"],
+  "residual": ["Unpredictable", "variability", "$SS_{residual}$"]
+}
+
+vpdLineHeights = (lines) => lines.map((line) => vpdIsMathLine(line) ? 33 : 28)
+
+// Splits at the last space when a source label won't fit beside its dot.
+vpdWrapSourceLabel = (label, limit) => {
+  const space = label.lastIndexOf(" ");
+  if (vpdTextWidth(label, 19) + 17 <= limit || space < 0) return [label];
+  return [label.slice(0, space), label.slice(space + 1)];
+}
+
+// Sources block layout for a node: entry rows below the node box. Passing a
+// compact canvas width wraps labels to the node's column and keeps each block
+// on the canvas.
+vpdSourceBlocks = (nodes, compactWidth) => nodes
+  .map((node) => {
+    if (!(node.sources || []).length) return null;
+    let y = node.y + node.height / 2 + 40;
+    const entries = node.sources.map((key) => {
+      const source = vpdSourceCatalog[key];
+      const lines = compactWidth
+        ? vpdWrapSourceLabel(source.label, node.width)
+        : [source.label];
+      const entry = {
+        key,
+        nodeId: node.id,
+        lines,
+        color: source.color,
+        y,
+        width: 17 + Math.max(...lines.map((line) => vpdTextWidth(line, 19)))
+      };
+      y += 28 + (lines.length - 1) * vpdSourceLineStep;
+      return entry;
+    });
+    const blockWidth = Math.max(...entries.map((entry) => entry.width));
+    let blockX = node.x - blockWidth / 2;
+    if (compactWidth) {
+      blockX = Math.max(10, Math.min(compactWidth - blockWidth - 10, blockX));
+    }
+    entries.forEach((entry) => { entry.x = blockX; });
+    const last = entries[entries.length - 1];
+    return {
+      nodeId: node.id,
+      entries,
+      stageIndex: Math.max(vpdStageOrder.indexOf(node.stage), vpdStageOrder.indexOf("sources")),
+      bottom: last.y + (last.lines.length - 1) * vpdSourceLineStep + 10
+    };
+  })
+  .filter(Boolean)
+
+vpdSlimNodeWidth = (node) => 28 + Math.max(...node.lines.map((line) =>
+  vpdIsMathLine(line) ? vpdMathWidth(line, 25) : vpdTextWidth(line, 23)))
+
+// How far the row below must drop for the sources under a row to clear it:
+// past the sources themselves, and far enough that a link slanting across
+// them has passed below them by the time it reaches their edge.
+vpdSourceClearance = (row, nextRow, canvasWidth, bottom) => {
+  let clearance = 0;
+  vpdSourceBlocks(row, canvasWidth).forEach((block) => {
+    const left = block.entries[0].x - 10;
+    const right = left + 20 + Math.max(...block.entries.map((entry) => entry.width));
+    const depth = block.bottom - bottom + 6;
+    clearance = Math.max(clearance, depth + 48);
+    nextRow.forEach((child) => {
+      const parent = row.find((node) => node.id === child.parent);
+      if (!parent || parent.id === block.nodeId) return;
+      const edge = parent.x > child.x ? right : left;
+      const reach = Math.abs(child.x - parent.x);
+      const toEdge = (edge - parent.x) * Math.sign(child.x - parent.x);
+      if (toEdge >= 0 && toEdge < reach) {
+        clearance = Math.max(clearance, depth * reach / Math.max(toEdge, 1));
+      }
+    });
+  });
+  return clearance;
+}
+
+// Each depth of the tree gets its own row. The first split shares the canvas
+// in proportion to the widths the wide layout gives those nodes; rows below
+// it take only the width their labels need, gathered under their parent.
+vpdPlaceCompact = (nodes, canvasWidth) => {
+  const margin = 4;
+  const gap = 24;
+  const rowGap = 48;
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const depth = (node) => node.parent ? depth(byId.get(node.parent)) + 1 : 0;
+  const rows = [];
+  nodes.forEach((node) => { (rows[depth(node)] = rows[depth(node)] || []).push(node); });
+
+  rows.forEach((row, index) => {
+    const space = canvasWidth - 2 * margin - gap * (row.length - 1);
+    const height = Math.max(...row.map((node) =>
+      vpdLineHeights(node.lines).reduce((total, h) => total + h, 0) + 24));
+    row.forEach((node) => { node.height = height; });
+
+    if (row.length === 1) {
+      row[0].width = Math.min(row[0].width, space);
+      row[0].x = canvasWidth / 2;
+      return;
+    }
+
+    const slim = index > 1;
+    const weights = row.map((node) => slim ? vpdSlimNodeWidth(node) : node.width);
+    const weight = weights.reduce((total, value) => total + value, 0);
+    const scale = slim ? Math.min(1, space / weight) : space / weight;
+    const rowWidth = weight * scale + gap * (row.length - 1);
+    const center = slim ? byId.get(row[0].parent).x : canvasWidth / 2;
+    let cursor = Math.max(margin,
+      Math.min(canvasWidth - margin - rowWidth, center - rowWidth / 2));
+    row.forEach((node, nodeIndex) => {
+      node.width = weights[nodeIndex] * scale;
+      node.x = cursor + node.width / 2;
+      cursor += node.width + gap;
+    });
+  });
+
+  let top = 6;
+  rows.forEach((row, index) => {
+    row.forEach((node) => { node.y = top + node.height / 2; });
+    const bottom = top + row[0].height;
+    if (index < rows.length - 1) {
+      top = bottom + Math.max(rowGap,
+        vpdSourceClearance(row, rows[index + 1], canvasWidth, bottom));
+    }
+  });
+  return nodes;
+}
+
 vpdEnsureStyles = () => {
   if (document.getElementById("variance-partition-diagram-styles")) return;
 
@@ -337,15 +488,21 @@ vpdEnsureStyles = () => {
   style.textContent = `
     .variance-partition-diagram {
       --sfs-figure-max-width: var(--vpd-max-width, 46rem);
-      --vpd-numerator-fill: color-mix(in srgb, var(--sfs-effect-color, #7654b5) 14%, var(--sfs-bg, #fff));
-      --vpd-denominator-fill: color-mix(in srgb, var(--sfs-neutral-color, #7b818a) 14%, var(--sfs-bg, #fff));
+      --vpd-between-fill: color-mix(in srgb, var(--sfs-effect-color, #7654b5) 14%, var(--sfs-bg, #fff));
+      --vpd-within-fill: color-mix(in srgb, var(--sfs-current-color, #d1495b) 14%, var(--sfs-bg, #fff));
+      --vpd-people-fill: color-mix(in srgb, var(--sfs-people-color, #8a5a2b) 14%, var(--sfs-bg, #fff));
+      --vpd-total-fill: color-mix(in srgb, var(--sfs-muted, #68727d) 14%, var(--sfs-bg, #fff));
+      --vpd-neutral-fill: color-mix(in srgb, var(--sfs-neutral-color, #7b818a) 14%, var(--sfs-bg, #fff));
       --vpd-emphasis-bg: color-mix(in srgb, var(--sfs-current-color, #d1495b) 16%, transparent);
     }
 
     @supports not (color: color-mix(in srgb, white, black)) {
       .variance-partition-diagram {
-        --vpd-numerator-fill: #e8e2f3;
-        --vpd-denominator-fill: #e8eaec;
+        --vpd-between-fill: #e8e2f3;
+        --vpd-within-fill: #f9e4e7;
+        --vpd-people-fill: #eee6dd;
+        --vpd-total-fill: #e7e9eb;
+        --vpd-neutral-fill: #e8eaec;
         --vpd-emphasis-bg: rgba(209, 73, 91, 0.16);
       }
     }
@@ -366,13 +523,11 @@ vpdEnsureStyles = () => {
       transition: fill 450ms ease;
     }
 
-    .variance-partition-diagram .vpd-node-shape.is-numerator {
-      fill: var(--vpd-numerator-fill);
-    }
-
-    .variance-partition-diagram .vpd-node-shape.is-denominator {
-      fill: var(--vpd-denominator-fill);
-    }
+    .variance-partition-diagram .vpd-node-shape.vpd-tone-between { fill: var(--vpd-between-fill); }
+    .variance-partition-diagram .vpd-node-shape.vpd-tone-within { fill: var(--vpd-within-fill); }
+    .variance-partition-diagram .vpd-node-shape.vpd-tone-people { fill: var(--vpd-people-fill); }
+    .variance-partition-diagram .vpd-node-shape.vpd-tone-total { fill: var(--vpd-total-fill); }
+    .variance-partition-diagram .vpd-node-shape.vpd-tone-neutral { fill: var(--vpd-neutral-fill); }
 
     .variance-partition-diagram .vpd-node-text {
       fill: var(--sfs-text, currentColor);
@@ -498,7 +653,10 @@ makeVariancePartitionDiagram = function(opts) {
   vpdEnsureStyles();
   if (window.interactiveFigure) window.interactiveFigure.ensureStyles();
 
-  const width = 960;
+  // The canvas this render is laid out on: the wide presets, or a compact
+  // canvas set by the space available (see vpdPlaceCompact).
+  let compactWidth = null;
+  const canvasWidth = () => compactWidth || vpdCanvasWidth;
   const transitionDuration = vpdPositiveNumber(opts.transitionDuration || opts.duration, 600);
   const labelOverrides = (opts.labels && typeof opts.labels === "object") ? opts.labels : {};
   const showFormulaOption = vpdBoolean(opts.formula ?? opts.showFormula, true);
@@ -521,6 +679,8 @@ makeVariancePartitionDiagram = function(opts) {
   function buildSpec() {
     const spec = vpdPresetSpecs[state.preset]();
     spec.nodes.forEach((node) => {
+      if (!showSourcesOption) node.sources = [];
+      if (compactWidth && vpdCompactLines[node.id]) node.lines = vpdCompactLines[node.id];
       const override = labelOverrides[node.id] ??
         labelOverrides[node.id.replace(/-([a-z])/g, (m, c) => c.toUpperCase())];
       if (override !== undefined) {
@@ -529,44 +689,8 @@ makeVariancePartitionDiagram = function(opts) {
           : String(override).split(/\n|<br\s*\/?>/).map((line) => line.trim()).filter(Boolean);
       }
     });
+    if (compactWidth) vpdPlaceCompact(spec.nodes, compactWidth);
     return spec;
-  }
-
-  // Sources block layout for a node: entry rows below the node box.
-  function sourceEntries(node) {
-    if (!showSourcesOption) return [];
-    return (node.sources || []).map((key, index) => {
-      const source = vpdSourceCatalog[key];
-      const textWidth = vpdTextWidth(source.label, 19);
-      const entryWidth = 17 + textWidth;
-      return {
-        key,
-        nodeId: node.id,
-        label: source.label,
-        color: source.color,
-        y: node.y + node.height / 2 + 40 + index * 28,
-        width: entryWidth
-      };
-    });
-  }
-
-  function sourceBlocks(spec) {
-    return spec.nodes
-      .map((node) => {
-        const entries = sourceEntries(node);
-        if (!entries.length) return null;
-        const blockWidth = Math.max(...entries.map((entry) => entry.width));
-        entries.forEach((entry) => { entry.x = node.x - blockWidth / 2; });
-        const nodeStageIndex = vpdStageOrder.indexOf(node.stage);
-        const sourcesIndex = vpdStageOrder.indexOf("sources");
-        return {
-          nodeId: node.id,
-          entries,
-          stageIndex: Math.max(nodeStageIndex, sourcesIndex),
-          bottom: entries[entries.length - 1].y + 10
-        };
-      })
-      .filter(Boolean);
   }
 
   function contentBottom(spec, blocks) {
@@ -576,7 +700,9 @@ makeVariancePartitionDiagram = function(opts) {
   }
 
   function svgHeight(spec, blocks, formulaY) {
-    if (showFormulaOption && spec.formula) return formulaY + 64;
+    if (showFormulaOption && spec.formula) {
+      return formulaY + (formulaRows(spec).length - 1) * vpdFormulaRowStep + 64;
+    }
     return contentBottom(spec, blocks) + 28;
   }
 
@@ -616,7 +742,7 @@ makeVariancePartitionDiagram = function(opts) {
 
   function drawNodeLabel(group, node) {
     group.selectAll("text").remove();
-    const lineHeights = node.lines.map((line) => vpdIsMathLine(line) ? 33 : 28);
+    const lineHeights = vpdLineHeights(node.lines);
     const totalHeight = lineHeights.reduce((total, h) => total + h, 0);
     let cursor = -totalHeight / 2;
     node.lines.forEach((line, index) => {
@@ -671,8 +797,7 @@ makeVariancePartitionDiagram = function(opts) {
     merged.each(function(node) {
       const group = d3.select(this);
       group.select("rect")
-        .classed("is-numerator", node.role === "numerator")
-        .classed("is-denominator", node.role === "denominator");
+        .attr("class", node.tone ? `vpd-node-shape vpd-tone-${node.tone}` : "vpd-node-shape");
       drawNodeLabel(group, node);
     });
     maybeTransition(merged, animate, duration)
@@ -687,6 +812,8 @@ makeVariancePartitionDiagram = function(opts) {
   }
 
   function renderLinks(spec, animate, duration, nodesById) {
+    const sourceBottoms = new Map(vpdSourceBlocks(spec.nodes, compactWidth)
+      .map((block) => [block.nodeId, block.bottom]));
     const linkData = spec.nodes
       .filter((node) => node.parent && nodesById.has(node.parent))
       .map((node) => {
@@ -695,7 +822,8 @@ makeVariancePartitionDiagram = function(opts) {
           id: node.id,
           stage: node.stage,
           x1: parent.x,
-          y1: parent.y + parent.height / 2 + 2,
+          y1: Math.max(parent.y + parent.height / 2 + 2,
+            (sourceBottoms.get(parent.id) ?? 0) + 12),
           x2: node.x,
           y2: node.y - node.height / 2 - 2
         };
@@ -733,7 +861,7 @@ makeVariancePartitionDiagram = function(opts) {
       .attr("x", entry.x - 10)
       .attr("y", entry.y - 20)
       .attr("width", entry.width + 20)
-      .attr("height", 28)
+      .attr("height", 28 + (entry.lines.length - 1) * vpdSourceLineStep)
       .attr("rx", 14)
       .attr("ry", 14);
     group.append("circle")
@@ -742,11 +870,15 @@ makeVariancePartitionDiagram = function(opts) {
       .attr("cy", entry.y - 6.5)
       .attr("r", 5.5)
       .style("fill", entry.color);
-    group.append("text")
+    const text = group.append("text")
       .attr("class", "vpd-source-text")
-      .attr("x", entry.x + 17)
-      .attr("y", entry.y)
-      .text(entry.label);
+      .attr("y", entry.y);
+    entry.lines.forEach((line, index) => {
+      text.append("tspan")
+        .attr("x", entry.x + 17)
+        .attr("dy", index ? vpdSourceLineStep : 0)
+        .text(line);
+    });
   }
 
   function renderSources(blocks, animate, duration) {
@@ -866,8 +998,17 @@ makeVariancePartitionDiagram = function(opts) {
     });
   }
 
+  // The formula is one row on the wide canvas. A compact canvas gives each
+  // ratio its own row, and the conceptual fraction a row below it.
+  function formulaRows(spec) {
+    const concept = Boolean(spec.formula.concept);
+    if (!compactWidth) return [spec.formula.ratios.map((ratio) => ({ ratio, concept }))];
+    return spec.formula.ratios.flatMap((ratio) =>
+      concept ? [[{ ratio }], [{ concept }]] : [[{ ratio }]]);
+  }
+
   function renderFormula(spec, formulaY, animate) {
-    const signature = JSON.stringify([state.preset, spec.formula, state.emphasize]);
+    const signature = JSON.stringify([state.preset, spec.formula, state.emphasize, compactWidth]);
     if (signature === lastFormulaSignature) return;
     const changed = lastFormulaSignature !== null;
     lastFormulaSignature = signature;
@@ -879,78 +1020,82 @@ makeVariancePartitionDiagram = function(opts) {
     // stage reveal and must not be overridden inline.
     const inner = formulaLayer.append("g").attr("class", "vpd-formula-inner");
 
-    const groups = spec.formula.ratios.map((ratio) => {
-      const fWidth = vpdMathWidth(ratio.f, 26);
-      const fracW = fractionWidth(ratio);
-      let groupWidth = fWidth + 16 + 22 + 16 + fracW;
-      if (spec.formula.concept) {
-        const conceptW = Math.max(
+    const conceptW = spec.formula.concept
+      ? Math.max(
           conceptRowWidth(spec.formula.concept.num),
           conceptRowWidth(spec.formula.concept.den)
-        ) + 16;
-        groupWidth += 16 + 22 + 16 + conceptW;
+        ) + 16
+      : 0;
+
+    formulaRows(spec).forEach((items, rowIndex) => {
+      const rowY = formulaY + rowIndex * vpdFormulaRowStep;
+      const row = inner.append("g").attr("class", "vpd-formula-row");
+      const groups = items.map(({ ratio, concept }) => {
+        const fWidth = ratio ? vpdMathWidth(ratio.f, 26) : 0;
+        const fracW = ratio ? fractionWidth(ratio) : 0;
+        let groupWidth = ratio ? fWidth + 16 + 22 + 16 + fracW : 0;
+        if (concept) groupWidth += (ratio ? 16 : 0) + 22 + 16 + conceptW;
+        return { ratio, concept, fWidth, fracW, groupWidth };
+      });
+
+      const gap = 64;
+      const totalWidth = groups.reduce((total, group) => total + group.groupWidth, 0) +
+        (groups.length - 1) * gap;
+      // Long formulas (three sources on each side) can outgrow the canvas;
+      // shrink the whole row around its center instead of clipping.
+      const center = canvasWidth() / 2;
+      const scale = Math.min(1, (canvasWidth() - 36) / totalWidth);
+      if (scale < 1) {
+        row.attr("transform",
+          `translate(${center},${rowY}) scale(${scale}) translate(${-center},${-rowY})`);
       }
-      return { ratio, fWidth, fracW, groupWidth };
-    });
+      let cursor = center - totalWidth / 2;
 
-    const gap = 64;
-    const totalWidth = groups.reduce((total, group) => total + group.groupWidth, 0) +
-      (groups.length - 1) * gap;
-    // Long formulas (three sources on each side) can outgrow the canvas;
-    // shrink the whole row around its center instead of clipping.
-    const scale = Math.min(1, (width - 36) / totalWidth);
-    if (scale < 1) {
-      inner.attr("transform",
-        `translate(${width / 2},${formulaY}) scale(${scale}) translate(${-width / 2},${-formulaY})`);
-    }
-    let cursor = width / 2 - totalWidth / 2;
+      groups.forEach((group) => {
+        const g = row.append("g").attr("class", "vpd-formula-group");
+        if (group.ratio) {
+          const fText = g.append("text")
+            .attr("class", "vpd-math")
+            .attr("text-anchor", "start")
+            .attr("x", cursor)
+            .attr("y", rowY + 9);
+          vpdRenderMath(fText, group.ratio.f);
+          cursor += group.fWidth + 16;
 
-    groups.forEach((group) => {
-      const g = inner.append("g").attr("class", "vpd-formula-group");
-      const fText = g.append("text")
-        .attr("class", "vpd-math")
-        .attr("text-anchor", "start")
-        .attr("x", cursor)
-        .attr("y", formulaY + 9);
-      vpdRenderMath(fText, group.ratio.f);
-      cursor += group.fWidth + 16;
+          g.append("text")
+            .attr("class", "vpd-math")
+            .attr("x", cursor + 11)
+            .attr("y", rowY + 9)
+            .text("=");
+          cursor += 22 + 16;
 
-      g.append("text")
-        .attr("class", "vpd-math")
-        .attr("x", cursor + 11)
-        .attr("y", formulaY + 9)
-        .text("=");
-      cursor += 22 + 16;
+          drawFraction(g, group.ratio, cursor + group.fracW / 2, rowY);
+          cursor += group.fracW;
+        }
 
-      drawFraction(g, group.ratio, cursor + group.fracW / 2, formulaY);
-      cursor += group.fracW;
+        if (group.concept) {
+          if (group.ratio) cursor += 16;
+          g.append("text")
+            .attr("class", "vpd-math")
+            .attr("x", cursor + 11)
+            .attr("y", rowY + 9)
+            .text("=");
+          cursor += 22 + 16;
 
-      if (spec.formula.concept) {
-        cursor += 16;
-        g.append("text")
-          .attr("class", "vpd-math")
-          .attr("x", cursor + 11)
-          .attr("y", formulaY + 9)
-          .text("=");
-        cursor += 22 + 16;
+          const conceptCenter = cursor + conceptW / 2;
+          drawConceptRow(g, spec.formula.concept.num, conceptCenter, rowY - 12);
+          drawConceptRow(g, spec.formula.concept.den, conceptCenter, rowY + 32);
+          g.append("line")
+            .attr("class", "vpd-frac-bar")
+            .attr("x1", conceptCenter - conceptW / 2)
+            .attr("x2", conceptCenter + conceptW / 2)
+            .attr("y1", rowY)
+            .attr("y2", rowY);
+          cursor += conceptW;
+        }
 
-        const conceptW = Math.max(
-          conceptRowWidth(spec.formula.concept.num),
-          conceptRowWidth(spec.formula.concept.den)
-        ) + 16;
-        const conceptCenter = cursor + conceptW / 2;
-        drawConceptRow(g, spec.formula.concept.num, conceptCenter, formulaY - 12);
-        drawConceptRow(g, spec.formula.concept.den, conceptCenter, formulaY + 32);
-        g.append("line")
-          .attr("class", "vpd-frac-bar")
-          .attr("x1", conceptCenter - conceptW / 2)
-          .attr("x2", conceptCenter + conceptW / 2)
-          .attr("y1", formulaY)
-          .attr("y2", formulaY);
-        cursor += conceptW;
-      }
-
-      cursor += gap;
+        cursor += gap;
+      });
     });
 
     if (changed && animate) {
@@ -973,12 +1118,12 @@ makeVariancePartitionDiagram = function(opts) {
     const spec = buildSpec();
     state.spec = spec;
     const nodesById = new Map(spec.nodes.map((node) => [node.id, node]));
-    const blocks = sourceBlocks(spec);
+    const blocks = vpdSourceBlocks(spec.nodes, compactWidth);
     const formulaY = contentBottom(spec, blocks) + 84;
     const height = svgHeight(spec, blocks, formulaY);
 
     maybeTransition(svg, animate, duration)
-      .attr("viewBox", `0 0 ${width} ${height}`);
+      .attr("viewBox", `0 0 ${canvasWidth()} ${height}`);
     svg.attr("aria-label", opts.ariaLabel || opts.alt || spec.alt);
 
     const nodeSel = renderNodes(spec, animate, duration, nodesById);
@@ -1059,6 +1204,30 @@ makeVariancePartitionDiagram = function(opts) {
 
   render({ animate: false });
   vpdSetupTutorial(rootNode, applyTutorialAction);
+
+  if (window.interactiveFigure &&
+      typeof window.interactiveFigure.observeResponsiveLayout === "function") {
+    // The wide canvas just scales, so it only needs one render; the compact
+    // canvas follows the width. Measured on the chart wrap, which tutorial
+    // side gutters can make narrower than the root.
+    window.interactiveFigure.observeResponsiveLayout({
+      root: rootNode,
+      container: chartWrap.node(),
+      compactBelow: vpdCompactBelow,
+      minimumWidth: 200,
+      key: (layout) => layout.compact ? Math.round(layout.availableWidth) : "wide",
+      onLayout(layout) {
+        const next = layout.compact
+          ? Math.round(layout.availableWidth) / vpdCompactScale
+          : null;
+        if (next === compactWidth) return;
+        compactWidth = next;
+        svg.interrupt("vpd-move");
+        svg.selectAll("*").interrupt("vpd-move");
+        render({ animate: false });
+      }
+    });
+  }
 
   return rootNode;
 }

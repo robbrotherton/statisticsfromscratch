@@ -7,6 +7,7 @@
   const QUESTION_TYPES = {
     freeResponse: "free-response",
     multipleChoice: "multiple-choice",
+    multipleSelect: "multiple-select",
     trueFalse: "true-false",
     numeric: "numeric",
     figure: "figure",
@@ -194,6 +195,14 @@
       return option ? option.correct === true : false;
     }
 
+    if (type === QUESTION_TYPES.multipleSelect) {
+      // Right only when the selection is exactly the set of correct options.
+      const selected = new Set((Array.isArray(response) ? response : []).map(Number));
+      return (question.options || []).every(
+        (option, index) => (option.correct === true) === selected.has(index)
+      );
+    }
+
     if (type === QUESTION_TYPES.trueFalse) {
       return normalizeText(response) === normalizeText(question.answer);
     }
@@ -241,6 +250,40 @@
     return Array.from(wrapper.querySelectorAll("input")).find(
       (input) => input.value === String(value)
     ) || null;
+  }
+
+  // A multiple-select question uses checkboxes and reports an array of the
+  // selected option values. It has no "tried" marking: a wrong selection does
+  // not say which of its options were wrong.
+  function multipleChoiceControl(wrapper) {
+    wrapper.querySelectorAll(".quiz-choice").forEach((choice) => {
+      choice.addEventListener("click", (event) => {
+        if (event.target.closest(
+          "input, a, button, textarea, select, [role='button'], [data-interactive-figure]"
+        )) return;
+        const input = choice.querySelector("input[type='checkbox']");
+        if (!input || input.disabled) return;
+        input.checked = !input.checked;
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    });
+
+    return {
+      element: wrapper,
+      getValue: () => Array.from(wrapper.querySelectorAll("input:checked"))
+        .map((input) => input.value),
+      setValue: (value) => {
+        const selected = new Set((Array.isArray(value) ? value : []).map(String));
+        wrapper.querySelectorAll("input").forEach((input) => {
+          input.checked = selected.has(input.value);
+        });
+      },
+      clear: () => {
+        wrapper.querySelectorAll("input").forEach((input) => {
+          input.checked = false;
+        });
+      },
+    };
   }
 
   function choiceControl(wrapper) {
@@ -329,6 +372,8 @@
     if (!wrapper) throw new Error(`Missing control for question ${question.id}`);
 
     if (type === QUESTION_TYPES.figure) return figureControl(wrapper, question);
+
+    if (type === QUESTION_TYPES.multipleSelect) return multipleChoiceControl(wrapper);
 
     if (type === QUESTION_TYPES.multipleChoice || type === QUESTION_TYPES.trueFalse) {
       return choiceControl(wrapper);
