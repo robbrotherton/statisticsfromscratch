@@ -258,6 +258,9 @@ makeMeanBalanceBeam = function(opts) {
   const startingPositions = makeStartingPositions();
 
   const boxDrag = d3.drag()
+    .container(function() { return beamAndBoxes.node(); })
+    // Use pointer coordinates rather than the box datum's score (d.x).
+    .subject(function(event) { return { x: event.x, y: event.y }; })
     .on("start", function(event, d) {
       if (!state.draggable) return;
       draggingBox = {
@@ -268,9 +271,7 @@ makeMeanBalanceBeam = function(opts) {
     })
     .on("drag", function(event, d) {
       if (!state.draggable || !draggingBox) return;
-      const sourceEvent = event.sourceEvent || event;
-      const pointer = d3.pointer(sourceEvent, beamAndBoxes.node());
-      const nextPosition = roundedPositionIndex(pointer[0] - halfBoxSize);
+      const nextPosition = roundedPositionIndex(event.x - halfBoxSize);
       if (moveBoxTo(d, nextPosition)) {
         draggingBox.moved = true;
       }
@@ -292,15 +293,15 @@ makeMeanBalanceBeam = function(opts) {
   });
 
   const pivotDrag = d3.drag()
+    .container(function() { return svg.node(); })
     .on("start", function() {
       if (!state.draggable) return;
       pivot.classed("is-dragging", true);
     })
     .on("drag", function(event) {
       if (!state.draggable) return;
-      const sourceEvent = event.sourceEvent || event;
-      const pointer = d3.pointer(sourceEvent, svg.node());
-      state.pivotX = clampPivot(xScale.invert(pointer[0] - halfBoxSize));
+      // D3 resolves the active mouse or touch into SVG coordinates.
+      state.pivotX = clampPivot(xScale.invert(event.x - halfBoxSize));
       update(true, { animate: false });
     })
     .on("end", function() {
