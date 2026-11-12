@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="sfs-maze sfs-maze-hard" viewBox="0 0 408 350" role="img" tabindex="0" aria-labelledby="sfs-maze-hard-title sfs-maze-hard-desc" data-maze='{"size":11,"entrance":[0,5],"exit":[10,5],"open":"3232323331003010100112302311131123301212231000311230110110310231103120310231212111102102311031111122123111221211101111010","route":[[0,5],[1,5],[2,5],[2,4],[3,4],[4,4],[4,3],[3,3],[3,2],[4,2],[5,2],[6,2],[7,2],[7,3],[7,4],[6,4],[6,5],[6,6],[5,6],[4,6],[4,7],[3,7],[2,7],[2,6],[1,6],[0,6],[0,7],[1,7],[1,8],[0,8],[0,9],[0,10],[1,10],[2,10],[3,10],[3,9],[4,9],[4,8],[5,8],[6,8],[7,8],[7,7],[7,6],[7,5],[8,5],[9,5],[10,5]],"forks":[{"at":5,"wrong":[5,4],"trap":true},{"at":12,"wrong":[8,2],"trap":true},{"at":15,"wrong":[6,3],"trap":false},{"at":20,"wrong":[5,7],"trap":true},{"at":28,"wrong":[2,8],"trap":true},{"at":33,"wrong":[2,9],"trap":false},{"at":36,"wrong":[5,9],"trap":true},{"at":40,"wrong":[8,8],"trap":true}],"seeds":{"route":19949,"forks":3}}' style="display:block;width:100%;max-width:22rem;height:auto;margin:0 auto;">
+  <title id="sfs-maze-hard-title">Hard maze (select to replay)</title>
+  <desc id="sfs-maze-hard-desc">The hard maze. The entrance is in the middle of the left side and the exit is straight across on the right. The route has 8 places where it forks. The route is the same length as the easy one, but at 6 of the forks the way that heads toward the exit is a short dead end, and the real route turns up, down or back. A red marker line traces the route at the same speed, but it goes into each of those dead ends and backs out, so it takes longer to finish.</desc>
+  <style>
+    .sfs-maze-hard .sfs-maze-route { stroke-dasharray: 2578; stroke-dashoffset: 0; }
+    .sfs-maze-hard.is-animated { cursor: pointer; }
+    .sfs-maze-hard.is-waiting .sfs-maze-route { stroke-dashoffset: 2578; }
+    .sfs-maze-hard.is-drawing .sfs-maze-route { animation: sfs-maze-hard-draw 6.7s linear both; }
+    .sfs-maze-hard.is-fading .sfs-maze-route { opacity: 0; transition: opacity 0.4s ease; }
+    @keyframes sfs-maze-hard-draw {
+      from { stroke-dashoffset: 2578; }
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+  <script>
+    (function () {
+      var svg = document.currentScript ? document.currentScript.closest("svg") : null;
+      if (!svg || !window.matchMedia) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      svg.classList.add("is-animated", "is-waiting");
+      function draw() {
+        svg.classList.remove("is-waiting", "is-fading", "is-drawing");
+        void svg.getBoundingClientRect();
+        svg.classList.add("is-drawing");
+      }
+      function replay() {
+        if (svg.classList.contains("is-waiting") || svg.classList.contains("is-fading")) return;
+        svg.classList.add("is-fading");
+        setTimeout(draw, 450);
+      }
+      if ("IntersectionObserver" in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) { if (e.isIntersecting) { io.disconnect(); draw(); } });
+        }, { threshold: 0.6 });
+        io.observe(svg);
+      } else {
+        draw();
+      }
+      svg.addEventListener("click", replay);
+      svg.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); replay(); }
+      });
+    })();
+  </script>
+  <path class="sfs-maze-route" d="M24.0 162.0 C31.8 162.0 54.5 162.2 67.5 162.2 C80.5 162.2 86.3 161.9 96.2 161.9 C106.0 161.9 117.7 167.1 122.2 162.3 C126.7 157.4 116.3 139.6 121.2 134.8 C126.2 130.0 140.1 135.7 149.8 135.6 C159.6 135.5 166.0 134.1 175.5 134.1 C185.0 134.1 197.5 130.9 202.8 135.7 C208.0 140.4 202.9 159.4 204.6 160.6 C206.2 161.9 215.7 146.1 212.0 142.7 C208.2 139.2 190.3 148.2 183.7 141.6 C177.2 135.0 181.9 112.4 175.7 106.0 C169.5 99.6 154.4 110.9 149.5 106.1 C144.6 101.3 143.9 84.1 148.5 79.4 C153.2 74.7 165.4 79.7 175.3 80.1 C185.3 80.4 193.7 81.1 203.8 81.2 C213.9 81.3 221.5 80.7 231.3 80.6 C241.2 80.5 248.8 80.9 258.5 80.7 C268.3 80.5 275.6 79.3 285.7 79.5 C295.8 79.7 304.6 81.4 314.6 81.7 C324.6 81.9 336.8 76.3 341.4 80.8 C345.9 85.3 338.9 105.8 339.8 106.6 C340.7 107.5 349.8 89.1 346.3 85.4 C342.8 81.8 330.0 86.3 320.4 86.4 C310.9 86.6 303.1 86.1 293.4 86.4 C283.7 86.6 273.0 84.1 266.5 87.8 C259.9 91.4 258.3 98.1 257.0 106.6 C255.8 115.0 264.2 129.6 259.8 134.6 C255.4 139.6 238.1 129.4 232.7 134.4 C227.4 139.4 230.1 152.6 230.0 162.4 C229.9 172.1 237.0 183.8 232.1 188.6 C227.2 193.3 212.5 188.5 202.8 188.8 C193.0 189.0 183.0 185.2 178.1 190.0 C173.2 194.9 171.1 211.3 175.6 215.8 C180.0 220.3 192.6 215.3 202.8 215.2 C213.0 215.2 230.7 214.2 232.2 215.6 C233.6 217.0 219.7 221.5 210.7 222.9 C201.8 224.4 193.6 224.9 182.3 223.8 C171.1 222.7 159.4 218.3 148.3 217.0 C137.3 215.6 125.9 221.4 121.0 216.3 C116.2 211.2 125.8 193.3 121.3 188.6 C116.9 183.9 106.1 189.9 96.3 190.2 C86.6 190.5 72.4 185.7 67.0 190.4 C61.7 195.1 61.6 211.5 66.8 216.2 C72.0 221.0 91.1 211.7 96.0 217.0 C100.8 222.2 89.1 240.6 93.7 245.3 C98.3 250.0 111.1 243.4 121.3 243.1 C131.5 242.7 149.0 242.2 150.3 243.3 C151.5 244.4 137.1 247.8 128.1 249.1 C119.1 250.4 111.3 251.5 100.2 250.6 C89.2 249.7 72.8 240.5 66.9 244.1 C60.9 247.8 66.9 261.2 67.3 271.0 C67.6 280.7 64.0 293.2 69.0 298.3 C74.0 303.4 85.7 299.6 95.1 299.5 C104.5 299.3 111.2 297.4 121.2 297.3 C131.2 297.3 145.7 304.2 150.7 299.3 C155.6 294.4 143.9 275.0 148.7 270.2 C153.5 265.3 167.7 272.0 177.4 272.4 C187.2 272.8 193.2 272.6 203.1 272.4 C213.0 272.3 222.5 271.9 232.4 271.4 C242.4 270.9 257.6 268.5 258.3 269.9 C259.0 271.3 245.2 277.5 236.4 279.0 C227.7 280.5 219.5 278.3 209.8 278.3 C200.1 278.2 188.4 284.9 182.5 278.6 C176.6 272.3 173.3 249.3 177.0 243.2 C180.7 237.1 193.5 244.5 203.0 244.5 C212.6 244.4 220.0 242.9 230.0 243.0 C240.0 243.1 248.6 244.8 258.7 244.9 C268.8 244.9 276.1 243.5 286.2 243.2 C296.2 242.8 304.8 242.9 314.3 242.9 C323.8 242.9 334.3 248.1 338.9 243.1 C343.6 238.1 340.1 225.0 340.2 215.2 C340.3 205.5 338.1 187.7 339.4 188.9 C340.6 190.1 345.8 210.7 347.1 222.0 C348.4 233.3 351.2 246.3 346.5 251.5 C341.8 256.7 330.7 251.0 321.1 250.8 C311.4 250.7 303.2 251.0 292.9 250.6 C282.7 250.3 270.5 254.9 264.0 249.0 C257.6 243.1 258.0 228.3 257.1 217.8 C256.2 207.3 259.1 200.6 259.1 190.7 C259.2 180.7 252.3 167.4 257.1 162.4 C261.9 157.4 275.8 162.5 285.8 162.7 C295.7 162.9 302.9 163.6 312.5 163.5 C322.1 163.4 326.2 162.4 339.1 162.1 C352.0 161.9 375.9 162.0 384.0 162.0" fill="none" stroke="var(--sfs-critical-color, #c63f3f)" stroke-width="6.0" stroke-linecap="round" stroke-linejoin="round" opacity="0.9" />
+  <path class="sfs-maze-walls" d="M54 12H354 M299.455 39.2727H354 M54 66.5455H81.2727 M108.545 66.5455H326.727 M81.2727 93.8182H108.545 M163.091 93.8182H244.909 M272.182 93.8182H326.727 M108.545 121.091H163.091 M190.364 121.091H217.636 M299.455 121.091H354 M54 148.364H108.545 M135.818 148.364H190.364 M244.909 148.364H354 M54 175.636H135.818 M163.091 175.636H217.636 M272.182 175.636H354 M81.2727 202.909H108.545 M135.818 202.909H163.091 M190.364 202.909H244.909 M299.455 202.909H326.727 M54 230.182H81.2727 M108.545 230.182H244.909 M272.182 230.182H326.727 M81.2727 257.455H163.091 M190.364 257.455H326.727 M81.2727 284.727H108.545 M163.091 284.727H244.909 M299.455 284.727H326.727 M54 312H354 M54 12V148.364 M54 175.636V312 M81.2727 39.2727V66.5455 M81.2727 121.091V148.364 M81.2727 257.455V284.727 M108.545 12V39.2727 M108.545 66.5455V93.8182 M108.545 121.091V148.364 M108.545 202.909V230.182 M135.818 39.2727V121.091 M135.818 148.364V202.909 M135.818 257.455V284.727 M163.091 12V39.2727 M163.091 175.636V202.909 M163.091 230.182V257.455 M163.091 284.727V312 M190.364 39.2727V66.5455 M190.364 93.8182V121.091 M217.636 12V39.2727 M217.636 121.091V175.636 M244.909 39.2727V66.5455 M244.909 93.8182V121.091 M244.909 148.364V230.182 M272.182 39.2727V66.5455 M272.182 93.8182V148.364 M272.182 175.636V230.182 M272.182 257.455V284.727 M299.455 257.455V312 M326.727 202.909V230.182 M354 12V148.364 M354 175.636V312" fill="none" stroke="var(--sfs-text, #212529)" stroke-width="3.8" stroke-linecap="square" />
+  <g fill="var(--sfs-text, #212529)" font-size="15" font-weight="700" font-family="inherit">
+    <text x="48" y="150.0" text-anchor="end">Start</text>
+    <text x="360" y="150.0" text-anchor="start">Finish</text>
+  </g>
+  <text x="204" y="344" text-anchor="middle" font-size="17" font-weight="600" fill="var(--sfs-text, #212529)">Hard</text>
+</svg>
