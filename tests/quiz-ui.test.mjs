@@ -74,12 +74,16 @@ test("a multiple-select question uses checkboxes and is right only for the exact
 
   // Pull the grading function out of the runtime and run it.
   const source = runtime.match(/function gradeQuestion\(question, response\) \{[\s\S]*?\n  \}\n/)[0];
+  const optionSource = runtime.match(/function optionCorrect\(option\) \{[\s\S]*?\n  \}\n/)[0];
+  const figureValues = {};
   const gradeQuestion = runInNewContext(`
     const QUESTION_TYPES = { multipleSelect: "multiple-select" };
     const questionType = (question) => question.type;
+    const normalizeText = (value) => String(value ?? "").trim();
+    ${optionSource}
     ${source}
     gradeQuestion;
-  `);
+  `, { window: { interactiveRuntime: { getValue: (path) => figureValues[path] } } });
   const question = {
     type: "multiple-select",
     options: [{ correct: true }, {}, { correct: true }],
@@ -89,6 +93,18 @@ test("a multiple-select question uses checkboxes and is right only for the exact
   assert.equal(gradeQuestion(question, ["0"]), false);
   assert.equal(gradeQuestion(question, ["0", "1", "2"]), false);
   assert.equal(gradeQuestion(question, []), false);
+
+  // Options graded by a figure follow whatever the figure says right now.
+  const fromFigure = {
+    type: "multiple-select",
+    options: [{ correctFrom: "plot.a" }, { correctFrom: "plot.b" }, { correctFrom: "plot.none" }],
+  };
+  Object.assign(figureValues, { "plot.a": true, "plot.b": false, "plot.none": false });
+  assert.equal(gradeQuestion(fromFigure, ["0"]), true);
+  assert.equal(gradeQuestion(fromFigure, ["0", "1"]), false);
+  Object.assign(figureValues, { "plot.a": false, "plot.none": true });
+  assert.equal(gradeQuestion(fromFigure, ["0"]), false);
+  assert.equal(gradeQuestion(fromFigure, ["2"]), true);
 
   // A wrong selection doesn't mark individual options as wrong.
   assert.match(
@@ -533,4 +549,21 @@ test("promptFrom mirrors the board's selection into the free-response prompt and
   quiz.applySelection(7);
 
   assert.equal(quiz.prompt2.textContent, "You chose the 7 intersection. What made you go for that?");
+});
+
+test("a multiple-select option can be graded against a figure's live value", () => {
+  assert.match(runtime, /function optionCorrect\(option\)/);
+  assert.match(runtime, /normalizeText\(option\.correctFrom\)/);
+  assert.match(runtime, /optionCorrect\(option\) === selected\.has\(index\)/);
+  assert.match(filter, /"is only available on multiple-select questions"/);
+  assert.match(filter, /"cannot be combined with correct"/);
+  // The listed answer follows the figure too.
+  assert.match(filter, /data-quiz-option="/);
+  assert.match(runtime, /function syncAnswerList\(\)/);
+});
+
+test("an answer that depends on a figure is cleared when the figure changes", () => {
+  assert.match(runtime, /const contextPath = question\.promptFrom \|\| question\.contextFrom;/);
+  assert.match(runtime, /responseSignature\(figureValue\(contextPath\)\)/);
+  assert.match(filter, /"cannot be combined with promptFrom"/);
 });

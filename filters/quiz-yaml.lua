@@ -336,6 +336,18 @@ local function validate_question(question, path, seen_ids)
     validation_error(path, "responseFrom and figure are only available on figure questions")
   end
 
+  if question.contextFrom ~= nil then
+    if is_blank(question.contextFrom) then
+      validation_error(path .. ".contextFrom", "must not be blank")
+    end
+    if question.promptFrom ~= nil then
+      validation_error(path .. ".contextFrom", "cannot be combined with promptFrom")
+    end
+    if question.type == "figure" then
+      validation_error(path .. ".contextFrom", "is not available on figure questions")
+    end
+  end
+
   if question.promptFrom ~= nil or question.promptTemplate ~= nil then
     if is_blank(question.promptFrom) or is_blank(question.promptTemplate) or is_blank(question.prompt) then
       validation_error(path .. ".promptFrom", "requires a value path, promptTemplate, and fallback prompt")
@@ -364,7 +376,19 @@ local function validate_question(question, path, seen_ids)
       if is_blank(option.text) then
         validation_error(option_path .. ".text", "is required")
       end
-      if option.correct == true then
+      if option.correctFrom ~= nil then
+        if question.type ~= "multiple-select" then
+          validation_error(option_path .. ".correctFrom", "is only available on multiple-select questions")
+        end
+        if is_blank(option.correctFrom) then
+          validation_error(option_path .. ".correctFrom", "must name a figure value, such as plot.showsInteraction")
+        end
+        if option.correct ~= nil then
+          validation_error(option_path .. ".correctFrom", "cannot be combined with correct")
+        end
+        -- Whether this option is right is only known in the browser.
+        correct_count = correct_count + 1
+      elseif option.correct == true then
         correct_count = correct_count + 1
       end
     end
@@ -472,6 +496,7 @@ local function add_question_html(question)
   question.answerFrom = field_text(question.answerFrom)
   question.responseFrom = field_text(question.responseFrom)
   question.promptFrom = field_text(question.promptFrom)
+  question.contextFrom = field_text(question.contextFrom)
   question.promptTemplate = field_text(question.promptTemplate)
   question.figureHtml = field_html(question.figure)
   question.figure = field_text(question.figure)
@@ -490,6 +515,7 @@ local function add_question_html(question)
     for _, option in ipairs(question.options) do
       option.textHtml = field_html(option.text)
       option.text = field_text(option.text)
+      option.correctFrom = field_text(option.correctFrom)
     end
   end
 
@@ -535,8 +561,13 @@ local function answer_html(question)
 
   if question.type == "multiple-select" and type(question.options) == "table" then
     local items = {}
-    for _, option in ipairs(question.options) do
-      if option.correct == true then
+    for index, option in ipairs(question.options) do
+      if option.correctFrom ~= nil then
+        -- The browser shows or hides this item to match the figure.
+        table.insert(items,
+          '<li data-quiz-option="' .. (index - 1) .. '" hidden>'
+          .. (option.textHtml or "") .. "</li>")
+      elseif option.correct == true then
         table.insert(items, "<li>" .. (option.textHtml or "") .. "</li>")
       end
     end

@@ -14,4 +14,67 @@ questions:
     explanation: >
       For example: caffeine (coffee vs decaf) by sleep (short vs full night),
       measuring reaction time.
+
+  - id: sketch_prediction
+    type: figure
+    responseFrom: designInteraction.sketch
+    prompt: >
+      Now sketch the result you'd predict. Call your first independent variable
+      Factor A and your second Factor B. Each dot is the mean of one of your
+      four groups. Drag each one up or down to roughly where you'd expect it to
+      be. Your graph is saved automatically.
+    figure: |
+      {{< interactive-figure designInteraction makeInteractionPlot options='{"means":{"a1b1":4,"a2b1":4,"a1b2":6,"a2b2":6},"draggable":true,"controls":false,"step":1,"valueLabels":true,"yTicks":"numeric","yLabel":"Your dependent variable","maxWidth":"34rem","ariaLabel":"Interaction plot of four group means that can each be dragged up or down: A1 and A2 on the x axis, with one line for B1 and one for B2."}' fallback="An interaction plot with four draggable group means: the B1 line starts flat at 4 and the B2 line flat at 6. Enable JavaScript to sketch your own result." >}}
+
+  - id: sketch_effects
+    type: multiple-select
+    contextFrom: designInteraction.sketch
+    prompt: >
+      Look at the graph you just made. Going only by where the four means are,
+      which of these does it show?
+    options:
+      - text: A main effect of Factor A
+        correctFrom: designInteraction.showsMainEffectA
+      - text: A main effect of Factor B
+        correctFrom: designInteraction.showsMainEffectB
+      - text: An interaction between Factor A and Factor B
+        correctFrom: designInteraction.showsInteraction
+      - text: None of these
+        correctFrom: designInteraction.showsNoEffects
+    hints:
+      - >
+        For Factor A, picture the point midway between the two dots above
+        $A_1$, and the point midway between the two dots above $A_2$. Is one
+        higher than the other?
+      - >
+        For Factor B, compare the middle of one line with the middle of the
+        other. For the interaction, check whether the lines are parallel.
+    explanation: >
+      On your graph, the marginal means for Factor A are
+      <span class="interactive-value" data-interactive-value="designInteraction.marginalA1" data-interactive-empty="...">...</span> at $A_1$ and
+      <span class="interactive-value" data-interactive-value="designInteraction.marginalA2" data-interactive-empty="...">...</span> at $A_2$. If those
+      differ, there's a main effect of Factor A. The marginal means for
+      Factor B are <span class="interactive-value" data-interactive-value="designInteraction.marginalB1" data-interactive-empty="...">...</span> at
+      $B_1$ and <span class="interactive-value" data-interactive-value="designInteraction.marginalB2" data-interactive-empty="...">...</span> at
+      $B_2$. If those differ, there's a main effect of Factor B. And going
+      from $A_1$ to $A_2$ changes the mean by
+      <span class="interactive-value" data-interactive-value="designInteraction.effectAatB1" data-interactive-empty="...">...</span> at $B_1$ and by
+      <span class="interactive-value" data-interactive-value="designInteraction.effectAatB2" data-interactive-empty="...">...</span> at $B_2$. If
+      those differ, the lines aren't parallel, and that's an interaction.
+      Remember that this is only the pattern in the means. Whether any of it
+      would be statistically significant depends on the variability within
+      the groups too.
+
+  - id: sketch_explain
+    type: free-response
+    checkLabel: Save response
+    prompt: >
+      In a sentence or two, put the pattern in your graph into words, in terms
+      of your own study. If your graph shows an interaction, try starting with
+      "The effect of ... depends on ...".
+    explanation: >
+      A good answer describes the pattern in terms of what was manipulated and
+      measured, not just "Factor A" and "Factor B". It says which main effects
+      it shows and in which direction, and whether the effect of one factor is
+      the same at both levels of the other.
 ```

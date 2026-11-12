@@ -19,7 +19,8 @@ interactive-scripts:
 
 <!-- PLAN (structural pass, 2026-11-05). This chapter's one new idea: the interaction, an effect that depends on another factor, as distinct from main effects. Everything else is Chapter 14 again with the between-groups variance split further.
 Skeleton: it depends → factorial designs → main effects and interactions → reading interaction graphs → partitioning → SS and df → steps 1-5 → reporting, interpreting → design your own. Conceptual first, procedure second, as in Chapter 14. Reading graphs moved up from the end for that reason; those paragraphs were written to follow the calculation, so check the joins.
-DATA CHANGED 2026-11-09 to maze × audience (invented numbers; the private structural-pass note has them). Factor A is the maze (easy, hard) and Factor B is the audience (alone, watched); scores are times in seconds, four kids per cell. Tables, figures, equations and worked numbers are swapped. Sentences that only needed names and numbers changed were changed in place; prose that only made sense for snacks is in CUT comments with a DRAFT note beside it. Search for DRAFT, FIX and FIGURE to find what still needs writing. -->
+DATA CHANGED 2026-11-09 to maze × audience (invented numbers; the private structural-pass note has them). Factor A is the maze (easy, hard) and Factor B is the audience (alone, watched); scores are times in seconds, four kids per cell. Tables, figures, equations and worked numbers are swapped. Sentences that only needed names and numbers changed were changed in place; prose that only made sense for snacks is in CUT comments with a DRAFT note beside it. Search for DRAFT, FIX and FIGURE to find what still needs writing.
+RESTRUCTURED 2026-11-11/12: reading graphs moved back down, after the worked analysis. Our results are two static graphs in "Reporting results"; "Interpreting the results" has one tutorial on reading other possible patterns (the static pattern graphs are cut). Marginal means get a table and a DRAFT in "Main effects and interactions". The sketch-your-own figure moved into the closing quiz. So the skeleton above now runs: … main effects and interactions (marginal means) → partitioning → SS and df → steps 1-5 → reporting → interpreting (graphs) → design your own. -->
 
 Here, we'll introduce the last variant of ANOVA that we'll deal with: the factorial ANOVA, meaning ANOVA used with research designs that have more than one independent variable. This enables us to see not just the effect of a single variable, but how two variables interact. It's slightly more complicated, both conceptually and mathematically, but it's based on the same idea of partitioning variance that we've used in the previous two chapters.
 
@@ -78,7 +79,21 @@ We can always find the number of individual groups by multiplying the factorial 
 
 ## Main effects and interactions
 
-<!-- FIX: marginal means are never defined, but the quizzes and the explorer rely on them. Define them here, pointing at the row and column means (tbl-factorial-means in Step 3 has them; it could move up to here). -->
+<!-- DRAFT (gap, 2026-11-11; Rob: this section should define and explain marginal means). The table below is new and live: the four cell means with the row and column means in its margins. Step 3's tbl-factorial-means keeps its own copy with each cell's SS. Beats for the prose, wherever it best fits around the two paragraphs below:
+     - A marginal mean is the mean of everyone at one level of a factor, ignoring the other factor. The name comes from where they sit: in the margins of the table.
+     - Maze: easy $(36 + 28)/2 = 32$, hard $(40 + 56)/2 = 48$. Audience: alone $(36 + 40)/2 = 38$, watched $(28 + 56)/2 = 42$. Each is the mean of eight kids. Averaging the two cell means only works because every cell has the same number of scores (the equal-n footnote in the SS section says the same).
+     - This is what "pool everyone together ... regardless of their level of Factor B" means in the paragraph below. A main effect is a difference between marginal means: 48 − 32 = 16 seconds for maze, 42 − 38 = 4 seconds for audience.
+     - The grand mean, 40, is in the corner; it's the mean of either pair of marginal means.
+     - What a marginal mean can hide leads into the interaction: watched kids were 4 seconds slower on average, but that's 8 seconds faster on the easy maze and 16 seconds slower on the hard one.
+     Later uses to tie back to this: $M_{\text{column}}$ and $M_{\text{row}}$ in the SS section are marginal means (it never says so); the explorer's Maze and Audience steps; the tutorial in "Interpreting the results", which draws them on the graph; quiz hints that say "marginal means". -->
+
+|  | Easy maze | Hard maze | Audience mean |
+|:--|:--:|:--:|:--:|
+| Alone | 36 | 40 | *38* |
+| Watched | 28 | 56 | *42* |
+| Maze mean | *32* | *48* | *40* |
+
+: Mean times (in seconds) for the four groups, with the marginal means for each factor in the last row and column, and the grand mean in the corner. {#tbl-factorial-marginal-means}
 
 <!-- FIX: "each of the four conditions compared to each of the others" is wrong: in a 2×2 the interaction is a single difference of differences. -->
 
@@ -90,136 +105,15 @@ And third, we're interested in the interaction between A and B. This is the whol
      Equivalent picture: the parallel lines you'd predict from the grand mean plus the two main effects, and how far the real means fall from that prediction. That's what "deviates from what we'd expect based on the main effects" means, and it needs saying concretely, since it recurs below.
      Spell out why "not parallel" is the test and "crossing" is not. -->
 
-<!-- FIGURE: additive prediction (plan §4.2). Extend makeInteractionPlot with marginal means, ghost parallel lines from the additive prediction, and residual arrows that square and sum to SS_interaction. -->
+<!-- FIGURE (built 2026-11-11): makeInteractionPlot now draws marginal means and the additive prediction (dashed parallel ghosts with a connector to each real mean). Both are steps of act-maze-interaction in "Interpreting the results", and fig-maze-results in "Reporting results" has the plain graphs. If this section wants the picture earlier, a static instance works here: options "marginals":"both" and/or "prediction":true. -->
 
 ### Grouping scores for analysis
 
 Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of Factor B, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
 
-## Reading interaction graphs
+<!-- PLAN (2026-11-11): "Reading interaction graphs" used to sit here. Rob moved it to follow the worked analysis: it's now the tutorial in "Interpreting the results". The paragraph below opened that section and still works as the lead-in to the equations; check the join. -->
 
 Before we get to the equations, a word about priorities: I'm much less interested in having you memorize all those different variations of variance equations than in making sure you understand the logic of factorial ANOVA on a more conceptual level and that you're able to interpret the pattern of findings that you might see.
-
-<!-- PLAN (2026-11-09): this tutorial and the paragraph after it moved here from Step 4, so the reader sees how an interaction graph is built, on the maze data, before the generic patterns ("Again, Factor A is represented as groups on the x-axis" below had nothing to refer back to). The heading is a placeholder. Step text and the paragraph had names and numbers swapped; the last sentence of each needed more than a swap, so check them. Lower times are faster here, which may need saying.
-     With the maze on the x-axis the lines cross. The DRAFT at the end of this section redraws the same four means with audience on the x-axis, where they don't. -->
-
-### Graphing the four means
-
-::::: {#act-maze-interaction .callout-tip .interactive}
-## Graphing the maze × audience results
-
-{{< interactive-figure
-  mazeInteraction
-  makeInteractionPlot
-  options='{
-    "means": {"a1b1": 36, "a2b1": 40, "a1b2": 28, "a2b2": 56},
-    "factorA": "Maze",
-    "factorB": "Audience",
-    "yLabel": "Mean time (seconds)",
-    "xTickLabels": ["Easy", "Hard"],
-    "seriesLabels": ["Alone", "Watched"],
-    "yDomain": [0, 60],
-    "yTicks": "numeric",
-    "showLines": false,
-    "valueLabels": true
-  }'
-  fallback="Line graph of the four maze-by-audience cell means: for kids working alone, times rise only slightly from the easy maze (36 seconds) to the hard maze (40); for kids being watched, they rise steeply from 28 to 56 seconds, so the two lines cross."
->}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Cell means" data-action='{"show-lines":false,"highlight":"none","animate":false}'}
-Each dot is the mean time of one of the four groups, placed above its maze condition.
-:::
-
-::: {.tutorial-step data-title="Join the dots" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
-Joining the dots by audience gives one line per level of the other factor: solid for kids working alone, dashed for kids being watched.
-:::
-
-::: {.tutorial-step data-title="Alone" data-action='{"show-lines":true,"highlight":"b1","animate":true}'}
-Working alone, kids took barely any longer on the hard maze than on the easy one — the line is nearly flat.
-:::
-
-::: {.tutorial-step data-title="Watched" data-action='{"show-lines":true,"highlight":"b2","animate":true}'}
-Being watched, kids took much longer on the hard maze than on the easy one — the line climbs steeply.
-:::
-
-::: {.tutorial-step data-title="Interaction" data-action='{"show-lines":true,"highlight":"none","animate":true}'}
-The lines are not parallel: the effect of maze difficulty depends on the audience. That is the interaction.
-:::
-::::
-
-:::::
-
-Each dot represents one of the four group means. The x-axis has the two levels of one factor and the levels of the other factor are represented by different lines, joining up the dots by the levels of that factor. For kids working alone, represented by the solid line, there was barely any difference between the easy maze and the hard maze. But that wasn't the case for kids being watched. For them, represented by the dashed line, the hard maze took much longer than the easy one. Put another way, it looks like being watched made kids faster on the easy maze and slower on the hard maze.
-
-<!-- FIX: "Generic" Factor A/B examples below need main-effect language checked against a sample result: flat lines describe sample means, and significance is a separate question. -->
-
-### No main effect of A, main effect of B, no interaction
-
-So here's a basic generic version of a two-by-two line graph. Again, Factor A is represented as groups on the x-axis and Factor B is represented as the different lines joining up the dots, which represent each of the four group means. But for this example, we just have two lines and they're both parallel to the x-axis.
-
-{{< interactive-figure
-  interactionPatternFlat
-  makeInteractionPlot
-  options='{"pattern": "flat-parallel", "controls": false, "maxWidth": "34rem"}'
-  fallback="Interaction plot with two flat parallel lines: no main effect of Factor A, a main effect of Factor B, and no interaction."
->}}
-
-{{< include quizzes/16-factorial-anova-interpreting-results-1.qmd >}}
-
-Let's think through how to interpret this basic pattern of findings. Think about the main effects first. Is there a main effect of Factor A? If there was, we would see that in the slope of the lines. If scores generally increased or decreased between the two levels of Factor A, the lines would slant up or down. Here they're completely flat, which is what we'd see with no main effect of Factor A — no difference in how people scored in level one of Factor A as compared to level two of Factor A overall. Is there a main effect of Factor B? We would see that in the distance between the lines. Here there's a big gap. Scores were generally higher in level two of Factor B as compared to level one of Factor B. So that indicates a main effect of Factor B. The interaction is evident in whether or not the lines are parallel. Here they are. This means that the main effect of Factor A is the same at all levels of Factor B and vice versa.
-
-So again, here there is no main effect of Factor A. There is a main effect of Factor B — level two scores are higher than level one scores overall. And that is equally true at both levels of Factor A. That's what we mean by not having an interaction.
-
-### Main effects of both A and B, no interaction
-
-Here's another example. Now the lines slope up to the right.
-
-{{< interactive-figure
-  interactionPatternSloped
-  makeInteractionPlot
-  options='{"pattern": "sloped-parallel", "controls": false, "maxWidth": "34rem"}'
-  fallback="Interaction plot with two parallel lines sloping up from A1 to A2: main effects of both factors, but no interaction."
->}}
-
-So see if you think there are significant main effects of Factor A, Factor B, and an interaction.
-
-Again, here, the slope of the line suggests that there is a main effect of Factor A — scores are higher across the board in level two of Factor A than in level one. And like the previous graph, there is still a wide gap between the lines, suggesting a main effect of Factor B — scores are generally higher in level two of Factor B than level one. But there's still no interaction. The lines are parallel, meaning that the main effect of A is the same at both levels of Factor B and vice versa.
-
-### Crossover interaction
-
-None of those previous examples showed an interaction. This is what an interaction might look like. Again, the interaction is revealed by lines which are not parallel to one another. This is called a crossover interaction because, as you can see, the lines cross over. And this is where interpreting the findings gets a little trickier.
-
-{{< interactive-figure
-  interactionPatternCrossover
-  makeInteractionPlot
-  options='{"pattern": "crossover", "controls": false, "maxWidth": "34rem"}'
-  fallback="Interaction plot with two lines crossing in an X shape: no main effect of either factor, but a crossover interaction."
->}}
-
-{{< include quizzes/16-factorial-anova-interpreting-results-3.qmd >}}
-
-Here there would be no main effect of Factor A because the average score for level one and level two would be about the same. Likewise, there would be no main effect of Factor B because, again, the average scores would be about the same between the two levels of Factor B. But the lack of main effects clearly doesn't tell the whole story, because there is this interesting crossover interaction going on.
-
-For level one of Factor A, scores are higher if you were in level two of Factor B than level one. But in level two of Factor A, the pattern was reversed. Scores were higher in level one of Factor B than in level two.
-
-### Another interaction example
-
-Here's another example of an interaction.
-
-{{< interactive-figure
-  interactionPatternOneFlat
-  makeInteractionPlot
-  options='{"pattern": "one-flat-one-sloped", "controls": false, "maxWidth": "34rem"}'
-  fallback="Interaction plot with one flat line and one line sloping up: Factor A only affects scores at level two of Factor B — an interaction."
->}}
-
-Here Factor A had no effect on people in level one of Factor B, but it did have an effect on people in level two of Factor B. It's important that you understand how to read these kinds of graphs and interpret the overall pattern of results from a factorial ANOVA.
-
-{{< include quizzes/16-factorial-anova-interpreting-results-2.qmd >}}
-
-<!-- DRAFT (gap; wards off "interaction = lines crossing"): same four means, two graphs. Any dataset with one large main effect will do: with the task on the x-axis the lines cross; with audience on the x-axis the same means don't cross. The interaction hasn't changed; only our choice of axis has. Then the takeaway: crossing is one way of being non-parallel. Lines that don't cross can still show an interaction (the example just above), but parallel lines never do.
-     FIGURE: two makeInteractionPlot instances side by side, with means passed in, or one with a swap-axes tutorial step. -->
 
 ## Partitioning variance
 
@@ -251,8 +145,6 @@ $$
 ## Where each effect goes
 
 {{< interactive-figure factorialAnovaExplorer makeAnovaVariabilityExplorer options='{"stage":"populations","calculations":false,"controlsOpen":false,"factors":[{"name":"Maze","levels":["Easy","Hard"]},{"name":"Audience","levels":["Alone","Watched"]}],"groups":[{"levels":[0,0],"values":[37,31,42,34]},{"levels":[1,0],"values":[41,34,45,40]},{"levels":[0,1],"values":[28,32,21,31]},{"levels":[1,1],"values":[53,61,50,60]}],"axisLabel":"Time (seconds)","xMin":15,"xMax":65,"populationSd":4.9}' fallback="Interactive diagram of the maze-by-audience times in four groups. Total, within-groups and between-groups sums of squares are built as in Chapter 14. The scores are then regrouped by maze and by audience, and each factor's squared deviations pour into the bottom of the between-groups layer. What's left of that layer is filled by each group mean's squared distance from the mean the two factors alone predict: the interaction. Finally the maze, audience and interaction mean squares each sit over the within-groups mean square as three F ratios." >}}
-
-
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="scores" data-major-title="Scores" data-title="Scores" data-action='{"stage":"populations","phase":"observe","animate":false}'}
@@ -646,12 +538,7 @@ The three observed $F$ ratios against the null $F$ distribution with $df = 1$ an
 
 And what that means is that there was a significant difference between the two maze conditions overall. Kids took longer on the hard maze, in general, than on the easy maze. But there was no difference between the two audience conditions in general. On average, kids didn't do any better or worse being watched than working alone. But we have a significant interaction, and a significant interaction means that the main effects don't mean too much by themselves, because the interaction tells us that the effect of one factor depends on the level of the other.
 
-#### Visualizing the results
-
-<!-- FIX (2026-11-09): the graph tutorial that followed this paragraph moved up to "Reading interaction graphs". The second sentence was about the banana's main effect; it now makes the matching point about audience, which has no significant main effect, so the logic runs the other way round. Check it. The last sentence now points back to the earlier graph.
-     FIGURE: this could be the place for the same four means redrawn with audience on the x-axis (see the DRAFT at the end of "Reading interaction graphs"), where the easy line falls and the hard line rises. -->
-
-This is what I meant by the interaction quantifying patterns of cell means that deviate from what you'd expect based on the main effects. The lack of a main effect of audience suggests that being watched doesn't generally matter. But the interaction tells us it isn't quite so simple. Visualizing the results in a line graph, as in @act-maze-interaction, shows the trends more clearly.
+<!-- PLAN (2026-11-11): "Visualizing the results" moved from here to "Reporting results", with the graphs (fig-maze-results). A forward pointer might be wanted here. -->
 
 ### Step 5: Estimate the effect and follow up
 
@@ -691,7 +578,143 @@ And lastly, we report the results. As always, this is a fairly dry, technical st
 
 > To examine the influence of maze difficulty and an audience on performance, a 2-factor ANOVA was conducted with completion times as the dependent variable and Maze Difficulty and Audience as between-participants independent variables. There was no significant main effect of Audience ($F(1, 12) = 2.67$, $p > .05$). There was, however, a significant main effect of Maze Difficulty ($F(1, 12) = 42.67$, $p < .05$, $\eta^2_p = .78$); overall, times were longer on the hard maze. Moreover, there was a significant interaction between Maze Difficulty and Audience ($F(1, 12) = 24.00$, $p < .05$, $\eta^2_p = .67$); being watched went with faster times on the easy maze but slower times on the hard maze.
 
+<!-- PLAN (2026-11-12, Rob): graphing *these* results is part of reporting them, so it's two static figures here. Reading *other* possible patterns is the tutorial in "Interpreting the results". The two paragraphs around the figure came from Step 4's "Visualizing the results" and the old graph section; the first one's cross-reference now points at the figure. Check the joins, and whether they sit better before the written report than after it. "Lower times are faster" may still need saying.
+     DRAFT (gap) for the second graph, which is new: same four means, audience on the x-axis. The easy line falls from 36 to 28 and the hard line rises from 40 to 56, so the lines don't cross here, though they do in the first graph. Nothing about the data changed, only which factor we put on the axis. Crossing is one way of being non-parallel; not parallel is what shows an interaction. -->
+
+<!-- FIX (2026-11-09): the second sentence was about the banana's main effect; it now makes the matching point about audience, which has no significant main effect, so the logic runs the other way round. Check it. -->
+
+This is what I meant by the interaction quantifying patterns of cell means that deviate from what you'd expect based on the main effects. The lack of a main effect of audience suggests that being watched doesn't generally matter. But the interaction tells us it isn't quite so simple. Visualizing the results in a line graph, as in @fig-maze-results, shows the trends more clearly.
+
+:::: {#fig-maze-results}
+::: {.sfs-figure-row .sfs-figure-row-wide .sfs-maze-results-row}
+{{< interactive-figure mazeResultsByMaze makeInteractionPlot options='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"factorA":"Maze","factorB":"Audience","yLabel":"Mean time (seconds)","xTickLabels":["Easy","Hard"],"seriesLabels":["Alone","Watched"],"yDomain":[0,60],"yTicks":"numeric","valueLabels":true,"controls":false,"swapAxes":false,"width":440}' fallback="Line graph of the four mean times with maze on the x-axis and one line per audience condition. Alone: 36 seconds on the easy maze, 40 on the hard maze. Watched: 28 on the easy maze, 56 on the hard maze. The two lines cross." >}}
+
+{{< interactive-figure mazeResultsByAudience makeInteractionPlot options='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"factorA":"Maze","factorB":"Audience","yLabel":"Mean time (seconds)","xTickLabels":["Easy","Hard"],"seriesLabels":["Alone","Watched"],"yDomain":[0,60],"yTicks":"numeric","valueLabels":true,"controls":false,"swapAxes":true,"width":440}' fallback="The same four means with audience on the x-axis and one line per maze. Easy maze: 36 seconds alone, 28 watched. Hard maze: 40 seconds alone, 56 watched. The lines do not cross, but they are not parallel." >}}
+:::
+[ROB: caption. The four mean times, graphed two ways: with maze on the x-axis and a line for each audience condition, and with audience on the x-axis and a line for each maze.]
+::::
+
+Each dot represents one of the four group means. The x-axis has the two levels of one factor and the levels of the other factor are represented by different lines, joining up the dots by the levels of that factor. For kids working alone, represented by the solid line, there was barely any difference between the easy maze and the hard maze. But that wasn't the case for kids being watched. For them, represented by the dashed line, the hard maze took much longer than the easy one. Put another way, it looks like being watched made kids faster on the easy maze and slower on the hard maze.
+
 ### Interpreting the results
+
+<!-- PLAN (2026-11-12, Rob): this tutorial is about how to read different patterns a two-by-two study could produce, not about graphing our results (fig-maze-results does that). It starts from our result as the reader last saw it, shows where each effect can be read off the graph (marginal means for the two main effects, the additive prediction for the interaction), then swaps in six made-up results on the same axes: no effects, each main effect alone, both, an interaction without crossing, and a pure crossover. Step text is Rob's; each [ROB: …] says what the step shows.
+     An introducing sentence or two is wanted here, framing it as "what else might we have found, and how would we tell?".
+     The "what if" steps describe patterns in sample means. Whether a slope or a gap is significant is a separate question, and the step text should say so once.
+     The generic Factor A / Factor B prose that went with the old static pattern graphs is in the second CUT comment below. -->
+
+::::: {#act-maze-interaction .callout-tip .interactive}
+## What other results would look like
+
+{{< interactive-figure
+  mazeInteraction
+  makeInteractionPlot
+  options='{
+    "means": {"a1b1": 36, "a2b1": 40, "a1b2": 28, "a2b2": 56},
+    "factorA": "Maze",
+    "factorB": "Audience",
+    "yLabel": "Mean time (seconds)",
+    "xTickLabels": ["Easy", "Hard"],
+    "seriesLabels": ["Alone", "Watched"],
+    "yDomain": [0, 60],
+    "yTicks": "numeric",
+        "valueLabels": true,
+    "step": 1
+  }'
+  fallback="Line graph of the four maze-by-audience cell means (36 and 40 seconds for kids working alone on the easy and hard mazes; 28 and 56 for kids being watched). Steps mark the marginal means (32 and 48 seconds for the easy and hard mazes; 38 and 42 for alone and watched) and the parallel lines the two main effects alone would predict, then replace the means with made-up results: no effects, a main effect of maze only, a main effect of audience only, both main effects with parallel lines, an interaction where the lines fan out without crossing, and a crossover with no main effects."
+>}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Our result" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"none","prediction":false,"animate":false}'}
+[ROB: start from the graph the reader has just seen in fig-maze-results: the real means, maze on the x-axis. The next three steps show where each of the three effects can be read off it; after that the means change to made-up results.]
+:::
+
+::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Maze" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"a","prediction":false,"animate":true}'}
+[ROB: where the main effect of maze is on the graph. A hollow diamond sits midway between the two dots above each maze: the marginal means, 32 and 48 (tbl-factorial-marginal-means). The dotted line joining them slopes up 16 seconds. A slope in that line is a main effect of the x-axis factor.]
+:::
+
+::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Audience" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"b","prediction":false,"animate":true}'}
+[ROB: where the main effect of audience is. A hollow marker at the middle of each line: the marginal means for alone (38) and watched (42). The gap between them is only 4 seconds, which is why the audience F was small even though being watched plainly mattered.]
+:::
+
+::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Prediction" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"none","prediction":true,"animate":true}'}
+[ROB: the graph the two main effects alone would predict: dashed parallel lines through 30 and 46 (alone), 34 and 50 (watched), as in tbl-factorial-predictions and the explorer's Prediction step. Every real mean is 6 seconds off its ghost. Parallel lines mean no interaction; distance from parallel is the interaction.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Nothing" data-action='{"means":{"a1b1":40,"a2b1":40,"a1b2":40,"a2b2":40},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: from here on the means are made up, to show what other results would look like. First: nothing going on. All four means the same, so both lines lie flat on top of each other. No slope in the diamonds' line, no gap between the lines' midpoints, nothing off parallel. In real data they'd never be exactly equal; that's what the F tests are for.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Maze only" data-action='{"means":{"a1b1":32,"a2b1":48,"a1b2":32,"a2b2":48},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: a main effect of maze and nothing else. Both lines climb together, one on top of the other. The diamonds' line slopes; the lines' midpoints coincide.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Audience only" data-action='{"means":{"a1b1":34,"a2b1":34,"a1b2":46,"a2b2":46},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: a main effect of audience and nothing else. Two flat lines with a gap. No slope, so no maze effect; the gap is the same at both mazes, so no interaction.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Both" data-action='{"means":{"a1b1":26,"a2b1":42,"a1b2":38,"a2b2":54},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: both main effects, no interaction. Sloped and separated, but parallel: being watched adds the same 12 seconds on either maze.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Fanning out" data-action='{"means":{"a1b1":30,"a2b1":34,"a1b2":30,"a2b2":54},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: an interaction where the lines never cross. The audience makes no difference on the easy maze and a big one on the hard maze. Both main effects are there too. Not parallel is the test; crossing isn't.]
+:::
+
+::: {.tutorial-step data-major="whatif" data-major-title="What if?" data-title="Crossover" data-action='{"means":{"a1b1":30,"a2b1":50,"a1b2":50,"a2b2":30},"show-lines":true,"highlight":"none","marginals":"both","prediction":false,"animate":true}'}
+[ROB: an interaction and nothing else. The lines form an X. The diamonds' line is flat and the two midpoints coincide, so neither main effect, yet each factor matters a great deal: its effect reverses depending on the other.]
+:::
+::::
+
+:::::
+
+<!-- CUT (2026-11-12; the five steps that built the results graph up, now that the results are a static figure). Kept verbatim.
+
+Each dot is the mean time of one of the four groups, placed above its maze condition.
+
+Joining the dots by audience gives one line per level of the other factor: solid for kids working alone, dashed for kids being watched.
+
+Working alone, kids took barely any longer on the hard maze than on the easy one — the line is nearly flat.
+
+Being watched, kids took much longer on the hard maze than on the easy one — the line climbs steeply.
+
+The lines are not parallel: the effect of maze difficulty depends on the audience. That is the interaction.
+-->
+
+<!-- CUT (2026-11-11; the generic Factor A / Factor B walk-through that went with the four static graphs, replaced by the "What if?" steps above). Kept verbatim, minus the figures and quizzes.
+
+### No main effect of A, main effect of B, no interaction
+
+So here's a basic generic version of a two-by-two line graph. Again, Factor A is represented as groups on the x-axis and Factor B is represented as the different lines joining up the dots, which represent each of the four group means. But for this example, we just have two lines and they're both parallel to the x-axis.
+
+Let's think through how to interpret this basic pattern of findings. Think about the main effects first. Is there a main effect of Factor A? If there was, we would see that in the slope of the lines. If scores generally increased or decreased between the two levels of Factor A, the lines would slant up or down. Here they're completely flat, which is what we'd see with no main effect of Factor A — no difference in how people scored in level one of Factor A as compared to level two of Factor A overall. Is there a main effect of Factor B? We would see that in the distance between the lines. Here there's a big gap. Scores were generally higher in level two of Factor B as compared to level one of Factor B. So that indicates a main effect of Factor B. The interaction is evident in whether or not the lines are parallel. Here they are. This means that the main effect of Factor A is the same at all levels of Factor B and vice versa.
+
+So again, here there is no main effect of Factor A. There is a main effect of Factor B — level two scores are higher than level one scores overall. And that is equally true at both levels of Factor A. That's what we mean by not having an interaction.
+
+### Main effects of both A and B, no interaction
+
+Here's another example. Now the lines slope up to the right.
+
+So see if you think there are significant main effects of Factor A, Factor B, and an interaction.
+
+Again, here, the slope of the line suggests that there is a main effect of Factor A — scores are higher across the board in level two of Factor A than in level one. And like the previous graph, there is still a wide gap between the lines, suggesting a main effect of Factor B — scores are generally higher in level two of Factor B than level one. But there's still no interaction. The lines are parallel, meaning that the main effect of A is the same at both levels of Factor B and vice versa.
+
+### Crossover interaction
+
+None of those previous examples showed an interaction. This is what an interaction might look like. Again, the interaction is revealed by lines which are not parallel to one another. This is called a crossover interaction because, as you can see, the lines cross over. And this is where interpreting the findings gets a little trickier.
+
+Here there would be no main effect of Factor A because the average score for level one and level two would be about the same. Likewise, there would be no main effect of Factor B because, again, the average scores would be about the same between the two levels of Factor B. But the lack of main effects clearly doesn't tell the whole story, because there is this interesting crossover interaction going on.
+
+For level one of Factor A, scores are higher if you were in level two of Factor B than level one. But in level two of Factor A, the pattern was reversed. Scores were higher in level one of Factor B than in level two.
+
+### Another interaction example
+
+Here's another example of an interaction.
+
+Here Factor A had no effect on people in level one of Factor B, but it did have an effect on people in level two of Factor B. It's important that you understand how to read these kinds of graphs and interpret the overall pattern of results from a factorial ANOVA.
+-->
+
+{{< include quizzes/16-factorial-anova-interpreting-results-1.qmd >}}
 
 <!-- DRAFT (gap): what the pattern means for the question; random assignment and causal language if both factors were manipulated. End on the body of evidence as Chapters 12 and 13 do: Zajonc et al. (1969), then the preregistered replication (Halfmann et al., 2020), which found main effects of task and audience but no interaction. Fisher's factorial argument (plan §4.4) fits here too; verify the quote first. -->
 
@@ -703,41 +726,7 @@ And lastly, we report the results. As always, this is a fairly dry, technical st
 
 Again, it's a complicated thing. And maybe it doesn't help that much talking about it in such abstract terms, since Factor A and Factor B don't intuitively mean anything. So I'd like you to come up with an example of your own, or to describe a study you've learned about somewhere else that fits this two-by-two design. It should be a design with two independent variables, each with two levels, and one dependent variable — the measure for which scores are recorded and compared across groups. Anytime I'm thinking about this kind of design, I literally just sketch a little graph like the ones earlier in this chapter with four dots, one for each group's average score — just whether I think it's going to be relatively high or low or in the middle — and then join up the dots to represent the levels of the factors.
 
-::::: {#act-design-interaction .callout-tip .interactive}
-## Sketch your own two-by-two result
-
-{{< interactive-figure
-  designInteraction
-  makeInteractionPlot
-  options='{
-    "pattern": "flat-parallel",
-    "draggable": true,
-    "valueLabels": true,
-    "yTicks": "numeric",
-    "controlsOpen": true
-  }'
-  fallback="Draggable interaction plot for sketching your own pattern of four cell means."
->}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Drag the dots" data-action='{"means":{"a1b1":3,"a2b1":3,"a1b2":7,"a2b2":7},"animate":false}'}
-Each dot is a cell mean — drag it up or down (or type exact values in the controls). Watch the effect readouts as the lines move.
-:::
-
-::: {.tutorial-step data-title="Main effects" data-action='{"means":{"a1b1":3,"a2b1":6,"a1b2":5,"a2b2":8},"animate":true}'}
-Sloped parallel lines: main effects of both factors, but no interaction — the Interaction readout stays at zero.
-:::
-
-::: {.tutorial-step data-title="Interaction" data-action='{"means":{"a1b1":2,"a2b1":8,"a1b2":8,"a2b2":2},"animate":true}'}
-Now the lines cross. Both main effects vanish, yet the interaction is as big as it gets.
-:::
-
-::: {.tutorial-step data-title="Your turn" data-action='{"means":{"a1b1":5,"a2b1":5,"a1b2":5,"a2b2":5},"animate":true}'}
-Sketch the pattern you'd predict for your own study: place each group's mean roughly where you expect it, then join up the dots mentally and ask — are the lines parallel?
-:::
-::::
-
-:::::
+<!-- PLAN (2026-11-11): the "Sketch your own two-by-two result" tutorial is now part of the quiz below. The reader names a design, drags the four means to the result they'd predict, says which effects their graph shows (checked against the graph they made), then explains the pattern in words. The quiz wording is a first draft for Rob to rewrite. -->
 
 {{< include quizzes/16-factorial-anova-design.qmd >}}
 

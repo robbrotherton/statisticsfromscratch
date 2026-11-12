@@ -185,6 +185,16 @@
     return String(answer);
   }
 
+  // A multiple-select option is right either by fiat (correct: true) or
+  // because a figure on the page says so (correctFrom: figureId.path), so that
+  // a reader can be asked about a graph they made themselves.
+  function optionCorrect(option) {
+    const path = normalizeText(option.correctFrom);
+    if (!path) return option.correct === true;
+    const runtime = window.interactiveRuntime;
+    return Boolean(runtime && typeof runtime.getValue === "function" && runtime.getValue(path));
+  }
+
   function gradeQuestion(question, response) {
     const type = questionType(question);
 
@@ -199,7 +209,7 @@
       // Right only when the selection is exactly the set of correct options.
       const selected = new Set((Array.isArray(response) ? response : []).map(Number));
       return (question.options || []).every(
-        (option, index) => (option.correct === true) === selected.has(index)
+        (option, index) => optionCorrect(option) === selected.has(index)
       );
     }
 
@@ -463,6 +473,9 @@
       question.diagnostics.length > 0;
     const responseKey = `${quiz.id}:${question.id}`;
     const isFigure = questionType(question) === QUESTION_TYPES.figure;
+    // A figure value the answer depends on. When it changes, a checked or
+    // saved answer no longer applies and is cleared.
+    const contextPath = question.promptFrom || question.contextFrom;
     let syncingFigure = false;
     let lastGraded = null;
     let hintsRevealed = 0;
@@ -517,7 +530,17 @@
       }
     }
 
+    // Options graded against a figure are listed in the answer only while the
+    // figure says they are right.
+    function syncAnswerList() {
+      explanationPanel.querySelectorAll("[data-quiz-option]").forEach((entry) => {
+        const option = (question.options || [])[Number(entry.dataset.quizOption)];
+        entry.hidden = !(option && optionCorrect(option));
+      });
+    }
+
     function openExplanation() {
+      syncAnswerList();
       explanationPanel.hidden = false;
       exposeRichContent(explanationPanel);
       updateRevealButton();
@@ -627,8 +650,8 @@
         return;
       }
       control.setValue(saved.response);
-      if (question.promptFrom &&
-          responseSignature(saved.context) !== responseSignature(figureValue(question.promptFrom))) {
+      if (contextPath &&
+          responseSignature(saved.context) !== responseSignature(figureValue(contextPath))) {
         clearLatestResponse(responseKey);
         return;
       }
@@ -711,7 +734,7 @@
         response,
         correct: isCorrect,
         answer: plainAnswer(question),
-        ...(question.promptFrom ? { context: figureValue(question.promptFrom) } : {}),
+        ...(contextPath ? { context: figureValue(contextPath) } : {}),
       });
     });
 
@@ -783,12 +806,12 @@
       });
     }
 
-    if (question.promptFrom) {
+    if (contextPath) {
       const prompt = item.querySelector(".quiz-prompt");
       const fallback = prompt.innerHTML;
-      let previousContext = responseSignature(figureValue(question.promptFrom));
+      let previousContext = responseSignature(figureValue(contextPath));
       function updatePrompt() {
-        const value = figureValue(question.promptFrom);
+        const value = figureValue(contextPath);
         const signature = responseSignature(value);
         if (signature !== previousContext) {
           // Preserve the draft, but a saved explanation of an earlier choice
@@ -797,6 +820,7 @@
           clearLatestResponse(responseKey);
           previousContext = signature;
         }
+        if (!question.promptFrom) return;
         if (responsePresent(value)) {
           const label = Array.isArray(value) ? value.join("–") : String(value);
           const text = question.promptTemplate.split("{value}").join(label);
@@ -805,7 +829,7 @@
           prompt.innerHTML = fallback;
         }
       }
-      prompt.setAttribute("aria-live", "polite");
+      if (question.promptFrom) prompt.setAttribute("aria-live", "polite");
       document.addEventListener("input", updatePrompt);
       document.addEventListener("sfs-interactive:ready", updatePrompt);
       updatePrompt();
