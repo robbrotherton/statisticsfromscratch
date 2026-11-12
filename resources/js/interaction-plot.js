@@ -48,6 +48,46 @@ ipNormalizePattern = (value) => {
   return null;
 }
 
+// Everything the four cell means say about the design, from means given as
+// [[a1b1, a2b1], [a1b2, a2b2]]. The marginal mean of a level is the mean of
+// its two cells (equal cell sizes). The additive prediction for a cell is
+// its two marginal means minus the grand mean. "Shows" flags describe the
+// pattern in the means only; they say nothing about significance.
+ipEffects = (means, epsilon = 1e-6) => {
+  const m = means;
+  const marginalA1 = (m[0][0] + m[1][0]) / 2;
+  const marginalA2 = (m[0][1] + m[1][1]) / 2;
+  const marginalB1 = (m[0][0] + m[0][1]) / 2;
+  const marginalB2 = (m[1][0] + m[1][1]) / 2;
+  const grandMean = (marginalA1 + marginalA2) / 2;
+  const mainEffectA = marginalA2 - marginalA1;
+  const mainEffectB = marginalB2 - marginalB1;
+  const effectAatB1 = m[0][1] - m[0][0];
+  const effectAatB2 = m[1][1] - m[1][0];
+  const interaction = effectAatB1 - effectAatB2;
+  const marginalA = [marginalA1, marginalA2];
+  const marginalB = [marginalB1, marginalB2];
+  const predictions = marginalB.map((b) => marginalA.map((a) => a + b - grandMean));
+  const showsMainEffectA = Math.abs(mainEffectA) > epsilon;
+  const showsMainEffectB = Math.abs(mainEffectB) > epsilon;
+  const showsInteraction = Math.abs(interaction) > epsilon;
+  return {
+    marginalA1, marginalA2, marginalB1, marginalB2, grandMean,
+    mainEffectA, mainEffectB, effectAatB1, effectAatB2, interaction, predictions,
+    parallel: !showsInteraction,
+    showsMainEffectA, showsMainEffectB, showsInteraction,
+    showsNoEffects: !showsMainEffectA && !showsMainEffectB && !showsInteraction
+  };
+}
+
+ipNormalizeMarginals = (value) => {
+  const key = ipKey(value);
+  if (["a", "factor-a", "x"].includes(key)) return "a";
+  if (["b", "factor-b", "lines"].includes(key)) return "b";
+  if (["both", "all", "true", "1", "on", "show"].includes(key)) return "both";
+  return "none";
+}
+
 ipEnsureStyles = () => {
   if (document.getElementById("interaction-plot-styles")) return;
 
@@ -128,6 +168,93 @@ ipEnsureStyles = () => {
     .interaction-plot .ip-series,
     .interaction-plot .ip-legend-item {
       transition: opacity 300ms ease;
+    }
+
+    /* Overlays never take the pointer from the draggable means below them. */
+    .interaction-plot .ip-overlay {
+      pointer-events: none;
+    }
+
+    /* Marginal means are stand-ins for two cells each, so they are hollow. */
+    .interaction-plot .ip-marginal-mark {
+      fill: var(--sfs-bg, #fff);
+      stroke: var(--ip-marginal-color, var(--graph-text-color, currentColor));
+      stroke-width: 2;
+    }
+
+    .interaction-plot .ip-marginal-mark[data-series="0"] {
+      --ip-marginal-color: var(--graph-series-1, var(--graph-line-color, #0072b2));
+    }
+
+    .interaction-plot .ip-marginal-mark[data-series="1"] {
+      --ip-marginal-color: var(--graph-series-2, #e69f00);
+    }
+
+    .interaction-plot .ip-marginal-link {
+      stroke: var(--graph-text-color, currentColor);
+      stroke-width: 1.4;
+      stroke-dasharray: 2 4;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0.8;
+    }
+
+    .interaction-plot .ip-marginal-label {
+      fill: var(--graph-text-color, currentColor);
+      font-family: var(--bs-body-font-family, system-ui, sans-serif);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      font-style: italic;
+      user-select: none;
+      /* A halo in the page color keeps the number readable over a line. */
+      paint-order: stroke;
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
+    /* The additive prediction: where the two main effects alone would put
+       each cell mean. Dashed, hollow ghosts in the series color. */
+    .interaction-plot .ip-prediction-line,
+    .interaction-plot .ip-prediction-dot,
+    .interaction-plot .ip-prediction-gap {
+      fill: none;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+    }
+
+    .interaction-plot .ip-prediction-line,
+    .interaction-plot .ip-prediction-dot {
+      stroke: var(--ip-series-color, currentColor);
+      stroke-dasharray: 2 4;
+      opacity: 0.75;
+    }
+
+    .interaction-plot .ip-prediction-dot {
+      fill: var(--sfs-bg, #fff);
+    }
+
+    .interaction-plot .ip-prediction-gap {
+      stroke: var(--graph-text-color, currentColor);
+      opacity: 0.7;
+    }
+
+    .interaction-plot [data-prediction-series="0"] {
+      --ip-series-color: var(--graph-series-1, var(--graph-line-color, #0072b2));
+    }
+
+    .interaction-plot [data-prediction-series="1"] {
+      --ip-series-color: var(--graph-series-2, #e69f00);
+    }
+
+    /* Redrawing with the other factor on the x-axis fades out and back in,
+       so no mean appears to change value. */
+    .interaction-plot .ip-swap-fade {
+      transition: opacity 240ms ease;
+    }
+
+    .interaction-plot.is-swapping .ip-swap-fade {
+      opacity: 0;
     }
 
     .interaction-plot .ip-series.is-dimmed,
@@ -216,7 +343,8 @@ ipEnsureStyles = () => {
     @media (prefers-reduced-motion: reduce) {
       .interaction-plot .ip-series,
       .interaction-plot .ip-legend-item,
-      .interaction-plot .ip-ring {
+      .interaction-plot .ip-ring,
+      .interaction-plot .ip-swap-fade {
         transition: none !important;
       }
     }
@@ -285,10 +413,17 @@ makeInteractionPlot = function(opts) {
     return clampMean(Math.round(value / step) * step);
   }
 
+  // Presets are written on a 0-10 scale and placed on this plot's own scale.
+  function presetMeans(pattern) {
+    const lo = Math.min(yDomain[0], yDomain[1]);
+    const span = Math.abs(yDomain[1] - yDomain[0]);
+    return ipPatternPresets[pattern].map((series) =>
+      series.map((value) => lo + (value / 10) * span));
+  }
+
   const initialPattern = ipNormalizePattern(opts.pattern);
   const initialMeans = normalizeMeans(opts.means) ||
-    (initialPattern ? ipPatternPresets[initialPattern].map((s) => s.slice()) : null) ||
-    ipPatternPresets["flat-parallel"].map((s) => s.slice());
+    presetMeans(initialPattern || "flat-parallel");
 
   const state = {
     means: initialMeans.map((series) => series.slice()),
@@ -300,8 +435,27 @@ makeInteractionPlot = function(opts) {
     tickLabels: ipBoolean(opts.tickLabels, !minimal),
     legend: ipBoolean(opts.legend, true),
     seriesLabelText: defaultSeriesLabels.slice(),
-    yTicks: normalizeYTicks(opts.yTicks, minimal ? "none" : "low-high")
+    yTicks: normalizeYTicks(opts.yTicks, minimal ? "none" : "low-high"),
+    // Which factor's marginal means to draw: "none", "a", "b" or "both".
+    marginals: ipNormalizeMarginals(opts.marginals),
+    prediction: ipBoolean(opts.prediction, false),
+    // Swapped: Factor B on the x-axis and one line per level of Factor A.
+    swap: ipBoolean(opts.swapAxes ?? opts.swap, false),
+    // The reader's own means, for quiz responses. Null until they move one.
+    sketch: null
   };
+
+  // The plot draws "slots": line s at x position i. Unswapped, that is cell
+  // (B level s, A level i); swapped, it is cell (B level i, A level s).
+  const slotValue = (s, i) => state.swap ? state.means[i][s] : state.means[s][i];
+  const setSlotValue = (s, i, value) => {
+    if (state.swap) state.means[i][s] = value;
+    else state.means[s][i] = value;
+  };
+  const xFactorName = () => state.swap ? factorB : factorA;
+  const lineFactorName = () => state.swap ? factorA : factorB;
+  const xLevelLabels = () => state.swap ? state.seriesLabelText : xTickLabels;
+  const lineLevelLabels = () => state.swap ? xTickLabels : state.seriesLabelText;
   if (opts.highlight !== undefined) state.highlight = normalizeHighlight(opts.highlight);
 
   function normalizeHighlight(value) {
@@ -314,8 +468,11 @@ makeInteractionPlot = function(opts) {
   }
 
   // Leave room on the right for the factor legend beside the plot.
+  // Either factor can be in the legend once the axes are swapped.
   const legendChars = Math.max(
+    factorA.length,
     factorB.length,
+    ...xTickLabels.map((label) => label.length),
     ...defaultSeriesLabels.map((label) => label.length)
   );
   const margin = Object.assign({
@@ -379,6 +536,7 @@ makeInteractionPlot = function(opts) {
           state.means[seriesIndex][xIndex] = clampMean(input.value);
           render({ animate: false });
           notifyValueChange();
+          scheduleSketchCommit();
         });
         return input;
       });
@@ -404,8 +562,8 @@ makeInteractionPlot = function(opts) {
         .on("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
-          setMeans(ipPatternPresets[pattern], { animate: true });
-          notifyValueChange();
+          setMeans(presetMeans(pattern), { animate: true });
+          commitSketch();
         });
     });
 
@@ -470,8 +628,15 @@ makeInteractionPlot = function(opts) {
     .attr("text-anchor", "middle")
     .text(yLabel);
 
+  xAxisLabel.classed("ip-swap-fade", true);
+
+  const predictionLayer = svg.append("g")
+    .attr("class", "ip-prediction-layer ip-overlay ip-swap-fade");
   const seriesLayer = svg.append("g")
-    .attr("class", "ip-series-layer");
+    .attr("class", "ip-series-layer ip-swap-fade");
+  const marginalLayer = svg.append("g")
+    .attr("class", "ip-marginal-layer ip-overlay ip-swap-fade");
+  const xMid = (x(0) + x(1)) / 2;
 
   // Point shape is the third redundant encoding of Factor B, after line
   // style and color.
@@ -515,10 +680,61 @@ makeInteractionPlot = function(opts) {
     return { group, lineGroup, line, points };
   });
 
+  // Additive prediction: per line, a dashed ghost line with hollow ghost
+  // dots, and a short connector from each ghost to the real mean.
+  const predictionGroups = [0, 1].map((seriesIndex) => {
+    const group = predictionLayer.append("g")
+      .attr("data-prediction-series", seriesIndex);
+    const line = group.append("line").attr("class", "ip-prediction-line");
+    const cells = [0, 1].map((xIndex) => ({
+      gap: group.append("line")
+        .attr("class", "ip-prediction-gap")
+        .attr("x1", x(xIndex))
+        .attr("x2", x(xIndex)),
+      dot: group.append("path")
+        .attr("class", "ip-prediction-dot")
+        .attr("d", symbolPath(seriesIndex, 110))
+    }));
+    return { group, line, cells };
+  });
+
+  // Marginal means. For the x-axis factor: a hollow diamond midway between
+  // the two dots at each x position, joined by a dotted line whose slope is
+  // that factor's main effect. For the line factor: a hollow marker at the
+  // middle of each line, joined by a dotted link whose length is its main
+  // effect.
+  const xMarginalGroup = marginalLayer.append("g").attr("class", "ip-marginal-x");
+  const xMarginalLink = xMarginalGroup.append("line").attr("class", "ip-marginal-link");
+  const xMarginalMarks = [0, 1].map((xIndex) => ({
+    mark: xMarginalGroup.append("path")
+      .attr("class", "ip-marginal-mark")
+      .attr("d", d3.symbol().type(d3.symbolDiamond).size(150)()),
+    label: xMarginalGroup.append("text")
+      .attr("class", "ip-marginal-label")
+      .attr("dominant-baseline", "middle")
+      .attr("text-anchor", xIndex === 0 ? "end" : "start")
+      .attr("x", x(xIndex) + (xIndex === 0 ? -16 : 16))
+  }));
+  const lineMarginalGroup = marginalLayer.append("g").attr("class", "ip-marginal-lines");
+  const lineMarginalLink = lineMarginalGroup.append("line")
+    .attr("class", "ip-marginal-link")
+    .attr("x1", xMid)
+    .attr("x2", xMid);
+  const lineMarginalMarks = [0, 1].map((seriesIndex) => ({
+    mark: lineMarginalGroup.append("path")
+      .attr("class", "ip-marginal-mark")
+      .attr("data-series", seriesIndex)
+      .attr("d", symbolPath(seriesIndex, 150)),
+    label: lineMarginalGroup.append("text")
+      .attr("class", "ip-marginal-label")
+      .attr("dominant-baseline", "middle")
+      .attr("x", xMid + 14)
+  }));
+
   // APA-style legend: the non-x factor's name as title, one keyed line
   // sample per level, placed beside the plot.
   const legendLayer = svg.append("g")
-    .attr("class", "ip-legend");
+    .attr("class", "ip-legend ip-swap-fade");
   const legendTitle = legendLayer.append("text")
     .attr("class", "ip-legend-title")
     .attr("dominant-baseline", "hanging")
@@ -550,6 +766,7 @@ makeInteractionPlot = function(opts) {
 
   // --- Dragging and keyboard ------------------------------------------------
 
+  let dragMoved = false;
   const drag = d3.drag()
     .on("start", function() {
       if (!state.draggable) return;
@@ -562,13 +779,17 @@ makeInteractionPlot = function(opts) {
       const sourceEvent = event.sourceEvent || event;
       const pointer = d3.pointer(sourceEvent, svg.node());
       const next = snapMean(y.invert(pointer[1]));
-      if (next === state.means[seriesIndex][xIndex]) return;
-      state.means[seriesIndex][xIndex] = next;
+      if (next === slotValue(seriesIndex, xIndex)) return;
+      setSlotValue(seriesIndex, xIndex, next);
+      dragMoved = true;
       render({ animate: false });
       notifyValueChange();
     })
     .on("end", function() {
       d3.select(this).classed("is-dragging", false);
+      // The sketch is published once the reader lets go, not on every pixel.
+      if (dragMoved) commitSketch();
+      dragMoved = false;
     });
 
   seriesGroups.forEach((series) => {
@@ -583,9 +804,10 @@ makeInteractionPlot = function(opts) {
         else if (event.key === "PageDown") delta = -step * 4;
         else return;
         event.preventDefault();
-        state.means[seriesIndex][xIndex] = snapMean(state.means[seriesIndex][xIndex] + delta);
+        setSlotValue(seriesIndex, xIndex, snapMean(slotValue(seriesIndex, xIndex) + delta));
         render({ animate: false });
         notifyValueChange();
+        scheduleSketchCommit();
       });
     });
   });
@@ -593,19 +815,30 @@ makeInteractionPlot = function(opts) {
   // --- Derived quantities ---------------------------------------------------
 
   function effects() {
-    const m = state.means;
-    const marginalA1 = (m[0][0] + m[1][0]) / 2;
-    const marginalA2 = (m[0][1] + m[1][1]) / 2;
-    const marginalB1 = (m[0][0] + m[0][1]) / 2;
-    const marginalB2 = (m[1][0] + m[1][1]) / 2;
-    const mainEffectA = marginalA2 - marginalA1;
-    const mainEffectB = marginalB2 - marginalB1;
-    const interaction = (m[0][1] - m[0][0]) - (m[1][1] - m[1][0]);
-    return {
-      marginalA1, marginalA2, marginalB1, marginalB2,
-      mainEffectA, mainEffectB, interaction,
-      parallel: Math.abs(interaction) < 0.001
+    return ipEffects(state.means, step / 4);
+  }
+
+  // --- The reader's sketch (quiz responses) -----------------------------------
+
+  let sketchTimer = null;
+
+  function commitSketch() {
+    if (sketchTimer) window.clearTimeout(sketchTimer);
+    sketchTimer = null;
+    state.sketch = {
+      a1b1: state.means[0][0],
+      a2b1: state.means[0][1],
+      a1b2: state.means[1][0],
+      a2b2: state.means[1][1]
     };
+    setValue();
+    notifyValueChange();
+  }
+
+  // Keyboard nudges and typed values arrive in bursts; publish once they stop.
+  function scheduleSketchCommit() {
+    if (sketchTimer) window.clearTimeout(sketchTimer);
+    sketchTimer = window.setTimeout(commitSketch, 500);
   }
 
   function setValue() {
@@ -620,11 +853,23 @@ makeInteractionPlot = function(opts) {
       marginalA2: derived.marginalA2,
       marginalB1: derived.marginalB1,
       marginalB2: derived.marginalB2,
+      grandMean: derived.grandMean,
+      predictions: derived.predictions,
       mainEffectA: derived.mainEffectA,
       mainEffectB: derived.mainEffectB,
+      effectAatB1: derived.effectAatB1,
+      effectAatB2: derived.effectAatB2,
       interaction: derived.interaction,
       parallel: derived.parallel,
+      showsMainEffectA: derived.showsMainEffectA,
+      showsMainEffectB: derived.showsMainEffectB,
+      showsInteraction: derived.showsInteraction,
+      showsNoEffects: derived.showsNoEffects,
+      sketch: state.sketch ? Object.assign({}, state.sketch) : null,
       showLines: state.showLines,
+      marginals: state.marginals,
+      prediction: state.prediction,
+      swapAxes: state.swap,
       draggable: state.draggable
     };
   }
@@ -639,7 +884,7 @@ makeInteractionPlot = function(opts) {
   // --- Rendering ------------------------------------------------------------
 
   function drawAxes() {
-    const tickLabel = (index) => state.tickLabels ? xTickLabels[index] : "";
+    const tickLabel = (index) => state.tickLabels ? xLevelLabels()[index] : "";
     xAxisLayer.call(
       d3.axisBottom(x)
         .tickSize(state.tickLabels ? 6 : 0)
@@ -663,7 +908,7 @@ makeInteractionPlot = function(opts) {
       yAxisLayer.call(d3.axisLeft(y).tickValues([]));
     }
 
-    xAxisLabel.style("display", state.axisLabels ? null : "none");
+    xAxisLabel.text(xFactorName()).style("display", state.axisLabels ? null : "none");
     yAxisLabel.style("display", state.axisLabels ? null : "none");
   }
 
@@ -687,15 +932,20 @@ makeInteractionPlot = function(opts) {
     rootNode.classList.toggle("is-draggable", state.draggable);
 
     legendLayer.style("display", state.legend ? null : "none");
-    legendTitle.text(factorB);
+    legendTitle.text(lineFactorName());
+    if (!opts.ariaLabel) {
+      svg.attr("aria-label",
+        "Interaction plot of four cell means: " + xLevelLabels().join(" and ") +
+        " on the x axis, one line per level of " + lineFactorName());
+    }
     legendItems.forEach(({ item, label }, seriesIndex) => {
-      label.text(state.seriesLabelText[seriesIndex]);
+      label.text(lineLevelLabels()[seriesIndex]);
       item.classed("is-dimmed",
         state.highlight !== null && state.highlight !== seriesIndex);
     });
 
     seriesGroups.forEach((series, seriesIndex) => {
-      const values = state.means[seriesIndex];
+      const values = [slotValue(seriesIndex, 0), slotValue(seriesIndex, 1)];
 
       series.group.classed("is-dimmed",
         state.highlight !== null && state.highlight !== seriesIndex);
@@ -713,7 +963,7 @@ makeInteractionPlot = function(opts) {
 
       series.points.forEach(({ point, ring, dot, valueLabel, xIndex }) => {
         const value = values[xIndex];
-        const otherValue = state.means[1 - seriesIndex][xIndex];
+        const otherValue = slotValue(1 - seriesIndex, xIndex);
         // Put each value label on the side of its dot facing away from the
         // other series' dot at the same x, so labels never collide.
         const above = value > otherValue || (value === otherValue && seriesIndex === 0);
@@ -737,12 +987,13 @@ makeInteractionPlot = function(opts) {
           .attr("aria-valuemax", state.draggable ? Math.max(...yDomain) : null)
           .attr("aria-valuenow", state.draggable ? value : null)
           .attr("aria-label", state.draggable
-            ? "Mean for " + xTickLabels[xIndex] + ", " +
-              state.seriesLabelText[seriesIndex] + ": " + format(value)
+            ? "Mean for " + xLevelLabels()[xIndex] + ", " +
+              lineLevelLabels()[seriesIndex] + ": " + format(value)
             : null);
       });
     });
 
+    renderOverlays(animate, duration);
     syncControls();
     setValue();
 
@@ -752,6 +1003,79 @@ makeInteractionPlot = function(opts) {
         rootNode.classList.remove("ip-no-anim");
       });
     }
+  }
+
+  function renderOverlays(animate, duration) {
+    const reveal = (target, visible) =>
+      window.interactiveFigure.setRevealVisible(target, visible, { root: rootNode, animate });
+    const slots = [0, 1].map((s) => [slotValue(s, 0), slotValue(s, 1)]);
+    const xMarginals = [0, 1].map((i) => (slots[0][i] + slots[1][i]) / 2);
+    const lineMarginals = slots.map((values) => (values[0] + values[1]) / 2);
+    const grand = (xMarginals[0] + xMarginals[1]) / 2;
+    const xFactorKey = state.swap ? "b" : "a";
+    const showX = state.marginals === "both" || state.marginals === xFactorKey;
+    const showLine = state.marginals === "both" ||
+      (state.marginals !== "none" && state.marginals !== xFactorKey);
+
+    maybeTransition(xMarginalLink, animate, duration)
+      .attr("x1", x(0)).attr("x2", x(1))
+      .attr("y1", y(xMarginals[0])).attr("y2", y(xMarginals[1]));
+    xMarginalMarks.forEach(({ mark, label }, xIndex) => {
+      maybeTransition(mark, animate, duration)
+        .attr("transform", `translate(${x(xIndex)},${y(xMarginals[xIndex])})`);
+      label.text(format(xMarginals[xIndex]));
+      maybeTransition(label, animate, duration).attr("y", y(xMarginals[xIndex]));
+    });
+    reveal(xMarginalGroup, showX);
+
+    // Keep the two labels at the middle of the plot from sitting on each other.
+    const closeBy = Math.abs(y(lineMarginals[0]) - y(lineMarginals[1])) < 16;
+    const upper = lineMarginals[0] >= lineMarginals[1] ? 0 : 1;
+    maybeTransition(lineMarginalLink, animate, duration)
+      .attr("y1", y(lineMarginals[0])).attr("y2", y(lineMarginals[1]));
+    lineMarginalMarks.forEach(({ mark, label }, seriesIndex) => {
+      const nudge = closeBy ? (seriesIndex === upper ? -9 : 9) : 0;
+      maybeTransition(mark, animate, duration)
+        .attr("transform", `translate(${xMid},${y(lineMarginals[seriesIndex])})`);
+      label.text(format(lineMarginals[seriesIndex]));
+      maybeTransition(label, animate, duration)
+        .attr("y", y(lineMarginals[seriesIndex]) + nudge);
+    });
+    reveal(lineMarginalGroup, showLine);
+
+    predictionGroups.forEach(({ line, cells }, seriesIndex) => {
+      const predicted = [0, 1].map((i) => xMarginals[i] + lineMarginals[seriesIndex] - grand);
+      maybeTransition(line, animate, duration)
+        .attr("x1", x(0)).attr("x2", x(1))
+        .attr("y1", y(predicted[0])).attr("y2", y(predicted[1]));
+      cells.forEach(({ gap, dot }, xIndex) => {
+        maybeTransition(dot, animate, duration)
+          .attr("transform", `translate(${x(xIndex)},${y(predicted[xIndex])})`);
+        maybeTransition(gap, animate, duration)
+          .attr("y1", y(predicted[xIndex]))
+          .attr("y2", y(slots[seriesIndex][xIndex]));
+      });
+    });
+    reveal(predictionLayer, state.prediction);
+  }
+
+  // Redraw with the other factor on the x-axis. The plot fades out, is
+  // redrawn in place, and fades back in.
+  let swapToken = 0;
+  function renderSwap(options) {
+    const animate = options.animate !== false && !ipPrefersReducedMotion();
+    const token = ++swapToken;
+    if (!animate) {
+      rootNode.classList.remove("is-swapping");
+      render({ animate: false });
+      return;
+    }
+    rootNode.classList.add("is-swapping");
+    window.setTimeout(() => {
+      if (token !== swapToken) return;
+      render({ animate: false });
+      rootNode.classList.remove("is-swapping");
+    }, 250);
   }
 
   function syncControls() {
@@ -784,6 +1108,7 @@ makeInteractionPlot = function(opts) {
     action = action || {};
     let changed = false;
     let shouldNotify = false;
+    let swapped = false;
     const animate = action.animate !== false;
     const renderOptions = { animate, duration: action.duration };
 
@@ -805,7 +1130,7 @@ makeInteractionPlot = function(opts) {
         case "pattern": {
           const pattern = ipNormalizePattern(value);
           if (pattern) {
-            state.means = ipPatternPresets[pattern].map((series) => series.slice());
+            state.means = presetMeans(pattern);
             changed = true;
             shouldNotify = true;
           }
@@ -870,6 +1195,26 @@ makeInteractionPlot = function(opts) {
           }
           changed = true;
           break;
+        case "marginals":
+        case "marginal-means":
+          state.marginals = ipNormalizeMarginals(value);
+          changed = true;
+          break;
+        case "prediction":
+        case "show-prediction":
+          state.prediction = ipBoolean(value, state.prediction);
+          changed = true;
+          break;
+        case "swap-axes":
+        case "swap": {
+          const next = ipBoolean(value, state.swap);
+          if (next !== state.swap) {
+            state.swap = next;
+            swapped = true;
+            changed = true;
+          }
+          break;
+        }
         case "controls-open":
         case "controls":
           if (context && typeof context.setControlsOpen === "function") {
@@ -882,10 +1227,31 @@ makeInteractionPlot = function(opts) {
     });
 
     if (changed) {
-      render(renderOptions);
+      if (swapped) renderSwap(renderOptions);
+      else if (rootNode.classList.contains("is-swapping")) {
+        // A step arrived mid-fade: finish the redraw at once.
+        swapToken += 1;
+        rootNode.classList.remove("is-swapping");
+        render({ animate: false });
+      } else render(renderOptions);
       if (shouldNotify) notifyValueChange();
     }
   }
+
+  // A quiz "figure" question saves and restores the reader's sketch here.
+  rootNode.quizResponse = {
+    setValue: function(path, value) {
+      if (path !== "sketch") throw new Error("Unsupported interaction plot response: " + path);
+      if (sketchTimer) window.clearTimeout(sketchTimer);
+      sketchTimer = null;
+      const normalized = value === null || value === undefined ? null : normalizeMeans(value);
+      state.means = (normalized || initialMeans).map((series) => series.slice());
+      state.sketch = null;
+      render({ animate: false });
+      if (normalized) commitSketch();
+      else notifyValueChange();
+    }
+  };
 
   render({ animate: false });
 
