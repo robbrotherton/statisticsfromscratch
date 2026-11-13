@@ -769,11 +769,10 @@
         selection.select(".ave-pop-area").attr("d", area(data)).attr("fill", curveColor);
         selection.select(".ave-pop-line").attr("d", line(data)).attr("stroke", curveColor);
       });
-      // With factors the curves belong to the opening step only. Left faint behind the
-      // lanes they'd come and go as the scores regroup.
-      const faint = design ? 0 : state.stage === "total" ? 0.1 : 0.07;
+      // The curves belong to the opening step only. Left faint behind the lanes they'd
+      // come and go as the scores regroup.
       curves.interrupt().transition().duration(animate ? 420 : 0)
-        .style("opacity", regrouped() ? 0 : visible ? 1 : faint);
+        .style("opacity", visible ? 1 : 0);
     }
 
     // Colour marks the grouping currently in use: none for the total, conditions for the
