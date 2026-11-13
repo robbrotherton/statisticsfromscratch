@@ -101,7 +101,7 @@ We can always find the number of individual groups by multiplying the factorial 
      - This is what "pool everyone together ... regardless of their level of Factor B" means in the paragraph below. A main effect is a difference between marginal means: 48 − 32 = 16 seconds for maze, 42 − 38 = 4 seconds for audience.
      - The grand mean, 40, is in the corner; it's the mean of either pair of marginal means.
      - What a marginal mean can hide leads into the interaction: watched kids were 4 seconds slower on average, but that's 8 seconds faster on the easy maze and 16 seconds slower on the hard one.
-     Later uses to tie back to this: $M_{\text{column}}$ and $M_{\text{row}}$ in the SS section are marginal means (it never says so); the explorer's Maze and Audience steps; the tutorial in "Interpreting the results", which draws them on the graph; quiz hints that say "marginal means". -->
+     Later uses to tie back to this: $M_A$ and $M_B$ in the SS section are marginal means (it now says so, pointing at this table's margins); the explorer's Maze and Audience steps; the tutorial in "Interpreting the results", which draws them on the graph; quiz hints that say "marginal means". -->
 
 |  | Easy maze | Hard maze | Audience mean |
 |:--|:--:|:--:|:--:|
@@ -125,7 +125,7 @@ And third, we're interested in the interaction between A and B. This is the whol
 
 ### Grouping scores for analysis
 
-Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of Factor B, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of audience, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
 
 <!-- PLAN (2026-11-11): "Reading interaction graphs" used to sit here. Rob moved it to follow the worked analysis: it's now the tutorial in "Interpreting the results". The paragraph below opened that section and still works as the lead-in to the equations; check the join. -->
 
@@ -183,7 +183,7 @@ $$
 [ROB: new part. Same scores, same places, recolored by maze only, ignoring the audience. Color marks the grouping in use, as with Chapter 15's people.]
 :::
 
-::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Rows" data-action='{"stage":"factor-a","phase":"rows","animate":true}'}
+::: {.tutorial-step data-major="maze" data-major-title="Maze" data-title="Regroup" data-action='{"stage":"factor-a","phase":"rows","animate":true}'}
 [ROB: everyone who did the easy maze in one row, everyone who did the hard maze in the other, watched or not. Eight scores per row.]
 :::
 
@@ -199,7 +199,7 @@ $$
 [ROB: now the other factor. Back in their groups, recolored by audience, ignoring the maze.]
 :::
 
-::: {.tutorial-step data-major="audience" data-major-title="Audience" data-title="Rows" data-action='{"stage":"factor-b","phase":"rows","animate":true}'}
+::: {.tutorial-step data-major="audience" data-major-title="Audience" data-title="Regroup" data-action='{"stage":"factor-b","phase":"rows","animate":true}'}
 [ROB: alone in one row, watched in the other.]
 :::
 
@@ -232,7 +232,7 @@ $$
 
 ## Sums of squares and degrees of freedom
 
-<!-- DRAFT (2026-11-09, written at Rob's request): this section now uses definitional formulas, as Chapters 14 and 15 do (ISSUES #5). The familiar three are restated without comment; the new ones are tied to the steps of act-factorial-anova-viz. Rob's sentences are kept where they still apply. Column and row symbols follow his "columns and rows" wording. The previous version is in the CUT comment at the end of the section. -->
+<!-- DRAFT (2026-11-09, written at Rob's request): this section now uses definitional formulas, as Chapters 14 and 15 do (ISSUES #5). The familiar three are restated without comment; the new ones are tied to the steps of act-factorial-anova-viz. Rob's sentences are kept where they still apply. Symbols changed 2026-11-12 from column/row to $M_A$, $n_A$, $M_B$, $n_B$: the scores are grouped by factor, as Chapter 15 grouped them by person, and rows and columns are only mentioned to say where a mean sits in a table. A and B are kept for the generic equations here and the blank summary table; from the worked calculations in Step 3 onward the subscripts are the factor names (maze, audience, interaction), as in the practice quiz. The previous version is in the CUT comment at the end of the section. -->
 
 So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variability that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
 
@@ -254,27 +254,27 @@ df_{\text{between}} &= k - 1
 \end{align}
 $$
 
-The new equations[^factorial-computational] here are for the main effects and interaction.[^factorial-equal-n] And as long as we're thinking about the data in a two-by-two table like @tbl-factorial-generic, then we can think in terms of columns and rows.
+The new equations[^factorial-computational] here are for the main effects and interaction.[^factorial-equal-n] Each main effect comes from regrouping the scores by one factor, ignoring the other.
 
-[^factorial-computational]: As in Chapters 14 and 15, there are computational versions of these formulas. They use column totals and row totals in the same way that Chapter 14's used treatment totals. We'll stick with the definitional formulas here too.
+[^factorial-computational]: As in Chapters 14 and 15, there are computational versions of these formulas. They use the total for each level of a factor in the same way that Chapter 14's used treatment totals. We'll stick with the definitional formulas here too.
 
 [^factorial-equal-n]: These formulas assume that every group has the same number of scores. With unequal group sizes, the pieces no longer add up so neatly, and the analysis gets more complicated.
 
 ### Sums of squares for Factor A
 
-In my generic table, I had Factor A at the top of the table, so its two conditions were represented as columns in the table. In @act-factorial-anova-viz, this was the part where we regrouped the scores by maze, ignoring the audience. We find the mean of all the scores in each column, $M_{\text{column}}$, and see how far it falls from the grand mean. Then we square that deviation and multiply it by $n_{\text{column}}$, the number of scores in the column, since each column mean represents that many scores.
+For Factor A, we group the scores by their level of Factor A, ignoring Factor B. In @act-factorial-anova-viz, this was the part where we regrouped the scores by maze, ignoring the audience. We find the mean of all the scores at each level, $M_A$, and see how far it falls from the grand mean. These are the marginal means for Factor A: in @tbl-factorial-marginal-means, they're the maze means in the bottom margin, one for each column. Then we square that deviation and multiply it by $n_A$, the number of scores at that level, since each of these means represents that many scores.
 
-$$ SS_A = \Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2 $$
+$$ SS_A = \Sigma n_A(M_A - M_{\text{grand}})^2 $$
 
-Notice that this is basically the same equation as for the between-groups sum of squares. The difference is that the means represent different sets of scores — scores for each column combined, rather than all four groups separately. It's the same move we made in Chapter 15 when we regrouped the scores by person. And its degrees of freedom are $k_A$, the number of levels for that factor, minus one.
+Notice that this is basically the same equation as for the between-groups sum of squares. The difference is that the means represent different sets of scores — all the scores at each level of Factor A combined, rather than all four groups separately. It's the same move we made in Chapter 15 when we regrouped the scores by person. And its degrees of freedom are $k_A$, the number of levels for that factor, minus one.
 
 $$ df_A = k_A - 1 $$
 
 ### Sums of squares for Factor B
 
-And it's the same logic for the $SS$ for Factor B. In my generic table, Factor B was on the side of the table, so its two conditions were represented as rows. Now we regroup the scores by audience, ignoring the maze. Again, the only new thing about this equation is that the means represent another grouping of scores, the scores for each row combined, and the number of scores in each row.
+And it's the same logic for the $SS$ for Factor B. Now we regroup the scores by audience, ignoring the maze. Again, the only new thing about this equation is that the means represent another grouping of scores: $M_B$ is the mean of all the scores at each level of Factor B, and $n_B$ is the number of scores at that level. These are the other set of marginal means, the audience means in the right-hand margin of the table, one for each row.
 
-$$ SS_B = \Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2 $$
+$$ SS_B = \Sigma n_B(M_B - M_{\text{grand}})^2 $$
 
 $$ df_B = k_B - 1 $$
 
@@ -291,14 +291,14 @@ $$
 
 For a two-by-two design, that leaves $3 - 1 - 1 = 1$ degree of freedom. More generally, it works out to $(k_A - 1)(k_B - 1)$, much like the error degrees of freedom in Chapter 15.
 
-But, as with the error component in Chapter 15, we can also get the interaction directly from the data, which helps show what it represents. In @act-factorial-anova-viz, each group got a prediction: the mean we'd expect for that group if the two main effects were all that was going on. To make the prediction, we start at the grand mean, then adjust for how far the group's column mean is from the grand mean, and again for its row mean. That simplifies to $M_{\text{column}} + M_{\text{row}} - M_{\text{grand}}$.
+But, as with the error component in Chapter 15, we can also get the interaction directly from the data, which helps show what it represents. In @act-factorial-anova-viz, each group got a prediction: the mean we'd expect for that group if the two main effects were all that was going on. To make the prediction, we start at the grand mean, then adjust for how far the mean for the group's level of Factor A is from the grand mean, and again for its level of Factor B. That simplifies to $M_A + M_B - M_{\text{grand}}$. In the table, $M_A$ and $M_B$ are the two marginal means in line with the group's cell: the one at the bottom of its column and the one at the end of its row.
 
 The interaction is about how far each group's actual mean falls from that prediction. We square each of those differences and multiply by the number of scores in the group, just as we did for the between-groups sum of squares.
 
 $$
 \begin{aligned}
-SS_{A \times B} = \Sigma n_{\text{group}}(&M_{\text{group}} - M_{\text{column}} \\
-&{}- M_{\text{row}} + M_{\text{grand}})^2
+SS_{A \times B} = \Sigma n_{\text{group}}(&M_{\text{group}} - M_A \\
+&{}- M_B + M_{\text{grand}})^2
 \end{aligned}
 $$
 
@@ -312,8 +312,8 @@ Over the last three chapters we've now used what is basically the same equation 
 |:--|:--|:--|
 | Between groups (Ch. 14--16) | Condition, or cell | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ |
 | Between people (Ch. 15) | Person | $\Sigma k(M_{\text{person}} - M_{\text{grand}})^2$ |
-| Factor A (Ch. 16) | Column | $\Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2$ |
-| Factor B (Ch. 16) | Row | $\Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2$ |
+| Factor A (Ch. 16) | Level of Factor A | $\Sigma n_A(M_A - M_{\text{grand}})^2$ |
+| Factor B (Ch. 16) | Level of Factor B | $\Sigma n_B(M_B - M_{\text{grand}})^2$ |
 
 : The same equation with the scores grouped four different ways. In each case, the squared deviation of a mean from the grand mean is multiplied by the number of scores that mean represents. {#tbl-anova-groupings}
 
@@ -371,8 +371,8 @@ Again, there are a lot of values to keep track of while you calculate this, so f
 | Source | $SS$ | $df$ | $MS$ | $F$ |
 |:-------|:--:|:--:|:--:|:--:|
 | Between groups | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ | $k - 1$ | []{.sfs-na} | []{.sfs-na} |
-| &emsp;Factor A | $\Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2$ | $k_A - 1$ | $\dfrac{SS_A}{df_A}$ | $\dfrac{MS_A}{MS_{\text{within}}}$ |
-| &emsp;Factor B | $\Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2$ | $k_B - 1$ | $\dfrac{SS_B}{df_B}$ | $\dfrac{MS_B}{MS_{\text{within}}}$ |
+| &emsp;Factor A | $\Sigma n_A(M_A - M_{\text{grand}})^2$ | $k_A - 1$ | $\dfrac{SS_A}{df_A}$ | $\dfrac{MS_A}{MS_{\text{within}}}$ |
+| &emsp;Factor B | $\Sigma n_B(M_B - M_{\text{grand}})^2$ | $k_B - 1$ | $\dfrac{SS_B}{df_B}$ | $\dfrac{MS_B}{MS_{\text{within}}}$ |
 | &emsp;A × B interaction | $SS_{\text{between}} - SS_A - SS_B$ | $df_{\text{between}} - df_A - df_B$ | $\dfrac{SS_{A \times B}}{df_{A \times B}}$ | $\dfrac{MS_{A \times B}}{MS_{\text{within}}}$ |
 | Within groups | $\Sigma (X - M_{\text{group}})^2$ | $N - k$ | $\dfrac{SS_{\text{within}}}{df_{\text{within}}}$ | []{.sfs-na} |
 | Total | $\Sigma (X - M_{\text{grand}})^2$ | $N - 1$ | []{.sfs-na} | []{.sfs-na} |
@@ -390,20 +390,20 @@ As a piece of advice, if you haven't already done this, I'd suggest that for you
 Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm gonna give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with its $T$ treatment total, which you'll remember is just the sum of the scores in the group, and its sum of squared deviations. I've also added the $T$-row totals, the sum of scores in each row, and the column totals, the sum of scores in each column. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each condition, $k$ the total number of treatment conditions, $k_A$ and $k_B$, the number of conditions for each factor, $G$, the sum of all recorded scores, and $\Sigma X^2$, the sum of every squared score.
 -->
 
-Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm going to give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with the group's mean and its sum of squared deviations. I've also added the mean of each row and each column, and the grand mean. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each group, $k$, the total number of groups, and $k_A$ and $k_B$, the number of levels for each factor.
+Step three is to calculate the test statistics. Here's the data table again. But like I've done before, I'm going to give you some of the quantities you'll need to save you some time. So I've replaced the four scores in each cell with the group's mean and its sum of squared deviations. I've also added the marginal means for each factor, and the grand mean. And below, I'm giving you $N$, the total number of scores, lowercase $n$, the number in each group, $k$, the total number of groups, and $k_{\text{maze}}$ and $k_{\text{audience}}$, the number of levels for each factor. Maze is our Factor A and audience is our Factor B, so from here on I'll label everything with the factor's name in place of the generic $A$ and $B$.
 
-|  | Easy maze | Hard maze | Row mean |
+|  | Easy maze | Hard maze | Audience mean |
 |:--|:--:|:--:|:--:|
 | Alone | $M = 36$; $SS = 66$ | $M = 40$; $SS = 62$ | 38 |
 | Watched | $M = 28$; $SS = 74$ | $M = 56$; $SS = 86$ | 42 |
-| Column mean | 32 | 48 | $M_{\text{grand}} = 40$ |
+| Maze mean | 32 | 48 | $M_{\text{grand}} = 40$ |
 
-: Means and sums of squares for each cell, with the row and column means. {#tbl-factorial-means}
+: Means and sums of squares for each cell, with the marginal means for each factor in the last row and column. {#tbl-factorial-means}
 
 $$
 \begin{gathered}
 N = 16 \qquad n = 4 \qquad k = 4 \\
-k_A = 2 \qquad k_B = 2
+k_{\text{maze}} = 2 \qquad k_{\text{audience}} = 2
 \end{gathered}
 $$
 
@@ -436,35 +436,37 @@ $$ df_{\text{between}} = k - 1 = 4 - 1 = 3 $$
 
 Those two add up to the total: $SS_{\text{total}} = 1{,}664 + 288 = 1{,}952$, with $df_{\text{total}} = N - 1 = 15$.
 
-Now for the new components. For the maze factor, we use the column means, 32 and 48 seconds. Each one represents eight scores:
+Now for the new components. For the maze factor, we use the two maze means from the bottom margin of the table, 32 and 48 seconds. Each one represents eight scores:
 
 $$
 \begin{aligned}
-SS_A &= \Sigma n_{\text{column}}(M_{\text{column}} - M_{\text{grand}})^2 \\
+SS_{\text{maze}} &= \Sigma n_{\text{maze}}(M_{\text{maze}} - M_{\text{grand}})^2 \\
 &= 8(32 - 40)^2 + 8(48 - 40)^2 \\
 &= 1{,}024
 \end{aligned}
 $$
 
-$$ df_A = k_A - 1 = 2 - 1 = 1 $$
+$$ df_{\text{maze}} = k_{\text{maze}} - 1 = 2 - 1 = 1 $$
 
-For the audience factor, we do the same with the row means, 38 and 42 seconds:
+For the audience factor, we do the same with the two audience means from the right-hand margin, 38 and 42 seconds:
 
 $$
 \begin{aligned}
-SS_B &= \Sigma n_{\text{row}}(M_{\text{row}} - M_{\text{grand}})^2 \\
+SS_{\text{audience}} &= \Sigma n_{\text{audience}}(M_{\text{audience}} \\
+&\qquad {}- M_{\text{grand}})^2 \\
 &= 8(38 - 40)^2 + 8(42 - 40)^2 \\
 &= 64
 \end{aligned}
 $$
 
-$$ df_B = k_B - 1 = 2 - 1 = 1 $$
+$$ df_{\text{audience}} = k_{\text{audience}} - 1 = 2 - 1 = 1 $$
 
 Then we can find the interaction by subtracting both of those from the between-groups component:
 
 $$
 \begin{aligned}
-SS_{A \times B} &= SS_{\text{between}} - SS_A - SS_B \\
+SS_{\text{interaction}} &= SS_{\text{between}} - SS_{\text{maze}} \\
+&\quad {}- SS_{\text{audience}} \\
 &= 1{,}664 - 1{,}024 - 64 \\
 &= 576
 \end{aligned}
@@ -472,12 +474,13 @@ $$
 
 $$
 \begin{aligned}
-df_{A \times B} &= df_{\text{between}} - df_A - df_B \\
+df_{\text{interaction}} &= df_{\text{between}} - df_{\text{maze}} \\
+&\quad {}- df_{\text{audience}} \\
 &= 3 - 1 - 1 = 1
 \end{aligned}
 $$
 
-But let's also see how the interaction builds up from the group means. Take the kids who did the easy maze alone. Their column mean is 32 and their row mean is 38, so the prediction is $32 + 38 - 40 = 30$ seconds. Their actual mean was 36 seconds: 6 seconds slower than the main effects alone would suggest. @tbl-factorial-predictions does the same for all four groups.
+But let's also see how the interaction builds up from the group means. Take the kids who did the easy maze alone. The mean for the easy maze is 32 and the mean for working alone is 38, so the prediction is $32 + 38 - 40 = 30$ seconds. Their actual mean was 36 seconds: 6 seconds slower than the main effects alone would suggest. @tbl-factorial-predictions does the same for all four groups.
 
 | Group | $M_{\text{group}}$ | Prediction | Difference |
 |:--|--:|--:|--:|
@@ -492,7 +495,7 @@ Every group mean is 6 seconds from its prediction, in one direction or the other
 
 $$
 \begin{aligned}
-SS_{A \times B} &= 4(6)^2 + 4(-6)^2 \\
+SS_{\text{interaction}} &= 4(6)^2 + 4(-6)^2 \\
 &\quad {}+ 4(-6)^2 + 4(6)^2 \\
 &= 576
 \end{aligned}
@@ -502,9 +505,9 @@ Now we have all the sums of squares and their degrees of freedom. Dividing each 
 
 $$
 \begin{align}
-MS_A &= \frac{SS_A}{df_A} = \frac{1{,}024}{1} = 1{,}024 \\
-MS_B &= \frac{SS_B}{df_B} = \frac{64}{1} = 64 \\
-MS_{A \times B} &= \frac{SS_{A \times B}}{df_{A \times B}} = \frac{576}{1} = 576 \\
+MS_{\text{maze}} &= \frac{SS_{\text{maze}}}{df_{\text{maze}}} = \frac{1{,}024}{1} = 1{,}024 \\
+MS_{\text{audience}} &= \frac{SS_{\text{audience}}}{df_{\text{audience}}} = \frac{64}{1} = 64 \\
+MS_{\text{interaction}} &= \frac{SS_{\text{interaction}}}{df_{\text{interaction}}} = \frac{576}{1} = 576 \\
 MS_{\text{within}} &= \frac{SS_{\text{within}}}{df_{\text{within}}} = \frac{288}{12} = 24
 \end{align}
 $$
@@ -513,9 +516,9 @@ Finally, we divide each of the three new mean squares by the within-groups mean 
 
 $$
 \begin{align}
-F_A &= \frac{MS_A}{MS_{\text{within}}} = \frac{1{,}024}{24} \approx 42.67 \\
-F_B &= \frac{MS_B}{MS_{\text{within}}} = \frac{64}{24} \approx 2.67 \\
-F_{A \times B} &= \frac{MS_{A \times B}}{MS_{\text{within}}} = \frac{576}{24} = 24.00
+F_{\text{maze}} &= \frac{MS_{\text{maze}}}{MS_{\text{within}}} = \frac{1{,}024}{24} \approx 42.67 \\
+F_{\text{audience}} &= \frac{MS_{\text{audience}}}{MS_{\text{within}}} = \frac{64}{24} \approx 2.67 \\
+F_{\text{interaction}} &= \frac{MS_{\text{interaction}}}{MS_{\text{within}}} = \frac{576}{24} = 24.00
 \end{align}
 $$
 
@@ -527,7 +530,7 @@ Here's the completed summary table so you can check your work:
 | Between groups | 1,664 | 3 | []{.sfs-na} | []{.sfs-na} |
 | &emsp;Maze (A) | 1,024 | 1 | 1,024 | 42.67 |
 | &emsp;Audience (B) | 64 | 1 | 64 | 2.67 |
-| &emsp;A × B interaction | 576 | 1 | 576 | 24.00 |
+| &emsp;Interaction (A × B) | 576 | 1 | 576 | 24.00 |
 | Within groups | 288 | 12 | 24 | []{.sfs-na} |
 | Total | 1,952 | 15 | []{.sfs-na} | []{.sfs-na} |
 
@@ -560,25 +563,51 @@ And what that means is that there was a significant difference between the two m
 
 #### Effect size: partial $\eta^2$
 
-<!-- FIX (2026-11-09): Chapter 15's reason for the partial version (conditions could never explain differences between people) doesn't carry over to a second manipulated factor, so it needs its own reason here. The three values add up to more than 1 (.78 + .18 + .67), which clashes with the bucket picture unless it's explained. Each denominator below is also just that effect's $SS$ plus $SS_{\text{within}}$, which would match the form used in Chapter 15. -->
+<!-- FIX (2026-11-09): Chapter 15's reason for the partial version (conditions could never explain differences between people) doesn't carry over to a second manipulated factor, so it needs its own reason here. The three values add up to more than 1 (.78 + .18 + .67), which clashes with the bucket picture unless it's explained. (Done 2026-11-12: each denominator is now written as that effect's $SS$ plus $SS_{\text{within}}$, the form used in Chapter 15; the paragraph above the equations says what is set aside to get there.) -->
 
-<!-- FIX: "when we get significant results" conflicts with Chapter 14 (always report effect size). The worked equations label these $\eta^2_A$ etc., while the prose and report call them $\eta^2_p$. -->
+<!-- FIX: "when we get significant results" conflicts with Chapter 14 (always report effect size). (Resolved 2026-11-12: the worked equations now use $\eta^2_p$ for all three, as Chapter 15 and the report do, with the effect named beside each one.) -->
 
-To complete our hypothesis test, when we get significant results, we need to quantify the effect size. Here, as for other ANOVAs, we use eta squared. Like the related samples ANOVA, we're actually using partial eta squared, one for each of our tests. There's the effect size for the main effect of Factor A, another effect size for Factor B, and another for the interaction, just like we have three $F$ ratios.
+To complete our hypothesis test, when we get significant results, we need to quantify the effect size. Here, as for other ANOVAs, we use eta squared. Like the related samples ANOVA, we're actually using partial eta squared, one for each of our tests. There's the effect size for the main effect of maze, another effect size for audience, and another for the interaction, just like we have three $F$ ratios.
 
-In each case, the numerator is the $SS$ for that component of the variability and the denominator is the partial variability, excluding the other sources that we quantify separately. So the partial $\eta^2$ for the main effect of Factor A is the $SS$ for Factor A divided by the total $SS$ minus the $SS$ for Factor B and for the interaction. We're partialling out those other sources of variability that we quantify separately. For Factor B, it's $SS_B$ over $SS_{\text{total}}$ minus $SS_A$ and $SS_{\text{interaction}}$. And for the interaction, it's the $SS$ for the interaction over $SS_{\text{total}}$ minus $SS_A$ and $SS_B$.
+In each case, the numerator is the $SS$ for that component of the variability and the denominator is the partial variability, excluding the other sources that we quantify separately. So for the main effect of maze, we set aside the $SS$ for audience and for the interaction, just as we dumped $SS_{\text{people}}$ out of the bucket in Chapter 15. We're partialling out those other sources of variability that we quantify separately. What's left is $SS_{\text{maze}}$ plus $SS_{\text{within}}$, and we ask what proportion of that is $SS_{\text{maze}}$. For audience, we set aside maze and the interaction, which leaves $SS_{\text{audience}}$ plus $SS_{\text{within}}$. And for the interaction, we set aside the two main effects, which leaves $SS_{\text{interaction}}$ plus $SS_{\text{within}}$.
 
 $$
 \begin{align}
-\eta^2_A &= \frac{SS_A}{SS_{\text{total}} - SS_B - SS_{A \times B}} = \frac{1{,}024}{1{,}952 - 64 - 576} = 0.78 \\
-\eta^2_B &= \frac{SS_B}{SS_{\text{total}} - SS_A - SS_{A \times B}} = \frac{64}{1{,}952 - 1{,}024 - 576} = 0.18 \\
-\eta^2_{A \times B} &= \frac{SS_{A \times B}}{SS_{\text{total}} - SS_A - SS_B} = \frac{576}{1{,}952 - 1{,}024 - 64} = 0.67
+&\text{Maze:} \\[0.5ex]
+&\quad \eta^2_p = \frac{SS_{\text{maze}}}{SS_{\text{maze}} + SS_{\text{within}}} \\[0.5ex]
+&\quad \phantom{\eta^2_p} = \frac{1{,}024}{1{,}024 + 288} = .78 \\[2ex]
+&\text{Audience:} \\[0.5ex]
+&\quad \eta^2_p = \frac{SS_{\text{audience}}}{SS_{\text{audience}} + SS_{\text{within}}} \\[0.5ex]
+&\quad \phantom{\eta^2_p} = \frac{64}{64 + 288} = .18 \\[2ex]
+&\text{Interaction:} \\[0.5ex]
+&\quad \eta^2_p = \frac{SS_{\text{interaction}}}{SS_{\text{interaction}} + SS_{\text{within}}} \\[0.5ex]
+&\quad \phantom{\eta^2_p} = \frac{576}{576 + 288} = .67
 \end{align}
 $$
 
 #### Simple effects
 
-<!-- DRAFT (gap): the follow-up to a significant interaction, in the role post-hoc tests played in Chapters 14 and 15. Test the effect of one factor at each level of the other, using $MS_{\text{within}}$. For these data: on the easy maze, watched kids were 8 seconds faster, $F(1, 12) = 5.33$, $p = .040$; on the hard maze, 16 seconds slower, $F(1, 12) = 21.33$, $p < .001$. A short section; this is the natural place to say what the interaction actually means for the research question. -->
+<!-- DRAFT (2026-11-12, written at Rob's request, in his voice as far as I could manage; his to rewrite). Replaces the gap note. Decisions behind it: no Tukey here, since each factor has two levels and Tukey across the four cells (HSD = 4.20 × √(24/4) ≈ 10.29) would test two comparisons that differ on both factors and would miss the 8-second easy-maze effect. Simple effects of audience at each maze, with $MS_{\text{within}}$ from the full analysis: easy $F(1, 12) = 5.33$, $p = .040$; hard $F(1, 12) = 21.33$, $p < .001$.
+     Check: the opener is still a gap, so this doesn't name Zajonc; once it's written, the last sentence of the results paragraph can say this is what he predicted. The report in "Reporting results" doesn't mention the simple effects yet (its FIX note says the last clause needs them). -->
+
+In the last two chapters, this is where we followed a significant $F$ with post-hoc tests. We don't need them for our main effects: each factor only has two levels, so if there's a difference, there's only one place it can be.^[With three or more levels of a factor, a significant main effect would leave the same question open as in Chapter 14, and we could follow it up the same way, with a test like Tukey's HSD.] The interaction is a different matter. It tells us that the effect of being watched isn't the same on both mazes, but not what the effect *is* on either one. Watched kids were 8 seconds faster than kids working alone on the easy maze, and 16 seconds slower on the hard maze. Is each of those a reliable difference in its own right?
+
+To find out, we test **simple effects**: the effect of one factor at a single level of the other. Here that means comparing alone and watched twice, once using only the kids who did the easy maze and once for the hard maze. Mathematically, there's nothing new. Each simple effect is just a between-groups sum of squares for two of our four groups: the means of 36 and 28 seconds around the easy-maze mean of 32, and the means of 40 and 56 around the hard-maze mean of 48. Two means give $df = 1$, so each mean square is the same as its sum of squares. And we divide by the same $MS_{\text{within}}$ as before, since it's still our best estimate of chance variability, based on all sixteen kids.
+
+$$
+\begin{aligned}
+&\text{Easy maze:} \\
+&\quad SS = 4(36 - 32)^2 + 4(28 - 32)^2 = 128 \\
+&\quad F = \frac{128}{24} \approx 5.33 \\[1.5ex]
+&\text{Hard maze:} \\
+&\quad SS = 4(40 - 48)^2 + 4(56 - 48)^2 = 512 \\
+&\quad F = \frac{512}{24} \approx 21.33
+\end{aligned}
+$$
+
+With $df = 1$ and $12$, the critical value is the same 4.75 as before, and both $F$ ratios are beyond it.^[The two sums of squares add up to 640, which is exactly $SS_{\text{audience}}$ plus $SS_{\text{interaction}}$, $64 + 576$. The simple effects haven't found any new variability. They've taken everything the audience did, the main effect and the interaction together, and split it up by maze instead.] So being watched made kids significantly faster on the easy maze, and significantly slower on the hard maze. Both halves of the pattern hold up on their own.
+
+One caution. We could just as well have tested the effect of the maze for kids working alone and for kids being watched, but testing everything we can think of brings back the experiment-wise error rate problem from Chapter 14. So we let the research question choose: ours was about what an audience does. Even then, some researchers use a stricter alpha for follow-up tests like these, and our easy-maze result, with $p = .040$, wouldn't survive one.
 
 #### Statistical power
 
@@ -732,7 +761,7 @@ Here Factor A had no effect on people in level one of Factor B, but it did have 
 
 {{< include quizzes/16-factorial-anova-interpreting-results-1.qmd >}}
 
-<!-- DRAFT (gap): what the pattern means for the question; random assignment and causal language if both factors were manipulated. End on the body of evidence as Chapters 12 and 13 do: Zajonc et al. (1969), then the preregistered replication (Halfmann et al., 2020), which found main effects of task and audience but no interaction. Fisher's factorial argument (plan §4.4) fits here too; verify the quote first. -->
+<!-- DRAFT (gap): what the pattern means for the question; random assignment and causal language if both factors were manipulated. End on the body of evidence as Chapters 12 and 13 do: Zajonc et al. (1969), then the preregistered replication (Halfmann et al., 2020), which found main effects of task and audience but no interaction. Located 2026-11-12; bib keys zajonc1969social and halfmann2020replicating are in references.bib. Halfmann, Bredehöft and Häusser (2020), "Replicating roaches", Psychological Science 31(3), 332-337: preregistered direct replication, 2 (audience present or absent) × 2 (runway or maze) between-subjects, 120 cockroaches, three times the original sample. An audience slowed the roaches on BOTH tasks: social inhibition replicated, social facilitation on the easy task did not. Both main effects significant (task F(1, 116) = 15.45, audience F(1, 116) = 55.58, both p < .001); interaction not significant. They note the original never tested the interaction statistically. Caveats they report: a different species (Blaberus craniifer; the original used Blatta orientalis), and the preregistered exclusion rule was relaxed. So it maps onto this chapter's three tests exactly: two main effects, no interaction, where the theory predicts the interaction. The F values come from a secondary summary (the open PDF blocks automated access); check them and the cell means against the paper before quoting. Fisher's factorial argument (plan §4.4) fits here too; verify the quote first. -->
 
 ### Assumptions
 
