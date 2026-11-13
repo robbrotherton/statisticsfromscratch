@@ -20,7 +20,8 @@ interactive-scripts:
 <!-- PLAN (structural pass, 2026-11-05). This chapter's one new idea: the interaction, an effect that depends on another factor, as distinct from main effects. Everything else is Chapter 14 again with the between-groups variance split further.
 Skeleton: it depends → factorial designs → main effects and interactions → reading interaction graphs → partitioning → SS and df → steps 1-5 → reporting, interpreting → design your own. Conceptual first, procedure second, as in Chapter 14. Reading graphs moved up from the end for that reason; those paragraphs were written to follow the calculation, so check the joins.
 DATA CHANGED 2026-11-09 to maze × audience (invented numbers; the private structural-pass note has them). Factor A is the maze (easy, hard) and Factor B is the audience (alone, watched); scores are times in seconds, four kids per cell. Tables, figures, equations and worked numbers are swapped. Sentences that only needed names and numbers changed were changed in place; prose that only made sense for snacks is in CUT comments with a DRAFT note beside it. Search for DRAFT, FIX and FIGURE to find what still needs writing.
-RESTRUCTURED 2026-11-11/12: reading graphs moved back down, after the worked analysis. Our results are two static graphs in "Reporting results"; "Interpreting the results" has one tutorial on reading other possible patterns (the static pattern graphs are cut). Marginal means get a table and a DRAFT in "Main effects and interactions". The sketch-your-own figure moved into the closing quiz. So the skeleton above now runs: … main effects and interactions (marginal means) → partitioning → SS and df → steps 1-5 → reporting → interpreting (graphs) → design your own. -->
+RESTRUCTURED 2026-11-11/12: reading graphs moved back down, after the worked analysis. Our results are two static graphs in "Reporting results"; "Interpreting the results" has one tutorial on reading other possible patterns (the static pattern graphs are cut). Marginal means get a table and a DRAFT in "Main effects and interactions". The sketch-your-own figure moved into the closing quiz. So the skeleton above now runs: … main effects and interactions (marginal means) → partitioning → SS and df → steps 1-5 → reporting → interpreting (graphs) → design your own.
+RESTRUCTURED 2026-11-13 (Rob): "Factorial designs" is now generic throughout (Factor A, Factor B; tbl-factorial-generic carries the marginal means), and the maze numbers follow in "Factorial ANOVA in context": the maze paragraph from the top of the partitioning section, tbl-factorial-marginal-means, and the explorer tutorial (act-factorial-anova-viz) all moved there. Search for DRAFT (2026-11-13 to find the prose written or changed in that pass. -->
 
 Here, we'll introduce the last variant of ANOVA that we'll deal with: the factorial ANOVA, meaning ANOVA used with research designs that have more than one independent variable. This enables us to see not just the effect of a single variable, but how two variables interact. It's slightly more complicated, both conceptually and mathematically, but it's based on the same idea of partitioning variance that we've used in the previous two chapters.
 
@@ -85,39 +86,28 @@ A **factorial** design, then, is one with more than one factor, each factor with
 
 It's important to understand the basic conceptual structure. With a two-by-two design, we end up with four individual groups, one for each combination of the levels of each factor. So generically, let's say we have Factor A and Factor B. If we arrange them in a table, you can see the four conditions that that creates.
 
-|  |  | **Factor A** | |
-|---|---|:--:|:--:|
-| | | $A_1$ | $A_2$ |
-| **Factor B** | $B_1$ | $A_1 B_1$ | $A_2 B_1$ |
-| | $B_2$ | $A_1 B_2$ | $A_2 B_2$ |
+|  |  | **Factor A** | | |
+|---|---|:--:|:--:|:--:|
+| | | $A_1$ | $A_2$ | *Marginal mean* |
+| **Factor B** | $B_1$ | $A_1 B_1$ | $A_2 B_1$ | $M_{B_1}$ |
+| | $B_2$ | $A_1 B_2$ | $A_2 B_2$ | $M_{B_2}$ |
+| | *Marginal mean* | $M_{A_1}$ | $M_{A_2}$ | $M_{\text{grand}}$ |
 
-: The four conditions of a generic 2×2 factorial design. {#tbl-factorial-generic}
+: The four conditions of a generic 2×2 factorial design, with the marginal means for each factor in the last row and column, and the grand mean in the corner. {#tbl-factorial-generic}
 
-If you're a participant in this study, you might be in the group of people treated with level one of Factor A and level one of Factor B. Or you might get level one of Factor A and level two of Factor B. Or you could be in level two of Factor A, level one of Factor B. Or $A_2 B_2$.
+If you're a participant in this study, you might be in the group of people treated with level one of Factor A and level one of Factor B. Or you might get level one of Factor A and level two of Factor B. Or you could be in level two of Factor A, level one of Factor B. Or $A_2 B_2$.[^factorial-combinations]
 
-We can find the number of individual groups by multiplying the factorial statement. So two-by-two literally means two multiplied by two, so four conditions in total. A two-by-three design would have two times three, so six groups. A three-by-five design would have three times five, so fifteen conditions. It can get pretty complicated. And you'd need a lot of participants to fill out all those subgroups. But again, we'll just stick with a two-by-two design.
+[^factorial-combinations]: We can find the number of individual groups by multiplying the factorial statement. So two-by-two literally means two multiplied by two, so four conditions in total. A two-by-three design would have two times three, so six groups. A three-by-five design would have three times five, so fifteen conditions. It can get pretty complicated. And you'd need a lot of participants to fill out all those subgroups. Sticking with a two-by-two design is enough for us: the logic of those more complicated designs is the same.
 
-<!-- DRAFT (gap, 2026-11-11; Rob: this section should define and explain marginal means). The table below is new and live: the four cell means with the row and column means in its margins. Step 3's tbl-factorial-means keeps its own copy with each cell's SS. Beats for the prose, wherever it best fits around the two paragraphs below:
-     - A marginal mean is the mean of everyone at one level of a factor, ignoring the other factor. The name comes from where they sit: in the margins of the table.
-     - Maze: easy $(36 + 28)/2 = 32$, hard $(40 + 56)/2 = 48$. Audience: alone $(36 + 40)/2 = 38$, watched $(28 + 56)/2 = 42$. Each is the mean of eight kids. Averaging the two cell means only works because every cell has the same number of scores (the equal-n footnote in the SS section says the same).
-     - This is what "pool everyone together ... regardless of their level of Factor B" means in the paragraph below. A main effect is a difference between marginal means: 48 − 32 = 16 seconds for maze, 42 − 38 = 4 seconds for audience.
-     - The grand mean, 40, is in the corner; it's the mean of either pair of marginal means.
-     - What a marginal mean can hide leads into the interaction: watched kids were 4 seconds slower on average, but that's 8 seconds faster on the easy maze and 16 seconds slower on the hard one.
-     Later uses to tie back to this: $M_A$ and $M_B$ in the SS section are marginal means (it now says so, pointing at this table's margins); the explorer's Maze and Audience steps; the tutorial in "Interpreting the results", which draws them on the graph; quiz hints that say "marginal means". -->
+You'll notice that @tbl-factorial-generic also has an extra row and column labelled **marginal mean**. There's one marginal mean for each level of each factor; each is the mean of everyone at one level of a factor, ignoring the other factor. $M_{A_1}$ is the mean of all the scores in the $A_1$ column, whether they came from $B_1$ or $B_2$. Likewise, $M_{B_1}$ is the mean of all the scores in the $B_1$ row, regardless of Factor A. And in the corner is the grand mean, the mean of every score all lumped together, just as before.
 
-|  | Easy maze | Hard maze | Audience mean |
-|:--|:--:|:--:|:--:|
-| Alone | 36 | 40 | *38* |
-| Watched | 28 | 56 | *42* |
-| Maze mean | *32* | *48* | *40* |
+When it comes to the hypothesis test for a factorial design, we'll actually run several hypothesis tests. For this two-by-two design we'll have three tests.
 
-: Mean times (in seconds) for the four groups, with the marginal means for each factor in the last row and column, and the grand mean in the corner. {#tbl-factorial-marginal-means}
+First, the **main effects**. The main effect of Factor A asks whether there is an overall difference between the levels of Factor A, ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. In other words, we compare the marginal means for Factor A. Then there's the main effect of Factor B. This is the same idea, applied to the other factor. We ignore the different groups on Factor A and just pool together everyone on each level of Factor B, and compare those two marginal means to see if there was an overall difference.
 
-<!-- FIX: "each of the four conditions compared to each of the others" is wrong: in a 2×2 the interaction is a single difference of differences. -->
+Third, we're interested in the **interaction** between factors A and B. This is the whole reason for coming up with a complicated design like this in the first place, instead of just two separate studies to look at Factors A and B in isolation. We want to know if Factor A and Factor B interact---that is, if the effect of one depends on the level of the other. So for this interaction test we'll look at the means of the four individual groups, checking to see if that pattern deviates from what we'd expect based on the main effects alone.
 
-When it comes to the hypothesis test for a factorial design, we'll actually run several hypothesis tests. For this two-by-two design we'll have three tests. First, the main effects. We test the main effect of Factor A — this asks whether there is an overall difference between the levels of Factor A ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. Second, there's the main effect of Factor B. This is the same idea. We ignore the different groups on Factor A and just pool together everyone on each level of Factor B, and compare those two levels to see if there was an overall difference.
-
-And third, we're interested in the interaction between A and B. This is the whole reason for coming up with a complicated design like this in the first place, instead of just two separate studies to look at Factors A and B in isolation. We want to know if Factor A and Factor B interact — that is, if the effect of one depends on the level of the other. So for this interaction test we'll look at each of the four conditions compared to each of the others, checking to see if that pattern of variability deviates from what we'd expect based on the main effects alone.
+The interaction can be the most difficult part of this analysis to really grasp. There are different ways factors can interact; different patterns of results than can reflect different interactions. I'm going to set the idea to the side for now, and we'll come back to it after we run through the calculations and see the results, so we can talk about it more concretely.
 
 <!-- DRAFT (gap; the chapter's most important new prose): interaction as a difference of differences. Work one table of four means by hand: the effect of A at B1, the effect of A at B2, and the difference between those two. Zero means no interaction: the effect is the same at each level. Callback to Chapter 13's difference scores.
      Equivalent picture: the parallel lines you'd predict from the grand mean plus the two main effects, and how far the real means fall from that prediction. That's what "deviates from what we'd expect based on the main effects" means, and it needs saying concretely, since it recurs below.
@@ -127,20 +117,15 @@ And third, we're interested in the interaction between A and B. This is the whol
 
 ### Partitioning variance in factorial designs
 
-Again, when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of audience, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+So for each of those three hypotheses, we calculate an $F$ ratio, and they all follow the same conceptual structure. We're comparing the variance between groups to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$ test and the other ANOVAs we've learned.
 
-<!-- PLAN (2026-11-11): "Reading interaction graphs" used to sit here. Rob moved it to follow the worked analysis: it's now the tutorial in "Interpreting the results". The paragraph below opened that section and still works as the lead-in to the equations; check the join. -->
+<!-- DRAFT (2026-11-13, written at Rob's request): the next two paragraphs are Rob's, condensed, plus new sentences to bring out the chapter's new move: splitting the between-groups variability (the treatment effects) rather than the within-groups variability. New: "And here's the new part" through "we can test each one separately." -->
 
-Before we get to the equations, a word about priorities: I'm much less interested in having you memorize all those different variations of variance equations than in making sure you understand the logic of factorial ANOVA on a more conceptual level and that you're able to interpret the pattern of findings that you might see.
+It starts out the same as every other ANOVA. We separate the total variability into variability between groups and variability within groups, each measured by its sum of squares. Here each cell of the table is a group, so our 2×2 design has four groups.
 
+In Chapter 14, that was all the partitioning we could do. In Chapter 15, with related samples, we were able to divide up the variability within groups. Now, assuming we're just using between-participants factors, we leave the variance within groups alone and divide up the variability *between* groups instead. That's where the treatment effects are, and with two factors there's more than one of them in there. The four group means might differ because of Factor A, because of Factor B, or because of the interaction between the two. A single between-groups $F$ ratio couldn't tell those apart. It would only tell us that the four groups differ somehow. By partitioning the treatment effects, we can test each one separately.
 
-<!-- FIX: "chance variability" and "the variance expected if there is no treatment effect" should match Chapter 14's two-estimates wording. Each effect in a 2×2 has df = 1, so each F is a squared t, which is a one-line callback to Chapter 14 worth making. -->
-
-So for each of those three hypotheses, we calculate an $F$ ratio. Though the math will differ slightly, because we'll be partitioning variance differently, the $F$ ratios all follow the same conceptual structure. We're comparing the variance between groups to the variance expected if there is no treatment effect. This should sound familiar. It's the same logic of the $t$ test and the other ANOVAs we've learned. But there's really nothing new here, just a more nuanced application of the basic concepts.
-
-Calculating the various components required for those three $F$ ratios works just like any other ANOVA. Conceptually, we're partitioning the total variance in the data into different sources, just as before. It starts out the same as every other ANOVA. We separate the total variability into variability between groups and variability within groups, each measured by its sum of squares. Here each cell of the table is a group, so our 2×2 design has four groups.
-
-Now here, assuming we're just using between-participants factors, we don't need to divide up the variance within groups. Instead, we want to think about the different sources of between-groups variability. We want to separate between-groups variability associated with Factor A exclusively and between-groups variability associated with Factor B exclusively. And knowing both of those, anything left over — any between-groups variability not accounted for by those main effects of Factor A and Factor B — must be due to the interaction between Factors A and B.
+So we want to separate between-groups variability associated with Factor A exclusively and between-groups variability associated with Factor B exclusively. And knowing both of those, anything left over---any between-groups variability not accounted for by those main effects of Factor A and Factor B---must be due to the interaction between Factors A and B.
 
 ::: {#fig-partitioning-factorial}
 {{< interactive-figure factorialPartitionDiagram makeVariancePartitionDiagram options='{"preset":"factorial","formula":false,"ariaLabel":"Diagram partitioning the total sum of squares into variability between groups, which contains treatment effects and chance, and variability within groups, which contains chance. The between-groups variability is further partitioned into Factor A, Factor B, and the A-by-B interaction, each containing its own main effect or interaction plus chance."}' fallback="Diagram partitioning the total sum of squares into variability between groups, which contains treatment effects and chance, and variability within groups, which contains chance. The between-groups variability is further partitioned into Factor A, Factor B, and the A-by-B interaction, each containing its own main effect or interaction plus chance." >}}
@@ -155,6 +140,113 @@ F_B &= \frac{MS_B}{MS_{\text{within}}} \\[1.5ex]
 F_{A \times B} &= \frac{MS_{A \times B}}{MS_{\text{within}}}
 \end{aligned}
 $$
+
+### Sums of squares and degrees of freedom
+
+Arriving at those $F$ ratios involves the same basic process as before. We start with between and within groups $SS$ and $df$. The equations are exactly the same as in Chapter 14. Just remember that each cell of the table is a group, so here $k = 4$.
+
+$$
+\begin{align}
+SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 \\
+SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\
+SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2
+\end{align}
+$$
+
+$$
+\begin{align}
+df_{\text{total}} &= N - 1 \\
+df_{\text{within}} &= N - k \\
+df_{\text{between}} &= k - 1
+\end{align}
+$$
+
+The new equations here are for the three pieces of the between-groups variability: the main effects and the interaction.[^factorial-equal-n] Each main effect comes from regrouping the scores by one factor, ignoring the other.
+
+[^factorial-equal-n]: These formulas assume that every group has the same number of scores. With unequal group sizes, the pieces no longer add up so neatly, and the analysis gets more complicated. Also, as in Chapters 14 and 15, there are computational versions of these formulas. They use the total for each level of a factor in the same way that Chapter 14's used treatment totals. We'll stick with the definitional formulas.
+
+<!-- DRAFT (2026-11-13, written at Rob's request): Factor A and Factor B are now presented together, like the total, within and between equations above. The first paragraph is new wording, saying that $M_A$ stands for each of Factor A's marginal means in turn; the "Notice" paragraph is Rob's, made to cover both factors. -->
+
+In these equations, $M_A$ stands for each of the marginal means for Factor A in turn, one for each level: $M_{A_1}$ and $M_{A_2}$, from the bottom margin of @tbl-factorial-generic. For each one, we see how far it falls from the grand mean, square that deviation, and multiply it by $n_A$, the number of scores at that level, since each of these means represents that many scores. Then we add those up. And it's the same logic for Factor B, using the other set of marginal means, $M_{B_1}$ and $M_{B_2}$, from the right-hand margin of the table.
+
+$$
+\begin{align}
+SS_A &= \Sigma n_A(M_A - M_{\text{grand}})^2 \\
+SS_B &= \Sigma n_B(M_B - M_{\text{grand}})^2
+\end{align}
+$$
+
+Notice that this is basically the same equation as for the between-groups sum of squares. The difference is that the means represent different sets of scores---all the scores at each level of one factor combined, rather than all four groups separately. We're just grouping scores one way or another to isolate different sources of variability, much like we did in Chapter 15 when we grouped the scores by person. 
+
+The degrees of freedom for each factor are its number of levels, $k_A$ or $k_B$, minus one.
+
+$$
+\begin{align}
+df_A &= k_A - 1 \\
+df_B &= k_B - 1
+\end{align}
+$$
+
+### The interaction
+
+And then, like I said, the $SS$ and $df$ for the interaction are simply whatever is left over: between-groups variability not already partitioned either into Factor A or Factor B. So we can find those through simple subtraction.
+
+$$
+\begin{align}
+SS_{A \times B} &= SS_{\text{between}} - SS_A - SS_B \\
+df_{A \times B} &= df_{\text{between}} - df_A - df_B
+\end{align}
+$$
+
+For a two-by-two design, that leaves $3 - 1 - 1 = 1$ degree of freedom. More generally, it works out to $(k_A - 1)(k_B - 1)$, much like the error degrees of freedom in Chapter 15.
+
+If you feel short-changed by the subtraction, we can also get the interaction variability directly from the data, which helps show what it represents. We give each group a prediction: the mean we'd expect for that group if the two main effects were all that was going on. To make the prediction, we start at the grand mean, then adjust for how far the mean for the group's level of Factor A is from the grand mean, and again for its level of Factor B. That simplifies to $M_A + M_B - M_{\text{grand}}$. In the table, $M_A$ and $M_B$ are the two marginal means in line with the group's cell: the one at the bottom of its column and the one at the end of its row.
+
+The interaction is about how far each group's actual mean falls from that prediction. We square each of those differences and multiply by the number of scores in the group, just as we did for the between-groups sum of squares.
+
+$$
+\begin{aligned}
+SS_{A \times B} = \Sigma n_{\text{group}}(&M_{\text{group}} - M_A \\
+&{}- M_B + M_{\text{grand}})^2
+\end{aligned}
+$$
+
+If there were no interaction at all, every group mean would sit right on its prediction, and this would come to zero. The farther the group means are from where the main effects alone would put them, the bigger the interaction.
+
+### One equation, different groupings
+
+Over the last three chapters we've now used what is basically the same equation four times: group the scores, find each group's mean, and see how far those means fall from the grand mean. All that changed was the grouping. @tbl-anova-groupings lines them up, much like the table comparing the $t$ statistics in Chapter 13.
+
+| Component | Scores grouped by | Sum of squares |
+|:--|:--|:--|
+| Between groups (Ch. 14--16) | Condition, or cell | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ |
+| Between people (Ch. 15) | Person | $\Sigma k(M_{\text{person}} - M_{\text{grand}})^2$ |
+| Factor A (Ch. 16) | Level of Factor A | $\Sigma n_A(M_A - M_{\text{grand}})^2$ |
+| Factor B (Ch. 16) | Level of Factor B | $\Sigma n_B(M_B - M_{\text{grand}})^2$ |
+
+: The same equation with the scores grouped four different ways. In each case, the squared deviation of a mean from the grand mean is multiplied by the number of scores that mean represents. {#tbl-anova-groupings}
+
+The two new components that aren't in the table, Chapter 15's error and this chapter's interaction, came from the other move we keep making: subtracting, to see what's left of a larger component once these have been taken out.
+
+## Factorial ANOVA in context
+
+It's useful to lay out the process in that generic fashion, I think, but going on about "Factor A, Factor B" can feel a little abstract. Before we run through the full hypothesis test, let's just put the terms and components we just talked about into the context of our maze and audience example. Then we can see how the math works visually before actually calculating it all out.
+
+Maze difficulty is our Factor A and audience is our Factor B. So when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of audience, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+
+@tbl-factorial-marginal-means has the mean time for each of the four groups, with the marginal means around the edges.
+
+|  | Easy maze | Hard maze | Audience mean |
+|:--|:--:|:--:|:--:|
+| Alone | 36 | 40 | *38* |
+| Watched | 28 | 56 | *42* |
+| Maze mean | *32* | *48* | *40* |
+
+: Mean times (in seconds) for the four groups, with the marginal means for each factor in the last row and column, and the grand mean in the corner. {#tbl-factorial-marginal-means}
+
+Kids who did the easy maze averaged 32 seconds and kids who did the hard maze averaged 48, whether or not anyone was watching. Kids working alone averaged 38 seconds and kids being watched averaged 42, whichever maze they did. Each of those marginal means represents eight kids. And the grand mean, 40 seconds, is in the corner.
+
+So the main effect of maze is about that 16-second difference between 32 and 48, and the main effect of audience is about the 4-second difference between 38 and 42. But look at what the audience means are hiding. Watched kids were 4 seconds slower on average, but they were 8 seconds *faster* on the easy maze and 16 seconds slower on the hard one. That's the kind of thing the interaction picks up.
 
 <!-- PLAN: the explorer tutorial below runs Chapter 14's and 15's visual on the maze × audience data (tbl-factorial-data). Maze has to be the first factor: the explorer can label a thin second-factor layer (audience, 3% of the total) but not a thin first one. Total, within and between are one step each, since Chapter 14 taught them; the new parts are the two factors (regrouped like Chapter 15's people) and the interaction (cell means against the additive prediction, filling what's left of between). Step text is Rob's to write; each [ROB: …] says what the step shows. When the data changes, only the options change. -->
 
@@ -230,95 +322,6 @@ $$
 ::::
 
 :::::
-
-### Sums of squares and degrees of freedom
-
-<!-- DRAFT (2026-11-09, written at Rob's request): this section now uses definitional formulas, as Chapters 14 and 15 do (ISSUES #5). The familiar three are restated without comment; the new ones are tied to the steps of act-factorial-anova-viz. Rob's sentences are kept where they still apply. Symbols changed 2026-11-12 from column/row to $M_A$, $n_A$, $M_B$, $n_B$: the scores are grouped by factor, as Chapter 15 grouped them by person, and rows and columns are only mentioned to say where a mean sits in a table. A and B are kept for the generic equations here and the blank summary table; from the worked calculations in Step 3 onward the subscripts are the factor names (maze, audience, interaction), as in the practice quiz. The previous version is in the CUT comment at the end of the section. -->
-
-So in terms of calculating these different components, it's the same basic process as before. First, we need to know various sums of squares and degrees of freedom. As always, we start with between and within groups $SS$ and $df$. And, again, now it's the between-groups variability that we further subdivide into the $SS$ and $df$ for Factor A, Factor B, and the remainder, which must be accounted for by the interaction.
-
-The equations for the total, within-groups, and between-groups $SS$ and $df$ are exactly the same as in Chapter 14. Just remember that each cell of the table is a group, so here $k = 4$.
-
-$$
-\begin{align}
-SS_{\text{total}} &= \Sigma (X - M_{\text{grand}})^2 \\
-SS_{\text{within}} &= \Sigma (X - M_{\text{group}})^2 \\
-SS_{\text{between}} &= \Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2
-\end{align}
-$$
-
-$$
-\begin{align}
-df_{\text{total}} &= N - 1 \\
-df_{\text{within}} &= N - k \\
-df_{\text{between}} &= k - 1
-\end{align}
-$$
-
-The new equations[^factorial-computational] here are for the main effects and interaction.[^factorial-equal-n] Each main effect comes from regrouping the scores by one factor, ignoring the other.
-
-[^factorial-computational]: As in Chapters 14 and 15, there are computational versions of these formulas. They use the total for each level of a factor in the same way that Chapter 14's used treatment totals. We'll stick with the definitional formulas here too.
-
-[^factorial-equal-n]: These formulas assume that every group has the same number of scores. With unequal group sizes, the pieces no longer add up so neatly, and the analysis gets more complicated.
-
-For Factor A, we group the scores by their level of Factor A, ignoring Factor B. In @act-factorial-anova-viz, this was the part where we regrouped the scores by maze, ignoring the audience. We find the mean of all the scores at each level, $M_A$, and see how far it falls from the grand mean. These are the marginal means for Factor A: in @tbl-factorial-marginal-means, they're the maze means in the bottom margin, one for each column. Then we square that deviation and multiply it by $n_A$, the number of scores at that level, since each of these means represents that many scores.
-
-$$ SS_A = \Sigma n_A(M_A - M_{\text{grand}})^2 $$
-
-Notice that this is basically the same equation as for the between-groups sum of squares. The difference is that the means represent different sets of scores — all the scores at each level of Factor A combined, rather than all four groups separately. It's the same move we made in Chapter 15 when we regrouped the scores by person. And its degrees of freedom are $k_A$, the number of levels for that factor, minus one.
-
-$$ df_A = k_A - 1 $$
-
-And it's the same logic for the $SS$ for Factor B. Now we regroup the scores by audience, ignoring the maze. Again, the only new thing about this equation is that the means represent another grouping of scores: $M_B$ is the mean of all the scores at each level of Factor B, and $n_B$ is the number of scores at that level. These are the other set of marginal means, the audience means in the right-hand margin of the table, one for each row.
-
-$$ SS_B = \Sigma n_B(M_B - M_{\text{grand}})^2 $$
-
-$$ df_B = k_B - 1 $$
-
-### The interaction
-
-And then, like I said, the $SS$ and $df$ for the interaction are simply whatever is left over: between-groups variability not already partitioned either into Factor A or Factor B. So we can find those through simple subtraction.
-
-$$
-\begin{align}
-SS_{A \times B} &= SS_{\text{between}} - SS_A - SS_B \\
-df_{A \times B} &= df_{\text{between}} - df_A - df_B
-\end{align}
-$$
-
-For a two-by-two design, that leaves $3 - 1 - 1 = 1$ degree of freedom. More generally, it works out to $(k_A - 1)(k_B - 1)$, much like the error degrees of freedom in Chapter 15.
-
-But, as with the error component in Chapter 15, we can also get the interaction directly from the data, which helps show what it represents. In @act-factorial-anova-viz, each group got a prediction: the mean we'd expect for that group if the two main effects were all that was going on. To make the prediction, we start at the grand mean, then adjust for how far the mean for the group's level of Factor A is from the grand mean, and again for its level of Factor B. That simplifies to $M_A + M_B - M_{\text{grand}}$. In the table, $M_A$ and $M_B$ are the two marginal means in line with the group's cell: the one at the bottom of its column and the one at the end of its row.
-
-The interaction is about how far each group's actual mean falls from that prediction. We square each of those differences and multiply by the number of scores in the group, just as we did for the between-groups sum of squares.
-
-$$
-\begin{aligned}
-SS_{A \times B} = \Sigma n_{\text{group}}(&M_{\text{group}} - M_A \\
-&{}- M_B + M_{\text{grand}})^2
-\end{aligned}
-$$
-
-If there were no interaction at all, every group mean would sit right on its prediction, and this would come to zero. The farther the group means are from where the main effects alone would put them, the bigger the interaction.
-
-### One equation, different groupings
-
-Over the last three chapters we've now used what is basically the same equation four times: group the scores, find each group's mean, and see how far those means fall from the grand mean. All that changed was the grouping. @tbl-anova-groupings lines them up, much like the table comparing the $t$ statistics in Chapter 13.
-
-| Component | Scores grouped by | Sum of squares |
-|:--|:--|:--|
-| Between groups (Ch. 14--16) | Condition, or cell | $\Sigma n_{\text{group}}(M_{\text{group}} - M_{\text{grand}})^2$ |
-| Between people (Ch. 15) | Person | $\Sigma k(M_{\text{person}} - M_{\text{grand}})^2$ |
-| Factor A (Ch. 16) | Level of Factor A | $\Sigma n_A(M_A - M_{\text{grand}})^2$ |
-| Factor B (Ch. 16) | Level of Factor B | $\Sigma n_B(M_B - M_{\text{grand}})^2$ |
-
-: The same equation with the scores grouped four different ways. In each case, the squared deviation of a mean from the grand mean is multiplied by the number of scores that mean represents. {#tbl-anova-groupings}
-
-The two new components that aren't in the table, Chapter 15's error and this chapter's interaction, came from the other move we keep making: subtracting, to see what's left of a larger component once these have been taken out.
-
-## Factorial ANOVA in context
-
-It's good useful to lay out the process in that generic fashion, I think, but going on about "Factor A, Factor B" can feel a little abstract. Before to run through the full hypothesis test, let's just put the terms and compoenents we just talked about into the context of our maze and audience example. Then we can see how the math works visually before actually calculating it all out.
 
 ## A factorial ANOVA, step by step
 
