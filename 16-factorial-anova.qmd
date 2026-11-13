@@ -67,11 +67,11 @@ How does this new, more complicated design change how we analyze the data, and t
 
 To refresh your memory of the terminology that goes with the ANOVA procedure, a factor means the variable that defines the different groups being compared, usually an independent variable that the researcher manipulates either between or within participants. The levels are the individual conditions that make up a factor.
 
-A **factorial** design, then, is one with more than one factor, each factor with two or more levels, with every combination of those levels represented. For our purposes, we're only going to look at one kind of factorial design: the two-by-two between-participants ANOVA, which has two between-participants factors, each with two levels. But you should be aware that one or both factors can be manipulated within participants. And we can have more factors, and factors that have different numbers of levels. We could have a three-by-two within-participants design. We can even have a mix of between- and within-participants factors (called a mixed-factorial design). But again, here we'll just stick with the two-by-two between-participants version to illustrate the basic logic.
+A **factorial** design, then, is one with more than one factor, each factor with two or more levels, with every combination of those levels represented. For our purposes, we're only going to look at one kind of factorial design: the two-by-two between-participants ANOVA, which has two between-participants factors, each with two levels. Designs can have more factors or levels, and can use within-participants factors or a mix of between- and within-participants factors (called a mixed-factorial design), but the basic logic remains the same.
 
 ### Main effects, marginal means, and interactions
 
-It's important to understand the basic conceptual structure. With a two-by-two design, we end up with four individual groups, one for each combination of the levels of each factor. So generically, let's say we have Factor A and Factor B. If we arrange them in a table, you can see the four conditions this creates.
+It's important to understand the basic conceptual structure. With a two-by-two design, we end up with four individual groups, one for each combination of the levels of each factor.[^factorial-combinations] So generically, let's say we have Factor A and Factor B. If we arrange them in a table, you can see the four conditions this creates.
 
 |  |  | **Factor A** | | |
 |---|---|:--:|:--:|:--:|
@@ -82,15 +82,13 @@ It's important to understand the basic conceptual structure. With a two-by-two d
 
 : The four conditions of a generic 2×2 factorial design, with the marginal means for each factor in the last row and column, and the grand mean in the corner. {#tbl-factorial-generic}
 
-If you're a participant in this study, you might be in the group of people treated with level one of Factor A and level one of Factor B. Or you might get level one of Factor A and level two of Factor B. Or you could be in level two of Factor A, level one of Factor B. Or $A_2 B_2$.[^factorial-combinations]
-
-[^factorial-combinations]: We can find the number of individual groups by multiplying the factorial statement. So two-by-two literally means two multiplied by two, so four conditions in total. A two-by-three design would have two times three, so six groups. A three-by-five design would have three times five, so fifteen conditions. It can get pretty complicated. And you'd need a lot of participants to fill out all those subgroups. Sticking with a two-by-two design is enough for us: the logic of those more complicated designs is the same.
+[^factorial-combinations]: We can find the number of individual groups by multiplying the factorial statement. So two-by-two literally means two multiplied by two, so four conditions in total. A two-by-three design would have two times three, so six groups.
 
 You'll notice that @tbl-factorial-generic also has an extra row and column labelled **marginal mean**. There's one marginal mean for each level of each factor; each is the mean of everyone at one level of a factor, ignoring the other factor. $M_{A_1}$ is the mean of all the scores in the $A_1$ column, whether they came from $B_1$ or $B_2$. Likewise, $M_{B_1}$ is the mean of all the scores in the $B_1$ row, regardless of Factor A. And in the corner is the grand mean, the mean of every score all lumped together, just as before.
 
 When it comes to the hypothesis test for a factorial design, we'll actually run several hypothesis tests. For this two-by-two design we'll have three tests.
 
-First, the **main effects**. The main effect of Factor A asks whether there is an overall difference between the levels of Factor A, ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. In other words, we compare the marginal means for Factor A. Then there's the main effect of Factor B. This is the same idea, applied to the other factor. We ignore the different groups on Factor A and just pool together everyone on each level of Factor B, and compare those two marginal means to see if there was an overall difference.
+First, the **main effects**. The main effect of Factor A asks whether there is an overall difference between the levels of Factor A, ignoring the levels of Factor B. We just pool everyone together depending on which level of Factor A they were in, regardless of their level of Factor B. In other words, we compare the marginal means for Factor A. The main effect of Factor B is the same idea, comparing its marginal means while ignoring Factor A.
 
 Third, we're interested in the **interaction** between factors A and B. This is a major reason for using a design like this, instead of just two separate studies to look at Factors A and B in isolation. We want to know if Factor A and Factor B interact---that is, if the effect of one depends on the level of the other.
 
@@ -209,9 +207,7 @@ The two new components that aren't in the table, Chapter 15's error and this cha
 
 ## Factorial ANOVA in context
 
-It's useful to lay out the process in that generic fashion, I think, but going on about "Factor A, Factor B" can feel a little abstract. Before we run through the full hypothesis test, let's just put the terms and components we just talked about into the context of our maze and audience example. Then we can see how the math works visually before actually calculating it all out.
-
-Maze difficulty is our Factor A and audience is our Factor B. So when we come to analyze the data, we'll be grouping up the scores in different ways to analyze the different patterns of variability. For the main effect of maze difficulty, we'll be comparing everyone who did the easy maze against everyone who did the hard maze. And then for the main effect of audience, we compare everyone who worked alone with everyone who was watched. For the interaction, we're basically looking at the variability among all four cells of the table to see if anything departs from what we'd expect based on those main effects alone.
+To make this more concrete, let's return to our maze experiment. Maze difficulty is our Factor A and audience is our Factor B.
 
 @tbl-factorial-marginal-means has the mean time for each of the four groups, with the marginal means around the edges.
 
@@ -226,6 +222,8 @@ Maze difficulty is our Factor A and audience is our Factor B. So when we come to
 Kids who did the easy maze averaged 32 seconds and kids who did the hard maze averaged 48. Kids working alone averaged 38 seconds and kids being watched averaged 42. Each of those marginal means represents eight kids. And the grand mean, 40 seconds, is in the corner.
 
 So the main effect of maze is about that 16-second difference between 32 and 48, and the main effect of audience is about the 4-second difference between 38 and 42. But look at what the audience means are hiding. Watched kids were 4 seconds slower on average, but they were 8 seconds *faster* on the easy maze and 16 seconds slower on the hard one. That's the kind of thing the interaction picks up.
+
+We'll work through calculating the $F$ ratios in a moment, but first let's see how the various sums of squares are built up in this factorial analysis.
 
 <!-- Maze must remain the first factor: the explorer can label a thin second-factor layer (audience, 3% of the total), but not a thin first one. -->
 
@@ -547,9 +545,9 @@ $$
 
 With $df = 1$ and $12$, the critical value is the same 4.75 as before, and both $F$ ratios are beyond it.^[The two sums of squares add up to 640, which is exactly $SS_{\text{audience}}$ plus $SS_{\text{interaction}}$, $64 + 576$. The simple effects haven't found any new variability. They've taken everything the audience did, the main effect and the interaction together, and split it up by maze instead.] So being watched made kids significantly faster on the easy maze, and significantly slower on the hard maze. Both halves of the pattern are significant at the unadjusted .05 threshold.
 
-We could have sliced the interaction the other way, testing the effect of the maze for kids working alone and for kids being watched. That would tell us that the hard maze took 4 seconds longer than the easy one for kids working alone, which isn't a significant difference ($F = 1.33$), and 28 seconds longer for kids being watched, which is ($F = 65.33$). It's the same interaction seen from the other side, and it's an accurate description of the data. But it only tells us that an audience widens the gap between the mazes. It can't tell us whether that's because watched kids sped up on the easy maze, slowed down on the hard one, or both. And that's exactly what our theory makes predictions about: facilitation on the easy task and impairment on the hard one. So we let the research question choose which simple effects to test.
+We could have sliced the interaction the other way, testing the effect of the maze for kids working alone and for kids being watched. But that wouldn't directly test our predictions of facilitation on the easy task and impairment on the hard one. So we let the research question choose which simple effects to test.
 
-One caution. Testing every simple effect we can think of would bring back the experiment-wise error rate problem from Chapter 14, and even our two follow-up tests add to it. There are corrections we could apply if we were being fastidious. Our easy-maze result, with $p = .040$, is close enough to the threshold that it might not survive one. The hard-maze result would.
+One caution. Testing every simple effect we can think of would bring back the experiment-wise error rate problem from Chapter 14, and even our two follow-up tests add to it. Our easy-maze result, with $p = .040$, is close enough to the threshold that it might not survive a correction. The hard-maze result would.
 
 #### Statistical power
 
