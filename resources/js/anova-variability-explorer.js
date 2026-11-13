@@ -20,6 +20,14 @@
   // that mean something else here: red, purple, brown and grey.
   const PERSON_COLORS = [0, 1, 3, 4, 5, 7];
   const CENTRE_PHASES = ["shift", "lanes", "deviations", "squares", "sum"];
+  // The interaction's prediction is built first, one factor at a time, before any cell
+  // mean is measured against it.
+  // It starts from the scores back in their groups, with only the grand mean drawn.
+  const PREDICT_PHASES = ["predict-start", "predict-a", "predict-b"];
+  const INTERACTION_PHASES = [...PREDICT_PHASES, ...PHASES];
+  // Each hop of a prediction takes this long, and the next waits this long after it.
+  const HOP_DURATION = 900;
+  const HOP_PAUSE = 350;
   // Real scores stay where they are, this faded, while a stand-in does the work.
   const DOT_FADED = 0.45;
   // Stand-ins at a mean stack this much further apart than scores do, so they can be counted.
@@ -85,14 +93,14 @@
       "f-ratio": "f"
     };
     const normalized = aliases[key] || key;
-    return [...COMPARE_PHASES, ...PEOPLE_PHASES, ...CENTRE_PHASES].includes(normalized)
+    return [...COMPARE_PHASES, ...PEOPLE_PHASES, ...CENTRE_PHASES, ...PREDICT_PHASES].includes(normalized)
       ? normalized
       : fallback;
   }
 
   // The compare stage has its own phases; the other stages use PHASES.
   function phaseForStage(stage, phase) {
-    const valid = { compare: COMPARE_PHASES, people: PEOPLE_PHASES, "factor-a": PEOPLE_PHASES, "factor-b": PEOPLE_PHASES, centre: CENTRE_PHASES }[stage] || PHASES;
+    const valid = { compare: COMPARE_PHASES, people: PEOPLE_PHASES, "factor-a": PEOPLE_PHASES, "factor-b": PEOPLE_PHASES, centre: CENTRE_PHASES, interaction: INTERACTION_PHASES }[stage] || PHASES;
     return valid.includes(phase) ? phase : defaultPhaseForStage(stage);
   }
 
@@ -148,6 +156,16 @@
       .anova-variability-explorer .ave-mean-line { stroke-width: 2.5; stroke-dasharray: 5 4; }
       .anova-variability-explorer .ave-grand-line { stroke: var(--ave-total); stroke-width: 2.5; stroke-dasharray: 8 5; }
       .anova-variability-explorer .ave-mean-label { font-size: var(--sfs-figure-small-size, 0.75rem); font-weight: 650; }
+      .anova-variability-explorer .ave-prediction-line { stroke: var(--ave-between); stroke-dasharray: 2 3; }
+      .anova-variability-explorer .ave-hop-line { fill: none; stroke-width: 2.5; }
+      .anova-variability-explorer .ave-hop-label {
+        font-size: var(--sfs-figure-small-size, 0.75rem);
+        font-weight: 650;
+        paint-order: stroke;
+        stroke: var(--bs-body-bg, #fff);
+        stroke-width: 3px;
+        stroke-linejoin: round;
+      }
       .anova-variability-explorer .ave-transfer-layer {
         pointer-events: none;
       }
@@ -602,6 +620,7 @@
     const lanesLayer = plotGroup.append("g").attr("class", "ave-lanes");
     const deviationLayer = plotGroup.append("g").attr("class", "ave-deviations");
     const meansLayer = plotGroup.append("g").attr("class", "ave-means");
+    const predictionLayer = plotGroup.append("g").attr("class", "ave-predictions");
     const dotsLayer = plotGroup.append("g").attr("class", "ave-dots");
     // Above the scores: while they're in play, the stand-ins are what's being counted.
     const ghostsLayer = plotGroup.append("g").attr("class", "ave-ghosts");
@@ -750,8 +769,11 @@
         selection.select(".ave-pop-area").attr("d", area(data)).attr("fill", curveColor);
         selection.select(".ave-pop-line").attr("d", line(data)).attr("stroke", curveColor);
       });
+      // With factors the curves belong to the opening step only. Left faint behind the
+      // lanes they'd come and go as the scores regroup.
+      const faint = design ? 0 : state.stage === "total" ? 0.1 : 0.07;
       curves.interrupt().transition().duration(animate ? 420 : 0)
-        .style("opacity", regrouped() ? 0 : visible ? 1 : state.stage === "total" ? 0.1 : 0.07);
+        .style("opacity", regrouped() ? 0 : visible ? 1 : faint);
     }
 
     // Colour marks the grouping currently in use: none for the total, conditions for the
@@ -970,7 +992,9 @@
     // treats it as shifted with the person's other scores. Those are fictions, so they're
     // drawn as ghosts. The scores themselves stay put.
     function standIn(d) {
-      if (state.stage === "between" || state.stage === "interaction") return stats.means[d.groupIndex];
+      if (state.stage === "between") return stats.means[d.groupIndex];
+      // While the prediction is being built, nothing has been measured against it yet.
+      if (state.stage === "interaction") return predicting() ? null : stats.means[d.groupIndex];
       const f = activeFactor();
       if (f >= 0) return ["recolour", "rows"].includes(state.phase) ? null : stats.levelStats[f].levelMeans[levelOf(d, f)];
       if (state.stage === "centre") return centredValue(d);
@@ -1186,10 +1210,13 @@
 
     function renderMeans(animate, moves) {
       const f = activeFactor();
-      const showGroupMeans = ["within", "between", "compare", "populations", "centre", "interaction"].includes(state.stage);
+      const showGroupMeans = ["within", "between", "compare", "populations", "centre"].includes(state.stage) ||
+        (state.stage === "interaction" && !predicting());
       const showPersonMeans = rowsView() && state.phase !== "rows" && f < 0;
       const showLevelMeans = rowsView() && state.phase !== "rows" && f >= 0;
-      const showGrand = ["total", "between", "compare", "centre"].includes(state.stage) || showPersonMeans || showLevelMeans;
+      // A prediction sets off from the grand mean, so it stays while the hops are in view.
+      const showGrand = ["total", "between", "compare", "centre"].includes(state.stage) || showPersonMeans || showLevelMeans ||
+        predicting() || hopsShown();
       // Centring carries each person's mean to the grand mean, and their scores with it.
       const meanX = (d) => x(d.person && state.stage === "centre" ? stats.grandMean : d.mean);
       const meanData = showLevelMeans
@@ -1197,12 +1224,7 @@
         : showPersonMeans
           ? stats.personMeans.map((mean, i) => ({ mean, i, person: true }))
           : showGroupMeans ? stats.means.map((mean, i) => ({ mean, i })) : [];
-      // In the interaction stage, each cell also shows the mean the two factors predict for it.
-      if (state.stage === "interaction") {
-        stats.predicted.forEach((mean, i) => meanData.push({ mean, i, prediction: true }));
-      }
       const meanColor = (d) => {
-        if (d.prediction) return "var(--ave-between)";
         if (d.level !== undefined) return levelFill(d.level, d.i);
         if (d.person) return personFill(d.i);
         return regrouped() ? "var(--ave-total)" : colors[d.i % colors.length];
@@ -1213,14 +1235,12 @@
         return d.person ? Math.min(16, personY.step() / 2 - 3) : lane.meanHalf;
       };
       const meanName = (d) => {
-        if (d.prediction) return d.i === 0 && !compact ? "prediction" : "";
         if (d.level !== undefined) return d.i === 0 && !compact ? `${factors[d.level].name} mean` : "";
         if (state.stage === "interaction") return d.i === 0 && !compact ? "cell mean" : "";
         if (!d.person) return compact ? "" : "group mean";
         return d.i === 0 && state.stage === "people" ? "person mean" : "";
       };
       const meanKey = (d) => {
-        if (d.prediction) return `prediction-${d.i}`;
         if (d.level !== undefined) return `level-${d.level}-${d.i}`;
         return d.person ? `person-${d.i}` : d.i;
       };
@@ -1238,17 +1258,15 @@
       } else {
         meanLines.attr("x1", meanX).attr("x2", meanX);
       }
-      // A prediction is drawn finer than a mean, so the two read apart.
-      if (design) meanLines.style("stroke-dasharray", (d) => d.prediction ? "2 3" : null);
       // A cell's mean and its prediction sit close together, so their labels read away
       // from each other: which way depends on which is higher.
-      const apart = (d) => {
-        if (state.stage !== "interaction") return 0;
-        const lower = stats.predicted[d.i] < stats.means[d.i];
-        return (d.prediction === lower) ? -1 : 1;
-      };
+      const apart = (d) => state.stage === "interaction" ? -predictionSide(d.i) : 0;
       meanMerged.select("text")
         .attr("fill", meanColor)
+        // Beside its prediction, a cell mean's label can run over the grand mean's line.
+        .style("paint-order", state.stage === "interaction" ? "stroke" : null)
+        .style("stroke", state.stage === "interaction" ? "var(--bs-body-bg, #fff)" : null)
+        .style("stroke-width", state.stage === "interaction" ? "3px" : null)
         // A person's mean can sit close to the grand mean, so its label reads away from that line.
         .attr("text-anchor", (d) => {
           if (apart(d)) return apart(d) < 0 ? "end" : "start";
@@ -1277,6 +1295,160 @@
         .text("grand mean");
       grandMerged.transition().duration(animate ? 320 : 0).style("opacity", 1);
       grand.exit().transition().duration(animate ? 160 : 0).style("opacity", 0).remove();
+    }
+
+    function predicting() {
+      return state.stage === "interaction" && PREDICT_PHASES.includes(state.phase);
+    }
+
+    // How many hops of the prediction have been made: one per factor.
+    function predictionHops() {
+      if (!design || state.stage !== "interaction") return 0;
+      const made = PREDICT_PHASES.indexOf(state.phase);
+      return made < 0 ? factors.length : made;
+    }
+
+    // The hops clear once the cell means are measured against the prediction, so the
+    // deviations are read on their own.
+    function hopsShown() {
+      return predictionHops() > 0 && phaseIndex() < 1;
+    }
+
+    // Where a cell's prediction stands after each hop: the grand mean, then moved by the
+    // first factor's effect at the cell's level, then by the second's. The last stop is
+    // the mean the two factors alone predict.
+    function predictionStops(i) {
+      const stops = [stats.grandMean];
+      factors.forEach((factor, f) => {
+        stops.push(stops[f] + stats.levelStats[f].levelMeans[groups[i].levels[f]] - stats.grandMean);
+      });
+      return stops;
+    }
+
+    // Which side of its cell mean a prediction's label reads on: away from the mean.
+    function predictionSide(i) {
+      return stats.predicted[i] < stats.means[i] ? -1 : 1;
+    }
+
+    function signed(value) {
+      if (Math.abs(value) < 1e-9) return "0";
+      return `${value < 0 ? "\u2212" : "+"}${fmt(Math.abs(value))}`;
+    }
+
+    let lastHops = 0;
+
+    // The interaction's prediction, made where it can be watched. A marker in each cell's
+    // lane sets off from the grand mean and hops once for each factor, by the distance of
+    // that factor's mean for the cell's level from the grand mean: the deviation its sum
+    // of squares was built from. Each hop leaves an arrow in the level's colour.
+    function renderPrediction(animate, moves, sameStage) {
+      if (!design) return;
+      const hops = predictionHops();
+      const cells = hops ? groups.map((group, i) => ({ i, stops: predictionStops(i) })) : [];
+      // Hops play only as the prediction is built, and only the ones not yet made.
+      const building = animate && predicting() && hops > lastHops;
+      const firstNew = building ? lastHops : hops;
+      // Scores on their way back to the lanes arrive first.
+      // So does a marker that isn't there yet.
+      const start = !building ? 0 : moves.crossing ? moves.moveAt + 1200 : sameStage && lastHops ? 0 : 400;
+      const hopAt = (h) => start + (h - firstNew) * (HOP_DURATION + HOP_PAUSE);
+      const landed = building ? hopAt(hops - 1) + HOP_DURATION : 0;
+      const place = (value) => `translate(${x(value)},0)`;
+
+      const markers = predictionLayer.selectAll("g.ave-prediction").data(cells, (d) => d.i);
+      markers.exit().interrupt("hop").interrupt("fade")
+        .transition("fade").duration(animate ? 160 : 0).style("opacity", 0).remove();
+      const markerEnter = markers.enter().append("g").attr("class", "ave-prediction")
+        .style("opacity", 0).attr("transform", (d) => place(d.stops[firstNew]));
+      markerEnter.append("line").attr("class", "ave-mean-line ave-prediction-line");
+      markerEnter.append("text").attr("class", "ave-mean-label").attr("fill", "var(--ave-between)");
+      const marker = markerEnter.merge(markers).interrupt("hop").interrupt("fade");
+      marker.select("line")
+        .attr("y1", (d) => groupY(d.i) - lane.meanHalf).attr("y2", (d) => groupY(d.i) + lane.meanHalf);
+      // It isn't the prediction until the last hop lands.
+      const named = hops === factors.length;
+      marker.select("text").interrupt()
+        .attr("text-anchor", (d) => predictionSide(d.i) < 0 ? "end" : "start")
+        .attr("x", (d) => predictionSide(d.i) * 4)
+        .attr("y", (d) => groupY(d.i) - lane.meanLabel)
+        .text((d) => d.i === 0 && !compact ? "prediction" : "")
+        .style("opacity", function() { return building || !named ? 0 : 1; })
+        .transition().delay(landed).duration(building ? 300 : 0)
+        .style("opacity", named ? 1 : 0);
+      marker.transition("fade").delay(Math.max(0, start - 350)).duration(animate ? 320 : 0).style("opacity", 1);
+      if (building) {
+        // A step taken before the last hop finished: that hop counts as made.
+        let hop = marker.attr("transform", (d) => place(d.stops[firstNew]));
+        d3.range(firstNew, hops).forEach((h) => {
+          hop = hop.transition("hop").delay(h === firstNew ? hopAt(h) : HOP_PAUSE)
+            .duration(HOP_DURATION).ease(d3.easeCubicInOut)
+            .attr("transform", (d) => place(d.stops[h + 1]));
+        });
+      } else {
+        marker.transition("hop").duration(animate ? 400 : 0)
+          .attr("transform", (d) => place(d.stops[hops]));
+      }
+
+      const offsets = compact ? [28, 17] : [33, 22];
+      const hopData = !hopsShown() ? [] : cells.flatMap((cell) => d3.range(hops).map((h) => {
+        const level = groups[cell.i].levels[h];
+        const from = x(cell.stops[h]);
+        const to = x(cell.stops[h + 1]);
+        const dir = Math.sign(to - from);
+        const text = compact ? signed(cell.stops[h + 1] - cell.stops[h])
+          : `${factors[h].levels[level]} ${signed(cell.stops[h + 1] - cell.stops[h])}`;
+        return {
+          key: `${cell.i}-${h}`, h, from, to, dir, text,
+          y: groupY(cell.i) - offsets[h % offsets.length],
+          color: levelFill(h, level),
+          // The first hop's name sits over its arrow if it fits there. Any other goes on
+          // past the arrow's tip, clear of the arrow above it.
+          over: h === 0 && Math.abs(to - from) >= text.length * 6.6 + 6
+        };
+      }));
+      const tip = (d, at) => `translate(${at},${d.y})`;
+      // The line stops short of the tip, so the arrowhead's point stays sharp.
+      const shaft = (d, at) => Math.abs(at - d.from) > 5 ? at - d.dir * 4 : d.from;
+      const arrows = predictionLayer.selectAll("g.ave-hop").data(hopData, (d) => d.key);
+      arrows.exit().interrupt().transition().duration(animate ? 160 : 0).style("opacity", 0).remove();
+      const arrowEnter = arrows.enter().append("g").attr("class", "ave-hop").style("opacity", 0);
+      arrowEnter.append("line").attr("class", "ave-hop-line");
+      arrowEnter.append("path").attr("class", "ave-hop-head");
+      arrowEnter.append("text").attr("class", "ave-hop-label");
+      const arrow = arrowEnter.merge(arrows).interrupt();
+      const fresh = (d) => building && d.h >= firstNew;
+      const line = arrow.select("line").interrupt()
+        .attr("stroke", (d) => d.color)
+        .attr("x1", (d) => d.from).attr("y1", (d) => d.y).attr("y2", (d) => d.y)
+        .attr("x2", (d) => fresh(d) ? d.from : shaft(d, d.to));
+      const head = arrow.select("path").interrupt()
+        .attr("fill", (d) => d.color)
+        .attr("d", (d) => d.dir ? `M0,0 L${-7 * d.dir},-4 L${-7 * d.dir},4 Z` : null)
+        .attr("transform", (d) => tip(d, fresh(d) ? d.from : d.to));
+      // Named while the prediction is being made; afterwards the arrows only say where it came from.
+      const labelled = predicting();
+      const label = arrow.select("text").interrupt()
+        .attr("fill", (d) => `color-mix(in srgb, ${d.color} 62%, var(--sfs-text, #222))`)
+        .attr("text-anchor", (d) => d.over ? "middle" : d.dir < 0 ? "end" : "start")
+        .attr("x", (d) => d.over ? (d.from + d.to) / 2 : d.to + (d.dir || 1) * 8)
+        .attr("y", (d) => d.over ? d.y - 6 : d.y + 4)
+        .text((d) => d.text)
+        .style("opacity", function(d) { return fresh(d) ? 0 : labelled ? 1 : this.style.opacity || 0; });
+      if (building) {
+        const moving = (selection) => selection.filter(fresh).transition()
+          .delay((d) => hopAt(d.h)).duration(HOP_DURATION).ease(d3.easeCubicInOut);
+        moving(line).attrTween("x2", (d) => {
+          const at = d3.interpolateNumber(d.from, d.to);
+          return (t) => shaft(d, at(t));
+        });
+        moving(head).attr("transform", (d) => tip(d, d.to));
+        label.filter(fresh).transition().delay((d) => hopAt(d.h) + HOP_DURATION - 250).duration(300)
+          .style("opacity", 1);
+      }
+      label.filter((d) => !fresh(d)).transition().duration(animate ? 240 : 0).style("opacity", labelled ? 1 : 0);
+      arrow.transition().delay((d) => fresh(d) ? hopAt(d.h) : 0).duration(animate ? 200 : 0)
+        .style("opacity", labelled ? 1 : 0.55);
+      lastHops = hops;
     }
 
     // Within pours in first and settles at the bottom; between fills the rest of the total.
@@ -1826,8 +1998,9 @@
 
     // F is the fraction itself: the gap the two have kept since the partition gets its bar.
     // With factors there are three fractions over one denominator. The within mean square
-    // stands under the middle numerator; dashed copies of it slide out under the other two,
-    // since it's the same quantity used three times. Each F's value goes under its fraction.
+    // stands under the middle numerator; copies of it slide out under the other two, drawn
+    // exactly as it is, since it's the same quantity used three times. Each F's value goes
+    // under its fraction.
     function renderFactorialFraction(animate, after) {
       const show = state.phase === "f";
       const within = aggregateSquares().find((d) => d.key === "within");
@@ -1845,17 +2018,20 @@
         .attr("stroke", "currentColor").attr("stroke-width", 2.5).attr("stroke-linecap", "round")
         .attr("y1", midline).attr("y2", midline)
         .attr("x1", (d) => d.cx).attr("x2", (d) => d.cx)
+        // A bar waiting for the cuts to land would show as a dot.
+        .style("opacity", 0)
         .merge(bars)
         .transition().delay(delay).duration(animate ? 480 : 0).ease(d3.easeCubicOut)
         .attr("x1", (d) => d.cx - d.half).attr("x2", (d) => d.cx + d.half)
-        .attr("y1", midline).attr("y2", midline);
+        .attr("y1", midline).attr("y2", midline)
+        .style("opacity", 1);
       bars.exit().transition().duration(animate ? 200 : 0).style("opacity", 0).remove();
 
       const copies = fractionLayer.selectAll("rect.ave-denominator-copy")
         .data(show ? items.filter((d) => d.key !== "factor-b") : [], (d) => d.key);
       copies.enter().append("rect").attr("class", "ave-denominator-copy ave-square")
-        .attr("fill", "none").attr("stroke", "var(--ave-within)").attr("stroke-width", 1.5)
-        .attr("stroke-dasharray", "4 3")
+        .attr("fill", "var(--ave-within)").attr("fill-opacity", 0.18)
+        .attr("stroke", "var(--ave-within)").attr("stroke-width", 1.5)
         .attr("x", denominator.x).attr("y", denominator.y)
         .attr("width", denominator.side).attr("height", denominator.side)
         .style("opacity", 0)
@@ -1928,6 +2104,9 @@
       }
       if (state.stage === "interaction") {
         return {
+          "predict-start": `The four groups of scores again, one for each combination of ${a.name} and ${b.name}, and the grand mean.`,
+          "predict-a": `A marker in each group's lane, moved from the grand mean by as far as the mean for the group's level of ${a.name} is from it.`,
+          "predict-b": `Each marker moved again, by as far as the mean for the group's level of ${b.name} is from the grand mean. Where it lands is the mean the two factors alone predict for the group.`,
           observe: `Each group's mean, and the mean that ${a.name} and ${b.name} alone would predict for it.`,
           deviations: "Each group mean's distance from its prediction.",
           squares: "Each group mean's distance from its prediction drawn as a square.",
@@ -2076,7 +2255,9 @@
       // settle, the deviations draw, then their squares grow, then they pour into the sum.
       // (A ghost has to reach its mean first.)
       const settled = hasStandIns() ? squares.GHOST_RISE + squares.GHOST_SLIDE + 60 : 800;
-      transitions.lineDelay = transitions.drawLines && !sameStage ? settled : 0;
+      // So does one that brings stand-ins to a prediction already made.
+      const arriving = !sameStage || (state.stage === "interaction" && !lastStandIns && hasStandIns());
+      transitions.lineDelay = transitions.drawLines && arriving ? settled : 0;
       transitions.squareDelay = transitions.drawLines && transitions.growSquares
         ? transitions.lineDelay + squares.LINE_DURATION + 250
         : 0;
@@ -2110,6 +2291,7 @@
       renderDeviations(animate, transitions);
       shrinkPersonSquares(regrouping);
       renderMeans(animate, regrouping);
+      renderPrediction(animate, regrouping, sameStage);
       renderGhosts(animate, regrouping);
       renderDots(animate, regrouping);
       renderSquares(animate, revealKey, layoutDelay, splitting, pourDelay);
@@ -2127,8 +2309,42 @@
       lastPersonColoured = personColoured();
     }
 
+    // With people or factors, a step from the partition straight to F plays what lies
+    // between in turn: the layers split, then each sum is cut into its mean square and F's
+    // bars are drawn. The figure holds the split for a moment on the way, so anything that
+    // draws it again first has to finish the step.
+    const SPLIT_HOLD = 1250;
+    let stagedStep = null;
+
+    function settleStagedStep() {
+      if (!stagedStep) return;
+      stagedStep.timer.stop();
+      state.phase = stagedStep.phase;
+      stagedStep = null;
+    }
+
+    function renderStep(animate) {
+      const staged = animate && !prefersReducedMotion() && regroups &&
+        state.stage === "compare" && state.phase === "f" &&
+        lastRenderedStage === "compare" && lastRenderedPhase === "partition";
+      if (!staged) {
+        render({ animate });
+        return;
+      }
+      state.phase = "split";
+      render({ animate: true });
+      stagedStep = {
+        phase: "f",
+        timer: d3.timeout(() => {
+          settleStagedStep();
+          render({ animate: true });
+        }, SPLIT_HOLD)
+      };
+    }
+
     function applyTutorialAction(action) {
       if (!action || typeof action !== "object") return;
+      settleStagedStep();
       if (action.stage !== undefined) {
         state.stage = stageFor(action.stage);
         state.phase = action.phase === undefined
@@ -2141,25 +2357,29 @@
         state.calculations = bool(action.calculations, state.calculations);
         calculationsToggle.property("checked", state.calculations);
       }
-      render({ animate: action.animate !== false });
+      renderStep(action.animate !== false);
     }
 
     calculationsToggle.on("change", function() {
+      settleStagedStep();
       state.calculations = this.checked;
       render({ animate: false });
     });
 
     rootNode.anovaVariabilityExplorer = {
       setStage(stage, animate) {
+        settleStagedStep();
         state.stage = stageFor(stage);
         state.phase = defaultPhaseForStage(state.stage);
         render({ animate: animate !== false });
       },
       setPhase(phase, animate) {
+        settleStagedStep();
         state.phase = phaseForStage(state.stage, normalizePhase(phase, state.phase));
-        render({ animate: animate !== false });
+        renderStep(animate !== false);
       },
       showCalculations(value) {
+        settleStagedStep();
         state.calculations = bool(value, true);
         calculationsToggle.property("checked", state.calculations);
         render({ animate: false });
@@ -2197,6 +2417,7 @@
             if (typeof window.interactiveFigure.cancelTransitions === "function") {
               window.interactiveFigure.cancelTransitions(rootNode);
             }
+            settleStagedStep();
             computeLayout(layout.width);
             applyLayout();
             render({ animate: false });

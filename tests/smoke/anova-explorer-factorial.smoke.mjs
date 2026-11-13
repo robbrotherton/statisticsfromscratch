@@ -125,6 +125,10 @@ test("every step draws, regrouping and splitting as it goes", async () => {
       await go(page, action);
       const rows = ["factor-a", "factor-b"].includes(action.stage) && action.phase !== "recolour";
       assert.equal(await laneCount(page), rows ? 2 : 4, `${width}: lanes at ${JSON.stringify(action)}`);
+      // The population curves are for the opening step only.
+      const curves = await page.evaluate(() => Array.from(document.querySelectorAll("g.ave-population"))
+        .filter((g) => getComputedStyle(g).opacity !== "0").length);
+      assert.equal(curves, action.stage === "populations" ? 4 : 0, `${width}: curves at ${JSON.stringify(action)}`);
       const labelled = await labelledLayers(page);
       // Between loses its name once a factor pours into it, and gets the interaction's
       // once the cells' departures fill what's left.
@@ -135,16 +139,134 @@ test("every step draws, regrouping and splitting as it goes", async () => {
         assert.ok(["factor-a", "factor-b", "between"].every((key) => labelled.includes(key)), `${width}: ${labelled}`);
       }
     }
-    // Three fractions, two of them over dashed copies of the one denominator.
+    // Three fractions, two of them over copies of the one denominator, drawn as it is.
     await go(page, { stage: "compare", phase: "f" });
-    const fraction = await page.evaluate(() => ({
-      bars: document.querySelectorAll("line.ave-factor-bar").length,
-      copies: document.querySelectorAll("rect.ave-denominator-copy").length
-    }));
-    assert.deepEqual(fraction, { bars: 3, copies: 2 });
+    const fraction = await page.evaluate(() => {
+      const look = (rect) => {
+        const style = getComputedStyle(rect);
+        return [style.fill, style.fillOpacity, style.stroke, style.strokeWidth, style.strokeDasharray,
+          rect.getAttribute("width"), rect.getAttribute("height")].join("|");
+      };
+      const within = Array.from(document.querySelectorAll("g.ave-ms-item"))
+        .find((g) => d3.select(g).datum().key === "within").querySelector("rect");
+      const copies = Array.from(document.querySelectorAll("rect.ave-denominator-copy"));
+      return {
+        bars: document.querySelectorAll("line.ave-factor-bar").length,
+        copies: copies.length,
+        alike: copies.every((copy) => look(copy) === look(within))
+      };
+    });
+    assert.deepEqual(fraction, { bars: 3, copies: 2, alike: true });
     assert.deepEqual(errors, []);
     await page.close();
   }
+});
+
+// Where each lane's prediction marker stands, in the scores' units, read off the axis.
+// d3 draws its ticks half a pixel along, so this is good to about a tenth of a second.
+const AXIS_SLACK = 0.2;
+const markers = (page) => page.evaluate(() => {
+  const ticks = Array.from(document.querySelectorAll(".ave-axis .tick")).map((tick) => ({
+    value: d3.select(tick).datum(),
+    x: Number(/translate\(([-\d.]+)/.exec(tick.getAttribute("transform"))[1])
+  }));
+  const [a, b] = [ticks[0], ticks[ticks.length - 1]];
+  const value = (x) => a.value + (x - a.x) * (b.value - a.value) / (b.x - a.x);
+  return Array.from(document.querySelectorAll("g.ave-prediction"))
+    .map((g) => value(Number(/translate\(([-\d.]+)/.exec(g.getAttribute("transform"))[1])));
+});
+const hopCount = (page) => page.evaluate(() => document.querySelectorAll("g.ave-hop").length);
+
+test("each prediction is built from the grand mean, one factor at a time", async () => {
+  for (const width of WIDTHS) {
+    const { page, errors } = await mount(options, width);
+    const s = await statistics(page);
+    const levelMean = (f, cell) => s.levelStats[f].levelMeans[options.groups[cell].levels[f]];
+    const cells = options.groups.map((group, i) => i);
+
+    // Before the first hop: the scores in their lanes and the grand mean, nothing else.
+    await go(page, { stage: "interaction", phase: "predict-start" });
+    assert.equal((await markers(page)).length, 0);
+    assert.equal(await hopCount(page), 0);
+    assert.deepEqual(await page.evaluate(() => ({
+      lanes: document.querySelectorAll("line.ave-lane").length,
+      grand: document.querySelectorAll("g.ave-grand-mean").length,
+      means: document.querySelectorAll("g.ave-group-mean").length,
+      ghosts: document.querySelectorAll("circle.anova-ghost").length
+    })), { lanes: 4, grand: 1, means: 0, ghosts: 0 });
+
+    await go(page, { stage: "interaction", phase: "predict-a" });
+    (await markers(page)).forEach((at, i) => near(at, levelMean(0, i), AXIS_SLACK));
+    assert.equal(await hopCount(page), cells.length, `${width}: one hop per lane`);
+
+    await go(page, { stage: "interaction", phase: "predict-b" });
+    (await markers(page)).forEach((at, i) => {
+      near(at, s.grandMean + (levelMean(0, i) - s.grandMean) + (levelMean(1, i) - s.grandMean), AXIS_SLACK);
+      near(at, s.predicted[i], AXIS_SLACK);
+    });
+    assert.equal(await hopCount(page), cells.length * 2, `${width}: two hops per lane`);
+
+    // The hops give way to the deviations, and the predictions stay where they landed.
+    for (const phase of ["deviations", "sum"]) {
+      await go(page, { stage: "interaction", phase });
+      assert.equal(await hopCount(page), 0, `${width}: hops at ${phase}`);
+      (await markers(page)).forEach((at, i) => near(at, s.predicted[i], AXIS_SLACK));
+    }
+
+    // Played with motion, a step taken mid-hop still ends in the right place.
+    await page.evaluate(() => {
+      const figure = window.__figure.anovaVariabilityExplorer;
+      figure.applyTutorialAction({ stage: "factor-b", phase: "sum", animate: false });
+      figure.applyTutorialAction({ stage: "interaction", phase: "predict-a" });
+    });
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.__figure.anovaVariabilityExplorer.applyTutorialAction({ stage: "interaction", phase: "predict-b" }));
+    await page.waitForTimeout(1600);
+    (await markers(page)).forEach((at, i) => near(at, s.predicted[i], AXIS_SLACK));
+    await page.evaluate(() => window.__figure.anovaVariabilityExplorer.applyTutorialAction({ stage: "interaction", phase: "predict-a" }));
+    await page.waitForTimeout(700);
+    (await markers(page)).forEach((at, i) => near(at, levelMean(0, i), AXIS_SLACK));
+    assert.equal(await hopCount(page), cells.length);
+
+    await go(page, { stage: "between", phase: "sum" });
+    assert.equal((await markers(page)).length, 0);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+const phaseShown = (page) => page.evaluate(() => ({
+  squares: Array.from(document.querySelectorAll("g.ave-ms-item")).filter((g) => getComputedStyle(g).opacity === "1").length,
+  bars: Array.from(document.querySelectorAll("line.ave-factor-bar")).filter((bar) => getComputedStyle(bar).opacity === "1").length
+}));
+
+test("a step from the partition to F splits, then cuts, then draws the fractions", async () => {
+  const { page, errors } = await mount(options, 620);
+  const play = (action) => page.evaluate((a) => window.__figure.anovaVariabilityExplorer.applyTutorialAction(a), action);
+  await go(page, { stage: "compare", phase: "partition" });
+  await play({ stage: "compare", phase: "f" });
+  // The split comes first: no mean squares and no bars yet.
+  await page.waitForTimeout(900);
+  assert.deepEqual(await phaseShown(page), { squares: 0, bars: 0 });
+  await page.waitForTimeout(6000);
+  assert.deepEqual(await phaseShown(page), { squares: 4, bars: 3 });
+
+  // Interrupted during the split, the step still ends at F, or wherever the reader went.
+  await go(page, { stage: "compare", phase: "partition" });
+  await play({ stage: "compare", phase: "f" });
+  await page.waitForTimeout(300);
+  await page.evaluate(() => window.__figure.anovaVariabilityExplorer.showCalculations(false));
+  await page.waitForTimeout(40);
+  assert.deepEqual(await phaseShown(page), { squares: 4, bars: 3 });
+  await go(page, { stage: "compare", phase: "partition" });
+  await play({ stage: "compare", phase: "f" });
+  await page.waitForTimeout(300);
+  await go(page, { stage: "interaction", phase: "sum" });
+  await page.waitForTimeout(1500);
+  assert.equal(await laneCount(page), 4);
+  assert.deepEqual(await phaseShown(page), { squares: 0, bars: 0 });
+  assert.deepEqual(errors, []);
+  await page.close();
 });
 
 test("nothing is drawn past the figure's sides", async () => {
