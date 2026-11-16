@@ -288,11 +288,19 @@ So now let's work through a hypothesis test for this design, using the maze and 
 
 ### Step 1: State the hypotheses
 
-We need a null and alternative hypothesis for each of our three tests. For maze difficulty, the null is that the easy and hard mazes have equal population mean times, averaging across the audience conditions. For audience, the null is that the alone and watched conditions have equal population mean times, averaging across the mazes. Each alternative is that those means differ. For the interaction, the null is that the effect of being watched is the same on both mazes; the alternative is that it depends on the maze.
+We need a null and alternative hypothesis for each of our three tests. For maze difficulty, the null is that the easy and hard mazes have equal population mean times, averaging across the audience conditions:
+
+$$ H_0: \mu_{\text{easy}} = \mu_{\text{hard}} $$
+
+For audience, the null is that the alone and watched conditions have equal population mean times, averaging across the mazes:
+
+$$ H_0: \mu_{\text{alone}} = \mu_{\text{watched}} $$
+
+Each alternative is that those means differ. For the interaction, the null is that the effect of being watched is the same on both mazes; the alternative is that it depends on the maze.
 
 ### Step 2: Set the decision criteria
 
-We use the same $F$ table as before, finding a critical value for each test. We'll use $\alpha = .05$ for each one. Each factor has two levels, so each main effect has $2 - 1 = 1$ degree of freedom in the numerator. The interaction also has one, which is what's left of $df_{\text{between}} = 3$ once the two main effects are taken out. And with $N = 16$ scores in $k = 4$ groups, the denominator has $df_{\text{within}} = N - k = 12$.
+The $F$ distribution for each of the $F$ ratios we'll produce all come from the same $F$ table as before. We find a critical value for each test. We'll use $\alpha = .05$. Each factor has two levels, so each main effect has $2 - 1 = 1$ degree of freedom in the numerator. The interaction also has one, which is what's left of $df_{\text{between}} = 3$ once the two main effects are taken out. And with $N = 16$ scores in $k = 4$ groups, the denominator has $df_{\text{within}} = N - k = 12$.
 
 Here all three tests have the same numerator and denominator degrees of freedom, so they share a critical value. In @tbl-factorial-critical, the column for 1 and the row for 12 give a critical $F$ of 4.75. We'll reject the null for any of the three tests whose $F$ exceeds that value. In a more complicated between-participants design, the numerator degrees of freedom can differ, although the denominator stays the same.
 
@@ -302,7 +310,7 @@ Here all three tests have the same numerator and denominator degrees of freedom,
 An excerpt of the $F$ table, with the critical value for $df = 1$ and $12$ highlighted.
 :::
 
-Now, remember how we went out of our way to control the experiment-wise error rate in the last couple of chapters, with a single omnibus test followed by a special post-hoc test for the multiple comparisons? Well, now we're doing three $F$ tests, each at $\alpha = .05$. Are we holding the experiment-wise error rate steady at .05? Nope! The three tests' error rates pile up in exactly the way we usually try to avoid. If nothing at all were going on with our mazes and audiences, the chance of at least one of the three tests coming out significant would be about 14%, just like the three $t$ tests we worried about in Chapter 14. Why do we let that happen here? Just because! Somehow this became the accepted convention. There are statistical solutions, but a review of published research found that researchers almost never used them [@cramer2016hidden]. We'll go along with the convention for now, and come back to it when we interpret the results.
+Now, remember how we went out of our way to control the experiment-wise error rate in the last couple of chapters, with a single omnibus test followed by a special post-hoc test for the multiple comparisons? Well, now we're doing three $F$ tests, each at $\alpha = .05$. Are we holding the experiment-wise error rate steady at $.05$? Nope! The three tests' error rates pile up in exactly the way we usually try to avoid. If nothing at all were going on with our mazes and audiences, the chance of at least one of the three tests coming out significant would be about 14%, just like the three $t$ tests we worried about in Chapter 14. Why do we let that happen here? Just because! Somehow this became the norm. There are statistical solutions, but a review of published research found that researchers almost never used them [@cramer2016hidden]. We'll go along with the convention for now, and come back to it when we interpret the results.
 
 ### Step 3: Collect and analyze the data
 
@@ -508,7 +516,7 @@ These three proportions have different denominators, so they aren't shares of on
 
 #### Simple effects
 
-In the last two chapters, this is where we followed a significant $F$ with post-hoc tests. We don't need them for our main effects: each factor only has two levels, so if there's a difference, there's only one place it can be.^[With three or more levels of a factor, a significant main effect would leave the same question open as in Chapter 14, and we could follow it up the same way, with a test like Tukey's HSD.] The interaction does need some additional probing, though. It tells us that the effect of being watched isn't the same on both mazes, but not what the effect *is* on either one. Watched kids were 8 seconds faster than kids working alone on the easy maze, and 16 seconds slower on the hard maze. Is each of those a reliable difference in its own right?
+In the last two chapters, we followed a significant $F$ with post-hoc tests. We don't need them for our main effects: each factor only has two levels, so if there's a difference, there's only one place it can be.^[With three or more levels of a factor, a significant main effect would leave the same question open as in Chapter 14, and we could follow it up the same way, with a test like Tukey's HSD.] The interaction does need some additional probing, though. It tells us that the effect of being watched isn't the same on both mazes, but not what the effect *is* on either one. Watched kids were 8 seconds faster than kids working alone on the easy maze, and 16 seconds slower on the hard maze. Is each of those a reliable difference in its own right?
 
 To find out, we test **simple effects**: the effect of one factor at a single level of the other. Here that means comparing the alone and watched means twice, once for the easy maze and once for the hard maze. Mathematically, there's nothing new. Each simple effect is just a between-groups sum of squares for two of our four groups: the means of 36 and 28 seconds around the easy-maze mean of 32, and the means of 40 and 56 around the hard-maze mean of 48. Two means give $df = 1$, so each mean square is the same as its sum of squares. And we divide by the same $MS_{\text{within}}$ as before, since it's still our best estimate of chance variability, based on all sixteen kids.
 
@@ -525,9 +533,7 @@ $$
 
 With $df = 1$ and $12$, the critical value is the same 4.75 as before, and both $F$ ratios are beyond it.^[The two sums of squares add up to 640, which is exactly $SS_{\text{audience}}$ plus $SS_{\text{interaction}}$, $64 + 576$. The simple effects haven't found any new variability. They've taken everything the audience did, the main effect and the interaction together, and split it up by maze instead.] So being watched made kids significantly faster on the easy maze, and significantly slower on the hard maze. Both halves of the pattern are significant at the unadjusted .05 threshold.
 
-We could have sliced the interaction the other way, testing the effect of the maze for kids working alone and for kids being watched. But that wouldn't directly test our predictions of facilitation on the easy task and impairment on the hard one. So we let the research question choose which simple effects to test.
-
-One caution. Testing every simple effect we can think of would bring back the experiment-wise error rate problem from Chapter 14, and even our two follow-up tests add to it. Our easy-maze result, with $p = .040$, is close enough to the threshold that it might not survive a correction. The hard-maze result would.
+We could have come at the interaction the other way, testing the effect of the maze for kids working alone and for kids being watched. But that wouldn't directly test our predictions of facilitation on the easy task and impairment on the hard one, and it would add another test with another error rate to add to the pile. We could adjust alpha for multiple comparisons, or we don't necessarily have to test every possible simple effect; we can use some restraint and let the research question choose which to test.
 
 #### Statistical power
 
@@ -541,7 +547,7 @@ We report the design, what we measured, and the $F$ ratios, degrees of freedom, 
 
 > To examine the influence of maze difficulty and an audience on performance, a 2-factor ANOVA was conducted with completion times as the dependent variable and Maze Difficulty and Audience as between-participants independent variables. There was no significant main effect of Audience ($F(1, 12) = 2.67$, $p = .128$, $\eta^2_p = .18$). There was, however, a significant main effect of Maze Difficulty ($F(1, 12) = 42.67$, $p < .001$, $\eta^2_p = .78$); overall, times were longer on the hard maze. Moreover, there was a significant interaction between Maze Difficulty and Audience ($F(1, 12) = 24.00$, $p < .001$, $\eta^2_p = .67$); the effect of being watched depended on maze difficulty. Unadjusted simple-effects tests showed faster times when watched on the easy maze ($F(1, 12) = 5.33$, $p = .040$) and slower times when watched on the hard maze ($F(1, 12) = 21.33$, $p < .001$).
 
-@fig-maze-results shows the four means with either factor on the x-axis. Remember that lower times mean faster performance.
+Either bar graphs or line graphs can show the group means. Line graphs are often preferred for interactions, because the lines make it easy to see whether the effect of one factor depends on the level of the other. One factor becomes ticks on the x-axis, and the other factor is represented by a line for each of its levels, possibly with different dash types or colors, and even different shapes for the points, as in @fig-maze-results. There I've drawn the same data two different ways: in one, Maze type (easy vs. hard) is on the x-axis with Audience (alone vs watched) as the line type; in the other the factors are swapped. The means and interaction are exactly the same in both graphs; the choice of which factor to map to which axis just changes the shape, with the lines crossing in one and not in the other. We wouldn't include both graphs in a report; we'd choose the one we think best shows the pattern of interest.
 
 :::: {#fig-maze-results}
 ::: {.sfs-figure-row .sfs-figure-row-wide .sfs-maze-results-row}
@@ -552,11 +558,9 @@ We report the design, what we measured, and the $F$ ratios, degrees of freedom, 
 The four mean times, graphed two ways: with maze on the x-axis and a line for each audience condition, and with audience on the x-axis and a line for each maze.
 ::::
 
-Each dot is a group mean, and each line joins the means for one level of the other factor. In the left graph, the solid line for kids working alone rises only a little from easy to hard; the dashed line for watched kids rises steeply. In the right graph, the easy-maze line falls from alone to watched, while the hard-maze line rises. The lines cross in the first graph and don't in the second, but they're non-parallel in both. The interaction is the same whichever way we graph it.
+### Interpreting interaction graphs
 
-### Interpreting the results
-
-Our results show one possible pattern. What else might we have found, and how would we recognize it? The next figure shows how to read the main effects and interaction from the graph, then tries some other patterns. These are patterns in the means; the $F$ tests tell us whether they're statistically significant.
+I said earlier that understanding the idea of an interaction can be tricky. See the findings represented as a line graph can help a lot, when you know what to look for. Our results showed an interaction, though it looked a bit different in the two graph variations.@act-maze-interaction shows how to read the main effects and interaction from a graph like this in general, then illustrates some other possible patterns of results.
 
 ::::: {#act-maze-interaction .callout-tip .interactive}
 ## What other results would look like
@@ -581,15 +585,15 @@ Our results show one possible pattern. What else might we have found, and how wo
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Our result" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"none","prediction":false,"animate":false}'}
-Start with our four group means, with maze on the x-axis and one line for each audience condition. Let's find the two main effects and the interaction on this graph.
+Here's the same four group means from @fig-maze-results, with maze on the x-axis and a line for each audience condition. Let's find the two main effects and the interaction on this graph.
 :::
 
 ::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Maze" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"a","prediction":false,"animate":true}'}
-The hollow diamonds sit midway between the two means for each maze. They're the marginal means: 32 seconds for easy and 48 for hard. The dotted line joining them slopes up, showing the overall difference associated with maze difficulty.
+The diamonds show the marginal means for maze type: 32 seconds for easy and 48 for hard. They're half way between the two means for each maze, because our groups had equal numbers of observations. The dotted line joining them slopes up. This represents the main effect of maze type, showing the overall difference associated with maze difficulty.
 :::
 
 ::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Audience" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"b","prediction":false,"animate":true}'}
-Now the hollow markers sit at the middle of each audience line: 38 seconds alone and 42 watched. That 4-second gap is the overall audience difference. It is small compared with the differences within each maze, because those go in opposite directions and partly cancel out.
+Now the markers sit at the middle of each audience line: 38 seconds alone and 42 watched. That 4-second gap is the overall audience difference. It is small compared with the differences within each maze, because those go in opposite directions and partly cancel out.
 :::
 
 ::: {.tutorial-step data-major="key" data-major-title="Our result" data-title="Prediction" data-action='{"means":{"a1b1":36,"a2b1":40,"a1b2":28,"a2b2":56},"show-lines":true,"highlight":"none","marginals":"none","prediction":true,"animate":true}'}
@@ -623,27 +627,21 @@ Here there's an interaction without either main effect. The audience effect reve
 
 :::::
 
-{{< include quizzes/16-factorial-anova-interpreting-results-1.qmd >}}
+{{< include quizzes/16-factorial-anova-design.qmd >}}
 
-#### Social facilitation
+### Social facilitation
 
-Our made-up kids showed the predicted pattern: facilitation on the easy task and impairment on the hard one. Because we randomly assigned kids to the four conditions, the design lets us investigate whether being watched causes those changes. Obviously with this tiny toy data set, we wouldn't be able to draw reliable conclusions even if the data was real. (Like I said, it wasn't: I just made it up.) Generally speaking though, the pattern fits with real research.
+So what do our findings say about social facilitation theory? Our made-up kids showed the predicted pattern: facilitation on the easy task and impairment on the hard one. Because we said we randomly assigned kids to conditions, we could take the findings as evidence of causality---that being watched causes the different performance depending on maze type. Obviously with the tiny sample sizes, we wouldn't be able to draw reliable conclusions even if the data was real. (Like I said, it wasn't: I just made it up.)
 
-I feel like there's something I should mention, though. The whole maze idea? It was inspired by a real study. But in the real study, it wasn't kids doing the mazes. It was cockroaches. Yeah. I didn't want to spend a whole chapter talking about cockroaches, so I made you picture delightful little kids insead. You're welcome. But if you're interested to read about what kind of mazes cockroaches find easy or hard, and how they respond to having an audience of other cockroaches watching on, be my guest [@zajonc1969social].
+The pattern fits with the real research that inspired the example, generally speaking. A review of 241 studies found that real people broadly showed the predicted pattern, though the effects tend to be small [@bond1983social].
 
-The idea that task difficulty changes the effect of an audience is associated with Robert Zajonc. A review of 241 studies found that real people broadly showed the predicted pattern, though the effects were much smaller than ours [@bond1983social]. Zajonc and his colleagues also ran a famous study with cockroaches doing a straight runway or a more complicated maze [@zajonc1969social]. But their analysis never separately tested the audience-by-task interaction. A preregistered replication with three times as many roaches in that comparison found that an audience slowed them down on both tasks: two significant main effects, but no significant interaction [@halfmann2020replicating].
+I feel like there's something I should mention, though. The maze idea? It was inspired by a real study. But in the real study, it wasn't kids doing the mazes. It was cockroaches. Yeah. I didn't want to spend a whole chapter talking about cockroaches, so I made you picture delightful little kids insead. You're welcome. But if you're interested to read about what kind of mazes cockroaches find easy or hard, and how they respond to having an audience of other cockroaches watching on, be my guest [@zajonc1969social].
 
-The replication's preregistration identified the interaction as the critical test. Which brings us back to our three tests at .05 each. Our central question was about the interaction too. If we'd committed to that one test up front and used it alone to judge that prediction, its Type I error rate would be .05. The ANOVA still hands us the two main effects, but those aren't extra chances to declare our prediction supported. Preregistration doesn't remove the multiple-testing problem if we still treat any significant result as a success [@cramer2016hidden].
+That study's evidence was limited, and a more recent preregistered replication found that an audience slowed them down on both tasks: two significant main effects, but no significant interaction [@halfmann2020replicating]. Speaking of which, Halfmann et al. pointed out that Zajonc hadn't actually tested the interaction, even though it was the critical prediction of social facilitation theory. Our central question was about the interaction too, but the ANOVA give us three bundled tests---the main effects in addition to the interaction. I mentioned that this can inflate the Type I error rate, but not if we commit to just basing our conclusions on one specific test in advance, for example by preregistering our analysis plan. If only the interaction matters, we can just ignore the main effects. If we'd committed to that one test up front and used it alone to judge that prediction, its Type I error rate would be .05 [see @cramer2016hidden].
 
 ### Assumptions
 
 The assumptions are the same as in Chapter 14, applied to all four cells: independent observations, approximately normal population distributions within each cell, and equal population variances across cells. The equal-variance assumption is also what lets us use the pooled $MS_{\text{within}}$ for the simple-effects tests.
-
-## Practice: Design your own example
-
-Now come up with a two-by-two between-participants study of your own, or one you've learned about. The activity below asks you to sketch and explain the pattern you'd predict. You don't need exact numbers; relatively high or low is enough.
-
-{{< include quizzes/16-factorial-anova-design.qmd >}}
 
 {{< include quizzes/16-factorial-anova-learning-checks.qmd >}}
 
