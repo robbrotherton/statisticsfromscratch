@@ -216,6 +216,33 @@ ipEnsureStyles = () => {
       opacity: 0.8;
     }
 
+    /* A merge holds the new marginal marks back until copies of the cell
+       dots have travelled to them, then lets them fade in. */
+    .interaction-plot .ip-marginal-layer .ip-marginal-mark,
+    .interaction-plot .ip-marginal-layer .ip-marginal-link,
+    .interaction-plot .ip-marginal-layer .ip-marginal-label {
+      transition: opacity 260ms ease;
+    }
+
+    .interaction-plot .ip-marginal-layer .ip-merge-hold {
+      opacity: 0 !important;
+      transition: none !important;
+    }
+
+    .interaction-plot .ip-merge-ghost {
+      fill: var(--ip-series-color, currentColor);
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 1.4;
+    }
+
+    .interaction-plot .ip-merge-ghost[data-series="0"] {
+      --ip-series-color: var(--graph-series-1, var(--graph-line-color, #0072b2));
+    }
+
+    .interaction-plot .ip-merge-ghost[data-series="1"] {
+      --ip-series-color: var(--graph-series-2, #e69f00);
+    }
+
     .interaction-plot .ip-marginal-label {
       fill: var(--graph-text-color, currentColor);
       font-family: var(--bs-body-font-family, system-ui, sans-serif);
@@ -750,6 +777,91 @@ makeInteractionPlot = function(opts) {
       .attr("x", xMid + 14)
   }));
 
+  // Merge animation: copies of the cell dots travel to where a marginal mean
+  // is about to appear and hand over to its hollow mark. For the x-axis
+  // factor they move straight up or down to meet halfway; for the line
+  // factor they slide along their own line to its middle.
+  const mergeLayer = svg.append("g")
+    .attr("class", "ip-merge-layer ip-overlay ip-swap-fade");
+  const MERGE_TRAVEL = 800;
+  const MERGE_FADE = 260;
+  let mergeToken = 0;
+  let lastStepIndex = null;
+
+  function stopMerge() {
+    mergeToken += 1;
+    mergeLayer.selectAll("*").interrupt("ip-merge").remove();
+    marginalLayer.selectAll(".ip-merge-hold").classed("ip-merge-hold", false);
+  }
+  // The tutorial runtime fires this before each step's action.
+  rootNode.addEventListener("sfs-if:cancel-transitions", stopMerge);
+
+  function playMerge(parts, delay) {
+    stopMerge();
+    const token = mergeToken;
+    const slots = [0, 1].map((s) => [slotValue(s, 0), slotValue(s, 1)]);
+    const xMarginals = [0, 1].map((i) => (slots[0][i] + slots[1][i]) / 2);
+    const lineMarginals = slots.map((values) => (values[0] + values[1]) / 2);
+    const marks = [];
+    const extras = [];
+    const trips = [];
+
+    if (parts.x) {
+      xMarginalMarks.forEach(({ mark, label }, xIndex) => {
+        marks.push(mark);
+        extras.push(label);
+        [0, 1].forEach((s) => trips.push({
+          series: s,
+          from: [x(xIndex), y(slots[s][xIndex])],
+          to: [x(xIndex), y(xMarginals[xIndex])]
+        }));
+      });
+      extras.push(xMarginalLink);
+    }
+    if (parts.line) {
+      lineMarginalMarks.forEach(({ mark, label }, s) => {
+        marks.push(mark);
+        extras.push(label);
+        [0, 1].forEach((xIndex) => trips.push({
+          series: s,
+          from: [x(xIndex), y(slots[s][xIndex])],
+          to: [xMid, y(lineMarginals[s])]
+        }));
+      });
+      extras.push(lineMarginalLink);
+    }
+    if (!trips.length) return;
+
+    marks.concat(extras).forEach((node) => node.classed("ip-merge-hold", true));
+
+    trips.forEach(({ series, from, to }) => {
+      mergeLayer.append("path")
+        .attr("class", "ip-merge-ghost")
+        .attr("data-series", series)
+        .attr("d", symbolPath(series, 130))
+        .attr("transform", `translate(${from[0]},${from[1]})`)
+        .transition("ip-merge")
+        .delay(delay)
+        .duration(MERGE_TRAVEL)
+        .ease(d3.easeCubicInOut)
+        .attr("transform", `translate(${to[0]},${to[1]})`)
+        .transition("ip-merge")
+        .duration(MERGE_FADE)
+        .style("opacity", 0)
+        .remove();
+    });
+
+    // The hollow mark fades in as the copies fade out, then its link and value.
+    window.setTimeout(() => {
+      if (token !== mergeToken) return;
+      marks.forEach((node) => node.classed("ip-merge-hold", false));
+    }, delay + MERGE_TRAVEL);
+    window.setTimeout(() => {
+      if (token !== mergeToken) return;
+      extras.forEach((node) => node.classed("ip-merge-hold", false));
+    }, delay + MERGE_TRAVEL + MERGE_FADE);
+  }
+
   // APA-style legend: the non-x factor's name as title, one keyed line
   // sample per level, placed beside the plot.
   const legendLayer = svg.append("g")
@@ -1029,6 +1141,16 @@ makeInteractionPlot = function(opts) {
     }
   }
 
+  // Which marginal means are drawn: the x-axis factor's, the line factor's.
+  function shownMarginals() {
+    const xFactorKey = state.swap ? "b" : "a";
+    return {
+      x: state.marginals === "both" || state.marginals === xFactorKey,
+      line: state.marginals === "both" ||
+        (state.marginals !== "none" && state.marginals !== xFactorKey)
+    };
+  }
+
   function renderOverlays(animate, duration) {
     const reveal = (target, visible) =>
       window.interactiveFigure.setRevealVisible(target, visible, { root: rootNode, animate });
@@ -1036,10 +1158,7 @@ makeInteractionPlot = function(opts) {
     const xMarginals = [0, 1].map((i) => (slots[0][i] + slots[1][i]) / 2);
     const lineMarginals = slots.map((values) => (values[0] + values[1]) / 2);
     const grand = (xMarginals[0] + xMarginals[1]) / 2;
-    const xFactorKey = state.swap ? "b" : "a";
-    const showX = state.marginals === "both" || state.marginals === xFactorKey;
-    const showLine = state.marginals === "both" ||
-      (state.marginals !== "none" && state.marginals !== xFactorKey);
+    const { x: showX, line: showLine } = shownMarginals();
 
     maybeTransition(xMarginalLink, animate, duration)
       .attr("x1", x(0)).attr("x2", x(1))
@@ -1135,11 +1254,18 @@ makeInteractionPlot = function(opts) {
     let swapped = false;
     const animate = action.animate !== false;
     const renderOptions = { animate, duration: action.duration };
+    const shownBefore = shownMarginals();
+    const meansBefore = JSON.stringify(state.means);
+    let merge = false;
 
     Object.entries(action).forEach(([rawKey, value]) => {
       switch (ipKey(rawKey)) {
         case "animate":
         case "duration":
+          break;
+        case "merge":
+        case "merge-marginals":
+          merge = ipBoolean(value, false);
           break;
         case "means":
         case "cell-means": {
@@ -1259,6 +1385,25 @@ makeInteractionPlot = function(opts) {
         render({ animate: false });
       } else render(renderOptions);
       if (shouldNotify) notifyValueChange();
+    }
+
+    // Merge only on the way forward: going back, or arriving by link, shows
+    // the marks in place.
+    const stepIndex = context && Number.isInteger(context.index) ? context.index : null;
+    const forward = stepIndex === null || lastStepIndex === null || stepIndex > lastStepIndex;
+    if (stepIndex !== null) lastStepIndex = stepIndex;
+    if (merge && animate && forward && !swapped && !ipPrefersReducedMotion()) {
+      const shownAfter = shownMarginals();
+      const parts = {
+        x: shownAfter.x && !shownBefore.x,
+        line: shownAfter.line && !shownBefore.line
+      };
+      // If the means moved too, wait for the dots to land before copying them.
+      const meansMoved = JSON.stringify(state.means) !== meansBefore;
+      const delay = meansMoved
+        ? ipPositiveNumber(action.duration, transitionDuration)
+        : 150;
+      if (parts.x || parts.line) playMerge(parts, delay);
     }
   }
 
