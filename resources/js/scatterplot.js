@@ -114,6 +114,49 @@ scSumSquaredResiduals = (points, slope, intercept) =>
     return residual * residual;
   })
 
+// --- Responsive geometry ------------------------------------------------------
+//
+// The plot is redrawn at the width it actually occupies, so one SVG unit is
+// one CSS pixel on every screen. Scaling a fixed viewBox instead (as this file
+// used to) shrinks the dots, the text and the drag targets along with the box:
+// a 640-unit plot in a 340 px phone column drew its 11-unit dots under 6 px
+// across. graph-core redraws for the same reason (see sfsGraphObserveWidth).
+//
+// Margins that hold tick or axis text keep their authored size, because the
+// text does. Margins that hold nothing shrink with the figure, down to a small
+// gutter, so a narrow plot isn't mostly margin.
+scPlotGeometry = ({ width, authoredWidth, authoredHeight, margin, textLeft, textBottom, aspect }) => {
+  const k = Math.min(1, width / authoredWidth);
+  const gutter = (value) => Math.max(Math.min(value, 12), Math.round(value * k));
+  const fitted = {
+    top: gutter(margin.top),
+    right: gutter(margin.right),
+    bottom: textBottom ? margin.bottom : gutter(margin.bottom),
+    left: textLeft ? margin.left : gutter(margin.left)
+  };
+  const innerWidth = Math.max(1, width - fitted.left - fitted.right);
+  const height = authoredHeight
+    ? Math.round(authoredHeight * (width / authoredWidth))
+    : Math.round(fitted.top + fitted.bottom + innerWidth / aspect);
+  const innerHeight = Math.max(1, height - fitted.top - fitted.bottom);
+  return {
+    width, height, margin: fitted, innerWidth, innerHeight,
+    plotRight: width - fitted.right,
+    plotBottom: height - fitted.bottom
+  };
+}
+
+// Dots are the full size wherever the plot has room for them, and ease down
+// only in small-multiple panels, where full-size dots would smother a cloud of
+// 60 or 100 points. The floor keeps them visible in the smallest panel.
+scPointRadius = (plotSide, base = 5.5) =>
+  Math.max(Math.min(4, base), Math.min(base, plotSide / 31))
+
+// Roughly one tick label per 56 px across and per 40 px up, never more than
+// the six a full-width plot shows.
+scTickCount = (length, spacing) =>
+  Math.max(2, Math.min(6, Math.floor(length / spacing)))
+
 scEnsureStyles = () => {
   if (document.getElementById("scatterplot-styles")) return;
 
@@ -127,6 +170,8 @@ scEnsureStyles = () => {
       --sc-residual-color: var(--sfs-current-color, #d1495b);
       --sc-ellipse-color: var(--sfs-comparison-color, #2f6f9f);
       --sc-drag-color: var(--sfs-focus, #2780e3);
+      --sc-positive-color: var(--graph-series-3, #009e73);
+      --sc-negative-color: var(--graph-series-4, #d55e00);
     }
 
     .scatterplot .sc-dot {
@@ -168,6 +213,45 @@ scEnsureStyles = () => {
       fill-opacity: 0.14;
       stroke: var(--sc-residual-color);
       stroke-width: 1.2;
+    }
+
+    /* A product of deviations is a rectangle from the point to the crosshair.
+       Sign is carried by hue and by the dashed outline of negative products. */
+    .scatterplot .sc-product {
+      fill: var(--sc-positive-color);
+      fill-opacity: 0.2;
+      stroke: var(--sc-positive-color);
+      stroke-width: 1.4;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .scatterplot .sc-product.is-negative {
+      fill: var(--sc-negative-color);
+      stroke: var(--sc-negative-color);
+      stroke-dasharray: 5 3;
+    }
+
+    .scatterplot .sc-product-label {
+      fill: var(--sc-positive-color);
+      font-family: var(--bs-body-font-family, system-ui, sans-serif);
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      paint-order: stroke;
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 3px;
+      user-select: none;
+    }
+
+    .scatterplot .sc-product-label.is-negative {
+      fill: var(--sc-negative-color);
+    }
+
+    .scatterplot .sc-deviation {
+      stroke: var(--graph-text-color, currentColor);
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
     }
 
     .scatterplot .sc-ellipse {
@@ -308,7 +392,8 @@ makeScatterplot = function(opts) {
   scEnsureStyles();
 
   const minimal = scKey(opts.style) === "minimal";
-  const width = scPositiveNumber(opts.width, 640);
+  const authoredWidth = scPositiveNumber(opts.width, 640);
+  const basePointRadius = scPositiveNumber(opts.pointRadius, 5.5);
   const transitionDuration = scPositiveNumber(opts.transitionDuration || opts.duration, 650);
   const format = d3.format(opts.format || ".2~f");
   const rFormat = d3.format(opts.rFormat || ".2f");
@@ -362,7 +447,7 @@ makeScatterplot = function(opts) {
   }
 
   // The r/SS annotation is a readout, not a graph mark, so it never dims.
-  const layerNames = ["points", "line", "residuals", "squares", "ellipse", "means"];
+  const layerNames = ["points", "line", "residuals", "squares", "ellipse", "means", "deviations", "products"];
 
   function normalizeEmphasis(value) {
     if (value === undefined || value === null) return null;
@@ -376,6 +461,8 @@ makeScatterplot = function(opts) {
         if (["square", "squares", "squared-residuals", "squared"].includes(key)) return "squares";
         if (["ellipse", "oval"].includes(key)) return "ellipse";
         if (["means", "mean", "crosshair"].includes(key)) return "means";
+        if (["mean-deviations", "deviation-lines"].includes(key)) return "deviations";
+        if (["product", "products", "rectangles", "sp"].includes(key)) return "products";
         return null;
       })
       .filter(Boolean);
@@ -393,6 +480,10 @@ makeScatterplot = function(opts) {
     showSquares: scBoolean(opts.showSquares ?? opts.squares ?? opts.squaredResiduals, false),
     showEllipse: scBoolean(opts.showEllipse ?? opts.ellipse, false),
     showMeans: scBoolean(opts.showMeans ?? opts.means, false),
+    showDeviations: scBoolean(opts.showDeviations ?? opts.deviations, false),
+    showProducts: scBoolean(opts.showProducts ?? opts.products, false),
+    productLabels: scBoolean(opts.productLabels, false),
+    showSP: scBoolean(opts.showSP ?? opts.spLabel, false),
     showR: scBoolean(opts.showR ?? opts.rLabel, false),
     showSS: scBoolean(opts.showSS ?? opts.ssLabel, false),
     pointLabels: scBoolean(opts.pointLabels, false),
@@ -405,7 +496,7 @@ makeScatterplot = function(opts) {
   const explicitXDomain = Array.isArray(opts.xDomain) && opts.xDomain.length === 2;
   const explicitYDomain = Array.isArray(opts.yDomain) && opts.yDomain.length === 2;
 
-  const margin = Object.assign({
+  const authoredMargin = Object.assign({
     top: 24,
     right: 24,
     bottom: state.axisLabels ? 58 : (state.ticks === "none" ? 26 : 40),
@@ -415,11 +506,26 @@ makeScatterplot = function(opts) {
   // Square plot area by default so point clouds and ellipses aren't visually
   // stretched; aspect = plot width / plot height.
   const aspect = scPositiveNumber(opts.aspect ?? opts.aspectRatio, 1);
-  const innerWidth = width - margin.left - margin.right;
-  const height = scPositiveNumber(opts.height,
-    Math.round(margin.top + margin.bottom + innerWidth / aspect));
-  const plotBottom = height - margin.bottom;
-  const plotRight = width - margin.right;
+  // The authored margins were sized for the ticks and labels the figure
+  // starts with, so that is also what decides whether they may shrink.
+  const marginsHoldText = state.axisLabels || state.ticks !== "none";
+  // Geometry is recomputed whenever the figure is redrawn at a new width.
+  let width, height, margin, innerWidth, plotBottom, plotRight, pointRadius;
+  function setGeometry(nextWidth) {
+    const geometry = scPlotGeometry({
+      width: nextWidth,
+      authoredWidth,
+      authoredHeight: scPositiveNumber(opts.height, 0) || null,
+      margin: authoredMargin,
+      textLeft: marginsHoldText,
+      textBottom: marginsHoldText,
+      aspect
+    });
+    ({ width, height, margin, innerWidth, plotBottom, plotRight } = geometry);
+    pointRadius = scPointRadius(
+      Math.min(geometry.innerWidth, geometry.innerHeight), basePointRadius);
+  }
+  setGeometry(authoredWidth);
 
   const root = d3.create("div")
     .attr("class", "scatterplot sfs-figure")
@@ -446,6 +552,7 @@ makeScatterplot = function(opts) {
   // --- Controls -------------------------------------------------------------
 
   const showControls = scBoolean(opts.controls, !minimal);
+  const correlationControls = scKey(opts.controlSet) === "correlation";
   let controls = null;
   let lineInputs = null;
   let showChecks = null;
@@ -455,52 +562,54 @@ makeScatterplot = function(opts) {
     controls = root.append("div")
       .attr("class", "sc-controls sfs-control-grid");
 
-    const linePanel = controls.append("section")
-      .attr("class", "sfs-control-panel sfs-if-control-panel");
-    linePanel.append("p")
-      .attr("class", "sfs-control-title")
-      .text("Line");
-    const buttonRow = linePanel.append("div")
-      .attr("class", "sc-line-buttons");
-    [
-      ["fit", "Best fit"],
-      ["mean", "Flat at mean of Y"]
-    ].forEach(([mode, label]) => {
-      buttonRow.append("button")
-        .attr("type", "button")
-        .attr("class", "sfs-button")
-        .text(label)
-        .on("click", (event) => {
-          event.preventDefault();
+    if (!correlationControls) {
+      const linePanel = controls.append("section")
+        .attr("class", "sfs-control-panel sfs-if-control-panel");
+      linePanel.append("p")
+        .attr("class", "sfs-control-title")
+        .text("Line");
+      const buttonRow = linePanel.append("div")
+        .attr("class", "sc-line-buttons");
+      [
+        ["fit", "Best fit"],
+        ["mean", "Flat at mean of Y"]
+      ].forEach(([mode, label]) => {
+        buttonRow.append("button")
+          .attr("type", "button")
+          .attr("class", "sfs-button")
+          .text(label)
+          .on("click", (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            state.lineMode = mode;
+            state.showLine = true;
+            render({ animate: true });
+            notifyValueChange();
+          });
+      });
+      const inputGrid = linePanel.append("div")
+        .attr("class", "sc-line-inputs");
+      lineInputs = {};
+      [["slope", "Slope (b)"], ["intercept", "Intercept (a)"]].forEach(([key, label]) => {
+        inputGrid.append("span").text(label);
+        const input = inputGrid.append("input")
+          .attr("type", "number")
+          .attr("step", 0.1)
+          .attr("aria-label", label)
+          .node();
+        input.addEventListener("input", (event) => {
           event.stopPropagation();
-          state.lineMode = mode;
+          const line = effectiveLine();
+          state.slope = key === "slope" ? scFiniteNumber(input.value, line.slope) : line.slope;
+          state.intercept = key === "intercept" ? scFiniteNumber(input.value, line.intercept) : line.intercept;
+          state.lineMode = "custom";
           state.showLine = true;
-          render({ animate: true });
+          render({ animate: false });
           notifyValueChange();
         });
-    });
-    const inputGrid = linePanel.append("div")
-      .attr("class", "sc-line-inputs");
-    lineInputs = {};
-    [["slope", "Slope (b)"], ["intercept", "Intercept (a)"]].forEach(([key, label]) => {
-      inputGrid.append("span").text(label);
-      const input = inputGrid.append("input")
-        .attr("type", "number")
-        .attr("step", 0.1)
-        .attr("aria-label", label)
-        .node();
-      input.addEventListener("input", (event) => {
-        event.stopPropagation();
-        const line = effectiveLine();
-        state.slope = key === "slope" ? scFiniteNumber(input.value, line.slope) : line.slope;
-        state.intercept = key === "intercept" ? scFiniteNumber(input.value, line.intercept) : line.intercept;
-        state.lineMode = "custom";
-        state.showLine = true;
-        render({ animate: false });
-        notifyValueChange();
+        lineInputs[key] = input;
       });
-      lineInputs[key] = input;
-    });
+    }
 
     const showPanel = controls.append("section")
       .attr("class", "sfs-control-panel sfs-if-control-panel");
@@ -508,13 +617,18 @@ makeScatterplot = function(opts) {
       .attr("class", "sfs-control-title")
       .text("Show");
     showChecks = {};
-    [
+    (correlationControls ? [
+      ["showMeans", "Means"],
+      ["showDeviations", "Deviations"],
+      ["showProducts", "Products"],
+      ["showEllipse", "Ellipse"]
+    ] : [
       ["showLine", "Fit line"],
       ["showResiduals", "Residuals"],
       ["showSquares", "Squared residuals"],
       ["showEllipse", "Ellipse"],
       ["showMeans", "Means"]
-    ].forEach(([key, label]) => {
+    ]).forEach(([key, label]) => {
       const row = showPanel.append("label")
         .attr("class", "sfs-check-row");
       const input = row.append("input")
@@ -544,7 +658,12 @@ makeScatterplot = function(opts) {
       return row.append("span")
         .attr("class", "sfs-readout-value");
     }
-    readouts = {
+    readouts = correlationControls ? {
+      ssX: addReadout("SS for X"),
+      ssY: addReadout("SS for Y"),
+      sp: addReadout("SP"),
+      r: addReadout("r")
+    } : {
       r: addReadout("r"),
       slope: addReadout("Slope (b)"),
       intercept: addReadout("Intercept (a)"),
@@ -559,36 +678,26 @@ makeScatterplot = function(opts) {
 
   const svg = chartWrap.append("svg")
     .attr("class", "sfs-svg sfs-graph")
-    .attr("viewBox", [0, 0, width, height])
     .attr("role", "img")
     .attr("aria-label", opts.ariaLabel ||
       "Scatterplot of " + yLabel + " against " + xLabel);
 
   const clipId = "sc-clip-" + Math.random().toString(36).slice(2, 9);
-  svg.append("clipPath")
+  const clipRect = svg.append("clipPath")
     .attr("id", clipId)
-    .append("rect")
-    .attr("x", margin.left)
-    .attr("y", margin.top)
-    .attr("width", innerWidth)
-    .attr("height", plotBottom - margin.top);
+    .append("rect");
 
   const xAxisLayer = svg.append("g")
-    .attr("class", "sc-axis sc-axis-x sfs-axis")
-    .attr("transform", `translate(0,${plotBottom})`);
+    .attr("class", "sc-axis sc-axis-x sfs-axis");
   const yAxisLayer = svg.append("g")
-    .attr("class", "sc-axis sc-axis-y sfs-axis")
-    .attr("transform", `translate(${margin.left},0)`);
+    .attr("class", "sc-axis sc-axis-y sfs-axis");
 
   const xAxisLabel = svg.append("text")
     .attr("class", "sc-axis-label sfs-axis-label")
-    .attr("x", (margin.left + plotRight) / 2)
-    .attr("y", height - 12)
     .attr("text-anchor", "middle")
     .text(xLabel);
   const yAxisLabel = svg.append("text")
     .attr("class", "sc-axis-label sfs-axis-label")
-    .attr("transform", `translate(16,${(margin.top + plotBottom) / 2}) rotate(-90)`)
     .attr("text-anchor", "middle")
     .text(yLabel);
 
@@ -599,6 +708,10 @@ makeScatterplot = function(opts) {
     .attr("clip-path", `url(#${clipId})`);
   const ellipsePath = ellipseLayer.append("path")
     .attr("class", "sc-ellipse");
+
+  const productsLayer = svg.append("g")
+    .attr("class", "sc-layer sc-products-layer")
+    .attr("clip-path", `url(#${clipId})`);
 
   const meansLayer = svg.append("g")
     .attr("class", "sc-layer sc-means-layer")
@@ -616,6 +729,12 @@ makeScatterplot = function(opts) {
   }
   const meanXText = meanLabel("X");
   const meanYText = meanLabel("Y");
+
+  const deviationsLayer = svg.append("g")
+    .attr("class", "sc-layer sc-deviations-layer")
+    .attr("clip-path", `url(#${clipId})`);
+  const productLabelsLayer = svg.append("g")
+    .attr("class", "sc-layer sc-product-labels-layer");
 
   const squaresLayer = svg.append("g")
     .attr("class", "sc-layer sc-squares-layer")
@@ -636,8 +755,40 @@ makeScatterplot = function(opts) {
     .attr("class", "sc-layer sc-labels-layer");
 
   const annotationLayer = svg.append("g")
-    .attr("class", "sc-layer sc-annotation")
-    .attr("transform", `translate(${margin.left + 14},${margin.top + 8})`);
+    .attr("class", "sc-layer sc-annotation");
+
+  // Everything whose position depends on the plot's size rather than its
+  // data. Called once at the authored width, and again after each resize.
+  function applyGeometry() {
+    x.range([margin.left, plotRight]);
+    y.range([plotBottom, margin.top]);
+    svg.attr("viewBox", [0, 0, width, height]);
+    clipRect
+      .attr("x", margin.left)
+      .attr("y", margin.top)
+      .attr("width", innerWidth)
+      .attr("height", plotBottom - margin.top);
+    xAxisLayer.attr("transform", `translate(0,${plotBottom})`);
+    yAxisLayer.attr("transform", `translate(${margin.left},0)`);
+    xAxisLabel
+      .attr("x", (margin.left + plotRight) / 2)
+      .attr("y", height - 12);
+    yAxisLabel
+      .attr("transform", `translate(16,${(margin.top + plotBottom) / 2}) rotate(-90)`);
+    annotationLayer
+      .attr("transform", `translate(${margin.left + 14},${margin.top + 8})`);
+  }
+  applyGeometry();
+
+  function resize(nextWidth) {
+    const rounded = Math.round(nextWidth);
+    if (!(rounded > 0) || rounded === width) return;
+    // A move still in flight would finish at positions from the old scales.
+    svg.selectAll("*").interrupt("sc-move");
+    setGeometry(rounded);
+    applyGeometry();
+    render({ animate: false });
+  }
   const rText = annotationLayer.append("text")
     .attr("dominant-baseline", "hanging");
   rText.append("tspan")
@@ -655,6 +806,19 @@ makeScatterplot = function(opts) {
   const ssValueSpan = ssText.append("tspan")
     .attr("dy", "-0.35em")
     .text(" = —");
+  const spText = annotationLayer.append("text")
+    .attr("dominant-baseline", "hanging");
+  spText.append("tspan")
+    .attr("font-style", "italic")
+    .text("SP");
+  const spValueSpan = spText.append("tspan").text(" = —");
+
+  // A real minus sign, and an explicit plus only where the sign is the point.
+  function signed(value, plus) {
+    const text = format(Math.abs(value));
+    if (value < 0 && Number(text) !== 0) return "\u2212" + text;
+    return (plus && value > 0 ? "+" : "") + text;
+  }
 
   // --- Derived quantities -----------------------------------------------------
 
@@ -765,10 +929,10 @@ makeScatterplot = function(opts) {
 
   function drawAxes(animate, duration) {
     const xAxis = state.ticks === "numeric"
-      ? d3.axisBottom(x).ticks(opts.xTickCount || 6).tickPadding(8)
+      ? d3.axisBottom(x).ticks(opts.xTickCount || scTickCount(innerWidth, 56)).tickPadding(8)
       : d3.axisBottom(x).tickValues([]);
     const yAxis = state.ticks === "numeric"
-      ? d3.axisLeft(y).ticks(opts.yTickCount || 6).tickPadding(6)
+      ? d3.axisLeft(y).ticks(opts.yTickCount || scTickCount(plotBottom - margin.top, 40)).tickPadding(6)
       : d3.axisLeft(y).tickValues([]);
 
     maybeTransition(xAxisLayer, animate, duration).call(xAxis);
@@ -885,6 +1049,59 @@ makeScatterplot = function(opts) {
       maybeTransition(ellipsePath, animate, duration).attr("d", ellipseD);
     }
 
+    // Deviations from the means: one segment across to M_X, one up or down to
+    // M_Y. Together they are two sides of that point's product rectangle.
+    const meanPX = x(stats.meanX);
+    const meanPY = y(stats.meanY);
+    const deviationData = state.points.flatMap((p, i) => [
+      { key: i + "x", p, axis: "x" },
+      { key: i + "y", p, axis: "y" }
+    ]);
+    const deviations = deviationsLayer.selectAll("line.sc-deviation")
+      .data(deviationData, (d) => d.key)
+      .join((enter) => enter.append("line")
+        .attr("class", "sc-deviation")
+        .attr("x1", (d) => x(d.p.x))
+        .attr("x2", (d) => x(d.p.x))
+        .attr("y1", (d) => y(d.p.y))
+        .attr("y2", (d) => y(d.p.y)));
+    maybeTransition(deviations, animate, duration)
+      .attr("x1", (d) => d.axis === "x" ? meanPX : x(d.p.x))
+      .attr("y1", (d) => d.axis === "x" ? y(d.p.y) : meanPY)
+      .attr("x2", (d) => x(d.p.x))
+      .attr("y2", (d) => y(d.p.y));
+
+    // Each product of deviations is a literal rectangle between the point
+    // and the crosshair, so its area is proportional to the size of the
+    // product and SP is the positive area minus the negative area.
+    const productOf = (p) => (p.x - stats.meanX) * (p.y - stats.meanY);
+    const products = productsLayer.selectAll("rect.sc-product")
+      .data(state.points)
+      .join((enter) => enter.append("rect")
+        .attr("class", "sc-product")
+        .attr("x", meanPX)
+        .attr("y", meanPY)
+        .attr("width", 0)
+        .attr("height", 0))
+      .classed("is-negative", (p) => productOf(p) < 0);
+    maybeTransition(products, animate, duration)
+      .attr("x", (p) => Math.min(x(p.x), meanPX))
+      .attr("y", (p) => Math.min(y(p.y), meanPY))
+      .attr("width", (p) => Math.abs(x(p.x) - meanPX))
+      .attr("height", (p) => Math.abs(y(p.y) - meanPY));
+
+    const productLabels = productLabelsLayer.selectAll("text.sc-product-label")
+      .data(state.points)
+      .join("text")
+      .attr("class", "sc-product-label")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .classed("is-negative", (p) => productOf(p) < 0)
+      .text((p) => productOf(p) === 0 ? "" : signed(productOf(p), true));
+    maybeTransition(productLabels, animate, duration)
+      .attr("x", (p) => (x(p.x) + meanPX) / 2)
+      .attr("y", (p) => (y(p.y) + meanPY) / 2);
+
     // Mean crosshair.
     maybeTransition(meanXLine, animate, duration)
       .attr("x1", x(stats.meanX))
@@ -913,7 +1130,7 @@ makeScatterplot = function(opts) {
           .attr("class", "sc-point");
         group.append("circle").attr("class", "sc-hit").attr("r", 16);
         group.append("circle").attr("class", "sc-ring").attr("r", 10);
-        group.append("circle").attr("class", "sc-dot sfs-graph-point").attr("r", 5.5);
+        group.append("circle").attr("class", "sc-dot sfs-graph-point").attr("r", pointRadius);
         group.attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`);
         return group;
       })
@@ -925,6 +1142,7 @@ makeScatterplot = function(opts) {
       });
     maybeTransition(pointGroups, animate, duration)
       .attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`);
+    pointGroups.select(".sc-dot").attr("r", pointRadius);
     pointGroups
       .attr("tabindex", state.draggable ? 0 : null)
       .attr("role", state.draggable ? "button" : null)
@@ -947,6 +1165,13 @@ makeScatterplot = function(opts) {
     // Annotations.
     rValueSpan.text(" = " + (stats.r === null ? "—" : rFormat(stats.r)));
     ssValueSpan.text(" = " + format(ssResidual));
+    spValueSpan.text(" = " + signed(stats.sp));
+    // Stack only the readouts that are showing.
+    let annotationRow = 0;
+    [[rText, state.showR], [ssText, state.showSS], [spText, state.showSP]].forEach(([text, shown]) => {
+      text.attr("y", annotationRow * 24);
+      if (shown) annotationRow += 1;
+    });
 
     // Reveals.
     setReveal(pointsLayer, state.showPoints, animate);
@@ -955,6 +1180,10 @@ makeScatterplot = function(opts) {
     setReveal(squaresLayer, state.showSquares, animate);
     setReveal(ellipseLayer, state.showEllipse, animate);
     setReveal(meansLayer, state.showMeans, animate);
+    setReveal(deviationsLayer, state.showDeviations, animate);
+    setReveal(productsLayer, state.showProducts, animate);
+    setReveal(productLabelsLayer, state.showProducts && state.productLabels, animate);
+    setReveal(spText, state.showSP, animate);
     setReveal(labelsLayer, state.pointLabels, animate);
     setReveal(rText, state.showR, animate);
     setReveal(ssText, state.showSS, animate);
@@ -966,7 +1195,9 @@ makeScatterplot = function(opts) {
       residuals: [residualsLayer],
       squares: [squaresLayer],
       ellipse: [ellipseLayer],
-      means: [meansLayer]
+      means: [meansLayer],
+      deviations: [deviationsLayer],
+      products: [productsLayer, productLabelsLayer]
     };
     layerNames.forEach((name) => {
       const dimmed = Boolean(state.emphasize) && !state.emphasize.includes(name);
@@ -1000,9 +1231,15 @@ makeScatterplot = function(opts) {
     }
     if (readouts) {
       readouts.r.text(stats.r === null ? "—" : rFormat(stats.r));
-      readouts.slope.text(format(line.slope));
-      readouts.intercept.text(format(line.intercept));
-      readouts.ssResidual.text(format(ssResidual));
+      if (correlationControls) {
+        readouts.ssX.text(format(stats.ssX));
+        readouts.ssY.text(format(stats.ssY));
+        readouts.sp.text(signed(stats.sp));
+      } else {
+        readouts.slope.text(format(line.slope));
+        readouts.intercept.text(format(line.intercept));
+        readouts.ssResidual.text(format(ssResidual));
+      }
     }
   }
 
@@ -1140,6 +1377,25 @@ makeScatterplot = function(opts) {
           state.showMeans = scBoolean(value, state.showMeans);
           changed = true;
           break;
+        case "show-deviations":
+        case "deviations":
+          state.showDeviations = scBoolean(value, state.showDeviations);
+          changed = true;
+          break;
+        case "show-products":
+        case "products":
+          state.showProducts = scBoolean(value, state.showProducts);
+          changed = true;
+          break;
+        case "product-labels":
+          state.productLabels = scBoolean(value, state.productLabels);
+          changed = true;
+          break;
+        case "show-sp":
+        case "sp-label":
+          state.showSP = scBoolean(value, state.showSP);
+          changed = true;
+          break;
         case "show-r":
         case "r-label":
           state.showR = scBoolean(value, state.showR);
@@ -1207,6 +1463,23 @@ makeScatterplot = function(opts) {
     } else {
       window.interactiveFigure.ensureStyles();
     }
+  }
+
+  // Redraw to the width the chart really has. The helper waits until the
+  // figure is in the page (and, for a figure inside a closed quiz answer,
+  // until it is shown) before it reports a width.
+  if (opts.responsive !== false && window.interactiveFigure &&
+      typeof window.interactiveFigure.observeResponsiveLayout === "function") {
+    window.interactiveFigure.observeResponsiveLayout({
+      root: rootNode,
+      container: chartWrap.node(),
+      minimumWidth: 96,
+      maximumWidth: 1600,
+      widthStep: 2,
+      onLayout(layout) {
+        resize(layout.width);
+      }
+    });
   }
 
   rootNode.setPoints = setPoints;

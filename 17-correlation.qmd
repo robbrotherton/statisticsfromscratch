@@ -23,15 +23,19 @@ The key difference between the correlational approach and the designs and statis
 
 <!-- PLAN: the big difference, made explicit. Comparison table (Chapters 11–16 vs. this chapter: variables, what each person contributes, picture, question, statistic) and the points from the editorial pass: rows are people and both columns are measurements; it looks like related samples but isn't the same question; X and Y are interchangeable; it's less of a break than it looks. -->
 
+::: {#quiz-correlation-which-analysis}
+{{< include quizzes/17-correlation-which-analysis.qmd >}}
+:::
+
 ## Picturing a relationship
 
 To give a few quick examples of these kinds of psychological research questions, we may be interested in the correlation between a person's income and their happiness. Do wealthier people tend to say they're happier? We generally visualize correlational data as a scatterplot like this: one variable on the $x$ axis and the other on the $y$ axis. Each dot represents one person's pair of scores.
 
-{{< interactive-figure incomeHappinessScatter makeScatterplot options='{"generate":{"r":0.55,"n":45,"seed":11},"style":"minimal","axisLabels":true,"xLabel":"Income","yLabel":"Happiness","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical income and happiness scores: a loose cloud of dots drifting upward, suggesting that higher income tends to go with higher happiness." >}}
+{{< interactive-figure incomeHappinessScatter makeScatterplot options='{"generate":{"r":0.2,"n":45,"seed":11},"style":"minimal","axisLabels":true,"xLabel":"Income","yLabel":"Happiness","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical income and happiness scores: a loose cloud of dots drifting slightly upward, suggesting that higher income tends to go with somewhat higher happiness." >}}
 
 Another question might be, does practice make perfect? We could record the amount of time someone spent practicing a task and record their performance of the task and put those pairs of observations on a scatterplot. Or we might suspect that the more absences someone has from a class, the worse their final grade will be for that class. Here, unlike those previous two examples, we'd be expecting that higher scores on one variable would be associated with lower scores on the other. This would be a negative correlation.
 
-{{< interactive-figure absencesGradeScatter makeScatterplot options='{"generate":{"r":-0.65,"n":45,"seed":12},"style":"minimal","axisLabels":true,"xLabel":"Absences","yLabel":"Final grade","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical absences and final grades: the cloud of dots slopes downward, with more absences going with lower grades — a negative correlation." >}}
+{{< interactive-figure absencesGradeScatter makeScatterplot options='{"generate":{"r":-0.35,"n":45,"seed":12},"style":"minimal","axisLabels":true,"xLabel":"Absences","yLabel":"Final grade","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical absences and final grades: a loose cloud of dots sloping downward, with more absences tending to go with lower grades: a negative correlation." >}}
 
 ### Characteristics of correlations
 
@@ -77,21 +81,23 @@ But there are other forms that correlations can take---nonlinear forms, where th
 
 A somewhat useful skill to practice is being able to look at a scatterplot and estimate the strength of the correlation. It's actually easier than you'd think. It takes just a very small amount of practice to get quite good.
 
-Here's a very small dataset with just five data points. It's representing some hypothetical data from a study looking at the amount of sleep students got the night before an exam and their test score. It sounds plausible that these two things would be correlated.
+Here's a very small dataset with just seven data points. It's representing some hypothetical data from a study looking at how much coffee students drank on the morning of an exam and their test score. It sounds plausible that these two things would be correlated.
 
-| Participant | Sleep (hours) | Test score |
+| Participant | Coffee (cups) | Test score |
 |:--:|:--:|:--:|
-| A | 4 | 5 |
-| B | 5 | 8 |
-| C | 7 | 8 |
-| D | 8 | 10 |
-| E | 11 | 9 |
+| A | 0 | 90 |
+| B | 0.5 | 60 |
+| C | 0.5 | 85 |
+| D | 1 | 65 |
+| E | 1.5 | 50 |
+| F | 1.5 | 65 |
+| G | 2 | 75 |
 
-: Hours of sleep the night before an exam and test scores for five students. {#tbl-sleep-scores}
+: Cups of coffee on the morning of an exam and test scores (out of 100) for seven students. {#tbl-coffee-scores}
 
-Here's what those five pairs of scores look like as a scatterplot. From looking at these few points, see if you can come up with a reasonable guess at the strength and direction of the correlation. Remember, the correlation will vary from zero to one or negative one, depending on its strength and its direction. We'll calculate its actual value a little bit later.
+Here's what those seven pairs of scores look like as a scatterplot. From looking at these few points, see if you can come up with a reasonable guess at the strength and direction of the correlation. Remember, the correlation will vary from zero to one or negative one, depending on its strength and its direction. We'll calculate its actual value a little bit later.
 
-{{< interactive-figure sleepScoresScatter makeScatterplot options='{"points":[[4,5],[5,8],[7,8],[8,10],[11,9]],"labels":["A","B","C","D","E"],"pointLabels":true,"xLabel":"Sleep (hours)","yLabel":"Test score","xDomain":[0,12],"yDomain":[0,12],"controls":false,"maxWidth":"30rem"}' fallback="Scatterplot of the five students' sleep hours and test scores: the points drift upward from student A at 4 hours and a score of 5 to student D at 8 hours and a score of 10, with E highest on sleep but not on score." >}}
+{{< interactive-figure coffeeScoresScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"labels":["A","B","C","D","E","F","G"],"pointLabels":true,"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"controls":false,"maxWidth":"30rem"}' fallback="Scatterplot of the seven students' cups of coffee and test scores: the points drift loosely downward from student A, with no coffee and a score of 90, to student E, with 1.5 cups and a score of 50. Student G drank the most, 2 cups, and scored 75." >}}
 
 ::: {#quiz-correlation-guess}
 {{< include quizzes/17-correlation-guess.qmd >}}
@@ -160,24 +166,69 @@ The definitional formula for this is $\Sigma(X - M_X)(Y - M_Y)$. And I hope that
 
 [^sp-computational]: As with the sum of squares back in Chapter 4, there's also a computational formula for the sum of products, and it's similarly related: $SP = \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n}$. Again, this is equivalent to the definitional formula. We'll stick with the definitional approach.
 
+Before we calculate anything, let's see what the sum of products looks like.
+
+::::: {#act-sum-of-products .callout-tip .interactive .with-controls}
+## Picturing the sum of products
+
+{{< interactive-figure sumOfProductsScatter makeScatterplot options='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"pointLabels":true,"productLabels":true,"controlSet":"correlation","controlsLabel":"sum of products controls","maxWidth":"30rem"}' fallback="The coffee and test score scatterplot with dashed lines at the two means, 1 cup and a score of 70. Each student's product of deviations is drawn as a rectangle between their point and the place where the mean lines cross: −20 for student A, 5 for B, −7.5 for C, 0 for D, −10 for E, −2.5 for F, and 5 for G. They sum to SP = −30." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Scores" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":false,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"animate":false}'}
+Here are our seven students again, with cups of coffee on the $X$ axis and test score on the $Y$ axis.
+:::
+
+::: {.tutorial-step data-title="Means" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+First we need the two means. The dashed lines mark the mean cups of coffee, $M_X = 1$, and the mean test score, $M_Y = 70$. Between them they split the plot into four quarters.
+:::
+
+::: {.tutorial-step data-title="Deviations" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+Each student has two deviations: how far they are from the mean on $X$, and how far they are from the mean on $Y$. Student A drank 1 cup less than average and scored 20 points above average. Student G is above average on both.
+:::
+
+::: {.tutorial-step data-title="Products" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+Now we multiply each student's two deviations. On the plot, that product is a rectangle: one deviation wide and the other deviation tall. Students A, C, E, and F are above one mean and below the other, so their deviations have opposite signs and their products are negative. Those are the orange rectangles with dashed outlines. Students B and G are on the same side of both means, so their products are positive. Student D is exactly at the mean for coffee, so their product is zero.
+:::
+
+::: {.tutorial-step data-title="Sum" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+Add up the products and we have the sum of products: $SP = -20 + 5 - 7.5 + 0 - 10 - 2.5 + 5 = -30$. The negative products outweigh the positive ones, so $SP$ comes out negative.
+:::
+
+::: {.tutorial-step data-title="Positive" data-action='{"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":false,"product-labels":false,"show-means":true,"show-deviations":false,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"generate":{"r":0.8,"n":12,"seed":5,"meanX":1.25,"meanY":70,"sdX":0.5,"sdY":11,"round":1}}'}
+Here are some different scores, with a positive relationship. Now most of the points are either below both means or above both means, so their deviations have the same sign and their products are positive. The positive products outweigh the negative ones, and $SP$ comes out positive.
+:::
+
+::: {.tutorial-step data-title="No relationship" data-action='{"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":false,"product-labels":false,"show-means":true,"show-deviations":false,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"generate":{"r":0,"n":12,"seed":5,"meanX":1.25,"meanY":70,"sdX":0.5,"sdY":11,"round":1}}'}
+And here there's no relationship at all. Points land in all four quarters, so the positive and negative products more or less cancel out, and $SP$ ends up close to zero.
+:::
+
+::: {.tutorial-step data-title="Explore" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":true,"show-r":true,"draggable":true,"emphasize":"none","controls-open":true}'}
+Back to our seven students. Try dragging a point around, and watch what happens to its rectangle, to $SP$, and to $r$ as it crosses one of the mean lines.
+:::
+::::
+
+:::::
+
 ### Worked example
 
-So let's return to the sleep data from @tbl-sleep-scores. The variable labeled $X$ is the number of hours of sleep these five people said they got the previous night. The variable labeled $Y$ is their score on a test. We want to know if sleep duration is related to test performance. So we'll calculate the correlation coefficient. We just need these three quantities: the sum of squares for $X$, the sum of squares for $Y$, and the sum of products.
+So let's return to the coffee data from @tbl-coffee-scores. The variable labeled $X$ is the number of cups of coffee these seven people said they drank that morning. The variable labeled $Y$ is their score on a test. We want to know if coffee consumption is related to test performance. So we'll calculate the correlation coefficient. We just need these three quantities: the sum of squares for $X$, the sum of squares for $Y$, and the sum of products.
 
-The first thing we need to do is calculate the mean of each variable, then the deviations for $X$ and $Y$, then square those deviations, and then sum the squared deviations to get the sums of squares. This gets us the values for the denominator of the $r$ equation. The last step is to multiply the deviations for $X$ and $Y$ to get the products. So $-3$ multiplied by $-3$ gives positive 9, $-2$ multiplied by $0$ gives 0, and so on. We then sum those products to get the sum of products, which here is 15.
+The first thing we need to do is calculate the mean of each variable, then the deviations for $X$ and $Y$, then square those deviations, and then sum the squared deviations to get the sums of squares. This gets us the values for the denominator of the $r$ equation. The last step is to multiply the deviations for $X$ and $Y$ to get the products. So $-1$ multiplied by $20$ gives $-20$, $-0.5$ multiplied by $-10$ gives positive 5, and so on. We then sum those products to get the sum of products, which here is $-30$.
 
 | $X$ | $X - M_X$ | $(X - M_X)^2$ | $Y$ | $Y - M_Y$ | $(Y - M_Y)^2$ | $(X - M_X)(Y - M_Y)$ |
 |--:|--:|--:|--:|--:|--:|--:|
-| 4 | $-3$ | 9 | 5 | $-3$ | 9 | 9 |
-| 5 | $-2$ | 4 | 8 | 0 | 0 | 0 |
-| 7 | 0 | 0 | 8 | 0 | 0 | 0 |
-| 8 | 1 | 1 | 10 | 2 | 4 | 2 |
-| 11 | 4 | 16 | 9 | 1 | 1 | 4 |
-| | | $SS_X = 30$ | | | $SS_Y = 14$ | $SP = 15$ |
+| 0 | $-1$ | 1 | 90 | 20 | 400 | $-20$ |
+| 0.5 | $-0.5$ | 0.25 | 60 | $-10$ | 100 | 5 |
+| 0.5 | $-0.5$ | 0.25 | 85 | 15 | 225 | $-7.5$ |
+| 1 | 0 | 0 | 65 | $-5$ | 25 | 0 |
+| 1.5 | 0.5 | 0.25 | 50 | $-20$ | 400 | $-10$ |
+| 1.5 | 0.5 | 0.25 | 65 | $-5$ | 25 | $-2.5$ |
+| 2 | 1 | 1 | 75 | 5 | 25 | 5 |
+| | | $SS_X = 3$ | | | $SS_Y = 1200$ | $SP = -30$ |
 
-: Deviations, squared deviations, and products for the sleep data. $M_X = 7$; $M_Y = 8$. {#tbl-r-definitional}
+: Deviations, squared deviations, and products for the coffee data. $M_X = 1$; $M_Y = 70$. {#tbl-r-definitional}
 
-$$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{15}{\sqrt{30 \times 14}} = .73$$
+$$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{-30}{\sqrt{3 \times 1200}} = \frac{-30}{60} = -.50$$
 
 ::: {#quiz-correlation-calculate-r}
 {{< include quizzes/17-correlation-calculate-r.qmd >}}
@@ -201,19 +252,17 @@ $$ H_1: \rho \ne 0 $$
 
 Now, this is going to sound weird, but the test statistic for a correlation is actually a $t$ statistic, not the $r$ correlation coefficient that we just calculated. We'll see how to calculate that $t$ statistic in Step 3. But for now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for bivariate correlations, degrees of freedom are $n$, the number of pairs of scores, minus two. That's because we're dealing with two variables, each with its own mean, so we lose one degree of freedom for each. But these aren't two independent samples. We're looking at the associations between pairs of scores, so $n$ counts the pairs.
 
-As before, we can check the $t$ table to find the critical values. Since our little example dataset has five pairs of scores, our degrees of freedom are five minus two, which is three.
+As before, we can check the $t$ table to find the critical values. Since our little example dataset has seven pairs of scores, our degrees of freedom are seven minus two, which is five. We'll use $\alpha = .05$. Looking in the two-tailed .05 column gives critical values of $\pm 2.571$. We reject the null if $t < -2.571$ or $t > 2.571$.
 
-{{< interactive-figure tCriticalValueTable makeTTable options='{"title":"t critical values","df":{"from":1,"to":30},"alphas":[0.1,0.05,0.025,0.01,0.005],"confidence":true,"selectedTail":"two","selected":{"df":3,"tail":"two","alpha":0.05},"tableMaxHeight":"18rem"}' fallback="Interactive t critical-value table." >}}
+::: {#tbl-correlation-critical}
+{{< interactive-figure correlationCriticalTable makeTTable options='{"title":"Critical values for the coffee test","df":{"from":1,"to":7},"alphas":[0.1,0.05,0.025,0.01,0.005],"tableMinWidth":"0","maxWidth":"32rem","confidence":false,"interactive":false,"selected":{"df":5,"tail":"two","alpha":0.05}}' fallback="t table excerpt for 1 through 7 degrees of freedom, highlighting the two-tailed .05 critical value of 2.571 at df = 5." >}}
 
-{{< interactive-figure tCriticalCurve makeDistributionGraph options='{"distribution":"t","df":{"$value":"tCriticalValueTable.df"},"title":{"$template":"df = ${tCriticalValueTable.df}"},"style":"minimal","height":160,"xDomain":[-4,4],"yDomain":[0,0.45],"xTicks":5,"shade":{"$value":"tCriticalValueTable.shade"},"maxWidth":"24rem"}' fallback="t distribution curve with the selected critical region shaded." >}}
-
-::: {#quiz-correlation-critical-value}
-{{< include quizzes/17-correlation-critical-value.qmd >}}
+An excerpt of the $t$ table, with the $df = 5$ row highlighted. The two-tailed $.05$ heading puts $.025$ in each tail.
 :::
 
 ### Step 3: Collect and analyze the data
 
-So next, we need the correlation coefficient, Pearson's $r$. We've already calculated that for our sleep data: $r = .73$ (@tbl-r-definitional).
+So next, we need the correlation coefficient, Pearson's $r$. We've already calculated that for our coffee data: $r = -.50$ (@tbl-r-definitional).
 
 But like I said, we don't test the $r$ statistic itself. Rather, we need to convert the $r$ value into a kind of $t$ statistic to see how improbable it is, given the variability in the data, that we would have observed an association this strong or stronger if no association actually exists in the population, as our null hypothesis assumes.
 
@@ -227,17 +276,21 @@ Here $r$ is the correlation coefficient, $\rho$ is the population correlation as
 
 $$ s_r = \sqrt{\frac{1 - r^2}{n - 2}} $$ {#eq-correlation-se}
 
-For our sleep data, that works out like this (keeping an extra decimal place for $r$ to avoid rounding error):
+For our coffee data, that works out like this:
 
-$$t = \frac{r - \rho}{s_r} = \frac{.732 - 0}{\sqrt{\dfrac{1 - .732^2}{5 - 2}}} = 1.86$$
+$$t = \frac{r - \rho}{s_r} = \frac{-.50 - 0}{\sqrt{\dfrac{1 - (-.50)^2}{7 - 2}}} = \frac{-.50}{.387} = -1.29$$
 
 ### Step 4: Make a decision
 
-Our $t = 1.86$ falls short of the critical value of $\pm 3.18$ for three degrees of freedom, so we fail to reject the null hypothesis despite the seemingly strong correlation. The corresponding two-tailed $p$-value is approximately $.16$, well above our $\alpha$ of $.05$.
+Our $t = -1.29$ falls short of the critical value of $\pm 2.571$ for five degrees of freedom, so we fail to reject the null hypothesis despite the seemingly strong correlation.
 
-::: {#quiz-correlation-significance}
-{{< include quizzes/17-correlation-significance.qmd >}}
+::: {#fig-correlation-decision}
+{{< interactive-figure correlationTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"t","df":5,"title":"Null distribution: df = 5","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[-5,5],"xTicks":5,"labels":{"x":"t statistic"},"shade":{"tail":"two","alpha":0.05},"markers":[{"at":-2.570582,"label":"−2.571","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":2.570582,"label":"+2.571","height":0.6,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":-1.290994,"label":"t = −1.29","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null t distribution with 5 degrees of freedom. The two rejection regions lie beyond ±2.571; the observed t of −1.29 falls between them." >}}
+
+The observed $t = -1.29$ falls between the critical values of the null $t$ distribution with $df = 5$.
 :::
+
+The corresponding two-tailed $p$-value is approximately $.25$, well above our $\alpha$ of $.05$.
 
 ### Step 5: Estimate the effect, interval, and power
 
@@ -247,7 +300,11 @@ You may have noticed we haven't calculated a separate measure of effect size her
 
 Pearson's $r$ is a measure of effect size because it quantifies the degree of association between two variables on a standardized scale ranging from negative one to one. And the correlation itself doesn't get bigger just because the sample does. That's why we can have such a strong correlation in our example dataset and yet fail to reject the null hypothesis.
 
-And Pearson's $r$ is closely related to another measure of effect size: $r^2$. You might have noticed that $r^2$ showed up in the calculation for the standard error of the correlation. Squaring the correlation gives us the proportion of the variability in one variable that's shared with the other---much like $\eta^2$ in Chapter 14, which gave us the share of the total variability accounted for by differences between the groups. For our sleep data, $r^2 = .732^2 \approx .54$, so about 54% of the variability in test scores is shared with hours of sleep. So it should be no surprise that $r$, $r^2$, and $t$ are all mathematically related. In fact, even Cohen's $d$ is mathematically related to $r$. I'll leave the actual mathematical relationships for anyone algebraically inclined to ponder over. But for us, the point is that these different statistics are all performing related jobs and share similar conceptual foundations.
+::: {#quiz-correlation-significance}
+{{< include quizzes/17-correlation-significance.qmd >}}
+:::
+
+And Pearson's $r$ is closely related to another measure of effect size: $r^2$. You might have noticed that $r^2$ showed up in the calculation for the standard error of the correlation. Squaring the correlation gives us the proportion of the variability in one variable that's shared with the other---much like $\eta^2$ in Chapter 14, which gave us the share of the total variability accounted for by differences between the groups. For our coffee data, $r^2 = (-.50)^2 = .25$, so 25% of the variability in test scores is shared with coffee consumption. So it should be no surprise that $r$, $r^2$, and $t$ are all mathematically related. In fact, even Cohen's $d$ is mathematically related to $r$. I'll leave the actual mathematical relationships for anyone algebraically inclined to ponder over. But for us, the point is that these different statistics are all performing related jobs and share similar conceptual foundations.
 
 As for how to interpret Pearson's $r$ as a measure of effect size, you might remember from Chapter 9 that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, Cohen was also familiar with Pearson's $r$ and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb, and Cohen himself strongly cautioned against over-reliance on them.
 
@@ -264,11 +321,23 @@ There's a great recent paper by @funder2019evaluating that looked at what effect
 
 : Rough benchmarks for interpreting $r$ as an effect size. {#tbl-r-benchmarks}
 
+To get a feel for what correlations of these sizes look like, here are four point clouds of 100 points each.
+
+::: {.sfs-figure-row}
+{{< interactive-figure benchmarkScatterR10 makeScatterplot options='{"generate":{"r":0.1,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .10: barely distinguishable from a circular cloud." >}}
+
+{{< interactive-figure benchmarkScatterR20 makeScatterplot options='{"generate":{"r":0.2,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .20: a very slight upward tilt." >}}
+
+{{< interactive-figure benchmarkScatterR30 makeScatterplot options='{"generate":{"r":0.3,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .30: a visible but loose upward tilt." >}}
+
+{{< interactive-figure benchmarkScatterR40 makeScatterplot options='{"generate":{"r":0.4,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .40: a clearer upward tilt, still with plenty of scatter." >}}
+:::
+
 So from this you can see how context-dependent our interpretation of effect size should be. I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when someone tells you about some experimental effect, ask them what the effect size was. If they can't tell you, you should be a little bit skeptical.
 
 For building an intuitive feel for what correlations of different sizes actually look like, spend some time with [Kristoffer Magnusson's interactive correlation visualization](https://rpsychologist.com/correlation/).
 
-<!-- PLAN: #### Confidence interval — show the result without teaching Fisher's transformation? 95% CI for these data is about [-.42, .98]. -->
+<!-- PLAN: #### Confidence interval — show the result without teaching Fisher's transformation? 95% CI for these data is about [-.91, .41]. -->
 
 <!-- PLAN: #### Statistical power — about 85 pairs for 80% power at rho = .3; about 195 at .2. -->
 
@@ -278,11 +347,11 @@ For building an intuitive feel for what correlations of different sizes actually
 
 As always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom, and the $p$-value for the correlation.
 
-> More sleep was associated with higher test scores, but the correlation did not reach statistical significance; $r(3) = .73$, $p = .16$.
+> Drinking more coffee was associated with lower test scores, but the correlation did not reach statistical significance; $r(5) = -.50$, $p = .25$.
 
 ### Interpreting the results
 
-<!-- PLAN: what failing to reject means here (as in Chapter 12: not "no relationship"; five pairs can't tell), then into causation. -->
+<!-- PLAN: what failing to reject means here (as in Chapter 12: not "no relationship"; seven pairs can't tell), then into causation. -->
 
 ### Correlation and causation
 
@@ -290,18 +359,96 @@ Now, if you know anything about correlation, it's probably that correlation does
 
 Take an example from real research. Drinking coffee is correlated with scoring higher on measures of IQ [@corley2010caffeine]. And as soon as you hear that, it's easy to start speculating about how the caffeine might improve cognitive function, so habitual consumption should increase general IQ. So maybe we should prescribe a daily dose of coffee to everyone to make us all smarter.
 
+::: {#fig-coffee-iq-correlation}
+
+{{< include resources/figures/coffee-iq-correlation.svg >}}
+
+Coffee consumption and IQ are positively correlated. The value here is illustrative, not an estimate from Corley et al.'s study. The line shows a relationship without telling us which variable, if either, causes the other.
+
+:::
+
 But you can probably see where I'm going with this. It would be premature to conclude that coffee causes higher IQ if all we've done is show that they're correlated. It could just as easily be the reverse: being smarter causes you to drink more coffee. Again, we could speculate about some causal effect whereby people with higher IQ have more sophisticated or refined tastes or are drawn to mild stimulants for whatever reason. But again, we should probably slow our roll. It could be that some third factor, like being richer, might be associated both with coffee consumption and IQ.
+
+::: {#fig-coffee-iq-third-variable}
+
+{{< include resources/figures/coffee-iq-third-variable.svg >}}
+
+A third variable can account for much of a correlation. Here, higher socioeconomic status goes with both more coffee consumption and higher IQ. The dashed line shows the weaker correlation left after accounting for socioeconomic status. These values are illustrative too. In the actual study, the coffee–IQ association weakened after adjustment for social class and childhood IQ [@corley2010caffeine].
+
+:::
 
 And even then, we haven't explained the causality. Maybe coffee is more fashionable in more affluent social circles. Maybe higher socioeconomic status makes people healthier and good health promotes higher IQ, or, conversely, poor health inhibits performance on IQ tests. Or maybe higher income is associated with having the resources that allow you to perform better on measures of IQ and to afford to buy more coffee.
 
 In any case, the point is that causality is difficult to establish and usually requires experiments in which participants are randomly assigned to conditions. We talked about why that is in Chapter 12. For now, just remember that correlation is not the same thing as causation. That doesn't mean that knowing about correlations that exist in the world is useless. Far from it. It just means we have to know the limitations of the data and the statistical techniques we apply to it.
 
+::: {#quiz-correlation-causation}
+{{< include quizzes/17-correlation-your-turn-causation.qmd >}}
+:::
+
 <!-- PLAN: still to add: separate the statistic from the design (random assignment licenses "cause," whatever statistic follows); the significance test only rules out chance; what Corley et al. actually found (verify against the paper); what correlational research is for. -->
+
+### Accounting for a third variable
+
+<!-- PLAN (2026-11-16): new section. The seven students can't settle anything, so this section switches to invented correlations from a larger imaginary study (n = 300) of the same three variables, then comes back to the seven students for the quiz. Only the tables, figures, equations, and quiz are live; the prose is sketched in DRAFT comments for Rob to write. Ordering against the coffee and IQ passage above is open: that passage could shrink to a short real-world coda after this section (Corley et al. is the same structure with a real ending: the association weakened after adjustment). All captions and quiz wording here are drafts. -->
+
+<!-- DRAFT: Seven students can't tell us much. Suppose a much bigger study, 300 students, measured the same two things and found r = -.15: small, typical of psychology (@tbl-r-benchmarks), and with that many students statistically significant, t(298) = -2.62, p = .009. So chance is an unlikely explanation. Does coffee hurt test performance? That's odd, since caffeine is supposed to keep us alert. -->
+
+::: {#fig-coffee-test-correlation}
+
+{{< include resources/figures/coffee-test-correlation.svg >}}
+
+Coffee and test scores in an imaginary study of 300 students. The value is invented. The line shows a relationship without telling us which variable, if either, causes the other.
+
+:::
+
+<!-- DRAFT: Who drinks the most coffee on the morning of a test? Perhaps the students who haven't been sleeping. Suppose the study also recorded each student's average nightly sleep over the week before the test. That sleep came before the morning's coffee, so the coffee can't have caused it. Three variables means three correlations. -->
+
+| Variables | $r$ |
+|:--|--:|
+| Coffee ($X$) and test score ($Y$) | $-.15$ |
+| Coffee ($X$) and sleep ($Z$) | $-.35$ |
+| Sleep ($Z$) and test score ($Y$) | $.30$ |
+
+: Invented correlations among coffee, test score, and sleep for an imaginary study of 300 students. {#tbl-coffee-sleep-correlations}
+
+<!-- DRAFT: The partial correlation is the correlation between X and Y that's left once Z has been accounted for: in effect, the correlation between coffee and test score among students who slept the same amount. It needs only the three correlations. -->
+
+$$ r_{XY \cdot Z} = \frac{r_{XY} - r_{XZ}\,r_{YZ}}{\sqrt{(1 - r_{XZ}^2)(1 - r_{YZ}^2)}} $$ {#eq-partial-r}
+
+$$ r_{XY \cdot Z} = \frac{-.15 - (-.35)(.30)}{\sqrt{(1 - (-.35)^2)(1 - .30^2)}} = \frac{-.045}{.894} = -.05 $$
+
+::: {#fig-coffee-test-third-variable}
+
+{{< include resources/figures/coffee-test-third-variable.svg >}}
+
+Accounting for sleep. Students who slept less drank more coffee and scored lower. The dashed line shows the correlation between coffee and test score that remains after accounting for sleep. All values are invented.
+
+:::
+
+<!-- DRAFT: Most of the association is gone, but not quite all of it. Cautions to make: (1) the numbers are invented, and the real evidence on coffee, sleep and grades is mixed (admin literature note); (2) this doesn't prove sleep is the cause, only that the data are consistent with that story, and other unmeasured variables remain; (3) a drop from "significant" to "not significant" (partial: t(297) = -0.87, p = .39) isn't itself the evidence; the change in size is; (4) only an experiment, randomly assigning coffee, would settle it. -->
+
+<!-- DRAFT: Back to our seven students. Here they are again with their sleep. -->
+
+| Participant | Coffee (cups) | Test score | Sleep (hours) |
+|:--:|:--:|:--:|:--:|
+| A | 0 | 90 | 9 |
+| B | 0.5 | 60 | 8 |
+| C | 0.5 | 85 | 8 |
+| D | 1 | 65 | 5 |
+| E | 1.5 | 50 | 6 |
+| F | 1.5 | 65 | 6 |
+| G | 2 | 75 | 7 |
+
+: The seven students from @tbl-coffee-scores, with their average nightly sleep over the week before the exam. $r_{XY} = -.50$; $r_{XZ} = -.667$; $r_{YZ} = .667$. {#tbl-coffee-sleep-scores}
+
+::: {#quiz-correlation-partial}
+{{< include quizzes/17-correlation-partial.qmd >}}
+:::
 
 ### Assumptions of the correlation test
 
-<!-- PLAN: new section. Linearity (needs the form figure); outliers (without student E, r = .89); restricted range; independent pairs; always look at the plot.
-     Other kinds of correlation go here: we've been assuming two quantitative variables, but the same math handles other data. Spearman = Pearson's r on ranks (sleep data: .87); point-biserial = Pearson's r with a 0/1 variable (Ch 12 spending data: r = .28, same t(8) = 0.82); phi as a mention only. -->
+<!-- PLAN: new section. Linearity (needs the form figure); outliers (without student A, the one who drank no coffee and scored 90, r = -.18); restricted range; independent pairs; always look at the plot.
+     Other kinds of correlation go here: we've been assuming two quantitative variables, but the same math handles other data. Spearman = Pearson's r on ranks (coffee data: -.41); point-biserial = Pearson's r with a 0/1 variable (Ch 12 spending data: r = .28, same t(8) = 0.82); phi as a mention only. -->
 
 ## Looking ahead
 

@@ -1,7 +1,6 @@
 ```{.quiz-yaml}
 id: 17_correlation_learning_checks
-title: >
-  Learning Checks
+title: Learning Checks
 questions:
   - id: rho_null_zero
     type: true-false
@@ -10,21 +9,109 @@ questions:
       states that the population correlation is zero.
     answer: true
     explanation: >
-      The null states no linear association in the population.
+      The null hypothesis says there is no linear association in the
+      population: $H_0\!: \rho = 0$.
 
-  - id: r_denominator_negative
-    type: true-false
+  - id: strongest_correlation
+    type: multiple-choice
     prompt: >
-      The denominator of Pearson's r cannot be negative.
-    answer: true
+      Which of these correlations is the strongest?
+    options:
+      - text: $r = .50$
+      - text: $r = .10$
+      - text: $r = -.70$
+        correct: true
+      - text: $r = 0$
     explanation: >
-      The denominator is a square root of sums of squares, so it cannot be negative.
+      Strength is the absolute magnitude: how far the correlation is from
+      zero. The sign only tells us the direction, so $-.70$ is a stronger
+      relationship than $.50$.
 
   - id: r_numerator_negative
     type: true-false
     prompt: >
-      The numerator of Pearson's r cannot be negative.
+      The numerator of Pearson's $r$ cannot be negative.
     answer: false
     explanation: >
-      The sum of products can be negative, producing a negative correlation.
+      The sum of products is negative when above-average scores on one
+      variable tend to go with below-average scores on the other. That's what
+      makes a correlation negative. The denominator, a square root of sums of
+      squares, can't be negative.
+
+  - id: add_constant
+    type: multiple-choice
+    prompt: >
+      Suppose the test in our coffee study had been marked too harshly, and
+      we add 10 points to every student's score. What happens to the
+      correlation between coffee and test score?
+    options:
+      - text: It gets stronger
+      - text: It gets weaker
+      - text: It stays the same
+        correct: true
+    hint: >
+      What happens to each student's deviation from the mean test score?
+    explanation: >
+      The mean goes up by 10 points too, so every deviation stays exactly as
+      it was, and so do $SS_Y$ and $SP$. The correlation depends on where the
+      scores are relative to their means, not on the means themselves.
+
+  - id: correlation_df
+    type: numeric
+    prompt: >
+      A researcher measures two variables for 20 people and tests the
+      correlation between them. What are the degrees of freedom for the test?
+    answer: 18
+    tolerance: 0
+    explanation: >
+      $df = n - 2 = 18$, where $n$ is the number of pairs of scores. It isn't
+      $n - 1 = 19$, because there are two variables, each with its own mean.
+      And it isn't $38$: these aren't two independent samples of 20.
+
+  - id: r_squared_shared
+    type: numeric
+    prompt: >
+      Two variables have a correlation of $r = .30$. What proportion of the
+      variability in one is shared with the other?
+    answer: 0.09
+    tolerance: 0.005
+    explanation: >
+      $r^2 = .30^2 = .09$, or 9%. It's the squared correlation that gives the
+      proportion of shared variability, not the correlation itself.
+
+  - id: significant_means_what
+    type: multiple-choice
+    prompt: >
+      In a large survey, the correlation between coffee drinking and IQ is
+      statistically significant, $p < .001$. Which conclusion does that
+      support?
+    options:
+      - text: Drinking coffee raises IQ
+      - text: Having a higher IQ leads people to drink more coffee
+      - text: No third variable is responsible for the relationship
+      - text: An association this strong would be very unlikely if there were no association in the population
+        correct: true
+    explanation: >
+      The significance test addresses chance, and only chance. A very small
+      $p$-value makes it hard to believe there's no association in the
+      population, but it says nothing about why the two variables go
+      together.
+
+  - id: curved_relationship
+    type: multiple-choice
+    prompt: >
+      A scatterplot shows a clear U shape: scores on $Y$ are high when $X$ is
+      low, low when $X$ is in the middle, and high again when $X$ is high.
+      Pearson's $r$ comes out close to zero. What should we conclude?
+    options:
+      - text: The two variables are unrelated
+      - text: There's no linear relationship, but there is a relationship that $r$ doesn't capture
+        correct: true
+      - text: The calculation must have gone wrong
+      - text: The sample is too small to detect the relationship
+    explanation: >
+      Pearson's $r$ measures linear relationships. On one side of the U the
+      products of deviations are mostly negative, on the other side mostly
+      positive, and they cancel out. This is one reason to look at the
+      scatterplot as well as the statistic.
 ```
