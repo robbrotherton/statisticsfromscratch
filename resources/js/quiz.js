@@ -195,6 +195,16 @@
     return Boolean(runtime && typeof runtime.getValue === "function" && runtime.getValue(path));
   }
 
+  // A figure can also say that, right now, an option is a judgment call
+  // (eitherFrom: figureId.path), such as an effect too small to call either
+  // way. Ticking it and leaving it unticked are then both right.
+  function optionEither(option) {
+    const path = normalizeText(option.eitherFrom);
+    if (!path) return false;
+    const runtime = window.interactiveRuntime;
+    return Boolean(runtime && typeof runtime.getValue === "function" && runtime.getValue(path));
+  }
+
   function gradeQuestion(question, response) {
     const type = questionType(question);
 
@@ -209,7 +219,7 @@
       // Right only when the selection is exactly the set of correct options.
       const selected = new Set((Array.isArray(response) ? response : []).map(Number));
       return (question.options || []).every(
-        (option, index) => optionCorrect(option) === selected.has(index)
+        (option, index) => optionEither(option) || optionCorrect(option) === selected.has(index)
       );
     }
 
@@ -531,11 +541,22 @@
     }
 
     // Options graded against a figure are listed in the answer only while the
-    // figure says they are right.
+    // figure says they are right. One the figure calls a judgment call is
+    // listed with a note that either answer was accepted.
     function syncAnswerList() {
       explanationPanel.querySelectorAll("[data-quiz-option]").forEach((entry) => {
         const option = (question.options || [])[Number(entry.dataset.quizOption)];
-        entry.hidden = !(option && optionCorrect(option));
+        const either = Boolean(option && optionEither(option));
+        entry.hidden = !(option && (optionCorrect(option) || either));
+        entry.classList.toggle("is-either", either);
+        let note = entry.querySelector(":scope > .quiz-answer-either");
+        if (either && !note) {
+          note = document.createElement("span");
+          note.className = "quiz-answer-either";
+          note.textContent = " (either answer accepted)";
+          entry.append(note);
+        }
+        if (note) note.hidden = !either;
       });
     }
 
