@@ -391,6 +391,14 @@ local function validate_question(question, path, seen_ids)
       elseif option.correct == true then
         correct_count = correct_count + 1
       end
+      if option.eitherFrom ~= nil then
+        if question.type ~= "multiple-select" then
+          validation_error(option_path .. ".eitherFrom", "is only available on multiple-select questions")
+        end
+        if is_blank(option.eitherFrom) then
+          validation_error(option_path .. ".eitherFrom", "must name a figure value, such as plot.borderlineInteraction")
+        end
+      end
     end
 
     if question.type == "multiple-choice" and correct_count ~= 1 then
@@ -516,6 +524,7 @@ local function add_question_html(question)
       option.textHtml = field_html(option.text)
       option.text = field_text(option.text)
       option.correctFrom = field_text(option.correctFrom)
+      option.eitherFrom = field_text(option.eitherFrom)
     end
   end
 

@@ -75,12 +75,14 @@ test("a multiple-select question uses checkboxes and is right only for the exact
   // Pull the grading function out of the runtime and run it.
   const source = runtime.match(/function gradeQuestion\(question, response\) \{[\s\S]*?\n  \}\n/)[0];
   const optionSource = runtime.match(/function optionCorrect\(option\) \{[\s\S]*?\n  \}\n/)[0];
+  const eitherSource = runtime.match(/function optionEither\(option\) \{[\s\S]*?\n  \}\n/)[0];
   const figureValues = {};
   const gradeQuestion = runInNewContext(`
     const QUESTION_TYPES = { multipleSelect: "multiple-select" };
     const questionType = (question) => question.type;
     const normalizeText = (value) => String(value ?? "").trim();
     ${optionSource}
+    ${eitherSource}
     ${source}
     gradeQuestion;
   `, { window: { interactiveRuntime: { getValue: (path) => figureValues[path] } } });
@@ -105,6 +107,29 @@ test("a multiple-select question uses checkboxes and is right only for the exact
   Object.assign(figureValues, { "plot.a": false, "plot.none": true });
   assert.equal(gradeQuestion(fromFigure, ["0"]), false);
   assert.equal(gradeQuestion(fromFigure, ["2"]), true);
+
+  // An option the figure calls a judgment call is right ticked or unticked;
+  // the others are still graded.
+  const withEither = {
+    type: "multiple-select",
+    options: [
+      { correctFrom: "plot.a", eitherFrom: "plot.smallA" },
+      { correctFrom: "plot.b" },
+      { correctFrom: "plot.none", eitherFrom: "plot.smallNone" },
+    ],
+  };
+  Object.assign(figureValues, {
+    "plot.a": true, "plot.b": true, "plot.none": false,
+    "plot.smallA": true, "plot.smallNone": false,
+  });
+  assert.equal(gradeQuestion(withEither, ["0", "1"]), true);
+  assert.equal(gradeQuestion(withEither, ["1"]), true);
+  assert.equal(gradeQuestion(withEither, ["0"]), false);
+  assert.equal(gradeQuestion(withEither, ["1", "2"]), false);
+  Object.assign(figureValues, { "plot.b": false, "plot.smallNone": true });
+  assert.equal(gradeQuestion(withEither, ["0"]), true);
+  assert.equal(gradeQuestion(withEither, ["2"]), true);
+  assert.equal(gradeQuestion(withEither, ["0", "1"]), false);
 
   // A wrong selection doesn't mark individual options as wrong.
   assert.match(
@@ -557,6 +582,11 @@ test("a multiple-select option can be graded against a figure's live value", () 
   assert.match(runtime, /optionCorrect\(option\) === selected\.has\(index\)/);
   assert.match(filter, /"is only available on multiple-select questions"/);
   assert.match(filter, /"cannot be combined with correct"/);
+  assert.match(runtime, /optionEither\(option\) \|\| optionCorrect\(option\) === selected\.has\(index\)/);
+  // The listed answer includes a judgment-call option, marked as such.
+  assert.match(runtime, /entry\.hidden = !\(option && \(optionCorrect\(option\) \|\| either\)\)/);
+  assert.match(runtime, /entry\.classList\.toggle\("is-either", either\)/);
+  assert.match(filter, /option\.eitherFrom = field_text\(option\.eitherFrom\)/);
   // The listed answer follows the figure too.
   assert.match(filter, /data-quiz-option="/);
   assert.match(runtime, /function syncAnswerList\(\)/);

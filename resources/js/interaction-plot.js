@@ -53,7 +53,13 @@ ipNormalizePattern = (value) => {
 // its two cells (equal cell sizes). The additive prediction for a cell is
 // its two marginal means minus the grand mean. "Shows" flags describe the
 // pattern in the means only; they say nothing about significance.
-ipEffects = (means, epsilon = 1e-6) => {
+//
+// A nudge (when given) is the smallest move of a single dot that a reader
+// might make by accident. An effect no bigger than one nudge's worth is
+// flagged as borderline: there, but small enough that "no effect" is a fair
+// reading too. One nudge shifts a marginal-mean difference by nudge / 2 and
+// the interaction contrast by the whole nudge.
+ipEffects = (means, epsilon = 1e-6, nudge = 0) => {
   const m = means;
   const marginalA1 = (m[0][0] + m[1][0]) / 2;
   const marginalA2 = (m[0][1] + m[1][1]) / 2;
@@ -71,12 +77,23 @@ ipEffects = (means, epsilon = 1e-6) => {
   const showsMainEffectA = Math.abs(mainEffectA) > epsilon;
   const showsMainEffectB = Math.abs(mainEffectB) > epsilon;
   const showsInteraction = Math.abs(interaction) > epsilon;
+  const borderlineMainEffectA = showsMainEffectA && Math.abs(mainEffectA) <= nudge / 2 + epsilon;
+  const borderlineMainEffectB = showsMainEffectB && Math.abs(mainEffectB) <= nudge / 2 + epsilon;
+  const borderlineInteraction = showsInteraction && Math.abs(interaction) <= nudge + epsilon;
+  const clearMainEffectA = showsMainEffectA && !borderlineMainEffectA;
+  const clearMainEffectB = showsMainEffectB && !borderlineMainEffectB;
+  const clearInteraction = showsInteraction && !borderlineInteraction;
+  const showsNoEffects = !showsMainEffectA && !showsMainEffectB && !showsInteraction;
+  const borderlineAny = borderlineMainEffectA || borderlineMainEffectB || borderlineInteraction;
   return {
     marginalA1, marginalA2, marginalB1, marginalB2, grandMean,
     mainEffectA, mainEffectB, effectAatB1, effectAatB2, interaction, predictions,
     parallel: !showsInteraction,
     showsMainEffectA, showsMainEffectB, showsInteraction,
-    showsNoEffects: !showsMainEffectA && !showsMainEffectB && !showsInteraction
+    showsNoEffects,
+    borderlineMainEffectA, borderlineMainEffectB, borderlineInteraction, borderlineAny,
+    // "None of these" is a fair answer when every effect is borderline.
+    borderlineNoEffects: borderlineAny && !clearMainEffectA && !clearMainEffectB && !clearInteraction
   };
 }
 
@@ -363,6 +380,8 @@ makeInteractionPlot = function(opts) {
     ? opts.yDomain.map(Number)
     : [0, 10];
   const step = ipPositiveNumber(opts.step, 0.25);
+  // How many steps of one dot count as a borderline effect (0: none do).
+  const borderlineSteps = Math.max(0, Number(opts.borderlineSteps) || 0);
   const format = d3.format(opts.format || ".2~f");
   const signedFormat = d3.format(opts.signedFormat || "+.2~f");
 
@@ -815,7 +834,7 @@ makeInteractionPlot = function(opts) {
   // --- Derived quantities ---------------------------------------------------
 
   function effects() {
-    return ipEffects(state.means, step / 4);
+    return ipEffects(state.means, step / 4, step * borderlineSteps);
   }
 
   // --- The reader's sketch (quiz responses) -----------------------------------
@@ -865,6 +884,11 @@ makeInteractionPlot = function(opts) {
       showsMainEffectB: derived.showsMainEffectB,
       showsInteraction: derived.showsInteraction,
       showsNoEffects: derived.showsNoEffects,
+      borderlineMainEffectA: derived.borderlineMainEffectA,
+      borderlineMainEffectB: derived.borderlineMainEffectB,
+      borderlineInteraction: derived.borderlineInteraction,
+      borderlineNoEffects: derived.borderlineNoEffects,
+      borderlineAny: derived.borderlineAny,
       sketch: state.sketch ? Object.assign({}, state.sketch) : null,
       showLines: state.showLines,
       marginals: state.marginals,

@@ -49,6 +49,37 @@ test("effect flags describe the pattern in the means", () => {
   assert.deepEqual(shown({ a1b1: 3, a2b1: 3, a1b2: 4, a2b2: 9 }), [true, true, true]);
 });
 
+test("an effect within one nudge of a single dot is borderline", () => {
+  const borderline = (means, nudge = 1) => {
+    const effects = ipEffects(cells(means), 0.25, nudge);
+    return [
+      effects.borderlineMainEffectA,
+      effects.borderlineMainEffectB,
+      effects.borderlineInteraction,
+      effects.borderlineNoEffects,
+    ];
+  };
+
+  // Nothing is borderline unless a nudge is given.
+  assert.deepEqual(borderline({ a1b1: 4, a2b1: 5, a1b2: 6, a2b2: 6 }, 0), [false, false, false, false]);
+  // No difference at all is not borderline: "none" is simply right.
+  assert.deepEqual(borderline({ a1b1: 5, a2b1: 5, a1b2: 5, a2b2: 5 }), [false, false, false, false]);
+
+  // One dot one step off "no effects": every effect it creates is small.
+  const nudged = { a1b1: 5, a2b1: 6, a1b2: 5, a2b2: 5 };
+  assert.deepEqual(shown(nudged), [true, true, true]);
+  assert.deepEqual(borderline(nudged), [true, true, true, true]);
+
+  // A clear main effect of B with a nudge on top: only "none" stays wrong.
+  const clearB = { a1b1: 2, a2b1: 3, a1b2: 8, a2b2: 8 };
+  assert.deepEqual(borderline(clearB), [true, false, true, false]);
+
+  // Two steps' worth is clear.
+  assert.deepEqual(borderline({ a1b1: 4, a2b1: 6, a1b2: 6, a2b2: 6 }), [false, false, false, false]);
+  // A clear main effect of A beside a borderline B and interaction.
+  assert.deepEqual(borderline({ a1b1: 3, a2b1: 6, a1b2: 3, a2b2: 7 }), [false, true, true, false]);
+});
+
 test("the graph tutorial starts from the real result, then shows every kind of pattern", () => {
   const steps = tutorialSteps(divById(chapter, "act-maze-interaction"));
   const real = { a1b1: 36, a2b1: 40, a1b2: 28, a2b2: 56 };
@@ -91,13 +122,20 @@ test("the results are graphed twice, once with each factor on the x-axis", () =>
 
 test("the sketch quiz is graded against values the plot publishes", () => {
   const paths = Array.from(
-    designQuiz.matchAll(/(?:correctFrom|contextFrom|responseFrom): designInteraction\.(\w+)/g),
+    designQuiz.matchAll(/(?:correctFrom|eitherFrom|contextFrom|responseFrom|data-interactive-show=")[: ]*"?designInteraction\.(\w+)/g),
     (match) => match[1]
   );
   assert.ok(paths.includes("sketch"));
   for (const flag of ["showsMainEffectA", "showsMainEffectB", "showsInteraction", "showsNoEffects"]) {
     assert.ok(paths.includes(flag), `no option is graded by ${flag}`);
   }
+  // Small effects can be called either way, so the sketch plot marks them.
+  for (const flag of [
+    "borderlineMainEffectA", "borderlineMainEffectB", "borderlineInteraction", "borderlineNoEffects",
+  ]) {
+    assert.ok(paths.includes(flag), `no option is excused by ${flag}`);
+  }
+  assert.match(designQuiz, /makeInteractionPlot[^\n]*"borderlineSteps":[1-9]/);
   for (const path of paths) {
     assert.match(source, new RegExp(`\\b${path}: `), `plot does not publish ${path}`);
   }

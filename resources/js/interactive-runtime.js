@@ -530,6 +530,23 @@
     });
   }
 
+  // Text marked data-interactive-show="figureId.path" appears only while that
+  // figure value is truthy, such as a note for one pattern of results.
+  function updateConditionalContent(root) {
+    const scope = root && typeof root.querySelectorAll === "function" ? root : document;
+    const elements = [];
+    if (scope.matches && scope.matches("[data-interactive-show]")) {
+      elements.push(scope);
+    }
+    scope.querySelectorAll("[data-interactive-show]").forEach(function(element) {
+      elements.push(element);
+    });
+
+    elements.forEach(function(element) {
+      element.hidden = !getPath(element.dataset.interactiveShow);
+    });
+  }
+
   function rerenderDynamicFigures(sourceFigure) {
     if (state.renderingDynamic) return;
     state.renderingDynamic = true;
@@ -545,6 +562,7 @@
 
   function updateDynamicContent(sourceFigure) {
     updateInlineValues(document);
+    updateConditionalContent(document);
     rerenderDynamicFigures(sourceFigure);
   }
 
@@ -593,6 +611,7 @@
     });
 
     updateInlineValues(root || document);
+    updateConditionalContent(root || document);
     return mounted;
   }
 
