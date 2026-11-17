@@ -15,33 +15,102 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
-In this chapter and the next, we'll cover the techniques of correlation and regression. Whereas the techniques we've covered so far deal with examining differences between groups, correlation and regression focus on associations between variables. As we'll see, though, this isn't as big a difference as you might expect. Correlation and regression are just another extension of the basic ideas of variability, sampling, and probability that have powered all of our inferential statistics so far.
+In this chapter and the next, we'll cover the techniques of correlation and regression. Whereas the $z$, $t$, and ANOVA statistics we've covered so far deal with examining differences between groups, correlation and regression focus on associations between variables. As we'll see, though, this isn't as big a difference as you might expect. Correlation and regression are just another extension of the basic ideas of variability, sampling, and probability that have powered all of our inferential statistics so far.
 
 ## From groups to pairs
 
-The key difference between the correlational approach and the designs and statistical tests we've covered so far---the $t$ test and ANOVA approach---is that those other approaches compare groups. This means studies with a grouping variable: a categorical variable that divides the sample up into different conditions, whether by random assignment or not. The statistics then compare those groups looking for differences over and above what we'd expect by chance. Correlational studies measure two quantitative variables per participant and examine the relationship between those variables---their association, rather than their difference.
+In Chapter 12, we imagined giving people $10 and telling them to spend it either on themselves or on someone else. I based that on a real experiment, in which people randomly assigned to spend a small amount of cash on someone else reported being happier later that day than people assigned to spend it on themselves [@dunn2008spending]. At the end of the chapter I made a big to-do about how one study is never the final word on anything.
 
-<!-- PLAN: the big difference, made explicit. Comparison table (Chapters 11–16 vs. this chapter: variables, what each person contributes, picture, question, statistic) and the points from the editorial pass: rows are people and both columns are measurements; it looks like related samples but isn't the same question; X and Y are interchangeable; it's less of a break than it looks. -->
+What I didn't mention then is that the researchers actually did more than one study. In the same paper, they reported another study in which they didn't give out cash or assign anyone to anything. Instead they just asked a nationally representative sample of 632 Americans how happy they were in general, and how much they spent in a typical month on gifts for other people and donations to charity.
 
-::: {#quiz-correlation-which-analysis}
-{{< include quizzes/17-correlation-which-analysis.qmd >}}
+Every test statistic we've met so far---$z$, $t$, $F$---has been designed to compare means. But there are no groups here. Each person just gives us two numbers: how much they spend on others, and how happy they are. The question isn't whether two groups *differ*, but whether those two variables go *together*: do people who spend more on others tend to be happier?
+
+How might we analyze the data to answer that question? I suppose we could *make* some groups. Maybe a lot of people tell us they spent nothing on others that month. So one option would be to split the sample into people who spent something and people who spent nothing, and compare the two groups' mean happiness with an independent-samples $t$ test. Even though group membership isn't randomly assigned, the $t$ test can still tell us whether the difference in means is more than we'd expect by chance.
+
+But that would throw away a lot of good information. Everyone who spent anything gets lumped together, so we lose what we knew about how much each person spent. We'd lose any distinction between someone who spent $5 on others and someone who spent $500. We're shoehorning the data into a form the $t$ test can handle. There has to be a better way! How might we make use of each person's actual amount spent?
+
+::: {#quiz-correlation-pairs}
+{{< include quizzes/17-correlation-pairs.qmd >}}
 :::
 
-## Picturing a relationship
+The idea @quiz-correlation-pairs was getting at is to look at the relationship between two variables by examining how they vary together. Like our other analyses, we still make use of averages, and deviations. The new idea is that we're looking at the consistency of deviations. When a score on one variable tends to be above its mean, is there a predictable pattern in the other variable? A positive correlation would predict that the other variable will also tend to be above its mean. Correspondingly, someone who spends below average would tend to be less happy than average. On the other hand, if the correlation were negative---more prosocial spending was associated with lower happiness---we would predict that a high spender would tend to be less happy than average. This is the essence of correlation; it's all about the consistency of these kinds of deviations.
 
-To give a few quick examples of these kinds of psychological research questions, we may be interested in the correlation between a person's income and their happiness. Do wealthier people tend to say they're happier? We generally visualize correlational data as a scatterplot like this: one variable on the $x$ axis and the other on the $y$ axis. Each dot represents one person's pair of scores.
+Here's what that idea looks like with some data. (These aren't the real survey responses, just a handful of made-up people to illustrate.)
 
-{{< interactive-figure incomeHappinessScatter makeScatterplot options='{"generate":{"r":0.2,"n":45,"seed":11},"style":"minimal","axisLabels":true,"xLabel":"Income","yLabel":"Happiness","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical income and happiness scores: a loose cloud of dots drifting slightly upward, suggesting that higher income tends to go with somewhat higher happiness." >}}
+::::: {#act-same-side .callout-tip .interactive}
+## Same side, opposite sides
 
-Another question might be, does practice make perfect? We could record the amount of time someone spent practicing a task and record their performance of the task and put those pairs of observations on a scatterplot. Or we might suspect that the more absences someone has from a class, the worse their final grade will be for that class. Here, unlike those previous two examples, we'd be expecting that higher scores on one variable would be associated with lower scores on the other. This would be a negative correlation.
+{{< interactive-figure spendingHappinessScatter makeScatterplot options='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"xLabel":"Spent on others last month ($)","yLabel":"Happiness (0–10)","xDomain":[0,300],"yDomain":[0,10],"controlSet":"correlation","maxWidth":"30rem"}' fallback="Scatterplot of invented data for 20 people: how much each spent on others last month against their happiness. Dashed lines at the two means split the plot into four quarters. People on the same side of both means are shown as solid dots, and people on opposite sides as hollow dots. Fifteen people are on the same side and five are on opposite sides. Two further sets of invented data show no relationship, with ten people on each, and a negative relationship, with seven on the same side and thirteen on opposite sides." >}}
 
-{{< interactive-figure absencesGradeScatter makeScatterplot options='{"generate":{"r":-0.35,"n":45,"seed":12},"style":"minimal","axisLabels":true,"xLabel":"Absences","yLabel":"Final grade","maxWidth":"22rem"}' fallback="Scatterplot of hypothetical absences and final grades: a loose cloud of dots sloping downward, with more absences tending to go with lower grades: a negative correlation." >}}
+:::: {.callout-footer}
+::: {.tutorial-step data-title="People" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":false,"show-quadrants":false,"animate":false}'}
+Each dot is one person: how much they spent on others last month along the $X$ axis, and how happy they said they were up the $Y$ axis.
+:::
 
-### Characteristics of correlations
+::: {.tutorial-step data-title="Means" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":false}'}
+The dashed lines mark the mean of each variable. Between them, they split the plot into four quarters.
+:::
+
+::: {.tutorial-step data-title="Sides" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
+People in the top right spent more than average and are happier than average. People in the bottom left are below average on both. They're on the same side of both means (the solid dots). People in the other two quarters are above average on one variable and below average on the other (the hollow dots). Here, 15 people are on the same side and 5 are on opposite sides. The two variables tend to go together.
+:::
+
+::: {.tutorial-step data-title="No relationship" data-action='{"points":[[122,3],[244,6],[193,5],[45,7],[161,4],[241,4],[97,7],[225,6],[169,8],[186,8],[161,6],[177,5],[177,4],[209,5],[141,5],[125,6],[82,4],[138,4],[78,5],[62,7]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
+Now suppose spending and happiness were unrelated. Here everyone spent the same amounts as before, but their happiness has nothing to do with it. They're scattered across all four quarters, 10 on the same side and 10 on opposite sides.
+:::
+
+::: {.tutorial-step data-title="Opposite" data-action='{"points":[[122,4],[244,5],[193,5],[45,8],[161,4],[241,4],[97,7],[225,5],[169,8],[186,7],[161,6],[177,5],[177,4],[209,5],[141,5],[125,6],[82,5],[138,4],[78,6],[62,7]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
+And if people who spent more on others tended to be *less* happy, most would end up on opposite sides: here, 7 on the same side and 13 on opposite sides.
+:::
+::::
+
+:::::
+
+Counting points like this is a rough version of what a correlation does. The real math also takes into account precisely how far each person is from the two means, so that someone far above average on both counts for more than someone only just above. And just as with a difference between group means, we'll need to know whether an apparent pattern is more than we'd expect by chance.
+
+### What would it mean?
+
+Now I know you're excited to do the math, and we'll get to it soon. But first, let's think about how this kind of design changes what conclusions we can draw from our data, and what kind of followup analyses might be useful.
+
+Remember, we have two different designs testing the same general idea, one by comparing randomly assigned groups, the other by looking for a correlation in survey reponses. Suppose both studies found what the researchers expected. People assigned to spend money on others were happier, and people who said they spent more on others were happier. Do those two findings mean the same thing?
+
+::: {#quiz-correlation-designs}
+{{< include quizzes/17-correlation-designs.qmd >}}
+:::
+
+The actual survey, using the appropriate analysis[^dunn-regression], found that people who spent more on others did tend to be happier. The association was small, but statistically significant. And the researchers had thought about income. They'd asked people about it, and taking it into account barely changed the association between spending on others and happiness. So income doesn't explain it away.
+
+[^dunn-regression]: They actually used regression to do this, which is the topic of the next chapter. But it's closely related to correlation, so it still makes for a valid illustration of the point here.
+
+But that only rules out one alternative. The researchers hadn't measured everything that might make people both more generous and happier, and nothing about the survey can tell us which way the influence runs. As they put it themselves, "the correlational nature of this design precludes causal inferences." That's what the experiment was for.
+
+The experiment has its own limitation, though. Nobody in everyday life is handed an envelope of cash and told whom to spend it on. Later experiments controlled things even more tightly. In one, everyone used a small payment to buy a little goody bag of chocolate or juice, either for themselves or for a sick child they'd never meet. That ruled out some alternative explanations, but it moved the situation even further from everyday giving. (The researchers also let people keep the cash instead if they preferred, because feeling that you chose to give seems to matter [@aknin2020spending].) So the experiment gives a clear answer to a narrow, somewhat artificial question. The survey answers a more realistic question, less conclusively. Each covers for the other's weakness.
+
+Notice that two separate things changed between the experiment and the survey. One is the kind of variable: groups or amounts. That decides which statistic we use. The other is whether the researchers assigned people to conditions or measured them as they found them. That decides what we can conclude.
+
+| | Groups | Amounts |
+|:--|:--|:--|
+| **Assigned by the researchers** | Spend on yourself or on someone else; $t$ test or ANOVA | Spend $0, $5, $10, or $20 on someone else; correlation |
+| **Measured as people come** | People who gave something or nothing; $t$ test or ANOVA | How much people gave; correlation |
+
+: Two separate choices. The columns decide the statistic; the rows decide what we can conclude. {#tbl-design-statistic}
+
+So "correlational" really describes a design, not a statistic. Usually, measured amounts go with correlations and assigned groups go with $t$ tests and ANOVA. But a $t$ test comparing people who chose to give with people who didn't is still correlational, as we saw in Chapter 12. And a correlation from an experiment that assigned different amounts would still support a causal conclusion.
+
+That's the territory for this chapter. We'll see how to picture an association, how to measure it with a single number, and how to test whether it's more than chance. Then we'll come back to what a correlation can and can't tell us, and how a third variable can be taken into account. For the calculations, we'll switch to a smaller, simpler dataset.
+
+<!-- PLAN: points held over from the old opening plan. X and Y are interchangeable (Characteristics). "Looks like related samples but isn't the same question" now lives in the learning checks. -->
+
+<!-- NOTE: quizzes/17-correlation-which-analysis.qmd is no longer included; its related-samples question moved to the learning checks. Delete the file once this opening is settled. -->
+
+<!-- SOURCES: admin/editorial/chapter-edits/chapters-12-17-prosocial-spending-literature-2026-11-17.md -->
+
+
+## Characteristics of correlations
 
 We'll be calculating a correlation statistic. But before we learn how it's calculated, it's important to outline its general conceptual structure. The correlation statistic is a single number that quantifies the association between two variables. It has three characteristics: its absolute magnitude, its direction, and its form.
 
-#### Magnitude
+### Magnitude
 
 The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0. In the four diagrams below, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
 
@@ -55,7 +124,7 @@ The absolute magnitude varies from zero to one. This quantifies the strength of 
 {{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
 :::
 
-#### Direction
+### Direction
 
 The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases in one variable are associated with increases on the other---or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other---that they move in opposite directions. Below, I've flipped the diagrams around so that they're now illustrating negative correlations.
 
@@ -69,7 +138,7 @@ The second characteristic is the direction of the correlation, meaning its sign,
 {{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
 :::
 
-#### Form
+### Form
 
 And finally, there is the form of the association. We will only cover linear correlations. This means that we're imagining that the association forms a straight line. For positive correlations, an increase in $X$ is associated with the same average increase in $Y$ all the way along the line. Or for negative correlations, the same average decrease in $Y$.
 
@@ -406,6 +475,10 @@ Accounting for sleep. The solid lines show sleep's correlations with coffee and 
 :::
 
 <!-- DRAFT: Most of the association is gone, but not quite all of it. -->
+
+<!-- CALLBACK: one or two sentences contrasting with the opening. Here, accounting for sleep removes most of the coffee association; in the spending survey, accounting for income barely changed it. Accounting for a third variable can go either way. Chapter 18 can return to Dunn et al.'s actual regression. -->
+
+<!-- PLAN: the "what correlational research is for" point in the DRAFT notes below is now made in the opening (the more realistic question, less conclusively). Refer back rather than repeat. -->
 
 ::: {#quiz-correlation-partial}
 {{< include quizzes/17-correlation-partial.qmd >}}
