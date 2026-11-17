@@ -108,6 +108,39 @@ scStats = (points) => {
   return { n, meanX, meanY, ssX, ssY, sp, r, fitSlope, fitIntercept };
 }
 
+// Which side of the two means a point falls on: 1 when it is above both or
+// below both (its deviations agree in sign), −1 when it is above one and below
+// the other, 0 when it sits exactly on either mean.
+scQuadrant = (p, stats) =>
+  Math.sign((p.x - stats.meanX) * (p.y - stats.meanY))
+
+// A point is hollowed by fading in a background-colored "hole" on top of
+// its dot, so the dot itself never changes size. The dot's 1.4 px outline
+// covers its outer 0.7 px, so its visible edge is at r − 0.7; the hole
+// leaves a ring SC_RING_WIDTH wide inside that edge.
+SC_DOT_OUTLINE = 1.4;
+SC_RING_WIDTH = 2;
+scHoleRadius = (r) => r - SC_DOT_OUTLINE / 2 - SC_RING_WIDTH
+
+// Whether a point drawn at (px, py) is on opposite sides of mean lines drawn
+// at (mx, my), in screen coordinates (where y grows downward).
+scOppositeOnScreen = (px, py, mx, my) => (px - mx) * (my - py) < 0
+
+scParseTranslate = (transform) => {
+  const match = /translate\(\s*([-\d.e]+)[ ,]+([-\d.e]+)\s*\)/.exec(transform || "");
+  return match ? { x: Number(match[1]), y: Number(match[2]) } : null;
+}
+
+scQuadrantCounts = (points) => {
+  const stats = scStats(points);
+  const signs = points.map((p) => scQuadrant(p, stats));
+  return {
+    same: signs.filter((s) => s > 0).length,
+    opposite: signs.filter((s) => s < 0).length,
+    onMean: signs.filter((s) => s === 0).length
+  };
+}
+
 scSumSquaredResiduals = (points, slope, intercept) =>
   d3.sum(points, (p) => {
     const residual = p.y - (slope * p.x + intercept);
@@ -177,7 +210,20 @@ scEnsureStyles = () => {
     .scatterplot .sc-dot {
       fill: var(--sc-point-color);
       stroke: var(--sfs-bg, #fff);
-      stroke-width: 1.4;
+      stroke-width: ${SC_DOT_OUTLINE};
+    }
+
+    /* Quadrant mode: a point on opposite sides of the two means turns
+       hollow as its hole fades in (see scHoleRadius). */
+    .scatterplot .sc-hole {
+      fill: var(--sfs-bg, #fff);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 240ms ease;
+    }
+
+    .scatterplot .sc-point.is-opposite .sc-hole {
+      opacity: 1;
     }
 
     .scatterplot .sc-hit {
@@ -315,7 +361,8 @@ scEnsureStyles = () => {
     }
 
     .scatterplot.sc-no-anim .sc-layer,
-    .scatterplot.sc-no-anim .sc-ring {
+    .scatterplot.sc-no-anim .sc-ring,
+    .scatterplot.sc-no-anim .sc-hole {
       transition: none !important;
     }
 
@@ -379,7 +426,8 @@ scEnsureStyles = () => {
 
     @media (prefers-reduced-motion: reduce) {
       .scatterplot .sc-layer,
-      .scatterplot .sc-ring {
+      .scatterplot .sc-ring,
+      .scatterplot .sc-hole {
         transition: none !important;
       }
     }
@@ -480,6 +528,7 @@ makeScatterplot = function(opts) {
     showSquares: scBoolean(opts.showSquares ?? opts.squares ?? opts.squaredResiduals, false),
     showEllipse: scBoolean(opts.showEllipse ?? opts.ellipse, false),
     showMeans: scBoolean(opts.showMeans ?? opts.means, false),
+    showQuadrants: scBoolean(opts.showQuadrants ?? opts.quadrants, false),
     showDeviations: scBoolean(opts.showDeviations ?? opts.deviations, false),
     showProducts: scBoolean(opts.showProducts ?? opts.products, false),
     productLabels: scBoolean(opts.productLabels, false),
@@ -995,6 +1044,12 @@ makeScatterplot = function(opts) {
 
     const stats = scStats(state.points);
     const line = effectiveLine();
+    // Where the mean lines are drawn right now (mid-move, if a step is still
+    // animating), so a point's hollow state can follow the lines as they move.
+    const meanStart = {
+      x: meanXLine.attr("x1") === null ? null : Number(meanXLine.attr("x1")),
+      y: meanYLine.attr("y1") === null ? null : Number(meanYLine.attr("y1"))
+    };
     const ssResidual = scSumSquaredResiduals(state.points, line.slope, line.intercept);
 
     drawAxes(animate, duration);
@@ -1131,6 +1186,7 @@ makeScatterplot = function(opts) {
         group.append("circle").attr("class", "sc-hit").attr("r", 16);
         group.append("circle").attr("class", "sc-ring").attr("r", 10);
         group.append("circle").attr("class", "sc-dot sfs-graph-point").attr("r", pointRadius);
+        group.append("circle").attr("class", "sc-hole").attr("r", scHoleRadius(pointRadius));
         group.attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`);
         return group;
       })
@@ -1140,9 +1196,36 @@ makeScatterplot = function(opts) {
         const index = Number(event.currentTarget.dataset.index);
         handlePointKeydown(event, index);
       });
-    maybeTransition(pointGroups, animate, duration)
-      .attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`);
+    // A point turns hollow (its hole fades in) when it is on opposite sides
+    // of the two means. While points and mean lines move between steps, that
+    // is checked frame by frame from where both are drawn, so a hole fades
+    // only as its point actually crosses a line.
+    const meanEnd = { x: x(stats.meanX), y: y(stats.meanY) };
+    if (animate) {
+      maybeTransition(pointGroups, animate, duration)
+        .attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`)
+        .tween("sc-quadrant", function(p) {
+          const node = this;
+          const end = { x: x(p.x), y: y(p.y) };
+          const start = scParseTranslate(node.getAttribute("transform")) || end;
+          const from = {
+            x: meanStart.x === null ? meanEnd.x : meanStart.x,
+            y: meanStart.y === null ? meanEnd.y : meanStart.y
+          };
+          const at = (a, b, t) => a + (b - a) * t;
+          return (t) => {
+            node.classList.toggle("is-opposite", state.showQuadrants && scOppositeOnScreen(
+              at(start.x, end.x, t), at(start.y, end.y, t),
+              at(from.x, meanEnd.x, t), at(from.y, meanEnd.y, t)));
+          };
+        });
+    } else {
+      pointGroups
+        .attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`)
+        .classed("is-opposite", (p) => state.showQuadrants && scQuadrant(p, stats) < 0);
+    }
     pointGroups.select(".sc-dot").attr("r", pointRadius);
+    pointGroups.select(".sc-hole").attr("r", scHoleRadius(pointRadius));
     pointGroups
       .attr("tabindex", state.draggable ? 0 : null)
       .attr("role", state.draggable ? "button" : null)
@@ -1375,6 +1458,11 @@ makeScatterplot = function(opts) {
         case "show-means":
         case "means":
           state.showMeans = scBoolean(value, state.showMeans);
+          changed = true;
+          break;
+        case "show-quadrants":
+        case "quadrants":
+          state.showQuadrants = scBoolean(value, state.showQuadrants);
           changed = true;
           break;
         case "show-deviations":
