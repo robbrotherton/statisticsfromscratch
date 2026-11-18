@@ -277,6 +277,7 @@ scEnsureStyles = () => {
       stroke-dasharray: 5 3;
     }
 
+    .scatterplot .sc-square-label,
     .scatterplot .sc-product-label {
       fill: var(--sc-positive-color);
       font-family: var(--bs-body-font-family, system-ui, sans-serif);
@@ -288,6 +289,8 @@ scEnsureStyles = () => {
       stroke-width: 3px;
       user-select: none;
     }
+
+    .scatterplot .sc-square-label { fill: var(--sc-residual-color); }
 
     .scatterplot .sc-product-label.is-negative {
       fill: var(--sc-negative-color);
@@ -526,6 +529,8 @@ makeScatterplot = function(opts) {
     showLine: scBoolean(opts.showLine, opts.line !== undefined || opts.slope !== undefined),
     showResiduals: scBoolean(opts.showResiduals ?? opts.residuals, false),
     showSquares: scBoolean(opts.showSquares ?? opts.squares ?? opts.squaredResiduals, false),
+    squareMode: ["x", "y"].includes(opts.squareMode) ? opts.squareMode : "residual",
+    squareLabels: scBoolean(opts.squareLabels, false),
     showEllipse: scBoolean(opts.showEllipse ?? opts.ellipse, false),
     showMeans: scBoolean(opts.showMeans ?? opts.means, false),
     showQuadrants: scBoolean(opts.showQuadrants ?? opts.quadrants, false),
@@ -788,6 +793,8 @@ makeScatterplot = function(opts) {
   const squaresLayer = svg.append("g")
     .attr("class", "sc-layer sc-squares-layer")
     .attr("clip-path", `url(#${clipId})`);
+  const squareLabelsLayer = svg.append("g")
+    .attr("class", "sc-layer sc-square-labels-layer");
   const residualsLayer = svg.append("g")
     .attr("class", "sc-layer sc-residuals-layer")
     .attr("clip-path", `url(#${clipId})`);
@@ -833,7 +840,7 @@ makeScatterplot = function(opts) {
     const rounded = Math.round(nextWidth);
     if (!(rounded > 0) || rounded === width) return;
     // A move still in flight would finish at positions from the old scales.
-    svg.selectAll("*").interrupt("sc-move");
+    svg.selectAll("*").interrupt("sc-move").interrupt("sc-square-label");
     setGeometry(rounded);
     applyGeometry();
     render({ animate: false });
@@ -848,7 +855,7 @@ makeScatterplot = function(opts) {
     .attr("y", 24)
     .attr("dominant-baseline", "hanging");
   ssText.append("tspan").text("SS");
-  ssText.append("tspan")
+  const ssSubscript = ssText.append("tspan")
     .attr("class", "sc-annotation-sub")
     .attr("dy", "0.35em")
     .text("residual");
@@ -1037,6 +1044,7 @@ makeScatterplot = function(opts) {
     options = options || {};
     const animate = options.animate !== false && !scPrefersReducedMotion();
     const duration = scPositiveNumber(options.duration, transitionDuration);
+    const drawMeanSquares = animate && options.drawMeanSquares && state.showSquares && state.squareMode !== "residual";
 
     if (!animate) {
       rootNode.classList.add("sc-no-anim");
@@ -1078,9 +1086,26 @@ makeScatterplot = function(opts) {
       .attr("y1", (p) => y(p.y))
       .attr("y2", (p) => y(line.slope * p.x + line.intercept));
 
-    // Each squared residual is a literal square: its side is the on-screen
-    // length of the residual segment, drawn toward the side with more room.
+    // Mean-deviation squares use the selected axis's screen scale for both
+    // sides; residual squares retain their regression-line reference.
     const plotMiddle = (margin.left + plotRight) / 2;
+    const squareGeometry = (p) => {
+      if (state.squareMode === "x") {
+        const side = Math.abs(x(p.x) - x(stats.meanX));
+        return {
+          x: Math.min(x(p.x), x(stats.meanX)),
+          y: y(p.y) <= (margin.top + plotBottom) / 2 ? y(p.y) : y(p.y) - side,
+          side
+        };
+      }
+      const reference = state.squareMode === "y" ? stats.meanY : line.slope * p.x + line.intercept;
+      const side = Math.abs(y(p.y) - y(reference));
+      return {
+        x: x(p.x) <= plotMiddle ? x(p.x) : x(p.x) - side,
+        y: Math.min(y(p.y), y(reference)),
+        side
+      };
+    };
     const squares = squaresLayer.selectAll("rect.sc-square")
       .data(state.points)
       .join((enter) => enter.append("rect")
@@ -1089,14 +1114,46 @@ makeScatterplot = function(opts) {
         .attr("y", (p) => y(p.y))
         .attr("width", 0)
         .attr("height", 0));
-    maybeTransition(squares, animate, duration)
-      .attr("x", (p) => {
-        const side = Math.abs(y(p.y) - y(line.slope * p.x + line.intercept));
-        return x(p.x) <= plotMiddle ? x(p.x) : x(p.x) - side;
-      })
-      .attr("y", (p) => Math.min(y(p.y), y(line.slope * p.x + line.intercept)))
-      .attr("width", (p) => Math.abs(y(p.y) - y(line.slope * p.x + line.intercept)))
-      .attr("height", (p) => Math.abs(y(p.y) - y(line.slope * p.x + line.intercept)));
+    squares.interrupt("sc-move");
+    if (drawMeanSquares) {
+      // Begin as the deviation segment itself, then grow perpendicular to it.
+      // X deviations are horizontal; Y deviations are vertical.
+      squares
+        .attr("x", (p) => state.squareMode === "x" ? squareGeometry(p).x : x(p.x))
+        .attr("y", (p) => state.squareMode === "x" ? y(p.y) : squareGeometry(p).y)
+        .attr("width", (p) => state.squareMode === "x" ? squareGeometry(p).side : 0)
+        .attr("height", (p) => state.squareMode === "x" ? 0 : squareGeometry(p).side);
+    }
+    const squareMove = maybeTransition(squares, animate, duration);
+    if (drawMeanSquares) squareMove.delay(duration + 100).ease(d3.easeCubicOut);
+    squareMove
+      .attr("x", (p) => squareGeometry(p).x)
+      .attr("y", (p) => squareGeometry(p).y)
+      .attr("width", (p) => squareGeometry(p).side)
+      .attr("height", (p) => squareGeometry(p).side);
+
+
+    const squareLabels = squareLabelsLayer.selectAll("text.sc-square-label")
+      .data(state.points)
+      .join("text")
+      .attr("class", "sc-square-label")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "central")
+      .text((p) => {
+        const deviation = state.squareMode === "x" ? p.x - stats.meanX
+          : state.squareMode === "y" ? p.y - stats.meanY
+          : p.y - (line.slope * p.x + line.intercept);
+        return format(deviation * deviation);
+      });
+    squareLabels.interrupt("sc-square-label");
+    squareLabels
+      .attr("x", (p) => squareGeometry(p).side === 0 ? x(p.x) - 12 : squareGeometry(p).x + squareGeometry(p).side / 2)
+      .attr("y", (p) => squareGeometry(p).side === 0 ? y(p.y) + 12 : squareGeometry(p).y + squareGeometry(p).side / 2)
+      .style("opacity", drawMeanSquares ? 0 : 1);
+    if (drawMeanSquares) {
+      squareLabels.transition("sc-square-label")
+        .delay(2 * duration + 100).duration(180).style("opacity", 1);
+    }
 
     // Ellipse.
     const ellipseD = ellipsePathData(stats);
@@ -1111,7 +1168,7 @@ makeScatterplot = function(opts) {
     const deviationData = state.points.flatMap((p, i) => [
       { key: i + "x", p, axis: "x" },
       { key: i + "y", p, axis: "y" }
-    ]);
+    ]).filter((d) => !state.showSquares || state.squareMode === "residual" || d.axis === state.squareMode);
     const deviations = deviationsLayer.selectAll("line.sc-deviation")
       .data(deviationData, (d) => d.key)
       .join((enter) => enter.append("line")
@@ -1120,6 +1177,14 @@ makeScatterplot = function(opts) {
         .attr("x2", (d) => x(d.p.x))
         .attr("y1", (d) => y(d.p.y))
         .attr("y2", (d) => y(d.p.y)));
+    deviations.interrupt("sc-move");
+    if (drawMeanSquares) {
+      deviations
+        .attr("x1", (d) => x(d.p.x))
+        .attr("y1", (d) => y(d.p.y))
+        .attr("x2", (d) => x(d.p.x))
+        .attr("y2", (d) => y(d.p.y));
+    }
     maybeTransition(deviations, animate, duration)
       .attr("x1", (d) => d.axis === "x" ? meanPX : x(d.p.x))
       .attr("y1", (d) => d.axis === "x" ? y(d.p.y) : meanPY)
@@ -1152,10 +1217,10 @@ makeScatterplot = function(opts) {
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
       .classed("is-negative", (p) => productOf(p) < 0)
-      .text((p) => productOf(p) === 0 ? "" : signed(productOf(p), true));
+      .text((p) => productOf(p) === 0 ? "0" : signed(productOf(p), true));
     maybeTransition(productLabels, animate, duration)
-      .attr("x", (p) => (x(p.x) + meanPX) / 2)
-      .attr("y", (p) => (y(p.y) + meanPY) / 2);
+      .attr("x", (p) => productOf(p) === 0 ? x(p.x) - 12 : (x(p.x) + meanPX) / 2)
+      .attr("y", (p) => productOf(p) === 0 ? y(p.y) + 12 : (y(p.y) + meanPY) / 2);
 
     // Mean crosshair.
     maybeTransition(meanXLine, animate, duration)
@@ -1247,7 +1312,8 @@ makeScatterplot = function(opts) {
 
     // Annotations.
     rValueSpan.text(" = " + (stats.r === null ? "—" : rFormat(stats.r)));
-    ssValueSpan.text(" = " + format(ssResidual));
+    ssSubscript.text(state.squareMode === "residual" ? "residual" : state.squareMode.toUpperCase());
+    ssValueSpan.text(" = " + format(state.squareMode === "x" ? stats.ssX : state.squareMode === "y" ? stats.ssY : ssResidual));
     spValueSpan.text(" = " + signed(stats.sp));
     // Stack only the readouts that are showing.
     let annotationRow = 0;
@@ -1261,6 +1327,7 @@ makeScatterplot = function(opts) {
     setReveal(lineLayer, state.showLine, animate);
     setReveal(residualsLayer, state.showResiduals, animate);
     setReveal(squaresLayer, state.showSquares, animate);
+    setReveal(squareLabelsLayer, state.showSquares && state.squareLabels, animate);
     setReveal(ellipseLayer, state.showEllipse, animate);
     setReveal(meansLayer, state.showMeans, animate);
     setReveal(deviationsLayer, state.showDeviations, animate);
@@ -1276,7 +1343,7 @@ makeScatterplot = function(opts) {
       points: [pointsLayer, labelsLayer],
       line: [lineLayer],
       residuals: [residualsLayer],
-      squares: [squaresLayer],
+      squares: [squaresLayer, squareLabelsLayer],
       ellipse: [ellipseLayer],
       means: [meansLayer],
       deviations: [deviationsLayer],
@@ -1444,6 +1511,10 @@ makeScatterplot = function(opts) {
           state.showResiduals = scBoolean(value, state.showResiduals);
           changed = true;
           break;
+        case "square-mode":
+          state.squareMode = ["x", "y"].includes(scKey(value)) ? scKey(value) : "residual";
+          changed = true;
+          break;
         case "show-squares":
         case "squares":
         case "squared-residuals":
@@ -1530,6 +1601,7 @@ makeScatterplot = function(opts) {
     });
 
     if (changed) {
+      renderOptions.drawMeanSquares = state.showSquares && state.squareMode !== "residual";
       render(renderOptions);
       if (shouldNotify) notifyValueChange();
     }

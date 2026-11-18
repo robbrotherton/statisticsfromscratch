@@ -19,21 +19,21 @@ In this chapter and the next, we'll cover the techniques of correlation and regr
 
 ## From groups to pairs
 
-In Chapter 12, we imagined giving people $10 and telling them to spend it either on themselves or on someone else. I based that on a real experiment, in which people randomly assigned to spend a small amount of cash on someone else reported being happier later that day than people assigned to spend it on themselves [@dunn2008spending]. At the end of the chapter I made a big to-do about how one study is never the final word on anything.
+In Chapter 12, we imagined giving people $10 and telling them to spend it either on themselves or on someone else. I based that idea on a real experiment, in which people randomly assigned to spend a small amount of cash on someone else reported being happier later that day than people assigned to spend it on themselves [@dunn2008spending]. At the end of the chapter I made a big to-do about how one study is never the final word on anything.
 
-What I didn't mention then is that the researchers actually did more than one study. In the same paper, they reported another study in which they didn't give out cash or assign anyone to anything. Instead they just asked a nationally representative sample of 632 Americans how happy they were in general, and how much they spent in a typical month on gifts for other people and donations to charity.
+What I didn't mention is that the researchers actually did more than one study. In the same paper, they reported another study in which they didn't give out cash or assign anyone to anything. Instead they just surveyed a representative sample of 632 Americans, asking how happy they were in general and how much they spent in a typical month on gifts for other people and donations to charity.
 
-Every test statistic we've met so far---$z$, $t$, $F$---has been designed to compare means. But there are no groups here. Each person just gives us two numbers: how much they spend on others, and how happy they are. The question isn't whether two groups *differ*, but whether those two variables go *together*: do people who spend more on others tend to be happier?
+Every test statistic we've met so far---$z$, $t$, $F$---has been designed to compare means. But there are no groups with this survey design. Each person just gives us two numbers: how much they spend on others, and how happy they are. The question isn't whether two groups *differ*, but whether those two variables go *together*: do people who spend more on others tend to be happier?
 
-How might we analyze the data to answer that question? I suppose we could *make* some groups. Maybe a lot of people tell us they spent nothing on others that month. So one option would be to split the sample into people who spent something and people who spent nothing, and compare the two groups' mean happiness with an independent-samples $t$ test. Even though group membership isn't randomly assigned, the $t$ test can still tell us whether the difference in means is more than we'd expect by chance.
+How might we analyze the data to answer that question? I suppose we could shoehorn the data into a form the $t$ test can handle. We could *make* some groups. Maybe a lot of people tell us they spent nothing on others that month. So one option would be to split the sample into people who spent something and people who spent nothing, and compare the two groups' mean happiness with an independent-samples $t$ test. Even though group membership isn't randomly assigned, the $t$ test can still tell us whether the difference in means is more than we'd expect by chance.
 
-But that would throw away a lot of good information. Everyone who spent anything gets lumped together, so we lose what we knew about how much each person spent. We'd lose any distinction between someone who spent $5 on others and someone who spent $500. We're shoehorning the data into a form the $t$ test can handle. There has to be a better way! How might we make use of each person's actual amount spent?
+But that would throw away a lot of good information. Everyone who spent anything gets lumped together, so we ignore precisely how much each person spent. We lose any distinction between someone who spent $5 on others and someone who spent $500. There has to be a better way! How might we make use of each person's actual amount spent?
 
 ::: {#quiz-correlation-pairs}
 {{< include quizzes/17-correlation-pairs.qmd >}}
 :::
 
-The idea @quiz-correlation-pairs was getting at is to look at the relationship between two variables by examining how they vary together. Like our other analyses, we still make use of averages, and deviations. The new idea is that we're looking at the consistency of deviations. When a score on one variable tends to be above its mean, is there a predictable pattern in the other variable? A positive correlation would predict that the other variable will also tend to be above its mean. Correspondingly, someone who spends below average would tend to be less happy than average. On the other hand, if the correlation were negative---more prosocial spending was associated with lower happiness---we would predict that a high spender would tend to be less happy than average. This is the essence of correlation; it's all about the consistency of these kinds of deviations.
+The idea @quiz-correlation-pairs was getting at is to look at the relationship between two variables by examining how they vary together. Like our other analyses, we still make use of averages and deviations. The new idea is that we're looking at the consistency of two different sets of deviations. When a score on one variable tends to be above its mean, is there a consistent pattern in the other variable? A positive correlation would find that the other variable will also tend to be above its mean. Correspondingly, someone who spends below average would tend to be less happy than average. On the other hand, if the correlation were negative---more prosocial spending was associated with lower happiness---we would find that a high spender would tend to be less happy than average. This is the essence of correlation; it's all about the consistency of pairs of deviations.
 
 Here's what that idea looks like with some data. (These aren't the real survey responses, just a handful of made-up people to illustrate.)
 
@@ -44,19 +44,19 @@ Here's what that idea looks like with some data. (These aren't the real survey r
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="People" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":false,"show-quadrants":false,"animate":false}'}
-Each dot is one person: how much they spent on others last month along the $X$ axis, and how happy they said they were up the $Y$ axis.
+This kind of graph is a **scatterplot**. Each dot represents one person's pair of answers: how much they spent on others last month along the $X$ axis, and how happy they said they were up the $Y$ axis.
 :::
 
 ::: {.tutorial-step data-title="Means" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":false}'}
-The dashed lines mark the mean of each variable. Between them, they split the plot into four quarters.
+The dashed lines show the mean of each variable: mean spend is the vertical line, and mean happiness the horizontal line. The two lines together split the plot into four quarters.
 :::
 
 ::: {.tutorial-step data-title="Sides" data-action='{"points":[[122,3],[244,7],[193,5],[45,6],[161,5],[241,6],[97,6],[225,7],[169,8],[186,8],[161,6],[177,6],[177,5],[209,6],[141,5],[125,5],[82,3],[138,4],[78,4],[62,5]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
-People in the top right spent more than average and are happier than average. People in the bottom left are below average on both. They're on the same side of both means (the solid dots). People in the other two quarters are above average on one variable and below average on the other (the hollow dots). Here, 15 people are on the same side and 5 are on opposite sides. The two variables tend to go together.
+People in the top right spent more than average and are happier than average. People in the bottom left are below average on both. They're on the same side of both means (the solid dots). People in the other two quarters are above average on one variable and below average on the other (the hollow dots). If you just count them up, 15 people are on the same side and 5 are on opposite sides. The two variables tend to go together.
 :::
 
 ::: {.tutorial-step data-title="No relationship" data-action='{"points":[[122,3],[244,6],[193,5],[45,7],[161,4],[241,4],[97,7],[225,6],[169,8],[186,8],[161,6],[177,5],[177,4],[209,5],[141,5],[125,6],[82,4],[138,4],[78,5],[62,7]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
-Now suppose spending and happiness were unrelated. Here everyone spent the same amounts as before, but their happiness has nothing to do with it. They're scattered across all four quarters, 10 on the same side and 10 on opposite sides.
+Now suppose spending and happiness were unrelated. Here everyone spent the same amounts as before, but I randomized their happiness ratings so that they are not consistently related to spending. The dots are scattered across all four quarters, 10 on the same side and 10 on opposite sides. No consistency.
 :::
 
 ::: {.tutorial-step data-title="Opposite" data-action='{"points":[[122,4],[244,5],[193,5],[45,8],[161,4],[241,4],[97,7],[225,5],[169,8],[186,7],[161,6],[177,5],[177,4],[209,5],[141,5],[125,6],[82,5],[138,4],[78,6],[62,7]],"x-domain":[0,300],"y-domain":[0,10],"show-means":true,"show-quadrants":true}'}
@@ -66,11 +66,11 @@ And if people who spent more on others tended to be *less* happy, most would end
 
 :::::
 
-Counting points like this is a rough version of what a correlation does. The real math also takes into account precisely how far each person is from the two means, so that someone far above average on both counts for more than someone only just above. And just as with a difference between group means, we'll need to know whether an apparent pattern is more than we'd expect by chance.
+Counting dots in the four sections like this is a rough version of what a correlation does. The real math also takes into account precisely how far each person is from the two means, so that someone far above average on both counts for more than someone only just above. And just as with a difference between group means, we'll need to know whether an apparent pattern is more than we'd expect by chance.
 
 ### What would it mean?
 
-Now I know you're excited to do the math, and we'll get to it soon. But first, let's think about how this kind of design changes what conclusions we can draw from our data, and what kind of followup analyses might be useful.
+Now I know you're excited to do the math, and we'll get to it soon. But first, let's distinguish two closely related terms. The **correlation statistic**, also called a **correlation coefficient**, is the number that quantifies the relationship between two variables. That's what we'll get to calculating in the next section. But **correlational** describes the research design. Before we caculate the statistic, let's think about how this kind of design changes what conclusions we can draw from our data, and what kind of followup analyses might be useful.
 
 Remember, we have two different designs testing the same general idea---that prosocial spending goes with happiness. One tests the idea by comparing randomly assigned groups, the other by looking for a correlation in survey reponses. Suppose both studies found what the researchers expected. People assigned to spend money on others were happier, and people who said they spent more on others were happier. Do those two findings mean the same thing?
 
@@ -90,36 +90,39 @@ The experiment has its own limitations, though. In order to pin down causality, 
 
 Notice that two separate things changed between the experiment and the survey. One is the kind of variable: groups or amounts. That decides which statistic we use. The other is whether the researchers assigned people to conditions or measured them as they found them. That decides what we can conclude.
 
-So "correlational" really describes a design, not a statistic. Usually, measured amounts go with correlations and assigned groups go with $t$ tests and ANOVA. But a $t$ test comparing people who chose to give with people who didn't is still correlational, as we saw in Chapter 12. And a correlation from an experiment that assigned different amounts would still support a causal conclusion.
-
-So we've talked this through in general terms. Now we can get into the details of the correlation statistic itself.
+So remember that "correlational" describes a design, not a statistic. Usually, measured amounts go with correlations and assigned groups go with $t$ tests and ANOVA. But a $t$ test comparing people who chose to give with people who didn't is still correlational, as we saw in Chapter 12. And a correlation from an experiment that assigned different amounts would still support a causal conclusion.
 
 ## The correlation coefficient
 
-The statistic we'll use is called **Pearson's $r$ correlation coefficient**, after Karl Pearson---the statistician Gosset went to study with in Chapter 11. But its development also involved another familiar figure: Francis Galton, whose board of bouncing balls helped us think about sampling in Chapter 7.
+Now we can get into the details of the correlation statistic itself. The statistic we'll use is called **Pearson's $r$ correlation coefficient**, named after Karl Pearson---the statistician Gosset went to study with in Chapter 11. But its development also involved another familiar figure: Francis Galton, whose board of bouncing balls helped us think about sampling in Chapter 7.
 
-Galton was interested in how people's physical characteristics varied together. Taller people tend to have longer arms, for instance, but the association isn't perfect. How could you put a number on how consistently the two measurements went together? One useful step was to express each measurement relative to its own variability. Being an inch above average in height isn't the same as being an inch above average in finger length. We've already encountered the same basic idea with $z$-scores: putting different measurements on a comparable scale [@galton1888corelations].
+Galton was interested in how people's physical characteristics varied together. Taller people tend to have longer arms, for example, but the association isn't perfect. How could you put a number on how consistently the two measurements went together? One useful step was to express each measurement relative to its own variability. Being one inch above the average height would be less surprising than having arms that are one inch longer than average. We've already encountered the same basic idea with $z$-scores: putting different measurements on a comparable scale [@galton1888corelations].
 
-Pearson developed the mathematical treatment behind the coefficient we use today [@pearson1896regression]. Galton had already used the letter $r$ in his work on regression, the closely related technique we'll meet in the next chapter. So correlation and regression have been intertwined from the beginning. Before getting into the calculations, though, let's see what the coefficient tells us.
+Pearson developed the mathematical treatment behind the coefficient we use today [@pearson1896regression]. Galton had already used the letter $r$ in his work on regression, the closely related technique we'll meet in the next chapter. So correlation and regression have been intertwined from the beginning.
 
-The correlation coefficient is a single number that quantifies the strength and direction of a linear association between two variables. We'll look at its magnitude and direction first, then what we mean by a linear association.
+The correlation coefficient is a single number that quantifies the strength and direction of a linear association between two variables.
 
-### Magnitude
+### Strength
 
-The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0. In the three diagrams below, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
+Because of how it's calculated, the absolute magnitude of $r$ varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0.
 
+:::: {#fig-scatter-strength}
 ::: {.sfs-figure-row}
 {{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: the ellipse traced around the dots is essentially a circle." >}}
 
 {{< interactive-figure magnitudeScatterR50 makeScatterplot options='{"generate":{"r":0.5,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .50: the ellipse tilts upward but stays wide." >}}
 
 {{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
+
 :::
+In these three scatterplots, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
+::::
 
 ### Direction
 
-The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases in one variable are associated with increases on the other---or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other---that they move in opposite directions. Below, I've flipped the diagrams around so that they're now illustrating negative correlations.
+The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases in one variable are associated with increases on the other---or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other---that they move in opposite directions.
 
+:::: {#fig-scatter-direction}
 ::: {.sfs-figure-row}
 {{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a circular cloud with no direction either way." >}}
 
@@ -127,13 +130,14 @@ The second characteristic is the direction of the correlation, meaning its sign,
 
 {{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
 :::
+Three more scatterplots, showing the same strength of correlations as @fig-scatter-strength but with negative correlations instead of positive.
+::::
 
-### Form
+### Linearity
 
-And finally, there is the form of the association. Pearson's $r$ measures a *linear* association: how consistently the points follow a straight line. But variables can also be related in ways that a straight line doesn't capture. As $X$ increases, $Y$ might decrease at first, then start increasing. The relationship is clear, but it curves.
+Lastly, I said Pearson's $r$ measures a *linear* association: how consistently the points follow a straight line. But variables can also be related in ways that a straight line doesn't capture. As $X$ increases, $Y$ might decrease at first, then start increasing. There's a real, predictable relationship, but it changes direction along the way. Pearson's $r$ can't capture that.
 
-Here are three examples: a U-shaped relationship, a wave, and something a bit less likely to turn up in a real study. All three have exactly the same linear correlation: $r = 0$.
-
+:::: {#fig-scatter-nonlinear}
 ::: {.sfs-figure-row}
 {{< interactive-figure formScatterU makeScatterplot options='{"points":[[0.07164,-0.98974],[-0.07164,-0.98974],[0.19857,-0.92114],[-0.19857,-0.92114],[0.3011,-0.81867],[-0.3011,-0.81867],[0.38646,-0.7013],[-0.38646,-0.7013],[0.46028,-0.57629],[-0.46028,-0.57629],[0.52593,-0.44679],[-0.52593,-0.44679],[0.5855,-0.31437],[-0.5855,-0.31437],[0.64034,-0.17992],[-0.64034,-0.17992],[0.69138,-0.04398],[-0.69138,-0.04398],[0.73929,0.0931],[-0.73929,0.0931],[0.78456,0.23108],[-0.78456,0.23108],[0.82758,0.36977],[-0.82758,0.36977],[0.86864,0.50906],[-0.86864,0.50906],[0.90797,0.64884],[-0.90797,0.64884],[0.94579,0.78904],[-0.94579,0.78904],[0.98224,0.9296],[-0.98224,0.9296]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points follow a U-shaped curve: Y falls and then rises as X increases. The linear correlation is r = 0." >}}
 
@@ -141,12 +145,14 @@ Here are three examples: a U-shaped relationship, a wave, and something a bit le
 
 {{< interactive-figure formScatterStar makeScatterplot options='{"points":[[0,1],[0,-0.43],[0.25275,0.34788],[-0.25275,0.34788],[0.95106,0.30902],[-0.95106,0.30902],[0.40895,-0.13288],[-0.40895,-0.13288],[0.58779,-0.80902],[-0.58779,-0.80902],[0.06319,0.83697],[-0.06319,0.83697],[0.12637,0.67394],[-0.12637,0.67394],[0.18956,0.51091],[-0.18956,0.51091],[0.42732,0.33816],[-0.42732,0.33816],[0.6019,0.32845],[-0.6019,0.32845],[0.77648,0.31873],[-0.77648,0.31873],[0.81553,0.19854],[-0.81553,0.19854],[0.68001,0.08807],[-0.68001,0.08807],[0.54448,-0.0224],[-0.54448,-0.0224],[0.45366,-0.30191],[-0.45366,-0.30191],[0.49837,-0.47095],[-0.49837,-0.47095],[0.54308,-0.63998],[-0.54308,-0.63998],[0.44084,-0.71426],[-0.44084,-0.71426],[0.29389,-0.61951],[-0.29389,-0.61951],[0.14695,-0.52475],[-0.14695,-0.52475]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points trace the outline of a five-pointed star. The linear correlation is r = 0 despite the clear pattern." >}}
 :::
+Three examples of nonlinear relationships: a U-shaped relationship, a wave, and something entirely contrived---data arranged in the shape of a star. None are random or unpredictable, but all three have exactly the same linear correlation: $r = 0$, becuase it only captures linear relationships.
+::::
 
 So a correlation of zero doesn't necessarily mean that there's no relationship. The points in the first two plots follow curves, and the last lot are arranged in a star. None of those patterns is captured by a straight line. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
 
 ### Estimating correlations
 
-A somewhat useful skill to practice is being able to look at a scatterplot and estimate the strength of the correlation. It's actually easier than you'd think. It takes just a very small amount of practice to get quite good.
+Now that you have a good sense of what the correlation coefficient does and how different correlations look, a somewhat useful skill to practice is being able to glance at a scatterplot and estimate the strength of the correlation. It's actually easier than you'd think. It takes just a very small amount of practice to get quite good.
 
 ::::: {#act-guess-correlation .callout-tip .interactive}
 ## Guess the correlation
@@ -181,78 +187,90 @@ This one runs the other way: $r = -.60$, a moderately strong negative correlatio
 
 :::::
 
-## Computing $r$
+## Calculating $r$
 
-So now let's see how to calculate Pearson's $r$. It's based on the ideas of variability and covariability.
+Now let's see how to calculate Pearson's $r$. It's based on the ideas of **variability** and **covariability**.
 
-You're very familiar with variability by now. It's the quantification of how much each variable varies, how widely spread or closely clustered scores are. Covariability is the new idea here. It quantifies how much $X$ and $Y$ vary in tandem. To what extent are changes in $X$ associated with corresponding changes in $Y$? So as $X$ increases, $Y$ increases as well, or as $X$ decreases, $Y$ also tends to decrease. Put another way, if there was no covariability, variation in $Y$ would be completely unrelated to the variation in $X$.
+You're very familiar with variability by now. It's the quantification of how much each variable varies, how widely spread or closely clustered scores are. Covariability is the new idea here. It quantifies how much $X$ and $Y$ vary together: to what extent are changes in $X$ associated with corresponding changes in $Y$? As $X$ increases, $Y$ increases as well, or as $X$ decreases, $Y$ also tends to decrease. Put another way, if there was no covariability at all, variation in $Y$ would be completely unrelated to the variation in $X$.
 
-### The equation
-
-Here's the equation:
+Here's the equation for Pearson's $r$:
 
 $$ r = \frac{SP}{\sqrt{SS_X SS_Y}} $$ {#eq-pearson-r}
 
 $SS_X$ and $SS_Y$ should look familiar. $SS$, as usual, refers to the sum of squared deviations. So here we have the separate sums of squares for variable $X$ and variable $Y$ to quantify their separate variability in the denominator. And we have this new quantity, $SP$, which quantifies the covariability of $X$ and $Y$.
 
-I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a corresponding change in $Y$, then their covariability in the numerator would be exactly as big as their separate variabilities, combined in the denominator. The correlation would equal one or negative one, meaning every change in $X$ is accompanied by a proportional change in $Y$. In other words, all the variability is covariability. There is no variability that isn't shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero.
+I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a corresponding change in $Y$, then their covariability in the numerator would be exactly as big as their separate variabilities, combined in the denominator. The correlation would equal one or negative one, meaning every change in $X$ is accompanied by a proportional change in $Y$. In other words, all the variability is covariability. There is no variability that isn't shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero. This is why $r$ can only vary between negative one and positive one.
 
-### Sum of squares recap
+### $SS$ and $SP$
 
-Before getting to $SP$, let's recap sum of squares. To calculate the sum of squared deviations, we square the deviation scores. And another way of saying that we square something is to say we multiply it by itself. So the definitional formula we learned for sums of squares was $\Sigma(X - M)^2$. And another equivalent way of writing that would be $\Sigma(X - M)(X - M)$. $X$ minus the mean gives us the deviations. We multiply those deviations by themselves. The squaring is just a convenient notation for this, but it means the same thing.
+Before getting to $SP$, let's recap sum of squares. To calculate the sum of squared deviations, we square the deviation scores. And another way of saying that we square something is to say we multiply it by itself. So here are two equivalent ways of writing the equation for sum of squares:
 
-### Sum of products ($SP$)
+$$ SS = \Sigma(X - M)^2 $$
 
-The reason I point this out is that the numerator does something quite similar, but instead of multiplying deviations by themselves, we multiply them by one another. Our numerator, $SP$, is the sum of products. Products refer to the product of the deviations. We multiply the deviations for variable $X$ by the deviations for variable $Y$ to get their products. Then we sum those products to get the sum of products.
+$$ SS = \Sigma(X - M)(X - M) $$
 
-The definitional formula for this is $\Sigma(X - M_X)(Y - M_Y)$. And I hope that by juxtaposing it with the sum of squares formula, you can see the conceptual link. The sum of squares quantifies the variability of an individual variable by multiplying its deviations by themselves. The sum of products quantifies the covariability of two variables by multiplying their deviations by one another.[^sp-computational]
+The reason I point this out is that $SP$ does something quite similar, but instead of multiplying deviations by *themselves*, we multiply them by *one another*. Our numerator, $SP$, is the sum of products. Products refer to the product of the deviations. We multiply the deviations for variable $X$ by the deviations for variable $Y$ to get their products. Then we sum those products to get the sum of products.
+
+$$ SP = \Sigma(X - M_X)(Y - M_Y) $$
+
+I hope that by juxtaposing this with the sum of squares formula, you can see the conceptual link. The sum of squares quantifies the variability of an individual variable by multiplying its deviations by themselves. The sum of products quantifies the covariability of two variables by multiplying their deviations by one another.[^sp-computational]
 
 [^sp-computational]: As with the sum of squares back in Chapter 4, there's also a computational formula for the sum of products, and it's similarly related: $SP = \Sigma XY - \frac{(\Sigma X)(\Sigma Y)}{n}$. Again, this is equivalent to the definitional formula. We'll stick with the definitional approach.
 
-Before we calculate anything, let's see what the sum of products looks like.
+### Worked example
+
+Let's work through a simple example to see how the sum of products is calculated. Suppose we're interested in how the number of cups of coffee a student drinks is related to their test score. Maybe the caffeine will increase alertness and cognitive performance, leading to better test scores. We have data for seven students, as shown in the table below.
+
+| Participant | Coffee (cups), $X$ | Test score, $Y$ |
+|:--:|:--:|:--:|
+| A | 0 | 90 |
+| B | 0.5 | 60 |
+| C | 0.5 | 85 |
+| D | 1 | 65 |
+| E | 1.5 | 50 |
+| F | 1.5 | 65 |
+| G | 2 | 75 |
+
+: Cups of coffee and test scores for seven students. {#tbl-coffee-scores}
+
+Before we work through the full calculation, let's picture the two sums of squares and the sum of products for this little dataset.
 
 ::::: {#act-sum-of-products .callout-tip .interactive .with-controls}
-## Picturing the sum of products
+## Picturing sums of squares and products
 
-{{< interactive-figure sumOfProductsScatter makeScatterplot options='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"pointLabels":true,"productLabels":true,"controlSet":"correlation","controlsLabel":"sum of products controls","maxWidth":"30rem"}' fallback="The coffee and test score scatterplot with dashed lines at the two means, 1 cup and a score of 70. Each student's product of deviations is drawn as a rectangle between their point and the place where the mean lines cross: −20 for student A, 5 for B, −7.5 for C, 0 for D, −10 for E, −2.5 for F, and 5 for G. They sum to SP = −30." >}}
+{{< interactive-figure sumOfProductsScatter makeScatterplot options='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[-1,2.5],"yDomain":[40,100],"pointLabels":true,"productLabels":true,"squareLabels":true,"controlSet":"correlation","controlsLabel":"sums of squares and products controls","maxWidth":"30rem"}' fallback="The tutorial first draws squares for deviations in coffee consumption (SS_X = 3), then test scores (SS_Y = 1200). The coffee and test score scatterplot with dashed lines at the two means, 1 cup and a score of 70. Each student's product of deviations is drawn as a rectangle between their point and the place where the mean lines cross: −20 for student A, 5 for B, −7.5 for C, 0 for D, −10 for E, −2.5 for F, and 5 for G. They sum to SP = −30." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Scores" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":false,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"animate":false}'}
+::: {.tutorial-step data-title="Scores" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":false,"square-mode":"residual","show-ss":false,"show-means":false,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"animate":false}'}
 Here are our seven students again, with cups of coffee on the $X$ axis and test score on the $Y$ axis.
 :::
 
-::: {.tutorial-step data-title="Means" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+::: {.tutorial-step data-title="Means" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":false,"square-mode":"residual","show-ss":false,"show-means":true,"show-deviations":false,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
 First we need the two means. The dashed lines mark the mean cups of coffee, $M_X = 1$, and the mean test score, $M_Y = 70$. Between them they split the plot into four quarters.
 :::
 
-::: {.tutorial-step data-title="Deviations" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+::: {.tutorial-step data-title="$SS_X$" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":true,"square-mode":"x","show-ss":true,"show-means":true,"show-deviations":true,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+Start with coffee consumption. Each horizontal deviation from $M_X = 1$ becomes the side of a square. Add the seven squared deviations: $SS_X = 1 + 0.25 + 0.25 + 0 + 0.25 + 0.25 + 1 = 3$.
+:::
+
+::: {.tutorial-step data-title="$SS_Y$" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":true,"square-mode":"y","show-ss":true,"show-means":true,"show-deviations":true,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+Now do the same for test scores. Each vertical deviation from $M_Y = 70$ becomes the side of a square. Add the seven squared deviations: $SS_Y = 400 + 100 + 225 + 25 + 400 + 25 + 25 = 1200$.
+:::
+
+::: {.tutorial-step data-title="Deviations" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":false,"square-mode":"residual","show-ss":false,"show-means":true,"show-deviations":true,"show-products":false,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
 Each student has two deviations: how far they are from the mean on $X$, and how far they are from the mean on $Y$. Student A drank 1 cup less than average and scored 20 points above average. Student G is above average on both.
 :::
 
-::: {.tutorial-step data-title="Products" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+::: {.tutorial-step data-title="Products" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":false,"square-mode":"residual","show-ss":false,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":false,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
 Now we multiply each student's two deviations. On the plot, that product is a rectangle: one deviation wide and the other deviation tall. Students A, C, E, and F are above one mean and below the other, so their deviations have opposite signs and their products are negative. Those are the orange rectangles with dashed outlines. Students B and G are on the same side of both means, so their products are positive. Student D is exactly at the mean for coffee, so their product is zero.
 :::
 
-::: {.tutorial-step data-title="Sum" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
+::: {.tutorial-step data-title="$SP$" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-squares":false,"square-mode":"residual","show-ss":false,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false}'}
 Add up the products and we have the sum of products: $SP = -20 + 5 - 7.5 + 0 - 10 - 2.5 + 5 = -30$. The negative products outweigh the positive ones, so $SP$ comes out negative.
-:::
-
-::: {.tutorial-step data-title="Positive" data-action='{"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":false,"product-labels":false,"show-means":true,"show-deviations":false,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"generate":{"r":0.8,"n":12,"seed":5,"meanX":1.25,"meanY":70,"sdX":0.5,"sdY":11,"round":1}}'}
-Here are some different scores, with a positive relationship. Now most of the points are either below both means or above both means, so their deviations have the same sign and their products are positive. The positive products outweigh the negative ones, and $SP$ comes out positive.
-:::
-
-::: {.tutorial-step data-title="No relationship" data-action='{"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":false,"product-labels":false,"show-means":true,"show-deviations":false,"show-products":true,"show-sp":true,"show-r":false,"draggable":false,"emphasize":"none","controls-open":false,"generate":{"r":0,"n":12,"seed":5,"meanX":1.25,"meanY":70,"sdX":0.5,"sdY":11,"round":1}}'}
-And here there's no relationship at all. Points land in all four quarters, so the positive and negative products more or less cancel out, and $SP$ ends up close to zero.
-:::
-
-::: {.tutorial-step data-title="Explore" data-action='{"points":[[0,90,"A"],[0.5,60,"B"],[0.5,85,"C"],[1,65,"D"],[1.5,50,"E"],[1.5,65,"F"],[2,75,"G"]],"x-domain":[0,2.5],"y-domain":[40,100],"point-labels":true,"product-labels":true,"show-means":true,"show-deviations":true,"show-products":true,"show-sp":true,"show-r":true,"draggable":true,"emphasize":"none","controls-open":true}'}
-Back to our seven students. Try dragging a point around, and watch what happens to its rectangle, to $SP$, and to $r$ as it crosses one of the mean lines.
 :::
 ::::
 
 :::::
-
-### Worked example
 
 So let's return to the coffee data from @tbl-coffee-scores. The variable labeled $X$ is the number of cups of coffee these seven people said they drank that morning. The variable labeled $Y$ is their score on a test. We want to know if coffee consumption is related to test performance. So we'll calculate the correlation coefficient. We just need these three quantities: the sum of squares for $X$, the sum of squares for $Y$, and the sum of products.
 

@@ -671,6 +671,26 @@
     return span;
   };
 
+  // Titles are plain text with optional inline TeX, never authored HTML.
+  function setTutorialLabel(element, text) {
+    if (element.dataset.labelText === text) return;
+    element.dataset.labelText = text;
+    if (!/\$[^$]+\$/.test(text)) {
+      element.textContent = text;
+      return;
+    }
+    element.replaceChildren();
+    const pattern = /\$([^$]+)\$/g;
+    let offset = 0;
+    let match;
+    while ((match = pattern.exec(text))) {
+      element.appendChild(document.createTextNode(text.slice(offset, match.index)));
+      element.appendChild(api.inlineMath(match[1]));
+      offset = pattern.lastIndex;
+    }
+    element.appendChild(document.createTextNode(text.slice(offset)));
+  }
+
   api.setRevealVisible = function(targets, visible, opts) {
     opts = opts || {};
     api.ensureStyles();
@@ -988,7 +1008,7 @@
         const label = document.createElement("span");
         label.className = "sfs-if-stepper-label";
         label.setAttribute("aria-hidden", "true");
-        label.textContent = entry.group.title || String(entry.groupIndex + 1);
+        setTutorialLabel(label, entry.group.title || String(entry.groupIndex + 1));
         node.append(dot, label);
       } else {
         const title = steps[entry.stepIndex].dataset.title || "Step " + (entry.minorIndex + 1);
@@ -1195,6 +1215,12 @@
       }
 
       updateReadout();
+      // The rail may have stayed detached throughout the initial compact view.
+      if (mode !== "compact") {
+        stepper.querySelectorAll(".sfs-if-inline-math").forEach(function(span) {
+          if (!span.querySelector("mjx-container")) queueMathTypeset(span, span.dataset.tex);
+        });
+      }
       updateArrowCentre();
       syncHint();
     }
@@ -1212,7 +1238,7 @@
         position.majorTitle ||
         "";
       readoutPosition.textContent = (index + 1) + " of " + steps.length;
-      readoutTitle.textContent = title ? " · " + title : "";
+      setTutorialLabel(readoutTitle, title ? " · " + title : "");
     }
 
     // Centre the arrows on the viz itself, excluding the controls drawer --
