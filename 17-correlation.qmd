@@ -72,56 +72,48 @@ Counting points like this is a rough version of what a correlation does. The rea
 
 Now I know you're excited to do the math, and we'll get to it soon. But first, let's think about how this kind of design changes what conclusions we can draw from our data, and what kind of followup analyses might be useful.
 
-Remember, we have two different designs testing the same general idea, one by comparing randomly assigned groups, the other by looking for a correlation in survey reponses. Suppose both studies found what the researchers expected. People assigned to spend money on others were happier, and people who said they spent more on others were happier. Do those two findings mean the same thing?
+Remember, we have two different designs testing the same general idea---that prosocial spending goes with happiness. One tests the idea by comparing randomly assigned groups, the other by looking for a correlation in survey reponses. Suppose both studies found what the researchers expected. People assigned to spend money on others were happier, and people who said they spent more on others were happier. Do those two findings mean the same thing?
 
 ::: {#quiz-correlation-designs}
 {{< include quizzes/17-correlation-designs.qmd >}}
 :::
 
-The actual survey, using the appropriate analysis[^dunn-regression], found that people who spent more on others did tend to be happier. The association was small, but statistically significant. And the researchers had thought about income. They'd asked people about it, and taking it into account barely changed the association between spending on others and happiness. So income doesn't explain it away.
+The actual survey, using the appropriate analysis[^dunn-regression], found that people who spent more on others did tend to be happier. The association was small, but statistically significant. But does that mean that prosocial spending is the only explanation? Certainly not. For one thing, maybe people who earn more money are both happier, and they tend to give more to charity and stuff. The relationship between the charitable spending and happiness could just be a byproduct of that other relationship. In fact, the researchers anticipated this possibility. They asked people about their income, and taking it into account barely changed the association between spending on others and happiness. So in this case, income doesn't explain away the relationship.
 
 [^dunn-regression]: They actually used regression to do this, which is the topic of the next chapter. But it's closely related to correlation, so it still makes for a valid illustration of the point here.
 
-But that only rules out one alternative. The researchers hadn't measured everything that might make people both more generous and happier, and nothing about the survey can tell us which way the influence runs. As they put it themselves, "the correlational nature of this design precludes causal inferences." That's what the experiment was for.
+But that only rules out one alternative. I'm sure you can imagine others. The researchers hadn't measured everything that might make people both more generous and happier, and nothing about the survey can tell us which way the influence runs. As they put it themselves, "the correlational nature of this design precludes causal inferences."
 
-The experiment has its own limitation, though. Nobody in everyday life is handed an envelope of cash and told whom to spend it on. Later experiments controlled things even more tightly. In one, everyone used a small payment to buy a little goody bag of chocolate or juice, either for themselves or for a sick child they'd never meet. That ruled out some alternative explanations, but it moved the situation even further from everyday giving. (The researchers also let people keep the cash instead if they preferred, because feeling that you chose to give seems to matter [@aknin2020spending].) So the experiment gives a clear answer to a narrow, somewhat artificial question. The survey answers a more realistic question, less conclusively. Each covers for the other's weakness.
+That's what the experiment was for.
+
+The experiment has its own limitations, though. In order to pin down causality, it creates a fairly unusual situation.Nobody in everyday life is handed an envelope of cash and told whom to spend it on. So the experiment gives a clear answer to a narrow, somewhat contrived question. The survey answers a more realistic question, less conclusively. Each covers for the other's weakness.
 
 Notice that two separate things changed between the experiment and the survey. One is the kind of variable: groups or amounts. That decides which statistic we use. The other is whether the researchers assigned people to conditions or measured them as they found them. That decides what we can conclude.
 
-| | Groups | Amounts |
-|:--|:--|:--|
-| **Assigned by the researchers** | Spend on yourself or on someone else; $t$ test or ANOVA | Spend $0, $5, $10, or $20 on someone else; correlation |
-| **Measured as people come** | People who gave something or nothing; $t$ test or ANOVA | How much people gave; correlation |
-
-: Two separate choices. The columns decide the statistic; the rows decide what we can conclude. {#tbl-design-statistic}
-
 So "correlational" really describes a design, not a statistic. Usually, measured amounts go with correlations and assigned groups go with $t$ tests and ANOVA. But a $t$ test comparing people who chose to give with people who didn't is still correlational, as we saw in Chapter 12. And a correlation from an experiment that assigned different amounts would still support a causal conclusion.
 
-That's the territory for this chapter. We'll see how to picture an association, how to measure it with a single number, and how to test whether it's more than chance. Then we'll come back to what a correlation can and can't tell us, and how a third variable can be taken into account. For the calculations, we'll switch to a smaller, simpler dataset.
+So we've talked this through in general terms. Now we can get into the details of the correlation statistic itself.
 
-<!-- PLAN: points held over from the old opening plan. X and Y are interchangeable (Characteristics). "Looks like related samples but isn't the same question" now lives in the learning checks. -->
+## The correlation coefficient
 
-<!-- NOTE: quizzes/17-correlation-which-analysis.qmd is no longer included; its related-samples question moved to the learning checks. Delete the file once this opening is settled. -->
+The statistic we'll use is called **Pearson's $r$ correlation coefficient**, after Karl Pearson---the statistician Gosset went to study with in Chapter 11. But its development also involved another familiar figure: Francis Galton, whose board of bouncing balls helped us think about sampling in Chapter 7.
 
-<!-- SOURCES: admin/editorial/chapter-edits/chapters-12-17-prosocial-spending-literature-2026-11-17.md -->
+Galton was interested in how people's physical characteristics varied together. Taller people tend to have longer arms, for instance, but the association isn't perfect. How could you put a number on how consistently the two measurements went together? One useful step was to express each measurement relative to its own variability. Being an inch above average in height isn't the same as being an inch above average in finger length. We've already encountered the same basic idea with $z$-scores: putting different measurements on a comparable scale [@galton1888corelations].
 
+Pearson developed the mathematical treatment behind the coefficient we use today [@pearson1896regression]. Galton had already used the letter $r$ in his work on regression, the closely related technique we'll meet in the next chapter. So correlation and regression have been intertwined from the beginning. Before getting into the calculations, though, let's see what the coefficient tells us.
 
-## Characteristics of correlations
-
-We'll be calculating a correlation statistic. But before we learn how it's calculated, it's important to outline its general conceptual structure. The correlation statistic is a single number that quantifies the association between two variables. It has three characteristics: its absolute magnitude, its direction, and its form.
+The correlation coefficient is a single number that quantifies the strength and direction of a linear association between two variables. We'll look at its magnitude and direction first, then what we mean by a linear association.
 
 ### Magnitude
 
-The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0. In the four diagrams below, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
+The absolute magnitude varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0. In the three diagrams below, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
 
 ::: {.sfs-figure-row}
-{{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: the ellipse traced around the dots is essentially a circle." >}}
+{{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: the ellipse traced around the dots is essentially a circle." >}}
 
-{{< interactive-figure magnitudeScatterR40 makeScatterplot options='{"generate":{"r":0.4,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .40: the ellipse tilts upward but stays wide." >}}
+{{< interactive-figure magnitudeScatterR50 makeScatterplot options='{"generate":{"r":0.5,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .50: the ellipse tilts upward but stays wide." >}}
 
-{{< interactive-figure magnitudeScatterR80 makeScatterplot options='{"generate":{"r":0.8,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .80: a much tighter upward-sloping ellipse." >}}
-
-{{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
+{{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
 :::
 
 ### Direction
@@ -129,50 +121,32 @@ The absolute magnitude varies from zero to one. This quantifies the strength of 
 The second characteristic is the direction of the correlation, meaning its sign, positive or negative. A positive correlation is one for which increases in one variable are associated with increases on the other---or, correspondingly, lower scores on one are associated with lower scores on the other. A negative correlation means that higher scores on one variable are associated with lower scores on the other---that they move in opposite directions. Below, I've flipped the diagrams around so that they're now illustrating negative correlations.
 
 ::: {.sfs-figure-row}
-{{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a circular cloud with no direction either way." >}}
+{{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a circular cloud with no direction either way." >}}
 
-{{< interactive-figure directionScatterR40 makeScatterplot options='{"generate":{"r":-0.4,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.40: a wide ellipse sloping downward." >}}
+{{< interactive-figure directionScatterR50 makeScatterplot options='{"generate":{"r":-0.5,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.50: a wide ellipse sloping downward." >}}
 
-{{< interactive-figure directionScatterR80 makeScatterplot options='{"generate":{"r":-0.8,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.80: a tight downward-sloping ellipse." >}}
-
-{{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":60,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
+{{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
 :::
 
 ### Form
 
-And finally, there is the form of the association. We will only cover linear correlations. This means that we're imagining that the association forms a straight line. For positive correlations, an increase in $X$ is associated with the same average increase in $Y$ all the way along the line. Or for negative correlations, the same average decrease in $Y$.
+And finally, there is the form of the association. Pearson's $r$ measures a *linear* association: how consistently the points follow a straight line. But variables can also be related in ways that a straight line doesn't capture. As $X$ increases, $Y$ might decrease at first, then start increasing. The relationship is clear, but it curves.
 
-But there are other forms that correlations can take---nonlinear forms, where the relationship between $X$ and $Y$ is different for different values of $X$. For one set of points, you can imagine a line that curves, so that as $X$ increases, $Y$ decreases, until a certain point where the curve changes direction, and increases in $X$ become associated with increases in $Y$. Or you can imagine even more complex lines which change directions more than once, attempting to find the best fit for the data. There can be value in these approaches, but for our purposes, we're going to focus on the basic linear form of correlation.
+Here are three examples: a U-shaped relationship, a wave, and something a bit less likely to turn up in a real study. All three have exactly the same linear correlation: $r = 0$.
 
-<!-- FIGURE: a form row (linear, curved, U-shaped clouds, each with its r). Needs a nonlinear option in the scatterplot generator, or explicit points. -->
+::: {.sfs-figure-row}
+{{< interactive-figure formScatterU makeScatterplot options='{"points":[[0.07164,-0.98974],[-0.07164,-0.98974],[0.19857,-0.92114],[-0.19857,-0.92114],[0.3011,-0.81867],[-0.3011,-0.81867],[0.38646,-0.7013],[-0.38646,-0.7013],[0.46028,-0.57629],[-0.46028,-0.57629],[0.52593,-0.44679],[-0.52593,-0.44679],[0.5855,-0.31437],[-0.5855,-0.31437],[0.64034,-0.17992],[-0.64034,-0.17992],[0.69138,-0.04398],[-0.69138,-0.04398],[0.73929,0.0931],[-0.73929,0.0931],[0.78456,0.23108],[-0.78456,0.23108],[0.82758,0.36977],[-0.82758,0.36977],[0.86864,0.50906],[-0.86864,0.50906],[0.90797,0.64884],[-0.90797,0.64884],[0.94579,0.78904],[-0.94579,0.78904],[0.98224,0.9296],[-0.98224,0.9296]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points follow a U-shaped curve: Y falls and then rises as X increases. The linear correlation is r = 0." >}}
+
+{{< interactive-figure formScatterWave makeScatterplot options='{"points":[[0.06065,0.77975],[-0.06065,0.77975],[0.12021,0.61158],[-0.12021,0.61158],[0.16269,0.43805],[-0.16269,0.43805],[0.19928,0.26317],[-0.19928,0.26317],[0.23334,0.08777],[-0.23334,0.08777],[0.26666,-0.08777],[-0.26666,-0.08777],[0.30072,-0.26317],[-0.30072,-0.26317],[0.33731,-0.43805],[-0.33731,-0.43805],[0.37979,-0.61158],[-0.37979,-0.61158],[0.43935,-0.77975],[-0.43935,-0.77975],[0.56065,-0.77975],[-0.56065,-0.77975],[0.62021,-0.61158],[-0.62021,-0.61158],[0.66269,-0.43805],[-0.66269,-0.43805],[0.69928,-0.26317],[-0.69928,-0.26317],[0.73334,-0.08777],[-0.73334,-0.08777],[0.76666,0.08777],[-0.76666,0.08777],[0.80072,0.26317],[-0.80072,0.26317],[0.83731,0.43805],[-0.83731,0.43805],[0.87979,0.61158],[-0.87979,0.61158],[0.93935,0.77975],[-0.93935,0.77975]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points follow a wave: Y repeatedly rises and falls as X increases. The linear correlation is r = 0." >}}
+
+{{< interactive-figure formScatterStar makeScatterplot options='{"points":[[0,1],[0,-0.43],[0.25275,0.34788],[-0.25275,0.34788],[0.95106,0.30902],[-0.95106,0.30902],[0.40895,-0.13288],[-0.40895,-0.13288],[0.58779,-0.80902],[-0.58779,-0.80902],[0.06319,0.83697],[-0.06319,0.83697],[0.12637,0.67394],[-0.12637,0.67394],[0.18956,0.51091],[-0.18956,0.51091],[0.42732,0.33816],[-0.42732,0.33816],[0.6019,0.32845],[-0.6019,0.32845],[0.77648,0.31873],[-0.77648,0.31873],[0.81553,0.19854],[-0.81553,0.19854],[0.68001,0.08807],[-0.68001,0.08807],[0.54448,-0.0224],[-0.54448,-0.0224],[0.45366,-0.30191],[-0.45366,-0.30191],[0.49837,-0.47095],[-0.49837,-0.47095],[0.54308,-0.63998],[-0.54308,-0.63998],[0.44084,-0.71426],[-0.44084,-0.71426],[0.29389,-0.61951],[-0.29389,-0.61951],[0.14695,-0.52475],[-0.14695,-0.52475]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points trace the outline of a five-pointed star. The linear correlation is r = 0 despite the clear pattern." >}}
+:::
+
+So a correlation of zero doesn't necessarily mean that there's no relationship. The points in the first two plots follow curves, and the last lot are arranged in a star. None of those patterns is captured by a straight line. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
 
 ### Estimating correlations
 
 A somewhat useful skill to practice is being able to look at a scatterplot and estimate the strength of the correlation. It's actually easier than you'd think. It takes just a very small amount of practice to get quite good.
-
-Here's a very small dataset with just seven data points. It's representing some hypothetical data from a study looking at how much coffee students drank on the morning of an exam and their test score. It sounds plausible that these two things would be correlated.
-
-| Participant | Coffee (cups) | Test score |
-|:--:|:--:|:--:|
-| A | 0 | 90 |
-| B | 0.5 | 60 |
-| C | 0.5 | 85 |
-| D | 1 | 65 |
-| E | 1.5 | 50 |
-| F | 1.5 | 65 |
-| G | 2 | 75 |
-
-: Cups of coffee on the morning of an exam and test scores (out of 100) for seven students. {#tbl-coffee-scores}
-
-Here's what those seven pairs of scores look like as a scatterplot. From looking at these few points, see if you can come up with a reasonable guess at the strength and direction of the correlation. Remember, the correlation will vary from zero to one or negative one, depending on its strength and its direction. We'll calculate its actual value a little bit later.
-
-{{< interactive-figure coffeeScoresScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"labels":["A","B","C","D","E","F","G"],"pointLabels":true,"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"controls":false,"maxWidth":"30rem"}' fallback="Scatterplot of the seven students' cups of coffee and test scores: the points drift loosely downward from student A, with no coffee and a score of 90, to student E, with 1.5 cups and a score of 50. Student G drank the most, 2 cups, and scored 75." >}}
-
-::: {#quiz-correlation-guess}
-{{< include quizzes/17-correlation-guess.qmd >}}
-:::
-
-If you want more practice, try the point clouds below: for each one, guess the correlation by eye before revealing its actual value.
 
 ::::: {#act-guess-correlation .callout-tip .interactive}
 ## Guess the correlation
@@ -207,9 +181,9 @@ This one runs the other way: $r = -.60$, a moderately strong negative correlatio
 
 :::::
 
-## Building $r$
+## Computing $r$
 
-So now let's examine the actual correlation statistic that we'll be using. It's called Pearson's $r$ correlation coefficient. It was developed by Karl Pearson. There are other variations of correlation statistics, but Pearson's $r$ is by far the most widely used. It's based on the ideas of variability and covariability.
+So now let's see how to calculate Pearson's $r$. It's based on the ideas of variability and covariability.
 
 You're very familiar with variability by now. It's the quantification of how much each variable varies, how widely spread or closely clustered scores are. Covariability is the new idea here. It quantifies how much $X$ and $Y$ vary in tandem. To what extent are changes in $X$ associated with corresponding changes in $Y$? So as $X$ increases, $Y$ increases as well, or as $X$ decreases, $Y$ also tends to decrease. Put another way, if there was no covariability, variation in $Y$ would be completely unrelated to the variation in $X$.
 
@@ -302,8 +276,6 @@ $$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{-30}{\sqrt{3 \times 1200}} = \frac{-30
 ::: {#quiz-correlation-calculate-r}
 {{< include quizzes/17-correlation-calculate-r.qmd >}}
 :::
-
-<!-- PLAN: ### Pearson's $r$ — short history section here, as "Student's $t$" follows the statistic in Chapter 11. Galton's question, Pearson's formula, Gosset's cards (height and finger length, Ch 11). Facts need verifying. -->
 
 ## A correlation test, step by step
 
@@ -508,7 +480,7 @@ And even then, we haven't explained the causality. Maybe coffee is more fashiona
 
 ### Assumptions of the correlation test
 
-<!-- PLAN: new section. Linearity (needs the form figure); outliers (without student A, the one who drank no coffee and scored 90, r = -.18); restricted range; independent pairs; always look at the plot.
+<!-- PLAN: new section. Brief callback to Form above: r captures linear association, so inspect the plot for curves rather than repeating the explanation or figures here. Outliers (without student A, the one who drank no coffee and scored 90, r = -.18); restricted range; independent pairs; always look at the plot.
      Other kinds of correlation go here: we've been assuming two quantitative variables, but the same math handles other data. Spearman = Pearson's r on ranks (coffee data: -.41); point-biserial = Pearson's r with a 0/1 variable (Ch 12 spending data: r = .28, same t(8) = 0.82); phi as a mention only. -->
 
 ## Looking ahead
