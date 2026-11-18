@@ -102,21 +102,25 @@ Pearson developed the mathematical treatment behind the coefficient we use today
 
 The correlation coefficient is a single number that quantifies the strength and direction of a linear association between two variables.
 
+To picture that, think of drawing a straight line through a scatterplot to summarize the relationship. The line follows the general pattern in the cloud of points, without necessarily passing through every point. This is a **regression line**. We'll work out how to calculate it and use it to make predictions in the next chapter. For now, it gives us a useful way to think about correlation: how closely do the points follow a straight-line pattern, and which way does that pattern run?
+
 ### Strength
 
 Because of how it's calculated, the absolute magnitude of $r$ varies from zero to one. This quantifies the strength of the relationship, or, in other words, the consistency of the association between the variables. The stronger and more consistent their association, the closer the correlation will be to 1. The weaker and less consistent their relationship, the closer the correlation will be to 0.
 
 :::: {#fig-scatter-strength}
 ::: {.sfs-figure-row}
-{{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: the ellipse traced around the dots is essentially a circle." >}}
+{{< interactive-figure magnitudeScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a flat regression line runs through a roughly circular ellipse." >}}
 
-{{< interactive-figure magnitudeScatterR50 makeScatterplot options='{"generate":{"r":0.5,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .50: the ellipse tilts upward but stays wide." >}}
+{{< interactive-figure magnitudeScatterR50 makeScatterplot options='{"generate":{"r":0.5,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .50: an upward-sloping regression line runs through a wide ellipse." >}}
 
-{{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
+{{< interactive-figure magnitudeScatterR100 makeScatterplot options='{"generate":{"r":1,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = 1: the ellipse collapses into a straight line joining every point." >}}
 
 :::
-In these three scatterplots, I've traced an ellipse around the scattered dots. Basically, the tighter the ellipse you can draw, the stronger the correlation is. Close to zero, it's basically a circle. At a correlation of one, it becomes a straight line, perfectly joining up all the points.
+In these three scatterplots, I've drawn the regression line and traced an ellipse around the scattered dots. The ellipse shows the shape of the cloud: close to zero, it's basically a circle; as the correlation gets stronger, it becomes longer and thinner, and the points follow the line more closely. At a correlation of one, every point falls on the line.
 ::::
+
+The strength isn't how steeply the line slopes. Changing cups to milliliters, for example, would change the slope without changing the correlation. What matters is how consistently the two variables go together, relative to their separate variability.
 
 ### Direction
 
@@ -124,13 +128,13 @@ The second characteristic is the direction of the correlation, meaning its sign,
 
 :::: {#fig-scatter-direction}
 ::: {.sfs-figure-row}
-{{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a circular cloud with no direction either way." >}}
+{{< interactive-figure directionScatterR0 makeScatterplot options='{"generate":{"r":0,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = 0: a flat regression line runs through a circular cloud." >}}
 
-{{< interactive-figure directionScatterR50 makeScatterplot options='{"generate":{"r":-0.5,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.50: a wide ellipse sloping downward." >}}
+{{< interactive-figure directionScatterR50 makeScatterplot options='{"generate":{"r":-0.5,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = −.50: a downward-sloping regression line runs through a wide ellipse." >}}
 
-{{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":40,"seed":7},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
+{{< interactive-figure directionScatterR100 makeScatterplot options='{"generate":{"r":-1,"n":40,"seed":7},"style":"minimal","line":"fit","showEllipse":true,"showR":true,"width":220}' fallback="Points with r = −1: a perfect straight line sloping downward." >}}
 :::
-Three more scatterplots, showing the same strength of correlations as @fig-scatter-strength but with negative correlations instead of positive.
+Three more scatterplots, showing the same strengths as @fig-scatter-strength but with negative correlations instead of positive. The lines slope downward: as $X$ increases, $Y$ tends to decrease. At zero, the line is flat, with no upward or downward linear trend.
 ::::
 
 ### Linearity
@@ -145,7 +149,7 @@ Lastly, I said Pearson's $r$ measures a *linear* association: how consistently t
 
 {{< interactive-figure formScatterStar makeScatterplot options='{"points":[[0,1],[0,-0.43],[0.25275,0.34788],[-0.25275,0.34788],[0.95106,0.30902],[-0.95106,0.30902],[0.40895,-0.13288],[-0.40895,-0.13288],[0.58779,-0.80902],[-0.58779,-0.80902],[0.06319,0.83697],[-0.06319,0.83697],[0.12637,0.67394],[-0.12637,0.67394],[0.18956,0.51091],[-0.18956,0.51091],[0.42732,0.33816],[-0.42732,0.33816],[0.6019,0.32845],[-0.6019,0.32845],[0.77648,0.31873],[-0.77648,0.31873],[0.81553,0.19854],[-0.81553,0.19854],[0.68001,0.08807],[-0.68001,0.08807],[0.54448,-0.0224],[-0.54448,-0.0224],[0.45366,-0.30191],[-0.45366,-0.30191],[0.49837,-0.47095],[-0.49837,-0.47095],[0.54308,-0.63998],[-0.54308,-0.63998],[0.44084,-0.71426],[-0.44084,-0.71426],[0.29389,-0.61951],[-0.29389,-0.61951],[0.14695,-0.52475],[-0.14695,-0.52475]],"style":"minimal","showR":true,"width":220,"xDomain":[-1.4,1.4],"yDomain":[-1.2,1.6]}' fallback="Points trace the outline of a five-pointed star. The linear correlation is r = 0 despite the clear pattern." >}}
 :::
-Three examples of nonlinear relationships: a U-shaped relationship, a wave, and something entirely contrived---data arranged in the shape of a star. None are random or unpredictable, but all three have exactly the same linear correlation: $r = 0$, becuase it only captures linear relationships.
+Three examples of nonlinear relationships: a U-shaped relationship, a wave, and something entirely contrived---data arranged in the shape of a star. None are random or unpredictable, but all three have exactly the same linear correlation: $r = 0$, because it only captures linear relationships.
 ::::
 
 So a correlation of zero doesn't necessarily mean that there's no relationship. The points in the first two plots follow curves, and the last lot are arranged in a star. None of those patterns is captured by a straight line. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
@@ -157,31 +161,31 @@ Now that you have a good sense of what the correlation coefficient does and how 
 ::::: {#act-guess-correlation .callout-tip .interactive}
 ## Guess the correlation
 
-{{< interactive-figure guessCorrelationGame makeScatterplot options='{"generate":{"r":0.85,"n":40,"seed":21},"ticks":"none","axisLabels":false,"maxWidth":"26rem"}' fallback="A series of point clouds for practicing estimating correlations by eye." >}}
+{{< interactive-figure guessCorrelationGame makeScatterplot options='{"generate":{"r":0.85,"n":40,"seed":21},"controlSet":"correlation","ticks":"none","axisLabels":false,"maxWidth":"26rem"}' fallback="A series of point clouds for practicing estimating correlations by eye." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Cloud 1" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":false,"show-ellipse":false,"animate":false}'}
+::: {.tutorial-step data-title="Cloud 1" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":false,"show-ellipse":false,"show-line":false,"animate":false}'}
 Size up the direction first, then the strength. What's your guess?
 :::
 
-::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":true,"show-ellipse":true}'}
-A strong positive correlation: $r = .85$. The ellipse around the points is long and thin.
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.85,"n":40,"seed":21},"show-r":true,"show-ellipse":true,"line":"fit"}'}
+A strong positive correlation: $r = .85$. The ellipse around the points is long and thin, and the points follow the upward-sloping line closely.
 :::
 
-::: {.tutorial-step data-title="Cloud 2" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":false,"show-ellipse":false}'}
+::: {.tutorial-step data-title="Cloud 2" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":false,"show-ellipse":false,"show-line":false}'}
 A new cloud. Direction, then strength---what's your guess this time?
 :::
 
-::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":true,"show-ellipse":true}'}
-Much weaker, though still positive: $r = .25$. The ellipse is nearly a circle.
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":0.25,"n":40,"seed":22},"show-r":true,"show-ellipse":true,"line":"fit"}'}
+Much weaker, though still positive: $r = .25$. The ellipse is nearly a circle, with plenty of scatter around the line.
 :::
 
-::: {.tutorial-step data-title="Cloud 3" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":false,"show-ellipse":false}'}
+::: {.tutorial-step data-title="Cloud 3" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":false,"show-ellipse":false,"show-line":false}'}
 One more. What's your guess?
 :::
 
-::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":true,"show-ellipse":true}'}
-This one runs the other way: $r = -.60$, a moderately strong negative correlation.
+::: {.tutorial-step data-title="Reveal" data-action='{"generate":{"r":-0.6,"n":40,"seed":23},"show-r":true,"show-ellipse":true,"line":"fit"}'}
+The line slopes downward this time: $r = -.60$, a moderately strong negative correlation.
 :::
 ::::
 
@@ -199,7 +203,7 @@ $$ r = \frac{SP}{\sqrt{SS_X SS_Y}} $$ {#eq-pearson-r}
 
 $SS_X$ and $SS_Y$ should look familiar. $SS$, as usual, refers to the sum of squared deviations. So here we have the separate sums of squares for variable $X$ and variable $Y$ to quantify their separate variability in the denominator. And we have this new quantity, $SP$, which quantifies the covariability of $X$ and $Y$.
 
-I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a corresponding change in $Y$, then their covariability in the numerator would be exactly as big as their separate variabilities, combined in the denominator. The correlation would equal one or negative one, meaning every change in $X$ is accompanied by a proportional change in $Y$. In other words, all the variability is covariability. There is no variability that isn't shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero. This is why $r$ can only vary between negative one and positive one.
+I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a corresponding change in $Y$, then their covariability in the numerator would be exactly as big as their separate variabilities, combined in the denominator. The correlation would equal one or negative one, meaning every change in $X$ is accompanied by a proportional change in $Y$. In other words, all the variability is covariability. Every point falls on the regression line, with no scatter around it. There is no variability that isn't shared. So the more unshared variability there is, the lower the correlation coefficient will be, until when there is no shared variability at all, the numerator of the equation will be zero and we will get a correlation coefficient of zero. This is why $r$ can only vary between negative one and positive one.
 
 ### $SS$ and $SP$
 
@@ -317,7 +321,9 @@ We calculated the correlation coefficient, $r$, for our sample already, but we d
 
 This is going to sound weird, but the test statistic for a correlation is actually a $t$ statistic. We'll see how to calculate that $t$ statistic in Step 3. 
 
-For now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for bivariate correlations, degrees of freedom are $n$, the number of pairs of scores, minus two. That's because we're dealing with two variables, each with its own mean, so when we compute the respective sets of deviations, we lose one degree of freedom for each. But these aren't two independent samples. We're looking at the associations between pairs of scores, so $n$ counts the pairs.
+For now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for bivariate correlations, degrees of freedom are $n$, the number of pairs of scores, minus two. Each student contributes one pair---their coffee consumption and their test score---so our seven students give us seven observations of the relationship, even though we've recorded fourteen scores.
+
+But why subtract two? Think about what would happen with just two points. We could always draw a straight line passing through both, fitting perfectly. The correlation would be one or negative one. There'd be no opportunity for either point to deviate from the line, because those two points determine the line itself. It's only when we add more observations that we can see any scatter around it. So fitting the line uses up two degrees of freedom, leaving $n - 2$ deviations free to vary.
 
 As before, we can check the $t$ table to find the critical values. Since our little example dataset has seven pairs of scores, our degrees of freedom are seven minus two, which is five. We'll use $\alpha = .05$. Looking in the two-tailed .05 column gives critical values of $\pm 2.571$. We reject the null if $t < -2.571$ or $t > 2.571$.
 
@@ -345,6 +351,10 @@ Here $r$ is the correlation coefficient, $\rho$ is the population correlation as
 
 $$ s_r = \sqrt{\frac{1 - r^2}{n - 2}} $$ {#eq-correlation-se}
 
+There's a new ingredient here: $r^2$, the correlation squared. Remember how $\eta^2$ in Chapter 14 told us what proportion of the total variability was accounted for by differences between the groups? $r^2$ does a similar job for a linear relationship: it tells us the proportion of the variability in one variable that's shared with the other. For our coffee data, $r^2 = (-.50)^2 = .25$. So 25% of the variability in test scores is shared with coffee consumption, leaving 75% unaccounted for by that relationship. In terms of the scatterplot, that's the variability in the points above and below the regression line. That's the $1 - r^2$ in the numerator.
+
+So the standard error reflects the variability left over after accounting for the relationship, divided by the degrees of freedom, with a square root to undo the squaring. A stronger correlation means less scatter around the line relative to the total variability in $Y$, making this standard error smaller. And for the same correlation, more pairs of scores make it smaller too. Both should make sense: a clearer pattern and more observations give us a more precise estimate.
+
 For our coffee data, that works out like this:
 
 $$t = \frac{r - \rho}{s_r} = \frac{-.50 - 0}{\sqrt{\dfrac{1 - (-.50)^2}{7 - 2}}} = \frac{-.50}{.387} = -1.29$$
@@ -361,23 +371,25 @@ The observed $t = -1.29$ falls between the critical values of the null $t$ distr
 
 The corresponding two-tailed $p$-value is approximately $.25$, well above our $\alpha$ of $.05$.
 
-### Step 5: Estimate the effect, interval, and power
+## Reporting and interpreting the results
 
-#### Effect size
+### Reporting results
 
-You may have noticed we haven't calculated a separate measure of effect size here, as we have done in the past. And that's because Pearson's $r$ correlation coefficient actually is itself a measure of effect size. By itself, $r$ tells us how strong the association is in our sample, but not how much evidence it rests on. That's why we had to convert it to a $t$ statistic for the hypothesis test. Remember that effect size is independent of statistical significance.
+As always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom, and the $p$-value for the correlation.
 
-Pearson's $r$ is a measure of effect size because it quantifies the degree of association between two variables on a standardized scale ranging from negative one to one. And the correlation itself doesn't get bigger just because the sample does. That's why we can have such a strong correlation in our example dataset and yet fail to reject the null hypothesis.
+> Drinking more coffee was associated with lower test scores, but the correlation did not reach statistical significance; $r(5) = -.50$, $p = .25$.
+
+### Interpreting the results
+
+So what do we make of our result? We failed to reject the null hypothesis, but that doesn't establish that there's no relationship. We only have seven pairs of scores. Our $r = -.50$ describes a fairly strong negative association in this sample; the hypothesis test tells us that, with so few observations, it isn't enough evidence to reject the null.
 
 ::: {#quiz-correlation-significance}
 {{< include quizzes/17-correlation-significance.qmd >}}
 :::
 
-And Pearson's $r$ is closely related to another measure of effect size: $r^2$. You might have noticed that $r^2$ showed up in the calculation for the standard error of the correlation. Squaring the correlation gives us the proportion of the variability in one variable that's shared with the other---much like $\eta^2$ in Chapter 14, which gave us the share of the total variability accounted for by differences between the groups. For our coffee data, $r^2 = (-.50)^2 = .25$, so 25% of the variability in test scores is shared with coffee consumption. So it should be no surprise that $r$, $r^2$, and $t$ are all mathematically related. In fact, even Cohen's $d$ is mathematically related to $r$. I'll leave the actual mathematical relationships for anyone algebraically inclined to ponder over. But for us, the point is that these different statistics are all performing related jobs and share similar conceptual foundations.
-
 As for how to interpret Pearson's $r$ as a measure of effect size, you might remember from Chapter 9 that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, Cohen was also familiar with Pearson's $r$ and offered some rules of thumb for it as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb, and Cohen himself strongly cautioned against over-reliance on them.
 
-There's a great recent paper by @funder2019evaluating that looked at what effect sizes are actually typically seen across a wide range of psychological studies, and they suggested evidence-based alternative benchmarks, shown alongside Cohen's in @tbl-r-benchmarks. By their reckoning, an $r$ of .05 is very small when it comes to explaining any single event, but it can add up to something consequential over time. An $r$ of .2 is a medium effect, of some practical use even in the short run, and .3 is large. And an $r$ of .4 or more, in the context of psychological research, is likely to be an overestimate, the authors argued, that will rarely be found again in a large sample or in a replication.
+We've already met Funder and Ozer's [-@funder2019evaluating] argument that small effects can matter, back in Chapter 9. Their paper offers some alternative benchmarks based on the kinds of effects found in psychological research and the consequences those effects can have. Let's get a feel for what they mean.
 
 | $r$ | Cohen | Funder and Ozer |
 |:--:|:--|:--|
@@ -390,39 +402,44 @@ There's a great recent paper by @funder2019evaluating that looked at what effect
 
 : Rough benchmarks for interpreting $r$ as an effect size. {#tbl-r-benchmarks}
 
-To get a feel for what correlations of these sizes look like, here are four point clouds of 100 points each.
+These are invented point clouds of 100 observations each. As you step through, the same points move to produce each correlation, with the axes kept on the same scale. We're showing positive correlations, but the same descriptions of strength apply to negative ones.
 
-::: {.sfs-figure-row}
-{{< interactive-figure benchmarkScatterR10 makeScatterplot options='{"generate":{"r":0.1,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .10: barely distinguishable from a circular cloud." >}}
+::::: {#act-correlation-effect-sizes .callout-tip .interactive}
+## How small is a small correlation?
 
-{{< interactive-figure benchmarkScatterR20 makeScatterplot options='{"generate":{"r":0.2,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .20: a very slight upward tilt." >}}
+{{< interactive-figure correlationEffectSizes makeScatterplot options='{"generate":{"r":0.05,"n":100,"seed":31,"round":4},"controlSet":"correlation","line":"fit","showEllipse":true,"showR":true,"ticks":"none","axisLabels":false,"xDomain":[0,100],"yDomain":[0,100],"pointRadius":4,"maxWidth":"28rem"}' fallback="A five-step tutorial showing invented correlations of .05, .10, .20, .30, and .40 on fixed axes, with a regression line and ellipse. The upward pattern becomes clearer, but substantial scatter remains even at .40." >}}
 
-{{< interactive-figure benchmarkScatterR30 makeScatterplot options='{"generate":{"r":0.3,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .30: a visible but loose upward tilt." >}}
-
-{{< interactive-figure benchmarkScatterR40 makeScatterplot options='{"generate":{"r":0.4,"n":100,"seed":31},"style":"minimal","showEllipse":true,"showR":true,"width":220}' fallback="Point cloud with r = .40: a clearer upward tilt, still with plenty of scatter." >}}
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Very small: .05" data-action='{"generate":{"r":0.05,"n":100,"seed":31,"round":4},"animate":false}'}
+At $r = .05$, there's barely any visible pattern. Knowing someone's $X$ score would tell us very little about their $Y$ score. Funder and Ozer call this *very small* for understanding a single event. But if a small influence operates repeatedly, its consequences can add up. Small doesn't necessarily mean unimportant.
 :::
 
-So from this you can see how context-dependent our interpretation of effect size should be. I encourage you to keep a note of this paper or just these descriptions of the different effect sizes on hand so they can help you interpret the findings you read about in research papers. Also, when someone tells you about some experimental effect, ask them what the effect size was. If they can't tell you, you should be a little bit skeptical.
+::: {.tutorial-step data-title="Small: .10" data-action='{"generate":{"r":0.1,"n":100,"seed":31,"round":4}}'}
+At $r = .10$, the pattern is still faint. Funder and Ozer call this *small*: a weak clue about any one outcome, but potentially consequential across many occasions or many people. Notice how much the points overlap. A small correlation leaves plenty of room for people to differ from the general tendency.
+:::
+
+::: {.tutorial-step data-title="Medium: .20" data-action='{"generate":{"r":0.2,"n":100,"seed":31,"round":4}}'}
+At $r = .20$, the upward pattern is getting clearer, though there's still plenty of scatter around the line. Funder and Ozer call this *medium*, with some practical use even for individual outcomes. It won't tell us exactly what someone will score, but it can give us a useful improvement on guessing without that information.
+:::
+
+::: {.tutorial-step data-title="Large: .30" data-action='{"generate":{"r":0.3,"n":100,"seed":31,"round":4}}'}
+At $r = .30$, Funder and Ozer call the effect *large*, with potentially substantial consequences over both short and long periods. That might sound surprising if you were expecting a tight cluster around the line. But large in psychological research doesn't mean close to perfect. There's still a lot going on besides this one relationship.
+:::
+
+::: {.tutorial-step data-title="Very large: .40" data-action='{"generate":{"r":0.4,"n":100,"seed":31,"round":4}}'}
+At $r = .40$, the pattern is clearer again. Funder and Ozer call this *very large* for psychological research, and urge particular scrutiny: unusually large estimates can shrink in bigger samples or replications. That doesn't mean a correlation this large must be wrong. It means we should look carefully at how reliably it has been estimated.
+:::
+::::
+
+:::::
+
+To make the accumulation idea more concrete, imagine a study habit that gives you a small advantage on any one quiz. It wouldn't guarantee a good score; the questions you happen to get and plenty of other things would matter too. But if the habit keeps helping across a whole course of quizzes, those small advantages could add up to a meaningful difference in what you learn and the grade you earn. The consequences accumulate; we're not saying that the correlation itself automatically gets bigger over time.
+
+So from this you can see how context-dependent our interpretation of effect size should be. These descriptions are starting points for thinking about a result, not boundaries that tell us whether it matters. What are we measuring, how reliable is the estimate, and what would a relationship of this size mean in practice?
 
 For building an intuitive feel for what correlations of different sizes actually look like, spend some time with [Kristoffer Magnusson's interactive correlation visualization](https://rpsychologist.com/correlation/).
 
-<!-- PLAN: #### Confidence interval — show the result without teaching Fisher's transformation? 95% CI for these data is about [-.91, .41]. -->
-
-<!-- PLAN: #### Statistical power — about 85 pairs for 80% power at rho = .3; about 195 at .2. -->
-
-## Reporting and interpreting the results
-
-### Reporting results
-
-As always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom, and the $p$-value for the correlation.
-
-> Drinking more coffee was associated with lower test scores, but the correlation did not reach statistical significance; $r(5) = -.50$, $p = .25$.
-
-### Interpreting the results
-
-<!-- PLAN: what failing to reject means here (as in Chapter 12: not "no relationship"; seven pairs can't tell). -->
-
-<!-- DRAFT (bridge): Our seven students are an excerpt: seven of the 300 students in a bigger (invented) study that measured the same things. Across all 300, r = -.15: small, typical of psychology (@tbl-r-benchmarks), and with that many students statistically significant, t(298) = -2.62, p = .009. Say outright that the seven's r = -.50 is much bigger than the full study's -.15, and that this is what small samples do (their interval ran from -.91 to .41; ties to Funder and Ozer on big correlations shrinking in big samples). So chance is now an unlikely explanation. What does the correlation mean? -->
+<!-- DRAFT (bridge): Our seven students are an excerpt: seven of the 300 students in a bigger (invented) study that measured the same things. Across all 300, r = -.15: small, typical of psychology (@tbl-r-benchmarks), and with that many students statistically significant, t(298) = -2.62, p = .009. Say outright that the seven's r = -.50 is much bigger than the full study's -.15, and that this is what small samples do (ties to Funder and Ozer on big correlations shrinking in big samples). So chance is now an unlikely explanation. What does the correlation mean? -->
 
 ### Correlation and causation
 
