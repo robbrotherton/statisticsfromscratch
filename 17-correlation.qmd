@@ -140,8 +140,6 @@ $$ r = \frac{SP}{\sqrt{SS_X SS_Y}} $$ {#eq-pearson-r}
 
 $SS_X$ and $SS_Y$ should look familiar. $SS$, as usual, refers to the sum of squared deviations. So here we have the separate sums of squares for variable $X$ and variable $Y$ to quantify their separate variability in the denominator. And we have this new quantity, $SP$, which quantifies the covariability of $X$ and $Y$.
 
-I'll explain in a moment exactly what $SP$ is. But first, let me point out that if every change in $X$ had a proportional change in $Y$, then the covariability in the numerator would be as big in magnitude as their separate variabilities, combined in the denominator. The correlation would equal one or negative one. In other words, all the variability is covariability. Every point falls on a straight line, just as we saw when the ellipse collapsed. There is no variability that isn't shared. So the more unshared variability there is, the closer the correlation coefficient will be to zero, When there is no shared linear variability at all, the numerator will be zero, and so will the correlation coefficient. This is why $r$ can only vary between negative one and positive one.
-
 ### $SS$ and $SP$
 
 Before getting to $SP$, let's recap sum of squares. To calculate the sum of squared deviations, we square the deviation scores. And another way of saying that we square something is to say we multiply it by itself. So here are two equivalent ways of writing the equation for sum of squares:
@@ -160,7 +158,7 @@ I hope that by juxtaposing this with the sum of squares formula, you can see the
 
 ### Worked example
 
-Let's work through a simple example to see how the sum of products is calculated. Suppose we're interested in how the number of cups of coffee a student drinks is related to their test score. Maybe the caffeine will increase alertness and cognitive performance, leading to better test scores. We have data for seven students, as shown in @tbl-coffee-scores.
+Let's work through a simple example to see how the sum of products is calculated. Suppose we're interested in how the number of cups of coffee a student drinks on the morning of a test is related to their score. Maybe the caffeine will increase alertness and cognitive performance, leading to better test scores. We have data for seven students, as shown in @tbl-coffee-scores.
 
 | Participant | Coffee (cups), $X$ | Test score, $Y$ |
 |:--:|:--:|:--:|
@@ -234,6 +232,8 @@ That gives us everything we need to calculate the correlation coefficient:
 
 $$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{-30}{\sqrt{3 \times 1200}} = \frac{-30}{60} = -.50$$
 
+Notice what the denominator is doing there. Our sum of products came out at $-30$, and the denominator at 60. Now imagine the same amount of variability on each variable, but with every student falling exactly on a straight line. Then every change in $X$ would be accompanied by a proportional change in $Y$, and the covariability in the numerator would be as big in magnitude as their separate variabilities combined in the denominator. $SP$ would be $-60$, and $r$ would be $-1$. In other words, all the variability would be covariability, just as we saw when the ellipse collapsed into a line. There'd be no variability that isn't shared. The more unshared variability there is, the closer the correlation coefficient gets to zero. When there is no shared linear variability at all, the numerator will be zero, and so will the correlation coefficient. This is why $r$ can only vary between negative one and positive one.
+
 ::: {#quiz-correlation-calculate-r}
 {{< include quizzes/17-correlation-calculate-r.qmd >}}
 :::
@@ -258,7 +258,7 @@ We calculated the correlation coefficient, $r$, for our sample already, but we d
 
 This is going to sound weird, but the test statistic for a correlation is actually a $t$ statistic. We'll see how to calculate that $t$ statistic in Step 3.
 
-For now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for bivariate correlations, degrees of freedom are $n$, the number of pairs of scores, minus two. Each student contributes one pair---their coffee consumption and their test score---so our seven students give us seven observations of the relationship, even though we've recorded fourteen scores.
+For now, we just need to know its degrees of freedom so we can determine the critical $t$ values. And for a correlation between two variables, degrees of freedom are $n$, the number of pairs of scores, minus two. Each student contributes one pair---their coffee consumption and their test score---so our seven students give us seven observations of the relationship, even though we've recorded fourteen scores.
 
 But why subtract two? Here's where the connection with regression helps. We can summarize a cloud of points by fitting a straight line through it, called a **regression line**. We'll work out how to fit it and use it for predictions in the next chapter. For now, think about what would happen with just two points, with different scores on both variables. We could always draw a straight line passing through both, fitting perfectly. The correlation would be one or negative one. There'd be no opportunity for either point to deviate from the line, because those two points determine the line itself. It's only when we add more observations that we can see any scatter around it. So fitting the line uses up two degrees of freedom, leaving $n - 2$ deviations free to vary.
 
@@ -320,6 +320,8 @@ So what do we make of our result? We failed to reject the null hypothesis, but t
 {{< include quizzes/17-correlation-significance.qmd >}}
 :::
 
+The flip side is that a weak correlation can be statistically significant, as long as it rests on enough observations. Suppose our seven students were the first seven in a study of 300. (The rest are invented too.) Across all 300, the correlation between coffee and test score is only $-.15$. With just seven students, a few scores can make quite a difference to $r$, and in this case the first seven made the relationship look much stronger. Yet it's the smaller correlation that reaches statistical significance, $r(298) = -.15$, $p = .009$. With that many students, a correlation this far from zero or farther would be unusual if the population correlation were zero. So whether a correlation is significant and how strong it is are separate questions. That brings us to the second one.
+
 As for how to interpret Pearson's $r$ as a measure of effect size, you might remember from Chapter 9 that Cohen offered some rules of thumb for interpreting Cohen's $d$. Well, he offered some for Pearson's $r$ as well. Cohen suggested that a correlation of .1 should be considered small, .3 medium, and .5 large. However, like I mentioned before, these are just rules of thumb, and Cohen himself strongly cautioned against over-reliance on them.
 
 We've already met Funder and Ozer's [-@funder2019evaluating] argument that small effects can matter, back in Chapter 9. Their paper offers some alternative benchmarks based on the kinds of effects found in psychological research and the consequences those effects can have. Let's get a feel for what they mean.
@@ -366,19 +368,17 @@ At $r = .40$, the pattern is clearer again. Funder and Ozer call this *very larg
 
 :::::
 
-To make the accumulation idea more concrete, imagine a study habit that gives you a small advantage on any one quiz. It wouldn't guarantee a good score; the questions you happen to get and plenty of other things would matter too. But if the habit keeps helping across a whole course of quizzes, those small advantages could add up to a meaningful difference in what you learn and the grade you earn. The consequences accumulate; we're not saying that the correlation itself automatically gets bigger over time.
+Funder and Ozer's point about small effects adding up is easier to see with an example. Imagine a study habit that gives you a small advantage on any one quiz. It wouldn't guarantee a good score; the questions you happen to get and plenty of other things would matter too. But if the habit keeps helping across a whole course of quizzes, those small advantages could add up to a meaningful difference in what you learn and the grade you earn. The consequences accumulate; we're not saying that the correlation itself automatically gets bigger over time.
 
 So from this you can see how context-dependent our interpretation of effect size should be. These descriptions are starting points for thinking about a result, not boundaries that tell us whether it matters. What are we measuring, how reliable is the estimate, and what would a relationship of this size mean in practice?
 
-Suppose our seven students were the first seven in a study of 300. (The rest are invented too.) Across all 300, the correlation between coffee and test score is only $-.15$. With just seven students, a few scores can make quite a difference to $r$, and in this case the first seven made the relationship look much stronger. Yet it's the smaller correlation that reaches statistical significance, $t(298) = -2.62$, $p = .009$. With that many students, a correlation this far from zero or farther would be unusual if the population correlation were zero.
-
 ### Correlation and causation
 
-As we saw at the beginning of this chapter with the prosocial spending survey, correlational research has its limits. Knowing that charitable spending is associated with happiness doesn't tell us whether spending causes happiness, or whether happier people are more likely to spend on others, or whether some other factor is behind both. In that research, the authors also measured income, and found that it was associated with both spending and happiness. But even after accounting for income, the association between spending and happiness remained. How did they do that?
+As we saw at the beginning of this chapter with the prosocial spending survey, correlational research has its limits. Knowing that charitable spending is associated with happiness doesn't tell us whether spending causes happiness, or whether happier people are more likely to spend on others, or whether some other factor is behind both. In that research, the authors also measured income, and taking it into account barely changed the association between spending and happiness. But what does "taking it into account" actually involve? They used regression, which we'll get to in the next chapter. But we can see the basic idea using nothing more than correlations.
 
 Let's apply the same logic to our coffee and test score example. We found a negative correlation between coffee consumption and test scores, but we don't know whether drinking coffee is causing lower test scores, or whether students who expect to do poorly on the exam are drinking more coffee, or whether some other factor is behind both. Maybe students who haven't been sleeping are both drinking more coffee and scoring lower on the exam.
 
-So suppose the study also recorded each student's average nightly sleep over the week before the exam. (That sleep came before the morning's coffee, so the coffee can't have caused it.) Here are our seven students again, with their sleep.
+So suppose the study also recorded each student's average nightly sleep over the week before the exam. (That sleep came before the morning's coffee, so the coffee can't have caused it.) Here are our seven students again, with their sleep. (We'll use all 300 students for the correlations, but this shows what the data look like with a third variable.)
 
 | Participant | Coffee (cups) | Test score | Sleep (hours) |
 |:--:|:--:|:--:|:--:|
@@ -424,7 +424,7 @@ Accounting for sleep brings the correlation much closer to zero, from $-.15$ to 
 {{< include quizzes/17-correlation-partial.qmd >}}
 :::
 
-For the full sample of 300, the partial correlation falls short of statistical significance, $t(297) = -0.87$, $p = .39$. But we can see how much the association shrank by comparing the two coefficients themselves. Crossing the $.05$ threshold doesn't tell us how much anything changed.
+For the full sample of 300, the partial correlation falls short of statistical significance, $t(297) = -0.87$, $p = .39$. (We lose one more degree of freedom for each variable we account for, so here $df = n - 3$.) But we can see how much the association shrank by comparing the two coefficients themselves. Crossing the $.05$ threshold doesn't tell us how much anything changed.
 
 Does that settle what caused the lower scores? Even if these were real students, we'd only have accounted for the sleep we measured. Other differences between students could still be involved. That's the advantage of random assignment back in Chapter 12. It gives even the differences we didn't think to measure the same distribution across groups on average. What lets us draw a causal conclusion is how the study was done. Running a $t$ test on groups the students chose for themselves wouldn't turn our survey into an experiment.
 
@@ -439,6 +439,10 @@ Does that settle what caused the lower scores? Even if these were real students,
 Remember the related-samples $t$ test in Chapter 13? Each child raced twice. We worked out a difference for each child, and those differences had to be independent from one child to the next. Here each student gives us a pair of scores. We're interested in how the two scores *within* a pair go together. Independence applies *between* pairs.
 
 Suppose our seven rows came from one student who sat seven exams. We'd still have seven dots on the scatterplot, but we'd only have one student. Treating those dots as seven independent students would give us the wrong basis for our $p$-value. To judge independence we need to know where the rows came from.
+
+#### Normality
+
+As with every $t$ test so far, the $t$ distribution we compare against assumes normally distributed populations. For a correlation, that applies to the pairs of scores. Strictly, the test assumes the two variables in the population follow what's called a **bivariate normal distribution**. You can picture it as the ellipse we've been drawing: a cloud of points that's densest in the middle and thins out smoothly toward the edges, with no long tails or clumps off to one side. As before, the test can tolerate some departures, but there's no automatic cutoff. Seven pairs of scores can't tell us much about the shape of the population, which is one more reason to be cautious about our little coffee example.
 
 #### Linearity
 
@@ -458,6 +462,26 @@ Three examples of nonlinear relationships: a U-shaped relationship, a wave, and 
 ::::
 
 So a correlation of zero doesn't necessarily mean that there's no relationship. The points in the first two plots follow curves, and the last lot are arranged in a star. None of those patterns is captured by a straight line. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
+
+A curve doesn't always produce a correlation near zero, either. Suppose test scores rose steeply over the first cup of coffee and then leveled off. Pearson's $r$ might come out fairly large, since the points do tend to go up. But a straight line would underestimate how much the first cup helped, and overestimate what each cup adds after that. The number would look fine; the summary would be wrong.
+
+#### Outliers
+
+Because $r$ is built from deviations, a score far from the means has a lot of influence. Its deviations are big, so its product is big, and it can outweigh the rest. Suppose an eighth student, student H, had drunk 5 cups of coffee and scored 95. Add that one student to our seven, and the correlation goes from $-.50$ to $+.33$. One person turned a negative correlation into a positive one.
+
+That doesn't mean we should delete any inconvenient scores. Maybe student H's score is a data entry error, or maybe that student really did drink five cups and ace the test. But it's another reason to look at the scatterplot. If a single point is doing most of the work, a correlation summarizing everyone could be telling us mostly about that one person.
+
+#### Restricted range
+
+A correlation also depends on how much variability there is to go around. Think back to Galton's heights and feet. Across the whole population, taller people tend to have bigger feet. But if we measured only professional basketball players, nearly everyone would be tall. With less variability in height, there'd be less for foot size to go along with, and the correlation would probably come out weaker. That wouldn't mean the relationship had changed, just that we'd only looked at a narrow slice of it. So when a correlation looks surprisingly weak, it's worth asking whether the sample covered the full range of scores we're interested in.
+
+## Summary
+
+So when we want to know whether two variables go together, we don't have to split anyone into groups. Pearson's $r$ uses each person's pair of deviations from the two means. The sum of products captures how much the variables vary together, and dividing by the square root of the two sums of squares puts that on a scale from $-1$ to $1$. To test whether a correlation is more than we'd expect by chance, we turn it into a $t$ statistic with $n - 2$ degrees of freedom, and from there the logic of the test is the same as always. And $r$ itself doubles as a measure of effect size, which is a separate question from whether it's significant.
+
+But a correlational design limits what we can conclude, whatever we find. Reverse causality or a third variable could be behind the association. A partial correlation lets us account for a variable we've measured, but not the ones we haven't.
+
+There's one more thing $r$ doesn't tell us. It says how closely the points follow a straight line, but not which line. If we wanted to predict a student's test score from how much coffee they drank, we'd need to know where that line sits and how steep it is. Fitting that line is the topic of the next chapter: regression.
 
 {{< include quizzes/17-correlation-learning-checks.qmd >}}
 
