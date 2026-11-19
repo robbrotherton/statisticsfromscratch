@@ -118,7 +118,7 @@ Scatterplots illustrating various correlation coefficients. I've drawn an ellips
 
 At zero, the ellipse in @fig-cor-characteristics is basically a circle, with no upward or downward tendency, meaning that there is no consistent linear relationship between the two variables. As the correlation gets stronger, the ellipse gets longer and thinner. A "perfect correlation" of either $1$ or $-1$ means that every change in one variable is accompanied by a proportional change in the other; the dots fall into a straight line, and the ellipse becomes a line. In a sense, the correlation coefficient is a measure of how closely the data points follow a straight-line pattern.[^scatterplot-scale-note]
 
-[^scatterplot-scale-note]: I should note that changing the scale of one axis doesn't change the correlation, but it can make the ellipse look more or less rotund. The correlation coefficient measures how consistently the two variables go together, relative to their separate variability, rather than how steep or stretched the pattern happens to look in a particular graph.
+[^scatterplot-scale-note]: I should note that changing the scale of one axis doesn't change the correlation, but it can make the ellipse look more or less rotund. The correlation coefficient measures how consistently the two variables go together, relative to their separate variability, rather than how the pattern happens to look in a particular graph with its particular scales and dimensions.
 
 ## Calculating $r$
 
@@ -264,7 +264,7 @@ $$ s_r = \sqrt{\frac{1 - r^2}{n - 2}} $$ {#eq-correlation-se}
 
 Remember how $\eta^2$ in Chapter 14 told us what proportion of the total variability was accounted for by differences between the groups? $r^2$ does a similar job for a linear relationship: it tells us the proportion of the variability in one variable that's shared with the other. For our coffee data, $r^2 = (-.50)^2 = .25$. So 25% of the variability in test scores is shared with coffee consumption, leaving 75% unaccounted for by that relationship. In terms of the scatterplot, that's the variability in the points above and below the regression line. That's the $1 - r^2$ in the numerator.
 
-So the standard error reflects the variability left over after accounting for the relationship, divided by the degrees of freedom, with a square root to undo the squaring. A stronger correlation means less scatter around the line relative to the total variability in $Y$, making this standard error smaller. And for the same correlation, more pairs of scores make it smaller too. Both should make sense: a clearer pattern and more observations give us a more precise estimate.
+So the standard error reflects variability left over after accounting for the predictable relationship, divided by the degrees of freedom, with a square root to undo the squaring. A stronger correlation makes the standard error smaller, becuase there is more predictability, less variability unaccounted for. As with the other standard errors we've seen, more observations make it smaller too, because more data gives us a more precise estimate.
 
 For our coffee data, that works out like this:
 
@@ -292,31 +292,23 @@ As always, we need to report the results of our hypothesis test. Here, that stat
 
 ### Interpreting the results
 
-So what do we make of our result? We failed to reject the null hypothesis, but that doesn't establish that there's no relationship. We only have seven pairs of scores. Our $r = -.50$ describes a fairly strong negative association in this sample; the hypothesis test tells us that, with so few observations, it isn't enough evidence to reject the null.
+So what can we make of our result? We failed to reject the null hypothesis, but that doesn't establish that there's no relationship. We only have seven pairs of scores. Our $r = -.50$ describes a fairly strong negative association in this sample, but with so few observations, it isn't strong enough evidence to reject the null.
 
 ::: {#quiz-correlation-significance}
 {{< include quizzes/17-correlation-significance.qmd >}}
 :::
 
-The flip side is that a weak correlation can be statistically significant, as long as it rests on enough observations. Suppose our seven students were the first seven in a study of 300. (The rest are invented too.) Across all 300, the correlation between coffee and test score is only $-.15$. With just seven students, a few scores can make quite a difference to $r$, and in this case the first seven made the relationship look much stronger. Yet it's the smaller correlation that reaches statistical significance, $r(298) = -.15$, $p = .009$. With that many students, a correlation this far from zero or farther would be unusual if the population correlation were zero. So whether a correlation is significant and how strong it is are separate questions. That brings us to the second one.
+On the other hand, a weak correlation can be statistically significant, if it comes from a large enough sample. Suppose we increased the sample for our study up to $n =  300$. In the larger sample, the correlation between coffee and test score is only $-.15$. This smaller correlation would reach statistical significance, $r(298) = -.15$, $p = .009$. So whether a correlation is significant and how strong it is are separate questions.
 
-How strong is a correlation of, say, $.30$? Cohen called that *medium*. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. Before you decide what to make of either label, what would you expect a scatterplot with $r = .30$ to look like?
+That significance decision comes down to a binary threshold, but how should we interpret the correlation as a measure of effect size? How impressive is a correlation of $.15$? What about $.05$, or $.30$? Cohen called $r = .30$ *medium*. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. In the social sciences, the behaviors or attitudes or whatever we're interested in are generally multiply determined. There are a lot of reasons why you get a particular score on a particular exam, not just how many cups of coffee you drank or how many hours of sleep you get. Those things might just reveal a small piece of the puzzle. And a small piece can be worth knowing about, even if it doesn't look terribly impressive on a scatterplot (@fig-correlation-effect-sizes).
 
-::::: {#act-correlation-effect-sizes .callout-tip .interactive}
-## What does a correlation of .30 look like?
+::::: {#fig-correlation-effect-sizes}
+::: {.sfs-figure-row}
+{{< interactive-figure correlationEffectSizes05 makeScatterplot options='{"generate":{"r":0.05,"n":100,"seed":31,"round":4},"style":"minimal","showEllipse":true,"showR":true,"width":280,"xDomain":[0,100],"yDomain":[0,100]}' fallback="Scatterplot of 100 observations with r = .05. There is barely any visible pattern; the ellipse is almost a circle." >}}
 
-{{< interactive-figure correlationEffectSizes makeScatterplot options='{"generate":{"r":0.05,"n":100,"seed":31,"round":4},"controlSet":"correlation","showEllipse":true,"showR":true,"ticks":"none","axisLabels":false,"xDomain":[0,100],"yDomain":[0,100],"pointRadius":4,"maxWidth":"28rem"}' fallback="Two scatterplots of the same 100 observations on fixed axes. At r = .05 there is barely any upward pattern. At r = .30 the trend is clearer, though scores still vary widely at any given X." >}}
-
-:::: {.callout-footer}
-::: {.tutorial-step data-title="Very small: .05" data-action='{"generate":{"r":0.05,"n":100,"seed":31,"round":4},"animate":false}'}
-At $r = .05$, there's barely any visible pattern. Keep an eye on the dots as we move the same 100 observations to give them a stronger correlation.
+{{< interactive-figure correlationEffectSizes30 makeScatterplot options='{"generate":{"r":0.3,"n":100,"seed":31,"round":4},"style":"minimal","showEllipse":true,"showR":true,"width":280,"xDomain":[0,100],"yDomain":[0,100]}' fallback="The same 100 observations rearranged to give r = .30. There is a visible upward trend, though scores still vary widely at any given X." >}}
 :::
-
-::: {.tutorial-step data-title="Large: .30" data-action='{"generate":{"r":0.3,"n":100,"seed":31,"round":4}}'}
-Now there's an upward trend. Pick a spot halfway along the $X$ axis and look at the dots near it. If I gave you someone's $X$ score, you'd still have quite a spread of $Y$ scores to choose from. And yet across the whole set of 100 people, you can see that as one score goes up, the other tends to go up too.
-:::
-::::
-
+A very small correlation ($r = .05$, left) and a large one by Funder and Ozer's standards ($r = .30$, right). At $.05$ there's barely any visible pattern. At $.30$ there's a more obvious upward trend. It would generally be considered quite a strong relationship in the context of social scientific research, even though there is still a lot of variability around the trend. In the social sciences, there always will be.
 :::::
 
 ### Correlation and causation
@@ -381,13 +373,22 @@ Does that settle what caused the lower scores? Even if these were real students,
 
 ### Correlation assumptions
 
-As with the child racers in Chapter 13, **independence** applies *between* people. Suppose our seven rows came from one student who sat seven exams. We'd still have seven dots on the scatterplot, but treating them as seven independent students would give us the wrong basis for our $p$-value.
+With correlational data, we have pairs of scores from the same person; obviously, the pairs aren't independent. As with the related-samples analyses we've used where this was also the case, the assumption of **independence** applies *between* people.
 
-The usual correlation test also assumes the pairs of scores come from a **bivariate normal distribution**. Picture the elliptical clouds from earlier, densest in the middle and thinning out smoothly toward the edges. As before, the test can tolerate some departures from normality, though seven pairs tell us little about the shape of the population.
+Pearson's correlation also assumes the pairs of scores come from a **bivariate normal distribution**. With the $t$ test and ANOVA we've assumed that the populations that produced samples of scores are normally distributed. With our paired correlational data, the assumption is that both populations---the population of $X$ scores and the population of $Y$ scores---are normally distributed together. Visually, the cloud of dots on a scatterplot should be densest in the middle and thinning out smoothly toward the edges, both horizontally and vertically (@fig-bivariate-normality). The test can tolerate some departures from bivariate normality, though seven pairs tell us little about the shape of the population.
 
-Lastly, when I defined Pearson's $r$, I said it measures a *linear* association: how consistently the points follow a straight line. So if we calculate Pearson's correlation coefficient, we're assuming **linearity**.
+:::: {#fig-bivariate-normality}
+::: {.sfs-figure-row}
+{{< interactive-figure bivariateNormalScatter makeScatterplot options='{"generate":{"r":0.5,"n":100,"seed":7},"style":"minimal","showR":true,"width":280,"xDomain":[0,100],"yDomain":[0,100]}' fallback="An approximately bivariate normal cloud of 100 points with r = .50. The points are densest in the middle and thin out evenly in every direction." >}}
 
-But variables can also be related in ways that a straight line doesn't capture. As $X$ increases, $Y$ might decrease at first, then start increasing. There's a real, predictable relationship, but it changes direction along the way. Pearson's $r$ can't capture that.
+{{< interactive-figure bivariateSkewedScatter makeScatterplot options='{"points":[[11.9,24.4],[16.3,42.5],[24.6,11.9],[9.3,20.4],[10.3,11.4],[62.6,53.8],[9.6,15.0],[11.3,8.0],[12.8,5.4],[18.6,42.0],[13.5,11.8],[20.2,13.0],[23.1,35.4],[10.5,5.9],[29.5,39.1],[27.9,23.2],[47.4,25.2],[50.6,27.2],[33.3,48.1],[27.6,25.0],[16.1,8.4],[16.5,14.4],[17.8,8.4],[21.6,11.8],[42.1,22.6],[20.8,38.8],[27.4,23.5],[64.9,35.3],[9.1,3.7],[15.6,8.5],[24.1,53.3],[13.3,40.5],[52.2,41.1],[15.5,7.4],[13.7,8.9],[26.2,21.7],[11.9,7.3],[17.2,10.3],[10.7,3.9],[9.5,40.1],[13.4,24.4],[14.0,43.4],[24.8,17.2],[20.5,14.7],[51.6,62.8],[16.4,13.5],[8.7,5.3],[13.1,19.1],[12.4,5.4],[9.5,8.9],[8.8,28.4],[12.1,13.2],[50.9,27.5],[16.6,26.4],[21.6,14.3],[11.9,21.3],[11.1,6.3],[9.4,11.7],[21.0,23.6],[17.3,18.5],[15.7,8.5],[26.2,13.9],[9.9,8.8],[12.9,59.6],[23.2,11.6],[35.9,24.9],[9.9,35.0],[54.8,29.2],[17.6,16.3],[8.8,5.5],[9.7,7.7],[10.5,12.5],[28.1,16.7],[22.4,39.4],[70.0,44.9],[11.8,20.4],[13.1,6.8],[24.5,59.1],[18.5,18.1],[25.2,12.1],[12.5,34.0],[19.7,31.4],[11.1,23.5],[58.0,37.8],[9.9,26.8],[11.1,15.1],[25.0,25.2],[10.0,3.6],[33.5,22.4],[25.0,17.7],[43.4,34.2],[27.9,36.4],[21.2,19.6],[13.2,14.7],[40.9,25.7],[15.1,9.3],[22.3,16.1],[13.3,5.1],[35.1,22.7],[20.7,23.4]],"style":"minimal","showR":true,"width":280,"xDomain":[0,100],"yDomain":[0,100]}' fallback="A skewed cloud of 100 points, also with r = .50. Most points are crammed into the lower-left corner, with a long, sparse tail stretching up and to the right." >}}
+:::
+Two clouds of 100 points with the same correlation, $r = .50$. On the left, the points come from a bivariate normal distribution: densest in the middle and thinning out evenly in every direction. On the right, both variables are positively skewed. The points pile up in the lower-left corner and straggle out to the upper right, violating the assumption.
+::::
+
+Lastly, when I defined Pearson's $r$, I said it measures the strenght of *linear* association: how consistently the points follow a straight line. So if we calculate Pearson's correlation coefficient, we're assuming **linearity**.
+
+But things can also be related in ways that a straight line doesn't capture. Maybe the relationship between $X$ and $Y$ starts out with $Y$ increases as $X$ increases, but changes direction at some point; as $X$ keeps increasing $Y$ starts to decrease. (The first scoop of ice cream might improve your mood; by the fourth you might start feeling worse.) Or maybe $X$ and $Y$ keep increasing together, but the rate of increase changes at some point. @fig-scatter-nonlinear illustrates some predictable (though increasingly contrived) relationships that Pearson's $r$ fails to capture. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
 
 :::: {#fig-scatter-nonlinear}
 ::: {.sfs-figure-row}
@@ -399,14 +400,6 @@ But variables can also be related in ways that a straight line doesn't capture. 
 :::
 Three examples of nonlinear relationships: a U-shaped relationship, a wave, and something entirely contrived---data arranged in the shape of a star. None are random or unpredictable, but all three have exactly the same linear correlation: $r = 0$, because it only captures linear relationships.
 ::::
-
-So a correlation of zero doesn't necessarily mean that there's no relationship. The points in the first two plots follow curves, and the last lot are arranged in a star. None of those patterns is captured by a straight line. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
-
-You'd be hard pressed to miss a star if you saw one on a scatterplot. You'd have a hard time guessing it was there from $r = 0$, though. That's why it's worth looking at the points before summarizing them with a single number.
-
-A curve doesn't always produce a correlation near zero, either. Suppose students taking an exam tend to score higher the more sleep they got the night before. Going from three hours to four might go with quite a jump in scores, while going from eight hours to nine makes little difference. The overall upward trend could give us a fairly strong positive correlation. We'd need to look at the scatterplot to see where that trend levels off.
-
-A curve doesn't always produce a correlation near zero, either. Suppose test scores rose steeply over the first cup of coffee and then leveled off. Pearson's $r$ might come out fairly large, since the points do tend to go up. But a straight line would underestimate how much the first cup helped, and overestimate what each cup adds after that. The number would look fine; the summary would be wrong.
 
 {{< include quizzes/17-correlation-learning-checks.qmd >}}
 
