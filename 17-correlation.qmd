@@ -8,7 +8,7 @@ interactive-scripts:
 
 {{< interactive-figure correlationCover makeAssociationCover options='{}' fallback="A grid of nonoverlapping multicolored dots pops into view, aligns at perfect positive correlation, then moves smoothly to a correlation of about 0.6." >}}
 
-In this chapter and the next, we'll cover the techniques of correlation and regression. Whereas the $z$, $t$, and ANOVA statistics we've covered so far deal with examining differences between means, correlation and regression focus on associations between variables. As we'll see, though, this isn't as big a difference as you might expect. Correlation and regression are just another extension of the basic idea of variability that have powered all of our inferential statistics so far.
+In this chapter and the next, we'll cover the techniques of correlation and regression. Whereas the $z$, $t$, and ANOVA statistics we've covered so far deal with examining differences between means, correlation and regression focus on associations between variables. As we'll see, though, this isn't as big a difference as you might expect. Correlation and regression are just further extensions of the basic idea of variability that has powered all of our inferential statistics so far.
 
 ## Buying happiness
 
@@ -67,9 +67,9 @@ Now I know you're excited to do the math, and we'll get to it soon. But first, l
 {{< include quizzes/17-correlation-designs.qmd >}}
 :::
 
-In the actual survey, people who spent more on others did tend to be happier. Can we conclude that spending on others makes people happier? Not necessarily. Maybe being happier makes people more generous. Or maybe there's some other explanation. Perhaps people with higher incomes could afford to give more and also tended to be happier. The researchers anticipated that possibility and asked about income, too. Taking it into account barely changed the association.[^dunn-regression]
+In the actual survey, people who spent more on others did tend to be happier. Can we conclude that spending on others makes people happier? Not necessarily. Maybe being happier makes people more generous. Or maybe there's some other explanation. Perhaps people with higher incomes could afford to give more and also tended to be happier. The researchers anticipated that possibility and asked about income, too. Taking it into account (as we'll learn how to do later in the chapter) barely changed the association.[^dunn-regression]
 
-[^dunn-regression]: They did this with regression, the topic of the next chapter.
+[^dunn-regression]: They did this not with correlation, but with regression, the topic of the next chapter. They're closely related techniques which can answer the same kind of question.
 
 That rules out one alternative explanation, but I'm sure you can think of others. The researchers hadn't measured everything that might make people both more generous and happier. As Dunn and colleagues put it themselves, "the correlational nature of this design precludes causal inferences."
 
@@ -235,7 +235,7 @@ So the correlation hypothesis test asks, how likely is it that a correlation as 
 
 This is going to sound weird, but the test statistic for a correlation is actually a $t$ statistic. Pearson's $r$ describes the size of the association in our sample, not how probable it is under the null hypothesis. So to test the null, we turn the $r$ into a $t$. We'll see how in the next step, but for now, we need its degrees of freedom to find the critical $t$. Its degrees of freedom are $n - 2$, where $n$ counts the pairs. Seven students give us seven observations of the relationship, even though we've recorded fourteen scores.
 
-Why subtract two? Well, picture what would happen with just two points on a scatterplot. We could always draw a straight line passing through both, fitting perfectly. The correlation would be one or negative one. There'd be no opportunity for either point to deviate from the line, because those two points determine the line itself. It's only when we add more observations that we can see any scatter around it. So fitting the line uses up two degrees of freedom, leaving $n - 2$ deviations free to vary.^[Slightly more technically, we're estimating the slope and intercept of the line from the data, and each estimated parameter costs a degree of freedom. We'll go into more detail on that in the next chapter.]
+Why subtract two? Well, picture just two points on a scatterplot. We wouldn't need an ellipse around them; we could draw a straight line passing through both, fitting perfectly. The correlation would be one or negative one. There'd be no opportunity for either point to deviate from the line, because those two points determine the line itself. It's only when we add more observations that we can see any scatter around it. So fitting the line uses up two degrees of freedom, leaving $n - 2$ deviations free to vary.^[Slightly more technically, we're estimating the slope and intercept of the line from the data, and each estimated parameter costs a degree of freedom. We'll go into more detail on that in the next chapter.]
 
 So with seven pairs of scores in our data set, we have $df = 5$. For our two-tailed test at $\alpha = .05$, the critical values are $\pm 2.571$.
 
@@ -255,9 +255,9 @@ The equation for the standard error of the correlation is a little different fro
 
 $$ s_r = \sqrt{\frac{1 - r^2}{n - 2}} $$ {#eq-correlation-se}
 
-Remember how $\eta^2$ in Chapter 14 told us what proportion of the total variability was accounted for by differences between the groups? $r^2$ does a similar job for a linear relationship: it tells us the proportion of the variability in one variable that's shared with the other. For our coffee data, $r^2 = (-.50)^2 = .25$. So 25% of the variability in test scores is shared with coffee consumption, leaving 75% unaccounted for by that relationship. In terms of the scatterplot, that's the variability in the points above and below the regression line. That's the $1 - r^2$ in the numerator.
+Remember how $\eta^2$ in Chapter 14 told us what proportion of the total variability was accounted for by differences between the groups? $r^2$ does a similar job for a linear relationship: it tells us the proportion of the variability in one variable that's shared with the other. For our coffee data, $r^2 = (-.50)^2 = .25$. So 25% of the variability in test scores is shared with coffee consumption, leaving 75% unaccounted for by that relationship. That's the $1 - r^2$ in the numerator.
 
-So the standard error reflects variability left over after accounting for the predictable relationship, divided by the degrees of freedom, with a square root to undo the squaring. A stronger correlation makes the standard error smaller, becuase there is more predictability, less variability unaccounted for. As with the other standard errors we've seen, more observations make it smaller too, because more data gives us a more precise estimate.
+So the standard error reflects variability left over after accounting for the predictable relationship, divided by the degrees of freedom, with a square root to undo the squaring. A stronger correlation makes the standard error smaller, because there is more predictability and less variability unaccounted for. As with the other standard errors we've seen, more observations make it smaller too, because more data gives us a more precise estimate.
 
 For our coffee data, that works out like this:
 
@@ -291,9 +291,9 @@ So what can we make of our result? We failed to reject the null hypothesis, but 
 {{< include quizzes/17-correlation-significance.qmd >}}
 :::
 
-On the other hand, a weak correlation can be statistically significant, if it comes from a large enough sample. Suppose we increased the sample for our study up to $n =  300$. In the larger sample, the correlation between coffee and test score is only $-.15$. This smaller correlation would reach statistical significance, $r(298) = -.15$, $p = .009$. So whether a correlation is significant and how strong it is are separate questions.
+On the other hand, a weak correlation can be statistically significant, if it comes from a large enough sample. Suppose we increased the sample for our study up to $n = 300$. In the larger sample, the correlation between coffee and test score is only $-.15$. This smaller correlation would reach statistical significance, $r(298) = -.15$, $p = .009$. So whether a correlation is significant and how strong it is are separate questions.
 
-That significance decision comes down to a binary threshold, but how should we interpret the correlation as a measure of effect size? How impressive is a correlation of $.15$? What about $.05$, or $.30$? Cohen called $r = .30$ *medium*. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. In the social sciences, the behaviors or attitudes or whatever we're interested in are generally multiply determined. There are a lot of reasons why you get a particular score on a particular exam, not just how many cups of coffee you drank or how many hours of sleep you get. Those things might just reveal a small piece of the puzzle. And a small piece can be worth knowing about, even if it doesn't look terribly impressive on a scatterplot (@fig-correlation-effect-sizes).
+That significance decision comes down to a binary threshold, but how should we interpret the correlation as a measure of effect size? How impressive is a correlation of $.15$? What about $.05$, or $.30$? Cohen called $r = .30$ *medium*. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. In the social sciences, the behaviors or attitudes or whatever we're interested in are generally multiply determined. There are a lot of reasons why you get a particular score on a particular exam, not just how many cups of coffee you drank or how many hours of sleep you got. Those things might just reveal a small piece of the puzzle. And a small piece can be worth knowing about, even if it doesn't look terribly impressive on a scatterplot (@fig-correlation-effect-sizes).
 
 ::::: {#fig-correlation-effect-sizes}
 ::: {.sfs-figure-row}
@@ -336,7 +336,9 @@ With three variables we can calculate three correlations, one for each pair. @tb
 
 Students who slept less tended to drink more coffee ($r = -.35$) and get lower test scores ($r = .30$). So how much of the relationship between coffee and test score is still there once we take sleep into account?
 
-We can work that out with a **partial correlation**. Think of two students who got the same amount of sleep. Would knowing which one drank more coffee still tell us anything about who scored higher? For each student, we work out how much more or less coffee they drank than we'd predict from their sleep using a straight line. Then we do the same for their test score. The partial correlation is the correlation between those two sets of deviations. We can calculate it directly from the three correlations in the table. Here $X$ is coffee, $Y$ is test score, and $Z$ is sleep.
+### Partial correlations
+
+If we measured all three things, we can answer that question with a **partial correlation**. Think of two students who got the same amount of sleep. Would knowing which one drank more coffee still tell us anything about who scored higher? For each student, we work out how much more or less coffee they drank than we'd predict from their sleep using a straight line. Then we do the same for their test score. The partial correlation is the correlation between those two sets of deviations. We can calculate it directly from the three correlations in the table. Here $X$ is coffee, $Y$ is test score, and $Z$ is sleep.
 
 $$ r_{XY \cdot Z} = \frac{r_{XY} - r_{XZ}\,r_{YZ}}{\sqrt{(1 - r_{XZ}^2)(1 - r_{YZ}^2)}} $$ {#eq-partial-r}
 
@@ -366,7 +368,7 @@ Does that settle what caused the lower scores? Even if these were real students,
 
 ### Correlation assumptions
 
-With correlational data, we have pairs of scores from the same person; obviously, the pairs aren't independent. As with the related-samples analyses we've used where this was also the case, the assumption of **independence** applies *between* people.
+With correlational data, we have pairs of scores from the same person; obviously, the two scores in each pair aren't independent of each other. As with the related-samples analyses we've used where this was also the case, the assumption of **independence** applies *between* people.
 
 Pearson's correlation also assumes the pairs of scores come from a **bivariate normal distribution**. With the $t$ test and ANOVA we've assumed that the populations that produced samples of scores are normally distributed. With our paired correlational data, the assumption is that both populations---the population of $X$ scores and the population of $Y$ scores---are normally distributed together. Visually, the cloud of dots on a scatterplot should be densest in the middle and thinning out smoothly toward the edges, both horizontally and vertically (@fig-bivariate-normality). The test can tolerate some departures from bivariate normality, though seven pairs tell us little about the shape of the population.
 
@@ -379,9 +381,9 @@ Pearson's correlation also assumes the pairs of scores come from a **bivariate n
 Two clouds of 100 points with the same correlation, $r = .50$. On the left, the points come from a bivariate normal distribution: densest in the middle and thinning out evenly in every direction. On the right, both variables are positively skewed. The points pile up in the lower-left corner and straggle out to the upper right, violating the assumption.
 ::::
 
-Lastly, when I defined Pearson's $r$, I said it measures the strenght of *linear* association: how consistently the points follow a straight line. So if we calculate Pearson's correlation coefficient, we're assuming **linearity**.
+Lastly, when I defined Pearson's $r$, I said it measures the strength of *linear* association: how consistently the points follow a straight line. So if we calculate Pearson's correlation coefficient, we're assuming **linearity**.
 
-But things can also be related in ways that a straight line doesn't capture. Maybe the relationship between $X$ and $Y$ starts out with $Y$ increases as $X$ increases, but changes direction at some point; as $X$ keeps increasing $Y$ starts to decrease. (The first scoop of ice cream might improve your mood; by the fourth you might start feeling worse.) Or maybe $X$ and $Y$ keep increasing together, but the rate of increase changes at some point. @fig-scatter-nonlinear illustrates some predictable (though increasingly contrived) relationships that Pearson's $r$ fails to capture. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
+But things can also be related in ways that a straight line doesn't capture. Maybe the relationship between $X$ and $Y$ starts out with $Y$ increasing as $X$ increases, but changes direction at some point: as $X$ keeps increasing, $Y$ starts to decrease. (The first scoop of ice cream might improve your mood; by the fourth you might start feeling worse.) Or maybe $X$ and $Y$ keep increasing together, but the rate of increase changes at some point. @fig-scatter-nonlinear illustrates some predictable (though increasingly contrived) relationships that Pearson's $r$ fails to capture. This is why it's worth looking at the scatterplot before trying to summarize the relationship with a single number.
 
 :::: {#fig-scatter-nonlinear}
 ::: {.sfs-figure-row}
