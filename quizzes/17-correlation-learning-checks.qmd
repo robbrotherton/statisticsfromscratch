@@ -66,15 +66,45 @@ questions:
       it was, and so do $SS_Y$ and $SP$. The correlation depends on where the
       scores are relative to their means, not on the means themselves.
 
-  - id: rho_null_zero
-    type: true-false
+  - id: calculate_sp
+    type: numeric
     prompt: >
-      In a nondirectional significance test of a correlation, the null hypothesis
-      states that the population correlation is zero.
-    answer: true
+      Four people have the following pairs of scores, written as $(X, Y)$:
+      $(1, 2)$, $(2, 1)$, $(3, 4)$, and $(4, 3)$. What is the sum of
+      products, $SP$?
+    answer: 3
+    tolerance: 0.01
+    hint: >
+      Find the two means, then multiply each person's deviation on $X$ by
+      their deviation on $Y$ and add the four products.
     explanation: >
-      The null hypothesis says there is no linear association in the
-      population: $H_0\!: \rho = 0$.
+      Both means are 2.5. The products are $(-1.5)(-.5) = .75$,
+      $(-.5)(-1.5) = .75$, $(.5)(1.5) = .75$, and $(1.5)(.5) = .75$.
+      Adding them gives $SP = 3$.
+
+  - id: calculate_r_from_pairs
+    type: numeric
+    prompt: >
+      For those same four pairs, $SS_X = SS_Y = 5$. Use your sum of
+      products to calculate Pearson's $r$.
+    answer: 0.60
+    tolerance: 0.01
+    explanation: >
+      $r = SP / \sqrt{SS_X SS_Y} = 3 / \sqrt{5 \times 5} = .60$.
+
+  - id: calculate_t
+    type: numeric
+    prompt: >
+      Our four pairs give $r = .60$. Calculate $t$ to test the null
+      hypothesis that $\rho = 0$.
+    answer: 1.06
+    tolerance: 0.01
+    hint: >
+      There are four pairs, so $df = 4 - 2 = 2$.
+    explanation: >
+      $t = .60 / \sqrt{(1 - .60^2)/(4 - 2)} = .60 / \sqrt{.32} = 1.06$.
+      With $df = 2$, the two-tailed $.05$ critical values are $\pm 4.303$,
+      so we fail to reject the null hypothesis.
 
   - id: correlation_df
     type: numeric
@@ -119,7 +149,7 @@ questions:
       - text: Drinking coffee lowers test scores
       - text: Doing badly on tests leads people to drink more coffee
       - text: No third variable is responsible for the relationship
-      - text: An association this strong would be very unlikely if there were no association in the population
+      - text: A result this strong is unlikely under the null hypothesis
         correct: true
     explanation: >
       The significance test addresses chance, and only chance. A very small
@@ -143,9 +173,9 @@ questions:
       Compare this with what happened when we accounted for sleep in the
       coffee study, and with income in the spending survey.
     explanation: >
-      Taking income into account barely changed the correlation, so income
-      can't be what's behind it. That's what happened with income in the
-      spending survey. But it only rules out the variable we measured. Some
+      Taking income into account barely changed the correlation, so differences
+      in income don't appear to explain much of the link. That's what happened
+      with income in the spending survey. Some
       other third variable could still account for the link, so we still
       can't conclude that exercise causes better mood.
 
@@ -164,7 +194,7 @@ questions:
       The two ratings in a pair are supposed to come from the same person.
       What about different pairs?
     explanation: >
-      The two scores within a pair are always related, but the pairs
+      The two scores within a pair needn't be independent, but the pairs
       themselves are supposed to be independent. Here, each person
       contributes seven pairs, and pairs from the same person will tend to
       resemble each other. The test would treat 280 pairs as 280

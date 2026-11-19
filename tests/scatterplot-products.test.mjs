@@ -85,28 +85,27 @@ test("dots are full size wherever there is room, and never below the floor", () 
   assert.equal(scPointRadius(552, 3), 3);
 });
 
-test("effect-size tutorial changes association while preserving observations, marginal spread and plot scales", () => {
-  const tutorial = divById(readChapter("17-correlation.qmd"), "act-correlation-effect-sizes");
-  const options = JSON.parse(/options='([^']+)'/.exec(tutorial)[1]);
-  const examples = tutorialSteps(tutorial);
-  assert.ok(examples.length > 1);
-  const baseline = pointsFor(examples[0].action);
+test("effect-size panels change association while preserving observations, marginal spread and plot scales", () => {
+  const figure = divById(readChapter("17-correlation.qmd"), "fig-correlation-effect-sizes");
+  const examples = Array.from(figure.matchAll(/makeScatterplot options='([^']+)'/g), match => JSON.parse(match[1]));
+  assert.equal(examples.length, 2);
+  const baseline = pointsFor(examples[0]);
   const baselineStats = scStats(baseline);
   let previousR = -1;
-  for (const { action } of examples) {
-    const points = pointsFor(action);
+  for (const options of examples) {
+    const points = pointsFor(options);
     const stats = scStats(points);
     assert.equal(points.length, baseline.length);
     assert.deepEqual(Array.from(points, p => p.x), Array.from(baseline, p => p.x));
-    assert.ok(Math.abs(stats.r - action.generate.r) < 1e-5);
+    assert.ok(Math.abs(stats.r - options.generate.r) < 1e-5);
     assert.ok(stats.r > previousR);
     assert.ok(Math.abs(stats.ssY - baselineStats.ssY) / baselineStats.ssY < 1e-5);
     for (const p of points) {
       assert.ok(p.x >= options.xDomain[0] && p.x <= options.xDomain[1]);
       assert.ok(p.y >= options.yDomain[0] && p.y <= options.yDomain[1]);
     }
-    assert.equal(action["x-domain"], undefined, "step keeps the shared X scale");
-    assert.equal(action["y-domain"], undefined, "step keeps the shared Y scale");
+    assert.deepEqual(options.xDomain, examples[0].xDomain, "panels share the X scale");
+    assert.deepEqual(options.yDomain, examples[0].yDomain, "panels share the Y scale");
     previousR = stats.r;
   }
 });
