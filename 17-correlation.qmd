@@ -83,7 +83,7 @@ Galton was interested in how people's physical characteristics varied together. 
 
 ### Characteristics
 
-The correlation coefficient is a single number that quantifies the **strength** and **direction** of a linear association between two quantitative variables.[^other-correlations] Because of how it's calculated, $r$ can range from $-1$ to $1$.
+The correlation coefficient is a single number that quantifies the **strength** and **direction** of a linear association between two quantitative variables.[^other-correlations] Because of how it's calculated (as we'll see why shortly), $r$ can range from $-1$ to $1$.
 
 [^other-correlations]: The same calculation turns up under a few other names. Pearson's $r$ calculated on ranks is *Spearman's rank correlation*. If one variable is quantitative and the other is coded 0 or 1, it's a *point-biserial correlation*. Coding the two spending groups in Chapter 12 that way gives $r = .28$ (with spend-on-other coded 1), and testing it gives the same $t(8) = 0.82$ we got by comparing means. If both variables are coded 0 or 1, the correlation is called *phi*.
 
@@ -135,7 +135,11 @@ The reason I point this out is that $SP$ does something quite similar, but inste
 
 $$ SP = \Sigma(X - M_X)(Y - M_Y) $$ {#eq-sum-of-products}
 
-With $SS$ we ask how far the scores on one variable spread around their mean. With $SP$ we get to keep the signs of the products. Above average on both? Positive. Below average on both? Also positive. Above on one and below on the other? That will make for a negative product. While $SS$ can only be positive, $SP$ can be positive or negative, depending on whether the two variables tend to go together or in opposite directions.
+With $SS$ we ask how far the scores on one variable spread around their mean. Some are below their mean, some above, but the squaring makes all the resulting values positive. With $SP$, in contrast, the products can be positive or negative. Above average on both? Positive. Below average on both? Also a positive product, because we'll be multiplying two negative deviations. Above on one and below on the other? That will make for a negative product.
+
+So the numerator of @eq-pearson-r measures how much $X$ and $Y$ vary *together*. It stays in the original units, and can be positive or negative. The denominator combines how much each one varies *on its own*. Those were squared, so the denominator is always positive, and it requires the square root to put things back into the same units as the numerator.
+
+If there were a perfect correlation, with every point on a straight line, then every deviation on $X$ would be matched by a proportional deviation on $Y$. All the variability in $X$ would be matched by the variability in $Y$, and vice versa. Those separate variabilities in the denomoinator would be equal to the covaraibility in the numerator. This is why $r$ is bounded between $-1$ and $1$: the numerator can be equal to the denominator (or its negative) but no greater than it. The more variability that isn't shared, the smaller $SP$ gets relative to the denominator, and the closer $r$ gets to zero.
 
 ### Worked example
 
@@ -211,8 +215,6 @@ That gives us everything we need to calculate the correlation coefficient:
 
 $$r = \frac{SP}{\sqrt{SS_X SS_Y}} = \frac{-30}{\sqrt{3 \times 1200}} = \frac{-30}{60} = -.50$$
 
-<!-- Notice what the denominator is doing there. Our sum of products came out at $-30$, and the denominator at 60. Now imagine the same amount of variability on each variable, but with every student falling exactly on a straight line. Then every change in $X$ would be accompanied by a proportional change in $Y$, and the covariability in the numerator would be as big in magnitude as their separate variabilities combined in the denominator. $SP$ would be $-60$, and $r$ would be $-1$. In other words, all the variability would be covariability, just as we saw when the ellipse collapsed into a line. There'd be no variability that isn't shared. The more unshared variability there is, the closer the correlation coefficient gets to zero. When there is no shared linear variability at all, the numerator will be zero, and so will the correlation coefficient. This is why $r$ can only vary between negative one and positive one. -->
-
 ::: {#quiz-correlation-calculate-r}
 {{< include quizzes/17-correlation-calculate-r.qmd >}}
 :::
@@ -279,7 +281,7 @@ The corresponding two-tailed $p$-value is approximately $.25$, well above our $\
 
 ### Reporting results
 
-As always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom, and the $p$-value for the correlation.
+As always, we need to report the results of our hypothesis test. Here, that statement will include the value of the correlation coefficient, Pearson's $r$, its degrees of freedom in parentheses, and the $p$-value for the correlation.
 
 > Drinking more coffee was associated with lower test scores, but the correlation did not reach statistical significance; $r(5) = -.50$, $p = .25$.
 
@@ -291,9 +293,9 @@ So what can we make of our result? We failed to reject the null hypothesis, but 
 {{< include quizzes/17-correlation-significance.qmd >}}
 :::
 
-On the other hand, a weak correlation can be statistically significant, if it comes from a large enough sample. Suppose we increased the sample for our study up to $n = 300$. In the larger sample, the correlation between coffee and test score is only $-.15$. This smaller correlation would reach statistical significance, $r(298) = -.15$, $p = .009$. So whether a correlation is significant and how strong it is are separate questions.
+On the other hand, a weak correlation can be statistically significant, if it comes from a large enough sample. Suppose we increased the sample for our study up to $n = 300$. In the larger sample, the correlation between coffee and test score is only $-.15$. With $df = 298$, the critical values are $\pm 1.968$. Converting $r = -.15$ gives $t = -2.62$, beyond the critical value, so this smaller correlation would reach statistical significance, $r(298) = -.15$, $p = .009$. In fact, we could convert the critical $t$ to an $r$, which would tell us that with 300 pairs, any correlation stronger than about $\pm .11$ would be significant. So whether a correlation is significant and how strong it is are separate questions.
 
-That significance decision comes down to a binary threshold, but how should we interpret the correlation as a measure of effect size? How impressive is a correlation of $.15$? What about $.05$, or $.30$? Cohen called $r = .30$ *medium*. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. In the social sciences, the behaviors or attitudes or whatever we're interested in are generally multiply determined. There are a lot of reasons why you get a particular score on a particular exam, not just how many cups of coffee you drank or how many hours of sleep you got. Those things might just reveal a small piece of the puzzle. And a small piece can be worth knowing about, even if it doesn't look terribly impressive on a scatterplot (@fig-correlation-effect-sizes).
+That significance decision comes down to a binary threshold, but how should we interpret the correlation as a measure of effect size? How impressive is a correlation of $.15$? What about $.05$, or $.30$? Cohen called $r = .30$ *medium* [@cohen1988power]. Funder and Ozer, whose argument about small effects adding up we met in Chapter 9, call it *large* in psychological research [@funder2019evaluating]. In the social sciences, the behaviors or attitudes or whatever we're interested in are generally multiply determined. There are a lot of reasons why you get a particular score on a particular exam, not just how many cups of coffee you drank or how many hours of sleep you got. Those things might just reveal a small piece of the puzzle. And a small piece can be worth knowing about, even if it doesn't look terribly impressive on a scatterplot (@fig-correlation-effect-sizes).
 
 ::::: {#fig-correlation-effect-sizes}
 ::: {.sfs-figure-row}
@@ -338,7 +340,7 @@ Students who slept less tended to drink more coffee ($r = -.35$) and get lower t
 
 ### Partial correlations
 
-If we measured all three things, we can answer that question with a **partial correlation**. Think of two students who got the same amount of sleep. Would knowing which one drank more coffee still tell us anything about who scored higher? For each student, we work out how much more or less coffee they drank than we'd predict from their sleep using a straight line. Then we do the same for their test score. The partial correlation is the correlation between those two sets of deviations. We can calculate it directly from the three correlations in the table. Here $X$ is coffee, $Y$ is test score, and $Z$ is sleep.
+If we measured all three things, we can answer that question with a **partial correlation**. Think of two students who got the same amount of sleep. Would knowing which one drank more coffee still tell us anything about who scored higher? For each student, we work out how much more or less coffee they drank than we'd predict from their sleep. Then we do the same for their test score. The partial correlation is the correlation between those two sets of deviations. We'll use this technique of measuring deviations from a prediction in the next chapter, but for now, we can calculate a partial correlation directly from the three correlation coefficients we already have. Here $X$ is coffee, $Y$ is test score, and $Z$ is sleep.
 
 $$ r_{XY \cdot Z} = \frac{r_{XY} - r_{XZ}\,r_{YZ}}{\sqrt{(1 - r_{XZ}^2)(1 - r_{YZ}^2)}} $$ {#eq-partial-r}
 
@@ -358,9 +360,9 @@ Accounting for sleep brings the correlation much closer to zero, from $-.15$ to 
 {{< include quizzes/17-correlation-partial.qmd >}}
 :::
 
-For the full sample of 300, the partial correlation falls short of statistical significance, $t(297) = -0.87$, $p = .39$. (We lose one more degree of freedom for each variable we account for, so here $df = n - 3$.) But we can see how much the association shrank by comparing the two coefficients themselves. Crossing the $.05$ threshold doesn't tell us how much anything changed.
+We can test a partial correlation by converting it to $t$ the same way as before, except that we lose one more degree of freedom for each variable we account for, so here $df = n - 3 = 297$. For the full sample of 300, that gives $t = -0.87$, well short of the critical values of $\pm 1.968$, so the partial correlation becomes nonsignificant. There's no longer a significant association between coffee and test score, once we account for sleep. But we might also be interested in a slightly different question: how much did the association *change*? That would be a separate test, distinct from the significance of the partial correlation itself. We can calculate a $z$ statistic for the difference between the two correlations, but we won't go into that here. I just want you to recognize the idea if you come across it in research papers or whatever.
 
-Does that settle what caused the lower scores? Even if these were real students, we'd only have accounted for the sleep we measured. Other differences between students could still be involved. That's the advantage of random assignment back in Chapter 12. It gives even the differences we didn't think to measure the same distribution across groups on average. What lets us draw a causal conclusion is how the study was done. Running a $t$ test on groups the students chose for themselves wouldn't turn our survey into an experiment.
+Looking at partial correlations, particularly when we set out to do our research with a specific third variable in mind, can add valuable context to our understanding of the relationships between variables. But it still doesn't establish causation or rule out other explanations. Other unmeasured factors could still be influencing the relationship. That brings us back to the advantage of random assignment in Chapter 12. It should mean that all the other influences on the thing we're interested in get evenly distributed across groups. It doesn't make the effect of sleep or whatever else might be important go away; it just averages them out so that any remaining difference between groups is due to the variable we manipulated.
 
 ::: {#quiz-correlation-causation}
 {{< include quizzes/17-correlation-your-turn-causation.qmd >}}
@@ -370,7 +372,7 @@ Does that settle what caused the lower scores? Even if these were real students,
 
 With correlational data, we have pairs of scores from the same person; obviously, the two scores in each pair aren't independent of each other. As with the related-samples analyses we've used where this was also the case, the assumption of **independence** applies *between* people.
 
-Pearson's correlation also assumes the pairs of scores come from a **bivariate normal distribution**. With the $t$ test and ANOVA we've assumed that the populations that produced samples of scores are normally distributed. With our paired correlational data, the assumption is that both populations---the population of $X$ scores and the population of $Y$ scores---are normally distributed together. Visually, the cloud of dots on a scatterplot should be densest in the middle and thinning out smoothly toward the edges, both horizontally and vertically (@fig-bivariate-normality). The test can tolerate some departures from bivariate normality, though seven pairs tell us little about the shape of the population.
+Pearson's correlation also assumes the pairs of scores come from a **bivariate normal distribution**. With the $t$ test and ANOVA we assumed scores came from a normally distributed population. With two variables being considered together, the assumption is that both populations are normal, and that their relationship is also normal. That means that at any given value of $X$, the $Y$ scores should be normally distributed around the trend. Visually, the cloud of dots on a scatterplot should be densest in the middle and thin out smoothly toward the edges, both horizontally and vertically (@fig-bivariate-normality). The test can tolerate some departures from bivariate normality, though seven pairs tell us little about the shape of the population.
 
 :::: {#fig-bivariate-normality}
 ::: {.sfs-figure-row}
