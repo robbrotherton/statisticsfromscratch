@@ -37,17 +37,6 @@ questions:
       zero. The sign only tells us the direction, so $-.70$ is a stronger
       relationship than $.50$.
 
-  - id: r_numerator_negative
-    type: true-false
-    prompt: >
-      The numerator of Pearson's $r$ cannot be negative.
-    answer: false
-    explanation: >
-      The sum of products is negative when above-average scores on one
-      variable tend to go with below-average scores on the other. That's what
-      makes a correlation negative. The denominator, a square root of sums of
-      squares, can't be negative.
-
   - id: add_constant
     type: multiple-choice
     prompt: >
@@ -68,10 +57,17 @@ questions:
 
   - id: calculate_sp
     type: numeric
-    prompt: >
-      Four people have the following pairs of scores, written as $(X, Y)$:
-      $(1, 2)$, $(2, 1)$, $(3, 4)$, and $(4, 3)$. What is the sum of
-      products, $SP$?
+    prompt: |
+      Four people have the following pairs of scores.
+
+      | $X$ | $Y$ |
+      |---:|---:|
+      | 1 | 2 |
+      | 2 | 1 |
+      | 3 | 4 |
+      | 4 | 3 |
+
+      What is the sum of products, $SP$?
     answer: 3
     tolerance: 0.01
     hint: >
@@ -95,8 +91,8 @@ questions:
   - id: calculate_t
     type: numeric
     prompt: >
-      Our four pairs give $r = .60$. Calculate $t$ to test the null
-      hypothesis that $\rho = 0$.
+      Use the correlation you just calculated for those four pairs to find
+      $t$ for the test of $\rho = 0$.
     answer: 1.06
     tolerance: 0.01
     hint: >
@@ -105,17 +101,6 @@ questions:
       $t = .60 / \sqrt{(1 - .60^2)/(4 - 2)} = .60 / \sqrt{.32} = 1.06$.
       With $df = 2$, the two-tailed $.05$ critical values are $\pm 4.303$,
       so we fail to reject the null hypothesis.
-
-  - id: correlation_df
-    type: numeric
-    prompt: >
-      A researcher measures two variables for 20 people and tests the
-      correlation between them. What are the degrees of freedom for the test?
-    answer: 18
-    tolerance: 0
-    explanation: >
-      The 20 people give us 20 points on a scatterplot. Fitting a line to
-      those points uses two degrees of freedom, leaving $df = 20 - 2 = 18$.
 
   - id: report_pairs
     type: numeric
@@ -127,17 +112,6 @@ questions:
     explanation: >
       The number in parentheses is the degrees of freedom, not the sample
       size. For a correlation, $df = n - 2$, so $n = 48 + 2 = 50$ pairs.
-
-  - id: r_squared_shared
-    type: numeric
-    prompt: >
-      Two variables have a correlation of $r = .30$. What proportion of the
-      variability in one is shared with the other?
-    answer: 0.09
-    tolerance: 0.005
-    explanation: >
-      $r^2 = .30^2 = .09$, or 9%. It's the squared correlation that gives the
-      proportion of shared variability, not the correlation itself.
 
   - id: significant_means_what
     type: multiple-choice
@@ -156,6 +130,22 @@ questions:
       $p$-value makes it hard to believe there's no association in the
       population, but it says nothing about why the two variables go
       together.
+
+  - id: partial_r_toy
+    type: numeric
+    prompt: >
+      Think back to our seven students, with coffee consumption ($x$),
+      test score ($y$), and hours of sleep ($z$). For just those seven students,
+      $r_{xy} = -.50$, $r_{xz} = -.667$, and $r_{yz} = .667$.
+      What is $r_{xy.z}$?
+    answer: -0.10
+    tolerance: 0.015
+    min: -1
+    max: 1
+    explanation: >
+      $r_{xy.z} = \dfrac{-.50 - (-.667)(.667)}{\sqrt{(1 - .667^2)(1 - .667^2)}} \approx \dfrac{-.50 + .444}{.556} \approx -.10$.
+      The correlation between coffee and test score is much weaker once we
+      account for sleep.
 
   - id: partial_barely_changes
     type: multiple-choice
