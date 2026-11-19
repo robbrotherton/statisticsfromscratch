@@ -110,3 +110,82 @@ test('tutorial titles send inline TeX to MathJax in the step rail and compact re
     await browser.close();
   }
 });
+
+test('regression draws, squares and collects all three deviations on one area scale', async () => {
+  const activity = divById(readChapter('18-regression.qmd'), 'act-least-squares');
+  const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
+  const actions = new Map(tutorialSteps(activity).map(step => [step.title, step.action]));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage();
+    await page.setContent('<div id="host"></div>');
+    for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'scatterplot']) {
+      await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
+    }
+    await page.evaluate(opts => {
+      const wrap = window.interactiveFigure.wrap;
+      window.interactiveFigure.wrap = args => {
+        window.stepRegression = args.applyAction;
+        return wrap(args);
+      };
+      document.querySelector('#host').appendChild(makeScatterplot({ ...opts, responsive: false }));
+    }, options);
+    const step = title => page.evaluate(action => window.stepRegression(action), actions.get(title));
+    const bin = page.locator('.sc-ss-collection');
+    await step('Residuals');
+    await page.waitForFunction(() => {
+      const line = document.querySelector('.sc-residual');
+      const square = document.querySelector('.sc-square');
+      const length = Math.abs(line.y1.baseVal.value - line.y2.baseVal.value);
+      return length > 0 && length < square.height.baseVal.value;
+    });
+    await step('Squares');
+    await page.waitForFunction(() => {
+      const r = document.querySelector('.sc-square');
+      return r.width.baseVal.value > 0 && r.width.baseVal.value < r.height.baseVal.value;
+    });
+    await step('Sum of squares');
+    await page.waitForFunction(() => document.querySelectorAll('.anova-transfer').length === 6);
+    await page.waitForFunction(() => document.querySelector('[data-sum=residual]')?.textContent === 'Residual = 900');
+    await step('What did the line explain?');
+    await step('Best-fit line');
+    assert.equal(await bin.locator('.anova-transfer').count(), 0);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const geometry = rect => ({
+      height: rect.height.baseVal.value, width: rect.width.baseVal.value, y: rect.y.baseVal.value
+    });
+    for (const [title, name, sum] of [
+      ['A flat line?', 'total', 1200],
+      ['Sum of squares', 'residual', 900],
+      ['What did the line explain?', 'regression', 300]
+    ]) {
+      await step(title);
+      assert.equal(await bin.locator('[data-sum=total]').textContent(), 'Total = 1200');
+      assert.ok((await bin.locator('[data-sum=' + name + ']').textContent()).endsWith('= ' + sum));
+      assert.equal(await bin.locator('.anova-transfer').count(), 0);
+      const box = await bin.locator('.sc-ss-outline').evaluate(geometry);
+      assert.ok(Math.abs(box.height - box.width) < 0.01);
+      const band = await bin.locator('.sc-ss-' + name).evaluate(geometry);
+      assert.ok(Math.abs(band.height / box.height - sum / 1200) < 0.001, name + " " + JSON.stringify({ box, band }));
+      const area = await bin.locator('.sc-ss-' + name).evaluate(r => r.width.baseVal.value * r.height.baseVal.value);
+      const sourceArea = await page.locator('.sc-squares-layer rect').evaluateAll(rs =>
+        rs.reduce((sum, r) => sum + r.width.baseVal.value * r.height.baseVal.value, 0));
+      assert.ok(Math.abs(area - sourceArea) < area * 1e-5);
+    }
+    assert.deepEqual(await page.locator('.sc-square-label').allTextContents(), ['100', '25', '25', '0', '25', '25', '100']);
+    const regression = await bin.locator('.sc-ss-regression').evaluate(geometry);
+    const residual = await bin.locator('.sc-ss-residual').evaluate(geometry);
+    assert.ok(Math.abs(regression.y + regression.height - residual.y) < 0.01);
+    assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
+    await step('Least error');
+    assert.equal(await bin.count(), 0);
+    assert.equal(await page.locator('.sc-prediction').count(), 0);
+    await page.getByLabel('Intercept (a)').evaluate(input => {
+      input.value = '75';
+      input.dispatchEvent(new Event('input'));
+    });
+    assert.equal(await page.locator('.scatterplot').evaluate(el => el.value.ssResidual), 1075);
+  } finally {
+    await browser.close();
+  }
+});

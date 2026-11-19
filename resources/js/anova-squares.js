@@ -1,5 +1,6 @@
-// Chapter 14's shared ANOVA drawing, used by the variability explorer and the
-// two-estimates figure so the two read as one visual grammar: dots offset within
+// Shared square geometry and animation. Chapter 18 also uses pour() to collect
+// squared deviations from the mean and the fitted line. Chapter 14 uses these helpers
+// in the variability explorer and the two-estimates figure: dots offset within
 // a lane, each deviation drawn as a square, the squares poured into a sum of
 // squares, and a sum cut into df equal pieces that stack into its mean square.
 // Callers own their layouts; everything here takes pixel geometry. Anything that

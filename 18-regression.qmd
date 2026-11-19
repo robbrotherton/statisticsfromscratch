@@ -72,36 +72,44 @@ And remember how we squared deviations in the past to find sums of squared devia
 
 The notation for the sum of squared residuals is $\Sigma(Y - \hat{Y})^2$. So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. This is called **least squares**.
 
-You can see the least-squares fit in action below. Step through to watch the residuals become literal squares, and then see what happens to them when we swap the best-fit line for a lazier guess.
+You can see the least-squares fit in action below. We'll start with a lazy guess, the mean, and see how much better we can do by letting the line tilt.
 
 ::::: {#act-least-squares .callout-tip .interactive .with-controls}
 ## Why is the best-fit line the best?
 
-{{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"maxWidth":"30rem"}' fallback="Scatterplot of the coffee and test score data used to demonstrate the least-squares fit: the best-fit line's squared residuals sum to 900, while a flat line at the mean of Y produces squared residuals summing to 1200." >}}
+{{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"maxWidth":"30rem"}' fallback="For the seven students, squared deviations from the mean fill a square with area 1200. Squared residuals from the fitted line fill 900 of it. Squared deviations of the predictions from the mean fill the remaining 300." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="The data" data-action='{"line":"none","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none","controls-open":false,"animate":false}'}
+::: {.tutorial-step data-title="The data" data-action='{"collect-ss":false,"line":"none","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none","controls-open":false,"animate":false}'}
 The seven coffee and test score pairs from the correlation chapter.
 :::
 
-::: {.tutorial-step data-title="Best-fit line" data-action='{"line":"fit","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none"}'}
+::: {.tutorial-step data-title="A flat line?" data-action='{"collect-ss":"total","draw":"both","line":"mean","show-residuals":true,"show-squares":true,"show-ss":false,"show-means":true,"emphasize":"none","controls-open":false}'}
+What if we ignored $X$ and just guessed the mean of $Y$ every time? That's a flat line at 70. Measure each score's distance from the line, square it, and collect the squares just as we did in ANOVA. The whole square is $SS_Y = 1200$, the total variability in test score.
+:::
+
+::: {.tutorial-step data-title="Best-fit line" data-action='{"collect-ss":"reference","line":"fit","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"controls-open":false,"emphasize":"none"}'}
 The line of best fit traces the best path through the points: $\hat{Y} = -10X + 80$.
 :::
 
-::: {.tutorial-step data-title="Residuals" data-action='{"line":"fit","show-residuals":true,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":["residuals","points"]}'}
+::: {.tutorial-step data-title="Residuals" data-action='{"draw":"lines","collect-ss":"reference","line":"fit","show-residuals":true,"show-squares":false,"show-ss":false,"show-means":false,"controls-open":false,"emphasize":["residuals","points"]}'}
 The vertical distance shows how far off our prediction was. For a point on the line the prediction is exactly right and the residual is zero. For every point we calculate the residual the same way, $Y - \hat{Y}$.
 :::
 
-::: {.tutorial-step data-title="Squares" data-action='{"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none"}'}
-Square each residual---literally---and add them up: $SS_{residual} = 900$.
+::: {.tutorial-step data-title="Squares" data-action='{"draw":"squares","collect-ss":"reference","line":"fit","show-residuals":true,"show-squares":true,"show-ss":false,"show-means":false,"controls-open":false,"emphasize":"none"}'}
+Square each residual---literally. The student whose score we missed by 15 points contributes a square with an area of 225.
 :::
 
-::: {.tutorial-step data-title="A flat line?" data-action='{"line":"mean","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":true,"emphasize":"none"}'}
-What if we ignored $X$ and just guessed the mean of $Y$ every time? That's a line with slope 0 and intercept $M_Y = 70$. The squares grow: $SS_{residual}$ is now 1200, which is exactly $SS_Y$, the total variability in $Y$.
+::: {.tutorial-step data-title="Sum of squares" data-action='{"collect-ss":"residual","line":"fit","show-residuals":true,"show-squares":true,"show-ss":false,"show-means":false,"controls-open":false,"emphasize":"none"}'}
+Collect these squares in the same outline. The student who scored exactly what we predicted contributes zero. Add up the areas for all seven students and we get $SS_{residual} = 900$. That fills three quarters of the square.
 :::
 
-::: {.tutorial-step data-title="Least error" data-action='{"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none","controls-open":true}'}
-Back to the best-fit line and back to 900. No other line does better---that's what makes it the least-squares fit. Don't take my word for it: the controls are now open, so try any slope and intercept you like. Remember the line we imagined moving down five points? Keep the slope at $-10$ and change the intercept from 80 to 75. The squared misses for all seven students now add up to 1075.
+::: {.tutorial-step data-title="What did the line explain?" data-action='{"collect-ss":"regression","draw":"both","line":"fit","show-residuals":true,"show-squares":true,"show-ss":false,"show-means":true,"emphasize":"none","controls-open":false}'}
+This time, start at each student's prediction on the fitted line. How far is it from our old guess of 70? For half a cup we predict 75, so that's a square of 25 for each of the two students who drank half a cup. Collect all seven and we get $SS_{regression} = 300$. It fills the gap exactly. That's how much squared error we saved by using coffee to predict test score.
+:::
+
+::: {.tutorial-step data-title="Least error" data-action='{"collect-ss":false,"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none","controls-open":true}'}
+Back to the residuals. Our best-fit line leaves us with 900. No other line does better---that's what makes it the least-squares fit. Don't take my word for it: the controls are now open, so try any slope and intercept you like. Remember the line we imagined moving down five points? Keep the slope at $-10$ and change the intercept from 80 to 75. The squared misses for all seven students now add up to 1075.
 :::
 ::::
 

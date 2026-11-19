@@ -147,7 +147,7 @@ local manifest = {
   },
   ["scatterplot"] = {
     file = "resources/js/scatterplot.js",
-    deps = { "d3", "interactive-figure-tools" }
+    deps = { "d3", "interactive-figure-tools", "anova-squares" }
   },
   ["make-inferential-diagram"] = {
     file = "resources/js/make-inferential-diagram.js",

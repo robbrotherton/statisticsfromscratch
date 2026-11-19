@@ -539,6 +539,7 @@ makeScatterplot = function(opts) {
     productLabels: scBoolean(opts.productLabels, false),
     showSP: scBoolean(opts.showSP ?? opts.spLabel, false),
     showR: scBoolean(opts.showR ?? opts.rLabel, false),
+    collectSS: null,
     showSS: scBoolean(opts.showSS ?? opts.ssLabel, false),
     pointLabels: scBoolean(opts.pointLabels, false),
     emphasize: normalizeEmphasis(opts.emphasize),
@@ -813,6 +814,82 @@ makeScatterplot = function(opts) {
   const annotationLayer = svg.append("g")
     .attr("class", "sc-layer sc-annotation");
 
+  const ssColors = {
+    total: "var(--sfs-muted, #68727d)",
+    residual: "var(--sc-residual-color)",
+    regression: "var(--sfs-effect-color, #7654b5)"
+  };
+
+  // One square, on the same area scale as the plot, throughout the comparison.
+  // The regression pieces land on the residual area already collected.
+  let collection;
+  function renderSSCollection(mode, stats, ssResidual, deviation, squareGeometry, animate, delay) {
+    if (collection) {
+      collection.selectAll("*").interrupt();
+      collection.remove();
+      collection = null;
+      svg.attr("viewBox", [0, 0, width, height]);
+    }
+    if (!mode || stats.ssY <= 0) return;
+
+    const side = Math.sqrt(stats.ssY) * Math.abs(y(1) - y(0));
+    const left = Math.max(6, (width - side - 112) / 2);
+    const top = height + 28;
+    const bottom = top + side;
+    const depth = value => side * value / stats.ssY;
+    const labelX = left + side + 12;
+    svg.attr("viewBox", [0, 0, width, bottom + 10]);
+    collection = svg.append("g").attr("class", "sc-ss-collection").attr("pointer-events", "none");
+    const label = (x, y, name) => collection.append("text")
+      .attr("class", "sc-axis-label").attr("x", x).attr("y", y).attr("data-sum", name);
+    const totalLabel = label(left, top - 9, "total");
+    const setTotal = value => totalLabel.text("Total = " + format(value));
+    setTotal(stats.ssY);
+    collection.append("rect").attr("class", "sc-ss-outline")
+      .attr("x", left).attr("y", top).attr("width", side).attr("height", side)
+      .attr("fill", ssColors.total).attr("fill-opacity", 0.06)
+      .attr("stroke", ssColors.total);
+    if (mode === "reference") return;
+
+    const base = mode === "regression" ? ssResidual : 0;
+    function band(value, offset) {
+      return { x: left, y: bottom - depth(offset + value), width: side, height: depth(value) };
+    }
+    function addBand(name, value, offset) {
+      const box = band(value, offset);
+      return collection.append("rect").attr("class", "sc-ss-" + name)
+        .attr("x", box.x).attr("y", box.y).attr("width", box.width).attr("height", box.height)
+        .attr("fill", ssColors[name]).attr("fill-opacity", 0.24)
+        .attr("stroke", ssColors[name]);
+    }
+    const partLabel = (name, middle) => label(labelX, bottom - depth(middle) + 4, name);
+    if (mode === "regression") {
+      addBand("residual", base, 0);
+      partLabel("residual", base / 2).text("Residual = " + format(base));
+    }
+
+    const color = ssColors[mode];
+    const pieces = state.points.map(p => {
+      const from = squareGeometry(p);
+      return { from, side: from.side, value: deviation(p) ** 2, color };
+    }).filter(piece => piece.value > 0);
+    const sum = d3.sum(pieces, piece => piece.value);
+    const sumRect = addBand(mode, animate ? 0 : sum, base);
+    let setSum = setTotal;
+    if (mode !== "total") {
+      const text = partLabel(mode, base + sum / 2);
+      const name = mode === "residual" ? "Residual" : "Regression";
+      setSum = value => text.text(name + " = " + format(value));
+    }
+    setSum(animate ? 0 : sum);
+    if (animate) {
+      window.sfsAnovaSquares.pour(collection, {
+        pieces, color, level: value => band(value, base), sumRect, delay,
+        mouth: { x: left + side / 2, y: top }, onLand: setSum
+      });
+    }
+  }
+
   // Everything whose position depends on the plot's size rather than its
   // data. Called once at the authored width, and again after each resize.
   function applyGeometry() {
@@ -1071,7 +1148,30 @@ makeScatterplot = function(opts) {
       .attr("x2", x(xHi))
       .attr("y2", y(line.slope * xHi + line.intercept));
 
-    // Residual segments join each point to its predicted value.
+    // A mean-only line measures total deviations. For the regression share the
+    // fitted scores themselves are the observations we measure from the mean.
+    const mode = (state.collectSS === "total" ? state.lineMode === "mean" : state.lineMode === "fit")
+      ? state.collectSS : null;
+    const predicted = p => line.slope * p.x + line.intercept;
+    const startScore = mode === "regression" ? predicted : p => p.y;
+    const endScore = mode === "regression" ? () => stats.meanY : predicted;
+    const deviation = p => startScore(p) - endScore(p);
+    lineLayer.selectAll("circle.sc-prediction")
+      .data(mode === "regression" ? state.points : [])
+      .join("circle").attr("class", "sc-prediction")
+      .attr("cx", p => x(p.x)).attr("cy", p => y(predicted(p)))
+      .attr("r", pointRadius * 0.75).attr("fill", "var(--sfs-bg, white)")
+      .attr("stroke", ssColors.regression).attr("stroke-width", 1.5);
+    const drawLines = animate && (options.draw === "lines" || options.draw === "both");
+    const growSquares = drawMeanSquares || (animate && (options.draw === "squares" || options.draw === "both"));
+    const squareDelay = drawLines || drawMeanSquares ? duration + 100 : 0;
+    const measureColor = mode === "regression" || mode === "total" ? ssColors[mode] : null;
+    for (const layer of [squaresLayer, squareLabelsLayer, residualsLayer]) {
+      layer.style("--sc-residual-color", measureColor);
+    }
+    // A horizontal mean is the only reference needed for these comparisons.
+    meanXLine.style("display", mode ? "none" : null);
+    meanXText.style("display", mode ? "none" : null);
     const residuals = residualsLayer.selectAll("line.sc-residual")
       .data(state.points)
       .join((enter) => enter.append("line")
@@ -1080,16 +1180,22 @@ makeScatterplot = function(opts) {
         .attr("x2", (p) => x(p.x))
         .attr("y1", (p) => y(p.y))
         .attr("y2", (p) => y(p.y)));
+    residuals.interrupt("sc-move");
+    if (drawLines) residuals.attr("y1", p => y(startScore(p))).attr("y2", p => y(startScore(p)));
     maybeTransition(residuals, animate, duration)
-      .attr("x1", (p) => x(p.x))
-      .attr("x2", (p) => x(p.x))
-      .attr("y1", (p) => y(p.y))
-      .attr("y2", (p) => y(line.slope * p.x + line.intercept));
+      .attr("x1", p => x(p.x)).attr("x2", p => x(p.x))
+      .attr("y1", p => y(startScore(p))).attr("y2", p => y(endScore(p)));
 
-    // Mean-deviation squares use the selected axis's screen scale for both
-    // sides; residual squares retain their regression-line reference.
+    // Equal Xs have equal predictions. Put their squares on opposite sides
+    // of the segment so both students' contributions can be seen.
+    const flipped = new Set();
+    if (mode === "regression") {
+      for (const students of d3.group(state.points, p => p.x).values()) {
+        students.forEach((p, i) => { if (i % 2) flipped.add(p); });
+      }
+    }
     const plotMiddle = (margin.left + plotRight) / 2;
-    const squareGeometry = (p) => {
+    const squareGeometry = p => {
       if (state.squareMode === "x") {
         const side = Math.abs(x(p.x) - x(stats.meanX));
         return {
@@ -1098,14 +1204,17 @@ makeScatterplot = function(opts) {
           side
         };
       }
-      const reference = state.squareMode === "y" ? stats.meanY : line.slope * p.x + line.intercept;
-      const side = Math.abs(y(p.y) - y(reference));
+      const reference = state.squareMode === "y" ? stats.meanY : endScore(p);
+      const start = y(startScore(p));
+      const side = Math.abs(start - y(reference));
+      const extendRight = (x(p.x) <= plotMiddle) !== flipped.has(p);
       return {
-        x: x(p.x) <= plotMiddle ? x(p.x) : x(p.x) - side,
-        y: Math.min(y(p.y), y(reference)),
+        x: extendRight ? x(p.x) : x(p.x) - side,
+        y: Math.min(start, y(reference)),
         side
       };
     };
+    renderSSCollection(mode, stats, ssResidual, deviation, squareGeometry, animate, squareDelay + duration);
     const squares = squaresLayer.selectAll("rect.sc-square")
       .data(state.points)
       .join((enter) => enter.append("rect")
@@ -1115,7 +1224,7 @@ makeScatterplot = function(opts) {
         .attr("width", 0)
         .attr("height", 0));
     squares.interrupt("sc-move");
-    if (drawMeanSquares) {
+    if (growSquares) {
       // Begin as the deviation segment itself, then grow perpendicular to it.
       // X deviations are horizontal; Y deviations are vertical.
       squares
@@ -1125,7 +1234,7 @@ makeScatterplot = function(opts) {
         .attr("height", (p) => state.squareMode === "x" ? 0 : squareGeometry(p).side);
     }
     const squareMove = maybeTransition(squares, animate, duration);
-    if (drawMeanSquares) squareMove.delay(duration + 100).ease(d3.easeCubicOut);
+    if (growSquares) squareMove.delay(squareDelay).ease(d3.easeCubicOut);
     squareMove
       .attr("x", (p) => squareGeometry(p).x)
       .attr("y", (p) => squareGeometry(p).y)
@@ -1140,19 +1249,19 @@ makeScatterplot = function(opts) {
       .attr("text-anchor", "middle")
       .attr("dominant-baseline", "central")
       .text((p) => {
-        const deviation = state.squareMode === "x" ? p.x - stats.meanX
+        const distance = state.squareMode === "x" ? p.x - stats.meanX
           : state.squareMode === "y" ? p.y - stats.meanY
-          : p.y - (line.slope * p.x + line.intercept);
-        return format(deviation * deviation);
+          : deviation(p);
+        return format(distance * distance);
       });
     squareLabels.interrupt("sc-square-label");
     squareLabels
       .attr("x", (p) => squareGeometry(p).side === 0 ? x(p.x) - 12 : squareGeometry(p).x + squareGeometry(p).side / 2)
       .attr("y", (p) => squareGeometry(p).side === 0 ? y(p.y) + 12 : squareGeometry(p).y + squareGeometry(p).side / 2)
-      .style("opacity", drawMeanSquares ? 0 : 1);
-    if (drawMeanSquares) {
+      .style("opacity", growSquares ? 0 : 1);
+    if (growSquares) {
       squareLabels.transition("sc-square-label")
-        .delay(2 * duration + 100).duration(180).style("opacity", 1);
+        .delay(squareDelay + duration).duration(180).style("opacity", 1);
     }
 
     // Ellipse.
@@ -1239,7 +1348,7 @@ makeScatterplot = function(opts) {
       .attr("x", x(stats.meanX))
       .attr("y", plotBottom - 8);
     maybeTransition(meanYText, animate, duration)
-      .attr("x", plotRight - 64)
+      .attr("x", plotRight - (mode ? 25 : 64))
       .attr("y", y(stats.meanY) - 7);
 
     // Points.
@@ -1410,7 +1519,7 @@ makeScatterplot = function(opts) {
     let changed = false;
     let shouldNotify = false;
     const animate = action.animate !== false;
-    const renderOptions = { animate, duration: action.duration };
+    const renderOptions = { animate, duration: action.duration, draw: action.draw };
 
     Object.entries(action).forEach(([rawKey, value]) => {
       switch (scKey(rawKey)) {
@@ -1558,6 +1667,10 @@ makeScatterplot = function(opts) {
         case "show-r":
         case "r-label":
           state.showR = scBoolean(value, state.showR);
+          changed = true;
+          break;
+        case "collect-ss":
+          state.collectSS = ["total", "reference", "residual", "regression"].includes(value) ? value : null;
           changed = true;
           break;
         case "show-ss":
