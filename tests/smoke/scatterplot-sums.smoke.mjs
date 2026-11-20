@@ -199,6 +199,170 @@ test('regression draws, squares and collects all three deviations on one area sc
   }
 });
 
+test('adding sleep splits the coffee line into parallel lines and partitions what both predict', async () => {
+  const activity = divById(readChapter('18-regression.qmd'), 'act-adding-sleep');
+  const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
+  const actions = new Map(tutorialSteps(activity).map(step => [step.title, step.action]));
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    // The figure has no controls drawer, so it claims its callout's tutorial itself.
+    await page.setContent('<div class="callout"><div id="host"></div><div class="callout-footer"><div class="tutorial-step"></div></div></div>');
+    for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'read-guides', 'scatterplot']) {
+      await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
+    }
+    await page.evaluate(opts => {
+      window.interactiveFigure.createTutorial = args => { window.stepSleep = args.applyAction; };
+      document.querySelector('#host').appendChild(makeScatterplot({ ...opts, responsive: false }));
+    }, options);
+    await page.waitForFunction(() => typeof window.stepSleep === 'function');
+    const step = title => page.evaluate(action => window.stepSleep({ ...action, animate: false }), actions.get(title));
+    const bin = page.locator('.sc-ss-collection');
+    const value = () => page.locator('.scatterplot').evaluate(el => el.value);
+    const height = name => bin.locator('.sc-ss-' + name).evaluate(r => r.height.baseVal.value);
+
+    await step('Coffee alone');
+    assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
+    await step('Sleep');
+    assert.equal(await page.locator('.sc-family-level').count(), 5);
+    assert.equal(await page.locator('.sc-family-line').count(), 0);
+    // Coffee adjusted to average sleep, as dashed outlines; the line through
+    // them, and through the means, has the two-predictor slope.
+    await step('Coffee at average sleep');
+    const ghostXs = await page.locator('.anova-ghost').evaluateAll(cs => cs.map(c => +c.getAttribute('cx')));
+    const toPx = await page.locator('.sc-point').evaluateAll(gs => gs.map(g => +/translate\(([-\d.]+)/.exec(g.getAttribute('transform'))[1]));
+    const pxPerCup = (toPx[6] - toPx[0]) / 2;
+    assert.deepEqual(ghostXs.map(cx => Math.round((cx - toPx[0]) / pxPerCup * 6) / 6),
+      [2 / 3, 5 / 6, 5 / 6, 1 / 3, 7 / 6, 7 / 6, 2].map(v => Math.round(v * 6) / 6));
+    assert.deepEqual([(await value()).slope, (await value()).intercept].map(v => Math.round(v * 1e9) / 1e9), [-2, 72]);
+    assert.equal(await page.locator('.sc-rise-label').first().textContent(), '\u22122');
+    await step('A line for each amount of sleep');
+    assert.equal(await page.locator('.sc-family-line').count(), 5);
+    const fit = (await value()).multiple;
+    assert.deepEqual([fit.slopeX, fit.slopeZ, fit.intercept].map(v => Math.round(v * 1e9) / 1e9), [-2, 6, 30]);
+    // Parallel, and 6 points apart per hour of sleep.
+    const slopes = await page.locator('.sc-family-line').evaluateAll(lines => lines.map(l =>
+      (l.y2.baseVal.value - l.y1.baseVal.value) / (l.x2.baseVal.value - l.x1.baseVal.value)));
+    slopes.forEach(slope => assert.ok(Math.abs(slope - slopes[0]) < 1e-5, JSON.stringify(slopes)));
+    await page.waitForFunction(() => !document.querySelector('.anova-ghost'));
+    assert.equal(await page.locator('.sc-spacing-layer .sc-rise-label').textContent(), '+6');
+
+    // One student, then two, then everyone, each from their own line.
+    const visible = selector => page.locator(selector).evaluateAll(nodes =>
+      nodes.filter(n => n.style.display !== 'none').map(n => n.textContent));
+    await step('One student');
+    assert.equal((await visible('.sc-residual')).length, 1);
+    await step('Another student');
+    assert.deepEqual(await visible('.sc-square-label'), ['36', '49']);
+    await step('Everyone');
+    assert.deepEqual(await visible('.sc-square-label'), ['36', '289', '64', '49', '169', '4', '49']);
+    await step('Sum of squares');
+    const outline = await height('outline');
+    assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 660');
+    assert.equal(await bin.locator('[data-sum=alone]').textContent(), 'Coffee alone = 900');
+    assert.ok(Math.abs(await height('residual') / outline - 660 / 1200) < 1e-3);
+    assert.ok(Math.abs(await height('alone') / outline - 900 / 1200) < 1e-3);
+    assert.equal(await bin.locator('[data-sum=aloneZ]').textContent(), 'Sleep alone = 666.67');
+    assert.ok(Math.abs(await height('aloneZ') / outline - 2000 / 3 / 1200) < 1e-3);
+    assert.equal((await value()).ssResidual, 660);
+
+    await step('What did both explain?');
+    assert.equal(await bin.locator('[data-sum=regression]').textContent(), 'Regression = 540');
+    assert.ok(Math.abs(await height('regression') / outline - 540 / 1200) < 1e-3);
+
+    await step('Who explained what?');
+    const parts = { onlyZ: ['Sleep only = 240', 240], onlyX: ['Coffee only = 6.67', 20 / 3], shared: ['Shared = 293.33', 880 / 3] };
+    let top = await bin.locator('.sc-ss-residual').evaluate(r => r.y.baseVal.value);
+    for (const [key, [text, sum]] of Object.entries(parts)) {
+      assert.equal(await bin.locator('[data-sum=' + key + ']').textContent(), text);
+      const rect = await bin.locator('.sc-ss-' + key).evaluate(r => ({ y: r.y.baseVal.value, height: r.height.baseVal.value }));
+      assert.ok(Math.abs(rect.height / outline - sum / 1200) < 1e-3, key);
+      // Stacked in order on top of the residual, filling the square.
+      assert.ok(Math.abs(rect.y + rect.height - top) < 0.01, key);
+      top = rect.y;
+    }
+
+    await step('Coffee alone');
+    assert.equal(await page.locator('.sc-family-line').count(), 0);
+    assert.equal((await value()).ssResidual, 900);
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('the coffee residuals table builds a column per step, and its own cells give the slope', async () => {
+  const activity = divById(readChapter('18-regression.qmd'), 'act-coffee-residuals');
+  const options = JSON.parse(/makeStepTable options='([^']+)'/.exec(activity)[1]);
+  const actions = tutorialSteps(activity).map(step => step.action);
+  // The cells are rounded for readers. Each should be its unrounded value to two
+  // decimals, and the unrounded sums should give the two-predictor slope.
+  // Headers keep the shortcode's doubled backslashes.
+  const value = text => Number(text.replace('\u2212', '-'));
+  const cells = key => options.columns.find(c => c.tex === key).cells.map(value);
+  const [z, x] = [cells('Z'), cells('X')];
+  const residuals = x.map((xi, i) => xi - (1 - (z[i] - 7) / 3));
+  const scoreDeviations = cells('Y - M_Y');
+  const close = (shown, exact) => assert.ok(Math.abs(shown - exact) <= 0.005 + 1e-9, shown + ' vs ' + exact);
+  cells('X - \\\\hat{X}').forEach((v, i) => close(v, residuals[i]));
+  cells('(X - \\\\hat{X})^2').forEach((v, i) => close(v, residuals[i] ** 2));
+  cells('(X - \\\\hat{X})(Y - M_Y)').forEach((v, i) => close(v, residuals[i] * scoreDeviations[i]));
+  const ss = residuals.reduce((a, e) => a + e * e, 0);
+  const sp = residuals.reduce((a, e, i) => a + e * scoreDeviations[i], 0);
+  assert.ok(Math.abs(sp / ss + 2) < 1e-9);
+
+  // The other way round: sleep's residuals from coffee, against the same score deviations.
+  const altCells = key => options.columns.find(c => c.alt && c.alt.tex === key).alt;
+  const sleepResiduals = z.map((zi, i) => zi - (7 - (4 / 3) * (x[i] - 1)));
+  altCells('Z - \\\\hat{Z}').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i]));
+  altCells('(Z - \\\\hat{Z})^2').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i] ** 2));
+  altCells('(Z - \\\\hat{Z})(Y - M_Y)').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i] * scoreDeviations[i]));
+  const ssSleep = sleepResiduals.reduce((a, e) => a + e * e, 0);
+  const spSleep = sleepResiduals.reduce((a, e, i) => a + e * scoreDeviations[i], 0);
+  assert.ok(Math.abs(spSleep / ssSleep - 6) < 1e-9);
+  close(value(altCells('(Z - \\\\hat{Z})^2').summary), ssSleep);
+  close(value(altCells('(Z - \\\\hat{Z})(Y - M_Y)').summary), spSleep);
+  close(value(options.columns.find(c => c.tex === '(X - \\\\hat{X})^2').summary), ss);
+  close(value(options.columns.find(c => c.tex === '(X - \\\\hat{X})(Y - M_Y)').summary), sp);
+
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.setContent('<div class="callout"><div id="host"></div><div class="callout-footer"><div class="tutorial-step"></div></div></div>');
+    for (const script of ['d3.min', 'interactive-figure', 'variability-table-generator']) {
+      await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
+    }
+    await page.evaluate(opts => {
+      window.interactiveFigure.createTutorial = args => { window.stepTable = args.applyAction; };
+      document.querySelector('#host').appendChild(makeStepTable(opts));
+    }, options);
+    await page.waitForFunction(() => typeof window.stepTable === 'function');
+    const shownColumns = () => page.locator('thead th').evaluateAll(ths => ths.filter(th => {
+      const target = th.querySelector('.vt-reveal-target');
+      return !target || target.classList.contains('is-visible');
+    }).length);
+    const expected = [2, 3, 4, 5, 7, 7];
+    const firstHeader = () => page.locator('thead th').first().textContent();
+    for (const [i, action] of actions.entries()) {
+      await page.evaluate(a => window.stepTable(a), action);
+      assert.equal(await shownColumns(), expected[i], 'columns after step ' + (i + 1));
+    }
+    // The last step swaps the predictors' columns and refills the calculation.
+    assert.match(await firstHeader(), /^Coffee/);
+    assert.equal(await page.locator('tbody tr').first().locator('td').nth(3).textContent(), '+0.67');
+    await page.evaluate(a => window.stepTable(a), actions[4]);
+    assert.match(await firstHeader(), /^Sleep/);
+    assert.equal(await page.locator('tbody tr').first().locator('td').nth(3).textContent(), '\u22120.33');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
 test('temperature tutorial traces guides and a rise over run, and its slider moves the reading', async () => {
   const activity = divById(readChapter('18-regression.qmd'), 'act-celsius-fahrenheit');
   const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);

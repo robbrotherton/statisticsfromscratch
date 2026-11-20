@@ -205,6 +205,52 @@ sfsVariabilityEnsureStyles = () => {
       opacity: 0;
       pointer-events: none;
     }
+
+    /* Step tables have more columns than the variability table's three, so
+       each column takes the width its contents need, headers may wrap, and
+       narrow screens get tighter cells. If it still doesn't fit, the wrap
+       scrolls sideways rather than the page. */
+    .step-table table {
+      table-layout: auto;
+      min-width: 0;
+    }
+
+    .step-table th {
+      white-space: normal;
+      vertical-align: bottom;
+    }
+
+    .step-table .step-table-narrow {
+      display: none;
+    }
+
+    .step-table th:first-child,
+    .step-table td:first-child {
+      text-align: left;
+    }
+
+    .step-table .step-table-divider {
+      border-left: 1px solid color-mix(in srgb, var(--sfs-text, #212529) 35%, transparent);
+    }
+
+    @media (max-width: 520px) {
+      .step-table table {
+        font-size: 0.82rem;
+      }
+
+      .step-table th,
+      .step-table td {
+        padding: 0.2rem 0.2rem;
+      }
+
+      .step-table .step-table-wide {
+        display: none;
+      }
+
+      .step-table .step-table-narrow {
+        display: inline;
+      }
+    }
   `;
   document.head.appendChild(style);
 }
@@ -821,5 +867,224 @@ makeVariabilityTables = (opts = {}) => {
   sfsVariabilitySetupFragments(rootNode, setStage, opts);
   sfsVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
 
+  return rootNode;
+}
+
+// --- Step tables ----------------------------------------------------------------
+//
+// A calculation table built a column at a time, for sequences other than the
+// variability table's own (scores, mean, deviations, squares, SS...). It shares
+// that table's look, reveal and tutorial wiring.
+//
+// opts.steps names the steps in order. Each of opts.columns gives a header:
+// `tex` (inline math), `label` (words), or both, which reads "label (tex)".
+// Narrow screens show `narrowTex` or `narrowLabel` if given, otherwise just the
+// `tex` of a header that has both. Then `cells` (one entry per row, plain
+// text), an optional `step` from which it shows (omitted: always shown),
+// `align`, `divider` (a rule on its left, e.g. where calculated columns begin),
+// and an optional `summary` (inline math for a closing row, shown with its
+// column). opts.summaryLabel (inline math, e.g. a sigma) heads that row from
+// opts.summaryStep.
+//
+// The same calculation can then be run again on other numbers: a column's
+// `alt` overrides any of the above for that version, and opts.altSwap names two
+// columns (by index) that trade places in it, as when two variables swap
+// roles. Tutorial steps send {"stage": "<step name or index>"}, adding
+// "alt": true for the other version. Moving between versions clears the
+// calculated columns, slides the swapped columns past each other, and fills
+// the calculation in again.
+makeStepTable = (opts = {}) => {
+  sfsVariabilityEnsureStyles();
+
+  const steps = (Array.isArray(opts.steps) ? opts.steps : []).map(String);
+  const columns = Array.isArray(opts.columns) ? opts.columns : [];
+  const rowCount = d3.max(columns, (column) => (column.cells || []).length) || 0;
+  const swap = Array.isArray(opts.altSwap) && opts.altSwap.length === 2 ? opts.altSwap.map(Number) : null;
+  const stepIndex = (value, fallback) => {
+    if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.min(steps.length - 1, Math.round(value)));
+    const index = steps.indexOf(String(value));
+    return index >= 0 ? index : fallback;
+  };
+  const version = (column, alt) => (alt && column.alt ? { ...column, ...column.alt } : column);
+  // How long the calculated columns take to clear, and the swap to glide.
+  const STEP_TABLE_CLEAR = 300;
+  const STEP_TABLE_GLIDE = 650;
+
+  const root = d3.create("div")
+    .attr("class", "variability-table step-table sfs-figure")
+    .style("--sfs-figure-max-width", opts.maxWidth || null)
+    .style("--vt-max-width", opts.maxWidth || null)
+    .style("--vt-table-min-width", opts.tableMinWidth || null);
+  const rootNode = root.node();
+
+  const table = root.append("div")
+    .attr("class", "vt-table-wrap")
+    .append("table")
+    .attr("class", "sfs-data-table vt-has-columns")
+    .attr("aria-label", opts.ariaLabel || "Calculation table");
+
+  // A header's wide and narrow versions are both in the page; CSS shows one.
+  const headerContent = (label, tex) => {
+    const span = document.createElement("span");
+    if (label !== undefined) span.append(label);
+    if (tex === undefined) return span;
+    if (label === undefined) {
+      span.append(sfsVariabilityInlineMath(tex));
+      return span;
+    }
+    // The symbol keeps its brackets: a long header breaks before "(", not inside.
+    const symbol = document.createElement("span");
+    symbol.style.whiteSpace = "nowrap";
+    symbol.append("(", sfsVariabilityInlineMath(tex), ")");
+    span.append(" ", symbol);
+    return span;
+  };
+  const headerNode = (spec) => {
+    const wide = headerContent(spec.label, spec.tex);
+    const narrowTex = spec.narrowTex ?? (spec.narrowLabel === undefined && spec.label !== undefined ? spec.tex : undefined);
+    if (narrowTex === undefined && spec.narrowLabel === undefined) return wide;
+    const both = document.createElement("span");
+    wide.className = "step-table-wide";
+    const narrow = headerContent(spec.narrowLabel, narrowTex);
+    narrow.className = "step-table-narrow";
+    both.append(wide, narrow);
+    return both;
+  };
+  const summaryNode = (tex) => {
+    const value = document.createElement("span");
+    value.className = "vt-summary-value";
+    value.appendChild(sfsVariabilityInlineMath(tex));
+    return value;
+  };
+
+  // Each cell holds one span, which is what gets revealed and refilled.
+  // Numbers align right; the first column, whichever it is, aligns left (CSS).
+  const holder = (cell, column, step) => {
+    cell.style("text-align", column.align && column.align !== "right" ? column.align : null)
+      .classed("step-table-divider", Boolean(column.divider));
+    const span = cell.append("span");
+    if (step !== undefined) span.attr("class", "vt-reveal-target").attr("data-step", stepIndex(step, 0));
+    return span.node();
+  };
+  const header = table.append("thead").append("tr");
+  const tbody = table.append("tbody");
+  const rows = d3.range(rowCount).map((row) => tbody.append("tr").attr("class", row === rowCount - 1 ? "vt-data-last" : null));
+  const hasSummary = opts.summaryLabel !== undefined || columns.some((column) => column.summary !== undefined);
+  const summaryRow = hasSummary ? tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row") : null;
+  const slots = columns.map((column) => ({
+    th: header.append("th"),
+    tds: rows.map((tr) => tr.append("td"))
+  }));
+  slots.forEach((slot, i) => {
+    const column = columns[i];
+    slot.headerSpan = holder(slot.th, column, column.step);
+    slot.cellSpans = slot.tds.map((td) => holder(td, column, column.step));
+    if (!summaryRow) return;
+    // The label heads the row from its own step; other summaries come with their column.
+    const td = summaryRow.append("td");
+    if (i === 0 && opts.summaryLabel !== undefined) {
+      holder(td, {}, opts.summaryStep).appendChild(summaryNode(opts.summaryLabel));
+    } else {
+      slot.summarySpan = holder(td, column, column.summaryStep ?? column.step);
+    }
+  });
+
+  const fillVersion = (alt) => {
+    columns.forEach((column, i) => {
+      const spec = version(column, alt);
+      const slot = slots[i];
+      slot.headerSpan.replaceChildren(headerNode(spec));
+      slot.cellSpans.forEach((span, row) => span.replaceChildren(String((spec.cells || [])[row] ?? "")));
+      if (slot.summarySpan) slot.summarySpan.replaceChildren(spec.summary === undefined ? "" : summaryNode(spec.summary));
+    });
+    sfsVariabilitySyncMath(rootNode);
+  };
+
+  // Put the swapped columns in the order a version wants. With `glide`, each
+  // cell then slides from where it was to where it now is.
+  let swapped = false;
+  const setSwapped = (want, glide) => {
+    if (!swap || want === swapped) return;
+    const moving = swap.flatMap((index) => [slots[index].th.node(), ...slots[index].tds.map((td) => td.node())]);
+    const before = new Map(moving.map((node) => [node, node.getBoundingClientRect().left]));
+    [slots[swap[0]].th, ...slots[swap[0]].tds].forEach((cell, k) => {
+      const a = cell.node();
+      const b = (k === 0 ? slots[swap[1]].th : slots[swap[1]].tds[k - 1]).node();
+      const marker = document.createComment("");
+      a.replaceWith(marker);
+      b.replaceWith(a);
+      marker.replaceWith(b);
+    });
+    swapped = want;
+    if (!glide) return;
+    moving.forEach((node) => {
+      const shift = before.get(node) - node.getBoundingClientRect().left;
+      node.style.transition = "none";
+      node.style.transform = `translateX(${shift}px)`;
+      node.style.position = "relative";
+      node.style.zIndex = "1";
+    });
+    rootNode.getBoundingClientRect();
+    moving.forEach((node) => {
+      node.style.transition = `transform ${STEP_TABLE_GLIDE}ms cubic-bezier(0.65, 0, 0.35, 1)`;
+      node.style.transform = "";
+    });
+    window.setTimeout(() => moving.forEach((node) => {
+      node.style.removeProperty("transition");
+      node.style.removeProperty("position");
+      node.style.removeProperty("z-index");
+    }), STEP_TABLE_GLIDE);
+  };
+  const reveal = (upTo, animate) => {
+    rootNode.querySelectorAll(".vt-reveal-target[data-step]").forEach((target) => {
+      sfsVariabilitySetRevealVisible(rootNode, [target], upTo >= Number(target.dataset.step), animate);
+    });
+  };
+
+  let stage = stepIndex(opts.stage, steps.length - 1);
+  let alt = false;
+  let timers = [];
+  const later = (fn, ms) => timers.push(window.setTimeout(fn, ms));
+  const setStage = (next, options = {}) => {
+    const nextAlt = Boolean(options.alt);
+    const animate = options.animate !== false &&
+      !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    timers.forEach(window.clearTimeout);
+    timers = [];
+    stage = stepIndex(next, stage);
+    const changing = nextAlt !== alt;
+    alt = nextAlt;
+    root.attr("data-step", steps[stage]).attr("data-version", alt ? "alt" : null);
+    rootNode.value = { stage, step: steps[stage], alt };
+    if (!changing || !animate) {
+      if (changing) {
+        fillVersion(alt);
+        setSwapped(alt, false);
+      }
+      reveal(stage, animate);
+    } else {
+      // Clear the calculation, swap the columns, then work it through again.
+      reveal(-1, true);
+      later(() => setSwapped(alt, true), STEP_TABLE_CLEAR);
+      later(() => {
+        fillVersion(alt);
+        reveal(stage, true);
+      }, STEP_TABLE_CLEAR + STEP_TABLE_GLIDE + 100);
+    }
+    if (options.notify !== false) sfsVariabilityNotify(rootNode);
+  };
+
+  const applyTutorialAction = (action) => {
+    if (!action || typeof action !== "object") return false;
+    const next = action.stage === undefined ? action.step : action.stage;
+    if (next === undefined) return false;
+    setStage(next, { animate: action.animate !== false, alt: sfsVariabilityBoolean(action.alt, false) });
+    return true;
+  };
+  rootNode.stepTable = { setStage, applyTutorialAction };
+
+  fillVersion(false);
+  setStage(stage, { animate: false, notify: false });
+  sfsVariabilitySetupTutorial(rootNode, applyTutorialAction, opts);
   return rootNode;
 }

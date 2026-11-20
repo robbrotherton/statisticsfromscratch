@@ -130,13 +130,12 @@ SC_PANEL_MIN_WIDTH = 176;
 // Room above the square for the panel's title and the total's label, and
 // below it for the two parts' labels.
 SC_PANEL_HEAD = 58;
-SC_PANEL_FOOT = 58;
+SC_PANEL_ROW = 20;
 // Under the plot, on a phone, the sums go without the panel's box and title,
 // with the parts named beside the square. The plot is shorter there, and the
 // square, on the plot's area scale, shrinks with it, so the whole tutorial
 // fits on the screen.
 SC_COMPACT_ASPECT = 1.35;
-SC_COMPACT_LABELS = 130;
 scHoleRadius = (r) => r - SC_DOT_OUTLINE / 2 - SC_RING_WIDTH
 
 // Whether a point drawn at (px, py) is on opposite sides of mean lines drawn
@@ -164,6 +163,34 @@ scSumSquaredResiduals = (points, slope, intercept) =>
     return residual * residual;
   })
 
+// Least squares with a second predictor, z, solved from the sums of squares
+// and products of the deviations (the normal equations). Also returns what
+// each predictor accounts for on its own, which the partition of the joint
+// regression sum of squares is built from. Null without a z for every point.
+scMultipleFit = (points) => {
+  if (!points.length || !points.every((p) => Number.isFinite(p.z))) return null;
+  const mean = (key) => d3.mean(points, (p) => p[key]);
+  const m = { x: mean("x"), y: mean("y"), z: mean("z") };
+  const s = (a, b) => d3.sum(points, (p) => (p[a] - m[a]) * (p[b] - m[b]));
+  const sxx = s("x", "x"), szz = s("z", "z"), sxz = s("x", "z");
+  const sxy = s("x", "y"), szy = s("z", "y");
+  const det = sxx * szz - sxz * sxz;
+  if (!(det > 0)) return null;
+  const slopeX = (szz * sxy - sxz * szy) / det;
+  const slopeZ = (sxx * szy - sxz * sxy) / det;
+  return {
+    slopeX,
+    slopeZ,
+    intercept: m.y - slopeX * m.x - slopeZ * m.z,
+    means: m,
+    // How much x changes per unit of z, for adjusting each x to the mean z.
+    slopeXOnZ: sxz / szz,
+    ssRegression: slopeX * sxy + slopeZ * szy,
+    ssRegressionX: sxy * sxy / sxx,
+    ssRegressionZ: szy * szy / szz
+  };
+}
+
 // --- Responsive geometry ------------------------------------------------------
 //
 // The plot is redrawn at the width it actually occupies, so one SVG unit is
@@ -175,12 +202,12 @@ scSumSquaredResiduals = (points, slope, intercept) =>
 // Margins that hold tick or axis text keep their authored size, because the
 // text does. Margins that hold nothing shrink with the figure, down to a small
 // gutter, so a narrow plot isn't mostly margin.
-scPlotGeometry = ({ width, authoredWidth, authoredHeight, margin, textLeft, textBottom, aspect }) => {
+scPlotGeometry = ({ width, authoredWidth, authoredHeight, margin, textLeft, textBottom, textRight, aspect }) => {
   const k = Math.min(1, width / authoredWidth);
   const gutter = (value) => Math.max(Math.min(value, 12), Math.round(value * k));
   const fitted = {
     top: gutter(margin.top),
-    right: gutter(margin.right),
+    right: textRight ? margin.right : gutter(margin.right),
     bottom: textBottom ? margin.bottom : gutter(margin.bottom),
     left: textLeft ? margin.left : gutter(margin.left)
   };
@@ -222,6 +249,10 @@ scEnsureStyles = () => {
       --sc-drag-color: var(--sfs-focus, #2780e3);
       --sc-positive-color: var(--graph-series-3, #009e73);
       --sc-negative-color: var(--graph-series-4, #d55e00);
+      /* A second predictor's levels: a ramp of the points' blue, from a pale
+         tint of it for the lowest value to a deep shade for the highest. */
+      --sc-z-low: color-mix(in oklab, var(--sc-point-color) 60%, var(--sfs-bg, #fff));
+      --sc-z-high: color-mix(in oklab, var(--sc-point-color) 70%, var(--sfs-text, #222));
     }
 
     .scatterplot .sc-dot {
@@ -262,6 +293,23 @@ scEnsureStyles = () => {
       stroke-width: 2.4;
       stroke-linecap: round;
       vector-effect: non-scaling-stroke;
+    }
+
+    .scatterplot .sc-family-line {
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      vector-effect: non-scaling-stroke;
+    }
+
+    .scatterplot .sc-family-label {
+      font-family: var(--bs-body-font-family, system-ui, sans-serif);
+      font-size: var(--sfs-figure-small-size, 0.75rem);
+      font-weight: 650;
+      paint-order: stroke;
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 3px;
+      stroke-linejoin: round;
     }
 
     .scatterplot .sc-residual {
@@ -348,6 +396,13 @@ scEnsureStyles = () => {
     .scatterplot .sc-mean-label,
     .scatterplot .sc-point-label {
       font-size: 0.8rem;
+    }
+
+    .scatterplot .sc-mean-label {
+      paint-order: stroke;
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 3px;
+      stroke-linejoin: round;
     }
 
     .scatterplot .sc-annotation text {
@@ -520,10 +575,20 @@ makeScatterplot = function(opts) {
       if (opts.labels[i] !== undefined) point.label = String(opts.labels[i]);
     });
   }
+  // A second predictor for multiple regression: `z` gives one value per point,
+  // `zName` names it in the figure and `zUnit` follows each level's value.
+  // `xName` names the first predictor where its axis label is too long.
+  const hasZ = Array.isArray(opts.z) && opts.z.length === initialPoints.length &&
+    opts.z.every((value) => Number.isFinite(Number(value)));
+  if (hasZ) initialPoints.forEach((point, i) => { point.z = Number(opts.z[i]); });
+  const xName = opts.xName || xLabel;
+  const zName = opts.zName || "Z";
+  const zUnit = opts.zUnit ? "\u2009" + opts.zUnit : "";
 
   // Line mode: "fit" recomputes least squares from the current points,
   // "mean" is the null model (slope 0, intercept M_Y, so SS_residual = SS_Y),
-  // "custom" holds whatever slope/intercept were supplied.
+  // "custom" holds whatever slope/intercept were supplied, "multiple" adds the
+  // second predictor, z, and "adjusted" is its slope for x through the means.
   function normalizeLine(value) {
     if (value === undefined || value === null) return null;
     if (typeof value === "object") {
@@ -539,6 +604,15 @@ makeScatterplot = function(opts) {
     }
     if (["mean", "mean-y", "flat", "null", "intercept-only"].includes(key)) {
       return { mode: "mean" };
+    }
+    // Both predictors: one line for each value of z, all with the same slope.
+    // "adjusted" is that slope alone, through the means: the line at the mean
+    // of z, fitted to x adjusted to the mean of z.
+    if (["multiple", "both"].includes(key) && hasZ) {
+      return { mode: "multiple" };
+    }
+    if (["adjusted", "partial"].includes(key) && hasZ) {
+      return { mode: "adjusted" };
     }
     return null;
   }
@@ -617,6 +691,14 @@ makeScatterplot = function(opts) {
     showSP: scBoolean(opts.showSP ?? opts.spLabel, false),
     showR: scBoolean(opts.showR ?? opts.rLabel, false),
     collectSS: null,
+    colorByZ: scBoolean(opts.colorByZ, false),
+    // Indices of the students whose residuals and squares are showing, or
+    // null for everyone's.
+    focus: null,
+    // Draw each point's x adjusted to the mean of z, as dashed outlines.
+    adjustX: false,
+    // Mark the step between two neighbouring lines of the family.
+    showSpacing: false,
     showSS: scBoolean(opts.showSS ?? opts.ssLabel, false),
     pointLabels: scBoolean(opts.pointLabels, false),
     emphasize: normalizeEmphasis(opts.emphasize),
@@ -636,7 +718,8 @@ makeScatterplot = function(opts) {
 
   const authoredMargin = Object.assign({
     top: 24,
-    right: 24,
+    // A second predictor's levels are named in the right-hand margin.
+    right: hasZ ? 42 : 24,
     bottom: state.axisLabels ? 58 : (state.ticks === "none" ? 26 : 40),
     left: state.axisLabels ? 64 : (state.ticks === "none" ? 26 : 46)
   }, opts.margin || {});
@@ -659,6 +742,7 @@ makeScatterplot = function(opts) {
     margin: authoredMargin,
     textLeft: marginsHoldText,
     textBottom: marginsHoldText,
+    textRight: hasZ,
     aspect: plotAspect
   });
   // ySpan is the height of the y domain, which sets the collected square's size.
@@ -978,6 +1062,12 @@ makeScatterplot = function(opts) {
     .attr("class", "sc-best-line");
   const fitLine = lineLayer.append("line")
     .attr("class", "sc-fit-line sfs-graph-line");
+  // With a second predictor, the one line becomes a family: one line for each
+  // value of z, labelled at its right-hand end.
+  const familyLayer = lineLayer.append("g").attr("class", "sc-family-layer");
+  const familyLabelsLayer = svg.append("g")
+    .attr("class", "sc-layer sc-family-labels-layer")
+    .attr("aria-hidden", "true");
 
   // Rise over run: the run along X, then the rise up (or down) to the line.
   const riseRunLayer = svg.append("g")
@@ -989,11 +1079,23 @@ makeScatterplot = function(opts) {
   const riseText = riseRunLayer.append("text").attr("class", "sc-rise-run-label sc-rise-label")
     .attr("text-anchor", "start")
     .attr("dy", "0.32em");
+  // The family's spacing: a rise from one line to the next, one unit of z up.
+  const spacingLayer = svg.append("g")
+    .attr("class", "sc-layer sc-spacing-layer")
+    .attr("aria-hidden", "true");
+  const spacingLine = spacingLayer.append("line").attr("class", "sc-rise-run-line sc-rise");
+  const spacingText = spacingLayer.append("text").attr("class", "sc-rise-run-label sc-rise-label")
+    .attr("text-anchor", "start")
+    .attr("dy", "0.32em");
 
   const pointsLayer = svg.append("g")
     .attr("class", "sc-layer sc-points-layer");
   const labelsLayer = svg.append("g")
     .attr("class", "sc-layer sc-labels-layer");
+  // Dashed outlines of adjusted scores, as the ANOVA figures draw stand-ins.
+  const ghostLayer = svg.append("g")
+    .attr("class", "sc-layer sc-ghost-layer")
+    .attr("aria-hidden", "true");
 
   // Above the points, so the marker on the line is never hidden by a dot.
   const guideLayer = svg.append("g")
@@ -1008,6 +1110,34 @@ makeScatterplot = function(opts) {
     residual: "var(--sc-residual-color)",
     regression: "var(--sfs-effect-color, #7654b5)"
   };
+  // Every name the sums of squares are given in the figure.
+  const ssNames = {
+    total: "Total",
+    residual: "Residual",
+    regression: "Regression",
+    best: "Best fit",
+    alone: xName + " alone",
+    aloneZ: zName + " alone",
+    onlyX: xName + " only",
+    onlyZ: zName + " only",
+    shared: "Shared"
+  };
+  // With two predictors the regression share splits as Chapter 16's between
+  // groups share split into its factors: each predictor's own part on top of
+  // the residual, in the same colour at different strengths, and what they
+  // share above them.
+  const partitionOpacity = { onlyZ: 0.36, onlyX: 0.12, shared: 0.24 };
+  // Room under the square (or beside it, under the plot) for the parts' names.
+  const legendRows = hasZ ? 4 : 2;
+  const compactLabelWidth = hasZ ? 150 : 130;
+
+  // Shades of blue for the levels of z: palest for the lowest.
+  const zLevels = hasZ ? Array.from(new Set(initialPoints.map((p) => p.z))).sort(d3.ascending) : [];
+  function zColor(z) {
+    const [lo, hi] = d3.extent(zLevels);
+    const share = hi > lo ? (z - lo) / (hi - lo) : 1;
+    return `color-mix(in oklab, var(--sc-z-high) ${Math.round(100 * share)}%, var(--sc-z-low))`;
+  }
 
   // One square, on the same area scale as the plot, throughout the comparison.
   // The regression pieces land on the residual area already collected. It
@@ -1031,7 +1161,8 @@ makeScatterplot = function(opts) {
     collection = svg.append("g").attr("class", "sc-ss-collection").attr("pointer-events", "none");
     if (panelBeside) {
       const panel = { x: width + SC_PANEL_GAP, y: Math.max(2, margin.top - 10),
-        width: figureWidth - width - SC_PANEL_GAP - 2, height: SC_PANEL_HEAD + side + SC_PANEL_FOOT };
+        width: figureWidth - width - SC_PANEL_GAP - 2,
+        height: SC_PANEL_HEAD + side + 18 + legendRows * SC_PANEL_ROW };
       left = panel.x + SC_PANEL_INSET;
       top = panel.y + SC_PANEL_HEAD;
       svg.attr("viewBox", [0, 0, figureWidth, Math.max(height, panel.y + panel.height + 2)]);
@@ -1042,7 +1173,7 @@ makeScatterplot = function(opts) {
         .attr("x", panel.x + SC_PANEL_INSET).attr("y", panel.y + 27)
         .text("Sums of squares");
     } else {
-      left = Math.max(4, Math.round((width - side - SC_COMPACT_LABELS) / 2));
+      left = Math.max(4, Math.round((width - side - compactLabelWidth) / 2));
       top = height + 26;
       svg.attr("viewBox", [0, 0, width, top + side + 6]);
     }
@@ -1055,18 +1186,18 @@ makeScatterplot = function(opts) {
     // The parts' labels, one row each under the square (beside it, under
     // the plot), with a swatch in the shape's own fill and outline.
     let rows = 0;
-    const partLabel = (name, color, dashed) => {
+    const partLabel = (name, color, dashed, opacity = 0.24) => {
       const rowX = panelBeside ? left : left + side + 12;
-      const rowY = (panelBeside ? bottom + 24 : top + 14) + 20 * rows++;
+      const rowY = (panelBeside ? bottom + 24 : top + 14) + SC_PANEL_ROW * rows++;
       collection.append("rect").attr("class", "sc-ss-swatch")
         .attr("x", rowX).attr("y", rowY - 10).attr("width", 12).attr("height", 12)
-        .attr("fill", dashed ? "none" : color).attr("fill-opacity", 0.24)
+        .attr("fill", dashed ? "none" : color).attr("fill-opacity", opacity)
         .attr("stroke", color).attr("stroke-width", dashed ? 1.5 : 1)
-        .attr("stroke-dasharray", dashed ? "3 2" : null);
+        .attr("stroke-dasharray", typeof dashed === "string" ? dashed : dashed ? "3 2" : null);
       return label(rowX + 18, rowY, name);
     };
     const totalLabel = label(left, top - 9, "total");
-    const setTotal = value => totalLabel.text("Total = " + format(value));
+    const setTotal = value => totalLabel.text(ssNames.total + " = " + format(value));
     setTotal(stats.ssY);
     collection.append("rect").attr("class", "sc-ss-outline")
       .attr("x", left).attr("y", top).attr("width", side).attr("height", side)
@@ -1087,8 +1218,41 @@ makeScatterplot = function(opts) {
         .attr("x", left).attr("y", bottom - depth(ssBest)).attr("width", side).attr("height", depth(ssBest))
         .attr("fill", "none").attr("stroke", "var(--sfs-text, currentColor)")
         .attr("stroke-width", 1.5).attr("stroke-dasharray", "5 4");
-      partLabel("residual", ssColors.residual).text("Residual = " + format(ssResidual));
-      partLabel("best", "var(--sfs-text, currentColor)", true).text("Best fit = " + format(ssBest));
+      partLabel("residual", ssColors.residual).text(ssNames.residual + " = " + format(ssResidual));
+      partLabel("best", "var(--sfs-text, currentColor)", true).text(ssNames.best + " = " + format(ssBest));
+      return;
+    }
+
+    // Both predictors' share, split into what each accounts for that the
+    // other doesn't, and what either could account for alone.
+    const fit = state.lineMode === "multiple" ? scMultipleFit(state.points) : null;
+    if (mode === "partition") {
+      if (!fit) return;
+      const parts = [
+        { key: "onlyZ", value: fit.ssRegression - fit.ssRegressionX },
+        { key: "onlyX", value: fit.ssRegression - fit.ssRegressionZ }
+      ];
+      parts.push({ key: "shared", value: fit.ssRegression - parts[0].value - parts[1].value });
+      collection.append("rect").attr("class", "sc-ss-residual")
+        .attr("x", left).attr("y", bottom - depth(ssResidual)).attr("width", side).attr("height", depth(ssResidual))
+        .attr("fill", ssColors.residual).attr("fill-opacity", 0.24)
+        .attr("stroke", ssColors.residual);
+      partLabel("residual", ssColors.residual).text(ssNames.residual + " = " + format(ssResidual));
+      // The parts divide the regression band they were collected as.
+      const whole = { y: bottom - depth(ssResidual + fit.ssRegression), height: depth(fit.ssRegression) };
+      let base = ssResidual;
+      parts.forEach((part) => {
+        const box = { y: bottom - depth(base + part.value), height: depth(part.value) };
+        base += part.value;
+        const rect = collection.append("rect").attr("class", "sc-ss-" + part.key)
+          .attr("x", left).attr("width", side)
+          .attr("fill", ssColors.regression).attr("stroke", ssColors.regression);
+        (animate ? rect.attr("y", whole.y).attr("height", whole.height).attr("fill-opacity", 0.24)
+          .transition().delay(200).duration(700).ease(d3.easeCubicInOut) : rect)
+          .attr("y", box.y).attr("height", box.height).attr("fill-opacity", partitionOpacity[part.key]);
+        partLabel(part.key, ssColors.regression, false, partitionOpacity[part.key])
+          .text(ssNames[part.key] + " = " + format(part.value));
+      });
       return;
     }
 
@@ -1105,7 +1269,7 @@ makeScatterplot = function(opts) {
     }
     if (mode === "regression") {
       addBand("residual", base, 0);
-      partLabel("residual", ssColors.residual).text("Residual = " + format(base));
+      partLabel("residual", ssColors.residual).text(ssNames.residual + " = " + format(base));
     }
 
     const color = ssColors[mode];
@@ -1118,10 +1282,24 @@ makeScatterplot = function(opts) {
     let setSum = setTotal;
     if (mode !== "total") {
       const text = partLabel(mode, color);
-      const name = mode === "residual" ? "Residual" : "Regression";
-      setSum = value => text.text(name + " = " + format(value));
+      setSum = value => text.text(ssNames[mode] + " = " + format(value));
     }
     setSum(animate ? 0 : sum);
+    // With both predictors, each predictor's residual total on its own is
+    // outlined, as the best fit was while the reader tried other lines. The
+    // gap down to the residual is what adding the other predictor gains.
+    if (fit && mode === "residual") {
+      [
+        { key: "alone", value: stats.ssY - fit.ssRegressionX, dash: "5 4" },
+        { key: "aloneZ", value: stats.ssY - fit.ssRegressionZ, dash: "2 3" }
+      ].forEach(({ key, value, dash }) => {
+        collection.append("rect").attr("class", "sc-ss-" + key)
+          .attr("x", left).attr("y", bottom - depth(value)).attr("width", side).attr("height", depth(value))
+          .attr("fill", "none").attr("stroke", "var(--sfs-text, currentColor)")
+          .attr("stroke-width", 1.5).attr("stroke-dasharray", dash);
+        partLabel(key, "var(--sfs-text, currentColor)", dash).text(ssNames[key] + " = " + format(value));
+      });
+    }
     if (animate) {
       window.sfsAnovaSquares.pour(collection, {
         pieces, color, level: value => band(value, base), sumRect, delay,
@@ -1201,17 +1379,38 @@ makeScatterplot = function(opts) {
     if (state.lineMode === "fit") {
       return { slope: stats.fitSlope, intercept: stats.fitIntercept };
     }
+    // With both predictors, the one line is x's slope through the means. It
+    // is also the family's line at the mean of z, which the others part from.
+    if (state.lineMode === "adjusted" || state.lineMode === "multiple") {
+      const fit = scMultipleFit(state.points);
+      if (fit) return { slope: fit.slopeX, intercept: fit.means.y - fit.slopeX * fit.means.x };
+      return { slope: stats.fitSlope, intercept: stats.fitIntercept };
+    }
     if (state.lineMode === "mean") {
       return { slope: 0, intercept: stats.meanY };
     }
     return { slope: state.slope, intercept: state.intercept };
   }
 
+  // Each point's prediction: from the line, or with both predictors, from
+  // the line for that point's value of z.
+  function predictor(line) {
+    const fit = state.lineMode === "multiple" ? scMultipleFit(state.points) : null;
+    return fit
+      ? (p) => fit.slopeX * p.x + fit.slopeZ * p.z + fit.intercept
+      : (p) => line.slope * p.x + line.intercept;
+  }
+
+  function sumSquaredResiduals(predict) {
+    return d3.sum(state.points, (p) => (p.y - predict(p)) ** 2);
+  }
+
   function setValue() {
     const stats = scStats(state.points);
     const line = effectiveLine();
-    const ssResidual = scSumSquaredResiduals(state.points, line.slope, line.intercept);
+    const ssResidual = sumSquaredResiduals(predictor(line));
     const ssResidualFit = scSumSquaredResiduals(state.points, stats.fitSlope, stats.fitIntercept);
+    const multiple = state.lineMode === "multiple" ? scMultipleFit(state.points) : null;
     rootNode.value = {
       n: stats.n,
       meanX: stats.meanX,
@@ -1228,6 +1427,7 @@ makeScatterplot = function(opts) {
       intercept: line.intercept,
       ssResidual,
       ssResidualFit,
+      multiple,
       seEstimate: stats.n > 2 ? Math.sqrt(ssResidual / (stats.n - 2)) : null,
       points: state.points.map((p) => ({ ...p })),
       guide: state.guide ? { x: state.guide.x, y: line.slope * state.guide.x + line.intercept } : null,
@@ -1391,7 +1591,8 @@ makeScatterplot = function(opts) {
 
   // The run sits on the side of the step away from the line, so its label
   // never crosses it: under a rising line, over a falling one.
-  function drawRiseRun(line, animate, duration, trace) {
+  // A traced step can wait `delay` ms for the line to reach its place.
+  function drawRiseRun(line, animate, duration, trace, delay = 0) {
     const step = state.riseRun;
     if (!step) {
       setReveal(riseRunLayer, false, animate);
@@ -1411,19 +1612,23 @@ makeScatterplot = function(opts) {
     riseRunLayer.selectAll("*").interrupt("sc-rise-run");
     if (trace && animate) {
       const half = Math.max(350, duration * 0.8);
-      runLine.attr("x1", x0).attr("y1", y0).attr("x2", x0).attr("y2", y0)
-        .transition("sc-rise-run").duration(half).ease(d3.easeCubicInOut)
-        .attr("x2", x1);
-      riseLine.attr("x1", x1).attr("y1", y0).attr("x2", x1).attr("y2", y0)
-        .transition("sc-rise-run").delay(half + 80).duration(half).ease(d3.easeCubicInOut)
-        .attr("y2", y1);
+      // Zero-length lines still draw their round caps, so each stays hidden
+      // until it starts to grow.
+      runLine.attr("x1", x0).attr("y1", y0).attr("x2", x0).attr("y2", y0).style("opacity", 0)
+        .transition("sc-rise-run").delay(delay).duration(half).ease(d3.easeCubicInOut)
+        .style("opacity", 1).attr("x2", x1);
+      riseLine.attr("x1", x1).attr("y1", y0).attr("x2", x1).attr("y2", y0).style("opacity", 0)
+        .transition("sc-rise-run").delay(delay + half + 80).duration(half).ease(d3.easeCubicInOut)
+        .style("opacity", 1).attr("y2", y1);
       runText.attr("x", (x0 + x1) / 2).attr("y", runLabelY).style("opacity", 0)
-        .transition("sc-rise-run").delay(half - 120).duration(200).style("opacity", 1);
+        .transition("sc-rise-run").delay(delay + half - 120).duration(200).style("opacity", 1);
       riseText.attr("x", x1 + 8).attr("y", (y0 + y1) / 2).style("opacity", 0)
-        .transition("sc-rise-run").delay(2 * half - 40).duration(200).style("opacity", 1);
+        .transition("sc-rise-run").delay(delay + 2 * half - 40).duration(200).style("opacity", 1);
     } else {
       runText.style("opacity", 1);
       riseText.style("opacity", 1);
+      runLine.style("opacity", 1);
+      riseLine.style("opacity", 1);
       maybeTransition(runLine, animate, duration)
         .attr("x1", x0).attr("y1", y0).attr("x2", x1).attr("y2", y0);
       maybeTransition(riseLine, animate, duration)
@@ -1443,6 +1648,119 @@ makeScatterplot = function(opts) {
     });
   }
 
+  // The family of lines for two predictors. They part from the one-predictor
+  // line, and fold back into it when a step returns to one predictor. Each
+  // level of z is labelled at the right-hand end of its line.
+  function drawFamily(fit, line, animate, duration) {
+    const [xLo, xHi] = x.domain();
+    const single = { y1: y(line.slope * xLo + line.intercept), y2: y(line.slope * xHi + line.intercept) };
+    const ends = (z) => fit
+      ? { y1: y(fit.slopeX * xLo + fit.slopeZ * z + fit.intercept), y2: y(fit.slopeX * xHi + fit.slopeZ * z + fit.intercept) }
+      : single;
+    const lines = familyLayer.selectAll("line.sc-family-line")
+      .data(fit ? zLevels : [], (z) => z)
+      .join(
+        (enter) => enter.append("line").attr("class", "sc-family-line")
+          .attr("x1", x(xLo)).attr("x2", x(xHi))
+          .attr("y1", single.y1).attr("y2", single.y2),
+        (update) => update,
+        (exit) => maybeTransition(exit, animate, duration)
+          .attr("y1", single.y1).attr("y2", single.y2).style("opacity", 0).remove()
+      )
+      .attr("stroke", zColor);
+    // While only some students are measured, so are only their lines.
+    const focusZ = state.focus ? new Set(state.focus.map((i) => state.points[i] && state.points[i].z)) : null;
+    const lineOpacity = (z) => !focusZ || focusZ.has(z) ? 1 : 0.25;
+    maybeTransition(lines, animate, duration)
+      .attr("x1", x(xLo)).attr("x2", x(xHi))
+      .attr("y1", (z) => ends(z).y1).attr("y2", (z) => ends(z).y2)
+      .style("opacity", lineOpacity);
+
+    // The key lists the levels top down from the highest, under the
+    // predictor's name, in the right-hand margin. Once the lines are drawn,
+    // each label moves level with its line's right-hand end.
+    const keyed = fit || state.colorByZ ? zLevels : [];
+    const rank = (z) => zLevels.length - 1 - zLevels.indexOf(z);
+    const labelX = plotRight + margin.right - 2;
+    const labelY = (z) => (fit ? ends(z).y2 : margin.top + 22 + 16 * rank(z)) + 4;
+    const labels = familyLabelsLayer.selectAll("text.sc-family-level")
+      .data(keyed, (z) => z)
+      .join((enter) => enter.append("text").attr("x", labelX).attr("y", labelY))
+      .attr("class", "sc-family-label sc-family-level")
+      .attr("text-anchor", "end")
+      .attr("fill", zColor)
+      .text((z) => format(z) + zUnit);
+    labels.interrupt("sc-move");
+    maybeTransition(labels, animate, duration)
+      .attr("x", labelX).attr("y", labelY)
+      .style("opacity", (z) => fit ? lineOpacity(z) : 1);
+    const name = familyLabelsLayer.selectAll("text.sc-family-name")
+      .data(keyed.length ? [d3.max(zLevels)] : [])
+      .join((enter) => enter.append("text").attr("x", labelX).attr("y", (z) => labelY(z) - 17))
+      .attr("class", "sc-family-label sc-family-name")
+      .attr("text-anchor", "end")
+      .attr("fill", "var(--graph-text-color, currentColor)")
+      .text(zName);
+    name.interrupt("sc-move");
+    maybeTransition(name, animate, duration)
+      .attr("x", labelX).attr("y", (z) => labelY(z) - 17);
+  }
+
+  // Each point's x as it would be at the mean of z, slid there as a dashed
+  // outline while the point itself stays put.
+  function drawAdjusted(fit, animate) {
+    const items = state.adjustX && fit ? state.points.map((p, i) => ({
+      key: i,
+      from: { x: x(p.x), y: y(p.y) },
+      x: x(p.x - fit.slopeXOnZ * (p.z - fit.means.z)),
+      y: y(p.y),
+      color: state.colorByZ ? zColor(p.z) : "var(--sc-point-color)"
+    })) : [];
+    // The outlines are anova-squares.js's, which only pages with them load.
+    const squares = window.sfsAnovaSquares;
+    if (!squares || (!items.length && ghostLayer.select("circle").empty())) return;
+    squares.ensureStyles();
+    squares.renderGhosts(ghostLayer, items, { animate });
+    ghostLayer.selectAll("circle.anova-ghost").attr("r", pointRadius);
+  }
+
+  // One unit of z up, from the line at the mean of z to the next, between
+  // the last point and the plot's right-hand edge.
+  let spacingShown = false;
+  function drawSpacing(fit, animate, duration) {
+    const below = fit ? zLevels.filter((z) => z <= fit.means.z) : [];
+    const z0 = below.length ? below[below.length - 1] : zLevels[0];
+    const z1 = zLevels.find((z) => z > z0);
+    const shown = state.showSpacing && Boolean(fit) && state.lineMode === "multiple" && z1 !== undefined;
+    if (shown) {
+      const at = (d3.max(state.points, (p) => p.x) + x.domain()[1]) / 2;
+      const level = (z) => y(fit.slopeX * at + fit.slopeZ * z + fit.intercept);
+      spacingText.text(signed(fit.slopeZ * (z1 - z0), true));
+      spacingLine.interrupt("sc-rise-run");
+      spacingLine.attr("x1", x(at)).attr("x2", x(at)).attr("y1", level(z0));
+      // Newly shown, it rises from one line to the next once the lines have parted.
+      if (animate && !spacingShown) {
+        spacingLine.attr("y2", level(z0))
+          .transition("sc-rise-run").delay(duration).duration(Math.max(350, duration * 0.8))
+          .ease(d3.easeCubicInOut).attr("y2", level(z1));
+      } else {
+        spacingLine.attr("y2", level(z1));
+      }
+      spacingText.attr("x", x(at) + 8).attr("y", (level(z0) + level(z1)) / 2);
+    }
+    spacingShown = shown;
+    setReveal(spacingLayer, shown, animate);
+  }
+
+  // Whether the last render showed the adjusted outlines, and its line mode,
+  // so the line is tethered to the outlines only as they first slide out.
+  let wasAdjusted = false;
+  let previousLineMode = state.lineMode;
+
+  // Which residuals and squares the last render showed, and what they
+  // measured, so a step that adds students draws only the newcomers.
+  let drawn = { key: null, residuals: new Set(), squares: new Set() };
+
   function render(options) {
     options = options || {};
     const animate = options.animate !== false && !scPrefersReducedMotion();
@@ -1461,18 +1779,50 @@ makeScatterplot = function(opts) {
       x: meanXLine.attr("x1") === null ? null : Number(meanXLine.attr("x1")),
       y: meanYLine.attr("y1") === null ? null : Number(meanYLine.attr("y1"))
     };
-    const ssResidual = scSumSquaredResiduals(state.points, line.slope, line.intercept);
+    const predicted = predictor(line);
+    const ssResidual = sumSquaredResiduals(predicted);
+    const fit = state.lineMode === "multiple" ? scMultipleFit(state.points) : null;
 
     drawAxes(animate, duration);
     rootNode.classList.toggle("is-draggable", state.draggable);
 
     // Fit line spans the x domain; the clip path trims any vertical overflow.
     const [xLo, xHi] = x.domain();
-    maybeTransition(fitLine, animate, duration)
-      .attr("x1", x(xLo))
-      .attr("y1", y(line.slope * xLo + line.intercept))
-      .attr("x2", x(xHi))
-      .attr("y2", y(line.slope * xHi + line.intercept));
+    // When the adjusted outlines slide out from the one-predictor line, the
+    // line moves with them: at every frame it is the least-squares line
+    // through the outlines where they are, so its slope eases from x's slope
+    // alone to x's slope with z, in step with the slide.
+    const tether = animate && state.adjustX && !wasAdjusted && previousLineMode === "fit" &&
+      window.sfsAnovaSquares ? scMultipleFit(state.points) : null;
+    const settle = tether ? window.sfsAnovaSquares.GHOST_RISE + window.sfsAnovaSquares.GHOST_SLIDE : 0;
+    if (tether) {
+      const adjust = (p) => -tether.slopeXOnZ * (p.z - tether.means.z);
+      fitLine.interrupt("sc-move").style("opacity", 1)
+        .transition("sc-move")
+        .delay(window.sfsAnovaSquares.GHOST_RISE)
+        .duration(window.sfsAnovaSquares.GHOST_SLIDE)
+        .ease(d3.easeCubicInOut)
+        .tween("sc-tether", function() {
+          const node = d3.select(this);
+          return (t) => {
+            const at = scStats(state.points.map((p) => ({ x: p.x + t * adjust(p), y: p.y })));
+            node.attr("x1", x(xLo)).attr("y1", y(at.fitSlope * xLo + at.fitIntercept))
+              .attr("x2", x(xHi)).attr("y2", y(at.fitSlope * xHi + at.fitIntercept));
+          };
+        });
+    } else {
+      maybeTransition(fitLine, animate, duration)
+        .attr("x1", x(xLo))
+        .attr("y1", y(line.slope * xLo + line.intercept))
+        .attr("x2", x(xHi))
+        .attr("y2", y(line.slope * xHi + line.intercept))
+        .style("opacity", fit ? 0 : 1);
+    }
+    wasAdjusted = state.adjustX;
+    previousLineMode = state.lineMode;
+    drawFamily(fit, line, animate, duration);
+    drawAdjusted(state.lineMode === "adjusted" || state.lineMode === "multiple" ? scMultipleFit(state.points) : null, animate);
+    drawSpacing(fit, animate, duration);
 
     bestLine
       .style("display", state.collectSS === "compare" ? null : "none")
@@ -1481,20 +1831,23 @@ makeScatterplot = function(opts) {
       .attr("x2", x(xHi))
       .attr("y2", y(stats.fitSlope * xHi + stats.fitIntercept));
 
-    drawRiseRun(line, animate, duration, options.traceRiseRun);
+    drawRiseRun(line, animate, duration, options.traceRiseRun, settle);
     drawGuide(line, animate, duration, options.traceGuide);
 
     // A mean-only line measures total deviations. For the regression share the
     // fitted scores themselves are the observations we measure from the mean.
+    // The partition step keeps the regression squares on the plot.
+    const fitted = state.lineMode === "fit" || state.lineMode === "adjusted" || Boolean(fit);
     const mode = state.collectSS === "compare" ? "compare"
-      : (state.collectSS === "total" ? state.lineMode === "mean" : state.lineMode === "fit")
+      : state.collectSS === "partition" ? (fit ? "partition" : null)
+      : (state.collectSS === "total" ? state.lineMode === "mean" : fitted)
         ? state.collectSS : null;
-    const predicted = p => line.slope * p.x + line.intercept;
-    const startScore = mode === "regression" ? predicted : p => p.y;
-    const endScore = mode === "regression" ? () => stats.meanY : predicted;
+    const measure = mode === "partition" ? "regression" : mode;
+    const startScore = measure === "regression" ? predicted : p => p.y;
+    const endScore = measure === "regression" ? () => stats.meanY : predicted;
     const deviation = p => startScore(p) - endScore(p);
     lineLayer.selectAll("circle.sc-prediction")
-      .data(mode === "regression" ? state.points : [])
+      .data(measure === "regression" ? state.points : [])
       .join("circle").attr("class", "sc-prediction")
       .attr("cx", p => x(p.x)).attr("cy", p => y(predicted(p)))
       .attr("r", pointRadius * 0.75).attr("fill", "var(--sfs-bg, white)")
@@ -1502,13 +1855,18 @@ makeScatterplot = function(opts) {
     const drawLines = animate && (options.draw === "lines" || options.draw === "both");
     const growSquares = drawMeanSquares || (animate && (options.draw === "squares" || options.draw === "both"));
     const squareDelay = drawLines || drawMeanSquares ? duration + 100 : 0;
-    const measureColor = mode === "regression" || mode === "total" ? ssColors[mode] : null;
+    const measureColor = measure === "regression" || measure === "total" ? ssColors[measure] : null;
     for (const layer of [squaresLayer, squareLabelsLayer, residualsLayer]) {
       layer.style("--sc-residual-color", measureColor);
     }
     // A horizontal mean is the only reference needed for these comparisons.
     meanXLine.style("display", mode ? "none" : null);
     meanXText.style("display", mode ? "none" : null);
+    // A step can show some students' residuals and squares before everyone's.
+    // Those already showing stay as they are; only newcomers are drawn.
+    const shown = (p, i) => !state.focus || state.focus.includes(i);
+    const drawKey = [measure, state.squareMode, state.lineMode].join("|");
+    const drawnBefore = drawn.key === drawKey ? drawn : { residuals: new Set(), squares: new Set() };
     const residuals = residualsLayer.selectAll("line.sc-residual")
       .data(state.points)
       .join((enter) => enter.append("line")
@@ -1516,9 +1874,13 @@ makeScatterplot = function(opts) {
         .attr("x1", (p) => x(p.x))
         .attr("x2", (p) => x(p.x))
         .attr("y1", (p) => y(p.y))
-        .attr("y2", (p) => y(p.y)));
+        .attr("y2", (p) => y(p.y)))
+      .style("display", (p, i) => shown(p, i) ? null : "none");
     residuals.interrupt("sc-move");
-    if (drawLines) residuals.attr("y1", p => y(startScore(p))).attr("y2", p => y(startScore(p)));
+    if (drawLines) {
+      residuals.filter((p, i) => !drawnBefore.residuals.has(i))
+        .attr("y1", p => y(startScore(p))).attr("y2", p => y(startScore(p)));
+    }
     maybeTransition(residuals, animate, duration)
       .attr("x1", p => x(p.x)).attr("x2", p => x(p.x))
       .attr("y1", p => y(startScore(p))).attr("y2", p => y(endScore(p)));
@@ -1526,7 +1888,7 @@ makeScatterplot = function(opts) {
     // Equal Xs have equal predictions. Put their squares on opposite sides
     // of the segment so both students' contributions can be seen.
     const flipped = new Set();
-    if (mode === "regression") {
+    if (measure === "regression") {
       for (const students of d3.group(state.points, p => p.x).values()) {
         students.forEach((p, i) => { if (i % 2) flipped.add(p); });
       }
@@ -1559,12 +1921,14 @@ makeScatterplot = function(opts) {
         .attr("x", (p) => x(p.x))
         .attr("y", (p) => y(p.y))
         .attr("width", 0)
-        .attr("height", 0));
+        .attr("height", 0))
+      .style("display", (p, i) => shown(p, i) ? null : "none");
     squares.interrupt("sc-move");
+    const growing = (p, i) => !drawnBefore.squares.has(i);
     if (growSquares) {
       // Begin as the deviation segment itself, then grow perpendicular to it.
       // X deviations are horizontal; Y deviations are vertical.
-      squares
+      squares.filter(growing)
         .attr("x", (p) => state.squareMode === "x" ? squareGeometry(p).x : x(p.x))
         .attr("y", (p) => state.squareMode === "x" ? y(p.y) : squareGeometry(p).y)
         .attr("width", (p) => state.squareMode === "x" ? squareGeometry(p).side : 0)
@@ -1595,11 +1959,14 @@ makeScatterplot = function(opts) {
     squareLabels
       .attr("x", (p) => squareGeometry(p).side === 0 ? x(p.x) - 12 : squareGeometry(p).x + squareGeometry(p).side / 2)
       .attr("y", (p) => squareGeometry(p).side === 0 ? y(p.y) + 12 : squareGeometry(p).y + squareGeometry(p).side / 2)
-      .style("opacity", growSquares ? 0 : 1);
+      .style("display", (p, i) => shown(p, i) ? null : "none")
+      .style("opacity", (p, i) => growSquares && growing(p, i) ? 0 : 1);
     if (growSquares) {
-      squareLabels.transition("sc-square-label")
+      squareLabels.filter(growing).transition("sc-square-label")
         .delay(squareDelay + duration).duration(180).style("opacity", 1);
     }
+    const showing = (on) => new Set(on ? state.points.map((p, i) => i).filter((i) => shown(null, i)) : []);
+    drawn = { key: drawKey, residuals: showing(state.showResiduals), squares: showing(state.showSquares) };
 
     // Ellipse.
     const ellipseD = ellipsePathData(stats);
@@ -1735,7 +2102,10 @@ makeScatterplot = function(opts) {
         .attr("transform", (p) => `translate(${x(p.x)},${y(p.y)})`)
         .classed("is-opposite", (p) => state.showQuadrants && scQuadrant(p, stats) < 0);
     }
-    pointGroups.select(".sc-dot").attr("r", pointRadius);
+    // While only some students are measured, the others step back.
+    pointGroups.style("opacity", (p, i) => shown(p, i) && !state.adjustX ? null : 0.35);
+    pointGroups.select(".sc-dot").attr("r", pointRadius)
+      .style("fill", (p) => state.colorByZ && Number.isFinite(p.z) ? zColor(p.z) : null);
     pointGroups.select(".sc-hole").attr("r", scHoleRadius(pointRadius));
     pointGroups
       .attr("tabindex", state.draggable ? 0 : null)
@@ -1771,6 +2141,7 @@ makeScatterplot = function(opts) {
     // Reveals.
     setReveal(pointsLayer, state.showPoints, animate);
     setReveal(lineLayer, state.showLine, animate);
+    setReveal(familyLabelsLayer, Boolean(fit) || state.colorByZ, animate);
     setReveal(residualsLayer, state.showResiduals, animate);
     setReveal(squaresLayer, state.showSquares, animate);
     setReveal(squareLabelsLayer, state.showSquares && state.squareLabels, animate);
@@ -1787,7 +2158,7 @@ makeScatterplot = function(opts) {
     // Emphasis dims every layer not in the emphasized set.
     const layerSelections = {
       points: [pointsLayer, labelsLayer],
-      line: [lineLayer],
+      line: [lineLayer, familyLabelsLayer],
       residuals: [residualsLayer],
       squares: [squaresLayer, squareLabelsLayer],
       ellipse: [ellipseLayer],
@@ -1861,8 +2232,9 @@ makeScatterplot = function(opts) {
     const animate = action.animate !== false;
     const renderOptions = { animate, duration: action.duration, draw: action.draw };
 
-    // A guide, a rise over run and the sliders belong to the step that asks
-    // for them, so moving to a step that doesn't clears them.
+    // A guide, a rise over run, the sliders, a focus on some students, the
+    // adjusted outlines and the family's spacing belong to the step that asks
+    // for them, so a step that doesn't clears them.
     const keys = Object.keys(action).map(scKey);
     const previousGuide = state.guide;
     const previousRiseRun = state.riseRun;
@@ -1876,6 +2248,18 @@ makeScatterplot = function(opts) {
     }
     if (!keys.includes("show-sliders") && state.shownSliders.length) {
       state.shownSliders = [];
+      changed = true;
+    }
+    if (!keys.includes("focus") && state.focus) {
+      state.focus = null;
+      changed = true;
+    }
+    if (!keys.includes("adjust-x") && state.adjustX) {
+      state.adjustX = false;
+      changed = true;
+    }
+    if (!keys.includes("show-spacing") && state.showSpacing) {
+      state.showSpacing = false;
       changed = true;
     }
 
@@ -2045,7 +2429,25 @@ makeScatterplot = function(opts) {
           changed = true;
           break;
         case "collect-ss":
-          state.collectSS = ["total", "reference", "residual", "regression", "compare"].includes(value) ? value : null;
+          state.collectSS = ["total", "reference", "residual", "regression", "compare", "partition"].includes(value) ? value : null;
+          changed = true;
+          break;
+        case "adjust-x":
+          state.adjustX = scBoolean(value, state.adjustX);
+          changed = true;
+          break;
+        case "show-spacing":
+          state.showSpacing = scBoolean(value, state.showSpacing);
+          changed = true;
+          break;
+        case "focus":
+          state.focus = Array.isArray(value)
+            ? value.map(Number).filter((i) => Number.isInteger(i) && i >= 0 && i < state.points.length)
+            : null;
+          changed = true;
+          break;
+        case "color-z":
+          state.colorByZ = scBoolean(value, state.colorByZ);
           changed = true;
           break;
         case "show-ss":
@@ -2110,7 +2512,25 @@ makeScatterplot = function(opts) {
       });
     } else {
       window.interactiveFigure.ensureStyles();
+      setupTutorial();
     }
+  }
+
+  // Without the controls drawer, whose wrap() would claim it, the figure
+  // claims its callout's tutorial itself once it is in the page.
+  function setupTutorial(attempt = 0) {
+    const api = window.interactiveFigure;
+    if (typeof api.createTutorial !== "function") return;
+    if (!rootNode.isConnected) {
+      if (attempt < 60) window.requestAnimationFrame(() => setupTutorial(attempt + 1));
+      return;
+    }
+    const callout = rootNode.closest(".callout");
+    const footer = callout ? callout.querySelector(".callout-footer") : null;
+    if (!footer || footer.dataset.sfsIfTutorial === "true") return;
+    const steps = Array.from(footer.children)
+      .filter((child) => child.classList && child.classList.contains("tutorial-step"));
+    if (steps.length) api.createTutorial({ root: rootNode, footer, steps, applyAction: applyTutorialAction });
   }
 
   // Redraw to the width the chart really has. The helper waits until the
