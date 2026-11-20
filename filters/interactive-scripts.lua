@@ -39,9 +39,13 @@ local manifest = {
     file = "resources/js/graph-data.js",
     deps = { "graph-core" }
   },
+  ["read-guides"] = {
+    file = "resources/js/read-guides.js",
+    deps = { "d3" }
+  },
   ["graph-frequency"] = {
     file = "resources/js/graph-frequency.js",
-    deps = { "graph-core", "graph-data" }
+    deps = { "graph-core", "graph-data", "read-guides" }
   },
   ["graph-interval"] = {
     file = "resources/js/graph-interval.js",
@@ -147,7 +151,7 @@ local manifest = {
   },
   ["scatterplot"] = {
     file = "resources/js/scatterplot.js",
-    deps = { "d3", "interactive-figure-tools", "anova-squares" }
+    deps = { "d3", "interactive-figure-tools", "anova-squares", "read-guides" }
   },
   ["make-inferential-diagram"] = {
     file = "resources/js/make-inferential-diagram.js",

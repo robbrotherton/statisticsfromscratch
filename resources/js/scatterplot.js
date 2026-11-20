@@ -387,6 +387,35 @@ scEnsureStyles = () => {
       opacity: 1;
     }
 
+    .scatterplot .sc-guide-label,
+    .scatterplot .sc-rise-run-label {
+      font-family: var(--bs-body-font-family, system-ui, sans-serif);
+      font-size: 0.85rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .scatterplot .sc-best-line {
+      stroke: var(--sfs-text, currentColor);
+      stroke-width: 1.5;
+      stroke-dasharray: 5 4;
+      opacity: 0.55;
+    }
+
+    .scatterplot .sc-rise-run-line {
+      stroke: var(--sfs-text, currentColor);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .scatterplot .sc-rise-run-label {
+      fill: var(--sfs-text, currentColor);
+      font-weight: 700;
+      paint-order: stroke;
+      stroke: var(--sfs-bg, #fff);
+      stroke-width: 4px;
+      stroke-linejoin: round;
+    }
+
     .scatterplot .sc-axis text,
     .scatterplot .sc-axis-label {
       fill: var(--graph-text-color, currentColor);
@@ -485,6 +514,23 @@ makeScatterplot = function(opts) {
     return null;
   }
 
+  // A read-off guide (up from a value of X to the line, then across to Y),
+  // given as an X value or { x }.
+  function normalizeGuide(value) {
+    const raw = value !== null && typeof value === "object" ? value.x : value;
+    if (raw === undefined || raw === null || raw === false || raw === "") return null;
+    const guideX = Number(raw);
+    return Number.isFinite(guideX) ? { x: guideX } : null;
+  }
+
+  // Rise over run: a step along the line from one value of X to another.
+  function normalizeRiseRun(value) {
+    if (!value || typeof value !== "object") return null;
+    const from = Number(value.from);
+    const to = Number(value.to);
+    return Number.isFinite(from) && Number.isFinite(to) && from !== to ? { from, to } : null;
+  }
+
   const initialLine = normalizeLine(opts.line) ||
     (opts.slope !== undefined || opts.intercept !== undefined
       ? { mode: "custom", slope: scFiniteNumber(opts.slope, 0), intercept: scFiniteNumber(opts.intercept, 0) }
@@ -498,7 +544,7 @@ makeScatterplot = function(opts) {
   }
 
   // The r/SS annotation is a readout, not a graph mark, so it never dims.
-  const layerNames = ["points", "line", "residuals", "squares", "ellipse", "means", "deviations", "products"];
+  const layerNames = ["points", "line", "residuals", "squares", "ellipse", "means", "deviations", "products", "guide", "rise-run"];
 
   function normalizeEmphasis(value) {
     if (value === undefined || value === null) return null;
@@ -514,6 +560,8 @@ makeScatterplot = function(opts) {
         if (["means", "mean", "crosshair"].includes(key)) return "means";
         if (["mean-deviations", "deviation-lines"].includes(key)) return "deviations";
         if (["product", "products", "rectangles", "sp"].includes(key)) return "products";
+        if (["guide", "guides", "read-off"].includes(key)) return "guide";
+        if (["rise-run", "rise", "run", "slope-step"].includes(key)) return "rise-run";
         return null;
       })
       .filter(Boolean);
@@ -544,6 +592,9 @@ makeScatterplot = function(opts) {
     pointLabels: scBoolean(opts.pointLabels, false),
     emphasize: normalizeEmphasis(opts.emphasize),
     draggable: scBoolean(opts.draggable, false),
+    guide: normalizeGuide(opts.guide),
+    riseRun: normalizeRiseRun(opts.riseRun),
+    shownSliders: Array.isArray(opts.showSliders) ? opts.showSliders.map(scKey) : [],
     axisLabels: scBoolean(opts.axisLabels, !minimal),
     ticks: normalizeTicks(opts.ticks ?? opts.tickLabels, minimal ? "none" : "numeric")
   };
@@ -606,6 +657,24 @@ makeScatterplot = function(opts) {
 
   // --- Controls -------------------------------------------------------------
 
+  // Sliders beneath the plot, in the same strip as the power and confidence
+  // interval figures, which tutorial steps reveal with `show-sliders`.
+  // Each is { key: "guide" | "slope" | "intercept", range: [min, max, step] },
+  // optionally with its own `tex` readout, in which {x}, {y}, {slope} and
+  // {intercept} stand for the current values, and `label` and `color`.
+  const sliderDefaults = {
+    guide: { label: xLabel, color: sfsReadGuides.COLOR, tex: "X = {x}" },
+    slope: { label: "Slope (b)", color: "var(--sc-line-color)", tex: "b = {slope}", readoutWidth: "4.6rem" },
+    intercept: { label: "Intercept (a)", color: "var(--graph-series-2, #e69f00)", tex: "a = {intercept}", readoutWidth: "4.6rem" }
+  };
+  const sliderSpecs = (Array.isArray(opts.sliders) ? opts.sliders : [])
+    .map((spec) => {
+      const key = scKey(spec && spec.key);
+      if (!sliderDefaults[key] || !Array.isArray(spec.range) || spec.range.length !== 3) return null;
+      return Object.assign({}, sliderDefaults[key], spec, { key, range: spec.range.map(Number) });
+    })
+    .filter(Boolean);
+
   const showControls = scBoolean(opts.controls, !minimal);
   const correlationControls = scKey(opts.controlSet) === "correlation";
   let controls = null;
@@ -617,7 +686,9 @@ makeScatterplot = function(opts) {
     controls = root.append("div")
       .attr("class", "sc-controls sfs-control-grid");
 
-    if (!correlationControls) {
+    // Sliders for the line replace the drawer's own line inputs.
+    const lineSliders = sliderSpecs.some((spec) => spec.key === "slope" || spec.key === "intercept");
+    if (!correlationControls && !lineSliders) {
       const linePanel = controls.append("section")
         .attr("class", "sfs-control-panel sfs-if-control-panel");
       linePanel.append("p")
@@ -731,6 +802,48 @@ makeScatterplot = function(opts) {
   const chartWrap = root.append("div")
     .attr("class", "sc-chart-wrap sfs-chart-wrap");
 
+  const sliders = sliderSpecs.length && window.interactiveFigure
+    ? window.interactiveFigure.factorSliders(rootNode, sliderSpecs, handleSlider)
+    : null;
+
+  function handleSlider(key, value) {
+    if (key === "guide") {
+      state.guide = { x: value };
+    } else {
+      const line = effectiveLine();
+      state.slope = key === "slope" ? value : line.slope;
+      state.intercept = key === "intercept" ? value : line.intercept;
+      state.lineMode = "custom";
+      state.showLine = true;
+    }
+    render({ animate: false });
+    notifyValueChange();
+  }
+
+  // KaTeX gets ASCII minus signs; d3's formatter writes U+2212.
+  function sliderTex(template, values) {
+    return template.replace(/\{(\w+)\}/g, (match, name) =>
+      Number.isFinite(values[name]) ? format(values[name]).replace("−", "-") : match);
+  }
+
+  function syncSliders(line) {
+    if (!sliders) return;
+    const guideX = state.guide ? state.guide.x : NaN;
+    const values = {
+      x: guideX,
+      y: line.slope * guideX + line.intercept,
+      slope: line.slope,
+      intercept: line.intercept
+    };
+    const tex = {};
+    sliderSpecs.forEach((spec) => { tex[spec.key] = sliderTex(spec.tex, values); });
+    sliders.sync({
+      shown: state.shownSliders,
+      values: { guide: state.guide ? guideX : undefined, slope: line.slope, intercept: line.intercept },
+      tex
+    });
+  }
+
   const svg = chartWrap.append("svg")
     .attr("class", "sfs-svg sfs-graph")
     .attr("role", "img")
@@ -803,13 +916,32 @@ makeScatterplot = function(opts) {
   const lineLayer = svg.append("g")
     .attr("class", "sc-layer sc-line-layer")
     .attr("clip-path", `url(#${clipId})`);
+  // Where the least-squares line is, while the reader tries others.
+  const bestLine = lineLayer.append("line")
+    .attr("class", "sc-best-line");
   const fitLine = lineLayer.append("line")
     .attr("class", "sc-fit-line sfs-graph-line");
+
+  // Rise over run: the run along X, then the rise up (or down) to the line.
+  const riseRunLayer = svg.append("g")
+    .attr("class", "sc-layer sc-rise-run-layer");
+  const runLine = riseRunLayer.append("line").attr("class", "sc-rise-run-line sc-run");
+  const riseLine = riseRunLayer.append("line").attr("class", "sc-rise-run-line sc-rise");
+  const runText = riseRunLayer.append("text").attr("class", "sc-rise-run-label sc-run-label")
+    .attr("text-anchor", "middle");
+  const riseText = riseRunLayer.append("text").attr("class", "sc-rise-run-label sc-rise-label")
+    .attr("text-anchor", "start")
+    .attr("dy", "0.32em");
 
   const pointsLayer = svg.append("g")
     .attr("class", "sc-layer sc-points-layer");
   const labelsLayer = svg.append("g")
     .attr("class", "sc-layer sc-labels-layer");
+
+  // Above the points, so the marker on the line is never hidden by a dot.
+  const guideLayer = svg.append("g")
+    .attr("class", "sc-layer sc-guide-layer")
+    .attr("aria-hidden", "true");
 
   const annotationLayer = svg.append("g")
     .attr("class", "sc-layer sc-annotation");
@@ -850,6 +982,27 @@ makeScatterplot = function(opts) {
       .attr("fill", ssColors.total).attr("fill-opacity", 0.06)
       .attr("stroke", ssColors.total);
     if (mode === "reference") return;
+
+    // Any line the reader tries: its squared residuals as one band, against
+    // a dashed outline of the least-squares total, which no line can beat.
+    if (mode === "compare") {
+      const ssBest = scSumSquaredResiduals(state.points, stats.fitSlope, stats.fitIntercept);
+      const shown = Math.min(ssResidual, stats.ssY);
+      collection.append("rect").attr("class", "sc-ss-residual")
+        .attr("x", left).attr("y", bottom - depth(shown)).attr("width", side).attr("height", depth(shown))
+        .attr("fill", ssColors.residual).attr("fill-opacity", 0.24)
+        .attr("stroke", ssColors.residual);
+      collection.append("rect").attr("class", "sc-ss-best")
+        .attr("x", left).attr("y", bottom - depth(ssBest)).attr("width", side).attr("height", depth(ssBest))
+        .attr("fill", "none").attr("stroke", "var(--sfs-text, currentColor)")
+        .attr("stroke-width", 1.5).attr("stroke-dasharray", "5 4");
+      const bestY = bottom - depth(ssBest);
+      // The current total is never below the best, so its label goes above.
+      const currentY = Math.max(top + 4, Math.min(bottom - depth(shown) + 4, bestY - 14));
+      label(labelX, bestY + 4, "best").text("Best fit = " + format(ssBest));
+      label(labelX, currentY, "residual").text("Residual = " + format(ssResidual));
+      return;
+    }
 
     const base = mode === "regression" ? ssResidual : 0;
     function band(value, offset) {
@@ -989,6 +1142,9 @@ makeScatterplot = function(opts) {
       ssResidualFit,
       seEstimate: stats.n > 2 ? Math.sqrt(ssResidual / (stats.n - 2)) : null,
       points: state.points.map((p) => ({ ...p })),
+      guide: state.guide ? { x: state.guide.x, y: line.slope * state.guide.x + line.intercept } : null,
+      riseRun: state.riseRun ? { ...state.riseRun } : null,
+      shownSliders: state.shownSliders.slice(),
       draggable: state.draggable
     };
   }
@@ -1110,6 +1266,88 @@ makeScatterplot = function(opts) {
     return d3.line().curve(d3.curveLinearClosed)(samples);
   }
 
+  function inDomain(scale, value) {
+    const [lo, hi] = scale.domain();
+    return value >= Math.min(lo, hi) && value <= Math.max(lo, hi);
+  }
+
+  // The read-off guide is drawn by read-guides.js, like the guides on the
+  // frequency polygon in Chapter 2. A step that sets a new guide traces it
+  // from the axis; the slider moves it directly.
+  function drawGuide(line, animate, duration, trace) {
+    const guideY = state.guide ? line.slope * state.guide.x + line.intercept : NaN;
+    const shown = Boolean(state.guide) && inDomain(x, state.guide.x) && inDomain(y, guideY);
+    const guides = shown ? [{
+      key: "guide",
+      x: x(state.guide.x),
+      y: y(guideY),
+      xLabel: format(state.guide.x),
+      yLabel: format(guideY)
+    }] : [];
+    const frame = { left: margin.left, bottom: plotBottom };
+    const tracing = shown && animate && trace;
+    sfsReadGuides.draw(guideLayer, guides, frame, {
+      collapsed: tracing,
+      labelClass: "sc-guide-label",
+      xLabelOffset: 24,
+      yLabelOffset: 12
+    });
+    if (tracing) sfsReadGuides.trace(guideLayer, frame, { duration: Math.max(400, duration) });
+
+    // The guide's values stand in for any tick labels they would collide with.
+    xAxisLayer.selectAll(".tick text")
+      .style("opacity", (d) => shown && Math.abs(x(d) - x(state.guide.x)) < 28 ? 0 : null);
+    yAxisLayer.selectAll(".tick text")
+      .style("opacity", (d) => shown && Math.abs(y(d) - y(guideY)) < 14 ? 0 : null);
+  }
+
+  // The run sits on the side of the step away from the line, so its label
+  // never crosses it: under a rising line, over a falling one.
+  function drawRiseRun(line, animate, duration, trace) {
+    const step = state.riseRun;
+    if (!step) {
+      setReveal(riseRunLayer, false, animate);
+      return;
+    }
+    const startY = line.slope * step.from + line.intercept;
+    const endY = line.slope * step.to + line.intercept;
+    const x0 = x(step.from);
+    const x1 = x(step.to);
+    const y0 = y(startY);
+    const y1 = y(endY);
+    const runBelow = (endY - startY) * (step.to - step.from) >= 0;
+    const runLabelY = y0 + (runBelow ? 18 : -8);
+    runText.text(signed(step.to - step.from, true));
+    riseText.text(signed(endY - startY, true));
+
+    riseRunLayer.selectAll("*").interrupt("sc-rise-run");
+    if (trace && animate) {
+      const half = Math.max(350, duration * 0.8);
+      runLine.attr("x1", x0).attr("y1", y0).attr("x2", x0).attr("y2", y0)
+        .transition("sc-rise-run").duration(half).ease(d3.easeCubicInOut)
+        .attr("x2", x1);
+      riseLine.attr("x1", x1).attr("y1", y0).attr("x2", x1).attr("y2", y0)
+        .transition("sc-rise-run").delay(half + 80).duration(half).ease(d3.easeCubicInOut)
+        .attr("y2", y1);
+      runText.attr("x", (x0 + x1) / 2).attr("y", runLabelY).style("opacity", 0)
+        .transition("sc-rise-run").delay(half - 120).duration(200).style("opacity", 1);
+      riseText.attr("x", x1 + 8).attr("y", (y0 + y1) / 2).style("opacity", 0)
+        .transition("sc-rise-run").delay(2 * half - 40).duration(200).style("opacity", 1);
+    } else {
+      runText.style("opacity", 1);
+      riseText.style("opacity", 1);
+      maybeTransition(runLine, animate, duration)
+        .attr("x1", x0).attr("y1", y0).attr("x2", x1).attr("y2", y0);
+      maybeTransition(riseLine, animate, duration)
+        .attr("x1", x1).attr("y1", y0).attr("x2", x1).attr("y2", y1);
+      maybeTransition(runText, animate, duration)
+        .attr("x", (x0 + x1) / 2).attr("y", runLabelY);
+      maybeTransition(riseText, animate, duration)
+        .attr("x", x1 + 8).attr("y", (y0 + y1) / 2);
+    }
+    setReveal(riseRunLayer, true, animate);
+  }
+
   function setReveal(target, visible, animate) {
     window.interactiveFigure.setRevealVisible(target, visible, {
       root: rootNode,
@@ -1148,10 +1386,21 @@ makeScatterplot = function(opts) {
       .attr("x2", x(xHi))
       .attr("y2", y(line.slope * xHi + line.intercept));
 
+    bestLine
+      .style("display", state.collectSS === "compare" ? null : "none")
+      .attr("x1", x(xLo))
+      .attr("y1", y(stats.fitSlope * xLo + stats.fitIntercept))
+      .attr("x2", x(xHi))
+      .attr("y2", y(stats.fitSlope * xHi + stats.fitIntercept));
+
+    drawRiseRun(line, animate, duration, options.traceRiseRun);
+    drawGuide(line, animate, duration, options.traceGuide);
+
     // A mean-only line measures total deviations. For the regression share the
     // fitted scores themselves are the observations we measure from the mean.
-    const mode = (state.collectSS === "total" ? state.lineMode === "mean" : state.lineMode === "fit")
-      ? state.collectSS : null;
+    const mode = state.collectSS === "compare" ? "compare"
+      : (state.collectSS === "total" ? state.lineMode === "mean" : state.lineMode === "fit")
+        ? state.collectSS : null;
     const predicted = p => line.slope * p.x + line.intercept;
     const startScore = mode === "regression" ? predicted : p => p.y;
     const endScore = mode === "regression" ? () => stats.meanY : predicted;
@@ -1456,7 +1705,9 @@ makeScatterplot = function(opts) {
       ellipse: [ellipseLayer],
       means: [meansLayer],
       deviations: [deviationsLayer],
-      products: [productsLayer, productLabelsLayer]
+      products: [productsLayer, productLabelsLayer],
+      guide: [guideLayer],
+      "rise-run": [riseRunLayer]
     };
     layerNames.forEach((name) => {
       const dimmed = Boolean(state.emphasize) && !state.emphasize.includes(name);
@@ -1464,6 +1715,7 @@ makeScatterplot = function(opts) {
     });
 
     syncControls(stats, line, ssResidual);
+    syncSliders(line);
     setValue();
 
     if (!animate) {
@@ -1521,10 +1773,45 @@ makeScatterplot = function(opts) {
     const animate = action.animate !== false;
     const renderOptions = { animate, duration: action.duration, draw: action.draw };
 
+    // A guide, a rise over run and the sliders belong to the step that asks
+    // for them, so moving to a step that doesn't clears them.
+    const keys = Object.keys(action).map(scKey);
+    const previousGuide = state.guide;
+    const previousRiseRun = state.riseRun;
+    if (!keys.includes("guide") && state.guide) {
+      state.guide = null;
+      changed = true;
+    }
+    if (!keys.includes("rise-run") && state.riseRun) {
+      state.riseRun = null;
+      changed = true;
+    }
+    if (!keys.includes("show-sliders") && state.shownSliders.length) {
+      state.shownSliders = [];
+      changed = true;
+    }
+
     Object.entries(action).forEach(([rawKey, value]) => {
       switch (scKey(rawKey)) {
         case "animate":
         case "duration":
+          break;
+        case "guide":
+          state.guide = normalizeGuide(value);
+          // Trace a new reading from the axis; keep one the reader is already looking at.
+          renderOptions.traceGuide = Boolean(state.guide) &&
+            !(previousGuide && previousGuide.x === state.guide.x);
+          changed = true;
+          shouldNotify = true;
+          break;
+        case "rise-run":
+          state.riseRun = normalizeRiseRun(value);
+          renderOptions.traceRiseRun = Boolean(state.riseRun) && !previousRiseRun;
+          changed = true;
+          break;
+        case "show-sliders":
+          state.shownSliders = Array.isArray(value) ? value.map(scKey) : [];
+          changed = true;
           break;
         case "points":
         case "data": {
@@ -1670,7 +1957,7 @@ makeScatterplot = function(opts) {
           changed = true;
           break;
         case "collect-ss":
-          state.collectSS = ["total", "reference", "residual", "regression"].includes(value) ? value : null;
+          state.collectSS = ["total", "reference", "residual", "regression", "compare"].includes(value) ? value : null;
           changed = true;
           break;
         case "show-ss":

@@ -671,6 +671,73 @@
     return span;
   };
 
+  // Factor sliders: one colored row per input in a strip beneath a plot,
+  // each hidden until a tutorial step shows it, when it fades in
+  // (sfs-figures.css, `.sp-factors`). The readout beside each slider is
+  // inline TeX. The power, confidence interval and distribution figures
+  // build the same markup by hand; new figures should use this.
+  //
+  //   factors  [{ key, label, color, range: [min, max, step], readoutWidth }]
+  //   onInput  (key, value) when the reader moves a slider
+  // Returns { strip, sync({ shown, values, tex }) }: `shown` lists the keys
+  // on show, `values` and `tex` are keyed by factor.
+  api.factorSliders = function(parent, factors, onInput) {
+    const strip = document.createElement("div");
+    strip.className = "sp-factors";
+    parent.appendChild(strip);
+
+    const rows = factors.map(function(factor) {
+      const row = document.createElement("div");
+      row.className = "sp-factor sp-factor-" + factor.key;
+      row.dataset.factor = factor.key;
+      row.hidden = true;
+      row.style.setProperty("--sp-factor-color", factor.color);
+      const label = row.appendChild(document.createElement("label"));
+      label.className = "sp-factor-slider";
+      const value = label.appendChild(document.createElement("span"));
+      value.className = "sp-factor-value";
+      if (factor.readoutWidth) value.style.minWidth = factor.readoutWidth;
+      const input = label.appendChild(document.createElement("input"));
+      Object.assign(input, {
+        type: "range",
+        min: factor.range[0],
+        max: factor.range[1],
+        step: factor.range[2]
+      });
+      input.setAttribute("aria-label", factor.label);
+      input.setAttribute("data-prevent-swipe", "");
+      input.addEventListener("input", function(event) {
+        event.stopPropagation();
+        onInput(factor.key, Number(input.value));
+      });
+      strip.appendChild(row);
+      return { factor, row, input, value };
+    });
+
+    function sync(next) {
+      const shown = (next && next.shown) || [];
+      const values = (next && next.values) || {};
+      const tex = (next && next.tex) || {};
+      rows.forEach(function({ factor, row, input, value }) {
+        const visible = shown.includes(factor.key);
+        row.hidden = !visible;
+        input.disabled = !visible;
+        if (values[factor.key] !== undefined && document.activeElement !== input) {
+          input.value = values[factor.key];
+        }
+        const [min, max] = factor.range;
+        const fill = (Number(input.value) - min) / (max - min);
+        input.style.setProperty("--sp-fill", Math.max(0, Math.min(1, fill)) * 100 + "%");
+        const expression = tex[factor.key];
+        if (expression === undefined || value.dataset.tex === expression) return;
+        value.dataset.tex = expression;
+        value.replaceChildren(api.inlineMath(expression));
+      });
+    }
+
+    return { strip, sync };
+  };
+
   // Titles are plain text with optional inline TeX, never authored HTML.
   function setTutorialLabel(element, text) {
     if (element.dataset.labelText === text) return;

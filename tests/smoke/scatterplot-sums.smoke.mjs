@@ -14,7 +14,7 @@ test('coffee tutorial draws both sums of squares and clears them when navigating
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.setContent('<div id="host"></div>');
-    for (const script of ['d3.min', 'interactive-figure', 'scatterplot']) {
+    for (const script of ['d3.min', 'interactive-figure', 'read-guides', 'scatterplot']) {
       await page.addScriptTag({ path: new URL(`../../resources/js/${script}.js`, import.meta.url).pathname });
     }
     await page.evaluate(options => {
@@ -119,7 +119,7 @@ test('regression draws, squares and collects all three deviations on one area sc
   try {
     const page = await browser.newPage();
     await page.setContent('<div id="host"></div>');
-    for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'scatterplot']) {
+    for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'read-guides', 'scatterplot']) {
       await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
     }
     await page.evaluate(opts => {
@@ -178,13 +178,75 @@ test('regression draws, squares and collects all three deviations on one area sc
     assert.ok(Math.abs(regression.y + regression.height - residual.y) < 0.01);
     assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
     await step('Least error');
-    assert.equal(await bin.count(), 0);
     assert.equal(await page.locator('.sc-prediction').count(), 0);
+    // The best fit's total stays outlined while the reader tries other lines.
+    assert.equal(await bin.locator('[data-sum=best]').textContent(), 'Best fit = 900');
+    assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
     await page.getByLabel('Intercept (a)').evaluate(input => {
       input.value = '75';
       input.dispatchEvent(new Event('input'));
     });
     assert.equal(await page.locator('.scatterplot').evaluate(el => el.value.ssResidual), 1075);
+    assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 1075');
+    assert.equal(await bin.locator('[data-sum=best]').textContent(), 'Best fit = 900');
+    const best = await bin.locator('.sc-ss-best').evaluate(geometry);
+    const current = await bin.locator('.sc-ss-residual').evaluate(geometry);
+    const outline = await bin.locator('.sc-ss-outline').evaluate(geometry);
+    assert.ok(Math.abs(best.height / outline.height - 900 / 1200) < 0.001);
+    assert.ok(Math.abs(current.height / outline.height - 1075 / 1200) < 0.001);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('temperature tutorial traces guides and a rise over run, and its slider moves the reading', async () => {
+  const activity = divById(readChapter('18-regression.qmd'), 'act-celsius-fahrenheit');
+  const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
+  const actions = tutorialSteps(activity).map(step => step.action);
+  const browser = await chromium.launch();
+  try {
+    const page = await browser.newPage({ reducedMotion: 'reduce' });
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.setContent('<div id="host"></div>');
+    for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'read-guides', 'scatterplot']) {
+      await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
+    }
+    await page.evaluate(opts => {
+      const wrap = window.interactiveFigure.wrap;
+      window.interactiveFigure.wrap = args => {
+        window.stepTemperature = args.applyAction;
+        return wrap(args);
+      };
+      document.querySelector('#host').appendChild(makeScatterplot({ ...opts, responsive: false }));
+    }, options);
+    const value = () => page.locator('.scatterplot').evaluate(el => el.value);
+    const visibleSliders = () => page.locator('.sp-factor:not([hidden])').count();
+    for (const action of actions) {
+      await page.evaluate(a => window.stepTemperature(a), action);
+      const v = await value();
+      if (action.guide !== undefined) {
+        assert.deepEqual(v.guide, { x: action.guide, y: 1.8 * action.guide + 32 });
+        assert.equal(await page.locator('.sfs-read-guide').count(), 1);
+      } else {
+        assert.equal(v.guide, null, 'a guide carried over from another step');
+        assert.equal(await page.locator('.sfs-read-guide').count(), 0);
+      }
+      assert.deepEqual(v.riseRun, action['rise-run'] || null);
+      assert.equal(await visibleSliders(), (action['show-sliders'] || []).length);
+    }
+    // The last step shows the slider; moving it moves the reading.
+    await page.locator('.sp-factor input[type=range]').evaluate(input => {
+      input.value = '20';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    assert.deepEqual((await value()).guide, { x: 20, y: 68 });
+    assert.deepEqual(await page.locator('.sfs-read-guide-value').allTextContents(), ['20', '68']);
+    // Stepping back hides the slider and clears the reading.
+    await page.evaluate(a => window.stepTemperature(a), actions[1]);
+    assert.equal(await visibleSliders(), 0);
+    assert.equal((await value()).guide, null);
+    assert.deepEqual(errors, []);
   } finally {
     await browser.close();
   }

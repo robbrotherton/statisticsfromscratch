@@ -16,32 +16,38 @@ interactive-scripts:
 <!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
      When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
 
+<!-- REVIEW 2026-11-20 — THROUGHLINE. One idea runs through the whole chapter: make a prediction,
+     square the misses, divide by df to get a variance, take the root to get back to the units.
+     Points where the chapter can say so explicitly (some now done inline, the rest noted below):
+       - Least squares: the mean minimizes SS for one guess (Ch 4); the line minimizes it for a
+         guess that depends on X. Already in the text.
+       - Slope vs r: same numerator (SP), different denominators. Added a few sentences in the slope section.
+       - s_estimate is a standard deviation whose deviations are residuals; 900/5 = 180 is a
+         variance, and that same 180 is MS_residual. Linked inline at the s_estimate section and at Step 3.
+       - r^2: 1 - r^2 = SS_residual / SS_Y, the 1 - r^2 inside Ch 17's s_r. Linked inline.
+       - F: a ratio of two variances (mean squares), as in Ch 14's two estimates. Added equations and explanation.
+       - SE of the slope sqrt(MS_res / SS_X), with the same shape as sqrt(s^2 / n). Added in the CI footnote.
+       - t^2 = F. Already in Step 4.
+       - Standardized slope = r with one predictor (needs b = r s_Y/s_X); the standardized betas in
+         multiple regression are the same idea. Noted at the slope section and in multiple regression.
+       - Partial correlation = correlation of residuals (Ch 17 promises this). Noted in multiple regression.
+       - Rows per predictor in the regression table, as in the Ch 16 factorial table rows. Noted in multiple regression.
+     A closing synthesis table (t -> d, F -> eta^2, r -> r^2, R^2) is already on the roadmap. -->
 
+
+<!-- REVIEW: "final chapter" / "last inferential procedure": the roadmap still plans a chi-square
+     preview and a "Choosing your test" capstone. Check this wording is what you want. -->
 In this, our final chapter, we'll introduce the last inferential procedure that we will cover: the regression technique. This is an extension of the idea of correlations among variables, much like ANOVA extends our ability to analyze differences among groups beyond what the $t$ test is capable of. And as we'll see, regression is actually a variation of the ANOVA technique itself.
 
-## The line of best fit
+## Making a prediction
 
 Suppose an eighth student in our coffee study tells us she drank a cup and a half on the morning of the exam. What score would we guess she got? In Chapter 17, the correlation for our seven students was $r = -.50$. That tells us which way to go with our guess. A cup and a half is above average, and students who drank more coffee tended to score lower. But how much lower? We can't write down a test score from $-.50$ alone.
 
-If all we had to go on were the seven test scores, a reasonable guess would be their mean, 70. On the scatterplot, that's a flat line at 70. Now suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank.
-
-So now let's talk about regression. Basically, regression tries to find the single straight line that traces the best path through the points. This is called the **line of best fit**. The purpose of this, in a very general sense, is that it makes the relationship easier to see. Remember the ellipse we drew around the points? That gave us a sense of their dispersion. The line shows the central tendency of the relationship, so to speak. By that, I mean it gives us a typical value on the $Y$ variable for any given value of $X$. You can just pick any value on the $X$ axis, trace a straight line up to the line of best fit, and then trace a straight line across to the $Y$ axis to find the typical value for that value of $X$. Try it for our student who drank a cup and a half.
-
-{{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem"}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10." >}}
-
-You should get a predicted score of 65.
-
-But how do we know the correct line to draw through the points? You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. It's obviously hard to tell just from looking. So what makes it the best? When a point isn't exactly on the line, it's either at some distance above or below the line of best fit. We call that a **prediction error**, as in, if you were predicting what the point would have been based only on the line, you would've been a bit off.
-
-Take the two students who drank a cup and a half. One scored 50, so our guess of 65 was 15 points too high. The other scored 65, so we got that one exactly right. Imagine moving the whole line down five points. We'd now guess 60 for both students. We'd be a bit closer to the first student, but now we'd be five points off for the one we originally got right. And of course we've changed our predictions for the other five students too. So the line of best fit is the line that minimizes the *collective* prediction error. As we'll see in a moment, we square all those misses and add them up. Any other straight line through this scatterplot would've produced a larger total.
+If all we had to go on were the seven test scores, a reasonable guess would be their mean, 70. On the scatterplot, that's a flat line at 70. Now suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank. How much should it tilt, and how would we know which line is best? Before we try that with the coffee data, let's look at a line that makes predictions perfectly.
 
 ## The equation of a straight line
 
-So how does regression achieve this? Well, you're probably familiar with a lot of this already from high school math. You probably know the equation for a straight line, $Y = bX + a$, although you might know a version of it with different letters. When I learned it in school, we learned $Y = mX + c$. I'm not sure why there are different versions, to be honest. Maybe it's a cultural thing. But they are all quantifying the same thing. $X$ and $Y$ are variables: the scores that we plot on the $X$ and $Y$ axes of the scatterplot respectively. $a$ is the intercept: the value of $Y$ when $X$ is zero. Or put more simply, the value of $Y$ when the line meets the $Y$ axis. $b$ is the slope of the line: how much $Y$ changes per unit change in $X$.
-
-### The Celsius–Fahrenheit example
-
-You might also be familiar with this particular example of a straight line equation: the relationship between temperatures on the Celsius scale and on the Fahrenheit scale. Obviously the relationship between these two variables is a perfect correlation. There is no variability that isn't completely shared. You can perfectly predict the value of one from the other with no prediction error at all. And the equation for this relationship is $Y = 1.8X + 32$.
+Here's a straight line you might already be familiar with: the relationship between temperatures on the Celsius scale and on the Fahrenheit scale. Obviously the relationship between these two variables is a perfect correlation. There is no variability that isn't completely shared. You can perfectly predict the value of one from the other with no prediction error at all. Before I give you the equation, see if you can work out how the conversion works from @tbl-celsius-fahrenheit.
 
 | Celsius | Fahrenheit |
 |--:|--:|
@@ -54,13 +60,73 @@ You might also be familiar with this particular example of a straight line equat
 
 : Some Celsius temperatures and their Fahrenheit equivalents. {#tbl-celsius-fahrenheit}
 
-Remember, 32 is the intercept. Zero degrees Celsius, so zero on the $X$ axis, corresponds to 32 Fahrenheit, 32 on the $Y$ axis. And 1.8 is the slope. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees.
+<!-- PROSE: the tutorial below has placeholder step text and working titles, and the figure after the quiz has a placeholder caption.
+     Order: read values off the line (concrete) → quiz (readers work out intercept and slope) → a static figure,
+     zoomed in to 0–5 °C, confirms them: the intercept, and one degree along rising 1.8 → "So the equation is…".
+     The mean comes in later, for the coffee intercept (a = M_Y − b M_X).
+     Mechanics: "guide" traces a reading up from X and across to Y; "rise-run" draws a step along the line;
+     "show-sliders" reveals the slider strip beneath the plot, as in the Chapter 9 power tutorial. -->
 
-So this equation allows you to easily convert values from Celsius to Fahrenheit. So if you didn't know what 20 Celsius corresponded to, you multiply 20 by 1.8, getting 36, and add 32, getting 68. So 20 Celsius is 68 Fahrenheit. Knowing the values of $b$ and $a$, the slope and the intercept, we can work out the Fahrenheit equivalent of any Celsius temperature we like.
+::::: {#act-celsius-fahrenheit .callout-tip .interactive}
+## Reading temperatures off the line
+
+{{< interactive-figure celsiusFahrenheitLine makeScatterplot options='{"points":[[0,32],[10,50],[20,68],[30,86],[40,104],[50,122]],"xLabel":"Celsius (°C)","yLabel":"Fahrenheit (°F)","xDomain":[0,50],"yDomain":[0,130],"line":"fit","showLine":false,"maxWidth":"30rem","sliders":[{"key":"guide","range":[0,50,1],"tex":"{x}\\\\,^\\\\circ\\\\text{C} = {y}\\\\,^\\\\circ\\\\text{F}","readoutWidth":"9rem"}]}' fallback="Six Celsius temperatures and their Fahrenheit equivalents fall exactly on a straight line. Guides read 20 °C across to 68 °F, as in the table, and 37 °C, which isn't in the table, across to 98.6 °F. A slider moves the reading to any temperature from 0 to 50 °C." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="The temperatures" data-action='{"x-domain":[0,50],"y-domain":[0,130],"show-points":true,"line":"none","animate":false}'}
+[Placeholder: the six temperatures from the table, plotted.]
+:::
+
+::: {.tutorial-step data-title="A straight line" data-action='{"x-domain":[0,50],"y-domain":[0,130],"show-points":true,"line":"fit"}'}
+[Placeholder: they fall exactly on a straight line; no prediction error.]
+:::
+
+::: {.tutorial-step data-title="Reading off" data-action='{"x-domain":[0,50],"y-domain":[0,130],"show-points":true,"line":"fit","guide":20}'}
+[Placeholder: 20 °C, up to the line and across: 68 °F, as in the table.]
+:::
+
+::: {.tutorial-step data-title="Between the points" data-action='{"x-domain":[0,50],"y-domain":[0,130],"show-points":true,"line":"fit","guide":37}'}
+[Placeholder: 37 °C isn't in the table, but the line still gives an answer: 98.6 °F.]
+:::
+
+::: {.tutorial-step data-title="Any temperature" data-action='{"x-domain":[0,50],"y-domain":[0,130],"show-points":true,"line":"fit","guide":37,"show-sliders":["guide"]}'}
+[Placeholder: use the slider to read off any temperature; the two values move together.]
+:::
+::::
+
+:::::
 
 ::: {#quiz-regression-fahrenheit}
 {{< include quizzes/18-regression-fahrenheit.qmd >}}
 :::
+
+::: {#fig-temperature-slope-intercept}
+
+{{< interactive-figure celsiusFahrenheitParts makeScatterplot options='{"points":[[0,32],[10,50],[20,68],[30,86],[40,104],[50,122]],"xLabel":"Celsius (°C)","yLabel":"Fahrenheit (°F)","xDomain":[0,5],"yDomain":[30,42],"line":"fit","maxWidth":"30rem","controls":false,"showPoints":false,"guide":0,"riseRun":{"from":0,"to":1}}' fallback="The Celsius–Fahrenheit line, zoomed in to 0 to 5 °C. A guide marks 32 °F where the line meets the Y axis. From there, one degree Celsius along the line rises 1.8 °F." >}}
+
+[Placeholder caption: zoomed in, the intercept, 32 °F at 0 °C, and the slope: one more degree Celsius, 1.8 more Fahrenheit.]
+
+:::
+
+So the equation for this relationship is $Y = 1.8X + 32$. That 32 is the intercept. Zero degrees Celsius, so zero on the $X$ axis, corresponds to 32 Fahrenheit, 32 on the $Y$ axis. And 1.8 is the slope. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees.
+
+This is an example of something else you're probably familiar with from high school math: the equation for a straight line, $Y = bX + a$, although you might know a version of it with different letters. When I learned it in school, we learned $Y = mX + c$. I'm not sure why there are different versions, to be honest. Maybe it's a cultural thing. But they are all quantifying the same thing. $X$ and $Y$ are variables: the scores that we plot on the $X$ and $Y$ axes of the scatterplot respectively. $a$ is the intercept: the value of $Y$ when $X$ is zero. Or put more simply, the value of $Y$ when the line meets the $Y$ axis. $b$ is the slope of the line: how much $Y$ changes per unit change in $X$. For converting temperatures, $b$ is 1.8 and $a$ is 32.
+
+So the temperature equation allows you to easily convert values from Celsius to Fahrenheit. Say you wanted to know what body temperature, 37 Celsius, corresponds to. You multiply 37 by 1.8, getting 66.6, and add 32, getting 98.6. Knowing the values of $b$ and $a$, the slope and the intercept, we can work out the Fahrenheit equivalent of any Celsius temperature we like.
+
+Notice that the correlation here is a perfect 1, but the slope is 1.8. They're answering different questions. The correlation tells us how consistently the points follow a straight line. The slope tells us how steep that line is, in the units we measured. Convert the other way, from Fahrenheit to Celsius, and the slope would be $1/1.8$, about 0.56. The correlation would still be 1.
+
+## The line of best fit
+
+Back to the coffee data. The basic idea of regression is to find the single straight line that traces the best path through the points. This is called the **line of best fit**. Remember the ellipse we drew around the points? That gave us a sense of their dispersion. The line shows the central tendency of the relationship, so to speak. By that, I mean it gives us a typical value on the $Y$ variable for any given value of $X$. And that typical value is our prediction for anyone with that value of $X$. You can just pick any value on the $X$ axis, trace a straight line up to the line of best fit, and then trace a straight line across to the $Y$ axis to find the typical value for that value of $X$. Use the slider to try it for our student who drank a cup and a half.
+
+{{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
+
+You should get a predicted score of 65.
+
+But how do we know the correct line to draw through the points? You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. It's obviously hard to tell just from looking. So what makes it the best? When a point isn't exactly on the line, it's either at some distance above or below the line of best fit. We call that a **prediction error**, as in, if you were predicting what the point would have been based only on the line, you would've been a bit off.
+
+Take the two students who drank a cup and a half. One scored 50, so our guess of 65 was 15 points too high. The other scored 65, so we got that one exactly right. Imagine moving the whole line down five points. We'd now guess 60 for both students. We'd be a bit closer to the first student, but now we'd be five points off for the one we originally got right. And of course we've changed our predictions for the other five students too. So the line of best fit is the line that minimizes the *collective* prediction error. As we'll see in a moment, we square all those misses and add them up. Any other straight line through this scatterplot would've produced a larger total.
 
 ## Predicted values and residuals
 
@@ -74,10 +140,10 @@ The notation for the sum of squared residuals is $\Sigma(Y - \hat{Y})^2$. So you
 
 You can see the least-squares fit in action below. We'll start with a lazy guess, the mean, and see how much better we can do by letting the line tilt.
 
-::::: {#act-least-squares .callout-tip .interactive .with-controls}
+::::: {#act-least-squares .callout-tip .interactive}
 ## Why is the best-fit line the best?
 
-{{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"maxWidth":"30rem"}' fallback="For the seven students, squared deviations from the mean fill a square with area 1200. Squared residuals from the fitted line fill 900 of it. Squared deviations of the predictions from the mean fill the remaining 300." >}}
+{{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"maxWidth":"30rem","sliders":[{"key":"slope","range":[-30,10,1]},{"key":"intercept","range":[40,100,1]}]}' fallback="For the seven students, squared deviations from the mean fill a square with area 1200. Squared residuals from the fitted line fill 900 of it. Squared deviations of the predictions from the mean fill the remaining 300." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="The data" data-action='{"collect-ss":false,"line":"none","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"emphasize":"none","controls-open":false,"animate":false}'}
@@ -108,8 +174,8 @@ Collect these squares in the same outline. The student who scored exactly what w
 This time, start at each student's prediction on the fitted line. How far is it from our old guess of 70? For half a cup we predict 75, so that's a square of 25 for each of the two students who drank half a cup. Collect all seven and we get $SS_{regression} = 300$. It fills the gap exactly. That's how much squared error we saved by using coffee to predict test score.
 :::
 
-::: {.tutorial-step data-title="Least error" data-action='{"collect-ss":false,"line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none","controls-open":true}'}
-Back to the residuals. Our best-fit line leaves us with 900. No other line does better---that's what makes it the least-squares fit. Don't take my word for it: the controls are now open, so try any slope and intercept you like. Remember the line we imagined moving down five points? Keep the slope at $-10$ and change the intercept from 80 to 75. The squared misses for all seven students now add up to 1075.
+::: {.tutorial-step data-title="Least error" data-action='{"collect-ss":"compare","line":"fit","show-residuals":true,"show-squares":true,"show-ss":true,"show-means":false,"emphasize":"none","show-sliders":["slope","intercept"]}'}
+Back to the residuals. Our best-fit line leaves us with 900. No other line does better---that's what makes it the least-squares fit. Don't take my word for it: use the sliders below the plot to try any slope and intercept you like. Remember the line we imagined moving down five points? Keep the slope at $-10$ and change the intercept from 80 to 75. The squared misses for all seven students now add up to 1075.
 :::
 ::::
 
@@ -119,19 +185,41 @@ Back to the residuals. Our best-fit line leaves us with 900. No other line does 
 
 ### The slope ($b$)
 
-So let's calculate $b$ and $a$ for this little set of data. We find the slope, $b$, by dividing $SP$, the sum of products, which as you remember quantifies the covariability between $X$ and $Y$, by the sum of squares for $X$. We calculated both of those in the previous chapter. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
+So let's calculate $b$ and $a$ for this little set of data. Start with what we already have. In Chapter 17 we found the correlation by dividing $SP$, the sum of products, which as you remember quantifies the covariability between $X$ and $Y$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units altogether. That's why we couldn't get a test score out of $-.50$. For the slope we want to keep the units: test points per cup. So we divide $SP$ by the variability of $X$ alone, the sum of squares for $X$. We calculated both of those in the previous chapter. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
 
 $$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
 
 In other words, as you move one unit along the $X$ axis, you move down ten units on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line along, the predicted $Y$ value moves from 70 to 60. So a change of one cup on $X$ corresponds to a change of $-10$ test points on $Y$. That's what we gain by keeping the units this time. The correlation of $-.50$ told us the line would slope down. The slope tells us how far down to go for each cup.
 
+<!-- REVIEW: NEW MATERIAL, two linked ideas (your prose):
+     (1) b = r (s_Y / s_X). Here s_Y = sqrt(1200/6) = 14.14 and s_X = sqrt(3/6) = 0.707, so -.50 × 20 = -10.
+         In z-score units both SDs are 1, so the slope IS r. That's the cleanest single statement of
+         correlation → regression, and the multiple regression section needs it for standardized slopes.
+     (2) Why it's called "regression". Ch 17 says Galton used r "in his work on regression" but this chapter
+         never explains the name. Predicted z_Y = r × z_X, so unless r = ±1 every prediction is closer to the
+         mean than the predictor was. That's regression toward the mean (Galton's heights of parents and children).
+         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback. -->
+
+
 ### The intercept ($a$)
 
 With $a$, we're determining the intercept of the line---where it crosses the $Y$ axis when $X$ equals zero. To figure this out, we can use the fact that the line of best fit passes through the point where the mean of $X$ and the mean of $Y$ intersect. Remember drawing those two mean lines on the scatterplot in Chapter 17? We know one point our line goes through (one cup, 70 points), and we know how steep it is. So where must it have started to get there?
 
+::: {#quiz-regression-intercept}
+{{< include quizzes/18-regression-intercept.qmd >}}
+:::
+
 That's what $a = M_Y - b M_X$ is working out. Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. Here the line went *down* ten points on its way to 70. So going back one cup brings us *up* ten points. That's $70 - (-10 \times 1)$, giving 80. So, again, that's the point at which the line meets the $Y$ axis. For a student who drank no coffee, we predict a score of 80.
 
 Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$. The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.
+
+<!-- REVIEW: This direction point is one of the main ways regression goes beyond r (r is symmetric; Ch 17
+     even says so about the correlation matrix). Consider moving it up: to the opening, or to just after the
+     Celsius–Fahrenheit section, where the last quiz question has readers convert F → C. With r = 1 both
+     directions give the same line. With r = -.50 they don't: predicting cups from score would give a line
+     with slope r × s_X/s_Y = -.025 cups per point. Drawn on these axes that's -40 points per cup, much
+     steeper than -10, because each line regresses toward its own mean. -->
+
 
 ## The standard error of the estimate
 
@@ -149,7 +237,13 @@ So now we have the equation to calculate our $\hat{Y}$ values. We can calculate 
 
 : Predicted values and residuals for the coffee data. {#tbl-residuals}
 
-$$SS_{residual} = \Sigma(Y - \hat{Y})^2 = 100 + 225 + 100 + 25 + 225 + 0 + 225 = 900$$
+$$
+\begin{aligned}
+SS_{residual} &= \Sigma(Y - \hat{Y})^2 \\
+&= 100 + 225 + 100 + 25 + 225 + 0 + 225 \\
+&= 900
+\end{aligned}
+$$
 
 ::: {#quiz-regression-ss-df}
 {{< include quizzes/18-regression-ss-df.qmd >}}
@@ -163,6 +257,13 @@ $$ s_{\text{estimate}} = \sqrt{\frac{SS_{residual}}{n-2}} = \sqrt{\frac{900}{5}}
 
 So our predictions for these students were typically off by about 13 test points.
 
+Notice what we had just before taking the square root: $900/5 = 180$. That's a variance, the average squared miss around the line (in squared test points). Keep that number in mind, because it's going to turn up again.
+
+<!-- REVIEW: Alternatively, move this whole section after "Partitioning variability", so that s_estimate is
+     introduced as sqrt(MS_residual) once mean squares exist. As it stands, the forward reference above and
+     the callback at Step 3 do the linking. -->
+
+
 ## Partitioning variability
 
 Think back to ANOVA. We started with each score's deviation from the grand mean. Knowing which group someone belonged to let us guess their group mean instead. How far the group means were from the grand mean gave us the between-groups variability. How far the scores still fell from their respective group means gave us the within-groups variability.
@@ -173,15 +274,34 @@ Notice how we've mostly been framing everything around the $Y$ variable. We're p
 
 Across the whole sample, those two sets of deviations give us the same kind of partition we used for ANOVA. The **regression sum of squares** is $SS_{regression} = \Sigma(\hat{Y} - M_Y)^2$. For the student who drank two cups, that's $(60 - 70)^2 = 100$ toward the regression sum of squares and $(75 - 60)^2 = 225$ toward the residual sum of squares. It's the *sums* that partition the total. The squares for any one student needn't add up that way.
 
-$$ SS_Y = SS_{regression} + SS_{residual} \qquad 1200 = 300 + 900 $$
+$$
+\begin{aligned}
+SS_Y &= SS_{regression} + SS_{residual} \\
+1200 &= 300 + 900
+\end{aligned}
+$$
 
 We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter, using the usual technique for sums of squares. So we already know those values. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
 
 $$ r^2 = \frac{SS_{regression}}{SS_Y} = \frac{300}{1200} = .25 $$
 
-There's the $.25$ we got by squaring $r = -.50$ in Chapter 17. In regression this proportion is called the **coefficient of determination**. It plays the same part as $\eta^2$ in ANOVA. Here, knowing coffee consumption accounts for a quarter of the variability in these seven test scores.
+There's the $.25$ we got by squaring $r = -.50$ in Chapter 17. In regression this proportion is called the **coefficient of determination**. It plays the same part as $\eta^2$ in ANOVA. Here, knowing coffee consumption accounts for a quarter of the variability in these seven test scores. The other three quarters, $SS_{residual}/SS_Y = 900/1200 = .75$, is the $1 - r^2$ that went into the standard error of the correlation in Chapter 17. Back then we described it as the variability unaccounted for by the relationship. Now you can see exactly what that is: the squared misses around the line.
 
-For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. One degree of freedom goes to regression for the one predictor, and five go to the residual. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom. We divide them to find a kind of variance, or mean square. Here we find $MS_{regression}$ and $MS_{residual}$. And those become the numerator and denominator of a new $F$ ratio for the regression. This is what we'll use for the hypothesis test.
+For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. One degree of freedom goes to regression for the one predictor. (The flat line at the mean already had its height; all the regression line adds is the slope.) That leaves five for the residual. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom. We divide them to find a kind of variance, or mean square. And those become the numerator and denominator of a new $F$ ratio for the regression.
+
+$$ MS_{regression} = \frac{SS_{regression}}{df_{regression}} $$
+
+$$ MS_{residual} = \frac{SS_{residual}}{df_{residual}} $$
+
+$$ F = \frac{MS_{regression}}{MS_{residual}} $$
+
+$MS_{residual}$ is the variance of the scores around the line, the same quantity we found on the way to the standard error of the estimate. $MS_{regression}$ is how much the line improved on the mean, per slope we estimated.
+
+::: {#quiz-regression-flat-line}
+{{< include quizzes/18-regression-flat-line.qmd >}}
+:::
+
+Suppose the slope in the population were zero. A line fitted to a sample would still tilt a little, because it would follow the random ups and downs in the scores. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
 
 ## A regression test, step by step
 
@@ -190,6 +310,12 @@ For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. On
 The null here is that the slope of the regression line in the population is zero. Or put another way, it would mean that knowing someone's score on the $X$ variable would be no help in making a straight-line prediction of their score on the $Y$ variable. Our best guess would be the mean of $Y$, regardless of their score on $X$. (That's exactly the flat line we pitted against the best-fit line in the activity earlier---the one whose squared error came out to $SS_Y$.)
 
 The alternative hypothesis is that the slope is not equal to zero. And notice that the slope we calculated based on our sample is labeled $b$. The population parameter we're interested in here is labeled with the Greek symbol $\beta$. For one predictor, asking whether $\beta$ is zero is the same question we asked about the population correlation in Chapter 17.
+
+<!-- REVIEW: NOTATION CLASH. Published papers (APA style, including Dunn et al.) use β for STANDARDIZED
+     coefficients. If multiple regression introduces standardized slopes, readers will meet β meaning two
+     things. Options: keep β for the population slope and footnote the APA usage; or write H0 in words /
+     with another symbol and keep β for standardized slopes, as Gravetter & Wallnau do. -->
+
 
 $$ H_0: \beta = 0 $$
 
@@ -225,11 +351,13 @@ Here's the full working, so you can check your answers:
 Summary table for the analysis of regression on the coffee data.
 :::
 
-$$
-MS_{regression} = \frac{300}{1} = 300 \qquad
-MS_{residual} = \frac{900}{5} = 180 \qquad
-F = \frac{300}{180} = 1.67
-$$
+$$ MS_{regression} = \frac{300}{1} = 300 $$
+
+$$ MS_{residual} = \frac{900}{5} = 180 $$
+
+$$ F = \frac{300}{180} = 1.67 $$
+
+There's that 180 again. The denominator of our $F$ ratio is the variance of the scores around the line, and its square root, $\sqrt{180} = 13.42$, is the standard error of the estimate.
 
 ### Step 4: Make a decision
 
@@ -247,11 +375,22 @@ So finally, we can report the results. Here, we can mention the general trend in
 
 > Each additional cup of coffee was associated with a predicted test score 10 points lower ($b = -10$). Coffee consumption accounted for 25% of the variability in scores, $F(1, 5) = 1.67$, $p = .25$.
 
-How precisely have we estimated that ten-point drop? Just as we did for a difference between means, we can put a confidence interval around the slope. Here the 95% interval runs from about 30 points lower to 10 points higher per cup.^[The standard error of the slope is $s_b = \sqrt{MS_{residual}/SS_X} = \sqrt{180/3} = 7.75$ points per cup. Using the critical $t$ from Chapter 17 gives $-10 \pm 2.571(7.75)$.] With seven students, even the direction of the population slope is uncertain.
+How precisely have we estimated that ten-point drop? Just as we did for a difference between means, we can put a confidence interval around the slope. Here the 95% interval runs from about 30 points lower to 10 points higher per cup.^[The standard error of the slope is $s_b = \sqrt{MS_{residual}/SS_X} = \sqrt{180/3} = 7.75$ points per cup. Using the critical $t$ from Chapter 17 gives $-10 \pm 2.571(7.75)$. Compare it with the standard error of the mean, which we could write as $\sqrt{s^2/n}$. In both cases it's a variance divided by how much information we have. For a mean, that's the number of scores. For a slope, it's how spread out the $X$ values are: the wider the range of coffee we observed, the more precisely we can pin down the slope.] With seven students, even the direction of the population slope is uncertain.
+
+<!-- REVIEW: extrapolation sets up restricted range (held off in Ch 17) and predicting beyond the data,
+     both saved for the possible "real-world messiness" chapter. A one-line forward allusion here would do. -->
 
 There's also a limit to where it makes sense to use the equation. Put eight cups into it and the predicted score is zero. Our students drank between zero and two cups. We've seen nothing to tell us what the relationship looks like out at eight. And even in the range we observed, telling someone to skip a cup of coffee is a different proposition from predicting how they'll score. What if the students who drank more coffee had also slept less?
 
-First, think about what we'd want to check in this scatterplot. Does a straight line follow the middle of the cloud? Do the vertical misses look about as spread out at one end as at the other? For the test and interval we've used, we assume independent observations and roughly normally distributed errors with similar spread at each value of $X$. That's much like checking the spread around the group means in ANOVA. Seven points give us very little to go on here.
+### Regression assumptions
+
+<!-- REVIEW: A statistical difference from Ch 17 worth one sentence. Regression assumes normally distributed
+     ERRORS around the line at each X, not bivariate normality; X itself can have any distribution (even
+     fixed by the researcher). The closing "What if the predictor is a group?" section depends on this, since
+     a 0/1 predictor can't be normal. A residual plot (the residuals from the least-squares activity, laid
+     out against X) is the natural check, and readers have already seen the residuals drawn. -->
+
+What would we want to check in this scatterplot? Does a straight line follow the middle of the cloud? Do the vertical misses look about as spread out at one end as at the other? For the test and interval we've used, we assume independent observations and roughly normally distributed errors with similar spread at each value of $X$. That's much like checking the spread around the group means in ANOVA. Seven points give us very little to go on here.
 
 ## Multiple regression
 
@@ -273,11 +412,30 @@ With **multiple regression**, each predictor gets its own slope. We multiply cup
 
 $$ \hat{Y} = b_1 X + b_2 Z + a $$ {#eq-multiple-regression}
 
-Fitting that equation to our seven students gives us a slope of $-2$ for coffee and $6$ for sleep. The intercept is 30.^[If you want to check the fit by hand, use the point of means and the fact that the residuals have zero sum of products with each predictor. For these data the two slope equations are $3b_1 - 4b_2 = -30$ and $-4b_1 + 12b_2 = 80$. The coefficients on the left are the sums of squares for coffee and sleep and their sum of products. The numbers on the right are their sums of products with test score. Substituting $b_1 = -2$ and $b_2 = 6$ satisfies both equations, and $a = M_Y - b_1 M_X - b_2 M_Z = 70 - (-2)(1) - 6(7) = 30$.]
+<!-- REVIEW (point 6, parked): this is the one place results simply appear. A possible lead-in:
+     a quiz asking readers to predict whether coffee's slope, with sleep in the equation, will be steeper
+     than −10, about the same, or flatter; then reveal −2; then the residual-on-residual tutorial
+     (comment below) shows why. The "what sleep adds" quiz further down already works this way. -->
+
+Fitting that equation to our seven students gives us a slope of $-2$ for coffee and $6$ for sleep. The intercept is 30.^[If you want to check the fit by hand, use the point of means and the fact that the residuals have zero sum of products with each predictor. For these data the two slope equations are $3b_1 - 4b_2 = -30$ and $-4b_1 + 12b_2 = 80$. The coefficients on the left are the sums of squares for coffee and sleep and their sum of products. The numbers on the right are their sums of products with test score. Substituting $b_1 = -2$ and $b_2 = 6$ satisfies both equations, and $a = M_Y - b_1 M_X - b_2 M_Z$ $= 70 - (-2)(1) - 6(7)$ $= 30$.]
 
 $$ \hat{Y} = -2X + 6Z + 30 $$
 
 Try the equation for someone who slept six hours and drank a cup and a half. We get $-2(1.5) + 6(6) + 30 = 63$. Now keep sleep at six hours and change coffee from one and a half cups to half a cup. The predicted score goes up by just two points. With coffee alone that same change raised the prediction by ten points. That's what the coffee slope means *with sleep in the equation*. Likewise, holding coffee constant, each extra hour of sleep raises the predicted score by six points.
+
+<!-- REVIEW: NEW SUBSECTION + TUTORIAL. This is where to deliver Ch 17's promise (line ~343: "We'll use this
+     technique of measuring deviations from a prediction in the next chapter"). Where does -2 come from?
+       - Regress coffee on sleep (slope -1/3) and keep the residuals: the part of each student's coffee that
+         sleep doesn't predict.
+       - Regress score on sleep (slope 6.67) and keep those residuals too.
+       - The least-squares slope of score residuals on coffee residuals is exactly -2 = b_1.
+       - Their correlation is -.10, the seven-student partial correlation (check with Ch 17's formula:
+         r_XY = -.50, r_XZ = -.67, r_YZ = .67).
+     So "each slope controls for the other" stops being a slogan: b_1 is literally the line of best fit through
+     the part of coffee and the part of score that sleep can't account for. Same for b_2 the other way round.
+     Tutorial idea: the coffee/score scatterplot, then step by step replace each axis with its residuals from
+     sleep, and fit the line (slope -2). Verified in R (Frisch–Waugh). Readers could leave the footnote's
+     normal equations aside after this. -->
 
 We can check the misses just as we did before. Two students had those same six hours and one and a half cups. Both now get a prediction of 63. Their scores were 50 and 65, so their residuals are $-13$ and $+2$.
 
@@ -309,13 +467,56 @@ $$ R^2 = \frac{SS_{regression}}{SS_Y} = \frac{540}{1200} = .45 $$
 
 With more than one predictor we write this proportion as capital $R^2$. Coffee alone accounted for 25% of the variability in our sample. Coffee and sleep together account for 45%. The overall $F$ tests the two slopes together against a model that just predicts the mean. Here $F(2, 4) = 1.64$, $p = .30$. Adding a predictor can improve the fit to the students we already have even if it wouldn't help us predict how new students will score.
 
-How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions.
+<!-- REVIEW: The last sentence above is the right idea but compressed. A concrete demonstration from these data:
+       - Sleep alone: R^2 = .444, SS_reg 533.3, SS_res 666.7, F(1, 5) = 4.00, p = .10.
+       - Add coffee: R^2 = .45 (it can never go down), but MS_reg is now split over 2 df and MS_res over 4,
+         so F(2, 4) = 1.64, p = .30.
+     A predictor that adds almost nothing still costs a degree of freedom, and the overall test gets weaker.
+     Adjusted R^2 could go in a footnote. Also worth stating H0 for the overall test: both population slopes are zero. -->
+
+::: {#quiz-regression-what-sleep-adds}
+{{< include quizzes/18-regression-what-sleep-adds.qmd >}}
+:::
+
+How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions. (In Chapter 17 we used all 300 students, and the partial correlation was $-.05$. For these seven students it works out to $-.10$.)
+
+<!-- REVIEW: NEW MATERIAL — the individual predictors. Everything verified in R.
+     UNIQUE VS SHARED. Coffee alone .25, sleep alone .444, both .45. So:
+       coffee's unique share .006, sleep's unique share .20, shared .244, unexplained .55.
+     Almost all of coffee's 25% is shared with sleep. A Venn-style diagram (or a variance-partition preset)
+     would show this well; Ch 17's coffee-test-third-variable SVG is a starting point.
+     SIGNIFICANCE OF EACH PREDICTOR. The partitioning route reuses the chapter's engine: the SS each predictor
+     adds when entered last, over MS_residual = 165:
+       coffee: 6.67 → F(1, 4) = 0.04 (t = -0.20), p = .85
+       sleep:  240  → F(1, 4) = 1.45 (t = 1.21),  p = .29
+     F = t^2 again; software prints t = b / s_b (s_b: coffee 9.95, sleep 4.97), so put that in a footnote.
+     Link to Ch 16: an expanded summary table with a row per predictor looks like the factorial table. But
+     6.67 + 240 = 246.67, not 540; the other 293 is shared and goes to neither row. In a balanced factorial
+     design the factors are uncorrelated, which is why those rows added up.
+     SIZE OF EACH PREDICTOR. Options, in order of fit with the chapter:
+       - Unique ΔR^2 (.006, .20): reuses the partition, no new formula. (It is the squared semipartial correlation.)
+       - Standardized slopes: coffee -.10, sleep .60. Cups and hours become comparable. With one predictor the
+         standardized slope is just r (needs b = r s_Y/s_X earlier). See the β notation note at Step 1.
+       - Partial r (-.10; squared .01 = ΔR^2 / (1 - R^2_sleep)): the Ch 17 link, already covered by the residual tutorial above.
+     CAVEATS ON "UNIQUE INFLUENCE". Statistical control, not causal. Each slope depends on which other predictors
+     are in the model. Shared variance belongs to neither predictor's test, so with correlated predictors the
+     overall F can be significant while neither slope is.
+     BOOKEND: Dunn et al. (2008) survey. Ch 17's footnote promises they controlled for income with regression.
+     As I recall, prosocial spending β ≈ .11 (significant) and personal spending β ≈ .02 (not), with income in
+     the model. CHECK AGAINST THE PAPER before using. A real multiple regression with standardized betas to
+     read, and it closes the loop from Ch 17's opener. -->
+
 
 ## What if the predictor is a group?
 
 Think back to the two spending groups in Chapter 12. Suppose we coded spending on yourself as 0 and spending on someone else as 1, and used that number to predict happiness. What would the least-squares line do? At 0, its best guess would be the mean for the first group. At 1, its best guess would be the mean for the second. Moving one unit along that line takes us from one group mean to the other, so the slope is just the difference between them. Each person's residual is their deviation from their own group mean, exactly the quantity we used for within-groups variability in ANOVA.
 
 So if we tested whether that slope was zero, we'd be asking whether the two group means were equal. That's the question we answered with an independent-samples $t$ test in Chapter 12 and with ANOVA in Chapter 14. With cups of coffee as our predictor, testing the slope brought us back to Chapter 17's test of the correlation. There's a name for the mathematical framework these procedures share. It's called the **general linear model**.
+
+<!-- REVIEW: In the same spirit, r^2 here is also eta^2 from a one-way ANOVA on the two groups (the point-biserial
+     r = .28 from Ch 17's footnote gives r^2 = .08). A sentence or the roadmap's closing table
+     (t → d, F → eta^2, r → r^2, R^2) would make the effect sizes part of the same family. -->
+
 
 We started with questions like “Did the two groups differ?” and “Do these two things go together?” Those are still different things we might want to know. But by now you've seen how far we can get with the same few tools you first met with a single mean. Make a prediction, see how far the scores fall from it, and ask how much better we can do with the information we have.
 
