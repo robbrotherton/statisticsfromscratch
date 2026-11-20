@@ -120,6 +120,23 @@ scQuadrant = (p, stats) =>
 // leaves a ring SC_RING_WIDTH wide inside that edge.
 SC_DOT_OUTLINE = 1.4;
 SC_RING_WIDTH = 2;
+
+// The sums-of-squares panel, laid out like the ANOVA explorer's: beside the
+// plot when the figure is at least SC_PANEL_BESIDE wide, otherwise under it.
+SC_PANEL_BESIDE = 500;
+SC_PANEL_GAP = 14;
+SC_PANEL_INSET = 18;
+SC_PANEL_MIN_WIDTH = 176;
+// Room above the square for the panel's title and the total's label, and
+// below it for the two parts' labels.
+SC_PANEL_HEAD = 58;
+SC_PANEL_FOOT = 58;
+// Under the plot, on a phone, the sums go without the panel's box and title,
+// with the parts named beside the square. The plot is shorter there, and the
+// square, on the plot's area scale, shrinks with it, so the whole tutorial
+// fits on the screen.
+SC_COMPACT_ASPECT = 1.35;
+SC_COMPACT_LABELS = 130;
 scHoleRadius = (r) => r - SC_DOT_OUTLINE / 2 - SC_RING_WIDTH
 
 // Whether a point drawn at (px, py) is on opposite sides of mean lines drawn
@@ -456,6 +473,18 @@ scEnsureStyles = () => {
       min-width: 6.4rem;
     }
 
+    .scatterplot .sc-ss-panel {
+      fill: color-mix(in srgb, var(--sfs-control-bg, #f1f3f5) 62%, transparent);
+      stroke: var(--sfs-border, #c8cdd2);
+    }
+
+    .scatterplot .sc-ss-panel-title {
+      fill: currentColor;
+      font-family: var(--bs-body-font-family, system-ui, sans-serif);
+      font-size: var(--sfs-figure-title-size, 1rem);
+      font-weight: 750;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .scatterplot .sc-layer,
       .scatterplot .sc-ring,
@@ -598,6 +627,9 @@ makeScatterplot = function(opts) {
     axisLabels: scBoolean(opts.axisLabels, !minimal),
     ticks: normalizeTicks(opts.ticks ?? opts.tickLabels, minimal ? "none" : "numeric")
   };
+  // A tutorial that collects sums of squares keeps their panel throughout, so
+  // the plot doesn't move when the first square arrives.
+  const ssPanel = scBoolean(opts.ssPanel, false);
 
   const explicitXDomain = Array.isArray(opts.xDomain) && opts.xDomain.length === 2;
   const explicitYDomain = Array.isArray(opts.yDomain) && opts.yDomain.length === 2;
@@ -616,22 +648,47 @@ makeScatterplot = function(opts) {
   // starts with, so that is also what decides whether they may shrink.
   const marginsHoldText = state.axisLabels || state.ticks !== "none";
   // Geometry is recomputed whenever the figure is redrawn at a new width.
+  // `width` and `height` are the plot's; the figure is wider when the sums
+  // panel stands beside the plot, and taller when it sits underneath.
   let width, height, margin, innerWidth, plotBottom, plotRight, pointRadius;
-  function setGeometry(nextWidth) {
-    const geometry = scPlotGeometry({
-      width: nextWidth,
-      authoredWidth,
-      authoredHeight: scPositiveNumber(opts.height, 0) || null,
-      margin: authoredMargin,
-      textLeft: marginsHoldText,
-      textBottom: marginsHoldText,
-      aspect
-    });
+  let figureWidth, panelBeside = false;
+  const plotGeometry = (plotWidth, plotAspect = aspect) => scPlotGeometry({
+    width: plotWidth,
+    authoredWidth,
+    authoredHeight: scPositiveNumber(opts.height, 0) || null,
+    margin: authoredMargin,
+    textLeft: marginsHoldText,
+    textBottom: marginsHoldText,
+    aspect: plotAspect
+  });
+  // ySpan is the height of the y domain, which sets the collected square's size.
+  function setGeometry(nextWidth, ySpan) {
+    figureWidth = nextWidth;
+    panelBeside = ssPanel && nextWidth >= SC_PANEL_BESIDE;
+    let geometry = plotGeometry(nextWidth, ssPanel ? SC_COMPACT_ASPECT : aspect);
+    if (panelBeside) {
+      // The square shares the plot's area scale, so the panel's width depends
+      // on the plot's, and the plot takes whatever the panel leaves.
+      const meanY = d3.mean(state.points, p => p.y);
+      const share = Math.sqrt(d3.sum(state.points, p => (p.y - meanY) ** 2)) / ySpan;
+      let plotWidth = nextWidth * 0.6;
+      for (let i = 0; i < 6; i++) {
+        geometry = plotGeometry(plotWidth);
+        const panelWidth = Math.max(SC_PANEL_MIN_WIDTH,
+          Math.ceil(share * geometry.innerHeight + 2 * SC_PANEL_INSET));
+        plotWidth = Math.round(nextWidth - SC_PANEL_GAP - panelWidth);
+      }
+      geometry = plotGeometry(plotWidth);
+    }
     ({ width, height, margin, innerWidth, plotBottom, plotRight } = geometry);
     pointRadius = scPointRadius(
       Math.min(geometry.innerWidth, geometry.innerHeight), basePointRadius);
   }
-  setGeometry(authoredWidth);
+  {
+    const span = d3.scaleLinear()
+      .domain(autoDomain((p) => p.y, explicitYDomain, opts.yDomain)).nice().domain();
+    setGeometry(authoredWidth, Math.abs(span[1] - span[0]));
+  }
 
   const root = d3.create("div")
     .attr("class", "scatterplot sfs-figure")
@@ -953,27 +1010,61 @@ makeScatterplot = function(opts) {
   };
 
   // One square, on the same area scale as the plot, throughout the comparison.
-  // The regression pieces land on the residual area already collected.
+  // The regression pieces land on the residual area already collected. It
+  // sits in a panel like the ANOVA explorer's, with the total named above the
+  // square and its parts listed underneath.
   let collection;
   function renderSSCollection(mode, stats, ssResidual, deviation, squareGeometry, animate, delay) {
     if (collection) {
       collection.selectAll("*").interrupt();
       collection.remove();
       collection = null;
-      svg.attr("viewBox", [0, 0, width, height]);
     }
-    if (!mode || stats.ssY <= 0) return;
+    const showPanel = (ssPanel || mode) && stats.ssY > 0;
+    if (!showPanel) {
+      svg.attr("viewBox", [0, 0, width, height]);
+      return;
+    }
 
     const side = Math.sqrt(stats.ssY) * Math.abs(y(1) - y(0));
-    const left = Math.max(6, (width - side - 112) / 2);
-    const top = height + 28;
+    let left, top;
+    collection = svg.append("g").attr("class", "sc-ss-collection").attr("pointer-events", "none");
+    if (panelBeside) {
+      const panel = { x: width + SC_PANEL_GAP, y: Math.max(2, margin.top - 10),
+        width: figureWidth - width - SC_PANEL_GAP - 2, height: SC_PANEL_HEAD + side + SC_PANEL_FOOT };
+      left = panel.x + SC_PANEL_INSET;
+      top = panel.y + SC_PANEL_HEAD;
+      svg.attr("viewBox", [0, 0, figureWidth, Math.max(height, panel.y + panel.height + 2)]);
+      collection.append("rect").attr("class", "sc-ss-panel")
+        .attr("x", panel.x).attr("y", panel.y).attr("width", panel.width).attr("height", panel.height)
+        .attr("rx", 10).attr("ry", 10);
+      collection.append("text").attr("class", "sc-ss-panel-title")
+        .attr("x", panel.x + SC_PANEL_INSET).attr("y", panel.y + 27)
+        .text("Sums of squares");
+    } else {
+      left = Math.max(4, Math.round((width - side - SC_COMPACT_LABELS) / 2));
+      top = height + 26;
+      svg.attr("viewBox", [0, 0, width, top + side + 6]);
+    }
     const bottom = top + side;
     const depth = value => side * value / stats.ssY;
-    const labelX = left + side + 12;
-    svg.attr("viewBox", [0, 0, width, bottom + 10]);
-    collection = svg.append("g").attr("class", "sc-ss-collection").attr("pointer-events", "none");
+    if (!mode) return;
+
     const label = (x, y, name) => collection.append("text")
       .attr("class", "sc-axis-label").attr("x", x).attr("y", y).attr("data-sum", name);
+    // The parts' labels, one row each under the square (beside it, under
+    // the plot), with a swatch in the shape's own fill and outline.
+    let rows = 0;
+    const partLabel = (name, color, dashed) => {
+      const rowX = panelBeside ? left : left + side + 12;
+      const rowY = (panelBeside ? bottom + 24 : top + 14) + 20 * rows++;
+      collection.append("rect").attr("class", "sc-ss-swatch")
+        .attr("x", rowX).attr("y", rowY - 10).attr("width", 12).attr("height", 12)
+        .attr("fill", dashed ? "none" : color).attr("fill-opacity", 0.24)
+        .attr("stroke", color).attr("stroke-width", dashed ? 1.5 : 1)
+        .attr("stroke-dasharray", dashed ? "3 2" : null);
+      return label(rowX + 18, rowY, name);
+    };
     const totalLabel = label(left, top - 9, "total");
     const setTotal = value => totalLabel.text("Total = " + format(value));
     setTotal(stats.ssY);
@@ -996,11 +1087,8 @@ makeScatterplot = function(opts) {
         .attr("x", left).attr("y", bottom - depth(ssBest)).attr("width", side).attr("height", depth(ssBest))
         .attr("fill", "none").attr("stroke", "var(--sfs-text, currentColor)")
         .attr("stroke-width", 1.5).attr("stroke-dasharray", "5 4");
-      const bestY = bottom - depth(ssBest);
-      // The current total is never below the best, so its label goes above.
-      const currentY = Math.max(top + 4, Math.min(bottom - depth(shown) + 4, bestY - 14));
-      label(labelX, bestY + 4, "best").text("Best fit = " + format(ssBest));
-      label(labelX, currentY, "residual").text("Residual = " + format(ssResidual));
+      partLabel("residual", ssColors.residual).text("Residual = " + format(ssResidual));
+      partLabel("best", "var(--sfs-text, currentColor)", true).text("Best fit = " + format(ssBest));
       return;
     }
 
@@ -1015,10 +1103,9 @@ makeScatterplot = function(opts) {
         .attr("fill", ssColors[name]).attr("fill-opacity", 0.24)
         .attr("stroke", ssColors[name]);
     }
-    const partLabel = (name, middle) => label(labelX, bottom - depth(middle) + 4, name);
     if (mode === "regression") {
       addBand("residual", base, 0);
-      partLabel("residual", base / 2).text("Residual = " + format(base));
+      partLabel("residual", ssColors.residual).text("Residual = " + format(base));
     }
 
     const color = ssColors[mode];
@@ -1030,7 +1117,7 @@ makeScatterplot = function(opts) {
     const sumRect = addBand(mode, animate ? 0 : sum, base);
     let setSum = setTotal;
     if (mode !== "total") {
-      const text = partLabel(mode, base + sum / 2);
+      const text = partLabel(mode, color);
       const name = mode === "residual" ? "Residual" : "Regression";
       setSum = value => text.text(name + " = " + format(value));
     }
@@ -1068,10 +1155,11 @@ makeScatterplot = function(opts) {
 
   function resize(nextWidth) {
     const rounded = Math.round(nextWidth);
-    if (!(rounded > 0) || rounded === width) return;
+    if (!(rounded > 0) || rounded === figureWidth) return;
     // A move still in flight would finish at positions from the old scales.
     svg.selectAll("*").interrupt("sc-move").interrupt("sc-square-label");
-    setGeometry(rounded);
+    const [yLo, yHi] = y.domain();
+    setGeometry(rounded, Math.abs(yHi - yLo));
     applyGeometry();
     render({ animate: false });
   }
