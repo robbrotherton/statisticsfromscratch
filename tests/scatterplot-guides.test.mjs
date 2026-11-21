@@ -36,9 +36,7 @@ test("the slope figure's line is the conversion, and its intercept guide and ris
 });
 
 test("the best-fit slider covers the plotted range and starts visible", () => {
-  // The slider figure lives in the prediction-error quiz.
-  const quiz = readChapter("quizzes/18-regression-prediction-error.qmd");
-  const figure = /\{\{< interactive-figure bestFitLineScatter makeScatterplot options='([^']+)'/.exec(quiz);
+  const figure = /\{\{< interactive-figure bestFitLineScatter makeScatterplot options='([^']+)'/.exec(chapter);
   const opts = JSON.parse(figure[1]);
   const guide = opts.sliders.find((slider) => slider.key === "guide");
   assert.deepEqual(guide.range.slice(0, 2), opts.xDomain);

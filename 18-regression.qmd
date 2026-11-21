@@ -88,11 +88,13 @@ The only difference is that these are now *predictions*. With temperatures, the 
 
 $$ \hat{Y} = bX + a $$ {#eq-regression-line}
 
+{{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem","color":"var(--quarto-scss-export-callout-color-tip, var(--bs-success))"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
+
 ::: {#quiz-regression-prediction-error}
 {{< include quizzes/18-regression-prediction-error.qmd >}}
 :::
 
-But I dodged an important issue. There are an infinite number of straight lines that we *could* draw through a scatterplot. You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. None of them will go through every data point perfectly. Every possible line will have some misses, and as @quiz-regression-prediction-error showed, moving the line closer to some points moves it further from others. How do we know which line is best? We find the one that minimizes the collective misses---the one that is least wrong. This is called the **line of best fit**.
+But I dodged an important issue. There are an infinite number of straight lines that we *could* draw through a scatterplot. You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. None of them will go through every data point perfectly. Every possible line will have some misses, and as @quiz-regression-prediction-error showed, moving the line closer to some points moves it further from others. How do we know which line is best? We find the one that minimizes the collective misses---the one that is least wrong.
 
 To be more precise about the "misses," when a point isn't exactly on the line, it's either at some distance above or below it. That distance gets a special name in the context of regression: a **residual**. It's the difference between the observed value, $Y$, and the predicted value, $\hat{Y}$. So a residual is:
 
@@ -106,17 +108,15 @@ So for any line, we can compute the residuals. Something else they have in commo
 
 $$ SS_{\text{residual}} = \Sigma(Y - \hat{Y})^2 $$
 
-So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$. This is called the **least squares** solution, which is why you'll also hear the line of best fit called the least-squares line, or simply the **regression line**.
+You can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the **line of best fit**. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$. This is called the **least squares** solution, which is why you'll also hear the line of best fit called the least-squares line, or simply the **regression line**.
 
 That's all well and good, but how do we actually find the line of best fit? Thankfully we don't have to go through every possible line to find the one that gives the smallest answer.^[Since there are infinitely many, it'd take forever.] We can find the slope and intercept of the line of best fit directly from the data.
-
-Start with the height. Think back to @quiz-regression-prediction-error, where we moved the line down five points. Sliding a line up or down without changing its slope is just like changing a single guess in Chapter 4. Too low, and the residuals add up to more than zero. Too high, and they add up to less. The best height is where they balance out and sum to zero, just as deviations from the mean do. And whatever the slope, that happens when the line passes through the point where the means of $X$ and $Y$ intersect. A student who drank the average amount of coffee gets a prediction of the average test score---the guess you made in @quiz-regression-first-guess. So the line of best fit pivots on the point of means. All that's left is to figure out how far to tilt it.
 
 ### The slope ($b$)
 
 In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units. That's why the correlation for Celsius and Fahrenheit comes out to 1, even though the slope is 1.8. For the slope we want to keep the units: test points per cup of coffee. So we divide $SP$ by $SS_X$ alone. $SP$ is in cups times points, and $SS_X$ is in cups squared, so what's left is points per cup. That's the "rise over run."[^weighted-slopes]
 
-[^weighted-slopes]: Here's another way to see what the formula is doing. Draw a line from the point of means out to each student, and find its slope. The student who drank no coffee and scored 90 is one cup to the left and 20 points up, a slope of $-20$. The student who drank two cups and scored 75 gives a slope of $+5$, and so on. The slope of the line of best fit is an average of those seven slopes, weighted by $(X - M_X)^2$, so students far from the average amount of coffee get more say. (The student who drank exactly one cup gets no say at all.) The weighted slopes add up to $SP = -30$, and the weights add up to $SS_X = 3$.
+[^weighted-slopes]: Here's another way to see what the formula is doing. Draw a line from the point where the two means meet (one cup, 70 points) out to each student, and find its slope. The student who drank no coffee and scored 90 is one cup to the left and 20 points up, a slope of $-20$. The student who drank two cups and scored 75 gives a slope of $+5$, and so on. The slope of the line of best fit is an average of those seven slopes, weighted by $(X - M_X)^2$, so students far from the average amount of coffee get more say. (The student who drank exactly one cup gets no say at all.) The weighted slopes add up to $SP = -30$, and the weights add up to $SS_X = 3$.
 
 We calculated both $SP$ and $SS_X$ in the previous chapter, so we already have what we need. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
 
@@ -135,23 +135,26 @@ In other words, as you move one unit along the $X$ axis, you move down ten units
 
 ### The intercept ($a$)
 
-Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. We already know one point the line passes through: the point of means. So we can start there and use the slope to work our way back to zero.
+Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. To figure this out, we can use that slope together with another point we know the line will pass through: the point where the means of $X$ and $Y$ intersect. (Why does it have to pass through that point? A student who drank exactly the average amount of coffee should get an exactly average test-score prediction. The fit line pivots around those means, like the balance beam in Chapter 4, except now the pivot balances both means simultaneously.)
 
-::: {#quiz-regression-intercept}
+So we can start at the point of means and use the slope to work our way back to zero. Each unit change in $X$ changes the height of the line by $b$, so by the time we move from $X = M_X$ to $X = 0$, the height has changed by $b M_X$. Subtract that from $M_Y$ and we reach the intercept.
+
+<!-- ::: {#quiz-regression-intercept}
 {{< include quizzes/18-regression-intercept.qmd >}}
-:::
+::: -->
 
-That's what this equation is working out:
 
 $$ a = M_Y - b M_X $$
 
-Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. For our data:
+For our data:
 
 $$ a = 70 - (-10) \times 1 = 80 $$
 
-For a student who drank no coffee, we predict a score of 80.
+In other words, we predict a score of 80 for a student who drank no coffee.
 
-Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$. The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.
+### $SS_{\text{residual}}$ and $SS_{\text{regression}}$
+
+Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$.^[The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.]
 
 <!-- REVIEW: This direction point is one of the main ways regression goes beyond r (r is symmetric; Ch 17
      even says so about the correlation matrix). Consider moving it up: to the opening, or to just after the
