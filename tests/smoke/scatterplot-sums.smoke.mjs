@@ -367,7 +367,7 @@ test('the coffee residuals table builds a column per step, and its own cells giv
 
 test('chapter 18 guides read off the line, the slider moves the reading, and the slope figure draws its rise over run', async () => {
   const chapter = readChapter('18-regression.qmd');
-  const bestFit = JSON.parse(/\{\{< interactive-figure bestFitLineScatter makeScatterplot options='([^']+)'/.exec(chapter)[1]);
+  const bestFit = JSON.parse(/\{\{< interactive-figure bestFitLineScatter makeScatterplot options='([^']+)'/.exec(readChapter('quizzes/18-regression-prediction-error.qmd'))[1]);
   const slope = JSON.parse(/makeScatterplot options='([^']+)'/.exec(divById(chapter, 'fig-temperature-slope-intercept'))[1]);
   const browser = await chromium.launch();
   try {

@@ -46,14 +46,15 @@ Last chapter we looked at data from a study on coffee consumption and test perfo
 
 But suppose a student missed the exam and is taking a makeup. If you knew how many cups of coffee this new student had drunk that morning, could you make a guess about how they're likely to do on the exam?
 
-<!-- quiz:
-- say she drank exactly the average amount of coffee, one cup. What score would you guess she got? (The mean of the seven students' scores is 70, so that would be a reasonable guess.)
-- say she drank more than average, a cup and a half. What score would you guess she got? Would guessing average test score still be the best best? (The correlation is negative, so we would guess lower than 70.)
-- if you had to predict a precise score, what would it be? (We don't have enough information to make a precise prediction from the correlation alone. But what's the thought process? look at that part of the scatterplot, pick a typical score. implicitly picturing a line?) -->
+{{< interactive-figure coffeeScoresScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"showMeans":true,"controls":false,"maxWidth":"30rem"}' fallback="The seven students' coffee and test scores from Chapter 17, with dashed lines at the mean of one cup and the mean score of 70." >}}
+
+::: {#quiz-regression-first-guess}
+{{< include quizzes/18-regression-first-guess.qmd >}}
+:::
 
 If all we had to go on were the seven test scores---we had no knowledge of how much coffee the student drank---a reasonable guess would be their mean, 70. Shown as a line on the scatterplot, that kind of prediction would be a flat line going all the way across at 70. It shows that we would be making the same guess for everyone, regardless of their coffee consumption.
 
-But suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank. That makes use of the relationship between the two variables. We found a negative correlation, $r = -.50$, so the line should slope downward; as coffee consumption increases, our predicted test score should decrease. But by how much? How would we know which line is best?
+But suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank. That makes use of the relationship between the two variables. We found a negative correlation, $r = -.50$, so the line should slope downward; as coffee consumption increases, our predicted test score should decrease. But by how much?
 
 ## Straight lines
 
@@ -75,45 +76,47 @@ A straight line you might already be familiar with is the relationship between t
 
 :::
 
-The relationship between the scales can be expressed as $Y = 1.8X + 32$. Zero degrees Celsius corresponds to 32 Fahrenheit; that's the intercept. $1.8$ is the slope: how much $Y$ changes per unit change in $X$. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees. We can covert any temperature from one scale to the other using this equation. Like, 100 degrees Celsius is 212 degrees Fahrenheit: $Y = 1.8(100) + 32 = 212$.
+The relationship between the scales can be expressed as $Y = 1.8X + 32$. Zero degrees Celsius corresponds to 32 Fahrenheit; that's the intercept. $1.8$ is the slope: how much $Y$ changes per unit change in $X$. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees. We can convert any temperature from one scale to the other using this equation. Like, 100 degrees Celsius is 212 degrees Fahrenheit: $Y = 1.8(100) + 32 = 212$.
 
 Obviously the relationship between these two variables is a perfect correlation. If we took some values of Celsius and their corresponding Fahrenheit values, we could calculate the correlation and it would come out to 1. But the slope is 1.8, not 1. They're related, but they answer different questions. The slope tells us how steep that line is, in the units we measured. Together with the intercept, this is what allows us to make predictions.
 
 ### The line of best fit
 
-So how does this help us when we have a bunch of data that isn't perfectly correlated? Simple: we draw a line though the points to summarize their relationship. It gives a typical value on the $Y$ variable for any given value of $X$. Then we use the line to make predictions, just like we convert Celsius to Fahrenheit.
+How does this help us when we have a bunch of data that isn't perfectly correlated? Simple: we draw a line through the points to summarize their relationship. It gives a typical value on the $Y$ variable for any given value of $X$. Then we use the line to make predictions, just like we convert Celsius to Fahrenheit.
 
-{{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
+The only difference is that these are now *predictions*. With temperatures, the line gave us the exact value of $Y$ every time. With coffee and test scores, it gives us a predicted value, which we write as $\hat{Y}$ ("Y-hat"):
 
-<!-- this is interactive with a slider, but not a full tutorial. the only one like it in the book so far, i think. i'm not opposed, but i wonder if it would be better as part of a quiz, where readers can input answers about both predictions and errors (before the term residual is introduced, to help it land intuitively) -->
-
-But I dodged an important issue. There are an infinite number of straight lines that we *could* draw through a scatterplot. You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. None of them will go through every data point perfectly. Every possible line will have some misses. How do we know which line is best? We find the one that minimizes the collective misses---the one that is least wrong. This is called the **line of best fit**.
-
-To be more precise about the "misses," when a point isn't exactly on the line, it's either at some distance above or below the line of best fit. That distance gets a special name in the context of regression: a **residual**. It's the difference between the observed value, $Y$, and the predicted value, denoted $\hat{Y}$. So a residual is:
-
-$$ Y - \hat{Y} $$
-
-Don't let the fancy new name and symbol fool you, though. This is a familiar concept. It's a deviation, just like $X - M$. The difference is that the predicted value comes from the line of best fit rather than from the mean. The line of best like summarizes the central tendency of the relationship between two variables, just like the mean summarizes the central tendency of a single variable. But when the two variables are related, it's a moving average, giving different predictions for different values of $X$.
-
-For example, the student who drank a cup and a half of coffee scored 50 points, but our prediction was 65. The difference is $50 - 65 = -15$. We could call that a prediction error, as in, if you were predicting what the point would have been based only on the line, you would've been a bit off.
+$$ \hat{Y} = bX + a $$ {#eq-regression-line}
 
 ::: {#quiz-regression-prediction-error}
 {{< include quizzes/18-regression-prediction-error.qmd >}}
 :::
 
-So for any line, we can compute the residuals. Something else they have in common with our old friends, deviations, is that we can square the residuals and then sum them up to get a useful quantity, the **sum of squared residuals**, $SS_{\text{residual}}$.
+But I dodged an important issue. There are an infinite number of straight lines that we *could* draw through a scatterplot. You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. None of them will go through every data point perfectly. Every possible line will have some misses, and as @quiz-regression-prediction-error showed, moving the line closer to some points moves it further from others. How do we know which line is best? We find the one that minimizes the collective misses---the one that is least wrong. This is called the **line of best fit**.
+
+To be more precise about the "misses," when a point isn't exactly on the line, it's either at some distance above or below it. That distance gets a special name in the context of regression: a **residual**. It's the difference between the observed value, $Y$, and the predicted value, $\hat{Y}$. So a residual is:
+
+$$ Y - \hat{Y} $$
+
+For example, the student who drank a cup and a half of coffee scored 50 points, but our prediction was 65. The residual is $50 - 65 = -15$. It's negative because we predicted too high. We could call that a prediction error, as in, if you were predicting the score based only on the line, you would've been 15 points off.
+
+Don't let the fancy new name and symbol fool you, though. This is a familiar concept. It's a deviation, just like $X - M$. The difference is that the predicted value comes from the line rather than from the mean. The line of best fit summarizes the central tendency of the relationship between two variables, just like the mean summarizes the central tendency of a single variable. But when the two variables are related, it's a mean that moves, giving different predictions for different values of $X$. That's what you were doing in @quiz-regression-first-guess if you picked a score typical of the students around a cup and a half.
+
+So for any line, we can compute the residuals. Something else they have in common with our old friends, deviations, is that we can square the residuals and then sum them up to get a useful quantity, the **sum of squared residuals**, $SS_{\text{residual}}$. It's a single number for the *collective* prediction error.
 
 $$ SS_{\text{residual}} = \Sigma(Y - \hat{Y})^2 $$
 
-So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. This is called **least squared error** solution.
+So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$. This is called the **least squares** solution, which is why you'll also hear the line of best fit called the least-squares line, or simply the **regression line**.
 
-The line of best fit is the line that minimizes this quanity, representing the *collective* prediction error. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$.
+That's all well and good, but how do we actually find the line of best fit? Thankfully we don't have to go through every possible line to find the one that gives the smallest answer.^[Since there are infinitely many, it'd take forever.] We can find the slope and intercept of the line of best fit directly from the data.
 
-That's all well and good, but how do we actually find the line of best fit? Thankfully we don't have to go through every possible line to find the one that gives the smallest answer.^[Since there are infinity of them, it'd take forever.] We can find the slope and intercept of the line of best fit directly from the data.
+Start with the height. Think back to @quiz-regression-prediction-error, where we moved the line down five points. Sliding a line up or down without changing its slope is just like changing a single guess in Chapter 4. Too low, and the residuals add up to more than zero. Too high, and they add up to less. The best height is where they balance out and sum to zero, just as deviations from the mean do. And whatever the slope, that happens when the line passes through the point where the means of $X$ and $Y$ intersect. A student who drank the average amount of coffee gets a prediction of the average test score---the guess you made in @quiz-regression-first-guess. So the line of best fit pivots on the point of means. All that's left is to figure out how far to tilt it.
 
 ### The slope ($b$)
 
-In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units. For the slope we want to keep them: test points per cup of coffee. So we divide $SP$ by $SS_X$ alone. This will give us the "rise over run"; for a unit change in $X$ (given its individual variability), how much does Y change (given its association with $X$, captured by $SP$)?
+In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units. That's why the correlation for Celsius and Fahrenheit comes out to 1, even though the slope is 1.8. For the slope we want to keep the units: test points per cup of coffee. So we divide $SP$ by $SS_X$ alone. $SP$ is in cups times points, and $SS_X$ is in cups squared, so what's left is points per cup. That's the "rise over run."[^weighted-slopes]
+
+[^weighted-slopes]: Here's another way to see what the formula is doing. Draw a line from the point of means out to each student, and find its slope. The student who drank no coffee and scored 90 is one cup to the left and 20 points up, a slope of $-20$. The student who drank two cups and scored 75 gives a slope of $+5$, and so on. The slope of the line of best fit is an average of those seven slopes, weighted by $(X - M_X)^2$, so students far from the average amount of coffee get more say. (The student who drank exactly one cup gets no say at all.) The weighted slopes add up to $SP = -30$, and the weights add up to $SS_X = 3$.
 
 We calculated both $SP$ and $SS_X$ in the previous chapter, so we already have what we need. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
 
@@ -132,23 +135,21 @@ In other words, as you move one unit along the $X$ axis, you move down ten units
 
 ### The intercept ($a$)
 
-Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. To figure this out, we can use that slope together with another point we know the line will pass through: the point where the means of $X$ and $Y$ intersect.
-
-$$ a = M_Y - b M_X $$
-
-The line captures the central tendency of the relationship, so it has to pass through that point where both scores are entirely typical. So we know that by the time the line has run from $X = 0$ to $X = M_X$, its slope will have produced a change in $Y$ of $b M_X$ to bring it to $M_Y$. Subtracting that change from $M_Y$ lets us figure out where must it have started on the $Y$ axis to get there.
-
-<!-- Alt wording: That's what $a = M_Y - b M_X$ is working out. Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. -->
-
-For our data:
-
-$$ a = 70 - (-10) \times 1 = 80 $$
-
-For a student who drank no coffee, we predict a score of 80.
+Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. We already know one point the line passes through: the point of means. So we can start there and use the slope to work our way back to zero.
 
 ::: {#quiz-regression-intercept}
 {{< include quizzes/18-regression-intercept.qmd >}}
 :::
+
+That's what this equation is working out:
+
+$$ a = M_Y - b M_X $$
+
+Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. For our data:
+
+$$ a = 70 - (-10) \times 1 = 80 $$
+
+For a student who drank no coffee, we predict a score of 80.
 
 Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$. The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.
 
