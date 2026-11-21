@@ -23,8 +23,8 @@ interactive-scripts:
        - Least squares: the mean minimizes SS for one guess (Ch 4); the line minimizes it for a
          guess that depends on X. Already in the text.
        - Slope vs r: same numerator (SP), different denominators. Added a few sentences in the slope section.
-       - s_estimate is a standard deviation whose deviations are residuals; 900/5 = 180 is a
-         variance, and that same 180 is MS_residual. Linked inline at the s_estimate section and at Step 3.
+       - s_estimate is a standard deviation whose deviations are residuals: sqrt(MS_residual) = sqrt(180).
+         Its own section was cut (2026-11-21); now a single sentence at Step 3.
        - r^2: 1 - r^2 = SS_residual / SS_Y, the 1 - r^2 inside Ch 17's s_r. Linked inline.
        - F: a ratio of two variances (mean squares), as in Ch 14's two estimates. Added equations and explanation.
        - SE of the slope sqrt(MS_res / SS_X), with the same shape as sqrt(s^2 / n). Added in the CI footnote.
@@ -152,18 +152,50 @@ $$ a = 70 - (-10) \times 1 = 80 $$
 
 In other words, we predict a score of 80 for a student who drank no coffee.
 
-### $SS_{\text{residual}}$ and $SS_{\text{regression}}$
+### Sums of squares
 
-Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$.^[The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.]
+Now we have a regression model: a model of the world in which we predict people who drank no coffee will score 80 on our exam, and each cup someone drinks will lower their predicted score by 10 points.^[The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points. This is a difference between regression and correlation: the correlation is symmetric, but regression depends on which variable is the predictor and which is the outcome. The slope of that line would be $-0.025$ cups per point, so a student who scored 65 would be predicted to have drunk $-0.025(65) + 2.625 = 1.0$ cup of coffee.]
 
-<!-- REVIEW: This direction point is one of the main ways regression goes beyond r (r is symmetric; Ch 17
-     even says so about the correlation matrix). Consider moving it up: to the opening, or to just after the
-     Celsius–Fahrenheit section, where a sentence (cut for pace) noted that converting F → C gives a slope of 1/1.8. With r = 1 both
-     directions give the same line. With r = -.50 they don't: predicting cups from score would give a line
-     with slope r × s_X/s_Y = -.025 cups per point. Drawn on these axes that's -40 points per cup, much
-     steeper than -10, because each line regresses toward its own mean. -->
+We can use the model to make a prediction for each student, and then compare that prediction to their actual score.
 
-You can see the least-squares fit in action below. We'll start with the same naive guess for everyone---that they will all just get the average test score, regardless of their coffee consumption---and see how much better we can do by letting the line tilt.
+<!-- table of X, Y, y hat, and Y - Yhat values -->
+
+This model makes different predictions than a model in which coffee and test performance are unrelated. Under that model, the best guess for everyone would be the mean test score, 70, as in @quiz-regression-first-guess. That model would draw a flat line on a graph, going straight across at 70.
+
+Let's compare those two models. How much better does the regression model do?
+
+The regression line's misses are the residuals. Their squares add up to $SS_{\text{residual}} = 900$, the smallest total any straight line can manage for these students.
+
+The flat line's misses are just each score's deviation from the mean of $Y$. So its squared misses add up to the sum of squares for $Y$, which we found in Chapter 17: $SS_Y = 1200$. That's how wrong we'd be giving everyone the same guess.
+
+The difference, $1200 - 900 = 300$, is how much error we avoided by letting the line tilt. That's the **regression sum of squares**, $SS_{\text{regression}}$. We can also get it directly, from how far each *prediction* moved away from the mean: $(\hat{Y} - M_Y)^2$.
+
+So we have three very similar equations:
+
+$$
+\begin{aligned}
+SS_Y &= \Sigma(Y - M_Y)^2 = 1200 \\
+SS_{\text{regression}} &= \Sigma(\hat{Y} - M_Y)^2 = 300 \\
+SS_{\text{residual}} &= \Sigma(Y - \hat{Y})^2 = 900
+\end{aligned}
+$$
+
+Each one sums squared deviations. What changes is which two things we take the difference between: a score and the mean, a prediction and the mean, or a score and its prediction. @tbl-regression-ss does this for all seven students.
+
+| $X$ | $Y$ | $\hat{Y}$ | $(Y - M_Y)^2$ | $(\hat{Y} - M_Y)^2$ | $(Y - \hat{Y})^2$ |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 90 | 80 | 400 | 100 | 100 |
+| 0.5 | 60 | 75 | 100 | 25 | 225 |
+| 0.5 | 85 | 75 | 225 | 25 | 100 |
+| 1 | 65 | 70 | 25 | 0 | 25 |
+| 1.5 | 50 | 65 | 400 | 25 | 225 |
+| 1.5 | 65 | 65 | 25 | 25 | 0 |
+| 2 | 75 | 60 | 25 | 100 | 225 |
+| $M = 1$ | $M = 70$ | $M = 70$ | $\Sigma = 1200$ | $\Sigma = 300$ | $\Sigma = 900$ |
+
+: Cups of coffee ($X$), test scores ($Y$), and predicted scores ($\hat{Y}$) for the seven students, with each student's squared deviations for the three sums of squares. {#tbl-regression-ss}
+
+In case the math feels a bit abstract, @act-least-squares visualizes each of the sums of squares getting produced.
 
 ::::: {#act-least-squares .callout-tip .interactive}
 ## Why is the best-fit line the best?
@@ -206,16 +238,15 @@ Back to the residuals. Our best-fit line leaves us with 900. No other line does 
 
 :::::
 
-
 ## Partitioning variability
 
-Think back to ANOVA. We started with each score's deviation from the grand mean. Knowing which group someone belonged to let us guess their group mean instead. How far the group means were from the grand mean gave us the between-groups variability. How far the scores still fell from their respective group means gave us the within-groups variability.
+Is this starting to feel like ANOVA to you? That's because it is! We're partitioning the total variability in the dependent variable into predictable and unpredictable components, just like we did a few chapters ago, using ANOVA to analyze differences between groups. Regression does the same thing, with the regression line standing in for the group means. Knowing how much coffee someone drank lets us guess their predicted score instead of the mean.
 
-Notice how we've mostly been framing everything around the $Y$ variable. We're predicting $Y$, and the residuals tell us how far off we were on $Y$. So it's the variability in test scores we're partitioning here. Start at the mean test score, 70. Take the student who drank two cups and scored 75. The line takes our prediction from 70 down to 60. The student's actual score is 15 points above that prediction. Those two steps, $-10$ and $+15$, add up to the original deviation of $+5$. The first step is how far the *prediction* is from the mean. The second is the residual.
+Notice how we've mostly been framing everything around the $Y$ variable. We're predicting $Y$, and the residuals tell us how far off we were on $Y$. So it's the variability in test scores we're partitioning here.
 
 {{< interactive-figure regressionPartitionDiagram makeVariancePartitionDiagram options='{"preset":"regression","maxWidth":"38rem"}' fallback="Diagram partitioning the total variability in Y into predictable variability (sum of squares regression) and unpredictable variability (sum of squares residual), whose mean squares form the F ratio for the analysis of regression." >}}
 
-Across the whole sample, those two sets of deviations give us the same kind of partition we used for ANOVA. The **regression sum of squares** is $SS_{regression} = \Sigma(\hat{Y} - M_Y)^2$. For the student who drank two cups, that's $(60 - 70)^2 = 100$ toward the regression sum of squares and $(75 - 60)^2 = 225$ toward the residual sum of squares. It's the *sums* that partition the total. The squares for any one student needn't add up that way.
+Across the whole sample, the regression and residual sums of squares partition the total, just as between and within did for ANOVA.
 
 $$
 \begin{aligned}
@@ -224,11 +255,15 @@ SS_Y &= SS_{regression} + SS_{residual} \\
 \end{aligned}
 $$
 
-We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
+What proportion of the total did the line account for?
 
 $$ r^2 = \frac{SS_{regression}}{SS_Y} = \frac{300}{1200} = .25 $$
 
 There's the $.25$ we got by squaring $r = -.50$ in Chapter 17. In regression this proportion is called the **coefficient of determination**. It plays the same part as $\eta^2$ in ANOVA. Here, knowing coffee consumption accounts for a quarter of the variability in these seven test scores. The other three quarters, $SS_{residual}/SS_Y = 900/1200 = .75$, is the $1 - r^2$ that went into the standard error of the correlation in Chapter 17. Back then we described it as the variability unaccounted for by the relationship. Now you can see exactly what that is: the squared misses around the line.
+
+::: {#quiz-regression-ss-df}
+{{< include quizzes/18-regression-ss-df.qmd >}}
+:::
 
 For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. One degree of freedom goes to regression for the one predictor. (The flat line at the mean already had its height; all the regression line adds is the slope.) That leaves five for the residual. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom. We divide them to find a kind of variance, or mean square. And those become the numerator and denominator of a new $F$ ratio for the regression.
 
@@ -238,57 +273,13 @@ $$ MS_{residual} = \frac{SS_{residual}}{df_{residual}} $$
 
 $$ F = \frac{MS_{regression}}{MS_{residual}} $$
 
-$MS_{residual}$ is the variance of the scores around the line, the same quantity we found on the way to the standard error of the estimate. $MS_{regression}$ is how much the line improved on the mean, per slope we estimated.
+$MS_{residual}$ is the variance of the scores around the line, the average squared miss in squared test points. $MS_{regression}$ is how much the line improved on the mean, per slope we estimated.
 
 ::: {#quiz-regression-flat-line}
 {{< include quizzes/18-regression-flat-line.qmd >}}
 :::
 
 Suppose the slope in the population were zero. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
-
-## The standard error of the estimate
-
-So now we have the equation to calculate our $\hat{Y}$ values. We can calculate the prediction error, the deviation of each point from the best fit line. And with that, we can square those residual deviations and sum the squares to find the sum of squared residuals, $SS_{residual}$. In Chapter 17 we subtracted 70 from every score to get its deviation from the mean. To fill in @tbl-residuals, the only thing we change is the number we subtract. For someone who drank half a cup, that's 75. For someone who drank two cups, it's 60.
-
-| Coffee ($X$) | Test score ($Y$) | $\hat{Y}$ | $Y - \hat{Y}$ | $(Y - \hat{Y})^2$ |
-|--:|--:|--:|--:|--:|
-| 0 | 90 | 80 | $10$ | 100 |
-| 0.5 | 60 | 75 | $-15$ | 225 |
-| 0.5 | 85 | 75 | $10$ | 100 |
-| 1 | 65 | 70 | $-5$ | 25 |
-| 1.5 | 50 | 65 | $-15$ | 225 |
-| 1.5 | 65 | 65 | $0$ | 0 |
-| 2 | 75 | 60 | $15$ | 225 |
-
-: Predicted values and residuals for the coffee data. {#tbl-residuals}
-
-$$
-\begin{aligned}
-SS_{residual} &= \Sigma(Y - \hat{Y})^2 \\
-&= 100 + 225 + 100 + 25 + 225 + 0 + 225 \\
-&= 900
-\end{aligned}
-$$
-
-::: {#quiz-regression-ss-df}
-{{< include quizzes/18-regression-ss-df.qmd >}}
-:::
-
-In the context of regression, we talk about the **standard error of the estimate**. The $\hat{Y}$ values that make up the line of best fit give our best guess at $Y$ for any value of $X$. How much did the actual scores tend to vary around those predictions? If you think about it, that's a familiar question. We calculate the mean of a set of scores, and standard deviation quantifies how much points tended to vary around that mean. Here we want the standard deviation of points around the line of best fit.
-
-Remember that standard deviation $s$ was found by taking the square root of the sum of squared deviations over degrees of freedom. The standard error of the estimate works the same way. Here it's the sum of squared residuals that we divide by the degrees of freedom. We used the data to estimate two things, the slope and the intercept, leaving $n - 2$ degrees of freedom.
-
-$$ s_{\text{estimate}} = \sqrt{\frac{SS_{residual}}{n-2}} = \sqrt{\frac{900}{5}} = 13.42 $$
-
-So our predictions for these students were typically off by about 13 test points.
-
-Notice what we had just before taking the square root: $900/5 = 180$. That's a variance, the average squared miss around the line (in squared test points). Keep that number in mind, because it's going to turn up again.
-
-<!-- REVIEW: Alternatively, move this whole section after "Partitioning variability", so that s_estimate is
-     introduced as sqrt(MS_residual) once mean squares exist. As it stands, the forward reference above and
-     the callback at Step 3 do the linking.
-     
-     Ok yeah, dropped it here. not sure its the best place for it now. -->
 
 ## A regression test, step by step
 
@@ -338,7 +329,7 @@ Here's the full working, so you can check your answers:
 Summary table for the analysis of regression on the coffee data.
 :::
 
-There's that 180 again. The denominator of our $F$ ratio is the variance of the scores around the line, and its square root, $\sqrt{180} = 13.42$, is the standard error of the estimate.
+The denominator of our $F$ ratio, $MS_{residual} = 180$, is the variance of the scores around the line. Its square root, $\sqrt{180} = 13.42$, is called the **standard error of the estimate**. It's the regression version of a standard deviation: our predictions were typically off by about 13 test points. (Statistical software usually reports it alongside the regression.)
 
 ### Step 4: Make a decision
 
