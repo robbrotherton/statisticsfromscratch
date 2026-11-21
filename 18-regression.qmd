@@ -38,17 +38,34 @@ interactive-scripts:
 
 <!-- REVIEW: "final chapter" / "last inferential procedure": the roadmap still plans a chi-square
      preview and a "Choosing your test" capstone. Check this wording is what you want. -->
-In this, our final chapter, we'll introduce the last inferential procedure that we will cover: the regression technique. This is an extension of the idea of correlations among variables, much like ANOVA extends our ability to analyze differences among groups beyond what the $t$ test is capable of. And as we'll see, regression is actually a variation of the ANOVA technique itself.
+In this chapter we'll introduce the last inferential procedure that we will cover: regression. This extends our ability to analyze relationships among variables, much like ANOVA extends our ability to analyze differences among groups beyond what the $t$ test is capable of. And as we'll see, regression is actually a variation of the ANOVA technique itself.
 
 ## Making a prediction
 
-Suppose an eighth student in our coffee study tells us she drank a cup and a half on the morning of the exam. What score would we guess she got? In Chapter 17, the correlation for our seven students was $r = -.50$. That tells us which way to go with our guess. A cup and a half is above average, and students who drank more coffee tended to score lower. But how much lower? We can't write down a test score from $-.50$ alone.
+Last chapter we looked at data from a study on coffee consumption and test performance. We found a negative correlation between the two variables, meaning that students who drank more coffee tended to score lower on the exam. We also found that knowing how well a student slept could help understand that relationship. The correlation and partial correlation show the strength of these relationships.
 
-If all we had to go on were the seven test scores, a reasonable guess would be their mean, 70. On the scatterplot, that's a flat line at 70. Now suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank. How much should it tilt, and how would we know which line is best? Before we try that with the coffee data, let's look at a line that makes predictions perfectly.
+But suppose a student missed the exam and is taking a makeup. If you knew how many cups of coffee this new student had drunk that morning, could you make a guess about how they're likely to do on the exam?
 
-## The equation of a straight line
+<!-- quiz:
+- say she drank exactly the average amount of coffee, one cup. What score would you guess she got? (The mean of the seven students' scores is 70, so that would be a reasonable guess.)
+- say she drank more than average, a cup and a half. What score would you guess she got? Would guessing average test score still be the best best? (The correlation is negative, so we would guess lower than 70.)
+- if you had to predict a precise score, what would it be? (We don't have enough information to make a precise prediction from the correlation alone. But what's the thought process? look at that part of the scatterplot, pick a typical score. implicitly picturing a line?) -->
 
-Here's a straight line you might already be familiar with: the relationship between temperatures on the Celsius scale and on the Fahrenheit scale, $Y = 1.8X + 32$. Obviously the relationship between these two variables is a perfect correlation. You can perfectly predict the value of one from the other with no prediction error at all.
+If all we had to go on were the seven test scores---we had no knowledge of how much coffee the student drank---a reasonable guess would be their mean, 70. Shown as a line on the scatterplot, that kind of prediction would be a flat line going all the way across at 70. It shows that we would be making the same guess for everyone, regardless of their coffee consumption.
+
+But suppose we let the line tilt, so we can give a different answer depending on how much coffee someone drank. That makes use of the relationship between the two variables. We found a negative correlation, $r = -.50$, so the line should slope downward; as coffee consumption increases, our predicted test score should decrease. But by how much? How would we know which line is best?
+
+## Straight lines
+
+A brief reminder about straight lines. (I'm guessing you're familiar with this from high school math.) A line on a graph is defined by two things: its slope, $b$, and its intercept, $a$.[^symbols] The slope tells us how steep the line is. This is often described as the "rise over run," or how much the line goes up or down for each unit it moves to the right. The intercept tells us where it crosses the $Y$ axis---what the value of $Y$ is when $X$ equals zero.
+
+That gives the equation for a straight line:
+
+$$ Y = bX + a $$ {#eq-straight-line}
+
+[^symbols]: These symbols aren't universal. When I learned this stuff in school, we used $m$ for the slope and $c$ for the intercept. There are both regional and disciplinary differences in the notation. In statistics, $b$ and $a$ are the most common symbols for slope and intercept.
+
+A straight line you might already be familiar with is the relationship between temperatures on the Celsius scale and on the Fahrenheit scale.
 
 ::: {#fig-temperature-slope-intercept}
 
@@ -58,37 +75,93 @@ Here's a straight line you might already be familiar with: the relationship betw
 
 :::
 
-This is an example of something else you're probably familiar with from high school math: the equation for a straight line, $Y = bX + a$, although you might know a version of it with different letters, such as $Y = mX + c$. $a$ is the intercept: the value of $Y$ when the line meets the $Y$ axis. Zero degrees Celsius corresponds to 32 Fahrenheit. $b$ is the slope of the line: how much $Y$ changes per unit change in $X$. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees.
+The relationship between the scales can be expressed as $Y = 1.8X + 32$. Zero degrees Celsius corresponds to 32 Fahrenheit; that's the intercept. $1.8$ is the slope: how much $Y$ changes per unit change in $X$. For an increase of one degree Celsius, Fahrenheit increases by 1.8 degrees. We can covert any temperature from one scale to the other using this equation. Like, 100 degrees Celsius is 212 degrees Fahrenheit: $Y = 1.8(100) + 32 = 212$.
 
-Notice that the correlation here is a perfect 1, but the slope is 1.8. They're answering different questions. The correlation tells us how consistently the points follow a straight line. The slope tells us how steep that line is, in the units we measured.
+Obviously the relationship between these two variables is a perfect correlation. If we took some values of Celsius and their corresponding Fahrenheit values, we could calculate the correlation and it would come out to 1. But the slope is 1.8, not 1. They're related, but they answer different questions. The slope tells us how steep that line is, in the units we measured. Together with the intercept, this is what allows us to make predictions.
 
-## The line of best fit
+### The line of best fit
 
-Back to the coffee data. The basic idea of regression is to find the single straight line that traces the best path through the points. This is called the **line of best fit**. Remember the ellipse we drew around the points? That gave us a sense of their dispersion. The line shows the central tendency of the relationship, so to speak. By that, I mean it gives us a typical value on the $Y$ variable for any given value of $X$. And that typical value is our prediction for anyone with that value of $X$. Use the slider to read off the prediction for our student who drank a cup and a half.
+So how does this help us when we have a bunch of data that isn't perfectly correlated? Simple: we draw a line though the points to summarize their relationship. It gives a typical value on the $Y$ variable for any given value of $X$. Then we use the line to make predictions, just like we convert Celsius to Fahrenheit. Use the slider to read off the prediction for our student who drank a cup and a half.
 
 {{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
 
 You should get a predicted score of 65.
 
-But how do we know the correct line to draw through the points? You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. It's obviously hard to tell just from looking. So what makes it the best? When a point isn't exactly on the line, it's either at some distance above or below the line of best fit. We call that a **prediction error**, as in, if you were predicting what the point would have been based only on the line, you would've been a bit off.
+But I dodged an important issue. There are an infinite number of straight lines that we *could* draw through a scatterplot. You can easily imagine a line that's a bit lower than this one, or a bit higher, or one that's at a steeper angle, or one that's shallower. None of them will go through every data point perfectly. Every possible line will have some misses. How do we know which line is best? We find the one that minimizes the collective misses---the one that is least wrong. This is called the **line of best fit**.
+
+To be more precise about the "misses," when a point isn't exactly on the line, it's either at some distance above or below the line of best fit. That distance gets a special name in the context of regression: a **residual**. It's the difference between the observed value, $Y$, and the predicted value, denoted $\hat{Y}$. So a residual is:
+
+$$ Y - \hat{Y} $$
+
+Don't let the fancy new name and symbol fool you, though. This is a familiar concept. It's a deviation, just like $X - M$. The difference is that the predicted value comes from the line of best fit rather than from the mean. The line of best like summarizes the central tendency of the relationship between two variables, just like the mean summarizes the central tendency of a single variable. But when the two variables are related, it's a moving average, giving different predictions for different values of $X$.
+
+For example, the student who drank a cup and a half of coffee scored 50 points, but our prediction was 65. The difference is $50 - 65 = -15$. 
+
+We call that a **prediction error**, as in, if you were predicting what the point would have been based only on the line, you would've been a bit off.
 
 ::: {#quiz-regression-prediction-error}
 {{< include quizzes/18-regression-prediction-error.qmd >}}
 :::
 
-And moving the line changes our predictions for the other five students too. So the line of best fit is the line that minimizes the *collective* prediction error. As we'll see in a moment, we square all those misses and add them up. Any other straight line through this scatterplot would've produced a larger total.
+So for any line, we can compute the residuals. Something else they have in common with our old friends, deviations, is that we can square the residuals and then sum them up to get a useful quantity, the **sum of squared residuals**, $SS_{\text{residual}}$.
 
-## Predicted values and residuals
+$$ SS_{\text{residual}} = \Sigma(Y - \hat{Y})^2 $$
 
-The regression line follows the same logic. The only difference is that because we're dealing with statistical relationships, rather than pure mathematical relationships like the one between Fahrenheit and Celsius, we refer to $\hat{Y}$ rather than $Y$. $\hat{Y}$ means that this is a predicted value based on the regression equation rather than an observed value that we saw in our data. It distinguishes those predicted $\hat{Y}$ values from the actual $Y$ values that we recorded for that variable.
+So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. This is called **least squares**.
 
-So this allows us to think about another quantity, $Y - \hat{Y}$. This is the prediction error from before, and in regression it's called a residual. It's the same idea as something you're already very familiar with. Remember, a deviation score is $X - M$. Residuals are basically deviations in the context of regression. $Y - \hat{Y}$ quantifies how much each point deviates from the regression line, or the amount of error between the observed value and the predicted value.
+The line of best fit is the line that minimizes this quanity, representing the *collective* prediction error. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$.
 
-And remember how we squared deviations in the past to find sums of squared deviations? Well, we do basically the same thing here. For the student who scored 50, the residual is $50 - 65 = -15$ test points. The guess was 15 points too high. Squaring that residual gives 225, so a miss below the line counts just as much as a miss the same distance above it.
+That's all well and good, but how do we actually find the line of best fit? Thankfully we don't have to go through every possible line to find the one that gives the smallest answer.^[Since there are infinity of them, it'd take forever.] We can find the slope and intercept of the line of best fit directly from the data.
 
-The notation for the sum of squared residuals is $\Sigma(Y - \hat{Y})^2$. So you can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the line of best fit. This is called **least squares**.
+### The slope ($b$)
 
-You can see the least-squares fit in action below. We'll start with a lazy guess, the mean, and see how much better we can do by letting the line tilt.
+In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units. For the slope we want to keep them: test points per cup of coffee. So we divide $SP$ by $SS_X$ alone. This will give us the "rise over run"; for a unit change in $X$ (given its individual variability), how much does Y change (given its association with $X$, captured by $SP$)?
+
+We calculated both $SP$ and $SS_X$ in the previous chapter, so we already have what we need. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
+
+$$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
+
+In other words, as you move one unit along the $X$ axis, you move down ten units on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line along, the predicted $Y$ value moves from 70 to 60. The correlation of $-.50$ told us the line would slope down. By keeping the units, the slope tells us how far down it goes for each cup of coffee.
+
+<!-- REVIEW: NEW MATERIAL, two linked ideas (your prose):
+     (1) b = r (s_Y / s_X). Here s_Y = sqrt(1200/6) = 14.14 and s_X = sqrt(3/6) = 0.707, so -.50 × 20 = -10.
+         In z-score units both SDs are 1, so the slope IS r. That's the cleanest single statement of
+         correlation → regression, and the multiple regression section needs it for standardized slopes.
+     (2) Why it's called "regression". Ch 17 says Galton used r "in his work on regression" but this chapter
+         never explains the name. Predicted z_Y = r × z_X, so unless r = ±1 every prediction is closer to the
+         mean than the predictor was. That's regression toward the mean (Galton's heights of parents and children).
+         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback. -->
+
+### The intercept ($a$)
+
+Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. To figure this out, we can use that slope together with another point we know the line will pass through: the point where the means of $X$ and $Y$ intersect.
+
+$$ a = M_Y - b M_X $$
+
+The line captures the central tendency of the relationship, so it has to pass through that point where both scores are entirely typical. So we know that by the time the line has run from $X = 0$ to $X = M_X$, its slope will have produced a change in $Y$ of $b M_X$ to bring it to $M_Y$. Subtracting that change from $M_Y$ lets us figure out where must it have started on the $Y$ axis to get there.
+
+<!-- Alt wording: That's what $a = M_Y - b M_X$ is working out. Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. -->
+
+For our data:
+
+$$ a = 70 - (-10) \times 1 = 80 $$
+
+For a student who drank no coffee, we predict a score of 80.
+
+::: {#quiz-regression-intercept}
+{{< include quizzes/18-regression-intercept.qmd >}}
+:::
+
+Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$. The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.
+
+<!-- REVIEW: This direction point is one of the main ways regression goes beyond r (r is symmetric; Ch 17
+     even says so about the correlation matrix). Consider moving it up: to the opening, or to just after the
+     Celsius–Fahrenheit section, where a sentence (cut for pace) noted that converting F → C gives a slope of 1/1.8. With r = 1 both
+     directions give the same line. With r = -.50 they don't: predicting cups from score would give a line
+     with slope r × s_X/s_Y = -.025 cups per point. Drawn on these axes that's -40 points per cup, much
+     steeper than -10, because each line regresses toward its own mean. -->
+
+You can see the least-squares fit in action below. We'll start with the same naive guess for everyone---that they will all just get the average test score, regardless of their coffee consumption---and see how much better we can do by letting the line tilt.
 
 ::::: {#act-least-squares .callout-tip .interactive}
 ## Why is the best-fit line the best?
@@ -131,45 +204,45 @@ Back to the residuals. Our best-fit line leaves us with 900. No other line does 
 
 :::::
 
-## Calculating the slope and intercept
 
-### The slope ($b$)
+## Partitioning variability
 
-So let's calculate $b$ and $a$ for this little set of data. Start with what we already have. In Chapter 17 we found the correlation by dividing $SP$, the sum of products, which as you remember quantifies the covariability between $X$ and $Y$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units altogether. That's why we couldn't get a test score out of $-.50$. For the slope we want to keep the units: test points per cup. So we divide $SP$ by the variability of $X$ alone, the sum of squares for $X$. We calculated both of those in the previous chapter. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
+Think back to ANOVA. We started with each score's deviation from the grand mean. Knowing which group someone belonged to let us guess their group mean instead. How far the group means were from the grand mean gave us the between-groups variability. How far the scores still fell from their respective group means gave us the within-groups variability.
 
-$$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
+Notice how we've mostly been framing everything around the $Y$ variable. We're predicting $Y$, and the residuals tell us how far off we were on $Y$. So it's the variability in test scores we're partitioning here. Start at the mean test score, 70. Take the student who drank two cups and scored 75. The line takes our prediction from 70 down to 60. The student's actual score is 15 points above that prediction. Those two steps, $-10$ and $+15$, add up to the original deviation of $+5$. The first step is how far the *prediction* is from the mean. The second is the residual.
 
-In other words, as you move one unit along the $X$ axis, you move down ten units on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line along, the predicted $Y$ value moves from 70 to 60. That's what we gain by keeping the units this time. The correlation of $-.50$ told us the line would slope down. The slope tells us how far down to go for each cup.
+{{< interactive-figure regressionPartitionDiagram makeVariancePartitionDiagram options='{"preset":"regression","maxWidth":"38rem"}' fallback="Diagram partitioning the total variability in Y into predictable variability (sum of squares regression) and unpredictable variability (sum of squares residual), whose mean squares form the F ratio for the analysis of regression." >}}
 
-<!-- REVIEW: NEW MATERIAL, two linked ideas (your prose):
-     (1) b = r (s_Y / s_X). Here s_Y = sqrt(1200/6) = 14.14 and s_X = sqrt(3/6) = 0.707, so -.50 × 20 = -10.
-         In z-score units both SDs are 1, so the slope IS r. That's the cleanest single statement of
-         correlation → regression, and the multiple regression section needs it for standardized slopes.
-     (2) Why it's called "regression". Ch 17 says Galton used r "in his work on regression" but this chapter
-         never explains the name. Predicted z_Y = r × z_X, so unless r = ±1 every prediction is closer to the
-         mean than the predictor was. That's regression toward the mean (Galton's heights of parents and children).
-         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback. -->
+Across the whole sample, those two sets of deviations give us the same kind of partition we used for ANOVA. The **regression sum of squares** is $SS_{regression} = \Sigma(\hat{Y} - M_Y)^2$. For the student who drank two cups, that's $(60 - 70)^2 = 100$ toward the regression sum of squares and $(75 - 60)^2 = 225$ toward the residual sum of squares. It's the *sums* that partition the total. The squares for any one student needn't add up that way.
 
+$$
+\begin{aligned}
+SS_Y &= SS_{regression} + SS_{residual} \\
+1200 &= 300 + 900
+\end{aligned}
+$$
 
-### The intercept ($a$)
+We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
 
-With $a$, we're determining the intercept of the line---where it crosses the $Y$ axis when $X$ equals zero. To figure this out, we can use the fact that the line of best fit passes through the point where the mean of $X$ and the mean of $Y$ intersect. Remember drawing those two mean lines on the scatterplot in Chapter 17? We know one point our line goes through (one cup, 70 points), and we know how steep it is. So where must it have started to get there?
+$$ r^2 = \frac{SS_{regression}}{SS_Y} = \frac{300}{1200} = .25 $$
 
-::: {#quiz-regression-intercept}
-{{< include quizzes/18-regression-intercept.qmd >}}
+There's the $.25$ we got by squaring $r = -.50$ in Chapter 17. In regression this proportion is called the **coefficient of determination**. It plays the same part as $\eta^2$ in ANOVA. Here, knowing coffee consumption accounts for a quarter of the variability in these seven test scores. The other three quarters, $SS_{residual}/SS_Y = 900/1200 = .75$, is the $1 - r^2$ that went into the standard error of the correlation in Chapter 17. Back then we described it as the variability unaccounted for by the relationship. Now you can see exactly what that is: the squared misses around the line.
+
+For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. One degree of freedom goes to regression for the one predictor. (The flat line at the mean already had its height; all the regression line adds is the slope.) That leaves five for the residual. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom. We divide them to find a kind of variance, or mean square. And those become the numerator and denominator of a new $F$ ratio for the regression.
+
+$$ MS_{regression} = \frac{SS_{regression}}{df_{regression}} $$
+
+$$ MS_{residual} = \frac{SS_{residual}}{df_{residual}} $$
+
+$$ F = \frac{MS_{regression}}{MS_{residual}} $$
+
+$MS_{residual}$ is the variance of the scores around the line, the same quantity we found on the way to the standard error of the estimate. $MS_{regression}$ is how much the line improved on the mean, per slope we estimated.
+
+::: {#quiz-regression-flat-line}
+{{< include quizzes/18-regression-flat-line.qmd >}}
 :::
 
-That's what $a = M_Y - b M_X$ is working out. Think about going from zero on the $X$ axis to the mean of $X$. Each unit you move along changes the height of the line by $b$, so by the time you reach $M_X$, the height has changed by $b M_X$ altogether. To get back to where you started, take that change away from $M_Y$. Here the line went *down* ten points on its way to 70. So going back one cup brings us *up* ten points. That's $70 - (-10 \times 1)$, giving 80. So, again, that's the point at which the line meets the $Y$ axis. For a student who drank no coffee, we predict a score of 80.
-
-Now we can answer our original question without reading off the graph. A cup and a half gives $\hat{Y} = -10(1.5) + 80 = 65$. The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points.
-
-<!-- REVIEW: This direction point is one of the main ways regression goes beyond r (r is symmetric; Ch 17
-     even says so about the correlation matrix). Consider moving it up: to the opening, or to just after the
-     Celsius–Fahrenheit section, where a sentence (cut for pace) noted that converting F → C gives a slope of 1/1.8. With r = 1 both
-     directions give the same line. With r = -.50 they don't: predicting cups from score would give a line
-     with slope r × s_X/s_Y = -.025 cups per point. Drawn on these axes that's -40 points per cup, much
-     steeper than -10, because each line regresses toward its own mean. -->
-
+Suppose the slope in the population were zero. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
 
 ## The standard error of the estimate
 
@@ -211,47 +284,9 @@ Notice what we had just before taking the square root: $900/5 = 180$. That's a v
 
 <!-- REVIEW: Alternatively, move this whole section after "Partitioning variability", so that s_estimate is
      introduced as sqrt(MS_residual) once mean squares exist. As it stands, the forward reference above and
-     the callback at Step 3 do the linking. -->
-
-
-## Partitioning variability
-
-Think back to ANOVA. We started with each score's deviation from the grand mean. Knowing which group someone belonged to let us guess their group mean instead. How far the group means were from the grand mean gave us the between-groups variability. How far the scores still fell from their respective group means gave us the within-groups variability.
-
-Notice how we've mostly been framing everything around the $Y$ variable. We're predicting $Y$, and the residuals tell us how far off we were on $Y$. So it's the variability in test scores we're partitioning here. Start at the mean test score, 70. Take the student who drank two cups and scored 75. The line takes our prediction from 70 down to 60. The student's actual score is 15 points above that prediction. Those two steps, $-10$ and $+15$, add up to the original deviation of $+5$. The first step is how far the *prediction* is from the mean. The second is the residual.
-
-{{< interactive-figure regressionPartitionDiagram makeVariancePartitionDiagram options='{"preset":"regression","maxWidth":"38rem"}' fallback="Diagram partitioning the total variability in Y into predictable variability (sum of squares regression) and unpredictable variability (sum of squares residual), whose mean squares form the F ratio for the analysis of regression." >}}
-
-Across the whole sample, those two sets of deviations give us the same kind of partition we used for ANOVA. The **regression sum of squares** is $SS_{regression} = \Sigma(\hat{Y} - M_Y)^2$. For the student who drank two cups, that's $(60 - 70)^2 = 100$ toward the regression sum of squares and $(75 - 60)^2 = 225$ toward the residual sum of squares. It's the *sums* that partition the total. The squares for any one student needn't add up that way.
-
-$$
-\begin{aligned}
-SS_Y &= SS_{regression} + SS_{residual} \\
-1200 &= 300 + 900
-\end{aligned}
-$$
-
-We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
-
-$$ r^2 = \frac{SS_{regression}}{SS_Y} = \frac{300}{1200} = .25 $$
-
-There's the $.25$ we got by squaring $r = -.50$ in Chapter 17. In regression this proportion is called the **coefficient of determination**. It plays the same part as $\eta^2$ in ANOVA. Here, knowing coffee consumption accounts for a quarter of the variability in these seven test scores. The other three quarters, $SS_{residual}/SS_Y = 900/1200 = .75$, is the $1 - r^2$ that went into the standard error of the correlation in Chapter 17. Back then we described it as the variability unaccounted for by the relationship. Now you can see exactly what that is: the squared misses around the line.
-
-For the degrees of freedom, $df_Y$ is the number of scores minus one, or six. One degree of freedom goes to regression for the one predictor. (The flat line at the mean already had its height; all the regression line adds is the slope.) That leaves five for the residual. Once we have those sums of squares and degrees of freedom, we do what we usually do with sums of squares and degrees of freedom. We divide them to find a kind of variance, or mean square. And those become the numerator and denominator of a new $F$ ratio for the regression.
-
-$$ MS_{regression} = \frac{SS_{regression}}{df_{regression}} $$
-
-$$ MS_{residual} = \frac{SS_{residual}}{df_{residual}} $$
-
-$$ F = \frac{MS_{regression}}{MS_{residual}} $$
-
-$MS_{residual}$ is the variance of the scores around the line, the same quantity we found on the way to the standard error of the estimate. $MS_{regression}$ is how much the line improved on the mean, per slope we estimated.
-
-::: {#quiz-regression-flat-line}
-{{< include quizzes/18-regression-flat-line.qmd >}}
-:::
-
-Suppose the slope in the population were zero. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
+     the callback at Step 3 do the linking.
+     
+     Ok yeah, dropped it here. not sure its the best place for it now. -->
 
 ## A regression test, step by step
 
