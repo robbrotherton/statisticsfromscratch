@@ -64,7 +64,7 @@ Notice that the correlation here is a perfect 1, but the slope is 1.8. They're a
 
 ## The line of best fit
 
-Back to the coffee data. The basic idea of regression is to find the single straight line that traces the best path through the points. This is called the **line of best fit**. Remember the ellipse we drew around the points? That gave us a sense of their dispersion. The line shows the central tendency of the relationship, so to speak. By that, I mean it gives us a typical value on the $Y$ variable for any given value of $X$. And that typical value is our prediction for anyone with that value of $X$. You can just pick any value on the $X$ axis, trace a straight line up to the line of best fit, and then trace a straight line across to the $Y$ axis to find the typical value for that value of $X$. Use the slider to try it for our student who drank a cup and a half.
+Back to the coffee data. The basic idea of regression is to find the single straight line that traces the best path through the points. This is called the **line of best fit**. Remember the ellipse we drew around the points? That gave us a sense of their dispersion. The line shows the central tendency of the relationship, so to speak. By that, I mean it gives us a typical value on the $Y$ variable for any given value of $X$. And that typical value is our prediction for anyone with that value of $X$. Use the slider to read off the prediction for our student who drank a cup and a half.
 
 {{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
 
@@ -76,13 +76,13 @@ But how do we know the correct line to draw through the points? You can easily i
 {{< include quizzes/18-regression-prediction-error.qmd >}}
 :::
 
-Take the two students who drank a cup and a half. One scored 50, so our guess of 65 was 15 points too high. The other scored 65, so we got that one exactly right. Imagine moving the whole line down five points. We'd now guess 60 for both students. We'd be a bit closer to the first student, but now we'd be five points off for the one we originally got right. And of course we've changed our predictions for the other five students too. So the line of best fit is the line that minimizes the *collective* prediction error. As we'll see in a moment, we square all those misses and add them up. Any other straight line through this scatterplot would've produced a larger total.
+And moving the line changes our predictions for the other five students too. So the line of best fit is the line that minimizes the *collective* prediction error. As we'll see in a moment, we square all those misses and add them up. Any other straight line through this scatterplot would've produced a larger total.
 
 ## Predicted values and residuals
 
 The regression line follows the same logic. The only difference is that because we're dealing with statistical relationships, rather than pure mathematical relationships like the one between Fahrenheit and Celsius, we refer to $\hat{Y}$ rather than $Y$. $\hat{Y}$ means that this is a predicted value based on the regression equation rather than an observed value that we saw in our data. It distinguishes those predicted $\hat{Y}$ values from the actual $Y$ values that we recorded for that variable.
 
-So this allows us to think about another quantity, $Y - \hat{Y}$. This is called a residual, but it's the same idea as something you're already very familiar with. Remember, a deviation score is $X - M$. Residuals are basically deviations in the context of regression. $Y - \hat{Y}$ quantifies how much each point deviates from the regression line, or the amount of error between the observed value and the predicted value.
+So this allows us to think about another quantity, $Y - \hat{Y}$. This is the prediction error from before, and in regression it's called a residual. It's the same idea as something you're already very familiar with. Remember, a deviation score is $X - M$. Residuals are basically deviations in the context of regression. $Y - \hat{Y}$ quantifies how much each point deviates from the regression line, or the amount of error between the observed value and the predicted value.
 
 And remember how we squared deviations in the past to find sums of squared deviations? Well, we do basically the same thing here. For the student who scored 50, the residual is $50 - 65 = -15$ test points. The guess was 15 points too high. Squaring that residual gives 225, so a miss below the line counts just as much as a miss the same distance above it.
 
@@ -139,7 +139,7 @@ So let's calculate $b$ and $a$ for this little set of data. Start with what we a
 
 $$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
 
-In other words, as you move one unit along the $X$ axis, you move down ten units on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line along, the predicted $Y$ value moves from 70 to 60. So a change of one cup on $X$ corresponds to a change of $-10$ test points on $Y$. That's what we gain by keeping the units this time. The correlation of $-.50$ told us the line would slope down. The slope tells us how far down to go for each cup.
+In other words, as you move one unit along the $X$ axis, you move down ten units on the $Y$ axis. Going from one to two on the $X$ axis, for example, if you follow the regression line along, the predicted $Y$ value moves from 70 to 60. That's what we gain by keeping the units this time. The correlation of $-.50$ told us the line would slope down. The slope tells us how far down to go for each cup.
 
 <!-- REVIEW: NEW MATERIAL, two linked ideas (your prose):
      (1) b = r (s_Y / s_X). Here s_Y = sqrt(1200/6) = 14.14 and s_X = sqrt(3/6) = 0.707, so -.50 × 20 = -10.
@@ -231,7 +231,7 @@ SS_Y &= SS_{regression} + SS_{residual} \\
 \end{aligned}
 $$
 
-We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter, using the usual technique for sums of squares. So we already know those values. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
+We've just seen how to calculate $SS_{residual}$. And we calculated the sum of squared deviations for $Y$ in the previous chapter. The sum of squares regression is just whatever is left over from $SS_Y - SS_{residual}$. Here that's $1200 - 900 = 300$. That's how much we reduced the squared error by letting the line tilt. What proportion of the total did that account for?
 
 $$ r^2 = \frac{SS_{regression}}{SS_Y} = \frac{300}{1200} = .25 $$
 
@@ -251,7 +251,7 @@ $MS_{residual}$ is the variance of the scores around the line, the same quantity
 {{< include quizzes/18-regression-flat-line.qmd >}}
 :::
 
-Suppose the slope in the population were zero. A line fitted to a sample would still tilt a little, because it would follow the random ups and downs in the scores. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
+Suppose the slope in the population were zero. Then, just like the two estimates in Chapter 14, both mean squares would be estimating the same error variance, and we'd expect $F$ to come out around 1. A real relationship adds to $MS_{regression}$ without adding to $MS_{residual}$, so it tends to make $F$ larger. This is what we'll use for the hypothesis test.
 
 ## A regression test, step by step
 
@@ -283,7 +283,7 @@ An excerpt of the $F$ table for $\alpha = .05$, with the critical value for $F(1
 
 ### Step 3: Collect and analyze the data
 
-Step three is to calculate the $F$ ratio for the data. Some of the required values we already calculated earlier in this chapter or in the previous chapter. So whether you already have them noted down, or you need to recalculate them, see if you can get all the required sums of squares and degrees of freedom to calculate the numerator and denominator of the test statistic and find the $F$ ratio.
+Step three is to calculate the $F$ ratio for the data. Some of the required values we already calculated earlier in this chapter or in the previous chapter. See if you can get all the required sums of squares and degrees of freedom to calculate the numerator and denominator of the test statistic and find the $F$ ratio.
 
 ::: {#quiz-regression-calculate-f}
 {{< include quizzes/18-regression-calculate-f.qmd >}}
@@ -301,17 +301,11 @@ Here's the full working, so you can check your answers:
 Summary table for the analysis of regression on the coffee data.
 :::
 
-$$ MS_{regression} = \frac{300}{1} = 300 $$
-
-$$ MS_{residual} = \frac{900}{5} = 180 $$
-
-$$ F = \frac{300}{180} = 1.67 $$
-
 There's that 180 again. The denominator of our $F$ ratio is the variance of the scores around the line, and its square root, $\sqrt{180} = 13.42$, is the standard error of the estimate.
 
 ### Step 4: Make a decision
 
-With our $F$ ratio in hand, we next make our decision. If $F$ is greater than the critical value, we can reject the null hypothesis. Our $F$ of 1.67 falls short of the critical value of 6.61 for $F(1, 5)$ at $\alpha = .05$. Here, as with the correlation for this data in the previous chapter, we fail to reject the null. In fact, we get the same $p = .25$ as in Chapter 17. Remember how Chapter 14's two-group $F$ was just the square of the independent-samples $t$? With one predictor, the regression $F$ is the square of the $t$ for the correlation. Here $(-1.291)^2 \approx 1.67$.
+Our $F$ of 1.67 falls short of the critical value of 6.61 for $F(1, 5)$ at $\alpha = .05$. Here, as with the correlation for this data in the previous chapter, we fail to reject the null. In fact, we get the same $p = .25$ as in Chapter 17. Remember how Chapter 14's two-group $F$ was just the square of the independent-samples $t$? With one predictor, the regression $F$ is the square of the $t$ for the correlation. Here $(-1.291)^2 \approx 1.67$.
 
 ::: {#fig-regression-decision}
 {{< interactive-figure regressionTestDecision makeDistributionGraph options='{"color":"var(--sfs-null-color, currentColor)","distribution":"f","df1":1,"df2":5,"title":"Null distribution: F(1, 5)","style":"minimal","xAxis":true,"yLabel":false,"xDomain":[0,10],"yDomain":[0,1.6],"points":160,"xTicks":6,"labels":{"x":"F ratio"},"shade":{"tail":"right","alpha":0.05},"markers":[{"at":6.607891,"label":"6.61","height":0.45,"color":"var(--sfs-critical-color, #c63f3f)"},{"at":1.666667,"label":"F = 1.67","height":0.6,"color":"var(--sfs-accent, #2c7fb8)"}],"maxWidth":"42rem"}' fallback="Null F distribution with 1 and 5 degrees of freedom. The rejection region lies beyond 6.61; the observed F of 1.67 falls short of it." >}}
@@ -321,7 +315,7 @@ The observed $F = 1.67$ falls short of the critical value of the null $F$ distri
 
 ## Reporting and interpreting the results
 
-So finally, we can report the results. Here, we can mention the general trend in the data as quantified in $b$, the slope of the regression line. And then we mention the $F$ ratio for the analysis of regression with its degrees of freedom and its $p$-value. We can also say how much of the variability the line accounted for.
+When we report the results, we can mention the general trend in the data as quantified in $b$, the slope of the regression line. And then we mention the $F$ ratio for the analysis of regression with its degrees of freedom and its $p$-value. We can also say how much of the variability the line accounted for.
 
 > Each additional cup of coffee was associated with a predicted test score 10 points lower ($b = -10$). Coffee consumption accounted for 25% of the variability in scores, $F(1, 5) = 1.67$, $p = .25$.
 
@@ -459,13 +453,13 @@ The slope is the sum of products over the sum of squares, exactly as it was with
 
 $$ b_1 = \frac{-3.33}{1.67} = -2 $$
 
-To get $b_2$, the slope for sleep, we do the same thing the other way round, with the part of sleep that coffee doesn't predict. Flip the first two columns in @act-coffee-residuals, and repeat the whole rigamarole to get $\hat{Z}$, predicted sleep scores. That gives a sum of squares of 6.67 and a sum of products of 40, so $b_2 = 40 / 6.67 = 6$.^[There's also a shortcut for these sums, without the column of residuals: take out the part that runs through the other predictor. For coffee, $SS_X - SP_{XZ}^2/SS_Z$ $= 3 - (-4)^2/12$ $= 1.67$ and $SP_{XY} - SP_{XZ}\,SP_{ZY}/SS_Z$ $= -30 - (-4)(80)/12$ $= -3.33$. For sleep, $SS_Z - SP_{XZ}^2/SS_X$ $= 12 - (-4)^2/3$ $= 6.67$ and $SP_{ZY} - SP_{XZ}\,SP_{XY}/SS_X$ $= 80 - (-4)(-30)/3$ $= 40$.]
+To get $b_2$, the slope for sleep, we do the same thing the other way round, with the part of sleep that coffee doesn't predict, as in the last step of @act-coffee-residuals. That gives a sum of squares of 6.67 and a sum of products of 40, so $b_2 = 40 / 6.67 = 6$.^[There's also a shortcut for these sums, without the column of residuals: take out the part that runs through the other predictor. For coffee, $SS_X - SP_{XZ}^2/SS_Z$ $= 3 - (-4)^2/12$ $= 1.67$ and $SP_{XY} - SP_{XZ}\,SP_{ZY}/SS_Z$ $= -30 - (-4)(80)/12$ $= -3.33$. For sleep, $SS_Z - SP_{XZ}^2/SS_X$ $= 12 - (-4)^2/3$ $= 6.67$ and $SP_{ZY} - SP_{XZ}\,SP_{XY}/SS_X$ $= 80 - (-4)(-30)/3$ $= 40$.]
 
 Like the line with one predictor, the equation passes through the means: one cup, seven hours, and 70 points. So to find the intercept, we start from the mean score and take away what the two slopes add at the mean coffee and mean sleep: $a = 70 - (-2)(1) - 6(7) = 30$.
 
 <!-- DRAFT: your sentence was "Fitting that equation to our seven students gives us a slope of $-2$ for coffee and
      $6$ for sleep. The intercept is 30." It now follows the working, so it's a summary; the footnote is unchanged. -->
-So the slope for coffee is $-2$, the slope for sleep is 6, and the intercept is 30.^[If you want to check the fit by hand, use the point of means and the fact that the residuals have zero sum of products with each predictor. For these data the two slope equations are $3b_1 - 4b_2 = -30$ and $-4b_1 + 12b_2 = 80$. The coefficients on the left are the sums of squares for coffee and sleep and their sum of products. The numbers on the right are their sums of products with test score. Substituting $b_1 = -2$ and $b_2 = 6$ satisfies both equations, and $a = M_Y - b_1 M_X - b_2 M_Z$ $= 70 - (-2)(1) - 6(7)$ $= 30$.]
+So the slope for coffee is $-2$, the slope for sleep is 6, and the intercept is 30.
 
 $$ \hat{Y} = -2X + 6Z + 30 $$
 
@@ -565,17 +559,14 @@ Summary table for the regression with coffee and sleep as predictors.
 
 $$ R^2 = \frac{SS_{regression}}{SS_Y} = \frac{540}{1200} = .45 $$
 
-With more than one predictor we write this proportion as capital $R^2$. Coffee alone accounted for 25% of the variability in our sample. Coffee and sleep together account for 45%. The overall $F$ tests the two slopes together against a model that just predicts the mean. Here $F(2, 4) = 1.64$, $p = .30$. Adding a predictor can improve the fit to the students we already have even if it wouldn't help us predict how new students will score.
-
-<!-- DRAFT -->
-The null hypothesis for this overall test is that both slopes are zero in the population. In other words, neither coffee nor sleep would help us predict test scores at all.
+With more than one predictor we write this proportion as capital $R^2$. Coffee alone accounted for 25% of the variability in our sample. Coffee and sleep together account for 45%. The overall $F$ tests the two slopes together against a model that just predicts the mean. The null hypothesis is that both slopes are zero in the population. In other words, neither coffee nor sleep would help us predict test scores at all. Here $F(2, 4) = 1.64$, $p = .30$. Adding a predictor can improve the fit to the students we already have even if it wouldn't help us predict how new students will score.
 
 <!-- REVIEW: The last sentence above is the right idea but compressed. A concrete demonstration from these data:
        - Sleep alone: R^2 = .444, SS_reg 533.3, SS_res 666.7, F(1, 5) = 4.00, p = .10.
        - Add coffee: R^2 = .45 (it can never go down), but MS_reg is now split over 2 df and MS_res over 4,
          so F(2, 4) = 1.64, p = .30.
      A predictor that adds almost nothing still costs a degree of freedom, and the overall test gets weaker.
-     Adjusted R^2 could go in a footnote. Also worth stating H0 for the overall test: both population slopes are zero. -->
+     Adjusted R^2 could go in a footnote. -->
 
 ::: {#quiz-regression-what-sleep-adds}
 {{< include quizzes/18-regression-what-sleep-adds.qmd >}}
