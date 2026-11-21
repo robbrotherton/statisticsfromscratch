@@ -233,6 +233,88 @@ sfsVariabilityEnsureStyles = () => {
       border-left: 1px solid color-mix(in srgb, var(--sfs-text, #212529) 35%, transparent);
     }
 
+    /* Compact tables (many columns) take a little less room between them. */
+    .step-table.step-table-compact th,
+    .step-table.step-table-compact td {
+      padding-left: 0.3rem;
+      padding-right: 0.3rem;
+    }
+
+    /* A running total's every value sits in the same place, only one of them
+       visible, so the column is as wide as the widest and never resizes. */
+    .step-table td > .vt-reveal-target.step-table-partials {
+      display: inline-grid;
+    }
+
+    .step-table .step-table-partials > * {
+      grid-area: 1 / 1;
+      justify-self: end;
+    }
+
+    .step-table .step-table-partial-off {
+      visibility: hidden;
+    }
+
+    /* Inline-block, so a number can rise into place as it appears. */
+    .step-table td > .vt-reveal-target {
+      display: inline-block;
+    }
+
+    /* The numbers a calculation uses glow softly, fading in and out. */
+    .step-table td {
+      transition: background-color 350ms ease, box-shadow 350ms ease;
+    }
+
+    .step-table td.step-table-glow {
+      background: var(--sfs-highlight-bg, #faf6c8);
+      box-shadow: 0 0 10px 2px var(--sfs-highlight-bg, #faf6c8);
+    }
+
+    /* Positive and negative products in the scatterplot's rectangle colours. */
+    .step-table .step-table-positive {
+      color: color-mix(in srgb, var(--graph-series-3, #009e73) 70%, var(--sfs-text, #212529));
+    }
+
+    .step-table .step-table-negative {
+      color: color-mix(in srgb, var(--graph-series-4, #d55e00) 75%, var(--sfs-text, #212529));
+    }
+
+    /* The worked sum for the glowing cells. It keeps its height when
+       empty so the figure doesn't jump. */
+    .step-table .step-table-readout {
+      min-height: 1.6em;
+      margin-top: 0.4rem;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.6;
+    }
+
+    .step-table .vt-summary-value.step-table-stacked {
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0;
+      line-height: 1.3;
+    }
+
+    /* A worked calculation: its parts sit side by side, wrapping on narrow
+       screens, with their space kept from the start. */
+    .step-table .step-table-derivation {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: 1.6em;
+    }
+
+    @media (max-width: 520px) {
+      .step-table .step-table-derivation {
+        line-height: 1.4;
+      }
+    }
+
+    .step-table .step-table-readout-label {
+      font-weight: 600;
+    }
+
     @media (max-width: 520px) {
       .step-table table {
         font-size: 0.82rem;
@@ -249,6 +331,21 @@ sfsVariabilityEnsureStyles = () => {
 
       .step-table .step-table-narrow {
         display: inline;
+      }
+
+      .step-table .step-table-readout {
+        font-size: 0.88rem;
+      }
+
+      /* For tables with more columns than fit at the usual size. */
+      .step-table.step-table-compact table {
+        font-size: 0.76rem;
+      }
+
+      .step-table.step-table-compact th,
+      .step-table.step-table-compact td {
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
       }
     }
   `;
@@ -893,6 +990,14 @@ makeVariabilityTables = (opts = {}) => {
 // "alt": true for the other version. Moving between versions clears the
 // calculated columns, slides the swapped columns past each other, and fills
 // the calculation in again.
+//
+// Calculated columns can also show their working as they fill in (`from`,
+// `op` or `show`, `slowRows`, `total`, `signs`; see "Showing the working"
+// below), and any column can have a number at its foot (`total` with
+// `summaryName`, e.g. a mean or a sum of squares).
+// opts.rowLabelColumn prefixes each worked row with that column's cell, e.g.
+// "A:". A header `tex` given as an array stacks its parts. opts.compact shrinks
+// the type on narrow screens for tables with many columns.
 makeStepTable = (opts = {}) => {
   sfsVariabilityEnsureStyles();
 
@@ -912,6 +1017,7 @@ makeStepTable = (opts = {}) => {
 
   const root = d3.create("div")
     .attr("class", "variability-table step-table sfs-figure")
+    .classed("step-table-compact", Boolean(opts.compact))
     .style("--sfs-figure-max-width", opts.maxWidth || null)
     .style("--vt-max-width", opts.maxWidth || null)
     .style("--vt-table-min-width", opts.tableMinWidth || null);
@@ -929,7 +1035,11 @@ makeStepTable = (opts = {}) => {
     if (label !== undefined) span.append(label);
     if (tex === undefined) return span;
     if (label === undefined) {
-      span.append(sfsVariabilityInlineMath(tex));
+      // An array stacks its parts, so a long product can head a narrow column.
+      (Array.isArray(tex) ? tex : [tex]).forEach((part, k) => {
+        if (k > 0) span.append(document.createElement("br"));
+        span.append(sfsVariabilityInlineMath(part));
+      });
       return span;
     }
     // The symbol keeps its brackets: a long header breaks before "(", not inside.
@@ -950,11 +1060,35 @@ makeStepTable = (opts = {}) => {
     both.append(wide, narrow);
     return both;
   };
-  const summaryNode = (tex) => {
-    const value = document.createElement("span");
-    value.className = "vt-summary-value";
-    value.appendChild(sfsVariabilityInlineMath(tex));
-    return value;
+  // A summary is the number at the foot of a column: a mean under the scores,
+  // a sum under a calculated column. `total` is its value (plain text) and
+  // `summaryName` (inline math, e.g. "SS_X") names it, reading "SS_X = 3".
+  // Narrow screens stack a sum's name over its value, and show a mean as just
+  // its value (the narrow headers, like "X − 1", say what it is). Or `summary`
+  // gives the math outright.
+  const texNumber = (text) => String(text).trim().replace(/^\+/, "").replace(/^−/, "-");
+  const summaryNode = (spec, value) => {
+    if (spec.summaryName === undefined) return summaryLinesNode([spec.summary ?? texNumber(value)]);
+    const named = [`${spec.summaryName} =`, texNumber(value)];
+    return summaryLinesNode([named.join(" ")], summed(spec) ? named : [texNumber(value)]);
+  };
+  const summaryLinesNode = (lines, narrowLines) => {
+    const make = (stack) => {
+      const value = document.createElement("span");
+      value.className = "vt-summary-value";
+      if (stack.length > 1) value.classList.add("step-table-stacked");
+      stack.forEach((line) => value.append(sfsVariabilityInlineMath(line)));
+      return value;
+    };
+    if (!narrowLines) return make(lines);
+    const both = document.createElement("span");
+    [[lines, "step-table-wide"], [narrowLines, "step-table-narrow"]].forEach(([stack, className]) => {
+      const wrap = document.createElement("span");
+      wrap.className = className;
+      wrap.append(make(stack));
+      both.append(wrap);
+    });
+    return both;
   };
 
   // Each cell holds one span, which is what gets revealed and refilled.
@@ -969,7 +1103,8 @@ makeStepTable = (opts = {}) => {
   const header = table.append("thead").append("tr");
   const tbody = table.append("tbody");
   const rows = d3.range(rowCount).map((row) => tbody.append("tr").attr("class", row === rowCount - 1 ? "vt-data-last" : null));
-  const hasSummary = opts.summaryLabel !== undefined || columns.some((column) => column.summary !== undefined);
+  const hasSummaryOf = (column) => column.summary !== undefined || column.total !== undefined;
+  const hasSummary = opts.summaryLabel !== undefined || columns.some(hasSummaryOf);
   const summaryRow = hasSummary ? tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row") : null;
   const slots = columns.map((column) => ({
     th: header.append("th"),
@@ -982,34 +1117,109 @@ makeStepTable = (opts = {}) => {
     if (!summaryRow) return;
     // The label heads the row from its own step; other summaries come with their column.
     const td = summaryRow.append("td");
+    slot.summaryTd = td;
     if (i === 0 && opts.summaryLabel !== undefined) {
-      holder(td, {}, opts.summaryStep).appendChild(summaryNode(opts.summaryLabel));
+      holder(td, {}, opts.summaryStep).appendChild(summaryLinesNode([opts.summaryLabel]));
     } else {
       slot.summarySpan = holder(td, column, column.summaryStep ?? column.step);
     }
   });
 
+  // More rows at the foot (opts.feet), for numbers the calculation uses but
+  // doesn't build, such as each variable's sum of squares. Each gives a `row`
+  // (1 for the first below the summaries), a `column`, an optional `span`
+  // across columns, a `name` and `value` (reading "name = value"; narrow
+  // screens stack them, using `narrowName` if given), a `step`
+  // from which it shows, and an `id` to point a glow at it.
+  const feet = Array.isArray(opts.feet) ? opts.feet : [];
+  const footTds = new Map();
+  d3.range(1, (d3.max(feet, (foot) => Number(foot.row) || 1) || 0) + 1).forEach((row) => {
+    const tr = tbody.append("tr").attr("class", "vt-summary-row sfs-table-summary-row");
+    for (let i = 0; i < columns.length;) {
+      const foot = feet.find((f) => (Number(f.row) || 1) === row && Number(f.column) === i);
+      const span = foot ? Math.max(1, Number(foot.span) || 1) : 1;
+      const td = tr.append("td").attr("colspan", span > 1 ? span : null);
+      // A cell under one column moves with it when columns swap.
+      if (span === 1) (slots[i].footTds = slots[i].footTds || []).push(td);
+      if (foot) {
+        const value = texNumber(foot.value);
+        const line = `${foot.name} = ${value}`;
+        // Narrow screens stack the name over the value, unless the cell spans
+        // columns and has room.
+        holder(td, columns[i], foot.step).appendChild(span > 1
+          ? summaryLinesNode([line])
+          : summaryLinesNode([line], [`${foot.narrowName ?? foot.name} =`, value]));
+        // A spanning cell centres under the columns it spans.
+        if (span > 1) td.style("text-align", "center");
+        if (foot.id !== undefined) footTds.set(String(foot.id), td.node());
+      }
+      i += span;
+    }
+  });
+
+  // A sum is built a row at a time, so its cell holds every running total,
+  // typeset in advance, and shows one of them (the last, normally).
+  const runningTotals = (spec) => {
+    const cells = (spec.cells || []).map((text) => Number(texNumber(text)));
+    const places = d3.max(spec.cells || [], (text) => (String(text).split(".")[1] || "").length) || 0;
+    let sum = 0;
+    return cells.map((number, k) => {
+      sum += number;
+      return k === cells.length - 1 ? spec.total : String(Number(sum.toFixed(places)));
+    });
+  };
+  const summed = (spec) => Array.isArray(spec.from) && spec.total !== undefined;
   const fillVersion = (alt) => {
     columns.forEach((column, i) => {
       const spec = version(column, alt);
       const slot = slots[i];
       slot.headerSpan.replaceChildren(headerNode(spec));
-      slot.cellSpans.forEach((span, row) => span.replaceChildren(String((spec.cells || [])[row] ?? "")));
-      if (slot.summarySpan) slot.summarySpan.replaceChildren(spec.summary === undefined ? "" : summaryNode(spec.summary));
+      slot.cellSpans.forEach((span, row) => {
+        const text = String((spec.cells || [])[row] ?? "");
+        span.replaceChildren(text);
+        // `signs` colours positive and negative values, as the scatterplot colours products.
+        const number = Number(texNumber(text));
+        span.classList.toggle("step-table-positive", Boolean(spec.signs) && number > 0);
+        span.classList.toggle("step-table-negative", Boolean(spec.signs) && number < 0);
+      });
+      if (!slot.summarySpan) return;
+      slot.summarySpan.replaceChildren();
+      slot.summarySpan.classList.add("step-table-partials");
+      slot.partials = [];
+      if (!hasSummaryOf(spec)) return;
+      const values = summed(spec) ? runningTotals(spec) : [spec.total];
+      slot.partials = values.map((value) => {
+        const node = summaryNode(spec, value);
+        slot.summarySpan.append(node);
+        return node;
+      });
+      showPartial(i, null);
     });
+    fillDerivation();
     sfsVariabilitySyncMath(rootNode);
+  };
+  // Show the running total after `row` rows, or (null) the final one.
+  const showPartial = (i, row) => {
+    const partials = slots[i].partials || [];
+    // Hidden, not removed, so the cell keeps the width of the widest (CSS).
+    partials.forEach((node, k) => {
+      node.classList.toggle("step-table-partial-off", k !== (row === null ? partials.length - 1 : row));
+    });
   };
 
   // Put the swapped columns in the order a version wants. With `glide`, each
-  // cell then slides from where it was to where it now is.
+  // cell then slides from where it was to where it now is. A column's cells
+  // include its foot, which may be its mean.
   let swapped = false;
+  const cellsOf = (slot) => [slot.th, ...slot.tds, ...(slot.summaryTd ? [slot.summaryTd] : []), ...(slot.footTds || [])]
+    .map((cell) => cell.node());
   const setSwapped = (want, glide) => {
     if (!swap || want === swapped) return;
-    const moving = swap.flatMap((index) => [slots[index].th.node(), ...slots[index].tds.map((td) => td.node())]);
+    const [first, second] = swap.map((index) => cellsOf(slots[index]));
+    const moving = [...first, ...second];
     const before = new Map(moving.map((node) => [node, node.getBoundingClientRect().left]));
-    [slots[swap[0]].th, ...slots[swap[0]].tds].forEach((cell, k) => {
-      const a = cell.node();
-      const b = (k === 0 ? slots[swap[1]].th : slots[swap[1]].tds[k - 1]).node();
+    first.forEach((a, k) => {
+      const b = second[k];
       const marker = document.createComment("");
       a.replaceWith(marker);
       b.replaceWith(a);
@@ -1035,10 +1245,257 @@ makeStepTable = (opts = {}) => {
       node.style.removeProperty("z-index");
     }), STEP_TABLE_GLIDE);
   };
-  const reveal = (upTo, animate) => {
+  const reveal = (upTo, animate, skip) => {
     rootNode.querySelectorAll(".vt-reveal-target[data-step]").forEach((target) => {
+      if (skip && skip.has(target)) return;
       sfsVariabilitySetRevealVisible(rootNode, [target], upTo >= Number(target.dataset.step), animate);
     });
+  };
+
+  // --- Showing the working ---
+  // A calculated column names what it comes from (`from`: a column's index
+  // for its cell in the same row, or {"summary": index} for the number at the
+  // foot of that column, such as its mean) and how (`op`: "subtract",
+  // "square" or "multiply", or a `show` template in which {0}, {1}... are
+  // those numbers and {=} the result). It fills in a row at a time: the
+  // numbers it uses glow, the new number appears, and a line under the table
+  // spells out the sum. The first `slowRows` rows (default opts.slowRows, 2)
+  // go slowly, the rest quickly. A calculated column with a `total` is then
+  // added up the same way, a cell at a time, its total growing at the foot.
+  // opts.readout: false leaves the line out, and the space it would take.
+  // opts.derivation puts a short worked calculation there instead of each
+  // row's working: from its `step`, its `parts` (inline math, each with a
+  // `glow` list of what it uses, as in `from`, or {"foot": id}) appear one by
+  // one. Its `alt` gives the parts for the other version.
+  const derivation = opts.derivation && Array.isArray(opts.derivation.parts) ? opts.derivation : null;
+  const rowWorking = !derivation && opts.rowWorking !== false;
+  const readout = opts.readout === false ? null : root.append("div")
+    .attr("class", "step-table-readout")
+    .attr("aria-hidden", derivation ? null : "true")
+    .node();
+  const derivationStep = derivation ? stepIndex(derivation.step, 0) : -1;
+  const derivationParts = derivation && readout
+    ? derivation.parts.map(() => {
+      const part = document.createElement("span");
+      part.className = "step-table-derivation-part vt-reveal-target";
+      part.dataset.step = String(derivationStep);
+      readout.append(part);
+      return part;
+    })
+    : [];
+  if (derivationParts.length) readout.classList.add("step-table-derivation");
+  const derivationSpec = (k) => {
+    const parts = alt && derivation.alt && derivation.alt.parts ? derivation.alt.parts : derivation.parts;
+    return parts[k] || {};
+  };
+  const fillDerivation = () => {
+    derivationParts.forEach((part, k) => part.replaceChildren(sfsVariabilityInlineMath(derivationSpec(k).tex || "")));
+  };
+  const rowLabelColumn = opts.rowLabelColumn === undefined ? null : Number(opts.rowLabelColumn);
+  const defaultSlowRows = Math.max(0, Math.round(sfsVariabilityFiniteNumber(opts.slowRows, 2)));
+  const STEP_TABLE_ROW_SLOW = 1300;
+  const STEP_TABLE_ROW_RESULT = 500;
+  const STEP_TABLE_ROW_FAST = 300;
+  const STEP_TABLE_SUM_ROW = 420;
+  const STEP_TABLE_HOLD = 700;
+  const SHOW_TEMPLATES = {
+    subtract: "{0} − {1} = {=}",
+    square: "{0}² = {=}",
+    multiply: "{0} × {1} = {=}"
+  };
+  const isNegative = (text) => /^[−-]/.test(text);
+  const plain = (text) => String(text ?? "").trim().replace(/^\+/, "").replace(/^-/, "−");
+  const cellText = (i, row) => String((version(columns[i], alt).cells || [])[row] ?? "");
+  const sourceText = (source, row) => (source && typeof source === "object"
+    ? String(version(columns[Number(source.summary)], alt).total ?? "")
+    : cellText(Number(source), row));
+  const sourceTd = (source, row) => {
+    if (source && typeof source === "object") {
+      if (source.foot !== undefined) return footTds.get(String(source.foot));
+      return slots[Number(source.summary)].summaryTd?.node();
+    }
+    return slots[Number(source)].tds[row]?.node();
+  };
+  const working = (i, row) => {
+    const spec = version(columns[i], alt);
+    const template = spec.show || SHOW_TEMPLATES[spec.op];
+    if (!template || !Array.isArray(spec.from)) return null;
+    // A negative number gets brackets unless it opens the sum: "−1 × 20", "0 − (−0.5)", "(−1)²".
+    const filled = template.replace(/\{(\d+)\}/g, (match, key, offset, whole) => {
+      const value = plain(sourceText(spec.from[Number(key)], row));
+      const bracket = isNegative(value) && (offset > 0 || whole[offset + match.length] === "²");
+      return bracket ? `(${value})` : value;
+    });
+    // Rounded cells don't always multiply back to the next rounded cell
+    // (−0.33 × 20 is −6.6, not −6.67), so then the line says "≈".
+    const result = String(cellText(i, row)).trim();
+    const [left] = filled.split(/\s*=\s*\{=\}/);
+    return filled.replace(/=(\s*)\{=\}/, (match, space) => `${roughly(left, result) ? "≈" : "="}${space}${result}`);
+  };
+  const roughly = (expression, result) => {
+    const code = expression.replace(/−/g, "-").replace(/×/g, "*").replace(/÷/g, "/").replace(/²/g, "**2")
+      .replace(/(\d)\s*\(/g, "$1*(");
+    const target = Number(result.replace("−", "-").replace(/^\+/, ""));
+    if (!/^[\d.\s+\-*/()]+$/.test(code) || !Number.isFinite(target)) return false;
+    let value;
+    try {
+      value = Function(`"use strict"; return (${code});`)();
+    } catch (error) {
+      return false;
+    }
+    const decimals = (result.split(".")[1] || "").length;
+    return Math.abs(value - target) > 0.5 * 10 ** -decimals + 1e-9;
+  };
+  const setReadout = (text, row) => {
+    if (!readout || !rowWorking) return;
+    readout.replaceChildren();
+    if (!text) return;
+    if (row !== undefined && rowLabelColumn !== null) {
+      const label = document.createElement("span");
+      label.className = "step-table-readout-label";
+      label.textContent = `${plain(cellText(rowLabelColumn, row))}: `;
+      readout.append(label);
+    }
+    readout.append(text);
+  };
+  // Highlights fade in and out (CSS), so moving the glow down a column is
+  // just a matter of which cells carry the class.
+  const glow = (nodes, keep) => {
+    const set = new Set(nodes.filter(Boolean));
+    rootNode.querySelectorAll(".step-table-glow").forEach((node) => {
+      if (!keep && !set.has(node)) node.classList.remove("step-table-glow");
+    });
+    set.forEach((node) => node.classList.add("step-table-glow"));
+  };
+  const clearGlow = () => glow([], false);
+  const glowRow = (i, row) => glow([
+    ...(version(columns[i], alt).from || []).map((source) => sourceTd(source, row)),
+    slots[i].tds[row].node()
+  ]);
+  const show = (nodes) => sfsVariabilitySetRevealVisible(rootNode, nodes.filter(Boolean), true, true);
+  const columnStep = (i) => (columns[i].step === undefined ? -1 : stepIndex(columns[i].step, 0));
+  const summaryStepOf = (i) => {
+    const step = columns[i].summaryStep ?? columns[i].step;
+    return step === undefined ? -1 : stepIndex(step, 0);
+  };
+  const footed = (i) => Boolean(slots[i].summarySpan) && hasSummaryOf(version(columns[i], alt));
+
+  // Refilling the table (as when the predictors swap) shows no working: the
+  // numbers sweep in down each column, foot included, each column starting
+  // before the last has finished, and each number rising slightly as it fades in.
+  const STEP_TABLE_SWEEP_ROW = 70;
+  const STEP_TABLE_SWEEP_COLUMN = 260;
+  const pop = (node) => {
+    show([node]);
+    if (node.animate) {
+      node.animate([
+        { opacity: 0, transform: "translateY(0.45em)" },
+        { opacity: 1, transform: "none" }
+      ], { duration: 420, easing: "cubic-bezier(0.2, 0.7, 0.3, 1)" });
+    }
+  };
+  const playSweep = (newColumn, newSummary) => {
+    const pending = new Set();
+    let start = 0;
+    columns.forEach((column, i) => {
+      const slot = slots[i];
+      const nodes = [
+        ...(newColumn(i) ? [slot.headerSpan, ...slot.cellSpans] : []),
+        ...(newSummary(i) && footed(i) ? [slot.summarySpan] : [])
+      ];
+      if (!nodes.length) return;
+      nodes.forEach((node, k) => {
+        pending.add(node);
+        later(() => pop(node), start + k * STEP_TABLE_SWEEP_ROW);
+      });
+      start += STEP_TABLE_SWEEP_COLUMN;
+    });
+    pending.forEach((node) => sfsVariabilitySetRevealVisible(rootNode, [node], false, false));
+    return pending;
+  };
+
+  // Lay out the working for the columns (and feet) a step brings in, one
+  // after another.
+  const STEP_TABLE_DERIVATION_PART = 1700;
+  const playWorking = (newColumn, newSummary) => {
+    const pending = new Set();
+    const beats = [];
+    let t = 0;
+    const at = (ms, fn) => beats.push([ms, fn]);
+    if (derivationParts.length && stage === derivationStep) {
+      // The worked calculation first, each part with what it uses glowing.
+      t = 500;
+      derivationParts.forEach((part, k) => {
+        pending.add(part);
+        at(t, () => {
+          glow((derivationSpec(k).glow || []).map((source) => sourceTd(source, 0)));
+          show([part]);
+        });
+        t += STEP_TABLE_DERIVATION_PART;
+      });
+      at(t - 500, clearGlow);
+    }
+    columns.forEach((column, i) => {
+      const slot = slots[i];
+      const spec = version(column, alt);
+      if (newColumn(i)) {
+        const cells = slot.cellSpans;
+        [slot.headerSpan, ...cells].forEach((node) => pending.add(node));
+        if (!working(i, 0)) {
+          at(t, () => show([slot.headerSpan, ...cells]));
+          t += 150;
+        } else {
+          const slowRows = spec.slowRows ?? defaultSlowRows;
+          at(t, () => show([slot.headerSpan]));
+          cells.forEach((cell, row) => {
+            const slow = row < slowRows;
+            at(t, () => {
+              glowRow(i, row);
+              setReadout(working(i, row), row);
+            });
+            at(t + (slow ? STEP_TABLE_ROW_RESULT : 0), () => show([cell]));
+            t += slow ? STEP_TABLE_ROW_SLOW : STEP_TABLE_ROW_FAST;
+          });
+          at(t, clearGlow);
+          t += 250;
+        }
+      }
+      if (newSummary(i) && footed(i)) {
+        pending.add(slot.summarySpan);
+        const foot = slot.summaryTd.node();
+        if (!summed(spec)) {
+          // A mean: there before the deviations from it.
+          at(t, () => show([slot.summarySpan]));
+          t += 450;
+        } else {
+          // Add the column up a cell at a time, the total growing at its foot.
+          at(t, () => setReadout(null));
+          slot.tds.forEach((td, row) => {
+            at(t, () => {
+              showPartial(i, row);
+              show([slot.summarySpan]);
+              glow([td.node(), foot], true);
+            });
+            t += STEP_TABLE_SUM_ROW;
+          });
+          t += STEP_TABLE_HOLD;
+          at(t, clearGlow);
+          t += 250;
+        }
+      }
+    });
+    pending.forEach((node) => sfsVariabilitySetRevealVisible(rootNode, [node], false, false));
+    beats.forEach(([ms, fn]) => later(fn, ms));
+    return pending;
+  };
+
+  // Without motion, the line still shows how the step's newest column is made.
+  const staticReadout = (upTo) => {
+    let text = null;
+    columns.forEach((column, i) => {
+      if (columnStep(i) === upTo && working(i, 0)) text = working(i, 0);
+    });
+    setReadout(text, text ? 0 : undefined);
   };
 
   let stage = stepIndex(opts.stage, steps.length - 1);
@@ -1051,24 +1508,38 @@ makeStepTable = (opts = {}) => {
       !(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
     timers.forEach(window.clearTimeout);
     timers = [];
+    clearGlow();
+    slots.forEach((slot, i) => showPartial(i, null));
+    const previous = stage;
     stage = stepIndex(next, stage);
     const changing = nextAlt !== alt;
     alt = nextAlt;
     root.attr("data-step", steps[stage]).attr("data-version", alt ? "alt" : null);
     rootNode.value = { stage, step: steps[stage], alt };
-    if (!changing || !animate) {
+    if (!changing && animate && stage === previous + 1) {
+      // One step on: work the new columns through in front of the reader.
+      setReadout(null);
+      const pending = playWorking((i) => columnStep(i) === stage, (i) => summaryStepOf(i) === stage);
+      reveal(stage, true, pending);
+    } else if (!changing || !animate) {
       if (changing) {
         fillVersion(alt);
         setSwapped(alt, false);
       }
       reveal(stage, animate);
+      staticReadout(stage);
     } else {
       // Clear the calculation, swap the columns, then work it through again.
+      setReadout(null);
       reveal(-1, true);
       later(() => setSwapped(alt, true), STEP_TABLE_CLEAR);
       later(() => {
         fillVersion(alt);
-        reveal(stage, true);
+        const pending = playSweep(
+          (i) => columnStep(i) >= 0 && columnStep(i) <= stage,
+          (i) => summaryStepOf(i) >= 0 && summaryStepOf(i) <= stage
+        );
+        reveal(stage, true, pending);
       }, STEP_TABLE_CLEAR + STEP_TABLE_GLIDE + 100);
     }
     if (options.notify !== false) sfsVariabilityNotify(rootNode);

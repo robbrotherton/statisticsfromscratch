@@ -2,6 +2,7 @@
 title: "Correlation"
 interactive-scripts:
   - scatterplot
+  - variability-table-generator
   - critical-table-generator
   - distribution-generator
 ---
@@ -24,7 +25,7 @@ But that would throw away a lot of good information. Everyone who spent anything
 {{< include quizzes/17-correlation-pairs.qmd >}}
 :::
 
-The idea @quiz-correlation-pairs was getting at is to look at each person's answers together, not to find a difference between them (like the related-samples $t$ test did), but to find an association. Take someone who spent more than average on other people. If that person was also happier than average, their two deviations point in the same direction. How about someone who was both a miser and miserable?^[Yeah, I just figured out those words are related.] Their deviations point in the same direction too.
+The idea @quiz-correlation-pairs was getting at is to look at each person's answers together, not to find a difference between them (like the related-samples $t$ test did), but to find an association. Take someone who spent more than average on other people. If that person was also happier than average, their two deviations point in the same direction. How about someone who was both a miser and miserable?^[Yeah, I just now realized those words are related. 🤯] Their deviations point in the same direction too.
 
 Here's what that idea looks like with some data. (These aren't the real survey responses, just a handful of made-up people to illustrate.)
 
@@ -196,20 +197,38 @@ Add up the products and we have the sum of products: $SP = -20 + 5 - 7.5 + 0 - 1
 
 :::::
 
-If you're working by hand, @tbl-r-definitional is Chapter 4's deviations table extended to include deviations and squared deviations for both variables. There's just one new column, for those products. To make it, we multiply each row's two deviations to get the product, then sum up that column to get $SP$.
+If you're working by hand, @act-products-table is Chapter 4's deviations table extended to include deviations and squared deviations for both variables. There's just one new column, for those products. To make it, we multiply each row's two deviations to get the product, then sum up that column to get $SP$.
 
-| $X$ | $X - M_X$ | $(X - M_X)^2$ | $Y$ | $Y - M_Y$ | $(Y - M_Y)^2$ | $(X - M_X)(Y - M_Y)$ |
-|--:|--:|--:|--:|--:|--:|--:|
-| 0 | $-1$ | 1 | 90 | 20 | 400 | $-20$ |
-| 0.5 | $-0.5$ | 0.25 | 60 | $-10$ | 100 | 5 |
-| 0.5 | $-0.5$ | 0.25 | 85 | 15 | 225 | $-7.5$ |
-| 1 | 0 | 0 | 65 | $-5$ | 25 | 0 |
-| 1.5 | 0.5 | 0.25 | 50 | $-20$ | 400 | $-10$ |
-| 1.5 | 0.5 | 0.25 | 65 | $-5$ | 25 | $-2.5$ |
-| 2 | 1 | 1 | 75 | 5 | 25 | 5 |
-| | | $SS_X = 3$ | | | $SS_Y = 1200$ | $SP = -30$ |
+<!-- DRAFT: step text below is a placeholder for Rob to rewrite. -->
+::::: {#act-products-table .callout-tip .interactive}
+## The sum of products by hand
 
-: Deviations, squared deviations, and products for the coffee data. $M_X = 1$; $M_Y = 70$. {#tbl-r-definitional}
+{{< interactive-figure productsTable makeStepTable options='{"steps":["data","coffee","score","products","sum"],"columns":[{"label":"Student","narrowLabel":"","cells":["A","B","C","D","E","F","G"]},{"label":"Coffee","tex":"X","cells":["0","0.5","0.5","1","1.5","1.5","2"],"summaryName":"M_X","total":"1","summaryStep":"coffee"},{"tex":"X - M_X","narrowTex":"X - 1","step":"coffee","from":[1,{"summary":1}],"cells":["−1","−0.5","−0.5","0","0.5","0.5","1"],"op":"subtract","slowRows":1},{"tex":"(X - M_X)^2","narrowTex":"(X - 1)^2","step":"coffee","from":[2],"op":"square","cells":["1","0.25","0.25","0","0.25","0.25","1"],"total":"3","slowRows":1,"summaryName":"SS_X"},{"label":"Score","tex":"Y","divider":true,"cells":["90","60","85","65","50","65","75"],"summaryName":"M_Y","total":"70","summaryStep":"score"},{"tex":"Y - M_Y","narrowTex":"Y - 70","step":"score","from":[4,{"summary":4}],"cells":["20","−10","15","−5","−20","−5","5"],"op":"subtract","slowRows":1},{"tex":"(Y - M_Y)^2","narrowTex":"(Y - 70)^2","step":"score","from":[5],"op":"square","cells":["400","100","225","25","400","25","25"],"total":"1200","slowRows":1,"summaryName":"SS_Y"},{"tex":["(X - M_X)","(Y - M_Y)"],"narrowLabel":"Product","step":"products","divider":true,"from":[2,5],"op":"multiply","signs":true,"cells":["−20","5","−7.5","0","−10","−2.5","5"],"summaryStep":"sum","total":"−30","summaryName":"SP"}],"readout":false,"compact":true,"maxWidth":"44rem","stage":"data"}' fallback="A table built a step at a time for the seven students, A to G. Coffee: deviations from the mean of 1 cup (−1, −0.5, −0.5, 0, 0.5, 0.5, 1) and their squares, summing to SS_X = 3. Test score: deviations from the mean of 70 (20, −10, 15, −5, −20, −5, 5) and their squares, summing to SS_Y = 1200. Then each student's two deviations multiplied together, one row at a time: −20, 5, −7.5, 0, −10, −2.5, 5. They sum to SP = −30." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Coffee and test scores" data-action='{"stage":"data","animate":false}'}
+Here are our seven students' coffee ($X$) and test scores ($Y$).
+:::
+
+::: {.tutorial-step data-title="Coffee" data-action='{"stage":"coffee"}'}
+First, coffee on its own, just as in Chapter 4. Subtract the mean of 1 cup from each student's coffee, square those deviations, and add them up: $SS_X = 3$.
+:::
+
+::: {.tutorial-step data-title="Test score" data-action='{"stage":"score"}'}
+Same again for test score, with its mean of 70: $SS_Y = 1200$.
+:::
+
+::: {.tutorial-step data-title="Products" data-action='{"stage":"products"}'}
+Now the new column. For each student, multiply their deviation in coffee by their deviation in test score. These are the rectangles from @act-sum-of-products.
+:::
+
+::: {.tutorial-step data-title="$SP$" data-action='{"stage":"sum"}'}
+Add up the products and we have the sum of products, $SP = -30$.
+:::
+
+::::
+
+:::::
 
 That gives us everything we need to calculate the correlation coefficient:
 
@@ -249,7 +268,7 @@ An excerpt of the $t$ table, with the $df = 5$ row highlighted. The two-tailed $
 
 ### Step 3: Collect and analyze the data
 
-We already found $r = -.50$ (@tbl-r-definitional). To test our hypothesis, we need to convert that into a $t$ statistic. Remember the basic structure of a $t$ statistic (@eq-t-structure)? We subtract a population parameter defined by the null hypothesis from our sample statistic, then divide by a standard error. Here the null says $\rho = 0$, and our sample statistic is $r$. The denominator is the **standard error of the correlation**, $s_r$.
+We already found $r = -.50$ (@act-products-table). To test our hypothesis, we need to convert that into a $t$ statistic. Remember the basic structure of a $t$ statistic (@eq-t-structure)? We subtract a population parameter defined by the null hypothesis from our sample statistic, then divide by a standard error. Here the null says $\rho = 0$, and our sample statistic is $r$. The denominator is the **standard error of the correlation**, $s_r$.
 
 $$ t = \frac{r - \rho}{s_r} $$ {#eq-correlation-t}
 

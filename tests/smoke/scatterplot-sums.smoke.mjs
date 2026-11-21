@@ -301,7 +301,9 @@ test('the coffee residuals table builds a column per step, and its own cells giv
   // decimals, and the unrounded sums should give the two-predictor slope.
   // Headers keep the shortcode's doubled backslashes.
   const value = text => Number(text.replace('\u2212', '-'));
-  const cells = key => options.columns.find(c => c.tex === key).cells.map(value);
+  // A stacked header's tex is an array of lines.
+  const texOf = spec => [].concat(spec.tex).join('');
+  const cells = key => options.columns.find(c => texOf(c) === key).cells.map(value);
   const [z, x] = [cells('Z'), cells('X')];
   const residuals = x.map((xi, i) => xi - (1 - (z[i] - 7) / 3));
   const scoreDeviations = cells('Y - M_Y');
@@ -314,7 +316,7 @@ test('the coffee residuals table builds a column per step, and its own cells giv
   assert.ok(Math.abs(sp / ss + 2) < 1e-9);
 
   // The other way round: sleep's residuals from coffee, against the same score deviations.
-  const altCells = key => options.columns.find(c => c.alt && c.alt.tex === key).alt;
+  const altCells = key => options.columns.find(c => c.alt && texOf(c.alt) === key).alt;
   const sleepResiduals = z.map((zi, i) => zi - (7 - (4 / 3) * (x[i] - 1)));
   altCells('Z - \\\\hat{Z}').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i]));
   altCells('(Z - \\\\hat{Z})^2').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i] ** 2));
@@ -322,10 +324,10 @@ test('the coffee residuals table builds a column per step, and its own cells giv
   const ssSleep = sleepResiduals.reduce((a, e) => a + e * e, 0);
   const spSleep = sleepResiduals.reduce((a, e, i) => a + e * scoreDeviations[i], 0);
   assert.ok(Math.abs(spSleep / ssSleep - 6) < 1e-9);
-  close(value(altCells('(Z - \\\\hat{Z})^2').summary), ssSleep);
-  close(value(altCells('(Z - \\\\hat{Z})(Y - M_Y)').summary), spSleep);
-  close(value(options.columns.find(c => c.tex === '(X - \\\\hat{X})^2').summary), ss);
-  close(value(options.columns.find(c => c.tex === '(X - \\\\hat{X})(Y - M_Y)').summary), sp);
+  close(value(altCells('(Z - \\\\hat{Z})^2').total), ssSleep);
+  close(value(altCells('(Z - \\\\hat{Z})(Y - M_Y)').total), spSleep);
+  close(value(options.columns.find(c => texOf(c) === '(X - \\\\hat{X})^2').total), ss);
+  close(value(options.columns.find(c => texOf(c) === '(X - \\\\hat{X})(Y - M_Y)').total), sp);
 
   const browser = await chromium.launch();
   try {
@@ -363,53 +365,39 @@ test('the coffee residuals table builds a column per step, and its own cells giv
   }
 });
 
-test('temperature tutorial traces guides and a rise over run, and its slider moves the reading', async () => {
-  const activity = divById(readChapter('18-regression.qmd'), 'act-celsius-fahrenheit');
-  const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
-  const actions = tutorialSteps(activity).map(step => step.action);
+test('chapter 18 guides read off the line, the slider moves the reading, and the slope figure draws its rise over run', async () => {
+  const chapter = readChapter('18-regression.qmd');
+  const bestFit = JSON.parse(/\{\{< interactive-figure bestFitLineScatter makeScatterplot options='([^']+)'/.exec(chapter)[1]);
+  const slope = JSON.parse(/makeScatterplot options='([^']+)'/.exec(divById(chapter, 'fig-temperature-slope-intercept'))[1]);
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ reducedMotion: 'reduce' });
     const errors = [];
     page.on('pageerror', e => errors.push(e.message));
-    await page.setContent('<div id="host"></div>');
+    await page.setContent('<div id="fit"></div><div id="slope"></div>');
     for (const script of ['d3.min', 'interactive-figure', 'anova-squares', 'read-guides', 'scatterplot']) {
       await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
     }
-    await page.evaluate(opts => {
-      const wrap = window.interactiveFigure.wrap;
-      window.interactiveFigure.wrap = args => {
-        window.stepTemperature = args.applyAction;
-        return wrap(args);
-      };
-      document.querySelector('#host').appendChild(makeScatterplot({ ...opts, responsive: false }));
-    }, options);
-    const value = () => page.locator('.scatterplot').evaluate(el => el.value);
-    const visibleSliders = () => page.locator('.sp-factor:not([hidden])').count();
-    for (const action of actions) {
-      await page.evaluate(a => window.stepTemperature(a), action);
-      const v = await value();
-      if (action.guide !== undefined) {
-        assert.deepEqual(v.guide, { x: action.guide, y: 1.8 * action.guide + 32 });
-        assert.equal(await page.locator('.sfs-read-guide').count(), 1);
-      } else {
-        assert.equal(v.guide, null, 'a guide carried over from another step');
-        assert.equal(await page.locator('.sfs-read-guide').count(), 0);
-      }
-      assert.deepEqual(v.riseRun, action['rise-run'] || null);
-      assert.equal(await visibleSliders(), (action['show-sliders'] || []).length);
-    }
-    // The last step shows the slider; moving it moves the reading.
-    await page.locator('.sp-factor input[type=range]').evaluate(input => {
-      input.value = '20';
+    await page.evaluate(([fit, parts]) => {
+      document.querySelector('#fit').appendChild(makeScatterplot({ ...fit, responsive: false }));
+      document.querySelector('#slope').appendChild(makeScatterplot({ ...parts, responsive: false }));
+    }, [bestFit, slope]);
+    const fit = page.locator('#fit .scatterplot');
+    const value = () => fit.evaluate(el => el.value);
+    // The fitted line is -10X + 80, and the slider starts visible.
+    assert.deepEqual((await value()).guide, { x: bestFit.guide, y: -10 * bestFit.guide + 80 });
+    assert.equal(await page.locator('#fit .sp-factor:not([hidden])').count(), 1);
+    await page.locator('#fit .sp-factor input[type=range]').evaluate(input => {
+      input.value = '1.5';
       input.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    assert.deepEqual((await value()).guide, { x: 20, y: 68 });
-    assert.deepEqual(await page.locator('.sfs-read-guide-value').allTextContents(), ['20', '68']);
-    // Stepping back hides the slider and clears the reading.
-    await page.evaluate(a => window.stepTemperature(a), actions[1]);
-    assert.equal(await visibleSliders(), 0);
-    assert.equal((await value()).guide, null);
+    assert.deepEqual((await value()).guide, { x: 1.5, y: 65 });
+    assert.deepEqual(await page.locator('#fit .sfs-read-guide-value').allTextContents(), ['1.5', '65']);
+    // The slope figure marks the intercept and steps along the line.
+    const parts = await page.locator('#slope .scatterplot').evaluate(el => el.value);
+    assert.deepEqual(parts.guide, { x: 0, y: 32 });
+    assert.deepEqual(parts.riseRun, slope.riseRun);
+    assert.equal(await page.locator('#slope .sfs-read-guide').count(), 1);
     assert.deepEqual(errors, []);
   } finally {
     await browser.close();
