@@ -87,7 +87,7 @@ How does this help us when we have a bunch of data that isn't perfectly correlat
 
 $$ \hat{Y} = bX + a $$ {#eq-regression-line}
 
-Here's what such a line might look like for our coffee and test score data. The red dot on the line shows the predicted score, $\hat{Y}$, for the amount of coffee you select.
+Here's what such a line might look like for our coffee and test score data.
 
 ::: {#fig-fit-line-interactive}
 {{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem","color":"var(--quarto-scss-export-callout-color-tip, var(--bs-success))"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
@@ -428,7 +428,7 @@ Remember how we got the slope with one predictor. We divided the sum of products
 
 To work out $\hat{X}$, we regress coffee on sleep, in exactly the same way we did in the first part of the chapter with coffee and test scores. This time sleep is the predictor and coffee is the outcome. Then we see how much more or less coffee each student drank than we predicted from their sleep. That's the residual, $X - \hat{X}$.
 
-From there it's all familiar. Square the coffee residuals and add them up, and we have a sum of squares in squared cups. Multiply each coffee residual by the student's deviation from the mean test score, $Y - M_Y$, and add those up, and we have a sum of products. Divide the sum of products by the sum of squares and we have the coffee slope. In Chapter 17 we took sleep out of both variables for the partial correlation. For this slope, taking it out of coffee is enough.^[Once we've taken out the linear relationship with sleep, the coffee residuals have zero correlation with sleep. So the part of test score that sleep predicts contributes nothing to the sum of products. If we take sleep out of test scores too, the slope stays the same, and the correlation between the two sets of residuals is $-.10$, the partial correlation for these seven students.]
+From there it's all familiar. Square the coffee residuals and add them up, and we have a sum of squares in squared cups. Multiply each coffee residual by the student's deviation from the mean test score, $Y - M_Y$, and add those up, and we have a sum of products. Divide the sum of products by the sum of squares and we have the coffee slope. In Chapter 17 we took sleep out of both variables for the partial correlation. For this slope, taking it out of coffee is enough.^[Once we've taken out the linear relationship with sleep, the coffee residuals have zero correlation with sleep. So the part of test score that sleep predicts contributes nothing to the sum of products. If we take sleep out of test scores too, the slope stays the same.]
 
 <!-- DRAFT -->
 ::::: {#act-coffee-residuals .callout-tip .interactive}
@@ -599,16 +599,14 @@ The overall $F$ tests both slopes together. We can also test whether each popula
 
 $$ F_{sleep} = \frac{240}{165} \approx 1.45 \qquad F_{coffee} \approx \frac{6.67}{165} \approx 0.04 $$
 
-Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before. The standard error is the same formula we used for one predictor, $\sqrt{MS_{residual}/SS}$, but with the sum of squares for that predictor's residuals. For coffee that's $\sqrt{165 / (5/3)} \approx 9.95$, giving $t \approx -0.20$. For sleep it's $\sqrt{165 / (20/3)} \approx 4.97$, giving $t \approx 1.21$.]
+Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before.]
 
 Notice that the shared 293.33 doesn't go to either test. Each test gives a predictor credit only for what it adds once the other is in the equation. In Chapter 16 that didn't come up. With the same number of scores in every group, the factors aren't related to each other, so there's nothing to share, and the pieces add up neatly. With predictors like coffee and sleep that go together, the overall test can be significant even when neither predictor is significant once we account for the other.
 
 <!-- DRAFT -->
 ### What the slopes mean
 
-Each slope is in the units we measured. With sleep in the equation, the slope for coffee says that for students who got the same amount of sleep, each extra cup goes with a test score 2 points lower. And for students who drank the same amount of coffee, each extra hour of sleep goes with a score 6 points higher.
-
-But notice how much the coffee slope changed, from $-10$ on its own to $-2$ with sleep. A slope in multiple regression always depends on what else is in the equation. Add another predictor that's related to coffee and the coffee slope could change again.^[Because cups and hours are different units, you can't compare the two slopes directly. Software often also reports *standardized* slopes, which are the slopes you'd get if every variable were first converted to $z$-scores. Here they're $-.10$ for coffee and $.60$ for sleep. Statistical software often calls these standardized estimates "Beta." We've been using $\beta$ for the population slope in the original units.]
+Notice how much the coffee slope changed, from $-10$ on its own to $-2$ with sleep. A slope in multiple regression always depends on what else is in the equation. Add another predictor that's related to coffee and the coffee slope could change again.^[Because cups and hours are different units, you can't compare the two slopes directly. Software often also reports *standardized* slopes, which are the slopes you'd get if every variable were first converted to $z$-scores. Here they're $-.10$ for coffee and $.60$ for sleep. Statistical software often calls these standardized estimates "Beta." We've been using $\beta$ for the population slope in the original units.]
 
 And just as with partial correlations in Chapter 17, holding sleep constant is something we're doing statistically, not experimentally. It tells us what coffee adds to our predictions once we know about sleep. It doesn't tell us whether coffee or sleep causes anything. Other things we didn't measure could still be behind the relationships. That's still a job for random assignment.
 
