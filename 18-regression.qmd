@@ -100,7 +100,7 @@ To be more precise about the "misses," when a point isn't exactly on the line, i
 
 $$ Y - \hat{Y} $$
 
-For example, the student who drank a cup and a half of coffee scored 50 points, but our prediction was 65. The residual is $50 - 65 = -15$. It's negative because we predicted too high. We could call that a prediction error, as in, if you were predicting the score based only on the line, you would've been 15 points off.
+Take the student from @quiz-regression-prediction-error who drank a cup and a half and scored 50. We predicted 65, so the residual is $50 - 65 = -15$. It's negative because we predicted too high. We could call that a prediction error, as in, if you were predicting the score based only on the line, you would've been 15 points off.
 
 Don't let the fancy new name and symbol fool you, though. This is a familiar concept. It's a deviation, just like $X - M$. The difference is that the predicted value comes from the line rather than from the mean. The line of best fit summarizes the central tendency of the relationship between two variables, just like the mean summarizes the central tendency of a single variable. But when the two variables are related, it's a mean that moves, giving different predictions for different values of $X$. That's what you were doing in @quiz-regression-first-guess if you picked a score typical of the students around a cup and a half.
 
@@ -108,7 +108,7 @@ So for any line, we can compute the residuals. Something else they have in commo
 
 $$ SS_{\text{residual}} = \Sigma(Y - \hat{Y})^2 $$
 
-You can see how this is fundamentally the same equation we learned all those chapters ago for the sum of squared deviations. In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the **line of best fit**. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$. This is called the **least squares** solution, which is why you'll also hear the line of best fit called the least-squares line, or simply the **regression line**.
+In Chapter 4 the mean gave us the smallest possible sum of squared deviations for a single guess. Here we get to choose both the height and the slope of the line. The one that minimizes the sum of squared residuals is the **line of best fit**. Any other straight line through this scatterplot would've produced a larger total for $SS_{\text{residual}}$. This is called the **least squares** solution, which is why you'll also hear the line of best fit called the least-squares line, or simply the **regression line**.
 
 That's all well and good, but how do we actually find the line of best fit? Thankfully we don't have to go through every possible line to find the one that gives the smallest answer.^[Since there are infinitely many, it'd take forever.] We can find the slope and intercept of the line of best fit directly from the data.
 
@@ -117,6 +117,10 @@ That's all well and good, but how do we actually find the line of best fit? Than
 In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by $\sqrt{SS_X SS_Y}$. Dividing by the variability of both variables cancels out the units. That's why the correlation for Celsius and Fahrenheit comes out to 1, even though the slope is 1.8. For the slope we want to keep the units: test points per cup of coffee. So we divide $SP$ by $SS_X$ alone. $SP$ is in cups times points, and $SS_X$ is in cups squared, so what's left is points per cup. That's the "rise over run."[^weighted-slopes]
 
 [^weighted-slopes]: Here's another way to see what the formula is doing. Draw a line from the point where the two means meet (one cup, 70 points) out to each student, and find its slope. The student who drank no coffee and scored 90 is one cup to the left and 20 points up, a slope of $-20$. The student who drank two cups and scored 75 gives a slope of $+5$, and so on. The slope of the line of best fit is an average of those seven slopes, weighted by $(X - M_X)^2$, so students far from the average amount of coffee get more say. (The student who drank exactly one cup gets no say at all.) The weighted slopes add up to $SP = -30$, and the weights add up to $SS_X = 3$.
+
+<!-- SEED (multiple regression): "Calculating the slopes and intercept" opens with "both were built from each
+     student's deviation from the mean coffee, X − M_X" and then swaps X − M_X for X − X̂. A one-line reminder
+     here, SP = Σ(X − M_X)(Y − M_Y) and SS_X = Σ(X − M_X)², would make that later swap a single substitution. -->
 
 We calculated both $SP$ and $SS_X$ in the previous chapter, so we already have what we need. We got $-30$ for the sum of products and 3 for the sum of squares for coffee. So here we get $-30$ over 3 for an answer of $-10$.
 
@@ -131,18 +135,16 @@ In other words, as you move one unit along the $X$ axis, you move down ten units
      (2) Why it's called "regression". Ch 17 says Galton used r "in his work on regression" but this chapter
          never explains the name. Predicted z_Y = r × z_X, so unless r = ±1 every prediction is closer to the
          mean than the predictor was. That's regression toward the mean (Galton's heights of parents and children).
-         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback. -->
+         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback.
+     SEED: a footnote with (1) here would set up "What the slopes mean", whose footnote gives standardized slopes
+     of −.10 and .60 cold. (2) could share it: the direction footnote's 1.125 vs 1.5 cups is regression toward the
+     mean in miniature. -->
 
 ### The intercept ($a$)
 
-Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. To figure this out, we can use that slope together with another point we know the line will pass through: the point where the means of $X$ and $Y$ intersect. (Why does it have to pass through that point? A student who drank exactly the average amount of coffee should get an exactly average test-score prediction. The fit line pivots around those means, like the balance beam in Chapter 4, except now the pivot balances both means simultaneously.)
+Having figured out the slope, we can use it to find $a$, the intercept. Remember, this is just the value of $Y$ when $X = 0$. To figure this out, we can use that slope together with another point we know the line will pass through: the point where the means of $X$ and $Y$ intersect. (Why does it have to pass through that point? A student who drank exactly the average amount of coffee should get an exactly average test-score prediction. The fit line pivots around those means, like the balance beam in Chapter 3, except now the pivot balances both means simultaneously.)
 
 So we can start at the point of means and use the slope to work our way back to zero. Each unit change in $X$ changes the height of the line by $b$, so by the time we move from $X = M_X$ to $X = 0$, the height has changed by $b M_X$. Subtract that from $M_Y$ and we reach the intercept.
-
-<!-- ::: {#quiz-regression-intercept}
-{{< include quizzes/18-regression-intercept.qmd >}}
-::: -->
-
 
 $$ a = M_Y - b M_X $$
 
@@ -154,19 +156,32 @@ In other words, we predict a score of 80 for a student who drank no coffee.
 
 ### Sums of squares
 
-Now we have a regression model: a model of the world in which we predict people who drank no coffee will score 80 on our exam, and each cup someone drinks will lower their predicted score by 10 points.^[The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points. This is a difference between regression and correlation: the correlation is symmetric, but regression depends on which variable is the predictor and which is the outcome. The slope of that line would be $-0.025$ cups per point, so a student who scored 65 would be predicted to have drunk $-0.025(65) + 2.625 = 1.0$ cup of coffee.]
+Now we have a regression model: a model of the world in which we predict people who drank no coffee will score 80 on our exam, and each cup someone drinks will lower their predicted score by 10 points.^[The direction of the prediction matters here. If we wanted to guess how much coffee someone drank from their test score, we'd fit a line that made the misses in *cups* as small as possible. Here we're measuring the misses in test points. This is a difference between regression and correlation: the correlation is symmetric, but regression depends on which variable is the predictor and which is the outcome. The slope of that line would be $-0.025$ cups per point, so a student who scored 65 would be predicted to have drunk $-0.025(65) + 2.75 = 1.125$ cups of coffee. That's less than the cup and a half that goes with a predicted score of 65 on our line. Each line pulls its predictions toward the mean of the variable it's predicting.]
 
-We can use the model to make a prediction for each student, and then compare that prediction to their actual score.
+<!-- SEED (multiple regression): the footnote above fits a line predicting one variable from the other the
+     "wrong" way round. Multiple regression does exactly that move (coffee predicted from sleep). A clause like
+     "we'll need a line like this later in the chapter" would plant it. -->
+
+We can use it to make a prediction for each student, and then compare that prediction to their actual score.
 
 <!-- table of X, Y, y hat, and Y - Yhat values -->
 
-This model makes different predictions than a model in which coffee and test performance are unrelated. Under that model, the best guess for everyone would be the mean test score, 70, as in @quiz-regression-first-guess. That model would draw a flat line on a graph, going straight across at 70.
+<!-- SEED (multiple regression): if this table has the columns X, Y, Ŷ, Y − Ŷ, (Y − Ŷ)² with Σ = 900, it is
+     @tbl-multiple-residuals minus the sleep column, so that later table reads as familiar. Bigger option: make it
+     the makeStepTable widget used in @act-coffee-residuals, built in stages (X, Y → Ŷ with the derivation
+     b = −30/3, a = 70 − (−10)(1) glowing above → Y − Ŷ → (Y − Ŷ)² Σ 900 → (Y − M_Y)² Σ 1200 and (Ŷ − M_Y)² Σ 300).
+     That would merge this placeholder and @tbl-regression-ss into one, and the later coffee-residuals table becomes
+     the same tool, columns and steps, with X̂ in place of Ŷ. Check phone width. -->
 
-Let's compare those two models. How much better does the regression model do?
+<!-- SEED (model language): keep "regression model" vs "a model in which they're unrelated". Multiple regression
+     compares coffee alone, sleep alone, both, and "a model that just predicts the mean"; the chapter closes on the
+     general linear model. -->
 
-The regression line's misses are the residuals. Their squares add up to $SS_{\text{residual}} = 900$, the smallest total any straight line can manage for these students.
+How much better does it do than a model in which coffee and test performance are unrelated? Under that model, the best guess for everyone would be the mean test score, 70, as we said at the start: a flat line going straight across at 70.
 
 The flat line's misses are just each score's deviation from the mean of $Y$. So its squared misses add up to the sum of squares for $Y$, which we found in Chapter 17: $SS_Y = 1200$. That's how wrong we'd be giving everyone the same guess.
+
+The regression line's misses are the residuals. Their squares add up to $SS_{\text{residual}} = 900$, the smallest total any straight line can manage for these students.
 
 The difference, $1200 - 900 = 300$, is how much error we avoided by letting the line tilt. That's the **regression sum of squares**, $SS_{\text{regression}}$. We can also get it directly, from how far each *prediction* moved away from the mean: $(\hat{Y} - M_Y)^2$.
 
@@ -198,7 +213,7 @@ Each one sums squared deviations. What changes is which two things we take the d
 In case the math feels a bit abstract, @act-least-squares visualizes each of the sums of squares getting produced.
 
 ::::: {#act-least-squares .callout-tip .interactive}
-## Why is the best-fit line the best?
+## Three sums of squares
 
 {{< interactive-figure leastSquaresTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"maxWidth":"42rem","ssPanel":true,"sliders":[{"key":"slope","range":[-30,10,1]},{"key":"intercept","range":[40,100,1]}]}' fallback="For the seven students, squared deviations from the mean fill a square with area 1200. Squared residuals from the fitted line fill 900 of it. Squared deviations of the predictions from the mean fill the remaining 300." >}}
 
@@ -208,7 +223,7 @@ The seven coffee and test score pairs from the correlation chapter.
 :::
 
 ::: {.tutorial-step data-title="A flat line?" data-action='{"collect-ss":"total","draw":"both","line":"mean","show-residuals":true,"show-squares":true,"show-ss":false,"show-means":true,"emphasize":"none","controls-open":false}'}
-What if we ignored $X$ and just guessed the mean of $Y$ every time? That's a flat line at 70. Measure each score's distance from the line, square it, and collect the squares just as we did in ANOVA. The whole square is $SS_Y = 1200$, the total variability in test score.
+What if we ignored $X$ and just guessed the mean of $Y$ every time? That's a flat line at 70. Measure each score's distance from the line, square it, and collect the squares. The whole square is $SS_Y = 1200$, the total variability in test score.
 :::
 
 ::: {.tutorial-step data-title="Best-fit line" data-action='{"collect-ss":"reference","line":"fit","show-residuals":false,"show-squares":false,"show-ss":false,"show-means":false,"controls-open":false,"emphasize":"none"}'}
@@ -594,6 +609,8 @@ With more than one predictor we write this proportion as capital $R^2$. Coffee a
        - Add coffee: R^2 = .45 (it can never go down), but MS_reg is now split over 2 df and MS_res over 4,
          so F(2, 4) = 1.64, p = .30.
      A predictor that adds almost nothing still costs a degree of freedom, and the overall test gets weaker.
+     SEED: @quiz-regression-flat-line already planted the reason ("the line will always seem to explain something,
+     even when there's nothing to explain"); a callback to it here would decompress the sentence cheaply.
      Adjusted R^2 could go in a footnote. -->
 
 ::: {#quiz-regression-what-sleep-adds}
