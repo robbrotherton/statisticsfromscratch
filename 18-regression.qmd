@@ -46,7 +46,6 @@ Last chapter we looked at the association between coffee consumption and test sc
 
 Now, suppose a student missed the exam and is taking a makeup. Could you guess how they're likely to score?
 
-
 {{< interactive-figure coffeeScoresScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"showMeans":true,"controls":false,"maxWidth":"30rem"}' fallback="The seven students' coffee and test scores from Chapter 17, with dashed lines at the mean of one cup and the mean score of 70." >}}
 
 ::: {#quiz-regression-first-guess}
@@ -54,11 +53,11 @@ Now, suppose a student missed the exam and is taking a makeup. Could you guess h
 <!-- add a first question: we don't know how much coffee they had. what's your guess? -->
 :::
 
-When we start talking about making predictions, rather than just the strength of association between two things, we're moving from correlation to regression. With just two variables, this is called **simple linear regression**. The variable we use to make the guess is the **predictor** ($X$, cups of coffee in our example). The variable we're trying to predict is the **outcome** ($Y$, test score). Which is which depends on the research question. We could use test scores to predict coffee instead. The correlation would stay the same, but the regression model would be different.
+When we start talking about making predictions, rather than just the strength of association between two things, we're moving from correlation to regression. When we fit a straight line with one predictor, it's called **simple linear regression**. The variable we use to make the guess is the **predictor** ($X$, cups of coffee in our example). The variable we're trying to predict is the **outcome** ($Y$, test score). Which is which depends on the research question. We could use test scores to predict coffee instead. The correlation would stay the same, but the regression model would be different.
 
 @quiz-regression-first-guess was getting at the ways we might use information to make predictions. If we don't have information about the predictor---we don't know how much coffee someone had---a reasonable guess at their outcome would be the average test score, 70. On the scatterplot that's the dashed line going straight across at a test score of 70. We would make the same guess for everyone.
 
-But when we do have information about the predictor, we can you it to potentially make a more accurate guess. We can let the line tilt, so our guess depends on how much coffee someone drank. We found a negative correlation, $r = -.50$, so the line should slope downward. But by how much?
+But when we do have information about the predictor, we can use it to potentially make a more accurate guess. We can let the line tilt, so our guess depends on how much coffee someone drank. We found a negative correlation, $r = -.50$, so the line should slope downward. But by how much?
 
 ## Straight lines
 
@@ -80,7 +79,7 @@ The line crosses the Fahrenheit axis at 32 °F and rises 18 °F for every 10 °C
 
 :::
 
-The correlation between the two scales is exactly 1, since every pair of values gives a point that will fall exactly on a straight line. Converting from Celsius to Fahrenheit, the relationship for that line is $Y = 1.8X + 32$. The intercept is 32 °F, and the slope is 1.8 °F per degree Celsius. So 100 degrees Celsius, for example, is 212 degrees Fahrenheit: $1.8(100) + 32 = 212$.
+The correlation between the two scales is exactly 1, since every pair of values falls on the same upward-sloping straight line. Converting from Celsius to Fahrenheit, the relationship for that line is $Y = 1.8X + 32$. The intercept is 32 °F, and the slope is 1.8 °F per degree Celsius. So 100 degrees Celsius, for example, is 212 degrees Fahrenheit: $1.8(100) + 32 = 212$.
 
 ### The line of best fit
 
@@ -88,12 +87,12 @@ How does this help us when we have a bunch of data that isn't perfectly correlat
 
 $$ \hat{Y} = bX + a $$ {#eq-regression-line}
 
-Here what such a line might look like for our coffee and test score data. It shows the prediction as a red dot on the line; not pair of value we actuall recorded, but the $\hat{Y}$ we would predict for that amount of coffee.
+Here's what such a line might look like for our coffee and test score data. The red dot on the line shows the predicted score, $\hat{Y}$, for the amount of coffee you select.
 
 ::: {#fig-fit-line-interactive}
 {{< interactive-figure bestFitLineScatter makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"line":"fit","controls":false,"maxWidth":"30rem","guide":0.5,"showSliders":["guide"],"sliders":[{"key":"guide","range":[0,2.5,0.5],"tex":"{x}\\\\text{ cups: } {y}\\\\text{ points}","readoutWidth":"9rem","color":"var(--quarto-scss-export-callout-color-tip, var(--bs-success))"}]}' fallback="The coffee and test score scatterplot with the line of best fit drawn through the points, falling from an intercept of 80 with a slope of −10. Guides read half a cup up to the line and across to 75 points, and a slider moves the reading from 0 to 2.5 cups: a cup and a half reads across to 65." >}}
 
-A scatterplot of the coffee and test score data, with the a line drawn through the points. The red dashed lines show how to find a predicted test score for any amount of coffee. The red dot on the line is $\hat{Y}$.
+A scatterplot of the coffee and test score data, with a line drawn through the points. The red dashed lines show how to find a predicted test score for any amount of coffee. The red dot on the line is $\hat{Y}$.
 
 :::
 
@@ -106,8 +105,6 @@ But there are infinitely many lines we *could* draw, and as @quiz-regression-pre
 To quantify the wrongness of a line, we look at its **residuals**---the vertical distances between each observed $Y$ value and its $\hat{Y}$ predictions for those same values of $X$. Taking each point on the scatterplot in turn, at that student's amount of coffee, how far above or below our prediction is their actual score? We subtract the predicted value from the observed value.
 
 $$ Y - \hat{Y} $$
-
-
 
 Don't let the fancy new name and symbol fool you. A residual is a deviation, just like $Y - M_Y$, the equation for deviations from a mean. Think of $\hat{Y}$ as a mean that changes as you move along the line, giving a typical score for each amount of coffee.
 
@@ -138,9 +135,9 @@ In other words, as you follow the line one unit along the $X$ axis, you move dow
 
 ### The intercept ($a$)
 
-Having figured out the slope, we can use it to find $a$, the predicted score when $X = 0$. To do so, we take a known point on the line and work backwards. Which known point? The point where the mean of $X$ and the mean of $Y$ meet.  A student who drank exactly the average amount of coffee will get an exactly average test-score prediction. The regression line pivots on the two means, like the balance beam in Chapter 3, except we're balancing both means simultaneously.
+Having figured out the slope, we can use it to find $a$, the predicted score when $X = 0$. To do so, we take a known point on the line and work backwards. Which known point? The point where the mean of $X$ and the mean of $Y$ meet. A student who drank exactly the average amount of coffee will get an exactly average test-score prediction. The regression line pivots on the two means, like the balance beam in Chapter 3, except we're balancing both means simultaneously.
 
-Each unit change in $X$ changes the height of the line by $b$, so by the time we move from $X = M_X$ to $X = 0$, the height has changed by $b M_X$. Subtract that from $M_Y$ and we reach the intercept.
+Each unit to the right changes the height of the line by $b$. From $X = 0$ to $X = M_X$, that's a change of $b M_X$. Subtract that from $M_Y$ and we reach the intercept.
 
 $$ a = M_Y - b M_X $$
 
@@ -167,7 +164,7 @@ Now we have our regression line, a model of the world in which we predict people
      compares coffee alone, sleep alone, both, and "a model that just predicts the mean"; the chapter closes on the
      general linear model. -->
 
-How much better does this model do than a model with no predictors? That would be the flat line from quiz at the start of the chapter. It guesses the mean test score, 70, for everyone. The flat line's misses are just each score's deviation from the mean of $Y$. So its squared misses add up to the sum of squares for $Y$, which we found in Chapter 17: $SS_Y = 1200$. That's how wrong we'd be giving everyone the same guess.
+How much better does this model do than a model with no predictors? That would be the flat line from the quiz at the start of the chapter. It guesses the mean test score, 70, for everyone. The flat line's misses are just each score's deviation from the mean of $Y$. So its squared misses add up to the sum of squares for $Y$, which we found in Chapter 17: $SS_Y = 1200$. That's how wrong we'd be giving everyone the same guess.
 
 The regression line's misses are the residuals. Their squares add up to $SS_{\text{residual}} = 900$, the smallest total any straight line can manage for these students.
 
@@ -311,7 +308,6 @@ An excerpt of the $F$ table for $\alpha = .05$, with the critical value for $F(1
 :::
 
 ### Step 3: Collect and analyze the data
-
 
 Here's the summary of what we calculated on our way through this chapter so far.
 
