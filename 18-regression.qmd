@@ -122,7 +122,7 @@ In Chapter 17 we found the correlation by dividing the sum of products, $SP$, by
 
 [^weighted-slopes]: Here's another way to see what the formula is doing. Draw a line from the point where the means meet (one cup, 70 points) to each student who drank a different amount from the mean. The student who drank no coffee and scored 90 is one cup to the left and 20 points up, a slope of $-20$. The student who drank two cups and scored 75 gives a slope of $+5$. The best-fit slope is a weighted average of those slopes, with weights $(X - M_X)^2$, so students farther from the average amount of coffee get more say. The weighted slopes add up to $SP = -30$, and the weights add up to $SS_X = 3$.
 
-We calculated both $SP$ and $SS_X$ for the coffee/test score in Chapter 17. The sum of products, $SP = \Sigma(X - M_X)(Y - M_Y)$, was $-30$. The sum of squares for coffee, $SS_X = \Sigma(X - M_X)^2$, was 3. Both use the same deviation from the mean coffee, $X - M_X$.
+We calculated both $SP$ and $SS_X$ for the coffee and test score data in Chapter 17. The sum of products, $SP = \Sigma(X - M_X)(Y - M_Y)$, was $-30$. The sum of squares for coffee, $SS_X = \Sigma(X - M_X)^2$, was 3. Both use the same deviation from the mean coffee, $X - M_X$.
 
 $$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
 
@@ -180,7 +180,7 @@ SS_{\text{residual}} &= \Sigma(Y - \hat{Y})^2 = 900
 \end{aligned}
 $$
 
-Each one sums squared deviations. What changes is which two things we take the difference between: a score and the mean, a prediction and the mean, or a score and its prediction. @tbl-regression-ss does this for all seven students.
+All three sums are in squared test points. What changes is which two things we take the difference between: a score and the mean, a prediction and the mean, or a score and its prediction. @tbl-regression-ss does this for all seven students.
 
 | $X$ | $Y$ | $\hat{Y}$ | $(Y - M_Y)^2$ | $(\hat{Y} - M_Y)^2$ | $(Y - \hat{Y})^2$ |
 |:--:|:--:|:--:|:--:|:--:|:--:|
@@ -315,7 +315,7 @@ Here's the summary of what we calculated on our way through this chapter so far.
 Summary table for the analysis of regression on the coffee data.
 :::
 
-The denominator of our $F$ ratio, $MS_{residual} = 180$, is the variance of the scores around the line. Its square root, $\sqrt{180} = 13.42$, is called the **standard error of the estimate**. It's the regression version of a standard deviation: our predictions were typically off by about 13 test points. (Statistical software usually reports it alongside the regression.)
+The denominator of our $F$ ratio, $MS_{residual} = 180$, estimates the variance of the scores around the line. Its square root, $\sqrt{180} \approx 13.42$, is called the **standard error of the estimate**. It's the regression version of a standard deviation: our predictions were typically off by about 13 test points. (Statistical software usually reports it alongside the regression.)
 
 ### Step 4: Make a decision
 
@@ -393,7 +393,7 @@ What would we want to check in this scatterplot? Does a straight line follow the
      slopes in depth, a fuller unique/shared treatment, and the Dunn et al. bookend (decide whether Ch 17's
      footnote promise needs a sentence here). The REVIEW comments below hold the detail for all of these. -->
 
-In Chapter 17 we asked whether coffee and test scores were still related once we took sleep into account. Let's take the same seven students and turn that into a prediction question. If we knew how much sleep someone got as well as how much coffee they drank, could we make a better guess at their score?
+In Chapter 17 we asked whether coffee and test scores were still related once we took sleep into account. Let's go back to our seven students. Could we make a better guess at someone's score if we knew how much they slept as well as how much coffee they drank? And once we know how much they slept, what does coffee still tell us?
 
 | Participant | Coffee ($X$) | Sleep ($Z$) | Test score ($Y$) |
 |:--:|:--:|:--:|:--:|
@@ -417,24 +417,24 @@ $$ \hat{Y} = b_1 X + b_2 Z + a $$ {#eq-multiple-regression}
      (comment below) shows why. The "what sleep adds" quiz further down already works this way. -->
 
 <!-- DRAFT -->
-So what are the two slopes? You might think we could just reuse what we already have. Coffee's slope on its own was $-10$. Fit sleep on its own and we'd get a slope of 6.67 points per hour. So why not put both of those into one equation? If we do that, our predictions miss by a total of 900, no better than coffee alone. Sleep alone did better than that, at 666.67.
+So what are the two slopes? You might think we could just reuse what we already have. Coffee's slope on its own was $-10$. Fit sleep on its own and we'd get about 6.67 points per hour. Put both slopes into one equation and set the intercept so we still predict 70 at the means. The squared misses add up to 900, just as they did with coffee alone. Even sleep on its own gets us down to about 667.
 
-The problem is that coffee and sleep go together. The students who drank more coffee tended to sleep less. So coffee's slope of $-10$ was already carrying a lot of sleep's effect. Adding sleep's own slope on top counts that part twice. What we want for coffee is its slope once sleep has been taken out of the picture. And for that we can use the technique we used for partial correlations in Chapter 17: measuring deviations from a prediction.
+The problem is that coffee and sleep go together. The students who drank more coffee tended to sleep less, and those who slept less tended to score lower. Fitting the two slopes separately lets both pick up some of the same pattern in test scores. So we need to fit them together. To work out what coffee adds once sleep is in the equation, we can borrow an idea from partial correlation in Chapter 17 and measure deviations from a prediction.
 
 <!-- DRAFT -->
 ### Calculating the slopes and intercept
 
-Remember how we got the slope with one predictor. We divided the sum of products by the sum of squares for coffee, and both were built from each student's deviation from the mean coffee, $X - M_X$. To take sleep into account, we do exactly the same thing, but we measure each student's coffee from a different reference point: the amount of coffee we'd predict from their sleep, $\hat{X}$. So instead of deviations, $X - M_X$, we work with residuals, $X - \hat{X}$. 
+Remember how we got the slope with one predictor. We divided the sum of products by the sum of squares for coffee, and both used each student's deviation from the mean coffee, $X - M_X$. To take sleep into account, we change what we measure from. We subtract the amount of coffee we'd predict from their sleep, $\hat{X}$, giving us the residual $X - \hat{X}$.
 
 To work out $\hat{X}$, we regress coffee on sleep, in exactly the same way we did in the first part of the chapter with coffee and test scores. This time sleep is the predictor and coffee is the outcome. Then we see how much more or less coffee each student drank than we predicted from their sleep. That's the residual, $X - \hat{X}$.
 
-From there it's all familiar. Square the residuals and add them up, and we have a sum of squares. Multiply each one by the student's deviation from the mean score, $Y - M_Y$, and add those up, and we have a sum of products. Divide one by the other and we have the slope. If that sounds familiar, it's because it's how we got the partial correlation in Chapter 17, except that this time we only need to take sleep out of coffee.^[If you take sleep out of the test scores as well, and use their residuals instead of $Y - M_Y$, you get exactly the same slope. And the correlation between the two sets of residuals is $-.10$, the partial correlation for these seven students.]
+From there it's all familiar. Square the coffee residuals and add them up, and we have a sum of squares in squared cups. Multiply each coffee residual by the student's deviation from the mean test score, $Y - M_Y$, and add those up, and we have a sum of products. Divide the sum of products by the sum of squares and we have the coffee slope. In Chapter 17 we took sleep out of both variables for the partial correlation. For this slope, taking it out of coffee is enough.^[Once we've taken out the linear relationship with sleep, the coffee residuals have zero correlation with sleep. So the part of test score that sleep predicts contributes nothing to the sum of products. If we take sleep out of test scores too, the slope stays the same, and the correlation between the two sets of residuals is $-.10$, the partial correlation for these seven students.]
 
 <!-- DRAFT -->
 ::::: {#act-coffee-residuals .callout-tip .interactive}
 ## Taking sleep out of coffee
 
-{{< interactive-figure coffeeResidualsTable makeStepTable options='{"steps":["data","predicted","residuals","squared","products"],"columns":[{"label":"Sleep","tex":"Z","cells":["9","8","8","5","6","6","7"],"summaryName":"M_Z","total":"7"},{"label":"Coffee","tex":"X","cells":["0","0.5","0.5","1","1.5","1.5","2"],"summaryName":"M_X","total":"1"},{"label":"Predicted","tex":"\\\\hat{X}","step":"predicted","divider":true,"cells":["0.33","0.67","0.67","1.67","1.33","1.33","1"],"alt":{"tex":"\\\\hat{Z}","cells":["8.33","7.67","7.67","7","6.33","6.33","5.67"],"from":[1],"show":"−1.33 × {0} + 8.33 = {=}"},"from":[0],"show":"−0.33 × {0} + 3.33 = {=}"},{"label":"Residual","tex":"X - \\\\hat{X}","step":"residuals","cells":["−0.33","−0.17","−0.17","−0.67","+0.17","+0.17","+1"],"alt":{"tex":"Z - \\\\hat{Z}","cells":["+0.67","+0.33","+0.33","−2","−0.33","−0.33","+1.33"],"from":[0,2]},"from":[1,2],"op":"subtract"},{"tex":"(X - \\\\hat{X})^2","step":"squared","cells":["0.11","0.03","0.03","0.44","0.03","0.03","1"],"alt":{"tex":"(Z - \\\\hat{Z})^2","cells":["0.44","0.11","0.11","4","0.11","0.11","1.78"],"total":"6.67"},"from":[3],"op":"square","total":"1.67","summaryName":"SS"},{"tex":"Y - M_Y","step":"products","cells":["20","−10","15","−5","−20","−5","5"]},{"tex":["(X - \\\\hat{X})","(Y - M_Y)"],"narrowLabel":"Product","step":"products","cells":["−6.67","1.67","−2.5","3.33","−3.33","−0.83","5"],"alt":{"tex":["(Z - \\\\hat{Z})","(Y - M_Y)"],"cells":["13.33","−3.33","5","10","6.67","1.67","6.67"],"total":"40"},"from":[3,5],"op":"multiply","signs":true,"total":"−3.33","summaryName":"SP"}],"altSwap":[0,1],"compact":true,"maxWidth":"44rem","stage":"data","feet":[{"row":1,"column":0,"name":"SS_Z","narrowName":"SS","value":"12","step":"predicted","id":"ssZ"},{"row":1,"column":1,"name":"SS_X","narrowName":"SS","value":"3","step":"predicted","id":"ssX"},{"row":2,"column":0,"span":2,"name":"SP_{XZ}","value":"−4","step":"predicted","id":"sp"}],"derivation":{"step":"predicted","parts":[{"tex":"b = SP_{XZ} / SS_Z = -4 / 12 = -0.33","glow":[{"foot":"sp"},{"foot":"ssZ"}]},{"tex":"a = M_X - b M_Z = 1 - (-0.33 \\\\times 7) = 3.33","glow":[{"summary":1},{"summary":0}]},{"tex":"\\\\hat{X} = -0.33Z + 3.33","glow":[]}],"alt":{"parts":[{"tex":"b = SP_{XZ} / SS_X = -4 / 3 = -1.33","glow":[{"foot":"sp"},{"foot":"ssX"}]},{"tex":"a = M_Z - b M_X = 7 - (-1.33 \\\\times 1) = 8.33","glow":[{"summary":0},{"summary":1}]},{"tex":"\\\\hat{Z} = -1.33X + 8.33","glow":[]}]}}}' fallback="A table built a column at a time for the seven students: sleep, coffee, the coffee predicted from sleep, the residuals, their squares (summing to SS = 1.67), each score's deviation from the mean of 70 and its product with the residual (summing to SP = −3.33). Then the same again with sleep and coffee swapped: sleep predicted from coffee, its residuals and their squares (summing to 6.67), and their products with the score deviations (summing to 40)." >}}
+{{< interactive-figure coffeeResidualsTable makeStepTable options='{"steps":["data","predicted","residuals","squared","products"],"columns":[{"label":"Sleep","tex":"Z","cells":["9","8","8","5","6","6","7"],"summaryName":"M_Z","total":"7"},{"label":"Coffee","tex":"X","cells":["0","0.5","0.5","1","1.5","1.5","2"],"summaryName":"M_X","total":"1"},{"label":"Predicted","tex":"\\\\hat{X}","step":"predicted","divider":true,"cells":["0.33","0.67","0.67","1.67","1.33","1.33","1"],"alt":{"tex":"\\\\hat{Z}","cells":["8.33","7.67","7.67","7","6.33","6.33","5.67"],"from":[1],"show":"−4/3 × {0} + 25/3 ≈ {=}"},"from":[0],"show":"−1/3 × {0} + 10/3 ≈ {=}"},{"label":"Residual","tex":"X - \\\\hat{X}","step":"residuals","cells":["−0.33","−0.17","−0.17","−0.67","+0.17","+0.17","+1"],"alt":{"tex":"Z - \\\\hat{Z}","cells":["+0.67","+0.33","+0.33","−2","−0.33","−0.33","+1.33"],"from":[0,2]},"from":[1,2],"op":"subtract"},{"tex":"(X - \\\\hat{X})^2","step":"squared","cells":["0.11","0.03","0.03","0.44","0.03","0.03","1"],"alt":{"tex":"(Z - \\\\hat{Z})^2","cells":["0.44","0.11","0.11","4","0.11","0.11","1.78"],"total":"6.67"},"from":[3],"op":"square","total":"1.67","summaryName":"SS"},{"tex":"Y - M_Y","step":"products","cells":["20","−10","15","−5","−20","−5","5"]},{"tex":["(X - \\\\hat{X})","(Y - M_Y)"],"narrowLabel":"Product","step":"products","cells":["−6.67","1.67","−2.5","3.33","−3.33","−0.83","5"],"alt":{"tex":["(Z - \\\\hat{Z})","(Y - M_Y)"],"cells":["13.33","−3.33","5","10","6.67","1.67","6.67"],"total":"40"},"from":[3,5],"op":"multiply","signs":true,"total":"−3.33","summaryName":"SP"}],"altSwap":[0,1],"compact":true,"maxWidth":"44rem","stage":"data","feet":[{"row":1,"column":0,"name":"SS_Z","narrowName":"SS","value":"12","step":"predicted","id":"ssZ"},{"row":1,"column":1,"name":"SS_X","narrowName":"SS","value":"3","step":"predicted","id":"ssX"},{"row":2,"column":0,"span":2,"name":"SP_{XZ}","value":"−4","step":"predicted","id":"sp"}],"derivation":{"step":"predicted","parts":[{"tex":"b = SP_{XZ} / SS_Z = -4 / 12 = -1/3","glow":[{"foot":"sp"},{"foot":"ssZ"}]},{"tex":"a = M_X - b M_Z = 1 - (-1/3 \\\\times 7) = 10/3","glow":[{"summary":1},{"summary":0}]},{"tex":"\\\\hat{X} = -(1/3)Z + 10/3","glow":[]}],"alt":{"parts":[{"tex":"b = SP_{XZ} / SS_X = -4 / 3","glow":[{"foot":"sp"},{"foot":"ssX"}]},{"tex":"a = M_Z - b M_X = 7 - (-4/3 \\\\times 1) = 25/3","glow":[{"summary":0},{"summary":1}]},{"tex":"\\\\hat{Z} = -(4/3)X + 25/3","glow":[]}]}}}' fallback="A table built a column at a time for the seven students: sleep, coffee, the coffee predicted from sleep, the residuals, their squares (summing to SS = 1.67), each score's deviation from the mean of 70 and its product with the residual (summing to SP = −3.33). Then the same again with sleep and coffee swapped: sleep predicted from coffee, its residuals and their squares (summing to 6.67), and their products with the score deviations (summing to 40)." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Coffee and sleep" data-action='{"stage":"data","animate":false}'}
@@ -442,7 +442,7 @@ Here's each student's sleep ($Z$) and coffee ($X$) again. We want to take sleep 
 :::
 
 ::: {.tutorial-step data-title="Predicted from sleep" data-action='{"stage":"predicted"}'}
-First, predict each student's coffee from their sleep. That's just a regression with one predictor. Its slope is the sum of products for coffee and sleep over the sum of squares for sleep, $-4/12 = -0.33$. Each extra hour of sleep goes with a third of a cup less coffee. And like any regression line, it goes through the means: one cup at seven hours.
+First, predict each student's coffee from their sleep. That's just a regression with one predictor. Its slope is the sum of products for coffee and sleep over the sum of squares for sleep, $-4/12 = -1/3$. Each extra hour of sleep goes with a third of a cup less coffee. And the line goes through the means, one cup at seven hours. The table rounds the results to two decimal places and uses the exact values for the next calculation.
 :::
 
 ::: {.tutorial-step data-title="Residuals" data-action='{"stage":"residuals"}'}
@@ -450,28 +450,28 @@ Then subtract: each student's actual coffee minus what their sleep predicts. The
 :::
 
 ::: {.tutorial-step data-title="Sum of squares" data-action='{"stage":"squared"}'}
-Now square the residuals and add them up, just as we squared $X - M_X$ to get the sum of squares for coffee. That was 3. For the residuals it's only 1.67, because most of the variability in coffee was predictable from sleep.
+Now square the residuals and add them up, just as we squared $X - M_X$ to get the sum of squares for coffee. That was 3. Now 1.67 is left after accounting for the part sleep predicts.
 :::
 
 ::: {.tutorial-step data-title="Sum of products" data-action='{"stage":"products"}'}
-Multiply each residual by that student's deviation from the mean score of 70, just as we multiplied $X - M_X$ by $Y - M_Y$ to get the sum of products. That was $-30$. With the residuals it's only $-3.33$. Most of coffee's relationship with test score was running through sleep.
+Multiply each residual by that student's deviation from the mean score of 70, just as we multiplied $X - M_X$ by $Y - M_Y$ to get the sum of products. That was $-30$. With the residuals it's only about $-3.33$.
 :::
 
 ::: {.tutorial-step data-title="The other way round" data-action='{"stage":"products","alt":true}'}
-For the slope for sleep, swap the two predictors' roles. Now we predict each student's sleep from their coffee, take the residuals, and square them and multiply them by the same deviations in test score. Sleep's sum of squares on its own was 12, and taking coffee out halves it to 6.67. Its sum of products was 80, and that halves too, to 40. So sleep's slope barely changes.
+For the slope for sleep, swap the two predictors' roles. Now we predict each student's sleep from their coffee. Square the sleep residuals for the sum of squares, and multiply them by the same deviations in test score for the sum of products. The sum of squares goes from 12 to 6.67 and the sum of products from 80 to 40. Both shrink by about half, so their ratio barely changes.
 :::
 
 ::::
 
 :::::
 
-The slope is the sum of products over the sum of squares, exactly as it was with one predictor, just using the residuals.^[The numbers in the table are rounded to two decimal places, but each was calculated from the unrounded values before it. If you work with the rounded values you'll get slightly different answers, like $-1.99$ for this slope. Unrounded, the sum of squares is exactly $5/3$ and the sum of products exactly $-10/3$, which gives exactly $-2$.]
+The slope is the sum of products over the sum of squares, just using the coffee residuals. The table showed $-3.33$ and $1.67$. Using the exact values gives us:
 
-$$ b_1 = \frac{-3.33}{1.67} = -2 $$
+$$ b_1 = \frac{-10/3}{5/3} = -2 $$
 
-To get $b_2$, the slope for sleep, we do the same thing the other way round, with the part of sleep that coffee doesn't predict, as in the last step of @act-coffee-residuals. That gives a sum of squares of 6.67 and a sum of products of 40, so $b_2 = 40 / 6.67 = 6$.^[There's also a shortcut for these sums, without the column of residuals: take out the part that runs through the other predictor. For coffee, $SS_X - SP_{XZ}^2/SS_Z$ $= 3 - (-4)^2/12$ $= 1.67$ and $SP_{XY} - SP_{XZ}\,SP_{ZY}/SS_Z$ $= -30 - (-4)(80)/12$ $= -3.33$. For sleep, $SS_Z - SP_{XZ}^2/SS_X$ $= 12 - (-4)^2/3$ $= 6.67$ and $SP_{ZY} - SP_{XZ}\,SP_{XY}/SS_X$ $= 80 - (-4)(-30)/3$ $= 40$.]
+For $b_2$, use the sleep residuals from the last step of @act-coffee-residuals. The sum of squares is $20/3$, or about 6.67, and the sum of products is 40, so $b_2 = 40 / (20/3) = 6$.^[There's also a shortcut for these sums using the original sums of squares and products. For coffee, $SS_X - SP_{XZ}^2/SS_Z$ $= 3 - (-4)^2/12$ $= 5/3$ and $SP_{XY} - SP_{XZ}\,SP_{ZY}/SS_Z$ $= -30 - (-4)(80)/12$ $= -10/3$. For sleep, $SS_Z - SP_{XZ}^2/SS_X$ $= 12 - (-4)^2/3$ $= 20/3$ and $SP_{ZY} - SP_{XZ}\,SP_{XY}/SS_X$ $= 80 - (-4)(-30)/3$ $= 40$.]
 
-Like the line with one predictor, the equation passes through the means: one cup, seven hours, and 70 points. So to find the intercept, we start from the mean score and take away what the two slopes add at the mean coffee and mean sleep: $a = 70 - (-2)(1) - 6(7) = 30$.
+Just like before, we predict the mean test score when the predictors are both at their means. Here that's 70 points at one cup and seven hours. To find the intercept, take away what the two slopes add at those means. We get $a = 70 - (-2)(1) - 6(7) = 30$.
 
 <!-- DRAFT: your sentence was "Fitting that equation to our seven students gives us a slope of $-2$ for coffee and
      $6$ for sleep. The intercept is 30." It now follows the working, so it's a summary; the footnote is unchanged. -->
@@ -501,7 +501,7 @@ Notice what happens if we fix sleep at a particular value. For someone who slept
 ::::: {#act-adding-sleep .callout-tip .interactive}
 ## Adding sleep
 
-{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines slide each student's coffee to what it would be at an average seven hours of sleep, and the line through them flattens from a slope of −10 to −2. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660, less than coffee alone's 900 of the total 1200. The 540 the two predictors account for splits into 240 for sleep only, 6.67 for coffee only, and 293.33 they share." >}}
+{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines show each student's coffee residual added to the prediction of one cup at seven hours of sleep, and the line through them flattens from a slope of −10 to −2. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660, less than coffee alone's 900 of the total 1200. The 540 the two predictors account for splits into 240 for sleep only, 6.67 for coffee only, and 293.33 they share." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Coffee alone" data-action='{"collect-ss":"residual","line":"fit","color-z":false,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none","animate":false}'}
@@ -513,7 +513,7 @@ Now color each student by how long they slept, darker for more sleep. The darker
 :::
 
 ::: {.tutorial-step data-title="Coffee at average sleep" data-action='{"collect-ss":"reference","line":"adjusted","adjust-x":true,"rise-run":{"from":0,"to":1},"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
-Now add the average of one cup back on to each student's residual from @act-coffee-residuals. That's their coffee as it would be if they'd slept an average seven hours. Students who slept more move right, and students who slept less move left. Watch the line follow them. Through the adjusted dots it's much flatter, with the slope for coffee once sleep is taken into account, $b_1$.
+One cup is what we'd predict at the average of seven hours. Add one cup to each residual from @act-coffee-residuals to put everyone on that same reference point. The dashed outlines show where each student now sits above or below one cup. Watch the line follow them. It's much flatter now, with the slope for coffee once sleep is taken into account, $b_1$.
 :::
 
 ::: {.tutorial-step data-title="A line for each amount of sleep" data-action='{"collect-ss":"reference","line":"multiple","rise-run":{"from":0,"to":1},"show-spacing":true,"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
@@ -541,13 +541,13 @@ As before, the rest of the square is what our predictions saved us compared with
 :::
 
 ::: {.tutorial-step data-title="Who explained what?" data-action='{"collect-ss":"partition","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":true,"emphasize":"none"}'}
-Just like we split between-groups variability into factors in Chapter 16, we can split this up. Some of it only sleep accounts for. That's the gap between coffee alone and both together that we saw a moment ago. A sliver only coffee accounts for. And the biggest part either one could account for on its own. That's the overlap between them.
+Just like we split between-groups variability into factors in Chapter 16, we can split this up. Sleep's part is the gap between coffee alone and both together that we saw a moment ago. Coffee's part is the sliver between sleep alone and both together. For these data, the biggest part is the overlap between what the two predictors account for on their own.
 :::
 ::::
 
 :::::
 
-We can check the misses just as we did before. Two students had those same six hours and one and a half cups. Both now get a prediction of 63. Their scores were 50 and 65, so their residuals are $-13$ and $+2$.
+We can check the misses just as we did in @tbl-regression-ss. Two students had those same six hours and one and a half cups. Their prediction goes from 65 with coffee alone to 63 with both predictors. Their scores were 50 and 65, so their new residuals are $-13$ and $+2$.
 
 | Coffee ($X$) | Sleep ($Z$) | Score ($Y$) | $\hat{Y}$ | $Y - \hat{Y}$ | $(Y - \hat{Y})^2$ |
 |--:|--:|--:|--:|--:|--:|
@@ -561,7 +561,7 @@ We can check the misses just as we did before. Two students had those same six h
 
 : Predicted values and residuals with both coffee and sleep as predictors. $SS_{residual} = 660$. {#tbl-multiple-residuals}
 
-We're predicting the same seven scores, so the total sum of squares is still 1200. The residual sum of squares is down to 660, leaving $1200 - 660 = 540$ accounted for by the two predictors together. This time there are two slopes, so regression gets two degrees of freedom. Estimating those slopes and the intercept leaves $7 - 3 = 4$ degrees of freedom for the residual.
+We're predicting the same seven scores, so the total sum of squares is still 1200. The residual sum of squares drops from 900 to 660, leaving $1200 - 660 = 540$ accounted for by the two predictors together. This time there are two slopes, so regression gets two degrees of freedom. Estimating those slopes and the intercept leaves $7 - 3 = 4$ degrees of freedom for the residual.
 
 ::: {#tbl-multiple-regression-summary .sfs-summary-table}
 | Source | $SS$ | $df$ | $MS$ | $F$ |
@@ -575,7 +575,7 @@ Summary table for the regression with coffee and sleep as predictors.
 
 $$ R^2 = \frac{SS_{regression}}{SS_Y} = \frac{540}{1200} = .45 $$
 
-With more than one predictor we write this proportion as capital $R^2$. Coffee alone accounted for 25% of the variability in our sample. Coffee and sleep together account for 45%. The overall $F$ tests the two slopes together against a model that just predicts the mean. The null hypothesis is that both slopes are zero in the population. In other words, neither coffee nor sleep would help us predict test scores at all. Here $F(2, 4) = 1.64$, $p = .30$. Adding a predictor can improve the fit to the students we already have even if it wouldn't help us predict how new students will score.
+With more than one predictor we write this proportion as capital $R^2$. Coffee alone accounted for 25% of the variability in our sample. Coffee and sleep together account for 45%. The overall $F$ tests the two slopes together against a model that just predicts the mean. The null hypothesis is that both slopes are zero in the population. Here $F(2, 4) = 1.64$, $p = .30$. Remember how the line with one predictor could tilt by chance? Here, too, a better fit to the students we have can happen by chance.
 
 <!-- REVIEW: The last sentence above is the right idea but compressed. A concrete demonstration from these data:
        - Sleep alone: R^2 = .444, SS_reg 533.3, SS_res 666.7, F(1, 5) = 4.00, p = .10.
@@ -595,13 +595,13 @@ How much does *coffee* add once we know about sleep? For these seven students, t
 <!-- DRAFT -->
 ### Testing each predictor
 
-The overall $F$ tells us whether the two predictors together do better than the mean. But we'll usually want to know about each one too. And we've already seen the pieces we need. In the last step of the activity, the 540 split into a part only sleep accounts for, 240, a part only coffee accounts for, 6.67, and a part either one could account for, 293.33. Each predictor's own part is what it adds once the other is already in the equation. So we test it the same way we tested each factor in Chapter 16. Its own sum of squares, with one degree of freedom, goes over the mean square for the residual, which plays the part the within-groups mean square played there.
+The overall $F$ tests both slopes together. We can also test whether each population slope is zero with the other predictor already in the equation. In the last step of @act-adding-sleep, we saw how much squared error each predictor saves on top of the other. With coffee already in, adding sleep saves $900 - 660 = 240$. With sleep already in, adding coffee saves about $666.67 - 660 = 6.67$. As in Chapter 16, each predictor's sum of squares has one degree of freedom. We divide it by the residual mean square from the model with both predictors, 165.
 
-$$ F_{sleep} = \frac{240}{165} = 1.45 \qquad F_{coffee} = \frac{6.67}{165} = 0.04 $$
+$$ F_{sleep} = \frac{240}{165} \approx 1.45 \qquad F_{coffee} \approx \frac{6.67}{165} \approx 0.04 $$
 
-Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before. The standard error is the same formula we used for one predictor, $\sqrt{MS_{residual}/SS}$, but with the sum of squares for that predictor's residuals. For coffee that's $\sqrt{165 / 1.67} = 9.95$, so $t = -2/9.95 = -0.20$. For sleep it's $\sqrt{165 / 6.67} = 4.97$, so $t = 6/4.97 = 1.21$.]
+Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before. The standard error is the same formula we used for one predictor, $\sqrt{MS_{residual}/SS}$, but with the sum of squares for that predictor's residuals. For coffee that's $\sqrt{165 / (5/3)} \approx 9.95$, giving $t \approx -0.20$. For sleep it's $\sqrt{165 / (20/3)} \approx 4.97$, giving $t \approx 1.21$.]
 
-Notice that the shared 293.33 doesn't go to either test. Neither predictor gets credit for it, because either one could account for it without the other. In Chapter 16 that didn't come up. With the same number of scores in every group, the factors aren't related to each other, so there's nothing to share, and the pieces add up neatly. With predictors like coffee and sleep that go together, it's possible for the two of them together to predict significantly better than the mean, while neither one is significant on its own.
+Notice that the shared 293.33 doesn't go to either test. Each test gives a predictor credit only for what it adds once the other is in the equation. In Chapter 16 that didn't come up. With the same number of scores in every group, the factors aren't related to each other, so there's nothing to share, and the pieces add up neatly. With predictors like coffee and sleep that go together, the overall test can be significant even when neither predictor is significant once we account for the other.
 
 <!-- DRAFT -->
 ### What the slopes mean
