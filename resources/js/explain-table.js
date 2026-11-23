@@ -54,6 +54,18 @@
     return (negative ? "- " : "+ ") + body;
   }).join(" ");
 
+  // True when every term is a plain (rounded) number and they don't add up
+  // to the shown total, as when 0.44 + ... + 1.78 = 6.66 but the cell shows
+  // the exact sum, 6.67. The popup then says "approximately".
+  function roundedSumDiffers(terms, result) {
+    const number = /^-?\d*\.?\d+$/;
+    if (!terms.every(t => number.test(t)) || !number.test(result)) return false;
+    // Compare at the precision of the most precise number shown.
+    const places = Math.max(...terms.concat(result).map(t => (t.split(".")[1] || "").length));
+    const total = terms.reduce((sum, t) => sum + Number(t), 0);
+    return Math.abs(total - Number(result)) > 0.5 * 10 ** -places;
+  }
+
   // Split a long sum over several lines of an aligned block.
   function chunk(terms) {
     const lines = [];
@@ -155,8 +167,9 @@
           tex = rule.lead + " = \\frac{" + joinTerms(terms, false) + "}{" + terms.length + "} = " + result;
         } else {
           const lines = chunk(terms);
+          const relation = roundedSumDiffers(terms, result) ? "\\approx" : "=";
           tex = "\\begin{aligned} " + rule.lead + " &= " + lines.join(" \\\\ &\\quad ") +
-            " \\\\ &= " + result + " \\end{aligned}";
+            " \\\\ &" + relation + " " + result + " \\end{aligned}";
         }
         attach(cell, tex, sources);
       });
@@ -168,7 +181,7 @@
     document.querySelectorAll(".sfs-explain-table").forEach(buildTable);
   }
 
-  window.sfsExplainTable = { fill, chunk, joinTerms };
+  window.sfsExplainTable = { fill, chunk, joinTerms, roundedSumDiffers };
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

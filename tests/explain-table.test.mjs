@@ -34,6 +34,15 @@ test("sums read as plus or minus each term, across lines", () => {
   assert.deepEqual([...chunk(["1", "-2", "3", "4", "-5"])], ["1 - 2 + 3 + 4", "- 5"]);
 });
 
+test("a sum of rounded terms that misses the shown total is marked approximate", () => {
+  const { roundedSumDiffers } = loadHelpers();
+  assert.equal(roundedSumDiffers(["0.44", "0.11", "0.11", "4", "0.11", "0.11", "1.78"], "6.67"), true);
+  assert.equal(roundedSumDiffers(["0.11", "0.03", "0.03", "0.44", "0.03", "0.03", "1"], "1.67"), false);
+  assert.equal(roundedSumDiffers(["(9 - 7)^2", "1"], "12"), false);
+  assert.equal(roundedSumDiffers(["13.33", "-3.33", "5", "10", "6.67", "1.67", "6.67"], "40"), true);
+  assert.equal(roundedSumDiffers(["36", "289", "64", "49", "169", "4", "49"], "660"), false);
+});
+
 test("every explain-table spec only refers to its own columns", () => {
   for (const name of readdirSync(ROOT).filter(n => n.endsWith(".qmd"))) {
     const text = readFileSync(join(ROOT, name), "utf8");
