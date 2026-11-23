@@ -39,6 +39,9 @@ local manifest = {
     file = "resources/js/graph-data.js",
     deps = { "graph-core" }
   },
+  ["explain-table"] = {
+    file = "resources/js/explain-table.js"
+  },
   ["read-guides"] = {
     file = "resources/js/read-guides.js",
     deps = { "d3" }

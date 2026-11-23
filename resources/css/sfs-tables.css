@@ -94,6 +94,13 @@ main table th,
   color: var(--sfs-muted);
 }
 
+/* Static tables: a rule between the data and its means and sums, as in the
+   step tables. The filter in filters/responsive-tables.lua marks the rows. */
+main table tr.sfs-table-summary-first > *,
+main table.table > tbody > tr.sfs-table-summary-first > * {
+  border-top: 2px solid var(--sfs-table-rule-color);
+}
+
 /* Match the row and column dice in Chapter 6. These are the same red and blue
    used by the first two dice on the chapter cover. */
 #tbl-dice-sums {
@@ -112,6 +119,39 @@ main table th,
 body.quarto-dark #tbl-dice-sums {
   --sfs-die-red-text: color-mix(in srgb, rgb(209 64 79) 72%, white);
   --sfs-die-blue-text: color-mix(in srgb, rgb(51 120 176) 72%, white);
+}
+
+/* Tables with tap-or-hover working (resources/js/explain-table.js). Cells
+   that explain themselves are tinted with the interactive-callout green,
+   mixed into the text color so they stay legible (about 5:1 on white). While
+   a popup is open its cell is outlined and the cells it draws on are
+   highlighted. */
+main table.table > tbody > tr > .sfs-explain-cell {
+  /* Set here, not on :root, so it follows the dark theme's text color. */
+  --sfs-explain-color: color-mix(in srgb,
+    var(--quarto-scss-export-callout-color-tip, var(--bs-success)) 55%, var(--sfs-text));
+  color: var(--sfs-explain-color);
+  cursor: help;
+}
+
+.sfs-explain-cell:focus-visible,
+main table.table > tbody > tr > .sfs-explain-target {
+  outline: 2px solid var(--sfs-explain-color);
+  outline-offset: -2px;
+}
+
+main table.table > tbody > tr > .sfs-explain-source {
+  background: var(--sfs-highlight-bg);
+}
+
+.sfs-explain-pop {
+  max-width: min(32rem, calc(100vw - 2rem));
+  overflow-x: auto;
+  padding: 0.1rem 0.25rem;
+}
+
+.sfs-explain-pop mjx-container[display="true"] {
+  margin: 0.25rem 0 !important;
 }
 
 /* Mark a modal row in static frequency tables without coupling the styling

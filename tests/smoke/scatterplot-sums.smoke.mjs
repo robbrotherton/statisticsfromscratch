@@ -293,75 +293,57 @@ test('adding sleep splits the coffee line into parallel lines and partitions wha
   }
 });
 
-test('the coffee residuals table builds a column per step, and its own cells give the slope', async () => {
-  const activity = divById(readChapter('18-regression.qmd'), 'act-coffee-residuals');
-  const options = JSON.parse(/makeStepTable options='([^']+)'/.exec(activity)[1]);
-  const actions = tutorialSteps(activity).map(step => step.action);
-  // The cells are rounded for readers. Each should be its unrounded value to two
-  // decimals, and the unrounded sums should give the two-predictor slope.
-  // Headers keep the shortcode's doubled backslashes.
-  const value = text => Number(text.replace('\u2212', '-'));
-  // A stacked header's tex is an array of lines.
-  const texOf = spec => [].concat(spec.tex).join('');
-  const cells = key => options.columns.find(c => texOf(c) === key).cells.map(value);
-  const [z, x] = [cells('Z'), cells('X')];
-  const residuals = x.map((xi, i) => xi - (1 - (z[i] - 7) / 3));
-  const scoreDeviations = cells('Y - M_Y');
-  const close = (shown, exact) => assert.ok(Math.abs(shown - exact) <= 0.005 + 1e-9, shown + ' vs ' + exact);
-  cells('X - \\\\hat{X}').forEach((v, i) => close(v, residuals[i]));
-  cells('(X - \\\\hat{X})^2').forEach((v, i) => close(v, residuals[i] ** 2));
-  cells('(X - \\\\hat{X})(Y - M_Y)').forEach((v, i) => close(v, residuals[i] * scoreDeviations[i]));
-  const ss = residuals.reduce((a, e) => a + e * e, 0);
-  const sp = residuals.reduce((a, e, i) => a + e * scoreDeviations[i], 0);
-  assert.ok(Math.abs(sp / ss + 2) < 1e-9);
+test('the two residual tables match their exact values, and their own sums give the two-predictor slopes', () => {
+  const chapter = readChapter('18-regression.qmd');
+  // The markdown table whose caption carries the ID, as rows of cell text.
+  const tableById = id => {
+    const lines = chapter.split('\n');
+    const caption = lines.findIndex(line => line.startsWith(':') && line.includes('{#' + id + '}'));
+    assert.ok(caption > 0, 'no table #' + id);
+    let first = caption - 1;
+    while (lines[first - 1] === '') first--;
+    const end = first;
+    while (first > 0 && lines[first - 1].startsWith('|')) first--;
+    return lines.slice(first, end).map(line => line.split('|').slice(1, -1).map(cell => cell.trim()));
+  };
+  const value = text => Number(text.replace(/[$\s]/g, '').replace(/^.*=/, '').replace('−', '-'));
+  const close = (shown, exact, label) => assert.ok(Math.abs(shown - exact) <= 0.005 + 1e-9, label + ': ' + shown + ' vs ' + exact);
+  const scoreDeviations = [20, -10, 15, -5, -20, -5, 5];
 
-  // The other way round: sleep's residuals from coffee, against the same score deviations.
-  const altCells = key => options.columns.find(c => c.alt && texOf(c.alt) === key).alt;
-  const sleepResiduals = z.map((zi, i) => zi - (7 - (4 / 3) * (x[i] - 1)));
-  altCells('Z - \\\\hat{Z}').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i]));
-  altCells('(Z - \\\\hat{Z})^2').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i] ** 2));
-  altCells('(Z - \\\\hat{Z})(Y - M_Y)').cells.map(value).forEach((v, i) => close(v, sleepResiduals[i] * scoreDeviations[i]));
-  const ssSleep = sleepResiduals.reduce((a, e) => a + e * e, 0);
-  const spSleep = sleepResiduals.reduce((a, e, i) => a + e * scoreDeviations[i], 0);
-  assert.ok(Math.abs(spSleep / ssSleep - 6) < 1e-9);
-  close(value(altCells('(Z - \\\\hat{Z})^2').total), ssSleep);
-  close(value(altCells('(Z - \\\\hat{Z})(Y - M_Y)').total), spSleep);
-  close(value(options.columns.find(c => texOf(c) === '(X - \\\\hat{X})^2').total), ss);
-  close(value(options.columns.find(c => texOf(c) === '(X - \\\\hat{X})(Y - M_Y)').total), sp);
-
-  const browser = await chromium.launch();
-  try {
-    const page = await browser.newPage({ reducedMotion: 'reduce' });
-    const errors = [];
-    page.on('pageerror', e => errors.push(e.message));
-    await page.setContent('<div class="callout"><div id="host"></div><div class="callout-footer"><div class="tutorial-step"></div></div></div>');
-    for (const script of ['d3.min', 'interactive-figure', 'variability-table-generator']) {
-      await page.addScriptTag({ path: new URL('../../resources/js/' + script + '.js', import.meta.url).pathname });
-    }
-    await page.evaluate(opts => {
-      window.interactiveFigure.createTutorial = args => { window.stepTable = args.applyAction; };
-      document.querySelector('#host').appendChild(makeStepTable(opts));
-    }, options);
-    await page.waitForFunction(() => typeof window.stepTable === 'function');
-    const shownColumns = () => page.locator('thead th').evaluateAll(ths => ths.filter(th => {
-      const target = th.querySelector('.vt-reveal-target');
-      return !target || target.classList.contains('is-visible');
-    }).length);
-    const expected = [2, 3, 4, 5, 7, 7];
-    const firstHeader = () => page.locator('thead th').first().textContent();
-    for (const [i, action] of actions.entries()) {
-      await page.evaluate(a => window.stepTable(a), action);
-      assert.equal(await shownColumns(), expected[i], 'columns after step ' + (i + 1));
-    }
-    // The last step swaps the predictors' columns and refills the calculation.
-    assert.match(await firstHeader(), /^Coffee/);
-    assert.equal(await page.locator('tbody tr').first().locator('td').nth(3).textContent(), '+0.67');
-    await page.evaluate(a => window.stepTable(a), actions[4]);
-    assert.match(await firstHeader(), /^Sleep/);
-    assert.equal(await page.locator('tbody tr').first().locator('td').nth(3).textContent(), '\u22120.33');
-    assert.deepEqual(errors, []);
-  } finally {
-    await browser.close();
+  // Each table: predictor, predicted variable, their product, the prediction, residual, squared, Y, Y - M_Y,
+  // product with the residual; then a row of means and a row of sums.
+  for (const [id, slope] of [['tbl-coffee-residuals', -2], ['tbl-sleep-residuals', 6]]) {
+    const [, , ...rest] = tableById(id);
+    assert.equal(rest.length, 9, id + ' rows');
+    const rows = rest.slice(0, 7).map(row => row.map(value));
+    const [means, sums] = [rest[7], rest[8]];
+    const predictor = rows.map(r => r[0]);
+    const outcome = rows.map(r => r[1]);
+    const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+    const [mp, mo] = [mean(predictor), mean(outcome)];
+    const sp = predictor.reduce((s, v, i) => s + (v - mp) * (outcome[i] - mo), 0);
+    const ss = predictor.reduce((s, v) => s + (v - mp) ** 2, 0);
+    const ssOutcome = outcome.reduce((s, v) => s + (v - mo) ** 2, 0);
+    const predicted = predictor.map(v => mo + (sp / ss) * (v - mp));
+    const residuals = outcome.map((v, i) => v - predicted[i]);
+    rows.forEach((r, i) => {
+      close(r[2], (predictor[i] - mp) * (outcome[i] - mo), id + ' cross product ' + i);
+      close(r[3], predicted[i], id + ' prediction ' + i);
+      close(r[4], residuals[i], id + ' residual ' + i);
+      close(r[5], residuals[i] ** 2, id + ' squared ' + i);
+      assert.equal(r[6] - 70, scoreDeviations[i], id + ' score ' + i);
+      assert.equal(r[7], scoreDeviations[i], id + ' score deviation ' + i);
+      close(r[8], residuals[i] * scoreDeviations[i], id + ' product ' + i);
+    });
+    [mp, mo, mo, 70].forEach((m, k) => close(value(means[[0, 1, 3, 6][k]]), m, id + ' mean ' + k));
+    close(value(sums[0]), ss, id + ' SS predictor');
+    close(value(sums[1]), ssOutcome, id + ' SS predicted');
+    close(value(sums[2]), sp, id + ' SP');
+    const ssResidual = residuals.reduce((s, e) => s + e * e, 0);
+    const spResidual = residuals.reduce((s, e, i) => s + e * scoreDeviations[i], 0);
+    close(value(sums[5]), ssResidual, id + ' SS residual');
+    close(value(sums[8]), spResidual, id + ' SP residual');
+    assert.ok(Math.abs(spResidual / ssResidual - slope) < 1e-9, id + ' slope');
   }
 });
 
