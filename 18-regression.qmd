@@ -7,6 +7,7 @@ interactive-scripts:
   - distribution-generator
   - variability-table-generator
   - explain-table
+  - overlap-squares
 ---
 
 {{< interactive-figure regressionCover makeAssociationCover options='{"regression":true}' fallback="Multicolored dots with a correlation of about 0.6 pop into view, then their line of best fit draws across them as their colors change to green near the line through vermilion at the largest absolute residuals." >}}
@@ -377,6 +378,10 @@ As usual, our tiny toy data set isn't really sufficient to check these assumptio
 
 We saw one way to incorporate a potential third variable like sleep into our analysis with the partial correlation in Chapter 17. But an advantage of regression over correlations is it allows us to include multiple predictors in a single model.
 
+::: {#quiz-regression-sleep-alone}
+{{< include quizzes/18-regression-sleep-alone.qmd >}}
+:::
+
 ## Multiple regression
 
 Here's the same coffee and test performance data as before, now with information about the students' sleep added in (same as we used for the partial correlation last chapter). Can we use this extra information in our regression model to make an even better guess at someone's test score? And once we know how much they slept, what does coffee still tell us?
@@ -399,7 +404,7 @@ $$ \hat{Y} = b_1 X + b_2 Z + a $$ {#eq-multiple-regression}
 
 We multiply cups of coffee by one slope and hours of sleep by the other, then add the intercept. The logic of determining those slopes and the intercept is the same as before: we choose the values that make the sum of squared residuals as small as possible.
 
-So how do we find the two slopes? You might think we could just reuse coffee's slope on its own ($-10$), and do the whole regression thing over again with sleep as a single predictor to get its slope. But that wouldn't give us a better model. In fact, it would defeat the purpose, by treating the predictors as separate, unrelated information. The whole point here is that maybe they are related. The students who drank more coffee tended to sleep less, and those who slept less tended to score lower. Fitting the two slopes separately lets both pick up some of the same pattern in test scores. We need to fit them together, accounting for their relationship with each other.
+So how do we find the two slopes? You might think we could just reuse coffee's slope on its own ($-10$) and the slope for sleep on its own that you found in @quiz-regression-sleep-alone ($6.67$). But that wouldn't give us a better model. In fact, it would defeat the purpose, by treating the predictors as separate, unrelated information. The whole point here is that maybe they are related. The students who drank more coffee tended to sleep less, and those who slept less tended to score lower. Fitting the two slopes separately lets both pick up some of the same pattern in test scores. We need to fit them together, accounting for their relationship with each other.
 
 ### Calculating the slopes and intercept
 
@@ -512,8 +517,28 @@ $$ \hat{Y} = -2X + 6Z + 30 $$
 
 For someone who slept six hours and drank a cup and a half, we get a predicted test score of $-2(1.5) + 6(6) + 30 = 63$. Now keep sleep at six hours and change coffee from one and a half cups to half a cup. The predicted score goes up by just two points. With coffee alone that same change raised the prediction by ten points. That's what the coffee slope means *with sleep in the equation*. Likewise, holding coffee constant, each extra hour of sleep raises the predicted score by six points.
 
-<!-- DRAFT -->
-Notice what happens if we fix sleep at a particular value. For someone who slept nine hours, the equation becomes $-2X + 6(9) + 30$, or $-2X + 84$. That's just an ordinary straight line, with a slope of $-2$ and an intercept of 84. Every amount of sleep gives a line like that, all with the same slope, each 6 points above the one for an hour less. You'll see those lines in the activity below.
+### Picturing the sums of squares
+
+Now that we produced the regression equation, we can check the misses just as we did in @tbl-regression-ss. Two students had those same six hours and one and a half cups. Their prediction goes from 65 with coffee alone to 63 with both predictors. Their scores were 50 and 65, so their new residuals are $-13$ and $+2$.
+
+::: {.sfs-explain-table data-explain='{"keys":["X","Z","Y","Yh","r","r2"],"cells":{"Yh":{"lead":"\\\\hat{Y}","calc":"-2({X}) + 6({Z}) + 30"},"r":{"lead":"Y - \\\\hat{Y}","calc":"{Y} - {Yh}"},"r2":{"lead":"(Y - \\\\hat{Y})^2","calc":"({r})^2"}},"summary":[{"X":{"lead":"M_X","mean":"{X}"},"Z":{"lead":"M_Z","mean":"{Z}"},"Y":{"lead":"M_Y","mean":"{Y}"},"Yh":{"lead":"M_{\\\\hat{Y}}","mean":"{Yh}"},"r2":{"lead":"SS_{\\\\text{residual}} = \\\\Sigma(Y - \\\\hat{Y})^2","sum":"{r2}"}}]}'}
+
+| Coffee ($X$) | Sleep ($Z$) | Score ($Y$) | $\hat{Y}$ | $Y - \hat{Y}$ | $(Y - \hat{Y})^2$ |
+|:--:|:--:|:--:|:--:|:--:|:--:|
+| 0 | 9 | 90 | 84 | $6$ | 36 |
+| 0.5 | 8 | 60 | 77 | $-17$ | 289 |
+| 0.5 | 8 | 85 | 77 | $8$ | 64 |
+| 1 | 5 | 65 | 58 | $7$ | 49 |
+| 1.5 | 6 | 50 | 63 | $-13$ | 169 |
+| 1.5 | 6 | 65 | 63 | $2$ | 4 |
+| 2 | 7 | 75 | 68 | $7$ | 49 |
+| $M_X = 1$ | $M_Z = 7$ | $M_Y = 70$ | $M_{\hat{Y}} = 70$ | | $SS_{\text{residual}} = 660$ |
+
+: Predicted values and residuals with both coffee and sleep as predictors. $SS_{residual} = 660$. {#tbl-multiple-residuals}
+
+:::
+
+Notice what happens if we fix sleep at a particular value. For someone who slept nine hours, the equation becomes $-2X + 6(9) + 30$, or $-2X + 84$. That's just an ordinary straight line, with a slope of $-2$ and an intercept of 84. Every amount of sleep gives a line like that, all with the same slope, each 6 points above the one for an hour less.^[Parallel lines mean this model has no interaction, in the sense of Chapter 16: the coffee slope is the same at every amount of sleep. Regression can include an interaction, by adding a third predictor made by multiplying each student's coffee by their sleep. Its slope lets the coffee slope change with the amount of sleep, so the lines no longer have to be parallel.] That gives us a way of visualizing the sums of squares we just computed using the equations.
 
 <!-- REVIEW: NEW SUBSECTION + TUTORIAL. This is where to deliver Ch 17's promise (line ~343: "We'll use this
      technique of measuring deviations from a prediction in the next chapter"). Where does -2 come from?
@@ -532,7 +557,7 @@ Notice what happens if we fix sleep at a particular value. For someone who slept
 ::::: {#act-adding-sleep .callout-tip .interactive}
 ## Adding sleep
 
-{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines show each student's coffee residual added to the prediction of one cup at seven hours of sleep, and the line through them flattens from a slope of −10 to −2. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660, less than coffee alone's 900 of the total 1200. The 540 the two predictors account for splits into 240 for sleep only, 6.67 for coffee only, and 293.33 they share." >}}
+{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines show each student's coffee residual added to the prediction of one cup at seven hours of sleep, and the line through them flattens from a slope of −10 to −2. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660 of the total 1200. The squared distances from each prediction to the mean fill the other 540." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Coffee alone" data-action='{"collect-ss":"residual","line":"fit","color-z":false,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none","animate":false}'}
@@ -564,38 +589,17 @@ And the same for everyone else, each measured from the line for their own amount
 :::
 
 ::: {.tutorial-step data-title="Sum of squares" data-action='{"collect-ss":"residual","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
-Collect the squares. The dashed outlines show how each predictor did on its own. Adding sleep to coffee brings the total down a lot. Adding coffee to sleep barely moves it at all.
+Collect the squares. With both predictors, they add up to 660.
 :::
 
 ::: {.tutorial-step data-title="What did both explain?" data-action='{"collect-ss":"regression","draw":"both","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":true,"emphasize":"none"}'}
 As before, the rest of the square is what our predictions saved us compared with just guessing the mean. Measure from each student's prediction to the mean and collect those squares. They fill the gap exactly.
 :::
-
-::: {.tutorial-step data-title="Who explained what?" data-action='{"collect-ss":"partition","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":true,"emphasize":"none"}'}
-Just like we split between-groups variability into factors in Chapter 16, we can split this up. Sleep's part is the gap between coffee alone and both together that we saw a moment ago. Coffee's part is the sliver between sleep alone and both together. For these data, the biggest part is the overlap between what the two predictors account for on their own.
-:::
 ::::
 
 :::::
 
-We can check the misses just as we did in @tbl-regression-ss. Two students had those same six hours and one and a half cups. Their prediction goes from 65 with coffee alone to 63 with both predictors. Their scores were 50 and 65, so their new residuals are $-13$ and $+2$.
-
-::: {.sfs-explain-table data-explain='{"keys":["X","Z","Y","Yh","r","r2"],"cells":{"Yh":{"lead":"\\\\hat{Y}","calc":"-2({X}) + 6({Z}) + 30"},"r":{"lead":"Y - \\\\hat{Y}","calc":"{Y} - {Yh}"},"r2":{"lead":"(Y - \\\\hat{Y})^2","calc":"({r})^2"}},"summary":[{"X":{"lead":"M_X","mean":"{X}"},"Z":{"lead":"M_Z","mean":"{Z}"},"Y":{"lead":"M_Y","mean":"{Y}"},"Yh":{"lead":"M_{\\\\hat{Y}}","mean":"{Yh}"},"r2":{"lead":"SS_{\\\\text{residual}} = \\\\Sigma(Y - \\\\hat{Y})^2","sum":"{r2}"}}]}'}
-
-| Coffee ($X$) | Sleep ($Z$) | Score ($Y$) | $\hat{Y}$ | $Y - \hat{Y}$ | $(Y - \hat{Y})^2$ |
-|:--:|:--:|:--:|:--:|:--:|:--:|
-| 0 | 9 | 90 | 84 | $6$ | 36 |
-| 0.5 | 8 | 60 | 77 | $-17$ | 289 |
-| 0.5 | 8 | 85 | 77 | $8$ | 64 |
-| 1 | 5 | 65 | 58 | $7$ | 49 |
-| 1.5 | 6 | 50 | 63 | $-13$ | 169 |
-| 1.5 | 6 | 65 | 63 | $2$ | 4 |
-| 2 | 7 | 75 | 68 | $7$ | 49 |
-| $M_X = 1$ | $M_Z = 7$ | $M_Y = 70$ | $M_{\hat{Y}} = 70$ | | $SS_{\text{residual}} = 660$ |
-
-: Predicted values and residuals with both coffee and sleep as predictors. $SS_{residual} = 660$. {#tbl-multiple-residuals}
-
-:::
+### Finishing the regression
 
 We're predicting the same seven scores, so the total sum of squares is still 1200. The residual sum of squares drops from 900 to 660, leaving $1200 - 660 = 540$ accounted for by the two predictors together. This time there are two slopes, so regression gets two degrees of freedom. Estimating those slopes and the intercept leaves $7 - 3 = 4$ degrees of freedom for the residual.
 
@@ -626,18 +630,64 @@ With more than one predictor we write this proportion as capital $R^2$. Coffee a
 {{< include quizzes/18-regression-what-sleep-adds.qmd >}}
 :::
 
-How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions. (In Chapter 17 we used all 300 students, and the partial correlation was $-.05$. For these seven students it works out to $-.10$.)
+How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. When you ran the regression with sleep as the only predictor in @quiz-regression-sleep-alone, the squared misses around its line added up to $SS_{\text{residual}} = 666.67$, the other 56% of the 1200. Adding coffee only brings that down to 660. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions. (In Chapter 17 we used all 300 students, and the partial correlation was $-.05$. For these seven students it works out to $-.10$.)
 
 <!-- DRAFT -->
 ### Testing each predictor
 
-The overall $F$ tests both slopes together. We can also test whether each population slope is zero with the other predictor already in the equation. In the last step of @act-adding-sleep, we saw how much squared error each predictor saves on top of the other. With coffee already in, adding sleep saves $900 - 660 = 240$. With sleep already in, adding coffee saves about $666.67 - 660 = 6.67$. As in Chapter 16, each predictor's sum of squares has one degree of freedom. We divide it by the residual mean square from the model with both predictors, 165.
+The overall $F$ tells us whether coffee and sleep together predict test scores better than chance would. But it doesn't tell us how much of that predictability is coming from its association with coffee, how much from sleep, or how much is coming from what they share.
+
+To find each predictor's unique contribution to the regression, we can make use of the various regression models we've put together throughout this chapter: one with just coffee predicting test scores; the one you calculated with just sleep predicting test scores; and the multiple regression with both predictors together. 
+
+Coffee and sleep together account for the most variability, of course.^[Adding more predictors can never lower $SS_{\text{regression}}$] $SS_{\text{regression}}$ for that model was $540$. In comparison, the first regression with coffee alone had $SS_{\text{regression}} = 300$. In other words, adding sleep to the model increased the regression sum of squares by $540 - 300 = 240$. That is sleep's unique contribution in the full, two-predictor model: what sleep accounts for that coffee doesn't. On the other hand, the model with only sleep as a predictor had $SS_{\text{regression}} = 533.33$. Adding coffee only increased the regression sum of squares by $540 - 533.33 = 6.67$. That is the unique contribution of coffee in the full model, the variability in test scores that coffee consumption accounts for and sleep doesn't.
+
+| Predictors | Dropped | $SS_{\text{regression}}$ | $SS_{\text{residual}}$ | Increase |
+|:--|:--|:--:|:--:|:--:|
+| Coffee and sleep | | 540 | 660 | |
+| Coffee | Sleep | 300 | 900 | 240 |
+| Sleep | Coffee | 533.33 | 666.67 | 6.67 |
+
+: What each model accounts for and what it misses, with both predictors and with each one alone. Each row adds up to the total of 1200. Dropping a predictor increases the squared misses by the amount only that predictor could account for. {#tbl-drop-one}
+
+<!-- DRAFT: step text below is a first pass for Rob to rewrite. -->
+::::: {#act-shared-squares .callout-tip .interactive}
+## Shared and unshared
+
+{{< interactive-figure sharedSquares makeOverlapSquares options='{"parts":[{"name":"Sleep","ss":533.3333333333334,"color":"var(--graph-series-1)"},{"name":"Coffee","ss":300,"color":"var(--graph-series-2)"}],"shared":293.3333333333333,"residual":660,"dfResidual":4,"maxWidth":"36rem"}' fallback="Two squares to scale: what sleep accounts for on its own, 533.33, and what coffee accounts for on its own, 300. Put together, coffee's square slides almost entirely inside sleep's. They overlap by 293.33, the part they share; 240 of sleep's square and a strip of 6.67 of coffee's are unshared. Together they cover 540. The three parts then become squares of their own. The shared square goes to neither test. The residual of 660 is cut into 4 equal pieces, one of which, 165, is the residual mean square. Each unshared square over that mean square gives its F: 240 over 165 is about 1.45 for sleep, and 6.67 over 165 is about 0.04 for coffee." >}}
+
+:::: {.callout-footer}
+::: {.tutorial-step data-title="Each alone" data-action='{"phase":"apart","animate":false}'}
+On its own, sleep accounts for 533.33 of the squared deviations in test scores, and coffee for 300. Each is drawn as a square of that area.
+:::
+
+::: {.tutorial-step data-title="Together" data-action='{"phase":"together"}'}
+With both in the model, coffee's square slides almost entirely inside sleep's. The overlap, 293.33, is what they share. Sleep covers 240 that coffee doesn't, and coffee covers just 6.67 that sleep doesn't. Together they account for 540, with the shared part counted once.
+:::
+
+::: {.tutorial-step data-title="Pull them apart" data-action='{"phase":"split"}'}
+Now separate the three parts. Each becomes a square of its own, with the same area it had. The shared square won't go to either predictor's test.
+:::
+
+::: {.tutorial-step data-title="Mean squares" data-action='{"phase":"ms"}'}
+Each unshared square has one degree of freedom, so it's already its own mean square. For the denominator we need the residual mean square: the 660 squared misses from the model with both predictors, cut into 4 equal pieces. One piece is 165.
+:::
+
+::: {.tutorial-step data-title="F for each" data-action='{"phase":"f"}'}
+Each $F$ is a predictor's unshared square over the residual mean square. Sleep's 240 is about 1.45 times 165. Coffee's 6.67 is a tiny fraction of it, about 0.04.
+:::
+::::
+
+:::::
+
+Each predictor's sum of squares has one degree of freedom. Both tests use the same denominator: the residual mean square from the model with both predictors, 165.
 
 $$ F_{sleep} = \frac{240}{165} \approx 1.45 \qquad F_{coffee} \approx \frac{6.67}{165} \approx 0.04 $$
 
 Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before.]
 
-Notice that the shared 293.33 doesn't go to either test. Each test gives a predictor credit only for what it adds once the other is in the equation. In Chapter 16 that didn't come up. With the same number of scores in every group, the factors aren't related to each other, so there's nothing to share, and the pieces add up neatly. With predictors like coffee and sleep that go together, the overall test can be significant even when neither predictor is significant once we account for the other.
+The two pieces add up to $240 + 6.67 = 246.67$, well short of the 540 that coffee and sleep account for together. The other $540 - 240 - 6.67 = 293.33$ is what the two predictors share, because they go together: the students who drank more coffee tended to sleep less. Either predictor could cover that part on its own. Drop one and the other still picks it up, so we'd only lose it by dropping both. Neither test gets credit for it.
+
+Because the shared part counts toward the overall test but not toward either predictor's own test, predictors that go together can produce a significant overall test even when neither predictor is significant once we account for the other.
 
 <!-- DRAFT -->
 ### What the slopes mean
