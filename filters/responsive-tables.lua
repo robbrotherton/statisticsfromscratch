@@ -6,6 +6,53 @@
 -- When they end the table they get the same class as the step tables'
 -- summary rows, and the first gets a rule above it (see sfs-tables.css).
 
+-- A cell that holds nothing but a number, such as 90, -0.33, 2,465, .50 or
+-- 81%, becomes inline math, so every number in a table is set in the same
+-- math font whether or not the source wrapped it in dollar signs. A bold
+-- number (**1**) becomes \mathbf{1}, and a number inside a span keeps its
+-- span, as with Chapter 3's [5]{.sfs-mode-marker}.
+local function number_tex(inline)
+  if not inline or inline.t ~= "Str" then return nil end
+  local text = inline.text
+  if text:match("^[%-+]?%d[%d,]*%.?%d*%%?$") or text:match("^[%-+]?%.%d+%%?$")
+    or text:match("^\u{2212}%d[%d,]*%.?%d*%%?$") or text:match("^\u{2212}%.%d+%%?$") then
+    return (text:gsub("\u{2212}", "-"):gsub(",", "{,}"):gsub("%%", "\\%%"))
+  end
+end
+
+-- The one inline a cell holds, or nil.
+local function only_inline(contents)
+  local inlines = {}
+  for _, block in ipairs(contents) do
+    if block.t ~= "Plain" and block.t ~= "Para" then return nil end
+    for _, inline in ipairs(block.content) do table.insert(inlines, inline) end
+  end
+  if #inlines == 1 then return inlines[1] end
+end
+
+local function as_math(inline)
+  local tex = number_tex(inline)
+  if tex then return pandoc.Math("InlineMath", tex) end
+  if inline.t == "Strong" and #inline.content == 1 then
+    tex = number_tex(inline.content[1])
+    if tex then return pandoc.Math("InlineMath", "\\mathbf{" .. tex .. "}") end
+  end
+  if inline.t == "Span" and #inline.content == 1 then
+    local inner = as_math(inline.content[1])
+    if inner then return pandoc.Span({ inner }, inline.attr) end
+  end
+end
+
+local function mathify_numbers(rows)
+  for _, row in ipairs(rows) do
+    for _, cell in ipairs(row.cells) do
+      local inline = only_inline(cell.contents)
+      local math = inline and as_math(inline)
+      if math then cell.contents = { pandoc.Plain({ math }) } end
+    end
+  end
+end
+
 local function is_summary_cell(cell)
   local inlines = {}
   for _, block in ipairs(cell.contents) do
@@ -30,6 +77,10 @@ local function is_summary_row(row)
 end
 
 function Table(table)
+  mathify_numbers(table.head.rows)
+  for _, body in ipairs(table.bodies) do mathify_numbers(body.body) end
+  mathify_numbers(table.foot.rows)
+
   -- Only the run of summary rows that ends the table. Grouped tables with a
   -- mean row after each group (Ch 14, Ch 15) are left alone.
   for _, body in ipairs(table.bodies) do
