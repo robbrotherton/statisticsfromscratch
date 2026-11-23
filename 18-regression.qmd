@@ -632,14 +632,15 @@ With more than one predictor we write this proportion as capital $R^2$. Coffee a
 
 How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. When you ran the regression with sleep as the only predictor in @quiz-regression-sleep-alone, the squared misses around its line added up to $SS_{\text{residual}} = 666.67$, the other 56% of the 1200. Adding coffee only brings that down to 660. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions. (In Chapter 17 we used all 300 students, and the partial correlation was $-.05$. For these seven students it works out to $-.10$.)
 
-<!-- DRAFT -->
 ### Testing each predictor
 
-The overall $F$ tells us whether coffee and sleep together predict test scores better than chance would. But it doesn't tell us how much of that predictability is coming from its association with coffee, how much from sleep, or how much is coming from what they share.
+The overall $F$ tells us whether coffee and sleep together predict test scores better than chance would. But it doesn't tell us how much of that predictability is coming from coffee on its own, how much is from sleep, or how much is coming from the two together---from what they share.
 
-To find each predictor's unique contribution to the regression, we can make use of the various regression models we've put together throughout this chapter: one with just coffee predicting test scores; the one you calculated with just sleep predicting test scores; and the multiple regression with both predictors together. 
+To find each predictor's unique contribution to the regression model, we can compare that full multiple regression model with the simpler models we've put together throughout this chapter: one with just coffee predicting test scores, and the one you calculated with just sleep predicting test scores. 
 
-Coffee and sleep together account for the most variability, of course.^[Adding more predictors can never lower $SS_{\text{regression}}$] $SS_{\text{regression}}$ for that model was $540$. In comparison, the first regression with coffee alone had $SS_{\text{regression}} = 300$. In other words, adding sleep to the model increased the regression sum of squares by $540 - 300 = 240$. That is sleep's unique contribution in the full, two-predictor model: what sleep accounts for that coffee doesn't. On the other hand, the model with only sleep as a predictor had $SS_{\text{regression}} = 533.33$. Adding coffee only increased the regression sum of squares by $540 - 533.33 = 6.67$. That is the unique contribution of coffee in the full model, the variability in test scores that coffee consumption accounts for and sleep doesn't.
+The model with both coffee and sleep as predictors accounted for the most variability, of course; adding more predictors can never lower $SS_{\text{regression}}$. For that model, $SS_{\text{regression}}$ was $540$. In comparison, the first regression with coffee as the only predictor had $SS_{\text{regression}} = 300$. In other words, adding sleep to the model increased the regression sum of squares by $540 - 300 = 240$. That is sleep's unique contribution in the full, two-predictor model: what sleep accounts for that coffee doesn't.
+
+On the other hand, the model with only sleep as a predictor had $SS_{\text{regression}} = 533.33$. Adding coffee only increased the regression sum of squares by $540 - 533.33 = 6.67$. That is the unique contribution of coffee in the full model, the variability in test scores that coffee consumption accounts for and sleep doesn't.
 
 | Predictors | Dropped | $SS_{\text{regression}}$ | $SS_{\text{residual}}$ | Increase |
 |:--|:--|:--:|:--:|:--:|
@@ -687,18 +688,19 @@ Both tests use the same denominator, the residual mean square from the model wit
 
 :::::
 
-Each predictor's sum of squares has one degree of freedom. Both tests use the same denominator: the residual mean square from the model with both predictors, 165.
+We have a sum of squares value each predictor can claim as its own. That means we can test each predictor separately to see whether it adds significantly to the model once we account for the other predictor. As usual, we divide the $SS$ by its $df$ to get a mean square. Each predictor's sum of squares has one degree of freedom.
+
+Both tests use the same denominator, the same one we used for the $F$ test for the model as a whole: the residual mean square, $MS_{\text{residual}} = 165$.
 
 $$ F_{sleep} = \frac{240}{165} \approx 1.45 \qquad F_{coffee} \approx \frac{6.67}{165} \approx 0.04 $$
 
-Each has 1 and 4 degrees of freedom. Neither comes close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before.]
+With 1 and 4 degrees of freedom, neither of these $F4 ratios come close to significance: $p = .29$ for sleep and $p = .85$ for coffee.^[Statistical software usually reports a $t$ for each slope rather than an $F$. It's the slope divided by its standard error, and $t^2 = F$, just like before.]
 
-The two pieces add up to $240 + 6.67 = 246.67$, well short of the 540 that coffee and sleep account for together. The other $540 - 240 - 6.67 = 293.33$ is what the two predictors share, because they go together: the students who drank more coffee tended to sleep less. Either predictor could cover that part on its own. Drop one and the other still picks it up, so we'd only lose it by dropping both. Neither test gets credit for it.
+Notice that we don't test the shared part. The two individual pieces add up to $240 + 6.67 = 246.67$, well short of the $SS_{\text{regression}} = 540$ that coffee and sleep produce together. The other $540 - 240 - 6.67 = 293.33$ is what the two predictors share, because they go together: the students who drank more coffee tended to sleep less. That was implicitly part of both the single-predictor models, even though we couldn't specifically quantify it with those. Only the multiple regression can tease the pieces apart.
 
-Because the shared part counts toward the overall test but not toward either predictor's own test, predictors that go together can produce a significant overall test even when neither predictor is significant once we account for the other.
+The shared part counts toward the overall test but not toward either predictor's own test, so predictors that go together can produce a significant overall test even when neither predictor is significant once we account for the other.
 
-<!-- DRAFT -->
-### What the slopes mean
+### Interpreting multiple regression
 
 Notice how much the coffee slope changed, from $-10$ on its own to $-2$ with sleep. A slope in multiple regression always depends on what else is in the equation. Add another predictor that's related to coffee and the coffee slope could change again.^[Because cups and hours are different units, you can't compare the two slopes directly. Software often also reports *standardized* slopes, which are the slopes you'd get if every variable were first converted to $z$-scores. Here they're $-.10$ for coffee and $.60$ for sleep. Statistical software often calls these standardized estimates "Beta." We've been using $\beta$ for the population slope in the original units.]
 
@@ -731,18 +733,20 @@ And just as with partial correlations in Chapter 17, holding sleep constant is s
      read, and it closes the loop from Ch 17's opener. -->
 
 
-## What if the predictor is a group?
+<!-- ## What if the predictor is a group?
+
+Going to save this for later I think.
 
 Think back to the two spending groups in Chapter 12. Suppose we coded spending on yourself as 0 and spending on someone else as 1, and used that number to predict happiness. What would the least-squares line do? At 0, its best guess would be the mean for the first group. At 1, its best guess would be the mean for the second. Moving one unit along that line takes us from one group mean to the other, so the slope is just the difference between them. Each person's residual is their deviation from their own group mean, exactly the quantity we used for within-groups variability in ANOVA.
 
 So if we tested whether that slope was zero, we'd be asking whether the two group means were equal. That's the question we answered with an independent-samples $t$ test in Chapter 12 and with ANOVA in Chapter 14. With cups of coffee as our predictor, testing the slope brought us back to Chapter 17's test of the correlation. There's a name for the mathematical framework these procedures share. It's called the **general linear model**.
 
-<!-- REVIEW: In the same spirit, r^2 here is also eta^2 from a one-way ANOVA on the two groups (the point-biserial
+    REVIEW: In the same spirit, r^2 here is also eta^2 from a one-way ANOVA on the two groups (the point-biserial
      r = .28 from Ch 17's footnote gives r^2 = .08). A sentence or the roadmap's closing table
-     (t → d, F → eta^2, r → r^2, R^2) would make the effect sizes part of the same family. -->
+     (t → d, F → eta^2, r → r^2, R^2) would make the effect sizes part of the same family. 
 
 
-We started with questions like “Did the two groups differ?” and “Do these two things go together?” Those are still different things we might want to know. But by now you've seen how far we can get with the same few tools you first met with a single mean. Make a prediction, see how far the scores fall from it, and ask how much better we can do with the information we have.
+We started with questions like “Did the two groups differ?” and “Do these two things go together?” Those are still different things we might want to know. But by now you've seen how far we can get with the same few tools you first met with a single mean. Make a prediction, see how far the scores fall from it, and ask how much better we can do with the information we have. -->
 
 {{< include quizzes/18-regression-learning-checks.qmd >}}
 
