@@ -691,6 +691,7 @@ makeScatterplot = function(opts) {
     showSP: scBoolean(opts.showSP ?? opts.spLabel, false),
     showR: scBoolean(opts.showR ?? opts.rLabel, false),
     collectSS: null,
+    showAlone: false,
     colorByZ: scBoolean(opts.colorByZ, false),
     // Indices of the students whose residuals and squares are showing, or
     // null for everyone's.
@@ -1285,10 +1286,11 @@ makeScatterplot = function(opts) {
       setSum = value => text.text(ssNames[mode] + " = " + format(value));
     }
     setSum(animate ? 0 : sum);
-    // With both predictors, each predictor's residual total on its own is
-    // outlined, as the best fit was while the reader tried other lines. The
-    // gap down to the residual is what adding the other predictor gains.
-    if (fit && mode === "residual") {
+    // With both predictors, a step can outline each predictor's residual
+    // total on its own ("show-alone"), as the best fit was while the reader
+    // tried other lines. The gap down to the residual is what adding the
+    // other predictor gains.
+    if (fit && mode === "residual" && state.showAlone) {
       [
         { key: "alone", value: stats.ssY - fit.ssRegressionX, dash: "5 4" },
         { key: "aloneZ", value: stats.ssY - fit.ssRegressionZ, dash: "2 3" }
@@ -2430,6 +2432,10 @@ makeScatterplot = function(opts) {
           break;
         case "collect-ss":
           state.collectSS = ["total", "reference", "residual", "regression", "compare", "partition"].includes(value) ? value : null;
+          changed = true;
+          break;
+        case "show-alone":
+          state.showAlone = scBoolean(value, state.showAlone);
           changed = true;
           break;
         case "adjust-x":

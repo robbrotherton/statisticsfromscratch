@@ -7,7 +7,7 @@ interactive-scripts:
   - distribution-generator
   - variability-table-generator
   - explain-table
-  - overlap-squares
+  - regression-partition
 ---
 
 {{< interactive-figure regressionCover makeAssociationCover options='{"regression":true}' fallback="Multicolored dots with a correlation of about 0.6 pop into view, then their line of best fit draws across them as their colors change to green near the line through vermilion at the largest absolute residuals." >}}
@@ -650,30 +650,38 @@ Coffee and sleep together account for the most variability, of course.^[Adding m
 : What each model accounts for and what it misses, with both predictors and with each one alone. Each row adds up to the total of 1200. Dropping a predictor increases the squared misses by the amount only that predictor could account for. {#tbl-drop-one}
 
 <!-- DRAFT: step text below is a first pass for Rob to rewrite. -->
-::::: {#act-shared-squares .callout-tip .interactive}
-## Shared and unshared
+::::: {#act-regression-partition .callout-tip .interactive}
+## Each predictor's own part
 
-{{< interactive-figure sharedSquares makeOverlapSquares options='{"parts":[{"name":"Sleep","ss":533.3333333333334,"color":"var(--graph-series-1)"},{"name":"Coffee","ss":300,"color":"var(--graph-series-2)"}],"shared":293.3333333333333,"residual":660,"dfResidual":4,"maxWidth":"36rem"}' fallback="Two squares to scale: what sleep accounts for on its own, 533.33, and what coffee accounts for on its own, 300. Put together, coffee's square slides almost entirely inside sleep's. They overlap by 293.33, the part they share; 240 of sleep's square and a strip of 6.67 of coffee's are unshared. Together they cover 540. The three parts then become squares of their own. The shared square goes to neither test. The residual of 660 is cut into 4 equal pieces, one of which, 165, is the residual mean square. Each unshared square over that mean square gives its F: 240 over 165 is about 1.45 for sleep, and 6.67 over 165 is about 0.04 for coffee." >}}
+{{< interactive-figure regressionPartition makeRegressionPartition options='{"parts":[{"name":"Sleep","ss":533.3333333333334},{"name":"Coffee","ss":300}],"regression":540,"msResidual":165,"maxWidth":"26rem"}' fallback="The regression sum of squares with both predictors, 540, drawn as a square. A band of 240 grows up from the bottom: what only sleep accounts for. A sliver of 6.67 grows on top of it: what only coffee accounts for. The remaining 293.33 is shared. The rest of the square fades away, and the two predictors' parts move out as squares of their own. Each is divided by its 1 degree of freedom, so its mean square is the same as its sum of squares. Under each, a fraction line and the residual mean square, 165: 240 over 165 gives F of about 1.45 for sleep, and 6.67 over 165 gives about 0.04 for coffee." >}}
 
 :::: {.callout-footer}
-::: {.tutorial-step data-title="Each alone" data-action='{"phase":"apart","animate":false}'}
-On its own, sleep accounts for 533.33 of the squared deviations in test scores, and coffee for 300. Each is drawn as a square of that area.
+::: {.tutorial-step data-title="Regression" data-action='{"phase":"whole","animate":false}'}
+Here's the regression sum of squares for the model with both predictors, 540, drawn as a square.
 :::
 
-::: {.tutorial-step data-title="Together" data-action='{"phase":"together"}'}
-With both in the model, coffee's square slides almost entirely inside sleep's. The overlap, 293.33, is what they share. Sleep covers 240 that coffee doesn't, and coffee covers just 6.67 that sleep doesn't. Together they account for 540, with the shared part counted once.
+::: {.tutorial-step data-title="Sleep only" data-action='{"phase":"big"}'}
+Coffee alone accounted for 300. Adding sleep brought the model up to 540, so $540 - 300 = 240$ belongs to sleep alone: what sleep accounts for that coffee doesn't.
 :::
 
-::: {.tutorial-step data-title="Pull them apart" data-action='{"phase":"split"}'}
-Now separate the three parts. Each becomes a square of its own, with the same area it had. The shared square won't go to either predictor's test.
+::: {.tutorial-step data-title="Coffee only" data-action='{"phase":"small"}'}
+Sleep alone accounted for 533.33. Adding coffee only brought the model up to 540, so coffee's own part is $540 - 533.33 = 6.67$. It's just a sliver.
+:::
+
+::: {.tutorial-step data-title="Shared" data-action='{"phase":"shared"}'}
+The rest, $540 - 240 - 6.67 = 293.33$, is shared. It's the part of coffee that just tracks sleep, and the part of sleep that just tracks coffee. Either predictor could account for it on its own, so we'd only lose it by dropping both.
+:::
+
+::: {.tutorial-step data-title="Pull them out" data-action='{"phase":"pull"}'}
+Each predictor's test uses only its own part. The shared part goes to neither test, so we set it aside and pull out the two predictors' parts as squares of their own, with the same areas.
 :::
 
 ::: {.tutorial-step data-title="Mean squares" data-action='{"phase":"ms"}'}
-Each unshared square has one degree of freedom, so it's already its own mean square. For the denominator we need the residual mean square: the 660 squared misses from the model with both predictors, cut into 4 equal pieces. One piece is 165.
+To turn each into a mean square, divide by its degrees of freedom. Each predictor's own part comes from one slope, so it has 1 degree of freedom, and dividing by 1 leaves it as it was: $240 / 1 = 240$ and $6.67 / 1 = 6.67$.
 :::
 
 ::: {.tutorial-step data-title="F for each" data-action='{"phase":"f"}'}
-Each $F$ is a predictor's unshared square over the residual mean square. Sleep's 240 is about 1.45 times 165. Coffee's 6.67 is a tiny fraction of it, about 0.04.
+Both tests use the same denominator, the residual mean square from the model with both predictors, 165. Each $F$ is a predictor's mean square over it: $240 / 165 \approx 1.45$ for sleep and $6.67 / 165 \approx 0.04$ for coffee.
 :::
 ::::
 

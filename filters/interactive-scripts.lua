@@ -39,6 +39,10 @@ local manifest = {
     file = "resources/js/graph-data.js",
     deps = { "graph-core" }
   },
+  ["regression-partition"] = {
+    file = "resources/js/regression-partition.js",
+    deps = { "d3", "interactive-figure-tools", "anova-squares" }
+  },
   ["explain-table"] = {
     file = "resources/js/explain-table.js"
   },

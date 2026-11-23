@@ -199,7 +199,7 @@ test('regression draws, squares and collects all three deviations on one area sc
   }
 });
 
-test('adding sleep splits the coffee line into parallel lines and partitions what both predict', async () => {
+test('adding sleep splits the coffee line into parallel lines and collects what both predict', async () => {
   const activity = divById(readChapter('18-regression.qmd'), 'act-adding-sleep');
   const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
   const actions = new Map(tutorialSteps(activity).map(step => [step.title, step.action]));
@@ -261,28 +261,20 @@ test('adding sleep splits the coffee line into parallel lines and partitions wha
     await step('Sum of squares');
     const outline = await height('outline');
     assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 660');
-    assert.equal(await bin.locator('[data-sum=alone]').textContent(), 'Coffee alone = 900');
     assert.ok(Math.abs(await height('residual') / outline - 660 / 1200) < 1e-3);
+    // Each predictor alone is only outlined when a step asks for it.
+    assert.equal(await bin.locator('.sc-ss-alone, .sc-ss-aloneZ').count(), 0);
+    await page.evaluate(() => window.stepSleep({ 'show-alone': true, animate: false }));
+    assert.equal(await bin.locator('[data-sum=alone]').textContent(), 'Coffee alone = 900');
     assert.ok(Math.abs(await height('alone') / outline - 900 / 1200) < 1e-3);
     assert.equal(await bin.locator('[data-sum=aloneZ]').textContent(), 'Sleep alone = 666.67');
     assert.ok(Math.abs(await height('aloneZ') / outline - 2000 / 3 / 1200) < 1e-3);
+    await page.evaluate(() => window.stepSleep({ 'show-alone': false, animate: false }));
     assert.equal((await value()).ssResidual, 660);
 
     await step('What did both explain?');
     assert.equal(await bin.locator('[data-sum=regression]').textContent(), 'Regression = 540');
     assert.ok(Math.abs(await height('regression') / outline - 540 / 1200) < 1e-3);
-
-    await step('Who explained what?');
-    const parts = { onlyZ: ['Sleep only = 240', 240], onlyX: ['Coffee only = 6.67', 20 / 3], shared: ['Shared = 293.33', 880 / 3] };
-    let top = await bin.locator('.sc-ss-residual').evaluate(r => r.y.baseVal.value);
-    for (const [key, [text, sum]] of Object.entries(parts)) {
-      assert.equal(await bin.locator('[data-sum=' + key + ']').textContent(), text);
-      const rect = await bin.locator('.sc-ss-' + key).evaluate(r => ({ y: r.y.baseVal.value, height: r.height.baseVal.value }));
-      assert.ok(Math.abs(rect.height / outline - sum / 1200) < 1e-3, key);
-      // Stacked in order on top of the residual, filling the square.
-      assert.ok(Math.abs(rect.y + rect.height - top) < 0.01, key);
-      top = rect.y;
-    }
 
     await step('Coffee alone');
     assert.equal(await page.locator('.sc-family-line').count(), 0);

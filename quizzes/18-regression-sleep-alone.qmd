@@ -1,0 +1,72 @@
+```{.quiz-yaml}
+id: 18_regression_sleep_alone
+title: Predicting test scores from sleep
+questions:
+  - id: sleep_slope
+    type: numeric
+    prompt: >
+      In Chapter 17 we also recorded how long each of the seven students
+      slept. The students who scored 90, 60, 85, 65, 50, 65 and 75 slept 9, 8,
+      8, 5, 6, 6 and 7 hours. Now use sleep ($Z$) instead of coffee to predict
+      test score. The sum of squares for sleep is $SS_Z = 12$, and the sum of
+      products for sleep and test score is $SP = 80$. What is the slope, in
+      test points per hour of sleep?
+    answer: 6.67
+    tolerance: 0.01
+    hint: >
+      Just as with coffee, divide the sum of products by the sum of squares
+      for the predictor.
+    explanation: >
+      $b = SP / SS_Z = 80 / 12 \approx 6.67$. Each extra hour of sleep goes
+      with a predicted score about 6.67 points higher.
+
+  - id: sleep_intercept
+    type: numeric
+    prompt: >
+      The students slept an average of $M_Z = 7$ hours, and their mean score
+      was $M_Y = 70$. What is the intercept?
+    answer: 23.33
+    tolerance: 0.05
+    hint: >
+      The line goes through the point where the two means meet.
+    explanation: >
+      $a = M_Y - b M_Z = 70 - (80/12)(7) \approx 70 - 46.67 = 23.33$. So
+      $\hat{Y} = 6.67Z + 23.33$, which predicts 70 for someone who slept the
+      average seven hours.
+
+  - id: sleep_residual_ss
+    type: numeric
+    prompt: >
+      The correlation between sleep and test score for these students is
+      $r = .67$ (exactly two thirds). The total sum of squares for test
+      scores is still $SS_Y = 1200$. What is $SS_{residual}$ for the line
+      predicting test score from sleep?
+    answer: 666.67
+    tolerance: 6
+    hint: >
+      $r^2$ is the proportion of $SS_Y$ the line accounts for. The rest is
+      left in the residuals.
+    explanation: >
+      $r^2 = (2/3)^2 = 4/9 \approx .44$, so the line accounts for
+      $1200 \times 4/9 \approx 533.33$. That leaves
+      $SS_{residual} = 1200 - 533.33 = 666.67$. (Rounding $r$ to .67 first
+      gives about 661 instead.) Sleep on its own accounts for more of the
+      variability in test scores than coffee did, 44% against 25%.
+
+  - id: two_slopes
+    type: multiple-choice
+    prompt: >
+      Coffee on its own gave a slope of $-10$, and sleep on its own gives
+      $6.67$. Suppose we put both in one equation with those same slopes:
+      $\hat{Y} = -10X + 6.67Z + a$. What would go wrong?
+    options:
+      - text: Nothing, because each slope already describes its own predictor
+      - text: The part of test scores that coffee and sleep both track would be counted twice
+        correct: true
+      - text: The line would no longer go through the means
+    explanation: >
+      The students who drank more coffee tended to sleep less. So part of
+      coffee's $-10$ was really about sleep, and part of sleep's $6.67$ was
+      really about coffee. Adding the two separate slopes counts that shared
+      part twice. A multiple regression fits the two slopes together instead.
+```
