@@ -4,13 +4,24 @@ title: Predicting test scores from sleep
 questions:
   - id: sleep_slope
     type: numeric
-    prompt: >
+    prompt: |
       In Chapter 17 we also recorded how long each of the seven students
-      slept. The students who scored 90, 60, 85, 65, 50, 65 and 75 slept 9, 8,
-      8, 5, 6, 6 and 7 hours. Now use sleep ($Z$) instead of coffee to predict
-      test score. The sum of squares for sleep is $SS_Z = 12$, and the sum of
-      products for sleep and test score is $SP = 80$. What is the slope, in
-      test points per hour of sleep?
+      slept. Now use sleep ($Z$) instead of coffee to predict test score
+      ($Y$).
+
+      | Hours of sleep ($Z$) | Test score ($Y$) | $(Z - M_Z)(Y - M_Y)$ |
+      |:--:|:--:|--:|
+      | 9 | 90 | 40 |
+      | 8 | 60 | -10 |
+      | 8 | 85 | 15 |
+      | 5 | 65 | 10 |
+      | 6 | 50 | 20 |
+      | 6 | 65 | 5 |
+      | 7 | 75 | 0 |
+      | $M_Z = 7$ | $M_Y = 70$ | |
+      | $SS_Z = 12$ | $SS_Y = 1200$ | $SP = 80$ |
+
+      What is the slope, in test points per hour of sleep?
     answer: 6.67
     tolerance: 0.01
     hint: >
@@ -34,23 +45,66 @@ questions:
       $\hat{Y} = 6.67Z + 23.33$, which predicts 70 for someone who slept the
       average seven hours.
 
+  - id: sleep_prediction
+    type: numeric
+    prompt: >
+      Use the slope and intercept to predict the test score for a student
+      who slept nine hours. What is $\hat{Y}$?
+    answer: 83.33
+    tolerance: 0.05
+    hint: >
+      Substitute $Z = 9$ into $\hat{Y} = bZ + a$.
+    explanation: >
+      Using the unrounded slope and intercept,
+      $\hat{Y} = (80/12)(9) + [70 - (80/12)(7)] \approx 83.33$.
+      Using $6.67$ and $23.33$ gives $83.36$, a small rounding difference.
+
+  - id: sleep_regression_ss
+    type: numeric
+    prompt: |
+      Here are the predictions for all seven students, calculated with the
+      unrounded slope and intercept and then rounded to two decimal places.
+
+      | Hours of sleep ($Z$) | Predicted score ($\hat{Y}$) |
+      |:--:|--:|
+      | 9 | 83.33 |
+      | 8 | 76.67 |
+      | 8 | 76.67 |
+      | 5 | 56.67 |
+      | 6 | 63.33 |
+      | 6 | 63.33 |
+      | 7 | 70.00 |
+
+      The mean test score is still $M_Y = 70$. Find $SS_{regression}$ by
+      squaring each prediction's distance from that mean and adding the
+      seven squares.
+    answer: 533.33
+    tolerance: 0.1
+    hint: >
+      Use $SS_{regression} = \Sigma(\hat{Y} - M_Y)^2$. The first prediction
+      contributes $(83.33 - 70)^2$. Include a square for each student,
+      even when students have the same prediction.
+    explanation: >
+      $SS_{regression} \approx 13.33^2 + 6.67^2 + 6.67^2 + (-13.33)^2
+      + (-6.67)^2 + (-6.67)^2 + 0^2 = 533.33$.
+      This is the variability in the predicted scores around the mean:
+      the part of the test-score variability that sleep accounts for.
+
   - id: sleep_residual_ss
     type: numeric
     prompt: >
-      The correlation between sleep and test score for these students is
-      $r = .67$ (exactly two thirds). The total sum of squares for test
-      scores is still $SS_Y = 1200$. What is $SS_{residual}$ for the line
-      predicting test score from sleep?
+      The total sum of squares for test scores is still $SS_Y = 1200$.
+      Using your answer to the previous question, what is $SS_{residual}$
+      for the line predicting test score from sleep?
     answer: 666.67
-    tolerance: 6
+    tolerance: 0.1
     hint: >
-      $r^2$ is the proportion of $SS_Y$ the line accounts for. The rest is
-      left in the residuals.
+      $SS_Y = SS_{regression} + SS_{residual}$. Subtract the part the line
+      accounts for from the total. You should have found
+      $SS_{regression} = 533.33$ in the previous question.
     explanation: >
-      $r^2 = (2/3)^2 = 4/9 \approx .44$, so the line accounts for
-      $1200 \times 4/9 \approx 533.33$. That leaves
-      $SS_{residual} = 1200 - 533.33 = 666.67$. (Rounding $r$ to .67 first
-      gives about 661 instead.) Sleep on its own accounts for more of the
+      $SS_{residual} = 1200 - 533.33 = 666.67$.
+      Sleep on its own accounts for more of the
       variability in test scores than coffee did, 44% against 25%.
 
   - id: two_slopes
