@@ -202,7 +202,10 @@ test('regression draws, squares and collects all three deviations on one area sc
 test('adding sleep splits the coffee line into parallel lines and collects what both predict', async () => {
   const activity = divById(readChapter('18-regression.qmd'), 'act-adding-sleep');
   const options = JSON.parse(/makeScatterplot options='([^']+)'/.exec(activity)[1]);
-  const actions = new Map(tutorialSteps(activity).map(step => [step.title, step.action]));
+  const steps = tutorialSteps(activity);
+  const actions = new Map(steps.map(step => [step.title, step.action]));
+  const sleepSteps = steps.filter(step => step.major === 'sleep');
+  const residualSteps = steps.filter(step => step.major === 'residuals');
   const browser = await chromium.launch();
   try {
     const page = await browser.newPage({ reducedMotion: 'reduce' });
@@ -218,27 +221,48 @@ test('adding sleep splits the coffee line into parallel lines and collects what 
       document.querySelector('#host').appendChild(makeScatterplot({ ...opts, responsive: false }));
     }, options);
     await page.waitForFunction(() => typeof window.stepSleep === 'function');
-    const step = title => page.evaluate(action => window.stepSleep({ ...action, animate: false }), actions.get(title));
+    const apply = action => page.evaluate(action => window.stepSleep({ ...action, animate: false }), action);
+    const step = title => apply(actions.get(title));
     const bin = page.locator('.sc-ss-collection');
     const value = () => page.locator('.scatterplot').evaluate(el => el.value);
     const height = name => bin.locator('.sc-ss-' + name).evaluate(r => r.height.baseVal.value);
 
     await step('Coffee alone');
     assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
-    await step('Sleep');
+    assert.equal(sleepSteps.length, 3);
+    await apply(sleepSteps[0].action);
     assert.equal(await page.locator('.sc-family-level').count(), 5);
     assert.equal(await page.locator('.sc-family-line').count(), 0);
-    // Coffee adjusted to average sleep, as dashed outlines; the line through
-    // them, and through the means, has the two-predictor slope.
-    await step('Coffee at average sleep');
-    const ghostXs = await page.locator('.anova-ghost').evaluateAll(cs => cs.map(c => +c.getAttribute('cx')));
-    const toPx = await page.locator('.sc-point').evaluateAll(gs => gs.map(g => +/translate\(([-\d.]+)/.exec(g.getAttribute('transform'))[1]));
-    const pxPerCup = (toPx[6] - toPx[0]) / 2;
-    assert.deepEqual(ghostXs.map(cx => Math.round((cx - toPx[0]) / pxPerCup * 6) / 6),
-      [2 / 3, 5 / 6, 5 / 6, 1 / 3, 7 / 6, 7 / 6, 2].map(v => Math.round(v * 6) / 6));
+    const observed = () => page.locator('.sc-point').evaluateAll(groups => groups.map(group => {
+      const { e, f } = group.transform.baseVal.getItem(0).matrix;
+      return [e, f];
+    }));
+    const original = await observed();
+    const pxAtZero = original[0][0];
+    const pxPerCup = (original[6][0] - pxAtZero) / 2;
+    const ghostXs = () => page.locator('.anova-ghost').evaluateAll(circles => circles.map(c => c.cx.baseVal.value));
+    const cupSixths = xs => xs.map(x => Math.round((x - pxAtZero) / pxPerCup * 6));
+    const means = page.locator('.sc-means-layer');
+    const fitLayer = page.locator('.sc-line-layer');
+
+    await apply(sleepSteps[1].action);
+    assert.equal(await means.getAttribute('aria-hidden'), 'false');
+    assert.equal(await means.locator('line').nth(1).evaluate(line => getComputedStyle(line).display), 'none');
+    const meanX = await means.locator('line').first().evaluate(line => line.x1.baseVal.value);
+    assert.deepEqual(cupSixths([meanX, ...await ghostXs()]), Array(8).fill(6));
+    assert.equal(await fitLayer.getAttribute('aria-hidden'), 'true');
+
+    await apply(sleepSteps[2].action);
+    assert.equal(await means.getAttribute('aria-hidden'), 'false');
+    assert.equal(await fitLayer.getAttribute('aria-hidden'), 'false');
+    assert.deepEqual(cupSixths(await ghostXs()), [4, 5, 5, 2, 7, 7, 12]);
+    const ghostYs = await page.locator('.anova-ghost').evaluateAll(circles => circles.map(c => c.cy.baseVal.value));
+    ghostYs.forEach((y, i) => assert.ok(Math.abs(y - original[i][1]) < 1e-4));
+    assert.deepEqual(await observed(), original);
     assert.deepEqual([(await value()).slope, (await value()).intercept].map(v => Math.round(v * 1e9) / 1e9), [-2, 72]);
     assert.equal(await page.locator('.sc-rise-label').first().textContent(), '\u22122');
     await step('A line for each amount of sleep');
+    assert.equal(await means.getAttribute('aria-hidden'), 'true');
     assert.equal(await page.locator('.sc-family-line').count(), 5);
     const fit = (await value()).multiple;
     assert.deepEqual([fit.slopeX, fit.slopeZ, fit.intercept].map(v => Math.round(v * 1e9) / 1e9), [-2, 6, 30]);
@@ -252,13 +276,14 @@ test('adding sleep splits the coffee line into parallel lines and collects what 
     // One student, then two, then everyone, each from their own line.
     const visible = selector => page.locator(selector).evaluateAll(nodes =>
       nodes.filter(n => n.style.display !== 'none').map(n => n.textContent));
-    await step('One student');
+    assert.equal(residualSteps.length, 4);
+    await apply(residualSteps[0].action);
     assert.equal((await visible('.sc-residual')).length, 1);
-    await step('Another student');
-    assert.deepEqual(await visible('.sc-square-label'), ['36', '49']);
-    await step('Everyone');
+    await apply(residualSteps[1].action);
+    assert.deepEqual(await visible('.sc-square-label'), ['36', '64']);
+    await apply(residualSteps[2].action);
     assert.deepEqual(await visible('.sc-square-label'), ['36', '289', '64', '49', '169', '4', '49']);
-    await step('Sum of squares');
+    await apply(residualSteps[3].action);
     const outline = await height('outline');
     assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 660');
     assert.ok(Math.abs(await height('residual') / outline - 660 / 1200) < 1e-3);

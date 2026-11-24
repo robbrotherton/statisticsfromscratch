@@ -696,7 +696,7 @@ makeScatterplot = function(opts) {
     // Indices of the students whose residuals and squares are showing, or
     // null for everyone's.
     focus: null,
-    // Draw each point's x adjusted to the mean of z, as dashed outlines.
+    // Dashed outlines at the mean of x ("mean") or with the residuals added (true).
     adjustX: false,
     // Mark the step between two neighbouring lines of the family.
     showSpacing: false,
@@ -1708,13 +1708,13 @@ makeScatterplot = function(opts) {
       .attr("x", labelX).attr("y", (z) => labelY(z) - 17);
   }
 
-  // Each point's x as it would be at the mean of z, slid there as a dashed
-  // outline while the point itself stays put.
-  function drawAdjusted(fit, animate) {
-    const items = state.adjustX && fit ? state.points.map((p, i) => ({
+  // Move dashed copies horizontally, keeping each observed score at its original height.
+  function drawAdjusted(stats, fit, animate) {
+    const atMean = state.adjustX === "mean";
+    const items = (atMean || (state.adjustX && fit)) ? state.points.map((p, i) => ({
       key: i,
       from: { x: x(p.x), y: y(p.y) },
-      x: x(p.x - fit.slopeXOnZ * (p.z - fit.means.z)),
+      x: x(atMean ? stats.meanX : p.x - fit.slopeXOnZ * (p.z - fit.means.z)),
       y: y(p.y),
       color: state.colorByZ ? zColor(p.z) : "var(--sc-point-color)"
     })) : [];
@@ -1722,7 +1722,7 @@ makeScatterplot = function(opts) {
     const squares = window.sfsAnovaSquares;
     if (!squares || (!items.length && ghostLayer.select("circle").empty())) return;
     squares.ensureStyles();
-    squares.renderGhosts(ghostLayer, items, { animate });
+    squares.renderGhosts(ghostLayer, items, { animate, moveDuration: squares.GHOST_SLIDE });
     ghostLayer.selectAll("circle.anova-ghost").attr("r", pointRadius);
   }
 
@@ -1754,10 +1754,7 @@ makeScatterplot = function(opts) {
     setReveal(spacingLayer, shown, animate);
   }
 
-  // Whether the last render showed the adjusted outlines, and its line mode,
-  // so the line is tethered to the outlines only as they first slide out.
-  let wasAdjusted = false;
-  let previousLineMode = state.lineMode;
+  let previousAdjustment = state.adjustX;
 
   // Which residuals and squares the last render showed, and what they
   // measured, so a step that adds students draws only the newcomers.
@@ -1790,40 +1787,23 @@ makeScatterplot = function(opts) {
 
     // Fit line spans the x domain; the clip path trims any vertical overflow.
     const [xLo, xHi] = x.domain();
-    // When the adjusted outlines slide out from the one-predictor line, the
-    // line moves with them: at every frame it is the least-squares line
-    // through the outlines where they are, so its slope eases from x's slope
-    // alone to x's slope with z, in step with the slide.
-    const tether = animate && state.adjustX && !wasAdjusted && previousLineMode === "fit" &&
-      window.sfsAnovaSquares ? scMultipleFit(state.points) : null;
-    const settle = tether ? window.sfsAnovaSquares.GHOST_RISE + window.sfsAnovaSquares.GHOST_SLIDE : 0;
-    if (tether) {
-      const adjust = (p) => -tether.slopeXOnZ * (p.z - tether.means.z);
-      fitLine.interrupt("sc-move").style("opacity", 1)
-        .transition("sc-move")
-        .delay(window.sfsAnovaSquares.GHOST_RISE)
-        .duration(window.sfsAnovaSquares.GHOST_SLIDE)
-        .ease(d3.easeCubicInOut)
-        .tween("sc-tether", function() {
-          const node = d3.select(this);
-          return (t) => {
-            const at = scStats(state.points.map((p) => ({ x: p.x + t * adjust(p), y: p.y })));
-            node.attr("x1", x(xLo)).attr("y1", y(at.fitSlope * xLo + at.fitIntercept))
-              .attr("x2", x(xHi)).attr("y2", y(at.fitSlope * xHi + at.fitIntercept));
-          };
-        });
-    } else {
-      maybeTransition(fitLine, animate, duration)
-        .attr("x1", x(xLo))
-        .attr("y1", y(line.slope * xLo + line.intercept))
-        .attr("x2", x(xHi))
-        .attr("y2", y(line.slope * xHi + line.intercept))
-        .style("opacity", fit ? 0 : 1);
-    }
-    wasAdjusted = state.adjustX;
-    previousLineMode = state.lineMode;
+    // Show the adjusted fit once the outlines are in place.
+    const adjustmentFit = state.adjustX === true && state.lineMode === "adjusted"
+      ? scMultipleFit(state.points) : null;
+    const outlines = window.sfsAnovaSquares;
+    const settle = animate && adjustmentFit && previousAdjustment !== true && outlines
+      ? outlines.GHOST_SLIDE + (previousAdjustment ? 0 : outlines.GHOST_RISE) : 0;
+    fitLine.interrupt("sc-move");
+    if (settle) fitLine.style("opacity", 0);
+    const lineMove = maybeTransition(fitLine, animate, settle ? 200 : duration);
+    if (settle) lineMove.delay(settle);
+    lineMove
+      .attr("x1", x(xLo)).attr("y1", y(line.slope * xLo + line.intercept))
+      .attr("x2", x(xHi)).attr("y2", y(line.slope * xHi + line.intercept))
+      .style("opacity", fit ? 0 : 1);
+    previousAdjustment = state.adjustX;
     drawFamily(fit, line, animate, duration);
-    drawAdjusted(state.lineMode === "adjusted" || state.lineMode === "multiple" ? scMultipleFit(state.points) : null, animate);
+    drawAdjusted(stats, adjustmentFit || fit, animate);
     drawSpacing(fit, animate, duration);
 
     bestLine
@@ -1861,9 +1841,11 @@ makeScatterplot = function(opts) {
     for (const layer of [squaresLayer, squareLabelsLayer, residualsLayer]) {
       layer.style("--sc-residual-color", measureColor);
     }
-    // A horizontal mean is the only reference needed for these comparisons.
-    meanXLine.style("display", mode ? "none" : null);
-    meanXText.style("display", mode ? "none" : null);
+    // The adjusted outlines use the vertical mean as their reference.
+    meanXLine.style("display", mode && !state.adjustX ? "none" : null);
+    meanXText.style("display", mode && !state.adjustX ? "none" : null);
+    meanYLine.style("display", state.adjustX ? "none" : null);
+    meanYText.style("display", state.adjustX ? "none" : null);
     // A step can show some students' residuals and squares before everyone's.
     // Those already showing stay as they are; only newcomers are drawn.
     const shown = (p, i) => !state.focus || state.focus.includes(i);
@@ -2148,7 +2130,7 @@ makeScatterplot = function(opts) {
     setReveal(squaresLayer, state.showSquares, animate);
     setReveal(squareLabelsLayer, state.showSquares && state.squareLabels, animate);
     setReveal(ellipseLayer, state.showEllipse, animate);
-    setReveal(meansLayer, state.showMeans, animate);
+    setReveal(meansLayer, state.showMeans || Boolean(state.adjustX), animate);
     setReveal(deviationsLayer, state.showDeviations, animate);
     setReveal(productsLayer, state.showProducts, animate);
     setReveal(productLabelsLayer, state.showProducts && state.productLabels, animate);
@@ -2439,7 +2421,7 @@ makeScatterplot = function(opts) {
           changed = true;
           break;
         case "adjust-x":
-          state.adjustX = scBoolean(value, state.adjustX);
+          state.adjustX = value === "mean" ? "mean" : scBoolean(value, state.adjustX === true);
           changed = true;
           break;
         case "show-spacing":

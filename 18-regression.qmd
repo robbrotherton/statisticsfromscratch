@@ -521,43 +521,47 @@ Notice what happens if we fix sleep at a particular value. For someone who slept
 ::::: {#act-adding-sleep .callout-tip .interactive}
 ## Adding sleep
 
-{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines show each student's coffee residual added to the prediction of one cup at seven hours of sleep, and the line through them flattens from a slope of −10 to −2. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660 of the total 1200. The squared distances from each prediction to the mean fill the other 540." >}}
+{{< interactive-figure addingSleepTutorial makeScatterplot options='{"points":[[0,90],[0.5,60],[0.5,85],[1,65],[1.5,50],[1.5,65],[2,75]],"z":[9,8,8,5,6,6,7],"xName":"Coffee","zName":"Sleep","zUnit":"h","xLabel":"Coffee (cups)","yLabel":"Test score","xDomain":[0,2.5],"yDomain":[40,100],"showLine":false,"controls":false,"maxWidth":"42rem","ssPanel":true}' fallback="The seven students' coffee and test scores, colored by how long they slept. Dashed outlines first move to the prediction of one cup at seven hours of sleep, then move left or right by each student's coffee residual. The fit through the adjusted outlines has a slope of −2 points per cup. Back at the real cups, that line becomes the seven-hour line of five parallel lines, one for each amount of sleep from 5 to 9 hours, each falling 2 points per cup and 6 points higher for each extra hour. Squared misses from each student's own line add up to 660 of the total 1200. The squared distances from each prediction to the mean fill the other 540." >}}
 
 :::: {.callout-footer}
 ::: {.tutorial-step data-title="Coffee alone" data-action='{"collect-ss":"residual","line":"fit","color-z":false,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none","animate":false}'}
 Here's where we left off: coffee on its own, the line of best fit, and its squared misses filling three quarters of the square.
 :::
 
-::: {.tutorial-step data-title="Sleep" data-action='{"collect-ss":"reference","line":"fit","color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
+::: {.tutorial-step data-major="sleep" data-major-title="Sleep" data-title="Sleep" data-action='{"collect-ss":"reference","line":"fit","color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
 To show how the multiple regression model incorporates sleep, let's color each student by how long they slept, darker for more sleep. You can see a bit of a pattern already: the darker dots tend to sit toward the left. The students who slept more drank less coffee.
 :::
 
-::: {.tutorial-step data-title="Coffee at average sleep" data-action='{"collect-ss":"reference","line":"adjusted","adjust-x":true,"rise-run":{"from":0,"to":1},"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
-How to take that covariability out of the coffee slope? Effectively we adjust each person's coffee score to show not how much they actually said they drank, but how much more or less they drank than would be expected for their amount of sleep. Plot those differences around the average coffee amount of one cup, and find the new line of best fit. The slope is much flatter now, at $-2$ points per cup. That gives us $b_1$, the slope for coffee once sleep is taken into account.
+::: {.tutorial-step data-major="sleep" data-title="Start at seven hours" data-action='{"collect-ss":"reference","line":"fit","show-line":false,"adjust-x":"mean","color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
+To take sleep out of the equation (so to speak), we'll put everyone at the same starting point. Seven hours was the average amount of sleep, and our model with sleep predicting coffee predicts one cup of coffee at seven hours of sleep. So we adjust each coffee value to the one-cup line as a dashed outline. (Each dot's height stays the same; we're only adjusting coffee, not changing test scores.)
 :::
 
-::: {.tutorial-step data-title="A line for each amount of sleep" data-action='{"collect-ss":"reference","line":"multiple","rise-run":{"from":0,"to":1},"show-spacing":true,"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
-Now for the second slope, $b_2$. The flatter line runs through the means and gives our predictions for seven hours of sleep. Pick any sleep line and move one cup to the right along it. You've held sleep constant, and the predicted score drops two points. Now keep coffee fixed and move up to the line for one more hour of sleep. The prediction goes up six points.
+::: {.tutorial-step data-major="sleep" data-title="Add back the coffee residuals" data-action='{"collect-ss":"reference","line":"adjusted","adjust-x":true,"rise-run":{"from":0,"to":1},"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
+But that model had some error in its predictions. So now we subtract the residuals in the $X - \hat{X}$ column of @tbl-coffee-residuals. It tells us how much more or less coffee each student drank than we predicted for the hours they actually slept. The student who score 90 on the test drank a third of a cup less than predicted based on their 9 hours of sleep, so their adjusted dot moves to about $0.67$. We do that for everyone and fit a line through the adjusted values. Its slope is $-2$ points per cup. That's $b_1$, the coffee slope after accounting for sleep.
 :::
 
-::: {.tutorial-step data-title="One student" data-action='{"draw":"both","focus":[0],"collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
-Now we measure the misses just as before. This student drank no coffee and slept nine hours, so we read their prediction off the nine-hour line. They scored a little higher than that. And we square the miss.
+::: {.tutorial-step data-major-title="Sleep lines" data-title="A line for each amount of sleep" data-action='{"collect-ss":"reference","line":"multiple","rise-run":{"from":0,"to":1},"show-spacing":true,"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
+Doing the same thing for the regression predicting sleep duration from coffee gave the second slope, $b_2 = 6$. At this point, a lot of books would have a graph showing the two slopes as a 3-dimensional plane. But I like to picture a set of parallel lines, one for each sleep duration, set 6 test-points apart. Each one holds sleep constant and shows the test score predictions for each amount of coffee. The predicted score always drops by 2 points for each additional cup of coffee, but now we can see how adding an hour of sleep (moving to the next line up) adds 6 predicted points.
 :::
 
-::: {.tutorial-step data-title="Another student" data-action='{"draw":"both","focus":[0,3],"collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
-This student slept just five hours. Their dot happens to sit between the six- and seven-hour lines, but that doesn't matter. Their prediction comes from the five-hour line, because that's how long they slept.
+::: {.tutorial-step data-major="residuals" data-major-title="Residuals" data-title="One student" data-action='{"draw":"both","focus":[0],"collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
+Now we collect the prediction errors just as before, but the errors are relative to the corresponding sleep line. This student drank no coffee and slept nine hours, so we read their prediction off the nine-hour line. They scored a little higher than predicted. That's the residual that we square.
 :::
 
-::: {.tutorial-step data-title="Everyone" data-action='{"draw":"both","collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
+::: {.tutorial-step data-major="residuals" data-title="Two students" data-action='{"draw":"both","focus":[0,2],"collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
+The student who scored 85 slept eight hours and drank half a cup of coffee. The eight-hour line predicts a score of 77. They scored eight points higher than predicted, so their residual is $+8$ and its square is 64.
+:::
+
+::: {.tutorial-step data-major="residuals" data-title="Everyone" data-action='{"draw":"both","collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
 And the same for everyone else, each measured from the line for their own amount of sleep.
 :::
 
-::: {.tutorial-step data-title="Sum of squares" data-action='{"collect-ss":"residual","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
-Collect the squares. With both predictors, they add up to 660.
+::: {.tutorial-step data-major="residuals" data-title="Collect squares" data-action='{"collect-ss":"residual","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
+Collect the squares. With both predictors, they add up to 660. That's $SS_{\text{residual}} = 660$ for the multiple regression model with both predictors, the same as we found in @tbl-multiple-residuals.
 :::
 
-::: {.tutorial-step data-title="What did both explain?" data-action='{"collect-ss":"regression","draw":"both","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":true,"emphasize":"none"}'}
-As before, the rest of the square is what our predictions saved us compared with just guessing the mean. Measure from each student's prediction to the mean and collect those squares. They fill the gap exactly.
+::: {.tutorial-step data-major-title="Explained" data-title="What did both explain?" data-action='{"collect-ss":"regression","draw":"both","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":true,"emphasize":"none"}'}
+As before, the rest of the square is what our predictions saved us compared with just guessing the mean. It is the sum of squared residuals, measured from each student's prediction to the mean. They fill the gap exactly.
 :::
 ::::
 
