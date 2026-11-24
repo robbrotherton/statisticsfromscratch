@@ -12,13 +12,6 @@ interactive-scripts:
 
 {{< interactive-figure regressionCover makeAssociationCover options='{"regression":true}' fallback="Multicolored dots with a correlation of about 0.6 pop into view, then their line of best fit draws across them as their colors change to green near the line through vermilion at the largest absolute residuals." >}}
 
-{{< include _coming-soon.qmd >}}
-
-:::::::: {.content-visible when-profile="draft"}
-
-<!-- WIP: everything below is hidden on the published site (it shows a "Coming soon!" placeholder instead).
-     When this chapter is ready, delete the include above, this comment, and the two :::::::: fences. -->
-
 In this chapter we'll introduce the last inferential procedure that we will cover: regression. This extends our ability to analyze relationships among variables, much like ANOVA extends our ability to analyze differences among groups beyond what the $t$ test is capable of. And as we'll see, regression is actually a variation of the ANOVA technique itself.
 
 ## Making a prediction
@@ -34,8 +27,6 @@ Suppose another student comes along to take the exam. Could you guess how they'r
 :::
 
 This is a lot like how we started thinking about correlations in the previous chapter. But when we start making specific predictions, rather than just talking about the general direction and strength of association between two things, we're moving from correlation to regression. 
-
-<!-- note here about whoever came up with this. two tall parents, predict the height of the kid. prob tall, but adjust toward mean. regress. picture a line going through the cluster of points (versus the ellipse from last chapter) -->
 
 When we fit a straight line with one predictor, it's called **simple linear regression**. The variable we use to make the guess is the **predictor** ($X$, cups of coffee in our example). The variable we're trying to predict is the **outcome** ($Y$, test score).^[Which is which depends on the research question. We could use test scores to predict coffee instead. The correlation would stay the same, but the regression model would be different.]
 
@@ -116,11 +107,6 @@ $$ b = \frac{SP}{SS_X} = \frac{-30}{3} = -10 $$
 
 In other words, as you follow the line one unit along the $X$ axis, you move down ten units on the $Y$ axis. Each cup of coffee consumed knocks 10 points off the predicted test score. The correlation of $-.50$ told us your expected score would go down; the slope tells us by how much.^[If we convert both variables to $z$-scores, $SS_X$ and $SS_Y$ are equal. The two formulas then have the same denominator, so with one predictor the slope in $z$-score units is just $r$.]
 
-<!-- REVIEW: Why it's called "regression". Ch 17 says Galton used r "in his work on regression" but this chapter
-         never explains the name. Predicted z_Y = r × z_X, so unless r = ±1 every prediction is closer to the
-         mean than the predictor was. That's regression toward the mean (Galton's heights of parents and children).
-         It also explains why Celsius–Fahrenheit doesn't regress: r = 1. Ch 7's Galton board gives a callback. -->
-
 ### The intercept ($a$)
 
 Having figured out the slope, we can use it to find $a$, the predicted score when $X = 0$. To do so, we take a known point on the line and work backwards. Which known point? The point where the mean of $X$ and the mean of $Y$ meet. Someone who is exactly average on the predictor will get an exactly average predicted score on the outcome. The regression line pivots on the two means, like the balance beam in Chapter 3, except we're balancing both means simultaneously.
@@ -150,18 +136,6 @@ We can use that regression equation to see the predictions for each of the seven
 | 1.5 | 50 | $-10(1.5) + 80 = 65$ | 
 | 1.5 | 65 | $-10(1.5) + 80 = 65$ |
 | 2 | 75 | $-10(2) + 80 = 60$ |
-
-<!-- table of X, Y, y hat (yhat in the form bX + a = hatY) -->
-
-<!-- SEED (multiple regression): if this table has the columns X, Y, Ŷ, Y − Ŷ, (Y − Ŷ)² with Σ = 900, it is
-     @tbl-multiple-residuals minus the sleep column, so that later table reads as familiar. Bigger option: make it
-     the makeStepTable widget (as in Ch 17's productsTable), built in stages (X, Y → Ŷ with the derivation
-     b = −30/3, a = 70 − (−10)(1) glowing above → Y − Ŷ → (Y − Ŷ)² Σ 900 → (Y − M_Y)² Σ 1200 and (Ŷ − M_Y)² Σ 300).
-     That would merge this placeholder and @tbl-regression-ss into one. Check phone width. -->
-
-<!-- SEED (model language): keep "regression model" vs "a model in which they're unrelated". Multiple regression
-     compares coffee alone, sleep alone, both, and "a model that just predicts the mean"; the chapter closes on the
-     general linear model. -->
 
 ### Sums of squares
 
@@ -537,7 +511,7 @@ To take sleep out of the equation (so to speak), we'll put everyone at the same 
 :::
 
 ::: {.tutorial-step data-major="sleep" data-title="Add back the coffee residuals" data-action='{"collect-ss":"reference","line":"adjusted","adjust-x":true,"rise-run":{"from":0,"to":1},"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
-But that model had some error in its predictions. So now we subtract the residuals in the $X - \hat{X}$ column of @tbl-coffee-residuals. It tells us how much more or less coffee each student drank than we predicted for the hours they actually slept. The student who score 90 on the test drank a third of a cup less than predicted based on their 9 hours of sleep, so their adjusted dot moves to about $0.67$. We do that for everyone and fit a line through the adjusted values. Its slope is $-2$ points per cup. That's $b_1$, the coffee slope after accounting for sleep.
+But that model had some error in its predictions. So now we add the residuals in the $X - \hat{X}$ column of @tbl-coffee-residuals to the one cup. It tells us how much more or less coffee each student drank than we predicted for the hours they actually slept. The student who score 90 on the test drank a third of a cup less than predicted based on their 9 hours of sleep, so their adjusted dot moves to about $0.67$. We do that for everyone and fit a line through the adjusted values. Its slope is $-2$ points per cup. That's $b_1$, the coffee slope after accounting for sleep.
 :::
 
 ::: {.tutorial-step data-major-title="Sleep lines" data-title="A line for each amount of sleep" data-action='{"collect-ss":"reference","line":"multiple","rise-run":{"from":0,"to":1},"show-spacing":true,"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
@@ -668,5 +642,3 @@ When we compare the predictors in a model individually, often we want to know if
 And just as with partial correlations in Chapter 17, holding sleep constant is something we're doing statistically, not experimentally. It tells us what coffee adds to our predictions once we know about sleep. It doesn't tell us whether coffee or sleep causes anything. Other things we didn't measure could still be behind the relationships. That's still a job for random assignment.
 
 {{< include quizzes/18-regression-learning-checks.qmd >}}
-
-::::::::
