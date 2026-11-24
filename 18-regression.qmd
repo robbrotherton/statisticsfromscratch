@@ -376,9 +376,9 @@ To make predictions, we multiply cups of coffee by one slope and hours of sleep 
 
 So how do we find the two slopes? You might think we could just reuse coffee's slope on its own ($-10$) and the slope for sleep on its own that you found in @quiz-regression-sleep-alone ($6.67$). But that wouldn't give us a better model. In fact, it would defeat the purpose, by treating scores on the predictors as separate, unrelated information. The whole point here is that maybe they *are* related. The students who drank more coffee tended to sleep less, and those who slept less tended to score lower. Fitting the two slopes separately lets both pick up some of the same pattern in test scores. We need to fit them together, accounting for their relationship with each other.
 
-We want to see how much coffee predicts test scores *after taking sleep into account*, as well as how much sleep predicts test scores *after taking coffee into account*. (Those are not the same thing!) In other words, we want to know how much coffee predicts test scores once we've removed the part of coffee that sleep predicts. That's what the partial correlation did; multiple regression does it too, in a slightly different way.
+The problem is that the predictors might vary *together*; people who sleep badly might drink more coffee or something. To tease them apart, we need to ask how much each predictor contributes to the outcome *after accounting for the other predictor*. We'll see exactly what "accounting for" means mathematically, but for now, imagine that we make two predictions for students who got *the same* amount of sleep. If one drank a cup more coffee than the other, how much do their predicted test scores differ? We say we're *holding sleep constant* because we use the same hours of sleep in both predictions. For the sleep slope we flip the question around: what test scores would we predict for people who had the same amount of coffee but different amounts of sleep. That's the different slopes capture.
 
-### Calculating the slopes and intercept
+### Calculating the slopes {#calculating-the-slopes-and-intercept}
 
 Here are the seven students again, this time with their hours of sleep alongside their coffee and test scores (the same sleep data from @quiz-regression-sleep-alone).
 
@@ -398,15 +398,7 @@ To remove the part of coffee that sleep predicts, we initially compute another s
 
 $$ b_1 = \frac{SP_{XY \cdot Z}}{SS_{X \cdot Z}} $$
 
-Then we flip it around to get a slope for sleep, controlling for coffee. This is another mini regression, now with sleep ($Z$) as outcome and coffee ($X$) as predictor. We find that slope and intercept to get a set of $\hat{Z}$ predictions, residuals ($Z - \hat{Z}$), and the sum of squared residuals for sleep accounting for coffee consumption, $SS_{Z \cdot X}$. Multiply the residuals by the test score deviations and add those up to get a sum of products, $SP_{ZY \cdot X}$. Divide to get the slope for sleep: change in test score per hour of sleep, after accounting for sleep's association with coffee.
-
-$$ b_2 = \frac{SP_{ZY \cdot X}}{SS_{Z \cdot X}} $$
-
-We have two slopes, but there's only one intercept. We can use the same logic as before, that the relationship pivots on the means of all three variables. The predicted score for a student with average coffee and average sleep will be the average test score. So we can solve for $a$ in the multiple regression equation, using the means of all three variables.
-
-$$ a = M_Y - b_1 M_X - b_2 M_Z $$
-
-@tbl-coffee-residuals and @tbl-sleep-residuals show all of this in action. There's a lot going on in them, but try to make sure you understand how the descriptions above map on to the numbers in the table and the calculations below each one. Start with the first row in @tbl-coffee-residuals. From that student's nine hours of sleep we'd predict about a third of a cup of coffee. They drank none, so their coffee residual is about $-0.33$ cups. Tap or hover over any green value to see how it was calculated.
+@tbl-coffee-residuals shows all of this. It's a lot, so start with the first row. From that student's nine hours of sleep we'd predict about a third of a cup of coffee. They drank none, so their coffee residual is about $-0.33$ cups. Tap or hover over any green value to see how it was calculated.
 
 ::: {.sfs-explain-table data-explain='{"keys":["Z","X","ZX","Xh","e","e2","Y","dY","eY"],"refs":{"MZ":[0,"Z"],"MX":[0,"X"],"MY":[0,"Y"]},"exact":{"Xh":["\\\\frac{1}{3}","\\\\frac{2}{3}","\\\\frac{2}{3}","\\\\frac{5}{3}","\\\\frac{4}{3}","\\\\frac{4}{3}","1"],"e":["-\\\\frac{1}{3}","-\\\\frac{1}{6}","-\\\\frac{1}{6}","-\\\\frac{2}{3}","\\\\frac{1}{6}","\\\\frac{1}{6}","1"]},"cells":{"ZX":{"lead":"(Z - M_Z)(X - M_X)","calc":"({Z} - {MZ})({X} - {MX})"},"Xh":{"lead":"\\\\hat{X}","calc":"-\\\\frac{1}{3}({Z}) + \\\\frac{10}{3}"},"e":{"lead":"X - \\\\hat{X}","calc":"{X} - {Xh}"},"e2":{"lead":"(X - \\\\hat{X})^2","calc":"({e})^2"},"dY":{"lead":"Y - M_Y","calc":"{Y} - {MY}"},"eY":{"lead":"(X - \\\\hat{X})(Y - M_Y)","calc":"{e} \\\\times {dY}"}},"summary":[{"Z":{"lead":"M_Z","mean":"{Z}"},"X":{"lead":"M_X","mean":"{X}"},"Y":{"lead":"M_Y","mean":"{Y}"}},{"Z":{"lead":"SS_Z = \\\\Sigma(Z - M_Z)^2","sum":"({Z} - {MZ})^2"},"X":{"lead":"SS_X = \\\\Sigma(X - M_X)^2","sum":"({X} - {MX})^2"},"ZX":{"lead":"SP_{XZ} = \\\\Sigma(Z - M_Z)(X - M_X)","sum":"{ZX}"},"e2":{"lead":"SS_{X \\\\cdot Z} = \\\\Sigma(X - \\\\hat{X})^2","sum":"{e2}"},"eY":{"lead":"SP_{XY \\\\cdot Z} = \\\\Sigma(X - \\\\hat{X})(Y - M_Y)","sum":"{eY}"}}]}'}
 
@@ -436,6 +428,11 @@ $$
 
 $$ b_1 = \frac{SP_{XY \cdot Z}}{SS_{X \cdot Z}} = \frac{-10/3}{5/3} = -2 $$
 
+So at the same amount of sleep, one more cup of coffee goes with a predicted score two points lower.
+
+To get the slope for sleep, holding coffee constant, do a second mini regression like that first one, now with the variables flipped around: sleep ($Z$) as outcome and coffee ($X$) as predictor. We find that slope and intercept to get a set of $\hat{Z}$ predictions, residuals ($Z - \hat{Z}$), and the sum of squared residuals for sleep accounting for coffee consumption, $SS_{Z \cdot X}$. Multiply the residuals by the test score deviations and add those up to get a sum of products, $SP_{ZY \cdot X}$. Divide to get the slope for sleep: change in test score per hour of sleep, after accounting for sleep's association with coffee.
+
+$$ b_2 = \frac{SP_{ZY \cdot X}}{SS_{Z \cdot X}} $$
 
 ::: {.sfs-explain-table data-explain='{"keys":["X","Z","XZ","Zh","e","e2","Y","dY","eY"],"refs":{"MX":[0,"X"],"MZ":[0,"Z"],"MY":[0,"Y"]},"exact":{"Zh":["\\\\frac{25}{3}","\\\\frac{23}{3}","\\\\frac{23}{3}","7","\\\\frac{19}{3}","\\\\frac{19}{3}","\\\\frac{17}{3}"],"e":["\\\\frac{2}{3}","\\\\frac{1}{3}","\\\\frac{1}{3}","-2","-\\\\frac{1}{3}","-\\\\frac{1}{3}","\\\\frac{4}{3}"]},"cells":{"XZ":{"lead":"(X - M_X)(Z - M_Z)","calc":"({X} - {MX})({Z} - {MZ})"},"Zh":{"lead":"\\\\hat{Z}","calc":"-\\\\frac{4}{3}({X}) + \\\\frac{25}{3}"},"e":{"lead":"Z - \\\\hat{Z}","calc":"{Z} - {Zh}"},"e2":{"lead":"(Z - \\\\hat{Z})^2","calc":"({e})^2"},"dY":{"lead":"Y - M_Y","calc":"{Y} - {MY}"},"eY":{"lead":"(Z - \\\\hat{Z})(Y - M_Y)","calc":"{e} \\\\times {dY}"}},"summary":[{"X":{"lead":"M_X","mean":"{X}"},"Z":{"lead":"M_Z","mean":"{Z}"},"Y":{"lead":"M_Y","mean":"{Y}"}},{"X":{"lead":"SS_X = \\\\Sigma(X - M_X)^2","sum":"({X} - {MX})^2"},"Z":{"lead":"SS_Z = \\\\Sigma(Z - M_Z)^2","sum":"({Z} - {MZ})^2"},"XZ":{"lead":"SP_{XZ} = \\\\Sigma(X - M_X)(Z - M_Z)","sum":"{XZ}"},"e2":{"lead":"SS_{Z \\\\cdot X} = \\\\Sigma(Z - \\\\hat{Z})^2","sum":"{e2}"},"eY":{"lead":"SP_{ZY \\\\cdot X} = \\\\Sigma(Z - \\\\hat{Z})(Y - M_Y)","sum":"{eY}"}}]}'}
 
@@ -467,9 +464,11 @@ $$ b_2 = \frac{SP_{ZY \cdot X}}{SS_{Z \cdot X}} = \frac{40}{20/3} = 6 $$
 
 ### Intercept and regression equation
 
-The two slopes are $b_1 = -2$ for coffee and $b_2 = 6$ for sleep. Each extra cup of coffee (at the same amount of sleep) reduces the predicted test score by 2 points, while each extra hour of sleep (keeping coffee constant) increases the predicted test score by 6 points.
+We have two slopes, but there's only one intercept. We can use the same logic as before, that the relationship pivots on the means of all three variables. The predicted score for a student with average coffee and average sleep will be the average test score. So we can solve for $a$ in the multiple regression equation, using the means of all three variables.
 
-Now we plug those into the intercept equation, along with the means of all three variables, to get the intercept.
+$$ a = M_Y - b_1 M_X - b_2 M_Z $$
+
+Plugging in our two slopes and the three means gives us:
 
 $$ a = 70 - (-2)(1) - 6(7) = 30 $$
 
@@ -524,7 +523,7 @@ One cup is what we'd predict at the average of seven hours. Add one cup to each 
 :::
 
 ::: {.tutorial-step data-title="A line for each amount of sleep" data-action='{"collect-ss":"reference","line":"multiple","rise-run":{"from":0,"to":1},"show-spacing":true,"color-z":true,"show-residuals":false,"show-squares":false,"show-means":false,"emphasize":"none"}'}
-Now put the dots back where they really are. The flatter line runs through the means, so it's our prediction for someone with an average seven hours of sleep. Each extra hour lifts the prediction by the slope for sleep, $b_2$, and each hour less lowers it by the same amount. So every amount of sleep gets its own line, all with the same slope.
+Now put the dots back where they really are. The flatter line runs through the means and gives our predictions for seven hours of sleep. Pick any sleep line and move one cup to the right along it. You've held sleep constant, and the predicted score drops two points. Now keep coffee fixed and move up to the line for one more hour of sleep. The prediction goes up six points.
 :::
 
 ::: {.tutorial-step data-title="One student" data-action='{"draw":"both","focus":[0],"collect-ss":"reference","line":"multiple","color-z":true,"show-residuals":true,"show-squares":true,"show-means":false,"emphasize":"none"}'}
@@ -573,8 +572,6 @@ The overall $F$ tests the two slopes together against a model that just predicts
 ::: {#quiz-regression-what-sleep-adds}
 {{< include quizzes/18-regression-what-sleep-adds.qmd >}}
 :::
-
-<!-- How much does *coffee* add once we know about sleep? For these seven students, the correlation between sleep and score was about $.67$. So sleep alone accounts for about 44% of the variability. When you ran the regression with sleep as the only predictor in @quiz-regression-sleep-alone, the squared misses around its line added up to $SS_{\text{residual}} = 666.67$, the other 56% of the 1200. Adding coffee only brings that down to 660. Going from sleep alone to sleep *and* coffee takes us from about 44% to 45%. That's the same story we got from the small partial correlation in Chapter 17, now told in terms of what coffee adds to our predictions. (In Chapter 17 we used all 300 students, and the partial correlation was $-.05$. For these seven students it works out to $-.10$.) -->
 
 ### Testing each predictor
 
