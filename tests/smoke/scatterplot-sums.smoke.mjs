@@ -230,7 +230,9 @@ test('adding sleep splits the coffee line into parallel lines and collects what 
     await step('Coffee alone');
     assert.equal(await bin.locator('[data-sum=residual]').textContent(), 'Residual = 900');
     assert.equal(sleepSteps.length, 3);
+    const fitLayer = page.locator('.sc-line-layer');
     await apply(sleepSteps[0].action);
+    assert.equal(await fitLayer.getAttribute('aria-hidden'), 'true');
     assert.equal(await page.locator('.sc-family-level').count(), 5);
     assert.equal(await page.locator('.sc-family-line').count(), 0);
     const observed = () => page.locator('.sc-point').evaluateAll(groups => groups.map(group => {
@@ -243,7 +245,6 @@ test('adding sleep splits the coffee line into parallel lines and collects what 
     const ghostXs = () => page.locator('.anova-ghost').evaluateAll(circles => circles.map(c => c.cx.baseVal.value));
     const cupSixths = xs => xs.map(x => Math.round((x - pxAtZero) / pxPerCup * 6));
     const means = page.locator('.sc-means-layer');
-    const fitLayer = page.locator('.sc-line-layer');
 
     await apply(sleepSteps[1].action);
     assert.equal(await means.getAttribute('aria-hidden'), 'false');
@@ -297,10 +298,20 @@ test('adding sleep splits the coffee line into parallel lines and collects what 
     await page.evaluate(() => window.stepSleep({ 'show-alone': false, animate: false }));
     assert.equal((await value()).ssResidual, 660);
 
-    await step('What did both explain?');
+    const observations = page.locator('.sc-points-layer');
+    const opacity = layer => layer.evaluate(el => Number(getComputedStyle(el).opacity));
+    await apply(steps.find(({ action }) => action['collect-ss'] === 'regression').action);
+    assert.equal(await observations.getAttribute('aria-hidden'), 'false');
+    const observedOpacity = await opacity(observations);
+    assert.ok(observedOpacity > 0 && observedOpacity < 1);
+    assert.equal(await opacity(fitLayer), 1);
+    assert.equal(await page.locator('.sc-prediction').count(), 7);
     assert.equal(await bin.locator('[data-sum=regression]').textContent(), 'Regression = 540');
     assert.ok(Math.abs(await height('regression') / outline - 540 / 1200) < 1e-3);
 
+    await apply(residualSteps[3].action);
+    assert.equal(await opacity(observations), 1);
+    assert.equal(await page.locator('.sc-prediction').count(), 0);
     await step('Coffee alone');
     assert.equal(await page.locator('.sc-family-line').count(), 0);
     assert.equal((await value()).ssResidual, 900);
