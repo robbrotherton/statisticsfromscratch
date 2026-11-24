@@ -366,8 +366,6 @@ sfsGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin,
     opts.interpolationGuideColor,
     "color-mix(in srgb, var(--sfs-danger-color, #c63f3f) 78%, var(--sfs-text, #212529))"
   );
-  const dash = sfsGraphValueOr(opts.interpolationGuideDash, "6 4");
-  const strokeWidth = sfsGraphValueOr(opts.interpolationGuideStrokeWidth, 1.8);
   const animationRequested = opts.animateInterpolationGuides === true;
   const animationEnabled = animationRequested && !sfsGraphPrefersReducedMotion();
   const duration = sfsGraphValueOr(opts.interpolationGuideAnimationDuration, 650);
@@ -401,98 +399,29 @@ sfsGraphAddPolygonInterpolationGuides = (svg, opts, series, scale, x, y, margin,
 
   if (!resolvedGuides.length) return;
 
-  const guideGroups = svg.append("g")
+  // Drawn by the shared read-off guides (read-guides.js), which the
+  // scatterplot uses too.
+  const layer = svg.append("g")
     .attr("class", "sfs-graph-interpolation-guides")
-    .attr("aria-hidden", "true")
-    .selectAll("g")
-    .data(resolvedGuides)
-    .join("g")
-      .attr("class", "sfs-graph-interpolation-guide");
-
-  const verticals = guideGroups.append("line")
-    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-vertical")
-    .attr("x1", (d) => d.xPixel)
-    .attr("x2", (d) => d.xPixel)
-    .attr("y1", plotBottom)
-    .attr("y2", (d) => animationEnabled ? plotBottom : d.yPixel)
-    .attr("stroke", color)
-    .attr("stroke-width", strokeWidth)
-    .attr("stroke-dasharray", dash)
-    .attr("vector-effect", "non-scaling-stroke");
-
-  const horizontals = guideGroups.append("line")
-    .attr("class", "sfs-graph-interpolation-guide-line sfs-graph-interpolation-guide-horizontal")
-    .attr("x1", (d) => d.xPixel)
-    .attr("x2", (d) => animationEnabled ? d.xPixel : margin.left)
-    .attr("y1", (d) => d.yPixel)
-    .attr("y2", (d) => d.yPixel)
-    .attr("stroke", color)
-    .attr("stroke-width", strokeWidth)
-    .attr("stroke-dasharray", dash)
-    .attr("vector-effect", "non-scaling-stroke");
-
-  const markers = guideGroups.append("circle")
-    .attr("class", "sfs-graph-interpolation-guide-marker")
-    .attr("cx", (d) => d.xPixel)
-    .attr("cy", (d) => d.yPixel)
-    .attr("r", sfsGraphValueOr(opts.interpolationGuidePointRadius, 4))
-    .attr("fill", "var(--sfs-bg, #fff)")
-    .attr("stroke", color)
-    .attr("stroke-width", 2)
-    .attr("vector-effect", "non-scaling-stroke")
-    .style("opacity", animationEnabled ? 0 : 1);
-
-  guideGroups.append("line")
-    .attr("class", "sfs-graph-interpolation-guide-tick")
-    .attr("x1", (d) => d.xPixel)
-    .attr("x2", (d) => d.xPixel)
-    .attr("y1", plotBottom)
-    .attr("y2", plotBottom + 6)
-    .attr("stroke", color)
-    .attr("stroke-width", 1.8)
-    .attr("vector-effect", "non-scaling-stroke");
-
-  guideGroups.append("text")
-    .attr("class", "sfs-graph-tick-label sfs-graph-interpolation-guide-label")
-    .attr("x", (d) => d.xPixel)
-    .attr("y", plotBottom + 21)
-    .attr("text-anchor", "middle")
-    .style("fill", color)
-    .attr("font-weight", 700)
-    .text((d) => d.xLabel);
-
-  guideGroups.filter((d) => d.label).append("title").text((d) => d.label);
+    .attr("aria-hidden", "true");
+  const frame = { left: margin.left, bottom: plotBottom };
+  sfsReadGuides.draw(layer, resolvedGuides.map((d) => ({
+    x: d.xPixel,
+    y: d.yPixel,
+    xLabel: d.xLabel,
+    title: d.label
+  })), frame, {
+    color,
+    collapsed: animationEnabled,
+    labelClass: "sfs-graph-tick-label sfs-graph-interpolation-guide-label"
+  });
 
   if (!animationEnabled) return;
-
-  const play = () => {
-    verticals.interrupt()
-      .attr("y2", plotBottom)
-      .transition()
-      .duration(duration)
-      .ease(ease)
-      .attr("y2", (d) => d.yPixel);
-
-    markers.interrupt()
-      .style("opacity", 0)
-      .transition()
-      .delay(Math.max(0, duration - 80))
-      .duration(120)
-      .style("opacity", 1);
-
-    horizontals.interrupt()
-      .attr("x2", (d) => d.xPixel)
-      .transition()
-      .delay(duration + pause)
-      .duration(duration)
-      .ease(ease)
-      .attr("x2", margin.left);
-  };
 
   sfsGraphPlayEntrance(
     svg,
     sfsGraphValueOr(opts.interpolationGuideAnimationThreshold, 0.95),
-    play,
+    () => sfsReadGuides.trace(layer, frame, { duration, pause, ease }),
     "interpolation-guides"
   );
 }
